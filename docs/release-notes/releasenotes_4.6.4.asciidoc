@@ -1,0 +1,58 @@
+== Kibi 4.6.4 and Kibana 4.6.4
+
+[float]
+=== Kibi Changes
+
+* Fixed - cleaned and improved sharing the graph state via URL [Enterprise Edition only]
+* Fixed - static route path for plugins
+* Fixed - use correct scroll_id in migrations
+* Fixed - upgrades between dash releases
+* Fixed - checkIfItIsRelevant in REST datasource returned true when no document was selected but required
+* Fixed - honour timezone settings in Graph Browser timebar [Enterprise Edition only]
+
+* Improved - upgraded moment-timezone to version 0.5.11
+* Improved - upgraded siren-join to version 2.4.4
+* Improved - upgraded license plugin to version 2.4.4 [Enterprise Edition only]
+* Improved - upgraded Kibi Timeline plugin to version 4.6.4
+* Improved - state is by default saved in session storage state:storeInSessionStorage=true
+* Improved - init explanation only on filter bar filters
+* Improved - added link to sample kibi.yml file into the documentation
+* Improved - tests coverage and quality
+* Improved - removed savedSession objects in favour of sharing through shortened URLs stored in kibi index
+* Improved - field formatter support in Graph Browser tooltips [Enterprise Edition only]
+
+* Added - merge upstream changes from Kibana 4.6.4.
+* Added - column name aliases to kibi-doc-table plugin
+* Added - priority field for dashboards
+* Added - hashed URL are now enabled by default
+* Added - and option to increase grid resolution
+* Added - kibi:enableAllDashboardsCounts to disable counts on all dashboards.
+* Added - kibi:enableAllRelBtnCounts to disable counts on all relational buttons.
+* Added - search on relations
+* Added - support for ACL rules on saved objects [Enterprise Edition only]
+* Added - new Kibi Multi Chart plugin [Enterprise Edition only]
+* Added - new Kibi Box Plot plugin [Enterprise Edition only]
+* Added - new Kibi Scatter Plot plugin [Enterprise Edition only]
+* Added - new Kibi Bubble Diagram plugin [Enterprise Edition only]
+* Added - new Kibi Vector Map plugin [Enterprise Edition only]
+* Added - new Kibi Horizontal Bar Chart plugin [Enterprise Edition only]
+
+[float]
+=== Kibana Changes
+
+[float]
+==== Enhancements
+
+* {k4pull}8733[Pull Request 8733]: Upgrade Node.js to version 6.9.0 for improved memory use and a segfault fix.
+* {k4pull}8022[Pull Request 8022]: Add state:storeInSessionState option enabling shorter URLs and enhancing Internet Explorer support.
+* {k4pull}8313[Pull Request 8313]: Upgrade Hapi server to 14.2.0 to support the new Node.js version.
+* {k4pull}9014[Pull Request 9014]: Improved rendering performance on Discover app with large numbers of fields.
+
+
+[float]
+==== Bug Fixes
+* {k4pull}8966[Pull Request 8966]: Trailing slash redirects now include the basepath configuration.
+* {k4pull}8338[Pull Request 8338]: Fix alias support when fetching types.
+* {k4pull}7123[Pull Request 7123]: Honor custom label for percentile ranks aggregation.
+* {k4pull}7021[Pull Request 7021]: Honor custom label for percentile and median metric visualizations.
+* {k4pull}6463[Pull Request 6463]: Use unmapped_type instead of ignore_unmapped in config migration.

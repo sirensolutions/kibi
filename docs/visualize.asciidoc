@@ -1,34 +1,29 @@
 [[visualize]]
-== Visualize
+= Visualize
 
-NOTE: Visualization management has not been modified by Kibi; we quote the
-original Kibana documentation for all the standard data aggregations
-integrated with Kibi specific features were applicable.
+[partintro]
+--
+_Visualize_ enables you to create visualizations of the data in your
+Elasticsearch indices. You can then build <<dashboard, dashboards>> that
+display related visualizations.
 
-You can use the _Visualize_ page to design data visualizations. You can save these visualizations, use
-them individually, or combine visualizations into a _dashboard_. A visualization can be based on one of the following
-data source types:
+Visualizations are based on Elasticsearch queries. By using a
+series of Elasticsearch {es-ref}search-aggregations.html[aggregations]
+to extract and process your data, you can create charts that show
+you the trends, spikes, and dips you need to know about.
 
-* A new interactive search
-* A saved search
-* An existing saved visualization
+You can create visualizations from a search saved from <<discover, Discover>>
+or start with a new search query.
+--
 
-Visualizations are based on the {elastic-ref}search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x.
-
-[float]
 [[createvis]]
-=== Creating a New Visualization
+== Creating a Visualization
 
-To start the New Visualization wizard, click on the *Visualize* tab at the top left of the page. If you are already
-creating a visualization, you can click the *New Visualization* button image:images/K4NewDocument.png[New Document
-button] in the toolbar to the right of the search bar. The wizard guides you through the following steps:
+To create a visualization:
 
-[float]
-[[newvis01]]
-==== Step 1: Choose the Visualization Type
-
-Choose a visualization type when you start the New Visualization wizard:
-
+. Click on *Visualize* in the side navigation.
+. Choose the visualization type:
++
 [horizontal]
 <<enhanced_search_results,Enhanced search results>>:: Display an interactive
 table of documents returned by an Elasticsearch query.
@@ -36,173 +31,132 @@ table of documents returned by an Elasticsearch query.
 queries on external datasources in Jade/Handlebards templates.
 <<relational_filter,Relational Filter>>:: Apply cross-dashboard filters
 based on the relations between different indices.
-<<area-chart,Area chart>>:: Use area charts to visualize the total contribution of several different series.
-<<data-table,Data table>>:: Use data tables to display the raw data of a composed aggregation. You can display the data
-table for several other visualizations by clicking at the bottom of the visualization.
-<<line-chart,Line chart>>:: Use line charts to compare different series.
-<<markdown-widget,Markdown widget>>:: Use the Markdown widget to display free-form information or instructions about your
-dashboard.
-<<metric-chart,Metric>>:: Use the metric visualization to display a single number on your dashboard.
-<<pie-chart,Pie chart>>:: Use pie charts to display each source's contribution to a total.
+<<multi-chart,Multi chart>>:: Display multiple visualization configurations.
+<<area-chart,Area chart>>:: Visualize the total contribution of several
+different series.
+<<data-table,Data table>>:: Display the raw data of a composed aggregation.
+<<line-chart,Line chart>>:: Compare different series.
+<<markdown-widget,Markdown widget>>:: Display free-form information or
+instructions.
+<<metric-chart,Metric>>:: Display a single number.
+<<pie-chart,Pie chart>>:: Display each source's contribution to a total.
+<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
+<<heatmap,Heat map>>:: Display data as a heat map.
 <<tilemap,Tile map>>:: Use tile maps to associate the results of an aggregation with geographic points.
-<<vertical-bar-chart,Vertical bar chart>>:: Use vertical bar charts as a general-purpose chart.
-<<wordcloud,Kibi Word Cloud>>:: Display a cloud of high frequency terms in a document collection.
+<<vertical-bar-chart,Vertical bar chart>>:: Graph values in a bar chart.
 <<timeline,Kibi Timeline>>:: Displays series of data coming from different
 saved searches on a single timeline component.
-<<radar_chart, Radar Chart>>:: Display multivariate data with a two-dimensional chart.
-<<graph_browser, Kibi Graph Browser*>>:: Displays a graph visualization starting from a selected document
-<<bubble_diagram, Kibi Bubble Diagram*>>:: The Bubble Diagram visualization displays series of data grouped into packed circles.
+<<scatter_plot, Scatter plot>>:: Display data in a scatter plot chart.
+<<radar_chart, Radar Chart>>:: Display multivariate data in a two-dimensional chart.
+<<graph_browser, Kibi Graph Browser>>:: Display a graph visualization starting from a selected document
+<<box_plot, Box plot>>:: Display data in a box plot.
+<<bubble_diagram, Kibi Bubble Diagram>>:: Display series of data grouped into packed circles.
+<<vector_map, Kibi Bubble Diagram>>:: Display series of data grouped into packed circles.
+<<horizontal_bar_chart, Horizontal Bar Chart>>:: Graph values in a horizontal bar chart.
 
-NOTE: *: available only in Kibi Enterprise Edition.
+. Specify a search query to retrieve the data for your visualization:
+** To enter new search criteria, select the index pattern for the indices that
+contain the data you want to visualize. This opens the visualization builder
+with a wildcard query that matches all of the documents in the selected
+indices.
+** To build a visualization from a saved search, click the name of the saved
+search you want to use. This opens the visualization builder and loads the
+selected query.
++
+NOTE: When you build a visualization from a saved search, any subsequent
+modifications to the saved search are automatically reflected in the
+visualization. To disable automatic updates, you can disconnect a visualization
+from the saved search.
 
-You can also load a saved visualization that you created earlier. The saved visualization selector includes a text
-field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Edit Saved
-Objects*, to manage your saved visualizations.
+. In the visualization builder, choose the metric aggregation for the
+visualization's Y axis:
++
+* {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
+* {es-ref}search-aggregations-metrics-avg-aggregation.html[average]
+* {es-ref}search-aggregations-metrics-sum-aggregation.html[sum]
+* {es-ref}search-aggregations-metrics-min-aggregation.html[min]
+* {es-ref}search-aggregations-metrics-max-aggregation.html[max]
+* {es-ref}search-aggregations-metrics-cardinality-aggregation.html[unique count]
+* {es-ref}search-aggregations-metrics-percentile-aggregation.html[median] (50th percentile)
+* {es-ref}search-aggregations-metrics-percentile-aggregation.html[percentiles]
+* {es-ref}search-aggregations-metrics-percentile-rank-aggregation.html[percentile ranks]
 
-If your new visualization is a Markdown widget, selecting that type takes you to a text entry field where you enter the
-text to display in the widget. For all other types of visualization, selecting the type takes you to data source
-selection.
+. For the visualizations X axis, select a bucket aggregation:
++
+* {es-ref}search-aggregations-bucket-datehistogram-aggregation.html[date histogram]
+* {es-ref}search-aggregations-bucket-range-aggregation.html[range]
+* {es-ref}search-aggregations-bucket-terms-aggregation.html[terms]
+* {es-ref}search-aggregations-bucket-filters-aggregation.html[filters]
+* {es-ref}search-aggregations-bucket-significantterms-aggregation.html[significant terms]
 
-[float]
-[[newvis02]]
-==== Step 2: Choose a Data Source
+For example, if you're indexing Apache server logs, you could build bar chart
+that shows the distribution of incoming requests by geographic location by
+specifying a terms aggregation on the `geo.src` field:
 
-You can choose a new or saved search to serve as the data source for your visualization. Searches are associated with
-an index or a set of indices. When you select _new search_ on a system with multiple indices configured, select an
-index pattern from the drop-down to bring up the visualization editor.
+image::images/bar-terms-agg.jpg[]
 
-When you create a visualization from a saved search and save the visualization, the search is tied to the visualization.
-When you make changes to the search that is linked to the visualization, the visualization updates automatically.
+The y-axis shows the number of requests received from each country, and the
+countries are displayed across the x-axis.
 
-[float]
-[[visualization-editor]]
-==== Step 3: The Visualization Editor
+Bar, line, or area chart visualizations use _metrics_ for the y-axis and
+_buckets_ for the x-axis. Buckets are analogous to SQL `GROUP BY`
+statements. Pie charts, use the metric for the slice size and the bucket
+for the number of slices.
 
-The visualization editor enables you to configure and edit visualizations. The visualization editor has the following
-main elements:
+You can futher break down the data by specifying sub aggregations. The first
+aggregation determines the data set for any subsequent aggregations. Sub
+aggregations are applied in order--you can drag the aggregations to change the
+order in which they're applied.
 
-1. <<toolbar-panel,Toolbar>>
-2. <<aggregation-builder,Aggregation Builder>>
-3. <<preview-canvas,Preview Canvas>>
+For example, you could add a terms sub aggregation on the `geo.dest` field to
+the Country of Origin bar chart to see the locations those requests were
+targeting.
 
-image:images/VizEditor.jpg[]
+image::images/bar-terms-subagg.jpg[]
 
-[float]
-[[viz-autorefresh]]
-include::./discover/autorefresh.asciidoc[]
+For more information about working with sub aggregations, see
+https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
+Aggregation Execution Order, and You].
 
-[float]
-[[toolbar-panel]]
-===== Toolbar
+include::visualize/kibi/enhanced_search_results.asciidoc[]
 
-The toolbar has a search field for interactive data searches, as well as controls to manage saving and loading
-visualizations. For visualizations based on saved searches, the search bar is grayed out. To edit the search, replacing
-the saved search with the edited version, double-click the search field.
+include::visualize/kibi/kibi_query_viewer.asciidoc[]
 
-The toolbar at the right of the search box has buttons for creating new visualizations, saving the current
-visualization, loading an existing visualization, sharing or embedding the visualization, and refreshing the data for
-the current visualization.
+include::visualize/kibi/multi_chart.asciidoc[]
 
-[float]
-[[aggregation-builder]]
-===== Aggregation Builder
+include::visualize/area.asciidoc[]
 
-Use the aggregation builder on the left of the page to configure the
-{elastic-ref}search-aggregations-metrics[metric] and {elastic-ref}search-aggregations-bucket.html[bucket] aggregations used in your
-visualization. Buckets are analogous to SQL `GROUP BY` statements. For more information on aggregations, see the main
-{elastic-ref}search-aggregations.html[Elasticsearch aggregations reference].
+include::visualize/datatable.asciidoc[]
 
-In addition to standard Elasticsearch aggregations, Kibi adds the
-_External Query Terms Filter_ aggregation, which is described in the <<external_datasources>> chapter.
+include::visualize/line.asciidoc[]
 
-Bar, line, or area chart visualizations use _metrics_ for the y-axis and _buckets_ are used for the x-axis, segment bar
-colors, and row/column splits. For pie charts, use the metric for the slice size and the bucket for the number of
-slices.
+include::visualize/markdown.asciidoc[]
 
-Choose the metric aggregation for your visualization's Y axis, such as
-{elastic-ref}search-aggregations-metrics-valuecount-aggregation.html[count],
-{elastic-ref}search-aggregations-metrics-avg-aggregation.html[average],
-{elastic-ref}search-aggregations-metrics-sum-aggregation.html[sum],
-{elastic-ref}search-aggregations-metrics-min-aggregation.html[min],
-{elastic-ref}search-aggregations-metrics-max-aggregation.html[max], or
-{elastic-ref}search-aggregations-metrics-cardinality-aggregation.html[cardinality]
-(unique count). Use bucket aggregations for the visualization's X axis, color slices, and row/column splits. Common
-bucket aggregations include date histogram, range, terms, filters, and significant terms.
+include::visualize/metric.asciidoc[]
 
-You can set the order in which buckets execute. In Elasticsearch, the first aggregation determines the data set
-for any subsequent aggregations. The following example involves a date bar chart of Web page hits for the top 5 file
-extensions.
+include::visualize/pie.asciidoc[]
 
-To use the same extension across all hits, set this order:
+include::visualize/tagcloud.asciidoc[]
 
-1.  *Color:* Terms aggregation of extensions
-2.  *X-Axis:* Date bar chart of `@timestamp`
+include::visualize/heatmap.asciidoc[]
 
-Elasticsearch collects the records for the top 5 extensions, then creates a date bar chart for each extension.
+include::visualize/tilemap.asciidoc[]
 
-To chart the top 5 extensions for each hour, use the following order:
+include::visualize/vertbar.asciidoc[]
 
-1.  *X-Axis:* Date bar chart of `@timestamp` (with 1 hour interval)
-2.  *Color:* Terms aggregation of extensions
+include::visualize/kibi/timeline.asciidoc[]
 
-For these requests, Elasticsearch creates a date bar chart from all the records, then groups the top five extensions
-inside each bucket, which in this example is a one-hour interval.
+include::visualize/kibi/scatter_plot.asciidoc[]
 
-NOTE: Remember, each subsequent bucket slices the data from the previous bucket.
+include::visualize/kibi/radar_chart.asciidoc[]
 
-To render the visualization on the _preview canvas_, click the green *Apply Changes* button at the top right of the
-Aggregation Builder.
+include::visualize/kibi/graph_browser.asciidoc[]
 
-You can learn more about aggregation and how altering the order of aggregations affects your visualizations
-https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[here].
+include::visualize/kibi/box_plot.asciidoc[]
 
-[float]
-[[visualize-filters]]
-include::filter_pinning.asciidoc[]
+include::visualize/kibi/bubble_diagram.asciidoc[]
 
-[float]
-[[preview-canvas]]
-===== Preview Canvas
+include::visualize/kibi/vector_map.asciidoc[]
 
-The preview canvas displays a preview of the visualization you've defined in the aggregation builder. To refresh the
-visualization preview, clicking the *Refresh* button image:images/K4Refresh.png[Refresh button] on the toolbar.
+include::visualize/kibi/horizontal_bar_chart.asciidoc[]
 
-include::enhanced_search_results.asciidoc[]
-
-include::kibi_query_viewer.asciidoc[]
-
-include::./visualize/area.asciidoc[]
-
-include::./visualize/datatable.asciidoc[]
-
-include::./visualize/line.asciidoc[]
-
-include::./visualize/markdown.asciidoc[]
-
-include::./visualize/metric.asciidoc[]
-
-include::pie.asciidoc[]
-
-include::./visualize/tilemap.asciidoc[]
-
-include::./visualize/vertbar.asciidoc[]
-
-include::wordcloud.asciidoc[]
-
-include::timeline.asciidoc[]
-
-include::radar_chart.asciidoc[]
-
-include::graph_browser.asciidoc[]
-
-include::box_plot.asciidoc[]
-
-include::bubble_diagram.asciidoc[]
-
-include::scatter_plot.asciidoc[]
-
-include::vector_map.asciidoc[]
-
-include::horizontal_bar_chart.asciidoc[]
-
-include::multi_chart.asciidoc[]

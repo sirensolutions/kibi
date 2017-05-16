@@ -1,0 +1,8 @@
+[[kibi_vector_map]]
+== Kibi Vector Map [Enterprise Edition only]
+
+This visualization displays a vector map from the data in the current set of Elasticsearch documents.
+
+[float]
+=== Usage
+image::images/vector_map/vector_map.png["Vector Map",align="center"]

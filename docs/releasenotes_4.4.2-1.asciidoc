@@ -1,8 +1,0 @@
-=== Kibi 4.4.2-1 Release Notes
-
-==== Kibi Changes
-
-* Backport fix for broken tiles in map widget
-* Backport fix for broken import export of objects
-* Backport fix for openjdk version check [Enterprise Edition only]
-* Backport fix support for nested fields label (Graph Browser) [Enterprise Edition only]

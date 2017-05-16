@@ -1,106 +1,76 @@
 [[windows]]
-=== Install Kibana on Windows
+=== Install Kibi on Windows
 
-Kibana can be installed on Windows using the `.zip` package.
-
-The latest stable version of Kibana can be found on the
-link:/downloads/kibana[Download Kibana] page.
-Other versions can be found on the
-link:/downloads/past-releases[Past Releases page].
-
-[[install-windows]]
-==== Download and install the `.zip` package
-
-ifeval::["{release-state}"=="unreleased"]
-
-Version {version} of Kibana has not yet been released.
-
-endif::[]
-
-ifeval::["{release-state}"!="unreleased"]
-
-Download the `.zip` windows archive for Kibana v{version} from
-https://artifacts.elastic.co/downloads/kibana/kibana-{version}-windows-x86.zip
-
-Unzip it with your favourite unzip tool. This will create a folder called
-kibana-{version}-windows-x86, which we will refer to as `$KIBANA_HOME`. In a
-terminal window, `CD` to the `$KIBANA_HOME` directory, for instance:
-
-
-["source","sh",subs="attributes"]
-----------------------------
-CD c:\kibana-{version}-windows-x86
-----------------------------
-
-endif::[]
+Kibi can be installed on Windows using the `.zip` package;
+zip packages can be downloaded from the {download-ref}[download page];
+the demo versions contain a pre-configured Elasticsearch cluster in addition to
+Kibi.
 
 [[windows-running]]
-==== Running Kibana from the command line
+==== Running Kibi from the command line
 
-Kibana can be started from the command line as follows:
+Kibi can be started from the command line as follows:
 
 [source,sh]
 --------------------------------------------
-.\bin\kibana
+.\bin\kibi
 --------------------------------------------
 
-By default, Kibana runs in the foreground, prints its logs to `STDOUT`,
+By default, Kibi runs in the foreground, prints its logs to `STDOUT`,
 and can be stopped by pressing `Ctrl-C`.
 
 [[windows-configuring]]
-==== Configuring Kibana via config file
+==== Configuring Kibi via config file
 
-Kibana loads its configuration from the `$KIBANA_HOME/config/kibana.yml`
+Kibi loads its configuration from the `config/kibi.yml`
 file by default.  The format of this config file is explained in
 <<settings>>.
 
 [[windows-layout]]
 ==== Directory layout of `.zip` archive
 
-The `.zip` package is entirely self-contained. All files and directories are,
-by default, contained within `$KIBANA_HOME` -- the directory created when
-unpacking the archive.
+The `.zip` package is entirely self-contained.
 
 This is very convenient because you don't have to create any directories to
-start using Kibana, and uninstalling Kibana is as easy as removing the
-`$KIBANA_HOME` directory.  However, it is advisable to change the default
-locations of the config and data directories so that you do not delete
-important data later on.
+start using Kibi, and uninstalling Kibi is as easy as removing the directory.
+However, it is advisable to change the default locations of the config and data
+directories so that you do not delete important data later on.
 
 
 [cols="<h,<,<m,<m",options="header",]
 |=======================================================================
 | Type | Description | Default Location | Setting
 | home
-  | Kibana home directory or `$KIBANA_HOME`
- d| Directory created by unpacking the archive
+  | Kibi home directory or `%KIBI_HOME%`
+ d| Directory created by unpacking the archive; in demo distributions, the
+    directory is `kibi`.
  d|
 
 | bin
-  | Binary scripts including `kibana` to start the Kibana server
-    and `kibana-plugin` to install plugins
-  | $KIBANA_HOME\bin
+  | Binary scripts including `kibi` to start the Kibi server
+    and `kibi-plugin` to install plugins
+  | %KIBI_HOME%\bin
  d|
 
 | config
-  | Configuration files including `kibana.yml`
-  | $KIBANA_HOME\config
+  | Configuration files including `kibi.yml`
+  | %KIBI_HOME%\config
  d|
 
 | data
-  | The location of the data files written to disk by Kibana and its plugins
-  | $KIBANA_HOME\data
+  | The location of the data files written to disk by Kibi and its plugins
+  | %KIBI_HOME%\data
  d|
 
 | optimize
   | Transpiled source code. Certain administrative actions (e.g. plugin install)
     result in the source code being retranspiled on the fly.
-  | $KIBANA_HOME\optimize
+  | %KIBI_HOME%\optimize
  d|
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
-  | $KIBANA_HOME\plugins
+  | %KIBI_HOME%\plugins
  d|
 
 |=======================================================================

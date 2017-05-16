@@ -1,25 +1,19 @@
 [[access_control]]
-
-== Authentication and access control [Enterprise Edition only]
-
-ifeval::["{enterprise_enabled}" == "false"]
-  NOTE: Documentation for Authentication and access control is available only in Kibi Enterprise Edition.
-endif::[]
-
-ifeval::["{enterprise_enabled}" == "true"]
+= Authentication and access control [Enterprise Edition only]
 
 Kibi EE can be integrated with Elasticsearch clusters protected by either
-Search Guard or Elastic Shield, providing configurable handling of
-authorization errors with specific extensions for the SIREn Join plugin.
+Search Guard or Elastic x-pack.
 
 In this scenario, both Kibi and Gremlin Server (the backend component
 used by the <<graph_browser,graph browser>> visualization) must be configured to serve requests over HTTPS.
 
-=== Enabling HTTPS in Kibi
+[float]
+== Enabling HTTPS in Kibi
 
 HTTPS support in Kibi can be enabled natively or by putting a reverse SSL proxy in front of it (e.g. nginx).
 
-==== Native HTTPS support
+[float]
+=== Native HTTPS support
 
 Native HTTPS support can be enabled by copying certificate and key files to a
 location readable by the Kibi process and setting the following parameters
@@ -41,7 +35,8 @@ server.ssl.key: "pki/server.key"
 The Kibi EE demo distribution includes a sample certificate and key in the `pki`
 directory.
 
-=== Enabling HTTPS in Gremlin Server
+[float]
+== Enabling HTTPS in Gremlin Server
 
 HTTPS must be enabled in Gremlin Server to secure requests from Kibi, even
 if Kibi is configured behind a reverse SSL proxy.
@@ -76,4 +71,3 @@ to the url set in `kibi.yml`.
 
 The Kibi EE demo distribution includes a sample keystore and CA bundle
 in the `pki` directory.
-

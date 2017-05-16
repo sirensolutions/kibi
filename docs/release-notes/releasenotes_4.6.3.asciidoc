@@ -1,0 +1,84 @@
+== Kibi 4.6.3 and Kibana 4.6.3
+
+[float]
+=== Kibi Changes
+
+* Fixed - upgradeable configurations were not correctly sorted
+* Fixed - outdated filters in the state were not correctly handled
+* Fixed - the relational panel tab was enabled even if relational panel was disabled
+* Fixed - source and target dashboards in relational button configuration were filtered incorrectly
+* Fixed - handling of authorization errors when computing indices in navbar helper and relational sequence buttons
+* Fixed - nested join_sequence creation
+* Fixed - negated joins creation by enclosing the complete query in a must clause
+* Fixed - listen to config events to correctly set the relational filter visible
+* Fixed - do not destroy handlers in cached helper modules to correctly refresh counts on tabs
+* Fixed - fail to access dashboard app if the previous dashboard was deleted
+* Fixed - missing timepicker when creating a new dashboard
+* Fixed - click handlers actions are not cleaned when staging the enhanced search vis
+* Fixed - cases when wrong property name was used in createNotifier
+* Fixed - diff_time now takes into account time precision
+* Fixed - kibi state was not properly propagated which caused an issue where time was not correctly set on a dashboard when done from discovery page
+* Fixed - problems with JSON textarea and label textbox edit
+* Fixed - do not center content if there is data in Kibi Query Viewer
+* Fixed - do not make a relation invalid if type is set to null by kibi-select
+* Fixed - reset count/isPruned property of a dashboard if its count was requested but was not in the metadata object, due to the dashboard not having a savedsearch on save
+* Fixed - now queries for invisible dashboards are not added to count request
+* Fixed - counts not properly updated when using "undo via back button"
+* Fixed - destroy html created by eeg library
+
+* Improved - check if the state contains outdated filters
+* Improved - relations graph configuration has to be explicitly saved
+* Improved - documented Sense and Marvel integration with Search Guard
+* Improved - support relational filter visualizations which reference no concrete index
+* Improved - made relational button grey when there is no results
+* Improved - store the synced dashboards in the kibistate
+* Improved - various sync-time-to directive improvements
+* Improved - notify the user if the session data has been saved
+* Improved - prevent the Kibi Enhanced Search visualization to make two requests for retrieving the rows
+* Improved - handling of various authorization errors
+* Improved - replaced ui-select with kibi-menu-template
+* Improved - introduced kibi-menu-template for choosing relations in buttons configuration
+* Improved - Display confirmation dialog when leaving a modified relational configuration
+* Improved - check if the relation id is defined at config time for the relational filter visualization
+* Improved - big part of code ported to ES6
+* Improved - use version 4.6.3 of the Kibi Timeline
+* Improved - ported all release notes to master
+* Improved - Searchguard integration documentation
+
+* Added - merge upstream changes from Kibana 4.6.3
+* Added - Saved objects API
+* Added - support requiresMultiSearch in the visualize editor for refreshing the ES results
+* Added - renamed kibi_core.default_dashboard_id into kibi_core.default_dashboard_title
+* Added - kibi:graphUseWebGl advanced option
+* Added - migration for relational filter button
+* Added - test:coverage grunt task
+* Added - Kibi now ships with Sentinl application [Enterprise Edition only]
+* Added - Map view to Graph Browser [Enterprise Edition only]
+* Added - Timeline view to Graph Browser [Enterprise Edition only]
+* Added - live filter to Graph Browser [Enterprise Edition only]
+
+* Backported - Kibana fix to ensure dashboard panels appear in the correct order
+
+[float]
+=== Kibana Changes
+
+[float]
+==== Enhancements
+* {k4pull}7085[Pull Request 7085]: Configuration to allow unauthenticated users to see status page
+* {k4pull}7996[Pull Request 7996]: Added option to configure headers for all Elasticsearch requests
+* {k4pull}7335[Pull Request 7335]: Status page and API now include plugin version info
+* {k4pull}6150[Pull Request 6150]: Error notifications will auto-dismiss after a timeout
+* {k4issue}6728[Issue 6728]: Package repos are now based on major versions
+
+[float]
+==== Bug Fixes
+* {k4pull}7457[Pull Request 7457]: Plugins now have a home for their data
+* {k4issue}8090[Issue 8090]: Fixed blank notifications that were appearing in plugin apps like Sense
+* {k4issue}8060[Issue 8060]: In some circumstances, Visualization editor controls would collapse after applying updates. They will now remain expanded
+* {k4pull}7422[Pull Request 7422]: Better cleanup on package removal
+* {k4issue}7590[Issue 7590]: Fixed logging for package installs using SysV
+* {k4pull}7431[Pull Request 7431]: A more accurate description for the Kibana service
+
+[float]
+==== Deprecations
+* {k4issue}6833[Issue 6833]: Ability to sort a terms aggregation by ascending count will be removed in a future version of Elasticsearch

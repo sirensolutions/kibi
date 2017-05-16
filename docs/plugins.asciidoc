@@ -1,93 +1,100 @@
 [[kibi-plugins]]
-== Kibi Plugins added
+= Kibi Plugins
 
-Add-on functionality for Kibi is implemented with plug-in modules. You can use the `bin/kibi plugin`
+[partintro]
+--
+Add-on functionality for Kibi/Kibana is implemented with plug-in modules. You can use the `bin/kibi-plugin`
 command to manage these modules. You can also install a plugin manually by moving the plugin file to the
-`installedPlugins` directory and unpacking the plugin files into a new directory.
+`plugins` directory and unpacking the plugin files into a new directory.
 
-A list of existing Kibana plugins is available on https://github.com/elastic/kibana/wiki/Known-Plugins[GitHub].
+Generally Kibana plugins are compatible with Kibi provided that you are using the same baseline version (e.g. Kibi 5.2.2-1 with a plugin designed for Kibana 5.2.2).
 
-[float]
-=== Installing Plugins
+[IMPORTANT]
+.Plugin compatibility
+==============================================
+
+The Kibana plugin interfaces are in a state of constant development.  We cannot provide backwards compatibility for plugins due to the high rate of change.  Kibana enforces that the installed plugins match the version of Kibana itself.  Plugin developers will have to release a new version of their plugin for each new Kibana release as a result.
+
+==============================================
+--
+
+== Installing Plugins
 
 Use the following command to install a plugin:
 
 [source,shell]
-bin/kibi plugin --install <org>/<package>/<version>
+bin/kibi-plugin install <package name or URL>
 
-[NOTE]
-====
-Elasticsearch plugins follow the elasticsearch versionning,
-e.g. to installing Marvel plugin for this perticular Kibi version which comes by default
-with elasticsearch v{elasticsearch-version} use:
+When you specify a plugin name without a URL, the plugin tool attempts to download an official Elastic plugin, such as:
 
-`bin/kibi plugin -i elasticsearch/marvel/{elasticsearch-version}`
-====
+["source","shell",subs="attributes"]
+$ bin/kibi-plugin install x-pack
 
-You can also use `-i` instead of `--install`, as in the following example:
-
-[source,shell]
-bin/kibi plugin -i elasticsearch/marvel/latest
-
-Because the organization given is `elasticsearch`, the plugin management tool automatically downloads the
-plugin from `download.elastic.co`.
 
 [float]
 === Installing Plugins from an Arbitrary URL
 
-You can specify a URL to a plugin with the `-u` or `--url` options after the `-i` or `--install` option, as in the
-following example:
+You can download official Elastic plugins simply by specifying their name. You
+can alternatively specify a URL to a specific plugin, as in the following
+example:
 
-[source,shell]
-bin/kibi plugin -i sample-plugin -u https://some.sample.url/directory
-Installing sample-plugin
-Attempting to extract from https://some.sample.url/directory
-Downloading <some number> bytes....................
-Extraction complete
-Optimizing and caching browser bundles...
-Plugin installation complete
+["source","shell",subs="attributes"]
+$ bin/kibi-plugin install https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-{version}.zip
 
 You can specify URLs that use the HTTP, HTTPS, or `file` protocols.
 
 [float]
 === Installing Plugins to an Arbitrary Directory
 
-Use the `-d` or `--plugin-dir` option to specify a directory for plugins, as in the following example:
+Use the `-d` or `--plugin-dir` option after the `install` command to specify a directory for plugins, as in the following
+example:
 
 [source,shell]
-bin/kibi plugin -i elasticsearch/sample-plugin/latest -d <path/to/directory>
-Installing sample-plugin
-Attempting to extract from https://download.elastic.co/elasticsearch/sample-plugin/sample-plugin-latest.tar.gz
-Downloading <some number> bytes....................
-Extraction complete
-Optimizing and caching browser bundles...
-Plugin installation complete
+$ bin/kibi-plugin install file:///some/local/path/x-pack.zip -d path/to/directory
 
 NOTE: This command creates the specified directory if it does not already exist.
 
 [float]
-=== Removing Plugins
+=== Installing Plugins with Linux packages
 
-Use the `--remove` or `-r` option to remove a plugin, including any configuration information, as in the following
-example:
+The Kibi server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
+want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
 
 [source,shell]
-bin/kibi plugin --remove marvel
+$ sudo -u kibana bin/kibi-plugin install x-pack
 
-You can also remove a plugin manually by deleting the plugin's subdirectory under the `installedPlugins` directory.
+If plugins were installed as a different user and the server is not starting, then you will need to change the owner of these files:
 
-[float]
-=== Listing Installed Plugins
+[source,shell]
+$ chown -R kibana:kibana /path/to/kibana/optimize
 
-Use `--list` or `-l` option to list the currently installed plugins.
-
-[float]
-=== Updating Plugins
+== Updating & Removing Plugins
 
 To update a plugin, remove the current version and reinstall the plugin.
 
-[float]
-=== Configuring the Plugin Manager
+To remove a plugin, use the `remove` command, as in the following example:
+
+[source,shell]
+$ bin/kibi-plugin remove 
+
+You can also remove a plugin manually by deleting the plugin's subdirectory under the `plugins/` directory.
+
+NOTE: Removing a plugin will result in an "optimize" run which will delay the next start of Kibi.
+
+== Disabling Plugins
+
+Use the following command to disable a plugin:
+
+[source,shell]
+-----------
+./bin/kibi --<plugin ID>.enabled=false <1>
+-----------
+
+NOTE: Disabling or enabling a plugin will result in an "optimize" run which will delay the start of Kibi.
+
+<1> You can find a plugin's plugin ID as the value of the `name` property in the plugin's `package.json` file.
+
+== Configuring the Plugin Manager
 
 By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager
 to perform. You can control the level of feedback with the `--quiet` and `--silent` options. Use the `--quiet` option to
@@ -132,5 +139,3 @@ installed plugins:
 image::images/app-picker.png[]
 
 Click a plugin's icon to switch to that plugin's functionality.
-
-include::known-plugins.asciidoc[]

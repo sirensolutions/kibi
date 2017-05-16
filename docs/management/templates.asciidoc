@@ -1,0 +1,37 @@
+[[datasource-templates]]
+== Templates
+
+You can define templates to format the results of a query on an
+<<external_datasource>>[external datasource] datasource and the results of an
+Elasticsearch query in a <<enhanced_search_results>>[Enhanced search results
+visualization].
+
+Kibi supports three template engines:
+
+* http://jade-lang.com/[jade]
+* http://handlebarsjs.com/[handlebars]
+* html-angular
+
+There are four pre-defined templates:
+
+* _kibi-json-jade_: this template presents the query results as a pretty-printed
+JSON object using the _jade_ engine. This is useful to test queries while
+writing them.
+* _kibi-table-jade_: this template displays the query results in a table,
+using the _jade_ engine.
+* _kibi-table-handlebars_: like _kibi-table-jade_, using the _handlebars_
+engine instead.
+* _kibi-html-angular_: this template for each document displays a panel
+* populated with all property values (Currently supported only in Enhanced
+* search results visualisation)
+
+You can define your own custom template by clicking on the _Settings / Templates_
+tab.
+
+Then, pick the engine you prefer and write the template; to see a preview,
+click on the _save_ button and select a query from the list;
+depending on the query you selected, the <<query-variables,_EntityURI_>> may
+need to be set.
+
+image::images/external_sources/templates_editor.png["Query template editor",align="center"]
+

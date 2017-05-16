@@ -1,0 +1,9 @@
+== Kibi 4.5.3-6
+
+[float]
+=== Kibi Changes
+
+* Siren-join plugin version upgraded to 2.3.4-1
+* Backport a fix for issue where no indices have been resolved for a query such query should be send to kibi index
+* Backport a fix to enable the relational panel before removing the join_set filter
+* Backport kibana PR 6651 - Fix courier "request already started" bug

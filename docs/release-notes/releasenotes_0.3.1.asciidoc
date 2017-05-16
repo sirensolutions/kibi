@@ -1,0 +1,13 @@
+== Kibi 0.3.1 and Kibana 4.4.1
+
+[float]
+=== Kibi Changes
+
+* Various bug fixes and stability improvements.
+* Siren join plugin version upgraded to https://github.com/sirensolutions/siren-join/tree/2.2.0[2.2.0].
+
+[float]
+=== Kibana Changes
+
+* Bump node.js to 0.12.10 from 0.12.9
+* {k4issue}6185[Issue 6185]:  Fixes a bug where the active HTTP spinner in the chrome bar is gone

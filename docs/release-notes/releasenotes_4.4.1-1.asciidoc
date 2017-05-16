@@ -1,0 +1,7 @@
+== Kibi 4.4.1-1
+
+[float]
+=== Kibi Changes
+
+* Fixed a bug - in community distribution the default join settings were incorrect
+* Fixed a bug - relational filter was not correctly refreshed

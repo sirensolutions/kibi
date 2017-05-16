@@ -4,16 +4,33 @@
 [partintro]
 --
 The Management application is where you perform your runtime configuration of
-Kibana, including both the initial setup and ongoing configuration of index
-patterns, advanced settings that tweak the behaviors of Kibana itself, and
-the various "objects" that you can save throughout Kibana such as searches,
+Kibi, including both the initial setup and ongoing configuration of index
+patterns, advanced settings that tweak the behaviors of Kibi itself, and
+the various "objects" that you can save throughout Kibi such as searches,
 visualizations, and dashboards.
 
 This section is pluginable, so in addition to the out of the box capabitilies,
-packs such as X-Pack can add additional management capabilities to Kibana.
+packs such as Kibi Access Control and X-Pack can add additional management capabilities.
 --
 
 include::management/index-patterns.asciidoc[]
+
+include::management/relations.asciidoc[]
+
+[[kibi-settings-datasources]]
+== Datasources
+
+For an overview of datasources, please read the <<external_datasources>>
+chapter.
+
+
+[[kibi-settings_queries]]
+== Queries
+
+For an overview of queries, please read the <<external_datasources>>
+chapter.
+
+include::management/templates.asciidoc[]
 
 include::management/managing-fields.asciidoc[]
 

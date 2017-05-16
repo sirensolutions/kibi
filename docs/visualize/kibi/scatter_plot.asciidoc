@@ -1,0 +1,81 @@
+[[kibi_scatter_plot]]
+== Kibi Scatter Plot [Enterprise Edition only]
+
+This visualization displays a scatter plot chart
+in four different modes: _Straight_, _Significant terms_, _Any aggregator_, _Filtered aggregator_.
+
+[float]
+=== Straight
+image::images/scatter_plot/straight_mode.png["Straight",align="center"]
+
+This mode doesn't use aggregates, it pulls the data directly from Elasticsearch using the {elastic-ref}query-dsl-function-score-query.html[Random scoring method] to get a random sample of records.
+
+ * *X values* - The value can be String, Date or Numeric. Select a field from the drop-down.
+ * *Y values* - The field value can be String, Date or Numeric. Select a field from the drop-down.
+ * *X axis label* - A label for the X axis.
+ * *Y axis label* - A label for the Y axis.
+ * *X axis scale* - You can select *linear*, *log*, or *square root* scales for the chart's X axis. You can use a log
+scale to display data that varies exponentially, such as a compounding interest chart, or a square root scale to
+regularize the display of data sets with variabilities that are themselves highly variable. This kind of data, where
+the variability is itself variable over the domain being examined, is known as _heteroscedastic_ data. For example, if
+a data set of height versus weight has a relatively narrow range of variability at the short end of height, but a wider
+range at the taller end, the data set is heteroscedastic.
+ * *Y axis scale* - You can select *linear*, *log*, or *square root* scales for the chart's Y axis.
+ * *Jitter field* - Deterministic jitter to add pseudo random data distribution in the X axis data interval. Jitter is useful
+for distributing the values across X axis. Doing so allows to show the data distributed across the bucket, in that way the dot is more visible.
+ * *Jitter scale* - You can select *linear*, *log*, or *square root* scales for the Jitter.
+ * *Label* - A label for the dot.
+ ** *Display label* - Check this box to enable the display of a label next to the dot.
+ ** *Label hover effect* - Check this box to enable the tooltip label.
+ * *Color* - A color for the dot.
+ * *Color field* - The field used as an input to generate the dot colors. Only number field types are allowed.
+ * *Dot size* - A size for the dot.
+ * *Dot size field* - The field used as an input for the dot size. Only number field types are allowed.
+ * *Dot size scale* - You can select *linear*, *log*, or *square root* scales for the dot size.
+ * *Size* - Number of random records to fetch from Eleasticsearch query.
+ * *Shape opacity* - Value from 0 to 1 which defines the dot transparency.
+
+[float]
+=== Significant terms
+image::images/scatter_plot/significant_terms_mode.png["Significant term",align="center"]
+
+In this mode the chart is built from a _Significant terms_ aggregation query result.
+The X values are taken from the *bg_count* field and the Y values from *doc_count* field.
+
+ * *Field* - the field which will provide terms to be aggregated.
+ * *Size* - the number of significant terms to be aggregated.
+ * *X axis label* - A label for the X axis.
+ * *Y axis label* - A label for the Y axis.
+ * *Color* - A color for the dot.
+ * *Shape opacity* - Value from 0 to 1 which defines the dot transparency.
+
+[float]
+=== Any aggregator
+image::images/scatter_plot/any_aggregator_mode.png["Any aggregator",align="center"]
+
+The chart is built from a _Date Histogram_, _Histogram_, _Terms_ or _Significant terms_ aggregation query result.
+
+ * *Aggregation* - Select an aggregation from the drop-down list.
+ * *X Metric* - X axis values. Select a metric from the drop-down list.
+ * *Y Metric* - Y axis values. Select a metric from the drop-down list.
+ * *Color* - A color for the dot.
+ * *Dot size* - A size for the dot.
+ * *Shape opacity* - Value from 0 to 1 which defines the dot transparency.
+
+[float]
+=== Filtered aggregator
+image::images/scatter_plot/filtered_aggregator_mode.png["Filtered aggregator",align="center"]
+
+The chart is built from a _Date Histogram_, _Histogram_, _Terms_ or _Significant terms_ aggregation query result.
+The X and Y values are taken from _Filters_ aggregation results.
+
+ * *Aggregation* - Select an aggregation from the drop-down list.
+ * *Filter X* - A filter string for the X axis.
+ * *Filter Y* - A filter string for the Y axis.
+ * *Metric* - Metric to be calculated for each filter aggregation. Select a metric from the drop-down list.
+ * *Color* - A color for the dot.
+ * *Dot size* - A size for the dot.
+ * *Shape opacity* - Value from 0 to 1 which defines the dot transparency.
+
+After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard
+changes* button to return your visualization to its previous state.

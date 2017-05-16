@@ -106,7 +106,7 @@ describe('plugins/elasticsearch', function () {
         callWithInternalUser.withArgs('indices.create', sinon.match.any).returns(Promise.reject(error));
         const fn = createKibanaIndex(server);
         return fn.catch(function (err) {
-          expect(err.message).to.be('Unable to create Kibana index ".my-kibana"');
+          expect(err.message).to.be('Unable to create Kibi index ".my-kibana"');
           expect(err).to.have.property('origError', error);
         });
       });
@@ -116,7 +116,7 @@ describe('plugins/elasticsearch', function () {
         callWithInternalUser.withArgs('cluster.health', sinon.match.any).returns(Promise.reject(new Error()));
         const fn = createKibanaIndex(server);
         return fn.catch(function (err) {
-          expect(err.message).to.be('Waiting for Kibana index ".my-kibana" to come online failed.');
+          expect(err.message).to.be('Waiting for Kibi index ".my-kibana" to come online failed.');
         });
       });
     });

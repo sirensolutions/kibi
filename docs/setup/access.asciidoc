@@ -2,7 +2,7 @@
 == Accessing Kibi
 
 Kibi is a web application that you access through port {kibi-default-port}. All you need to do is point your web browser at the
-machine where Kibana is running and specify the port number. For example, `{start-url}` or
+machine where Kibi is running and specify the port number. For example, `{start-url}` or
 `http://YOURDOMAIN.com:{kibi-default-port}`.
 
 When you access Kibi, the <<discover,Discover>> page loads by default with the default index pattern selected. The

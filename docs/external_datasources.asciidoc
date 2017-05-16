@@ -1,11 +1,12 @@
 [[external_datasources]]
-== External datasources
+= External datasources
 
 Kibi provides visualizations and aggregations to integrate data from external
 datasources; this section explains how to setup datasources and configure
 <<datasource-queries, queries>> and <<datasource-templates, query templates>>.
 
-=== Configuration
+[float]
+== Configuration
 
 To create a new external datasource navigate to "Setttings/Datasources"
 First fill datasource title, name and pick the type
@@ -15,10 +16,6 @@ Kibi supports following datasource types:
 * SQLite
 * MySQL
 * PostgreSQL
-* Sparql over http - any SPARQL HTTP endpoint (tested with Openlink Virtuoso and Joseki)
-* SQL JDBC - *experimental* JDBC support for SQL (tested with http://www.h2database.com/html/main.html[H2]).
-* SPARQL JDBC - *experimental* JDBC support for SPARQL
-* Kibi Tinkerpop3 [Enterprise Edition only] - *experimental* support for Kibi Gremlin Server
 
 After selecting the datasource type additional parameters will appear.
 Below list of additional mandatory parameters for each datasource type:
@@ -33,7 +30,6 @@ To control the maximum number of query results kept in cache, set the `kibi_core
 
 [NOTE]
 A Kibi restart is required to apply changes to kibi.yml configuration file.
-
 
 *REST*
 
@@ -54,29 +50,8 @@ A Kibi restart is required to apply changes to kibi.yml configuration file.
 * username - username with read access to the database
 * password - corresponding password
 
-*Sparql over http*
-
-* endpoint_url - url of the SPARQL http endpoint
-
-*SQL JDBC, SPARQL JDBC*
-
-* connection_string - JDBC connection string without username and password e.g.: "jdbc:postgresql://localhost/mydatabase"
-* libpath - path to folder with your jars  e.g.: "/otp/dbdrivers"
-* drivername - e.g.: "org.postgresql.Driver"
-* libs - comma separated list of jars (they can be just filenames then it is asumend they are in libpath folder or they can have absolute paths to jars)
-
-ifeval::["{enterprise_enabled}" == "true"]
-
-*Kibi Tinkerpop3 [Enterprise Edition only]*
-
-NOTE: Kibi Tinkerpop3 datasource is available only in Kibi Enterprise Edition.
-
-* url - url of the Kibi Gremlin Server e.g.: http://localhost:8080/graph/queryBatch
-
-endif::[]
-
-
-=== Parameters encryption
+[float]
+== Parameters encryption
 
 Sensitive datasource parameters like passwords are encrypted before being
 stored in the `.kibi` index.
@@ -108,8 +83,9 @@ Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=
 NOTE: Make sure to set the configuration file as readable only by the user
 running the Kibi process.
 
+[float]
 [[entity_selection]]
-=== Datasource entity selection
+== Datasource entity selection
 
 Selected Entities can be used to as source of parameters for queries
 Each selected entity is uniquely identified by an URI:
@@ -140,40 +116,9 @@ screenshot below:
 
 image::images/external_sources/entity_selection_hover.png["Entity selection options", align="center"]
 
-[[datasource-templates]]
-=== Query templates
-
-You can define templates to format query results.
-
-Kibi supports three template engines:
-
-* http://jade-lang.com/[jade]
-* http://handlebarsjs.com/[handlebars]
-* html-angular
-
-There are four pre-defined templates:
-
-* _kibi-json-jade_: this template presents the query results as a pretty-printed
-JSON object using the _jade_ engine. This is useful to test queries while
-writing them.
-* _kibi-table-jade_: this template displays the query results in a table,
-using the _jade_ engine.
-* _kibi-table-handlebars_: like _kibi-table-jade_, using the _handlebars_
-engine instead.
-* _kibi-html-angular_: this template for each document displays a panel populated with all property values (Currently supported only in Enhanced search results visualisation)
-
-You can define your own custom template by clicking on the _Settings / Templates_
-tab.
-
-Then, pick the engine you prefer and write the template; to see a preview,
-click on the _save_ button and select a query from the list;
-depending on the query you selected, the <<query-variables,_EntityURI_>> may
-need to be set.
-
-image::images/external_sources/templates_editor.png["Query template editor",align="center"]
-
+[float]
 [[datasource-queries]]
-=== Queries
+== Queries
 
 Queries can be used to provide data to <<datasource-templates>>,
 <<relational-column, tag>> and filter Elasticsearch documents.
@@ -201,7 +146,7 @@ NOTE: Template rendering is currently a blocking operation, therefore queries re
 
 [float]
 [[query-variables]]
-==== Query variables:
+=== Query variables:
 
 One of the most useful features of queries is that it is possible to set some
 of their parameters before execution by using datasource specific variables,
@@ -234,7 +179,7 @@ image::images/external_sources/query_table_var.png["SQL query with variables",al
 
 [float]
 [[activation-query]]
-==== Activation Query
+=== Activation Query
 
 An activation query can be specified to conditionally execute the results
 query.
@@ -258,23 +203,9 @@ FROM Vehicles
 WHERE id='@doc[_source][id]@' AND vehicle_type='Motorcycle'
 ----
 
-On SPARQL datasources, activation queries must be written using the _ASK_ form;
-the corresponding results query will be executed only if the query has a
-solution.
-
-Example:
-
-[source,sparql]
-----
-PREFIX vehicle: <http://ontologies.example.org/vehicle#>
-
-ASK {
-    <@doc[_source][uri]@> a vehicle:Motorcycle
-}
-----
-
+[float]
 [[datasource-uses]]
-=== Use cases
+== Use cases
 
 Once you've configured query templates and queries, you can use them
 in the following visualizations:
@@ -284,8 +215,9 @@ in the following visualizations:
 
 It is also possible to use queries as aggregations as explained below.
 
+[float]
 [[external-query-terms-filter-aggregation]]
-==== External query terms filters aggregation
+=== External query terms filters aggregation
 
 The query results from an external data source can be used as an aggregation
 in visualizations.

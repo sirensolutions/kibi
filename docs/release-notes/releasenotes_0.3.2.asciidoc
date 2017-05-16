@@ -1,0 +1,8 @@
+== Kibi 0.3.2
+
+[float]
+=== Kibi Changes
+
+* Various bug fixes and stability improvements.
+* New version of kibi_timeline_vis 0.1.2
+* Siren join plugin version upgraded to https://github.com/sirensolutions/siren-join/tree/2.2.0-1[2.2.0-1]

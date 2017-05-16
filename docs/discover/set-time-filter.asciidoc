@@ -10,7 +10,7 @@ range in the histogram at the top of the page.
 
 To set a time filter with the Time Picker:
 
-. Click Time Picker image:images/time-picker.jpg[] in the Kibana toolbar.
+. Click Time Picker image:images/time-picker.jpg[] in the Kibi toolbar.
 . To set a quick filter, click one of the shortcut links.
 +
 image::images/time-filter.jpg[Time filter shortcuts]

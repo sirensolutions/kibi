@@ -1,9 +1,9 @@
 [[metric-chart]]
-=== Metric
+== Metric
 
 A metric visualization displays a single number for each aggregation you select:
 
-include::../y_axis_aggs.asciidoc[]
+include::y-axis-aggs.asciidoc[]
 
 You can click the *Advanced* link to display more customization options:
 
@@ -14,7 +14,7 @@ definition, as in the following example:
 { "script" : "doc['grade'].value * 1.2" }
 
 NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{elastic-ref}modules-scripting.html[dynamic Groovy scripting].
+{es-ref}modules-scripting.html[dynamic Groovy scripting].
 
 The availability of these options varies depending on the aggregation you choose.
 
@@ -22,6 +22,6 @@ Click the *Options* tab to display the font size slider.
 
 [float]
 [[metric-viewing-detailed-information]]
-==== Viewing Detailed Information
+=== Viewing Detailed Information
 
-include::../visualization_raw_data.asciidoc[]
+include::visualization-raw-data.asciidoc[]

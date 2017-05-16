@@ -1,52 +1,13 @@
 [[relational-browsing]]
-== Kibi Relational Browsing
+= Relational Browsing
 
-Kibi adds a relational dimension to Kibana when browsing indices,
-allowing to _filter_ documents on a dashboard by showing only those that have
-a relation with documents displayed in a different dashboard, possibly stored
-in different indices.
+Kibi allows to _filter_ documents on a dashboard by showing only those that
+have a relation with documents displayed in a different dashboard, possibly
+stored in different indices.
 
-There are two paradigms a user can follow:
-
-1. through the <<relational-panel>>, a user picks a set of dashboards to join: filtering documents within a dashboard **automatically** updates the other related dashboards; and
-2. through the <<relational_filter>>, a user _builds_ interactivelly the sequence of dashboards to join.
-
-[[relational-panel]]
-=== Relational Panel
-
-With the relational panel browsing paradigm, all the dashboards of interest are join together. Effectivelly, documents that can be viewed in each dashboard are those that are connected with the rest.
-
-For example, consider two dashboards Articles and Companies which documents are related to one another; if one filters articles by their publishing date to a certain range, then only the companies that are mentioned in articles published within that range are displayed.
-
-==== Configuration
-
-In order to use this browsing paradigm, it is necessary to configure the <<kibi-settings-relations,relationships>>.
-
-Once this is done, you can view which dashboards are connected to each other using the relational panel by clicking on the icon image:images/relations_settings/relational_panel_icon.png["Relational panel icon"] in the Dashboard tab.
-In the image below, the dashboards Articles, Companies, and Investments are connected together.
-
-image::images/relational_panel/panel.png["Relational panel",align="center"]
-
-[[relational-panel-browsing]]
-==== Browsing
-
-Since a <<saving-dashboards,saved search>> is now associated with a dashboard, a count indicating the current number of documents in that dashboard is displayed on each tab. For example on the previous image, there are 151714 articles, 6419 companies, and 13231 investments rounds that are inter-connected. These numbers coupled with the relational panel allows to get a feeling of the current state of the joined dashboards.
-The current set of connected dashboards are displayed in the label of the blue filter image:images/relational_panel/filter.png["relational panel filter"].
-
-Since all the dashboards in the set are connected to each other, adding a filter to a dashboard will also update the connected dashboards. If you select **TechCrunch** as the source for articles, there are now in total 27772 articles. Being automatically updated, we observe that only 3748 companies (out of 6419) and 8136 investments (out of 13231) are actually connected to those articles from TechCrunch.
-
-image::images/relational_panel/with_filter.png["Relational panel with a filter",align="center"]
-
-You can see the current filters that are applied with the relational panel by hovering the mouse over the blue filter.
-The explanation tooltip shown below indicates that the current 311 companies are connected with:
-
-- articles coming from TechCrunch published within a specific time range; and
-- investments funded within another time range.
-
-image::images/relational_panel/explanation.png["Explanation of the relational filter",align="center"]
-
+[float]
 [[relational_filter]]
-=== Relational filter
+== Relational filter
 
 The relational filter visualization allows to "pivot" from a dashboard
 to another by creating a join between multiple indices based on their
@@ -71,14 +32,11 @@ Clicking on the button will switch you to the _Companies_ dashboard and display 
 
 image::images/relational_filter/relational_filter_companies_target.png["Relational filter on the Companies dashboard",align="center", width="400"]
 
-The relational filter visualization requires the {siren-join-website}[Siren Join plugin {siren-join-version}] for
-Elasticsearch. The plugin is compatible with Elasticsearch {elasticsearch-version}.
-
-For more information about the Siren Join plugin visit our website at https://siren.solutions/searchplugins/join/.
+The relational filter visualization requires the {vanguard-website}[Vanguard plugin {vanguard-version}] for Elasticsearch.
 
 [float]
 [[relational_filter_config]]
-==== Configuration
+=== Configuration
 
 Click on the _Add filter_ button to create a new filter in the visualization;
 the filter is defined by the following parameters:
@@ -101,7 +59,7 @@ to the currently displayed dashboard.
 
 [float]
 [[relational_filter_usage]]
-==== Usage
+=== Usage
 
 When clicking on a button in the relational filter visualization,
 the current state of the source dashboard is added to the relational filter
@@ -109,7 +67,7 @@ and applied to the target dashboard.
 Just move the mouse over relational filter to see an explanation of what is being joined.
 
 [float]
-===== Walkthrough example
+==== Walkthrough example
 
 We start on the **Articles** dashboard, search for `pizza` and click on the relational filter to switch to the **Companies** dashboard.
 
@@ -135,7 +93,7 @@ NOTE: The sequence of the joins in the explanation are shown in reverse, i.e., t
 
 [float]
 [[relational-filter_viewing-detailed-information]]
-==== Viewing Detailed Information
+=== Viewing Detailed Information
 
 To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed
 information about the raw data replace the visualization, as in this example:
@@ -145,7 +103,7 @@ image::images/relational_filter/spy.png["Spy panel of the relational filter visu
 This panel provides two kinds data: information about the query behind the relational filter in the `Multi Search` tab, and details about the visualization object in the `Debug` tab.
 
 [float]
-===== Multi Search
+==== Multi Search
 
 This pane presents information about the {elastic-ref}search-multi-search.html[msearch] request executed to perform the joins. A relational filter corresponds to one query of the msearch.
 
@@ -173,7 +131,7 @@ The filterjoin query as sent to the Elasticsearch cluster, presented in JSON for
 The raw response from the server, presented in JSON format.
 
 [float]
-===== Debug
+==== Debug
 
 The Debug tab presents the JSON object that Kibi uses for this relational filter.
 

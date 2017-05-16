@@ -14,7 +14,7 @@ object:
 Editing a saved object enables you to directly modify the object definition. You can change the name of the object, add
 a description, and modify the JSON that defines the object's properties.
 
-If you attempt to access an object whose index has been deleted, Kibana displays its Edit Object page. You can:
+If you attempt to access an object whose index has been deleted, Kibi displays its Edit Object page. You can:
 
 * Recreate the index so you can continue using the object.
 * Delete the object and recreate it using a different index.
@@ -48,11 +48,11 @@ To export a set of objects:
 . Click *Export* to select a location to write the exported JSON.
 
 WARNING: Exported dashboards do not include their associated index patterns. Re-create the index patterns manually before
-importing saved dashboards to a Kibana instance running on another Elasticsearch cluster.
+importing saved dashboards to a Kibi instance running on another Elasticsearch cluster.
 
 To import a set of objects:
 
 . Go to *Settings > Objects*.
 . Click *Import* to navigate to the JSON file representing the set of objects to import.
 . Click *Open* after selecting the JSON file.
-. If any objects in the set would overwrite objects already present in Kibana, confirm the overwrite.
+. If any objects in the set would overwrite objects already present in Kibi, confirm the overwrite.

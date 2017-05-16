@@ -1,11 +1,10 @@
 [[logstash]]
-== Loading data into Elasticsearch
+= Loading data into Elasticsearch
 
 This chapter contains basic information on how to load data into Elasticsearch
 for evaluation purposes.
 
-[float]
-=== From a SQL database using Logstash
+== From a SQL database using Logstash
 
 The indices in the Kibi demo distribution have been populated by running
 four https://www.elastic.co/products/logstash[Logstash] configurations over
@@ -16,7 +15,7 @@ The database has the following schema:
 image::images/logstash/crunchbase-schema.png["SQLite database schema",align="center"]
 
 [float]
-==== Index setup
+=== Index setup
 
 Before loading data, we need to setup indices and mappings; for
 example, let's create an index called `company-minimal` in the Elasticsearch
@@ -43,7 +42,7 @@ command:
 curl -X DELETE http://localhost:9220/company-minimal
 
 [float]
-==== Mapping definition
+=== Mapping definition
 
 Mappings allow to configure how documents are stored in the index; for example,
 they allow to define how fields are matched by the search engine and set their
@@ -70,26 +69,21 @@ Open a text editor and paste the following text:
     "CompanyMinimal": {
         "properties": {
             "id": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
             },
             "number_of_employees": {
                 "type": "long"
             },
             "name": {
-                "index": "analyzed",
-                "type": "string"
+                "type": "text"
             },
             "description": {
-                "index": "analyzed",
-                "type": "string"
+                "type": "text"
             },
             "homepage": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
             },
             "location": {
-                "geohash": true,
                 "type": "geo_point"
             }
         }
@@ -99,20 +93,7 @@ Open a text editor and paste the following text:
 
 
 `CompanyMinimal` is the name of the mapping; `properties` contains the
-indexing options for each field.
-
-The `type` attribute specifies the field type; the example mapping contains
-four strings, a number and a {elastic-ref}mapping-geo-point-type.html[geo_point],
-which allows to perform geographically aware search queries.
-
-The `index` attribute in each field definition is used to control how the
-field will be handled by search engine; if set to `not_analyzed`, the search
-engine will match a document only if its field value is equal to the value
-set in the search query, if set to `analyzed` the field value will be processed
-by an analyzer to allow full-text queries.
-
-It is also possible to set the `index` attribute to `no` to make the search
-engine ignore the field.
+options for each field.
 
 Save the file to `demo/example/CompanyMinimal.mapping`
 inside the directory where you extracted the demo distribution.
@@ -130,9 +111,8 @@ response:
 {"acknowledged":true}
 -----
 
-
 [float]
-==== SQL query definition
+=== SQL query definition
 
 To extract the values that will be loaded to the index by Logstash, we need to
 write a SQL query; open a text editor and paste the following one:
@@ -157,7 +137,7 @@ Save the file to `demo/example/company-minimal.sql`
 inside the directory where you extracted the demo distribution.
 
 [float]
-==== Logstash configuration
+=== Logstash configuration
 
 We now need to write a Logstash configuration to process the records returned
 by the query and populate the `company-minimal` index.
@@ -232,10 +212,9 @@ and the https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.htm
 documentation.
 
 [float]
-==== Browsing the index in Kibi
+=== Browsing the index in Kibi
 
-Open {start-url} or for installation with Shield open {start-url-shield} in your browser,
-click on the _Settings_ tab then on _Indices_ .
+Open {start-url} in your browser, click on the _Settings_ tab then on _Indices_ .
 
 Deselect _Index contains time-based events_, then write `company-minimal` in
 the _Index name or pattern_ field:
@@ -252,8 +231,7 @@ the loaded fields:
 
 image::images/logstash/company-minimal-expand.png["Viewing all the fields in a document",align="center"]
 
-[float]
-==== Demo distribution data loading script
+=== Demo distribution data loading script
 
 The complete demo data loading process can be repeatead by running the
 `demo/sql/bin/index_crunchbase_sqlite.sh` script; the script performs the

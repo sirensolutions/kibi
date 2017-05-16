@@ -1,149 +1,15 @@
-[[sentinl_joinquery]]
-== Sentinl
+[[sentinl]]
+= Sentinl
 
 **Sentinl** extends Kibi/Kibana with Alerting and Reporting functionality to monitor, notify and report on data series changes using standard queries,
 programmable validators and a variety of configurable actions.
 
 Sentinl is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana via its integrated App and Spy integration.
 
-NOTE: Public documentation for Sentinl is available https://github.com/sirensolutions/sentinl/wiki[here].
+Kibi EE extends Sentinl with support for Vanguard join features.
 
-=== Join query
+[float]
+== Documentation
 
-ifeval::["{enterprise_enabled}" == "false"]
-Join Query in Sentinl are available only in the Enterprise Edition.
+The full Sentinl documentation is available https://github.com/sirensolutions/sentinl/wiki[here].
 
-NOTE: If you want to read more about join query, this is the https://github.com/sirensolutions/siren-join[documentation].
-
-endif::[]
-
-ifeval::["{enterprise_enabled}" == "true"]
-
-Kibi extends Sentinl functions to support Join Queries. Here is an example of a Join query:
-
-[source,json]
-----
-"query": {
-  "filtered": {
-    "query": {
-      "query_string": {
-        "query": "Action:allow",
-        "analyze_wildcard": true
-      }
-    },
-    "filter": {
-      "bool": {
-        "must": [
-          {
-            "filterjoin": {
-              "field-source-index": {
-                "indices": [
-                  "target-index"
-                ],
-                "path": "field-target-index",
-                "query": {
-                  "bool": {
-                    "filter": {
-                      "range": {
-                        "@timestamp": {
-                          "format": "epoch_millis",
-                          "gte": "now-4h"
-                        }
-                      }
-                    }
-                  }
-                },
-                "termsEncoding": "long"
-              }
-            }
-          },
-          {
-            "range": {
-              "@timestamp": {
-                "gte": "now-48h",
-                "format": "epoch_millis"
-              }
-            }
-          }
-        ]
-      }
-    }
-  }
-}
-----
-
-With Join query you can match values from different indexes and return all the matches.
-The core of the query is the field "filterjoin", where you define which is the field to use in the join and which is the target index with its field.
-The source index is defined above, in the "request" field.
-
-[source,json]
-----
-"search": {
-  "request": {
-    "index": [
-      "source-index-name"
-    ],
-    ...
-  }
-}
-----
-
-Like normal watchers, when a join query is executed, a new alarm is generated.
-You can see its body in the alarm page.
-
-Here is a generic anatomy of a response:
-
-[source,json]
-----
-{
-  "@timestamp": "2016-12-13T15:01:01.707Z",
-  "level": "high",
-  "message": "A message",
-  "action": "your-action",
-  "payload": {
-    "coordinate_search": {
-      "actions": [
-        {
-          "relations": {
-            "from": {
-              "indices": [
-                "target-index-name"
-              ],
-              "types": [],
-              "field": "target-field-of-the-index"
-            },
-            "to": {
-              "indices": "source-index-name",
-              "types": null,
-              "field": "source-field-of-the-index"
-            }
-          },
-          "size": 155966,
-          "size_in_bytes": 1247737,
-          "is_pruned": false,
-          "cache_hit": true,
-          "terms_encoding": "long",
-          "took": 0
-        }
-      ]
-    },
-    "took": 33669,
-    "timed_out": false,
-    "_shards": {
-      "total": 20,
-      "successful": 20,
-      "failed": 0
-    },
-    "hits": {
-      "total": 77,
-      "max_score": 0,
-      "hits": []
-    },
-    //the list of matches
-  }
-}
-----
-
-NOTE: If you want to read more about join query, this is the https://github.com/sirensolutions/siren-join[documentation].
-
-endif::[]

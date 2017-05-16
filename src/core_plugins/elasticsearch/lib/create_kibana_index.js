@@ -12,6 +12,7 @@ module.exports = function (server) {
     };
   }
 
+  // kibi: renamed Kibana to Kibi
   return callWithInternalUser('indices.create', {
     index: index,
     body: {
@@ -21,12 +22,12 @@ module.exports = function (server) {
       mappings
     }
   })
-  .catch(handleError('Unable to create Kibana index "<%= kibana.index %>"'))
+  .catch(handleError('Unable to create Kibi index "<%= kibana.index %>"'))
   .then(function () {
     return callWithInternalUser('cluster.health', {
       waitForStatus: 'yellow',
       index: index
     })
-    .catch(handleError('Waiting for Kibana index "<%= kibana.index %>" to come online failed.'));
+    .catch(handleError('Waiting for Kibi index "<%= kibana.index %>" to come online failed.'));
   });
 };

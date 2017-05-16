@@ -1,0 +1,7 @@
+== Kibi 4.5.3-2
+
+[float]
+=== Kibi Changes
+
+* Fixed autoload issue when loading plugins
+* Upgraded timeline plugin to 4.5.3-2 - support dateFormat:tz property

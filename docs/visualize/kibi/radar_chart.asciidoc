@@ -1,0 +1,17 @@
+[[radar_chart]]
+== Radar Chart
+
+A radar chart http://siren.solutions/radar-or-spider-chart-for-kibana-4-3-and-kibi-0-3/[introduced in kibi-0.3.0]
+is a graphical method of displaying multivariate data
+in the form of a two-dimensional chart of three or more quantitative variables
+represented on axes starting from the same point.
+The relative position and angle of the axes is typically uninformative.
+
+image::images/radar_visualization.png["Radar chart visualization",align="center"]
+
+image::images/radar_settings.png["Radar chart settings",align="center"]
+
+
+The radar chart is also known as web chart, spider chart, star chart.
+It is developed as a https://github.com/sirensolutions/kibi_radar_vis[standalone plugin]
+suitable to install in both Kibi 0.3+ and Kibana 4.3+.

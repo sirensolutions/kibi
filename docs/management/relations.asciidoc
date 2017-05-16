@@ -1,0 +1,39 @@
+[[kibi-settings-relations]]
+== Relations
+
+In this panel, you can define relationships between index patterns. These
+relationships ultimately form a **graph** of index patterns. This graph is used
+in conjunction with the Vanguard plugin, allowing to perform join operations
+between **dashboards**, i.e., filtering a dashboard's documents with regards to
+an other.
+
+[float]
+=== Graph of Index Patterns
+
+A relationship is defined as a **join** operation between two indices with the
+following fields:
+
+- _Left Index Pattern_: the left index of the join;
+- _Left Type_: the type of the left index of the join;
+- _Left Field_: the field of the left index to join on;
+- _Right Index Pattern_: the right index of the join;
+- _Right Type_: the type of the right index of the join;
+- _Right Field_: the field of the right index to join with; and
+- _Label_: the label of the relation.
+
+The image below displays a graph of four index patterns, where three
+relationships have defined. You can add a new relationship by clicking on the
+"_Add relation_" button.
+
+image::images/relations_settings/indices_settings.png["Graph of Index Patterns",align="center"]
+
+A relation is also indicated on the <<kbn-settings-indices,Indices>> tab thanks
+to the icon image:images/relations_settings/index_relation_icon.png["Index
+relation icon"].  If you hover the mouse over it, a tooltip message is
+displayed indicating the index pattern and field that field is joined with.
+
+For example, in the image below, that icon is displayed next to the field "id"
+of the "investor" index, which is join with the field "investorid" of the
+"investment" index.
+
+image::images/relations_settings/investor_index.png["Investor Index",align="center"]

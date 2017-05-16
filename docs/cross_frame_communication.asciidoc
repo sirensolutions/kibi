@@ -1,16 +1,11 @@
 [[cross_frame_communication]]
-== Cross frame communication [Enterprise Edition only]
-
-ifeval::["{enterprise_enabled}" == "false"]
-  NOTE: Documentation for Cross frame communication is available only in Kibi Enterprise Edition.
-endif::[]
-
-ifeval::["{enterprise_enabled}" == "true"]
+= Cross frame communication [Enterprise Edition only]
 
 To allow cross frame communication Kibi exposes an object at **window.kibi**;
 the object can be called only if both Kibi and the container page are in the same domain.
 
-=== Methods
+[float]
+== Methods
 
 `generateShortUrl(shareAsEmbed, displayNavBar)`
 
@@ -43,6 +38,3 @@ document.getElementById('kibiframe')
 
 If possible, it is recommended to purge old documents of type `url` from the `.kibi`
 index periodically; old documents can be identified by looking at the `createDate` attribute.
-
-endif::[]
-

@@ -3,6 +3,15 @@
   border-bottom: $tableBorder;
 }
 
+/* kibi: added kibi-break-tabs class to fix the tabs in management/siren/objects */
+.kuiTabs.kibi-break-tabs {
+  display: inline-block;
+  button {
+    padding: 8px 12px;
+  }
+}
+/* kibi: end */
+
   /**
    * 1. Override button styles (some of which are from Bootstrap).
    */

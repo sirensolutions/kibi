@@ -57,7 +57,33 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     return scope.$on(`change:config`, update);
   }
 
+  // siren: custom validator for value
+  const _validators = function (validator, val) {
+    switch (validator) {
+      case 'positiveIntegerValidator':
+        if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
+          throw `Should be a positive integer but was [${val}].`;
+        }
+        return parseInt(val);
+      default:
+        throw `Unknown validator [${validator}] for [${val}].`;
+    }
+  };
+  // siren: end
+
   function change(key, value) {
+    // kibi: added to allow for custom validation step before saving the value
+    if (settings[key].validator) {
+      try {
+        value = _validators(settings[key].validator, value);
+      } catch (err) {
+        const validationError = new Error(`Wrong value set for: ${key}. ${err}`);
+        notify.error(validationError);
+        return Promise.reject(validationError);
+      }
+    }
+    // kibi: end
+
     const declared = config.isDeclared(key);
     const oldVal = declared ? settings[key].userValue : undefined;
     const newVal = key in defaults && defaults[key].defaultValue === value ? null : value;
@@ -75,6 +101,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
       .catch(reason => {
         localUpdate(key, initialVal, config.get(key));
         notify.error(reason);
+        throw reason; // kibi: rethrow the error so that it is handled downstream in the UI
       });
   }
 

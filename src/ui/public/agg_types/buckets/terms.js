@@ -146,9 +146,7 @@ define(function (require) {
             }
 
             if (orderAgg.type.name === 'count') {
-              if (dir === 'asc') {
-                routeBasedNotifier.warning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
-              }
+              // kibi: do not display the deprecation warning.
               order._count = dir;
               return;
             }

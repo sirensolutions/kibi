@@ -12,6 +12,7 @@ import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 import setupLogging from '../../server/logging';
 import { DEV_SSL_CERT_PATH } from '../dev_ssl';
 
+
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
 export default class BasePathProxy {
@@ -24,13 +25,20 @@ export default class BasePathProxy {
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');
 
-    const { cert } = config.get('server.ssl');
+    // kibi: support server.ssl.ca parameter
+    const { cert, ca } = config.get('server.ssl');
     if (cert) {
       const httpsAgentConfig = {};
       if (cert === DEV_SSL_CERT_PATH && config.get('server.host') !== 'localhost') {
         httpsAgentConfig.rejectUnauthorized = false;
       } else {
-        httpsAgentConfig.ca = readFileSync(cert);
+        // kibi: support server.ssl.ca parameter
+        if (ca) {
+          httpsAgentConfig.ca = readFileSync(ca);
+        } else {
+          httpsAgentConfig.ca = readFileSync(cert);
+        }
+        // kibi: end
       }
       this.proxyAgent = new HttpsAgent(httpsAgentConfig);
     }

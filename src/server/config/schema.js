@@ -61,7 +61,8 @@ module.exports = () => Joi.object({
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     ssl: Joi.object({
       cert: Joi.string(),
-      key: Joi.string()
+      key: Joi.string(),
+      ca: Joi.string() // kibi: added CA parameter for verification purposes
     }).default(),
     cors: Joi.when('$dev', {
       is: true,

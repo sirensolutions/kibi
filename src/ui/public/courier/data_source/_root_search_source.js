@@ -2,9 +2,7 @@ import SearchSourceProvider from 'ui/courier/data_source/search_source';
 
 export default function RootSearchSource(Private, $rootScope, timefilter, createNotifier) {
   const SearchSource = Private(SearchSourceProvider);
-
   const notify = createNotifier({ location: 'Root Search Source' });
-
   const globalSource = new SearchSource();
   globalSource.inherits(false); // this is the final source, it has no parents
   globalSource.filter(function (globalSource) {
@@ -61,4 +59,4 @@ export default function RootSearchSource(Private, $rootScope, timefilter, create
       return globalSource;
     }
   };
-};
+}

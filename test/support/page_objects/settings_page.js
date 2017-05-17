@@ -1,5 +1,5 @@
 
-import Bluebird from 'bluebird';
+import Bluebird, { map as mapAsync } from 'bluebird';
 
 import {
   defaultFindTimeout,
@@ -39,7 +39,7 @@ export default class SettingsPage {
   async setAdvancedSettings(propertyName, propertyValue) {
     const self = this;
     await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton').click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.sleep(1000);
     // kibi: added to be able to change the boolean values
     if (typeof propertyValue === 'boolean') {
@@ -56,7 +56,7 @@ export default class SettingsPage {
     // kibi: end
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton').click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async navigateTo() {
@@ -90,7 +90,7 @@ export default class SettingsPage {
     (await this.getTimeFieldNameField()).click();
     // close dropdown, keep focus
     (await this.getTimeFieldNameField()).click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.try(async () => {
       (await this.getTimeFieldOption(selection)).click();
       const selected = (await this.getTimeFieldOption(selection)).isSelected();
@@ -111,7 +111,7 @@ export default class SettingsPage {
   async clickDefaultIndexButton() {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-success.ng-scope').click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async clickDeletePattern() {
@@ -144,7 +144,7 @@ export default class SettingsPage {
           if (chartString === columnName) {
             return chart.click()
             .then(function () {
-              return PageObjects.header.isGlobalLoadingIndicatorHidden();
+              return PageObjects.header.waitUntilLoadingHasFinished();
             });
           }
         });
@@ -211,9 +211,11 @@ export default class SettingsPage {
     });
   }
 
-  getPageFieldCount() {
-    return this.remote.setFindTimeout(defaultFindTimeout)
-    .findAllByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr td.ng-scope:nth-child(1) span.ng-binding');
+  async getFieldNames() {
+    const fieldNameCells = await PageObjects.common.findAllTestSubjects('editIndexPattern indexedFieldName');
+    return await mapAsync(fieldNameCells, async cell => {
+      return (await cell.getVisibleText()).trim();
+    });
   }
 
   async goToPage(pageNum) {
@@ -221,7 +223,7 @@ export default class SettingsPage {
     .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
       (pageNum + 1) + ') a.ng-binding')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async openControlsRow(row) {
@@ -241,7 +243,7 @@ export default class SettingsPage {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   getPopularity() {
@@ -254,21 +256,21 @@ export default class SettingsPage {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async controlChangeSave() {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async setPageSize(size) {
     await this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
     .click();
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async createIndexPattern() {
@@ -278,7 +280,7 @@ export default class SettingsPage {
       await this.selectTimeFieldOption('@timestamp');
       await this.getCreateButton().click();
     });
-    await PageObjects.header.isGlobalLoadingIndicatorHidden();
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.common.try(async () => {
       const currentUrl = await this.remote.getCurrentUrl();
       PageObjects.common.log('currentUrl', currentUrl);
@@ -298,11 +300,12 @@ export default class SettingsPage {
     });
     await PageObjects.common.try(async () => {
       PageObjects.common.debug('getAlertText');
-      alertText = await this.remote.getAlertText();
+      alertText = await PageObjects.common.findTestSubject('confirmModalBodyText').getVisibleText();
     });
     await PageObjects.common.try(async () => {
-      PageObjects.common.debug('acceptAlert');
-      await this.remote.acceptAlert();
+      PageObjects.common.debug('acceptConfirmation');
+      await PageObjects.common.findTestSubject('confirmModalConfirmButton')
+        .click();
     });
     await PageObjects.common.try(async () => {
       const currentUrl = await this.remote.getCurrentUrl();

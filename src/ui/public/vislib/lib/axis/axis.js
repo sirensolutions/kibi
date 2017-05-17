@@ -47,6 +47,7 @@ export default function AxisFactory(Private) {
       }
     }
 
+
     _stackNegAndPosVals(data) {
       const cache = {};
       data.forEach(series => {
@@ -217,4 +218,4 @@ export default function AxisFactory(Private) {
   }
 
   return Axis;
-};
+}

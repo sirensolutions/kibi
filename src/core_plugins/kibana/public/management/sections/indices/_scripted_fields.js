@@ -9,7 +9,7 @@ import { getSupportedScriptingLangs } from 'ui/scripting_langs';
 import { scriptedFields as docLinks } from 'ui/documentation_links/documentation_links';
 
 uiModules.get('apps/management')
-.directive('scriptedFields', function (kbnUrl, createNotifier, $filter) {
+.directive('scriptedFields', function (kbnUrl, createNotifier, $filter, confirmModal) {
   const rowScopes = []; // track row scopes, so they can be destroyed as needed
   const filter = $filter('filter');
 
@@ -40,8 +40,8 @@ uiModules.get('apps/management')
         _.invoke(rowScopes, '$destroy');
         rowScopes.length = 0;
 
-        const fields = filter($scope.indexPattern.getScriptedFields(), $scope.fieldFilter);
-        _.find($scope.editSections, {index: 'scriptedFields'}).count = fields.length; // Update the tab count
+        const fields = filter($scope.indexPattern.getScriptedFields(), { name: $scope.fieldFilter });
+        _.find($scope.editSections, { index: 'scriptedFields' }).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
           const rowScope = $scope.$new();
@@ -100,7 +100,11 @@ uiModules.get('apps/management')
       };
 
       $scope.remove = function (field) {
-        $scope.indexPattern.removeScriptedField(field.name);
+        const confirmModalOptions = {
+          confirmButtonText: 'Delete field',
+          onConfirm: () => { $scope.indexPattern.removeScriptedField(field.name); }
+        };
+        confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
       };
 
       $scope.getDeprecatedLanguagesInUse = function () {

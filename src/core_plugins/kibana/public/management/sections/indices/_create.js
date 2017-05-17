@@ -9,7 +9,7 @@ import uiModules from 'ui/modules';
 import createTemplate from 'plugins/kibana/management/sections/indices/_create.html';
 
 uiRoutes
-.when('/management/siren/index/', {
+.when('/management/siren/index', {
   template: createTemplate
 });
 
@@ -22,8 +22,7 @@ uiModules.get('apps/management')
 
   // this and child scopes will write pattern vars here
   const index = $scope.index = {
-    name: 'logstash-*',
-
+    name: config.get('indexPattern:placeholder'),
     isTimeBased: true,
     nameIsPattern: false,
     notExpandable: false,
@@ -228,7 +227,9 @@ uiModules.get('apps/management')
     .then(function () {
       const pattern = mockIndexPattern(index);
 
-      return indexPatterns.mapper.getFieldsForIndexPattern(pattern, true)
+      return indexPatterns.mapper.getFieldsForIndexPattern(pattern, {
+        skipIndexPatternCache: true,
+      })
       .catch(function (err) {
         // TODO: we should probably display a message of some kind
         if (err instanceof IndexPatternMissingIndices) {

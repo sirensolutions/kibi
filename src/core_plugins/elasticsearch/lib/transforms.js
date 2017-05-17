@@ -40,7 +40,7 @@ export default function (server) {
    * @return {object} the Elasticsearch response.
    */
   async function transformSearchResponse(response, savedQueries) {
-    await inject.runSavedQueries({responses: [response]}, server.plugins.kibi_core.getQueryEngine(), savedQueries);
+    await inject.runSavedQueries({ responses: [response] }, server.plugins.kibi_core.getQueryEngine(), savedQueries);
     return response;
   }
 

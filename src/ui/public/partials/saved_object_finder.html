@@ -20,8 +20,8 @@
 
     <div class="row">
       <div class="input-group form-group finder-form col-md-7">
-        <span class="input-group-addon">
-          <i class="fa fa-search"></i>
+        <span class="input-group-addon savedObjectFinderSearchIcon">
+          <span class="fa fa-search"></span>
         </span>
         <input
           input-focus
@@ -31,7 +31,16 @@
           class="form-control"
           name="filter"
           type="text"
-          autocomplete="off" />
+          autocomplete="off"
+        />
+      </div>
+      <div class="finder-hit-count col-md-2">
+        <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
+      </div>
+      <div class="finder-manage-object col-md-2" ng-if="onAddNew">
+        <a class="small" ng-click="onAddNew()">
+          Add new {{finder.properties.noun}}
+        </a>
       </div>
       <div class="finder-manage-object col-md-2" ng-if="!useLocalManagement">
         <a class="small" ng-click="finder.manageObjects(finder.properties.name)">
@@ -46,10 +55,10 @@
     <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
       <span class="paginate-heading">
         Name
-        <i
+        <span
           class="fa"
           ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
-        </i>
+        </span>
       </span>
     </li>
     <li

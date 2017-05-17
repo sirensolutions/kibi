@@ -16,7 +16,7 @@ import { IndexPatternMissingIndices } from 'ui/errors';
 function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns, globalState,
     elasticsearchPlugins, $location, config, Private, createNotifier) {
   const State = Private(StateManagementStateProvider);
-  const notify = createNotifier({ location: 'Kibi State'});
+  const notify = createNotifier({ location: 'Kibi State' });
   const relationsHelper = Private(RelationsHelperProvider);
   const decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
 
@@ -271,7 +271,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
             appState.filters = filters;
 
             // query
-            const origQuery = query && query.query || {query_string: {analyze_wildcard: true, query: '*'}};
+            const origQuery = query && query.query || { query_string: { analyze_wildcard: true, query: '*' } };
             if (!angular.equals(origQuery, appState.query)) {
               queryChanged = true;
             }

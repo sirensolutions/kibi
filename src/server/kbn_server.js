@@ -22,6 +22,7 @@ module.exports = class KbnServer {
       require('./config/setup'), // sets this.config, reads this.settings
       require('./http'), // sets this.server
       require('./logging'),
+      require('./config/deprecation_warnings'),
       require('./warnings'),
       require('./status'),
 
@@ -87,7 +88,7 @@ module.exports = class KbnServer {
    * @return undefined
    */
   async listen() {
-    let { server, config } = this;
+    const { server, config } = this;
     this.cleaningArray = []; // Kibi: added to manage cleanup functions through shutdown_manager
 
     await this.ready();

@@ -41,4 +41,4 @@ export default function stubSearchSource(Private, $q, Promise) {
     }
   };
 
-};
+}

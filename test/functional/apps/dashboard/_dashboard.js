@@ -1,5 +1,8 @@
 
 import expect from 'expect.js';
+import {
+  DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT
+} from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
 
 import {
   bdd,
@@ -15,7 +18,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     PageObjects.common.debug('Starting dashboard before method');
     const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
     // delete .kibana index and update configDoc
-    return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
+    return esClient.deleteAndUpdateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
     // and load a set of makelogs data
     .then(function loadkibanaVisualizations() {
       PageObjects.common.debug('load kibana index with visualizations');
@@ -53,11 +56,12 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         }, Promise.resolve());
       }
 
-      return addVisualizations(visualizations)
-      .then(function () {
-        PageObjects.common.debug('done adding visualizations');
-        PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
-      });
+      return PageObjects.dashboard.clickNewDashboard()
+        .then(() => addVisualizations(visualizations))
+        .then(function () {
+          PageObjects.common.debug('done adding visualizations');
+          PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
+        });
     });
 
     bdd.it('set the timepicker time to that which contains our test data', function setTimepicker() {
@@ -74,6 +78,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         PageObjects.common.saveScreenshot('Dashboard-set-timepicker');
       });
     });
+
 
     bdd.it('should save and load dashboard', function saveAndLoadDashboard() {
       const dashboardName = 'Dashboard Test 1';
@@ -99,11 +104,9 @@ bdd.describe('dashboard tab', function describeIndexTests() {
           PageObjects.common.debug('now re-load previously saved dashboard');
           return PageObjects.dashboard.loadSavedDashboard(dashboardName);
         });
-      })
-      .then(function () {
-        PageObjects.common.saveScreenshot('Dashboard-load-saved');
       });
     });
+
 
     bdd.it('should have all the expected visualizations', function checkVisualizations() {
       return PageObjects.common.tryForTime(10000, function () {
@@ -119,14 +122,18 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     });
 
     bdd.it('should have all the expected initial sizes', function checkVisualizationSizes() {
-      const visObjects = [ { dataCol: '1', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 AreaChart' },
-        { dataCol: '4', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺漢字 DataTable' },
-        { dataCol: '7', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 LineChart' },
-        { dataCol: '10', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization PieChart' },
-        { dataCol: '1', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization TileMap' },
-        { dataCol: '4', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺ VerticalBarChart' },
-        { dataCol: '7', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization MetricChart' }
+      const width = DEFAULT_PANEL_WIDTH;
+      const height = DEFAULT_PANEL_HEIGHT;
+      const visObjects = [
+        { dataCol: '1', dataRow: '1', dataSizeX: width, dataSizeY: height, title: 'Visualization漢字 AreaChart' },
+        { dataCol: width + 1, dataRow: '1', dataSizeX: width, dataSizeY: height, title: 'Visualization☺漢字 DataTable' },
+        { dataCol: '1', dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization漢字 LineChart' },
+        { dataCol: width + 1, dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization PieChart' },
+        { dataCol: '1', dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization TileMap' },
+        { dataCol: width + 1, dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization☺ VerticalBarChart' },
+        { dataCol: '1', dataRow: (height * 3) + 1, dataSizeX: width, dataSizeY: height, title: 'Visualization MetricChart' }
       ];
+
       return PageObjects.common.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelData()
         .then(function (panelTitles) {
@@ -136,5 +143,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         });
       });
     });
+
+
   });
 });

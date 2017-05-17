@@ -51,7 +51,6 @@ export default (grunt) => {
     const nodeVersion = 'v48';
     let sqliteBindingSrc;
     let sqliteBindingDestFolder;
-    let sqliteBindingDest;
     const nodejavaBindingSrc = __dirname + '/../../resources/nodejavabridges/' + name + '/nodejavabridge_bindings.node';
     const nodejavaBindingDest = buildDir + '/node_modules/java/build/Release/nodejavabridge_bindings.node';
     switch (name) {
@@ -78,7 +77,7 @@ export default (grunt) => {
       default:
         throw new Error('Unknown platform: [' + name + ']');
     }
-    sqliteBindingDest = `${sqliteBindingDestFolder}/node_sqlite3.node`;
+    const sqliteBindingDest = `${sqliteBindingDestFolder}/node_sqlite3.node`;
 
     toCopy.push({
       sqliteBindingSrc: sqliteBindingSrc,

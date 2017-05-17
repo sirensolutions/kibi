@@ -114,7 +114,7 @@ exports._runInject = function (query, queryEngine, credentials) {
       throw new Error('Missing fieldName field in the inject object: ' + query);
     }
 
-    return queryEngine.getIdsFromQueries(queryDefs, {selectedDocuments: [entityURI], credentials})
+    return queryEngine.getIdsFromQueries(queryDefs, { selectedDocuments: [entityURI], credentials })
     .then(function (setOfIds) {
       return function (hit) {
         const res = {

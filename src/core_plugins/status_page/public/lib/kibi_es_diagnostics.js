@@ -30,7 +30,7 @@ module.exports = function (data, $http, kibiIndexName) {
         promises.push(Promise.resolve(formatResults('kibi plugin statuses', data.statuses)));
 
         Promise.all(promises).then((results) => {
-          const blob = new Blob([results.join('\n')], {type: 'application/text'});
+          const blob = new Blob([results.join('\n')], { type: 'application/text' });
           saveAs(blob, 'diagniostics.txt');
         });
       }

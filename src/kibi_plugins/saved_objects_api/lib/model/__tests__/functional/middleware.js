@@ -12,7 +12,7 @@ describe('saved_objects_api/functional', function () {
     getMiddlewares() {}
   }
 
-  const helper = new ModelTestHelper(60000, 'index-pattern', 'title', 'idx', {saved_objects_api: new SavedObjectsAPIMock()});
+  const helper = new ModelTestHelper(60000, 'index-pattern', 'title', 'idx', { saved_objects_api: new SavedObjectsAPIMock() });
 
   class Middleware {
     async createRequest() {}
@@ -62,15 +62,15 @@ describe('saved_objects_api/functional', function () {
       middlewareMock
       .expects('createRequest')
       .once()
-      .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined);
+      .withExactArgs(helper.getInstance(), 'idx1', { title: '1' }, undefined);
       middlewareMock
       .expects('updateRequest')
       .once()
-      .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined);
+      .withExactArgs(helper.getInstance(), 'idx1', { title: '1' }, undefined);
       middlewareMock
       .expects('createResponse')
       .once()
-      .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined, sinon.match.has('_id', 'idx1'));
+      .withExactArgs(helper.getInstance(), 'idx1', { title: '1' }, undefined, sinon.match.has('_id', 'idx1'));
 
       await helper.testCreation();
       expect(getMiddlewaresStub.callCount).to.be(3);
@@ -80,23 +80,23 @@ describe('saved_objects_api/functional', function () {
     it('should call registered middlewares when updating an object.', wrapAsync(async () => {
       middlewareMock
       .expects('createRequest')
-      .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined);
+      .withExactArgs(helper.getInstance(), 'idx1', { title: '1' }, undefined);
       middlewareMock
       .expects('updateRequest')
-      .withExactArgs(helper.getInstance(), 'idx1', {title: '2'}, undefined);
+      .withExactArgs(helper.getInstance(), 'idx1', { title: '2' }, undefined);
       middlewareMock
       .expects('createRequest')
-      .withExactArgs(helper.getInstance(), 'idx2', {title: '1'}, undefined);
+      .withExactArgs(helper.getInstance(), 'idx2', { title: '1' }, undefined);
 
       middlewareMock
       .expects('createResponse')
-      .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined, sinon.match.has('_id', 'idx1'));
+      .withExactArgs(helper.getInstance(), 'idx1', { title: '1' }, undefined, sinon.match.has('_id', 'idx1'));
       middlewareMock
       .expects('updateResponse')
-      .withExactArgs(helper.getInstance(), 'idx1', {title: '2'}, undefined, sinon.match.has('_id', 'idx1'));
+      .withExactArgs(helper.getInstance(), 'idx1', { title: '2' }, undefined, sinon.match.has('_id', 'idx1'));
       middlewareMock
       .expects('createResponse')
-      .withExactArgs(helper.getInstance(), 'idx2', {title: '1'}, undefined, sinon.match.has('_id', 'idx2'));
+      .withExactArgs(helper.getInstance(), 'idx2', { title: '1' }, undefined, sinon.match.has('_id', 'idx2'));
 
       await helper.testIndexing();
       expect(getMiddlewaresStub.callCount).to.be(6);
@@ -105,19 +105,19 @@ describe('saved_objects_api/functional', function () {
 
     it('should call registered middlewares when patching an object.', wrapAsync(async () => {
       const model = helper.getInstance();
-      await model.create('idx1', {title: '1'});
+      await model.create('idx1', { title: '1' });
 
       middlewareMock
       .expects('patchRequest')
-      .withExactArgs(helper.getInstance(), 'idx1', {title: '2'}, undefined);
+      .withExactArgs(helper.getInstance(), 'idx1', { title: '2' }, undefined);
       middlewareMock
       .expects('patchResponse')
       .withExactArgs(helper.getInstance(),
-        'idx1', {title: '2'}, undefined,
+        'idx1', { title: '2' }, undefined,
         sinon.match.has('_version', 2)
       );
 
-      await model.patch('idx1', {title: '2'});
+      await model.patch('idx1', { title: '2' });
       expect(getMiddlewaresStub.callCount).to.be(4);
       middlewareMock.verify();
     }));
@@ -150,7 +150,7 @@ describe('saved_objects_api/functional', function () {
       .withExactArgs(helper.getInstance(), 10, 'q', undefined);
       middlewareMock
       .expects('searchResponse')
-      .withExactArgs(helper.getInstance(), 10, 'q', undefined, { hits: { hits: [], total: 0 }});
+      .withExactArgs(helper.getInstance(), 10, 'q', undefined, { hits: { hits: [], total: 0 } });
 
       await model.search(10, 'q');
       expect(getMiddlewaresStub.callCount).to.be(6);

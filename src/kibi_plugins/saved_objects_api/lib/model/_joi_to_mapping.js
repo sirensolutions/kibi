@@ -8,9 +8,9 @@ import { each } from 'lodash';
 function getElasticsearchMappingType(joi) {
   switch (joi.type) {
     case 'string':
-      return {type: 'string'};
+      return { type: 'string' };
     case 'boolean':
-      return {type: 'boolean'};
+      return { type: 'boolean' };
     case 'object':
       if (joi.children) {
         const body = {
@@ -21,16 +21,16 @@ function getElasticsearchMappingType(joi) {
         });
         return body;
       } else {
-        return {type: 'string'};
+        return { type: 'string' };
       }
       break;
     case 'date':
-      return {type: 'date'};
+      return { type: 'date' };
     case 'number':
       if (joi.rules) {
         for (const rule of joi.rules) {
           if (rule.name === 'integer') {
-            return {type: 'integer' };
+            return { type: 'integer' };
           }
         }
       }

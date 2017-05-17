@@ -68,7 +68,7 @@ describe('Filter Manager', function () {
     expect(queryFilter.addFilters.callCount).to.be(1);
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase'} } }
+      query: { match: { myField: { query: 1, type: 'phrase' } } }
     }]);
   });
 
@@ -77,13 +77,13 @@ describe('Filter Manager', function () {
     expect(queryFilter.addFilters.callCount).to.be(1);
     checkAddFilters(3, [{
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase'} } }
+      query: { match: { myField: { query: 1, type: 'phrase' } } }
     }, {
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 2, type: 'phrase'} } }
+      query: { match: { myField: { query: 2, type: 'phrase' } } }
     }, {
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 3, type: 'phrase'} } }
+      query: { match: { myField: { query: 3, type: 'phrase' } } }
     }]);
   });
 
@@ -99,7 +99,7 @@ describe('Filter Manager', function () {
     filterManager.add('myField', 1, '+', 'myIndex');
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase'} } }
+      query: { match: { myField: { query: 1, type: 'phrase' } } }
     }], 0);
     expect(appState.filters).to.have.length(1);
 
@@ -119,15 +119,15 @@ describe('Filter Manager', function () {
     checkAddFilters(0, null, 3);
     expect(appState.filters).to.have.length(2);
 
-    const scriptedField = {name: 'scriptedField', scripted: true, script: 1, lang: 'painless'};
+    const scriptedField = { name: 'scriptedField', scripted: true, script: 1, lang: 'painless' };
     filterManager.add(scriptedField, 1, '+', 'myIndex');
     checkAddFilters(1, [{
-      meta: {index: 'myIndex', negate: false, field: 'scriptedField'},
+      meta: { index: 'myIndex', negate: false, field: 'scriptedField' },
       script: {
         script: {
           inline: buildInlineScriptForPhraseFilter(scriptedField),
           lang: scriptedField.lang,
-          params: {value: 1}
+          params: { value: 1 }
         }
       }
     }], 4);
@@ -140,7 +140,7 @@ describe('Filter Manager', function () {
 
   describe('Kibi - filter on null value', function () {
     it('should add a filter with null value', function () {
-      var myField = {displayName: 'myField'};
+      const myField = { displayName: 'myField' };
       filterManager.add(myField, null, '+', 'myIndex');
       expect(queryFilter.addFilters.callCount).to.be(1);
       checkAddFilters(1, [{
@@ -158,7 +158,7 @@ describe('Filter Manager', function () {
     });
 
     it('should negate existing null filter', function () {
-      var myField = {displayName: 'myField'};
+      const myField = { displayName: 'myField' };
       filterManager.add(myField, null, '+', 'myIndex');
       sinon.assert.calledOnce(queryFilter.addFilters);
       checkAddFilters(1, [{

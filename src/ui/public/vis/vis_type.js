@@ -15,6 +15,7 @@ export default function VisTypeFactory(Private) {
     this.schemas = opts.schemas || new VisTypeSchemas();
     this.params = opts.params || {};
     this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
+    this.fullEditor = opts.fullEditor == null ? false : opts.fullEditor;
     this.implementsRenderComplete = opts.implementsRenderComplete || false;
     // kibi: Default to false unless otherwise specified
     // this is used for the spy panel of visualizations that query more than one index
@@ -34,4 +35,4 @@ export default function VisTypeFactory(Private) {
   };
 
   return VisType;
-};
+}

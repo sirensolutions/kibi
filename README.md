@@ -1,4 +1,4 @@
-# Kibi 5.2.2
+# Kibi 5.3.2
 
 Kibi extends Kibana 5.2.2 with data intelligence features; the core feature of
 Kibi is the capability to join and filter data from multiple Elasticsearch

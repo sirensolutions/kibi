@@ -43,7 +43,7 @@ export default function TileMapFactory(Private) {
           self._appendMap(this);
         });
       };
-    };
+    }
 
     /**
      * Invalidate the size of the map, so that leaflet will resize to fit.
@@ -56,7 +56,7 @@ export default function TileMapFactory(Private) {
       this.maps.forEach(function (map) {
         map.updateSize();
       });
-    };
+    }
 
     /**
      * clean up the maps
@@ -68,7 +68,7 @@ export default function TileMapFactory(Private) {
       this.maps = this.maps.filter(function (map) {
         map.destroy();
       });
-    };
+    }
 
     /**
      * Adds allmin and allmax properties to geoJson data
@@ -81,7 +81,7 @@ export default function TileMapFactory(Private) {
       const geoMinMax = this.handler.data.getGeoExtents();
       this.geoJson.properties.allmin = geoMinMax.min;
       this.geoJson.properties.allmax = geoMinMax.max;
-    };
+    }
 
     /**
      * Renders map
@@ -98,12 +98,13 @@ export default function TileMapFactory(Private) {
 
       const params = _.assign({}, _.get(this._chartData, 'geoAgg.vis.params'), uiStateParams);
 
+      const tooltipFormatter = this.handler.visConfig.get('addTooltip') ? this.tooltipFormatter : null;
       const map = new TileMapMap(container, this._chartData, {
         center: params.mapCenter,
         zoom: params.mapZoom,
         events: this.events,
         markerType: this.handler.visConfig.get('mapType'),
-        tooltipFormatter: this.tooltipFormatter,
+        tooltipFormatter: tooltipFormatter,
         valueFormatter: this.valueFormatter,
         attr: this.handler.visConfig._values
       });
@@ -120,8 +121,8 @@ export default function TileMapFactory(Private) {
       }
 
       this.maps.push(map);
-    };
+    }
   }
 
   return TileMap;
-};
+}

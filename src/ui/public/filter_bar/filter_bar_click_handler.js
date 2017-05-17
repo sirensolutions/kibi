@@ -56,7 +56,7 @@ export default function (createNotifier) {
           });
         }
 
-        filters = dedupFilters($state.filters, uniqFilters(filters));
+        filters = dedupFilters($state.filters, uniqFilters(filters), { negate: true });
         // We need to add a bunch of filter deduping here.
         if (!simulate) {
           $state.$newFilters = filters;
@@ -66,4 +66,4 @@ export default function (createNotifier) {
       }
     };
   };
-};
+}

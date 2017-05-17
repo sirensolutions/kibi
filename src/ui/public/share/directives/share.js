@@ -67,7 +67,7 @@ uiModules
             },
           }),
         });
-      };
+      }
 
       function getSnapshotUrl() {
         const url = $location.absUrl();

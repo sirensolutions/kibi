@@ -29,4 +29,4 @@ export default function TemplateRenderbotFactory(Private, $compile, $rootScope) 
   };
 
   return TemplateRenderbot;
-};
+}

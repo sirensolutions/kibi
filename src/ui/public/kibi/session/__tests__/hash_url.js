@@ -10,9 +10,9 @@ import {
 describe('kibi/session/hashUrl', () => {
 
   const states = [
-    {global: true, data: '&:g'},
-    {app: true},
-    {kibi: true}
+    { global: true, data: '&:g' },
+    { app: true },
+    { kibi: true }
   ];
   const encodedStates = states.map(state => encodeURIComponent(rison.encode(state)));
 

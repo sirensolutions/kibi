@@ -72,14 +72,14 @@ describe('Kibi Controllers', function () {
       // Note: below we trigger the templateChanged and labelChanged manually to simplify tests
 
       it('should set _label when label property is set in _templateVarsString', function () {
-        $scope.vis.params.queryDefinitions[0]._templateVarsString = JSON.stringify({label: 'value changed in template vars'});
+        $scope.vis.params.queryDefinitions[0]._templateVarsString = JSON.stringify({ label: 'value changed in template vars' });
         $scope.templateChanged();
         const actual = $scope.vis.params.queryDefinitions[0]._label;
         expect(actual).to.equal('value changed in template vars');
       });
 
       it('should reset _label when label property is set in _templateVarsString set to empty string', function () {
-        $scope.vis.params.queryDefinitions[0]._templateVarsString = JSON.stringify({label: ''});
+        $scope.vis.params.queryDefinitions[0]._templateVarsString = JSON.stringify({ label: '' });
         $scope.templateChanged();
         const actual = $scope.vis.params.queryDefinitions[0]._label;
         expect(actual).to.equal('');
@@ -89,14 +89,14 @@ describe('Kibi Controllers', function () {
         $scope.vis.params.queryDefinitions[0]._label = 'value changed in label';
         $scope.labelChanged(0);
         const actual = JSON.parse($scope.vis.params.queryDefinitions[0]._templateVarsString);
-        expect(actual).to.eql({label: 'value changed in label'});
+        expect(actual).to.eql({ label: 'value changed in label' });
       });
 
       it('should reset label in _templateVarsString when _label changed to an empty string', function () {
         $scope.vis.params.queryDefinitions[0]._label = '';
         $scope.labelChanged(0);
         const actual = JSON.parse($scope.vis.params.queryDefinitions[0]._templateVarsString);
-        expect(actual).to.eql({label: ''});
+        expect(actual).to.eql({ label: '' });
       });
     });
   });

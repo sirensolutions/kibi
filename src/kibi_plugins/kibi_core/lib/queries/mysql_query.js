@@ -59,7 +59,7 @@ MysqlQuery.prototype._executeQuery = function (query, connectionString, timeout)
     try {
       connection = mysql.createConnection(connectionString);
       connection.connect();
-      connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
+      connection.query({ sql: query, timeout: timeout || 1000 }, function (err, rows, fields) {
         if (err) {
           if (err.message) {
             err = {
@@ -71,7 +71,7 @@ MysqlQuery.prototype._executeQuery = function (query, connectionString, timeout)
           reject(err);
           return;
         }
-        fulfill({rows: rows, fields: fields});
+        fulfill({ rows: rows, fields: fields });
       });
     } catch (err) {
       reject(err);

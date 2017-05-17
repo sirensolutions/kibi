@@ -47,7 +47,7 @@ require('ui/routes')
 
 app.controller('timelion', function (
     $scope, $http, timefilter, AppState, courier, $route, $routeParams,
-    kbnUrl, createNotifier, config, $timeout, Private, savedVisualizations, safeConfirm) {
+    kbnUrl, createNotifier, config, $timeout, Private, savedVisualizations, confirmModal) {
 
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
@@ -86,12 +86,19 @@ app.controller('timelion', function (
     },
     run: function () {
       const title = savedSheet.title;
-      safeConfirm('Are you sure you want to delete the sheet ' + title + ' ?').then(function () {
+      function doDelete() {
         savedSheet.delete().then(() => {
           notify.info('Deleted ' + title);
           kbnUrl.change('/');
         }).catch(notify.fatal);
-      });},
+      }
+
+      const confirmModalOptions = {
+        onConfirm: doDelete,
+        confirmButtonText: 'Delete sheet'
+      };
+      confirmModal(`Are you sure you want to delete the sheet ${title}?`, confirmModalOptions);
+    },
     testId: 'timelionDeleteButton',
   }, {
     key: 'open',
@@ -158,7 +165,7 @@ app.controller('timelion', function (
           if (!$scope.running) $scope.search();
           startRefresh();
         }, interval.value);
-      };
+      }
       startRefresh();
     }
   });
@@ -230,14 +237,14 @@ app.controller('timelion', function (
       if (id) {
         notify.info('Saved sheet as "' + savedSheet.title + '"');
         if (savedSheet.id !== $routeParams.id) {
-          kbnUrl.change('/{{id}}', {id: savedSheet.id});
+          kbnUrl.change('/{{id}}', { id: savedSheet.id });
         }
       }
     });
-  };
+  }
 
   function saveExpression(title) {
-    savedVisualizations.get({type: 'timelion'}).then(function (savedExpression) {
+    savedVisualizations.get({ type: 'timelion' }).then(function (savedExpression) {
       savedExpression.visState.params = {
         expression: $scope.state.sheet[$scope.state.selected],
         interval: $scope.state.interval
@@ -248,7 +255,7 @@ app.controller('timelion', function (
         if (id) notify.info('Saved expression as "' + savedExpression.title + '"');
       });
     });
-  };
+  }
 
   function dismissNotifications() {
     unsafeNotifications.splice(0, unsafeNotifications.length);

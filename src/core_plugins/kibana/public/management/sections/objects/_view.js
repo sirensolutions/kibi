@@ -14,7 +14,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjectsView', function (kbnIndex, createNotifier) {
+.directive('kbnManagementObjectsView', function (kbnIndex, createNotifier, confirmModal) {
   return {
     restrict: 'E',
     // kibi: replaces esAdmin with savedObjectsAPI
@@ -119,7 +119,14 @@ uiModules.get('apps/management')
 
         const fields =  _.reduce(obj._source, createField, []);
         if (service.Class) readObjectClass(fields, service.Class);
-        $scope.fields = _.sortBy(fields, 'name');
+
+        // sorts twice since we want numerical sort to prioritize over name,
+        // and sortBy will do string comparison if trying to match against strings
+        const nameSortedFields = _.sortBy(fields, 'name');
+        $scope.fields = _.sortBy(nameSortedFields, (field) => {
+          const orderIndex = service.Class.fieldOrder ? service.Class.fieldOrder.indexOf(field.name) : -1;
+          return (orderIndex > -1) ? orderIndex : Infinity;
+        });
       })
       .catch(notify.fatal);
 
@@ -144,7 +151,7 @@ uiModules.get('apps/management')
         session.setUseSoftTabs(true);
         session.on('changeAnnotation', function () {
           const annotations = session.getAnnotations();
-          if (_.some(annotations, { type: 'error'})) {
+          if (_.some(annotations, { type: 'error' })) {
             if (!_.contains($scope.aceInvalidEditors, fieldName)) {
               $scope.aceInvalidEditors.push(fieldName);
             }
@@ -167,25 +174,36 @@ uiModules.get('apps/management')
        * @returns {type} description
        */
       $scope.delete = function () {
-        // kibi: wrapped the original function
-        // as we need to do our checks before
-        const _delete = function () {
-          return savedObjectsAPI.delete({
-            index: kbnIndex,
-            type: service.type,
-            id: $routeParams.id
-          })
-          .then(function (resp) {
-            // this should be emited also from other places
-            $rootScope.$emit('kibi:' + service.type + ':changed', resp); // kibi: kibi event
-            $rootScope.$emit('kibi:' + service.type + ':changed:deleted', resp); // kibi: kibi event
-            return redirectHandler('deleted');
-          })
-          .catch(notify.error); // kibi: changed from fatal to error
+        const doDelete = function () {
+          // kibi: wrapped the original function
+          // as we need to do our checks before
+          const _delete = function () {
+            return savedObjectsAPI.delete({
+              index: kbnIndex,
+              type: service.type,
+              id: $routeParams.id
+            })
+            .then(function (resp) {
+              // this should be emited also from other places
+              $rootScope.$emit('kibi:' + service.type + ':changed', resp); // kibi: kibi event
+              $rootScope.$emit('kibi:' + service.type + ':changed:deleted', resp); // kibi: kibi event
+              return redirectHandler('deleted');
+            })
+            .catch(notify.error); // kibi: changed from fatal to error
+          };
+
+          deleteHelper.deleteByType(service.type, [$routeParams.id], _delete);
+          // kibi: end
         };
 
-        deleteHelper.deleteByType(service.type, [$routeParams.id], _delete);
-        // kibi: end
+        const confirmModalOptions = {
+          onConfirm: doDelete,
+          confirmButtonText: 'Delete object'
+        };
+        confirmModal(
+          'Are you sure want to delete this object? This action is irreversible!',
+          confirmModalOptions
+        );
       };
 
       $scope.submit = function () {

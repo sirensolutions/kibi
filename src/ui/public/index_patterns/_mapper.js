@@ -10,18 +10,18 @@ import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
 // kibi: imports
 import PathsProvider from 'ui/kibi/index_patterns/_get_paths_for_index_pattern';
 
-// kibi: require savedObjecsAPI service instead of esAdmin
+// kibi: require savedObjecsAPI service instead of esAdmin, added mappings
 export default function MapperService(Private, Promise, es, savedObjectsAPI, config, kbnIndex, mappings) {
 
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
   const patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
+  const LocalCache = Private(IndexPatternsLocalCacheProvider);
 
   // kibi: support dots in field name
   const _getPathsForIndexPattern = Private(PathsProvider);
 
-  const LocalCache = Private(IndexPatternsLocalCacheProvider);
 
   function Mapper() {
 
@@ -58,17 +58,17 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
     /**
      * Gets an object containing all fields with their mappings
      * @param {dataSource} dataSource
-     * @param {boolean} skipIndexPatternCache - should we ping the index-pattern objects
+     * @param {object} options
      * @returns {Promise}
      * @async
      */
-    self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
+    self.getFieldsForIndexPattern = function (indexPattern, opts) {
       const id = indexPattern.id;
 
       const cache = fieldCache.get(id);
       if (cache) return Promise.resolve(cache);
 
-      if (!skipIndexPatternCache) {
+      if (!opts.skipIndexPatternCache) {
         // kibi: retrieve index pattern using the saved objects API.
         return savedObjectsAPI.get({
           index: kbnIndex,
@@ -80,7 +80,7 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
           if (resp.found && resp._source.fields) {
             fieldCache.set(id, JSON.parse(resp._source.fields));
           }
-          return self.getFieldsForIndexPattern(indexPattern, true);
+          return self.getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true });
         });
       }
 
@@ -162,7 +162,7 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
       return Promise.reject(new IndexPatternAuthorizationError());
     } else if (err.status >= 400) {
       // transform specific error type
-      return Promise.reject(new IndexPatternMissingIndices());
+      return Promise.reject(new IndexPatternMissingIndices(err.message));
     } else {
       // rethrow all others
       throw err;
@@ -170,4 +170,4 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
   }
 
   return new Mapper();
-};
+}

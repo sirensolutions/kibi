@@ -89,4 +89,4 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
   };
 
   return Field;
-};
+}

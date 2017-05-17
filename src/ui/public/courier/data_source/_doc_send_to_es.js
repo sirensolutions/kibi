@@ -11,7 +11,7 @@ import errors from 'ui/errors';
 import RequestQueueProvider from 'ui/courier/_request_queue';
 import FetchProvider from 'ui/courier/fetch/fetch';
 
-export default function (savedObjectsAPI, savedObjectsAPITypes, Promise, Private, es, esAdmin, kbnIndex) {
+export default function (Promise, Private, es, esAdmin, kbnIndex, savedObjectsAPI, savedObjectsAPITypes) {
   const requestQueue = Private(RequestQueueProvider);
   const courierFetch = Private(FetchProvider);
 
@@ -94,4 +94,4 @@ export default function (savedObjectsAPI, savedObjectsAPITypes, Promise, Private
       throw new errors.RequestFailure(err);
     });
   };
-};
+}

@@ -34,4 +34,4 @@ export default function createUrlShortener(createNotifier, $http, $location, sir
   return {
     shortenUrl
   };
-};
+}

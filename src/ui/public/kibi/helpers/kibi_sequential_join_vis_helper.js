@@ -84,7 +84,7 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
               kibiState.save();
               // switch to target dashboard
               if (this.targetDashboardId) {
-                kbnUrl.change('/dashboard/{{id}}', {id: this.targetDashboardId});
+                kbnUrl.change('/dashboard/{{id}}', { id: this.targetDashboardId });
               }
             };
 
@@ -105,7 +105,7 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
             this.joinSeqFilter.meta.alias_tmpl = '';
             // just redirect to the target dashboard
             if (this.targetDashboardId) {
-              kbnUrl.change('/dashboard/{{id}}', {id: this.targetDashboardId});
+              kbnUrl.change('/dashboard/{{id}}', { id: this.targetDashboardId });
             }
           }
         });

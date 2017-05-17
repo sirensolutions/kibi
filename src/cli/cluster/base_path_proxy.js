@@ -1,8 +1,8 @@
 import { Server } from 'hapi';
 import { notFound } from 'boom';
-import { merge, sample } from 'lodash';
+import { map, merge, sample } from 'lodash';
 import { format as formatUrl } from 'url';
-import { map, fromNode } from 'bluebird';
+import { map as promiseMap, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
 import { readFileSync } from 'fs';
 
@@ -10,6 +10,7 @@ import Config from '../../server/config/config';
 import setupConnection from '../../server/http/setup_connection';
 import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 import setupLogging from '../../server/logging';
+import { transformDeprecations } from '../../server/config/transform_deprecations';
 import { DEV_SSL_CERT_PATH } from '../dev_ssl';
 
 
@@ -20,27 +21,21 @@ export default class BasePathProxy {
     this.clusterManager = clusterManager;
     this.server = new Server();
 
-    const config = Config.withDefaultSchema(userSettings);
+    const settings = transformDeprecations(userSettings);
+    const config = Config.withDefaultSchema(settings);
 
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');
 
-    // kibi: support server.ssl.ca parameter
-    const { cert, ca } = config.get('server.ssl');
-    if (cert) {
-      const httpsAgentConfig = {};
-      if (cert === DEV_SSL_CERT_PATH && config.get('server.host') !== 'localhost') {
-        httpsAgentConfig.rejectUnauthorized = false;
-      } else {
-        // kibi: support server.ssl.ca parameter
-        if (ca) {
-          httpsAgentConfig.ca = readFileSync(ca);
-        } else {
-          httpsAgentConfig.ca = readFileSync(cert);
-        }
-        // kibi: end
-      }
-      this.proxyAgent = new HttpsAgent(httpsAgentConfig);
+    const sslEnabled = config.get('server.ssl.enabled');
+    if (sslEnabled) {
+      this.proxyAgent = new HttpsAgent({
+        key: readFileSync(config.get('server.ssl.key')),
+        passphrase: config.get('server.ssl.keyPassphrase'),
+        cert: readFileSync(config.get('server.ssl.certificate')),
+        ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+        rejectUnauthorized: false
+      });
     }
 
     if (!this.basePath) {
@@ -75,7 +70,7 @@ export default class BasePathProxy {
       config: {
         pre: [
           (req, reply) => {
-            map(clusterManager.workers, worker => {
+            promiseMap(clusterManager.workers, worker => {
               if (worker.type === 'server' && !worker.listening && !worker.crashed) {
                 return fromNode(cb => {
                   const done = () => {
@@ -116,7 +111,7 @@ export default class BasePathProxy {
       method: '*',
       path: `/{oldBasePath}/{kbnPath*}`,
       handler(req, reply) {
-        const {oldBasePath, kbnPath = ''} = req.params;
+        const { oldBasePath, kbnPath = '' } = req.params;
 
         const isGet = req.method === 'get';
         const isBasePath = oldBasePath.length === 3;

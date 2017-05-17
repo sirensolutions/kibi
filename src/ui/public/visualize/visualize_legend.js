@@ -95,7 +95,7 @@ uiModules.get('kibana')
         if (cache && cache.get(cacheKey)) {
           return cache.get(cacheKey);
         }
-        const filters = clickHandler({point: legendData}, true) || [];
+        const filters = clickHandler({ point: legendData }, true) || [];
         if (cache) {
           cache.set(cacheKey, filters.length);
         }

@@ -54,7 +54,7 @@ uiModules
         _.each(relDashboards.links, function (link) {
           const relation = _.find(
             $scope.relations.relationsDashboards,
-            {relation: link.data.relation, dashboards: [link.source.replace(/^eegid-/, ''), link.target.replace(/^eegid-/, '')]}
+            { relation: link.data.relation, dashboards: [link.source.replace(/^eegid-/, ''), link.target.replace(/^eegid-/, '')] }
           );
           if (!relation) {
             return;

@@ -1330,8 +1330,8 @@ describe('Join querying', function () {
                       join_sequence: [
                         {
                           relation: [
-                            {pattern: 'A', path: 'aaa', indices: ['A']},
-                            {pattern: 'B', path: 'bbb', indices: ['B'], types: ['A']}
+                            { pattern: 'A', path: 'aaa', indices: ['A'] },
+                            { pattern: 'B', path: 'bbb', indices: ['B'], types: ['A'] }
                           ]
                         }
                       ]
@@ -1340,8 +1340,8 @@ describe('Join querying', function () {
                       join_sequence: [
                         {
                           relation: [
-                            {pattern: 'C', path: 'ccc', indices: ['C']},
-                            {pattern: 'D', path: 'ddd', indices: ['D']}
+                            { pattern: 'C', path: 'ccc', indices: ['C'] },
+                            { pattern: 'D', path: 'ddd', indices: ['D'] }
                           ]
                         }
                       ]

@@ -78,7 +78,7 @@ SQLiteQuery.prototype.openConnection = function () {
       try {
         self._connection.configure('busyTimeout', timeout);
       } catch (error) {
-        reject(self._augmentError({message: 'Invalid timeout: ' + timeout}));
+        reject(self._augmentError({ message: 'Invalid timeout: ' + timeout }));
         return;
       }
 

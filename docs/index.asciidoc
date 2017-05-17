@@ -4,21 +4,21 @@
 
 :enterprise_enabled: true
 :java-version: 1.8
-:vanguard-version: 5.2.2
+:vanguard-version: 5.3.2
 :vanguard-website: https://siren.io/vanguard
-:version: 5.2.2
-:kibana-version: 5.2.2
-:kibana-announcement: https://www.elastic.co/blog/kibana-5-2-2-released
-:kibana-ref: https://www.elastic.co/guide/en/kibana/5.2
+:version: 5.3.2
+:kibana-version: 5.3.2
+:kibana-announcement: https://www.elastic.co/blog/kibana-5-3-2-released
+:kibana-ref: https://www.elastic.co/guide/en/kibana/5.3
 :kibi-version: {version}
-:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.2/
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.3/
 :es-ref: {elastic-ref}
-:elasticsearch-version: 5.2.2
+:elasticsearch-version: 5.3.2
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
 :searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
 :searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
 :searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
-:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-2.3.5
+:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-5.3.2
 :kibi-ref: http://siren.solutions/kibi/docs/current/
 :dockerhub-ref: https://hub.docker.com/u/sirensolutions/
 :download-ref: https://support.siren.solutions
@@ -28,7 +28,7 @@
 :k4issue: https://github.com/elastic/kibana/issues/
 :k4pull: https://github.com/elastic/kibana/pull/
 :version: 4.6
-:compatible-es-versions: 2.4.x
+:compatible-es-versions: 5.3.x
 :es-compability-table-ref: https://github.com/sirensolutions/kibi/blob/master/README.md#compatibility-table-kibi--elasticsearch
 
 :repo: https://github.com/elastic/kibana/
@@ -36,7 +36,7 @@
 :pull:           {repo}pull/
 :commit:         {repo}commit/
 :security:       https://www.elastic.co/community/security/
-:branch: 5.2.2
+:branch: 5.3.2
 
 include::introduction.asciidoc[]
 

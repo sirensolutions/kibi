@@ -78,6 +78,11 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
         'Highlighting makes requests slow when working on big documents.',
     },
+    'doc_table:highlight:all_fields': {
+      value: true,
+      description: 'Improves highlighting by using a separate "highlight_query" that uses "all_fields" mode on "query_string" queries. ' +
+        'Set to false if you are using a "default_field" in your index.',
+    },
     'courier:maxSegmentCount': {
       value: 30,
       description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
@@ -306,6 +311,10 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
         'handle. To counter-act this we are testing if storing parts of the URL in ' +
         'sessions storage could help. Please let us know how it goes!'
     },
+    'indexPattern:placeholder': {
+      value: 'logstash-*',
+      description: 'The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.',
+    },
 
     // kibi: added by kibi
     'kibi:awesomeDemoMode' : {
@@ -387,4 +396,4 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
   // kibi: end
 
   return options;
-};
+}

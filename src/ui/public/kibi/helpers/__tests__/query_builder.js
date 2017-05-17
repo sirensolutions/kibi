@@ -442,31 +442,31 @@ describe('Kibi Components', function () {
     it('different types of filters negated', function () {
       const differentKindOfNegatedFilters = [
         {
-          meta:{negate:true},
+          meta:{ negate:true },
           range: {}
         },
         {
-          meta:{negate:true},
+          meta:{ negate:true },
           dbfilter: {}
         },
         {
-          meta:{negate:true},
+          meta:{ negate:true },
           or: {}
         },
         {
-          meta:{negate:true},
+          meta:{ negate:true },
           exists: {}
         },
         {
-          meta:{negate:true},
+          meta:{ negate:true },
           geo_bounding_box: {}
         },
         {
-          meta:{negate:true},
+          meta:{ negate:true },
           missing: {}
         },
         {
-          meta:{negate:true},
+          meta:{ negate:true },
           script: {}
         }
       ];

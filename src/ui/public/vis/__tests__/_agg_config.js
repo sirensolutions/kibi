@@ -181,7 +181,7 @@ describe('AggConfig', function () {
 
   describe('::nextId', function () {
     it('accepts a list of objects and picks the next id', function () {
-      const next = AggConfig.nextId([ {id: 100}, {id: 500} ]);
+      const next = AggConfig.nextId([ { id: 100 }, { id: 500 } ]);
       expect(next).to.be(501);
     });
 
@@ -205,7 +205,7 @@ describe('AggConfig', function () {
         {
           type: 'count',
           schema: 'metric',
-          params: {field: '@timestamp'}
+          params: { field: '@timestamp' }
         }
       ]
     }, {
@@ -303,7 +303,7 @@ describe('AggConfig', function () {
           {
             type: 'count',
             schema: 'metric',
-            params: {field: '@timestamp'}
+            params: { field: '@timestamp' }
           }
         ]
       },
@@ -313,7 +313,7 @@ describe('AggConfig', function () {
           {
             type: 'count',
             schema: 'metric',
-            params: {field: '@timestamp'}
+            params: { field: '@timestamp' }
           },
           {
             type: 'date_histogram',

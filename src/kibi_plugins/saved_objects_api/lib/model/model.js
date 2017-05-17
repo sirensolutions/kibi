@@ -153,7 +153,7 @@ export default class Model {
   async create(id, body, request) {
     try {
       let requestMiddlewareMethod = 'createRequest';
-      let responseMiddlewareMethod = 'createResponse';
+      const responseMiddlewareMethod = 'createResponse';
 
       let response = await this._cluster.callWithInternalUser('get', {
         index: this._config.get('kibana.index'),
@@ -206,7 +206,7 @@ export default class Model {
       let requestMiddlewareMethod = 'updateRequest';
       let responseMiddlewareMethod = 'updateResponse';
 
-      let response = await this._cluster.callWithInternalUser('get', {
+      const response = await this._cluster.callWithInternalUser('get', {
         index: this._config.get('kibana.index'),
         type: this._type,
         id: id,

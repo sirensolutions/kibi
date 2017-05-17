@@ -92,6 +92,7 @@ uiModules
       if (_.get($scope, 'vis.type.requiresMultiSearch')) {
         $scope.multiSearchData = new KibiSpyData();
       }
+      // kibi: end
 
       const applyClassNames = function () {
         const $visEl = getVisContainer();
@@ -116,7 +117,7 @@ uiModules
           if (shouldHaveFullSpy()) {
             $visEl.addClass('spy-only');
             $spyEl.addClass('only');
-          };
+          }
         }, 0);
       };
 

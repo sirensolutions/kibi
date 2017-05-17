@@ -23,7 +23,7 @@ module.exports = function (grunt) {
     grunt.log.write('Downloading ' + url + '\n');
     return new Promise(function (fulfill, reject) {
       const file = fs.createWriteStream(dest);
-      const request = wreck.request('GET', url, {redirects: 3}, function (err, res) {
+      const request = wreck.request('GET', url, { redirects: 3 }, function (err, res) {
         if (err) {
           reject(err);
           return;

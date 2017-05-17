@@ -31,7 +31,7 @@ uiModules
         if ($scope.g) {
           $scope.g.destroy();
         }
-        $scope.g = new Eeg(element, {baseURL, layersOrder, minNodeSize});
+        $scope.g = new Eeg(element, { baseURL, layersOrder, minNodeSize });
       }
 
       $scope.$watch('graph', function (graph) {

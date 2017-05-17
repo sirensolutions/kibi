@@ -15,26 +15,26 @@ import _ from 'lodash';
 import errors from 'ui/errors';
 import uuid from 'node-uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
-
 import DocSourceProvider from '../data_source/admin_doc_source';
 import SearchSourceProvider from '../data_source/search_source';
 
+// kibi: imports
 import SavedObjectSourceProvider from 'ui/courier/data_source/savedobject_source';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
+// kibi: end
 
-// kibi: include savedObjectsAPI dependencies
-export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes, esAdmin, kbnIndex, Promise, Private, Notifier,
-    safeConfirm, indexPatterns) {
+export default function SavedObjectFactory(
+  esAdmin, kbnIndex, Promise, Private, createNotifier, confirmModalPromise, indexPatterns,
+  savedObjectsAPI, savedObjectsAPITypes
+  ) {
 
   const DocSource = Private(DocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
-  // kibi: use a custom source for objects managed by the Saved Objects API
-  const SavedObjectSource = Private(SavedObjectSourceProvider);
-  // kibi: end
 
-  // kibi: added to clear the cache on object save
-  const cache = Private(CacheProvider);
+  // kibi: imports
+  const SavedObjectSource = Private(SavedObjectSourceProvider); // use a custom source for objects managed by the Saved Objects API
+  const cache = Private(CacheProvider); // added to clear the cache on object save
   // kibi: end
 
   function SavedObject(config) {
@@ -44,6 +44,7 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
      * Initialize config vars
      ************/
     // the doc which is used to store this object
+
     // kibi: set source based on type
     let docSource;
     if (savedObjectsAPITypes.has(config.type)) {
@@ -69,7 +70,7 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
     this.defaults = config.defaults || {};
 
     // Create a notifier for sending alerts
-    const notify = new Notifier({
+    const notify = createNotifier({
       location: 'Saved ' + type
     });
 
@@ -321,7 +322,7 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
           if (_.get(err, 'origError.status') === 409) {
             const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
-            return safeConfirm(confirmMessage)
+            return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
               .then(() => docSource.doIndex(source))
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }
@@ -419,4 +420,4 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
   }
 
   return SavedObject;
-};
+}

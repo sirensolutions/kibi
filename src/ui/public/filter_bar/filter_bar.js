@@ -8,6 +8,7 @@ import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extract_tim
 import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filter_out_time_based_filter';
 import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/change_time_filter';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import compareFilters from './lib/compare_filters';
 import uiModules from 'ui/modules';
 const module = uiModules.get('kibana');
 
@@ -18,7 +19,7 @@ import JoinExplainProvider from 'ui/filter_bar/join_explanation';
 import MarkFilterBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
-module.directive('filterBar', function (config, $rootScope, kibiState, createNotifier, Private, Promise, getAppState) {
+module.directive('filterBar', function (Private, Promise, getAppState, kibiState, config, createNotifier) {
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
   const mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
   const extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
@@ -26,6 +27,7 @@ module.directive('filterBar', function (config, $rootScope, kibiState, createNot
   const changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const privateFilterFieldRegex = /(^\$|meta)/;
+
   // kibi: added some helpers
   const joinExplain = Private(JoinExplainProvider);
   const markFiltersBySelectedEntities = Private(MarkFilterBySelectedEntitiesProvider);
@@ -33,6 +35,7 @@ module.directive('filterBar', function (config, $rootScope, kibiState, createNot
   const notify = createNotifier({
     location: 'Kibi Navigation Bar'
   });
+  //: kibi: end
 
   return {
     restrict: 'E',
@@ -65,8 +68,7 @@ module.directive('filterBar', function (config, $rootScope, kibiState, createNot
       };
 
       $scope.applyFilters = function (filters) {
-        // add new filters
-        $scope.addFilters(filterAppliedAndUnwrap(filters));
+        addAndInvertFilters(filterAppliedAndUnwrap(filters));
         $scope.newFilters = [];
 
         // change time filter
@@ -162,9 +164,26 @@ module.directive('filterBar', function (config, $rootScope, kibiState, createNot
             return filters;
           })
           .then(filterOutTimeBasedFilter)
-          .then($scope.addFilters);
+          .then(addAndInvertFilters);
         }
       });
+
+      function addAndInvertFilters(filters) {
+        const existingFilters = queryFilter.getFilters();
+        const inversionFilters = _.filter(existingFilters, (existingFilter) => {
+          const newMatchingFilter = _.find(filters, _.partial(compareFilters, existingFilter));
+          return newMatchingFilter
+            && newMatchingFilter.meta
+            && existingFilter.meta
+            && existingFilter.meta.negate !== newMatchingFilter.meta.negate;
+        });
+        const newFilters = _.reject(filters, (filter) => {
+          return _.find(inversionFilters, _.partial(compareFilters, filter));
+        });
+
+        _.forEach(inversionFilters, $scope.invertFilter);
+        $scope.addFilters(newFilters);
+      }
 
       function convertToEditableFilter(filter) {
         return _.omit(_.cloneDeep(filter), function (val, key) {
@@ -180,6 +199,7 @@ module.directive('filterBar', function (config, $rootScope, kibiState, createNot
           _.map(filters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled)
         );
         const markFilters = prevDependsOnSelectedEntitiesDisabled.then(() => markFiltersBySelectedEntities(filters));
+        // kibi: end
 
         mapAndFlattenFilters(filters).then(function (results) {
           // used to display the current filters in the state

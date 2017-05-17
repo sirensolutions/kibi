@@ -1,7 +1,8 @@
+import { defaultFindTimeout } from '../';
 
 import {
-  defaultFindTimeout,
-} from '../';
+  DashboardConstants
+} from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 import PageObjects from './';
 
@@ -12,9 +13,15 @@ export default class DashboardPage {
     this.findTimeout = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
+  gotoDashboardLandingPage() {
+    return this.findTimeout
+      .findByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`)
+      .click();
+  }
+
   clickNewDashboard() {
-    return PageObjects.common.findTestSubject('dashboardNewButton')
-    .click();
+    return PageObjects.common.findTestSubject('newDashboardLink')
+      .click();
   }
 
   clickAddVisualization() {
@@ -71,7 +78,7 @@ export default class DashboardPage {
     return PageObjects.common.findTestSubject('dashboardSaveButton')
     .click()
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -83,7 +90,7 @@ export default class DashboardPage {
       .type(dashName);
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     })
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -98,7 +105,7 @@ export default class DashboardPage {
       });
     })
     .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
@@ -122,24 +129,32 @@ export default class DashboardPage {
   // entry, or at least to a single page of results
   loadSavedDashboard(dashName) {
     const self = this;
-    return self.remote
-    .findByCssSelector('input[name="dashboards-filter"]')
-    .click()
-    .type(dashName.replace('-',' '))
-    // TODO: KIBI5: restore when the filter is backed by ES
-    //.then(() => {
-      //return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    //})
-    //.then(() => {
-      //return PageObjects.common.sleep(1000);
-    //})
+    return this.gotoDashboardLandingPage()
+    .then(function filterDashboard() {
+      PageObjects.common.debug('Load Saved Dashboard button clicked');
+      return PageObjects.common.findTestSubject('searchFilter')
+        .click()
+        .type(dashName.replace('-',' '));
+        // TODO: KIBI5: restore when the filter is backed by ES
+        //.then(() => {
+          //return PageObjects.header.isGlobalLoadingIndicatorHidden();
+        //})
+        //.then(() => {
+          //return PageObjects.common.sleep(1000);
+        //})
+    })
+    .then(() => {
+      return PageObjects.header.waitUntilLoadingHasFinished();
+    })
+    .then(() => {
+      return PageObjects.common.sleep(1000);
+    })
     .then(function clickDashboardByLinkedText() {
       PageObjects.common.debug('filtered on dashboard name');
       return self.clickDashboardByLinkText(dashName);
     })
     .then(() => {
-      PageObjects.common.debug(`Loading ${dashName} dashboard`);
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
+      return PageObjects.header.waitUntilLoadingHasFinished();
     });
   }
 
@@ -168,7 +183,7 @@ export default class DashboardPage {
         let obj = {};
         return chart.getAttribute('data-col')
         .then(theData => {
-          obj = {dataCol:theData};
+          obj = { dataCol:theData };
           return chart;
         })
         .then(chart => {

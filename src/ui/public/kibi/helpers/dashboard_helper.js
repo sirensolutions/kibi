@@ -35,7 +35,7 @@ export default function DashboardHelperFactory($timeout, kbnUrl, kibiState, save
       // switch dashboard in the next tick. If the state (e.g., appState) is being changed, this would
       // invalidate the state of the new dashboard
       return $timeout(() => {
-        kbnUrl.change('/dashboard/{{id}}', {id: dashboardId});
+        kbnUrl.change('/dashboard/{{id}}', { id: dashboardId });
       });
     });
   };

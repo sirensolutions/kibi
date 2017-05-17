@@ -715,17 +715,17 @@ describe('Kibi Components', function () {
       it('should create a group and add it', function () {
         const existingFilters = [
           {
-            join_sequence: [{indices: ['index1']}, {indices: ['index2']}]
+            join_sequence: [{ indices: ['index1'] }, { indices: ['index2'] }]
           },
           {
-            join_sequence: [{indices: ['index3']}, {indices: ['index4']}]
+            join_sequence: [{ indices: ['index3'] }, { indices: ['index4'] }]
           }
         ];
 
         const expected = {
           group: [
-            [{indices: ['index1']}, {indices: ['index2']}],
-            [{indices: ['index3']}, {indices: ['index4']}]
+            [{ indices: ['index1'] }, { indices: ['index2'] }],
+            [{ indices: ['index3'] }, { indices: ['index4'] }]
           ]
         };
 

@@ -134,11 +134,11 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
      * Add config and index patterns to the list of exported objects
      */
     addExtraObjectForExportAll(objectsToExport) {
-      objectsToExport.push([{id: kibiVersion, type: 'config'}]);
+      objectsToExport.push([{ id: kibiVersion, type: 'config' }]);
 
       return indexPatterns.getIds().then(function (list) {
         _.each(list, (id) => {
-          objectsToExport.push([{id: id, type: 'index-pattern'}]);
+          objectsToExport.push([{ id: id, type: 'index-pattern' }]);
         });
         return objectsToExport;
       });

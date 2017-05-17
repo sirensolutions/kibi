@@ -12,4 +12,4 @@ export default function EnsureSomeIndexPatternsFn(Private, createNotifier, $loca
       return patterns;
     };
   };
-};
+}

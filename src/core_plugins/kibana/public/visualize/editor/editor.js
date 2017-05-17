@@ -5,6 +5,7 @@ import 'plugins/kibana/visualize/editor/agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
+import chrome from 'ui/chrome';
 import angular from 'angular';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import DocTitleProvider from 'ui/doc_title';
@@ -15,6 +16,8 @@ import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
+import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
+import { VisualizeConstants } from '../visualize_constants';
 
 // kibi: imports
 import 'ui/kibi/directives/kibi_param_entity_uri';
@@ -22,12 +25,12 @@ import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons
 import HasAnyOfVisSavedSearchesATimeField from 'ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field';
 
 uiRoutes
-.when('/visualize/create', {
+.when(VisualizeConstants.CREATE_PATH, {
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
       const visTypes = Private(RegistryVisTypesProvider);
-      const visType = _.find(visTypes, {name: $route.current.params.type});
+      const visType = _.find(visTypes, { name: $route.current.params.type });
       if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
         throw new Error('You must provide either an indexPattern or a savedSearchId');
       }
@@ -39,7 +42,7 @@ uiRoutes
     }
   }
 })
-.when('/visualize/edit/:id', {
+.when(`${VisualizeConstants.EDIT_PATH}/:id`, {
   template: editorTemplate,
   resolve: {
     isEntityDependent: function (Private, savedVisualizations, $route) {
@@ -73,7 +76,7 @@ uiModules
   };
 });
 
-function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppState, kbnUrl, courier, Private, Promise) {
+function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier, kibiState) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -129,11 +132,6 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
   const searchSource = savedVis.searchSource;
 
   $scope.topNavMenu = [{
-    key: 'new',
-    description: 'New Visualization',
-    run: function () { kbnUrl.change('/visualize', {}); },
-    testId: 'visualizeNewButton',
-  }, {
     key: 'save',
     description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
@@ -142,11 +140,6 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
     disableButton() {
       return Boolean($scope.editableVis.dirty);
     }
-  }, {
-    key: 'open',
-    description: 'Open Saved Visualization',
-    template: require('plugins/kibana/visualize/editor/panels/load.html'),
-    testId: 'visualizeOpenButton',
   }, {
     key: 'share',
     description: 'Share Visualization',
@@ -208,13 +201,19 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
     $scope.uiState = $state.makeStateful('uiState');
     $scope.appStatus = $appStatus;
 
+    const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
+    kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+
+    $scope.isAddToDashMode = () => addToDashMode;
+
     // Associate PersistedState instance with the Vis instance, so that
     // `uiStateVal` can be called on it. Currently this is only used to extract
     // map-specific information (e.g. mapZoom, mapCenter).
     vis.setUiState($scope.uiState);
 
+
     $scope.timefilter = timefilter;
-    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
@@ -252,12 +251,26 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
 
     $state.replace();
 
+    // MERGE 5.3.2 Do we need both watchers ??
     $scope.$watch('indexPattern.timeFieldName', function (timeField) {
       // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
       hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField).then((has) => {
         timefilter.enabled = has;
       });
     });
+
+    $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
+      // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
+      hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField).then((has) => {
+        timefilter.enabled = has;
+      });
+    });
+
+
+    $scope.getVisualizationTitle = function getVisualizationTitle() {
+      return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
+    };
+
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -327,10 +340,6 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
     }
   };
 
-  $scope.startOver = function () {
-    kbnUrl.change('/visualize', {});
-  };
-
   /**
    * Called when the user clicks "Save" button.
    */
@@ -347,10 +356,16 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
-        if (savedVis.id === $route.current.params.id) {
+        if ($scope.isAddToDashMode()) {
+          const dashboardBaseUrl = chrome.getNavLinkById('kibana:dashboard');
+          // Not using kbnUrl.change here because the dashboardBaseUrl is a full path, not a url suffix.
+          // Rather than guess the right substring, we'll just navigate there directly, just as if the user
+          // clicked the dashboard link in the UI.
+          $window.location.href = `${dashboardBaseUrl.lastSubUrl}&${DashboardConstants.NEW_VISUALIZATION_ID_PARAM}=${savedVis.id}`;
+        } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {
-          kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
+          kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
         }
       }
     }, notify.error); // kibi: changed from fatal to error
@@ -413,4 +428,4 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
   }
 
   init();
-};
+}

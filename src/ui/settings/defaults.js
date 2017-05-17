@@ -341,7 +341,7 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
     },
     'kibi:panel_vertical_size': {
       type: 'number',
-      value: 2,
+      value: 3,
       description: 'Set to change the default vertical panel size.',
       validator: 'positiveIntegerValidator'
     },

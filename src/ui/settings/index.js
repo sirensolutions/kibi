@@ -150,13 +150,6 @@ function hydrateUserSettings(user) {
   }
 }
 
-function getClientSettings(config) {
-  const index = config.get('kibana.index');
-  const id = config.get('pkg.kibiVersion'); // kibi: take the kibi version instead of kibana's
-  const type = 'config';
-  return { index, type, id };
-}
-
 function assertRequest(req) {
   if (
     typeof req === 'object' &&

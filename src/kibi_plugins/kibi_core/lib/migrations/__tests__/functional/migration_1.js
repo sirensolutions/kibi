@@ -20,6 +20,7 @@ describe('kibi_core/migrations/functional', function () {
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
   const cluster = new Cluster({
     url: clusterUrl,
+    ssl: { verificationMode: 'none' },
     requestTimeout: timeout
   });
   const configuration = {

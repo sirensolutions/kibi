@@ -427,16 +427,8 @@ describe('timepicker directive', function () {
     });
 
     it('should only copy its input to scope.from and scope.to when scope.applyAbsolute() is called', function (done) {
-// MERGE 5.3.2 fix it
-// <<<<<<< HEAD
-//       $scope.setQuick('now-30m', 'now');
-//       sinon.assert.calledOnce(syncTimeTo); // kibi: added to test if syncTimeTo is called
-//       expect($scope.from).to.be('now-30m');
-//       expect($scope.to).to.be('now');
-// =======
-//       $scope.from = 'now-30m';
-//       $scope.to = 'now';
-// >>>>>>> v5.3.2
+      $scope.from = 'now-30m';
+      $scope.to = 'now';
 
       $scope.absolute.from = moment('2012-02-01');
       $scope.absolute.to = moment('2012-02-11');

@@ -67,7 +67,7 @@ describe('ui/courier/fetch/strategy/search', () => {
 
       it('queries the kibi index (.kibi) with a must_not match_all boolean', () => {
         return search.reqsFetchParamsToBody(reqsFetchParams).then(value => {
-          expect(_.includes(value, '"index":[".kibana"]')).to.be(true);
+          expect(_.includes(value, '"index":[".kibi"]')).to.be(true);
           expect(_.includes(value, emptyMustNotQuery)).to.be(true);
         });
       });
@@ -98,7 +98,7 @@ describe('ui/courier/fetch/strategy/search', () => {
           }
         ];
         return search.reqsFetchParamsToBody(reqsFetchParams).then(value => {
-          const indexLineMatch = value.match(/"index":\[".kibana"\]/g);
+          const indexLineMatch = value.match(/"index":\[".kibi"\]/g);
           expect(indexLineMatch).to.not.be(null);
           expect(indexLineMatch.length).to.be(2);
           const queryLineMatch = value.match(/"query":\{"bool":\{"must_not":\[\{"match_all":\{\}\}\]\}\}/g);

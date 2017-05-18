@@ -55,12 +55,6 @@ module.exports = function (kibana) {
               ret.kibiWarnings.datasource_encryption_warning = true;
             }
           }
-
-          ret.kacConfiguration = {
-            acl: {
-              enabled: config.has('kibi_access_control.acl.enabled') ? config.get('kibi_access_control.acl.enabled') : false
-            }
-          };
           // kibi:end
 
           return ret;

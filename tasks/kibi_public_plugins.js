@@ -10,7 +10,8 @@ module.exports = function (grunt) {
 
   const archives = [
     {
-      url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.2.2/kibi_radar_vis-5.2.2.zip',
+
+      url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.3.2-SNAPSHOT/kibi_radar_vis-5.3.2-SNAPSHOT.zip',
       dest: `${tempFolder}/kibi_radar_vis.zip` // siren: Add temp folder location to filepath
     },
     {

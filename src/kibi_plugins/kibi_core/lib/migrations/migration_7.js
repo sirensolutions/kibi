@@ -12,7 +12,7 @@ import Migration from 'kibiutils/lib/migrations/migration';
  *
  * - migrate latest configuration to the new config object singleton
  */
-export default class Migration6 extends Migration {
+export default class Migration7 extends Migration {
 
   constructor(configuration) {
     super(configuration);

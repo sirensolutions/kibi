@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
-import migrateConfig from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
 import kibanaVersion from './kibana_version';
 import pluginList from './wait_for_plugin_list';
@@ -99,7 +98,6 @@ module.exports = function (plugin, server) {
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
       .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
-      .then(_.partial(migrateConfig, server))
       .then(_.partial(pluginList, plugin, server)) // kibi: added by kibi to know the list of installed plugins
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');

@@ -16,7 +16,6 @@
             "_id": "4.0.0",
             "_score": 1,
             "_source": {
-               "buildNum": 5888,
                "defaultIndex": "logstash-*"
             }
          }

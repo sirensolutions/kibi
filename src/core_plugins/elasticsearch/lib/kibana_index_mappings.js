@@ -8,14 +8,6 @@ export const mappings = {
       }
     }
   },
-  config: {
-    properties: {
-      buildNum: {
-        type: 'string',
-        index: 'not_analyzed'
-      }
-    }
-  },
   // siren: added mappings for the session object
   url: {
     properties: {

@@ -4,7 +4,7 @@ define(function (require) {
     let _ = require('lodash');
     let moment = require('moment');
 
-    let IndexPatternMissingIndices = require('ui/errors').IndexPatternMissingIndices;
+    let { IndexPatternMissingIndices, IndexPatternAuthorizationError } = require('ui/errors');
     let transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
     let _getPathsForIndexPattern = Private(require('ui/kibi/index_patterns/_get_paths_for_index_pattern'));
     let intervals = Private(require('ui/index_patterns/_intervals'));
@@ -144,7 +144,10 @@ define(function (require) {
     }
 
     function handleMissingIndexPattern(err) {
-      if (err.status >= 400) {
+      // kibi: handle authorization errors
+      if (err.status === 403) {
+        return Promise.reject(new IndexPatternAuthorizationError());
+      } else if (err.status >= 400) {
         // transform specific error type
         return Promise.reject(new IndexPatternMissingIndices());
       } else {

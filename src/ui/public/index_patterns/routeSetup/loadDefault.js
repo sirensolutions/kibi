@@ -1,5 +1,5 @@
 let _ = require('lodash');
-let { NoDefaultIndexPattern, NoDefinedIndexPatterns } = require('ui/errors');
+let { IndexPatternAuthorizationError, NoDefaultIndexPattern, NoDefinedIndexPatterns } = require('ui/errors');
 let Notifier = require('kibie/notify/notifier');
 let notify = new Notifier({
   location: 'Index Patterns'
@@ -36,10 +36,28 @@ module.exports = function (opts) {
         throw new NoDefaultIndexPattern();
       }
 
-      return notify.event('loading default index pattern', function () {
-        return indexPatterns.get(defaultId).then(function (pattern) {
+      // kibi: handle authorization errors when accessing the default index
+      return notify.event('loading default index pattern', function loadIndexPattern(indexPattern) {
+        const indexPatternId = indexPattern || defaultId;
+        return indexPatterns.get(indexPatternId).then(function (pattern) {
+          if (indexPatternId !== defaultId) {
+            config.set('defaultIndex', indexPatternId);
+            defaultId = indexPatternId;
+          }
           rootSearchSource.getGlobalSource().set('index', pattern);
-          notify.log('index pattern set to', defaultId);
+          notify.log('index pattern set to', indexPatternId);
+        })
+        .catch(err => {
+          if (err instanceof IndexPatternAuthorizationError) {
+            if (patterns.length) {
+              return loadIndexPattern(patterns.pop());
+            } else {
+              // kibi: unset the defaultIndex since none of the known index patterns can be accessed
+              config.set('defaultIndex');
+              throw new NoDefaultIndexPattern();
+            }
+          }
+          throw err;
         });
       });
     });

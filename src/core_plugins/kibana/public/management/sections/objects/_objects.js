@@ -22,8 +22,14 @@ uiRoutes
   template: objectIndexHTML
 });
 
+uiRoutes
+.when('/management/kibana/objects/:service', {
+  redirectTo: '/management/kibana/objects'
+});
+
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function (kbnIndex, createNotifier, Private, kbnUrl, Promise) {
+.directive('kbnManagementObjects', function (kbnIndex, createNotifier, Private, kbnUrl, Promise, confirmModal) {
+
   // kibi: all below dependencies added by kibi to improve import/export and delete operations
   const cache = Private(CacheProvider);
   const deleteHelper = Private(DeleteHelperProvider);
@@ -72,7 +78,7 @@ uiModules.get('apps/management')
         $q.all(services).then(function (data) {
           $scope.services = sortBy(data, 'title');
           let tab = $scope.services[0];
-          if ($state.tab) $scope.currentTab = tab = find($scope.services, {title: $state.tab});
+          if ($state.tab) $scope.currentTab = tab = find($scope.services, { title: $state.tab });
 
           $scope.$watch('state.tab', function (tab) {
             if (!tab) $scope.changeTab($scope.services[0]);
@@ -120,24 +126,36 @@ uiModules.get('apps/management')
 
       // TODO: Migrate all scope methods to the controller.
       $scope.bulkDelete = function () {
-        // kibi: modified to do some checks before the delete
-        const _delete = function () {
-          return $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
-          .then(cache.invalidate) // kibi: invalidate the cache of saved objects
-          .then(refreshData)
-          .then(function () {
-            $scope.selectedItems.length = 0;
-          })
-          .catch(notify.error);
-        };
 
-        deleteHelper.deleteByType($scope.currentTab.service.type, pluck($scope.selectedItems, 'id'), _delete);
-        // kibi: end
+        function doBulkDelete() {
+          // kibi: modified to do some checks before the delete
+          const _delete = function () {
+            return $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
+            .then(cache.invalidate) // kibi: invalidate the cache of saved objects
+            .then(refreshData)
+            .then(function () {
+              $scope.selectedItems.length = 0;
+            })
+            .catch(notify.error);
+          };
+
+          deleteHelper.deleteByType($scope.currentTab.service.type, pluck($scope.selectedItems, 'id'), _delete);
+          // kibi: end
+        }
+
+        const confirmModalOptions = {
+          confirmButtonText: `Delete ${$scope.currentTab.title}`,
+          onConfirm: doBulkDelete
+        };
+        confirmModal(
+          `Are you sure you want to delete the selected ${$scope.currentTab.title}? This action is irreversible!`,
+          confirmModalOptions
+        );
       };
 
       // TODO: Migrate all scope methods to the controller.
       $scope.bulkExport = function () {
-        const objs = $scope.selectedItems.map(partialRight(extend, {type: $scope.currentTab.type}));
+        const objs = $scope.selectedItems.map(partialRight(extend, { type: $scope.currentTab.type }));
         retrieveAndExportDocs(objs);
       };
 
@@ -162,7 +180,7 @@ uiModules.get('apps/management')
         if (!objs.length) return notify.error('No saved objects to export.');
         // kibi: use savedObjectsAPI instead of es
         savedObjectsAPI.mget({
-          body: {docs: objs.map(transformToMget)}
+          body: { docs: objs.map(transformToMget) }
         })
         .then(function (response) {
           // kibi: sort the docs so the config is on the top
@@ -176,11 +194,11 @@ uiModules.get('apps/management')
       // Takes an object and returns the associated data needed for an mget API request
       function transformToMget(obj) {
         // kibi: added index
-        return {index: kbnIndex, _id: obj.id, _type: obj.type};
+        return { index: kbnIndex, _id: obj.id, _type: obj.type };
       }
 
       function saveToFile(results) {
-        const blob = new Blob([angular.toJson(results, true)], {type: 'application/json'});
+        const blob = new Blob([angular.toJson(results, true)], { type: 'application/json' });
         saveAs(blob, 'export.json');
       }
 
@@ -191,6 +209,13 @@ uiModules.get('apps/management')
           docs = JSON.parse(fileContents);
         } catch (e) {
           notify.error('The file could not be processed.');
+          return;
+        }
+
+        // make sure we have an array, show an error otherwise
+        if (!Array.isArray(docs)) {
+          notify.error('Saved objects file format is invalid and cannot be imported.');
+          return;
         }
 
         // kibi: change the import to sequential to solve the dependency problem between objects

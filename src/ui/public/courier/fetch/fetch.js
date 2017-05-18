@@ -8,10 +8,23 @@ import ReqStatusProvider from './req_status';
 export default function fetchService(Private, Promise) {
 
   const requestQueue = Private(RequestQueueProvider);
-  const fetchThese = Private(FetchTheseProvider);
-
+  const immediatelyFetchThese = Private(FetchTheseProvider);
   const callResponseHandlers = Private(CallResponseHandlersProvider);
   const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
+
+  const debouncedFetchThese = _.debounce(() => {
+    const requests = requestQueue.get().filter(req => req.isFetchRequestedAndPending());
+    immediatelyFetchThese(requests);
+  }, {
+    wait: 10,
+    maxWait: 50
+  });
+
+  const fetchTheseSoon = (requests) => {
+    requests.forEach(req => req._setFetchRequested());
+    debouncedFetchThese();
+    return Promise.all(requests.map(req => req.getCompletePromise()));
+  };
 
   function fetchQueued(strategy) {
     let requests = requestQueue.getStartable(strategy);
@@ -32,7 +45,7 @@ export default function fetchService(Private, Promise) {
     //kibi: end
 
     if (!requests.length) return Promise.resolve();
-    else return fetchThese(requests);
+    else return fetchTheseSoon(requests);
   }
 
   this.fetchQueued = fetchQueued;
@@ -40,7 +53,7 @@ export default function fetchService(Private, Promise) {
   function fetchASource(source, strategy) {
     const defer = Promise.defer();
 
-    fetchThese([
+    fetchTheseSoon([
       source._createRequest(defer)
     ]);
 
@@ -66,7 +79,7 @@ export default function fetchService(Private, Promise) {
    * @param {array} reqs - the requests to fetch
    * @async
    */
-  this.these = fetchThese;
+  this.these = fetchTheseSoon;
 
   /**
    * Send responses to a list of requests, used when requests
@@ -92,4 +105,4 @@ export default function fetchService(Private, Promise) {
       }
     });
   };
-};
+}

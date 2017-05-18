@@ -7,7 +7,7 @@ import angular from 'angular';
 import EventsProvider from 'ui/events';
 import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';
 
-export default function (kibiState, Private, $rootScope, getAppState, globalState, config) {
+export default function (Private, $rootScope, getAppState, globalState, config, kibiState) {
   const EventEmitter = Private(EventsProvider);
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
 
@@ -419,4 +419,4 @@ export default function (kibiState, Private, $rootScope, getAppState, globalStat
       });
     }
   }
-};
+}

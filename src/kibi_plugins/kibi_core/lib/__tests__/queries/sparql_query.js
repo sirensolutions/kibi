@@ -67,13 +67,13 @@ describe('SparqlQuery', function () {
       const sparqlQuery = new SparqlQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
       sinon.stub(sparqlQuery, '_executeQuery', function () {
-        return Promise.resolve({results: {bindings: [{}]}});
+        return Promise.resolve({ results: { bindings: [{}] } });
       });
 
       const generateCacheKeySpy = sinon.spy(sparqlQuery, 'generateCacheKey');
 
-      return sparqlQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
-        expect(res.results).to.eql({bindings: [{}]});
+      return sparqlQuery.fetchResults({ credentials: { username: 'fred' } }, false, 'variableX').then(function (res) {
+        expect(res.results).to.eql({ bindings: [{}] });
         sinon.assert.calledOnce(generateCacheKeySpy);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'http://localhost:9876', 'select * where {?s ?p ?o}', false, 'variableX', 'fred');
       });
@@ -82,11 +82,11 @@ describe('SparqlQuery', function () {
     it('checkIfItIsRelevant', function () {
       const sparqlQuery = new SparqlQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
-      sinon.stub(sparqlQuery, '_executeQuery').returns(Promise.resolve({results: {bindings: [{}]}}));
+      sinon.stub(sparqlQuery, '_executeQuery').returns(Promise.resolve({ results: { bindings: [{}] } }));
 
       const generateCacheKeySpy = sinon.spy(sparqlQuery, 'generateCacheKey');
 
-      return sparqlQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+      return sparqlQuery.checkIfItIsRelevant({ credentials: { username: 'fred' } }).then(function (res) {
         expect(res).to.equal(QUERY_DEACTIVATED);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'http://localhost:9876', ' select * where {?s ?p ?o} LIMIT 1', 'fred');
         expect(generateCacheKeySpy.callCount).to.equal(1);

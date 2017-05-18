@@ -71,7 +71,7 @@ describe('RestQuery', () => {
         id: 'id1'
       };
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: [ doc ]})
+      return restQuery.checkIfItIsRelevant({ selectedDocuments: [ doc ] })
       .then(ret => {
         expect(ret).to.be(QUERY_RELEVANT);
       });
@@ -87,7 +87,7 @@ describe('RestQuery', () => {
         id: 'id1'
       };
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: [ doc ]})
+      return restQuery.checkIfItIsRelevant({ selectedDocuments: [ doc ] })
       .then(ret => {
         expect(ret).to.be(QUERY_RELEVANT);
       });
@@ -98,7 +98,7 @@ describe('RestQuery', () => {
         rest_path: '',
       });
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
+      return restQuery.checkIfItIsRelevant({ selectedDocuments: undefined })
       .then(ret => {
         expect(ret).to.be(QUERY_RELEVANT);
       });
@@ -109,7 +109,7 @@ describe('RestQuery', () => {
         rest_body: 'doesNotDependEntity',
       });
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
+      return restQuery.checkIfItIsRelevant({ selectedDocuments: undefined })
       .then(ret => {
         expect(ret).to.be(QUERY_RELEVANT);
       });
@@ -131,7 +131,7 @@ describe('RestQuery', () => {
         id: 'id1'
       };
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: [ doc ]})
+      return restQuery.checkIfItIsRelevant({ selectedDocuments: [ doc ] })
       .catch(err => {
         expect(err.message).to.eql('Could not fetch document [/company/company/id1], check logs for details please.');
       });
@@ -142,7 +142,7 @@ describe('RestQuery', () => {
         rest_path: '/id=@doc[id]@'
       });
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
+      return restQuery.checkIfItIsRelevant({ selectedDocuments: undefined })
       .then(ret => {
         expect(ret).to.equal(SELECTED_DOCUMENT_NEEDED);
       });
@@ -153,7 +153,7 @@ describe('RestQuery', () => {
         rest_body: '/id=@doc[id]@'
       });
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
+      return restQuery.checkIfItIsRelevant({ selectedDocuments: undefined })
       .then(ret => {
         expect(ret).to.equal(SELECTED_DOCUMENT_NEEDED);
       });
@@ -186,7 +186,7 @@ describe('RestQuery', () => {
       const generateCacheKeySpy = sinon.spy(restQuery, 'generateCacheKey');
 
       sinon.stub(rp, 'Request').returns(Promise.resolve(fakeDoc1));
-      return restQuery.fetchResults({credentials: {username: 'fred'}}).then(res => {
+      return restQuery.fetchResults({ credentials: { username: 'fred' } }).then(res => {
         expect(res).to.eql(fakeDoc1);
         sinon.assert.calledOnce(generateCacheKeySpy);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'GET', 'http://localhost:3000/posts', '', '{}', '{}', '', 'fred');
@@ -297,7 +297,7 @@ describe('RestQuery', () => {
           datasource: {
             datasourceParams: {
               headers: [
-                {name: 'header1', value: 'value1'}
+                { name: 'header1', value: 'value1' }
               ]
             },
             datasourceClazz: {
@@ -334,7 +334,7 @@ describe('RestQuery', () => {
             }
           },
           rest_headers: [
-            {name: 'header1', value: 'value1'}
+            { name: 'header1', value: 'value1' }
           ]
         });
 
@@ -353,7 +353,7 @@ describe('RestQuery', () => {
           datasource: {
             datasourceParams: {
               headers: [
-                {name: 'header2', value: 'value2'}
+                { name: 'header2', value: 'value2' }
               ]
             },
             datasourceClazz: {
@@ -366,7 +366,7 @@ describe('RestQuery', () => {
             }
           },
           rest_headers: [
-            {name: 'header1', value: 'value1'}
+            { name: 'header1', value: 'value1' }
           ]
         });
 
@@ -387,8 +387,8 @@ describe('RestQuery', () => {
           datasource: {
             datasourceParams: {
               headers: [
-                {name: 'header1', value: 'value1'},
-                {name: 'header2', value: 'value2'}
+                { name: 'header1', value: 'value1' },
+                { name: 'header2', value: 'value2' }
               ]
             },
             datasourceClazz: {
@@ -401,7 +401,7 @@ describe('RestQuery', () => {
             }
           },
           rest_headers: [
-            {name: 'header1', value: 'valueOverridden'}
+            { name: 'header1', value: 'valueOverridden' }
           ]
         });
 
@@ -425,7 +425,7 @@ describe('RestQuery', () => {
           datasource: {
             datasourceParams: {
               params: [
-                {name: 'param1', value: 'value1'}
+                { name: 'param1', value: 'value1' }
               ]
             },
             datasourceClazz: {
@@ -462,7 +462,7 @@ describe('RestQuery', () => {
             }
           },
           rest_params: [
-            {name: 'param1', value: 'value1'}
+            { name: 'param1', value: 'value1' }
           ]
         });
 
@@ -480,7 +480,7 @@ describe('RestQuery', () => {
           datasource: {
             datasourceParams: {
               params: [
-                {name: 'param2', value: 'value2'}
+                { name: 'param2', value: 'value2' }
               ]
             },
             datasourceClazz: {
@@ -493,7 +493,7 @@ describe('RestQuery', () => {
             }
           },
           rest_params: [
-            {name: 'param1', value: 'value1'}
+            { name: 'param1', value: 'value1' }
           ]
         });
 
@@ -514,8 +514,8 @@ describe('RestQuery', () => {
           datasource: {
             datasourceParams: {
               params: [
-                {name: 'param1', value: 'value1'},
-                {name: 'param2', value: 'value2'}
+                { name: 'param1', value: 'value1' },
+                { name: 'param2', value: 'value2' }
               ]
             },
             datasourceClazz: {
@@ -528,7 +528,7 @@ describe('RestQuery', () => {
             }
           },
           rest_params: [
-            {name: 'param1', value: 'valueOverridden'}
+            { name: 'param1', value: 'valueOverridden' }
           ]
         });
 

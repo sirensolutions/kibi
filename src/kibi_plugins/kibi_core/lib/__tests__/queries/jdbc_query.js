@@ -71,21 +71,21 @@ describe('JdbcQuery', function () {
       // stub _init to skip initialization
       sinon.stub(jdbcQuery, '_init').returns(Promise.resolve(true));
       // stub _execute queryto skip query execution
-      sinon.stub(jdbcQuery, '_executeQuery').returns(Promise.resolve({result: []}));
+      sinon.stub(jdbcQuery, '_executeQuery').returns(Promise.resolve({ result: [] }));
 
       generateCacheKeySpy = sinon.spy(jdbcQuery, 'generateCacheKey');
     });
 
     it('fetchResults', function () {
-      return jdbcQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableName').then(function (res) {
-        expect(res.results).to.eql({bindings: [{}]});
+      return jdbcQuery.fetchResults({ credentials: { username: 'fred' } }, false, 'variableName').then(function (res) {
+        expect(res.results).to.eql({ bindings: [{}] });
         sinon.assert.calledOnce(generateCacheKeySpy);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'connectionString', 'select * from x', false, 'variableName', 'fred');
       });
     });
 
     it('checkIfItIsRelevant', function () {
-      return jdbcQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+      return jdbcQuery.checkIfItIsRelevant({ credentials: { username: 'fred' } }).then(function (res) {
         expect(res).to.equal(QUERY_DEACTIVATED);
         sinon.assert.calledOnce(generateCacheKeySpy);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'connectionString', 'select * from x LIMIT 1', 'fred');

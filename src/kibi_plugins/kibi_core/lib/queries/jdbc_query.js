@@ -22,7 +22,7 @@ JdbcQuery.prototype = _.create(AbstractQuery.prototype, {
 JdbcQuery.prototype._init = function () {
   const self = this;
   if (self.initialized === true) {
-    return Promise.resolve({'message': 'JDBC driver already initialized.'});
+    return Promise.resolve({ 'message': 'JDBC driver already initialized.' });
   }
 
   const jdbcConfig = self.jdbcHelper.prepareJdbcConfig(self.config.datasource.datasourceParams);
@@ -37,7 +37,7 @@ JdbcQuery.prototype._init = function () {
           return;
         }
         self.initialized = true;
-        fulfill({'message': 'JDBC driver initialized successfully.'});
+        fulfill({ 'message': 'JDBC driver initialized successfully.' });
       });
     } catch (err) {
       reject(err);

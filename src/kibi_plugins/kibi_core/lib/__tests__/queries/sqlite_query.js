@@ -64,12 +64,12 @@ describe('SqliteQuery', function () {
       }, cacheMock);
 
       // stub _execute query to skip query execution
-      sinon.stub(sqliteQuery, '_executeQuery').returns(Promise.resolve({result: {}}));
+      sinon.stub(sqliteQuery, '_executeQuery').returns(Promise.resolve({ result: {} }));
 
       const generateCacheKeySpy = sinon.spy(sqliteQuery, 'generateCacheKey');
 
-      return sqliteQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
-        expect(res.results).to.eql({ bindings: [{}]});
+      return sqliteQuery.fetchResults({ credentials: { username: 'fred' } }, false, 'variableX').then(function (res) {
+        expect(res.results).to.eql({ bindings: [{}] });
         sinon.assert.calledOnce(generateCacheKeySpy);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'my.db', 'select * from x', false, 'variableX', 'fred');
       });

@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
   const platform = require('os').platform();
-  const {format} = require('url');
-  const {resolve} = require('path');
+  const { format } = require('url');
+  const { resolve } = require('path');
   const root = p => resolve(__dirname, '../../', p);
 
   // kibi: replaced scrpit name with kibi

@@ -328,9 +328,9 @@ describe('Kibi Services', function () {
       });
 
       it('_getListOfDashboardsFromGroups', function () {
-        const dA = {id: 'A'};
-        const dB = {id: 'B'};
-        const dC = {id: 'C'};
+        const dA = { id: 'A' };
+        const dB = { id: 'B' };
+        const dC = { id: 'C' };
         const groups = [
           {
             dashboards: [dA, dB]

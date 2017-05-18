@@ -83,8 +83,7 @@
           <!-- Bulk delete button -->
           <button
             class="kuiButton kuiButton--danger kuiButton--iconText"
-            confirm-click="bulkDelete()"
-            confirmation="Are you sure you want to delete the selected {{currentTab.title}}? This action is irreversible!"
+            ng-click="bulkDelete()"
             aria-label="Delete selected objects"
             ng-disabled="selectedItems.length == 0"
           >
@@ -110,7 +109,10 @@
       </div>
 
       <!-- NoResults -->
-      <div class="kuiPanel kuiPanel--centered" ng-if="!service.data.length">
+      <div
+        class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+        ng-if="!service.data.length"
+      >
         <div class="kuiNoItems">
           No {{service.title}} matched your search.
         </div>
@@ -140,12 +142,14 @@
             class="kuiTableRow"
           >
             <td class="kuiTableRowCell kuiTableRowCell--checkBox">
-              <input
-                type="checkbox"
-                class="kuiCheckBox"
-                ng-click="toggleItem(item)"
-                ng-checked="selectedItems.indexOf(item) >= 0"
-              >
+              <div class="kuiTableRowCell__liner">
+                <input
+                  type="checkbox"
+                  class="kuiCheckBox"
+                  ng-click="toggleItem(item)"
+                  ng-checked="selectedItems.indexOf(item) >= 0"
+                >
+              </div>
             </td>
             <td class="kuiTableRowCell">
               <div class="kuiTableRowCell__liner">

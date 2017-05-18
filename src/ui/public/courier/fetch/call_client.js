@@ -125,4 +125,4 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
   }
 
   return callClient;
-};
+}

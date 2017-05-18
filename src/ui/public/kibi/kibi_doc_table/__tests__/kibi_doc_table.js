@@ -144,7 +144,7 @@ describe('Kibi doc table', function () {
                 _type: 'AAA',
                 _id: '42',
                 _score: 1,
-                _source: {label: 'labelValue'}
+                _source: { label: 'labelValue' }
               }
             ]
           }
@@ -170,7 +170,7 @@ describe('Kibi doc table', function () {
                 _type: 'AAA',
                 _id: '42',
                 _score: 1,
-                _source: {label: 'labelValue'}
+                _source: { label: 'labelValue' }
               }
             ]
           }

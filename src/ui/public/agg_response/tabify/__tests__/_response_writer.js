@@ -195,7 +195,7 @@ describe('ResponseWriter class', function () {
           ]
         });
         const agg = vis.aggs.bySchemaName.split[0];
-        const buckets = new Buckets({ buckets: [ { key: 'apache' } ]});
+        const buckets = new Buckets({ buckets: [ { key: 'apache' } ] });
         const writer = new ResponseWriter(vis, { canSplit: false });
 
         expect(function () {
@@ -353,7 +353,7 @@ describe('ResponseWriter class', function () {
         const vis = new Vis(indexPattern, {
           type: 'pie',
           aggs: [
-            { type: 'terms', schema: 'segment', params: { field: '_type' }},
+            { type: 'terms', schema: 'segment', params: { field: '_type' } },
             { type: 'count', schema: 'metric' }
           ]
         });
@@ -372,7 +372,7 @@ describe('ResponseWriter class', function () {
         const vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
-            { type: 'terms', schema: 'segment', params: { field: '_type' }},
+            { type: 'terms', schema: 'segment', params: { field: '_type' } },
             { type: 'count', schema: 'metric' }
           ]
         });

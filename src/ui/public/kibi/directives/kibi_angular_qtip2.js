@@ -21,16 +21,16 @@ uiModules
         if (newValue) {
           if (attrs.qtipText) {
             if (attrs.qtipTitle) {
-              content = {title: attrs.qtipTitle, text: attrs.qtipText};
+              content = { title: attrs.qtipTitle, text: attrs.qtipText };
             } else {
-              content = {text: attrs.qtipText};
+              content = { text: attrs.qtipText };
             }
           }
           if (scope.qtipHtml) {
             if (attrs.qtipTitle) {
-              content = {title: attrs.qtipTitle, text: $('<div>' + scope.qtipHtml + '</div>')};
+              content = { title: attrs.qtipTitle, text: $('<div>' + scope.qtipHtml + '</div>') };
             } else {
-              content = {text: $('<div>' + scope.qtipHtml + '</div>')};
+              content = { text: $('<div>' + scope.qtipHtml + '</div>') };
             }
           }
 

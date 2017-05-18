@@ -264,9 +264,10 @@
 
   .cell-hover {
     background-color: @table-cell-hover-bg;
-  }
-  .cell-hover:hover {
-    background-color: @table-cell-hover-hover-bg;
+
+    .table-cell-filter {
+      background-color: @table-cell-hover-bg;
+    }
   }
 
 
@@ -280,10 +281,10 @@
   .agg-table-paginated {
     tr:hover td {
       background-color: @table-row-hover-bg;
-    }
 
-    .cell-hover:hover {
-      background-color: @table-cell-hover-hover-bg;
+      .table-cell-filter {
+        background-color: @table-row-hover-bg;
+      }
     }
   }
 
@@ -569,10 +570,12 @@
           color: @dashboard-panel-heading-link-color;
           opacity: 1;
         }
+        /* kibi: added */
         &.panel-border {
           background-color: @panel-header-bg;
           border-color: @panel-border;
         }
+        // kibi: end
       }
 
       .load-error {
@@ -599,5 +602,27 @@
   .kibana-nav-actions .active {
     background-color: @config-bg;
     color: @dark-button-font;
+  }
+
+  .truncate-by-height:before {
+    background: linear-gradient(to bottom, transparent 0%, @dashboard-bg 100%) !important;
+  }
+
+  kbn-table, .kbn-table, tbody[kbn-rows] {
+    dl.source {
+      dt {
+        background: #5f5f5f;
+        color: #ffffff;
+      }
+    }
+  }
+
+// /src/ui/public/doc_table/doc_table.less
+  .discover-table-row {
+    td {
+      .table-cell-filter {
+        background-color: @panel-bg;
+      }
+    }
   }
 }

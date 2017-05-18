@@ -57,7 +57,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         const pushFilter = Private(FilterBarPushFilterProvider)(getAppState());
         const indexPatternName = agg.vis.indexPattern.id;
         const field = agg.fieldName();
-        const filter = {geo_bounding_box: {}};
+        const filter = { geo_bounding_box: {} };
         filter.geo_bounding_box[field] = event.bounds;
 
         pushFilter(filter, false, indexPatternName);
@@ -89,7 +89,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         title: 'Value',
         min: 1,
         max: 1,
-        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]
@@ -113,4 +113,4 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       }
     ])
   });
-};
+}

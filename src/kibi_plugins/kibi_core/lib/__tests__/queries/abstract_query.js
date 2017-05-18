@@ -237,10 +237,10 @@ describe('AbstractQuery', function () {
 
   describe('._extractIdsFromSql', function () {
     const rows = [
-      { id: 1, label: 'ab'},
-      { id: 2, label: 'ab'},
-      { id: 3, label: 'cd'},
-      { ID: 4, label: 'cd'}
+      { id: 1, label: 'ab' },
+      { id: 2, label: 'ab' },
+      { id: 3, label: 'cd' },
+      { ID: 4, label: 'cd' }
     ];
 
     it('should return unique ids from the specified rows', function () {

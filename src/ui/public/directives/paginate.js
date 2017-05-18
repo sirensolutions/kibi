@@ -41,7 +41,7 @@ uiModules.get('kibana')
       }
     },
     controllerAs: 'paginate',
-    controller: function ($scope) {
+    controller: function ($scope, $document) {
       const self = this;
       const ALL = 0;
 
@@ -99,6 +99,10 @@ uiModules.get('kibana')
           //siren: update value of paginationCount
           self.updatePaginationCount(number);
         }
+      };
+
+      self.goToTop = function goToTop() {
+        $document.scrollTop(0);
       };
 
       self.renderList = function () {

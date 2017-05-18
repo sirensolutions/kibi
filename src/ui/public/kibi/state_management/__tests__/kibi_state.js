@@ -104,7 +104,7 @@ describe('State Management', function () {
         to: defaultEndTime
       };
 
-      config.set('query:queryString:options', {analyze_wildcard: true});
+      config.set('query:queryString:options', { analyze_wildcard: true });
       config.set('timepicker:timeDefaults', defaultTime);
       timefilter.time = defaultTime;
     });
@@ -1646,7 +1646,7 @@ describe('State Management', function () {
             id: 'dashboard1',
             title: 'dashboard1',
             kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({filter:[]})
+              searchSourceJSON: JSON.stringify({ filter:[] })
             }
           },
           {
@@ -1657,7 +1657,7 @@ describe('State Management', function () {
             timeFrom: 'now-15y',
             timeTo: 'now',
             kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({filter:[]})
+              searchSourceJSON: JSON.stringify({ filter:[] })
             }
           }
         ]

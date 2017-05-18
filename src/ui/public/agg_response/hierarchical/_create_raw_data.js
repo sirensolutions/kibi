@@ -53,6 +53,7 @@ export default function (vis, resp) {
    * @returns {void}
    */
   function walkBuckets(agg, data, record) {
+    if (!data) return;
     if (!_.isArray(record)) {
       record = [];
     }
@@ -89,4 +90,4 @@ export default function (vis, resp) {
   walkBuckets(buckets[0], resp.aggregations);
 
   return results;
-};
+}

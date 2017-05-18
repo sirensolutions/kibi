@@ -6,8 +6,8 @@ module.exports = function (plugin, server) {
 
   return Promise.all(
     [
-      callWithInternalUser('cat.nodes', {h: 'name,node.role,ip', format:'json'}),
-      callWithInternalUser('cat.plugins', {h: 'name,component', format: 'json'})
+      callWithInternalUser('cat.nodes', { h: 'name,node.role,ip', format:'json' }),
+      callWithInternalUser('cat.plugins', { h: 'name,component', format: 'json' })
     ]
   ).then(([ nodeList, pluginList ]) => {
     const elasticsearchPlugins = [];

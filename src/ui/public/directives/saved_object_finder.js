@@ -4,6 +4,7 @@ import keymap from 'ui/utils/key_map';
 import SavedObjectsSavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import uiModules from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
+import 'ui/partials/saved_object_finder.less';
 
 // kibi: imports
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
@@ -28,7 +29,12 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       // kibi: optional needed for filtering visualizations based on dashboard savedSearchId
       savedSearchId: '=?savedSearchId',
       // kibi: allow to override the number of objects per page
-      perPage: '=?perPage'
+      perPage: '=?perPage',
+      /**
+       * @type {function} - an optional function. If supplied an `Add new X` button is shown
+       * and this function is called when clicked.
+       */
+      onAddNew: '='
     },
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
@@ -252,7 +258,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       };
 
       self.manageObjects = function (type) {
-        $location.url('/management/siren/objects?_a=' + rison.encode({tab: type}));
+        $location.url('/management/siren/objects?_a=' + rison.encode({ tab: type }));
       };
 
       self.hitCountNoun = function () {

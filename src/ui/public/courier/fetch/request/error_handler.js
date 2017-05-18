@@ -28,4 +28,4 @@ export default function RequestErrorHandlerFactory(Private) {
   }
 
   return handleError;
-};
+}

@@ -11,13 +11,13 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import uiModules from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
-function IndexPatternsProvider(savedObjectsAPI, createNotifier, Private, Promise, kbnIndex) {
+function IndexPatternsProvider(createNotifier, Private, Promise, kbnIndex, savedObjectsAPI) {
   const self = this;
 
   const IndexPattern = Private(IndexPatternsIndexPatternProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
 
-  const notify = createNotifier({ location: 'IndexPatterns Service'});
+  const notify = createNotifier({ location: 'IndexPatterns Service' });
 
   self.get = function (id) {
     if (!id) return self.make();

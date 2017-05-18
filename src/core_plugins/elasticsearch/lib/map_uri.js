@@ -63,4 +63,4 @@ export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
     const mappedUrl = formatUrl(mappedUrlComponents);
     done(null, mappedUrl, mappedHeaders);
   };
-};
+}

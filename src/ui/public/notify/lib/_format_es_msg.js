@@ -14,4 +14,4 @@ export default function formatESMsg(err) {
 
   const result = _.pluck(rootCause, 'reason').join('\n');
   return result;
-};
+}

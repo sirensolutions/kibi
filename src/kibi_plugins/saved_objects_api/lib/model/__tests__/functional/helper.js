@@ -35,6 +35,7 @@ export default class ModelTestHelper {
     this._scenarioManager = new ScenarioManager(clusterUrl, timeout);
     this._cluster = new Cluster({
       url: clusterUrl,
+      ssl: { verificationMode: 'none' },
       requestTimeout: timeout
     });
 

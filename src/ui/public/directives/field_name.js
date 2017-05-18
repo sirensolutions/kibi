@@ -51,6 +51,7 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
         const name = $scope.field ? $scope.field.name : $scope.fieldName;
         const results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
         const scripted = $scope.field ? $scope.field.scripted : false;
+        const displayName = $filter('shortDots')(name);
 
         // kibi: build element structure before setting field name
         $el
@@ -62,7 +63,6 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
         // kibi: support alias for column name
         // check if alias is different than original name to avoid showing
         // the same name in parenthesis
-        let fieldDisplayName = $filter('shortDots')(name);
         if ($scope.fieldAlias && $scope.fieldAlias !== name) {
           $el
             .append($('<span>')
@@ -71,13 +71,13 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
             );
           $el
             .append($('<span>')
-              .text(fieldDisplayName)
+              .text(displayName)
               .addClass('original-field-name')
             );
         } else {
           $el
             .append($('<span>')
-              .text(fieldDisplayName)
+              .text(displayName)
               .addClass('discover-field-name')
             );
         }

@@ -32,4 +32,4 @@ export default function DiffTimePickerValuesFn($rootScope) {
 
     return false;
   };
-};
+}

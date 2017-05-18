@@ -8,7 +8,7 @@ export default (function () {
   const path = require('path');
   const url = require('url');
   const resolve = require('path').resolve;
-  const Elasticdump = require('elasticdump');
+  const Elasticdump = require('elasticdump').elasticdump;
 
   function ElasticDump() {
   }

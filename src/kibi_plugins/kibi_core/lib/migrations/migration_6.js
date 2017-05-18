@@ -125,7 +125,7 @@ export default class Migration6 extends Migration {
           'url',
           obj._id,
           // copy old kibiSession to new sirenSession
-          {sirenSession: obj._source.kibiSession, kibiSession: null},
+          { sirenSession: obj._source.kibiSession, kibiSession: null },
         );
         upgradedUrls++;
       }

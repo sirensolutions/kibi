@@ -10,11 +10,12 @@ module.exports = function (grunt) {
 
   const archives = [
     {
-      url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.2.2/kibi_radar_vis-5.2.2.zip',
+
+      url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.3.2-SNAPSHOT/kibi_radar_vis-5.3.2-SNAPSHOT.zip',
       dest: `${tempFolder}/kibi_radar_vis.zip` // siren: Add temp folder location to filepath
     },
     {
-      url: 'https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.2.2-SNAPSHOT/kibi_timeline_vis-5.2.2-SNAPSHOT.zip',
+      url: 'https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.3.2-SNAPSHOT/kibi_timeline_vis-5.3.2-SNAPSHOT.zip',
       dest: `${tempFolder}/kibi_timeline_vis.zip` //siren: Add temp folder location to filepath
     }
   ];
@@ -23,7 +24,7 @@ module.exports = function (grunt) {
     grunt.log.write('Downloading ' + url + '\n');
     return new Promise(function (fulfill, reject) {
       const file = fs.createWriteStream(dest);
-      const request = wreck.request('GET', url, {redirects: 3}, function (err, res) {
+      const request = wreck.request('GET', url, { redirects: 3 }, function (err, res) {
         if (err) {
           reject(err);
           return;

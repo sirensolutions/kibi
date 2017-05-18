@@ -200,4 +200,4 @@ export default function ResizeCheckerFactory(Private, createNotifier) {
   };
 
   return ResizeChecker;
-};
+}

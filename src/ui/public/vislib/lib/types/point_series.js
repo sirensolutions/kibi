@@ -178,4 +178,4 @@ export default function ColumnHandler(Private) {
       return defaults;
     }
   };
-};
+}

@@ -6,28 +6,28 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import VisProvider from 'ui/vis';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import 'ui/persisted_state';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', rows: true }},
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  { type: 'terms', schema: 'split', params: { field: 'extension', rows: true } },
+  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
 const colAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  { type: 'terms', schema: 'split', params: { field: 'extension', row: false } },
+  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
 const sliceAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
 const aggArray = [
@@ -78,11 +78,11 @@ describe('No global chart settings', function () {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
   }));
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, $injector) {
     chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
     chart2 = Private(FixturesVislibVisFixtureProvider)(visLibParams2);
     Vis = Private(VisProvider);
-    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    persistedState = new ($injector.get('PersistedState'))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 
@@ -177,10 +177,10 @@ aggArray.forEach(function (dataAgg, i) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
     }));
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private, $injector) {
       vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
       Vis = Private(VisProvider);
-      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      persistedState = new ($injector.get('PersistedState'))();
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 

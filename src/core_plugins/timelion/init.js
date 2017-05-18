@@ -3,8 +3,6 @@ const processFunctionDefinition = require('./server/lib/process_function_definit
 import timelionConfiguration from './server/lib/saved_objects/timelion-sheet';
 
 module.exports = function (server) {
-  //var config = server.config();
-
   server.plugins.saved_objects_api.registerType(timelionConfiguration);
 
   require('./server/routes/run.js')(server);

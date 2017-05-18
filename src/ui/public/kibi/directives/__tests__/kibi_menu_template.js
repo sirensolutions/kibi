@@ -175,8 +175,8 @@ describe('Kibi Components', function () {
         init({
           template: '<span ng-repeat="item in kibiMenuTemplateLocals.items">{{item.name}}</span>',
           items: [
-            { name: 'A'},
-            { name: 'B'}
+            { name: 'A' },
+            { name: 'B' }
           ]
         });
 
@@ -188,7 +188,7 @@ describe('Kibi Components', function () {
 
         // now lets change the name
         $scope.$apply(function () {
-          $scope.locals.items.push({name: 'C'});
+          $scope.locals.items.push({ name: 'C' });
         });
         expect($menu.find('span:nth-child(3)').text()).to.equal('C');
       });
@@ -200,8 +200,8 @@ describe('Kibi Components', function () {
         init({
           template: '<span ng-repeat="item in kibiMenuTemplateLocals.items" ng-click="item.click()">{{item.name}}</span>',
           items: [
-            { name: 'A', click: clickOnA},
-            { name: 'B', click: clickOnB}
+            { name: 'A', click: clickOnA },
+            { name: 'B', click: clickOnB }
           ]
         });
 

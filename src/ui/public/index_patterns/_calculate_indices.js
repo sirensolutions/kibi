@@ -78,4 +78,4 @@ export default function CalculateIndicesFactory(Promise, es) {
   }
 
   return calculateIndices;
-};
+}

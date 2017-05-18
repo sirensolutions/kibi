@@ -39,7 +39,7 @@ module.exports = function (queryEngine, json, credentials) {
         options.credentials = credentials;
       }
 
-      return queryEngine.getIdsFromQueries([{queryId: queryid, queryVariableName: queryVariableName}], options)
+      return queryEngine.getIdsFromQueries([{ queryId: queryid, queryVariableName: queryVariableName }], options)
       .then(function createObject(queries) {
         return new Promise(function (fulfill, reject) {
           const filter = {};

@@ -7,7 +7,7 @@ export default function tabifyAggResponseProvider(Private, createNotifier) {
   const AggConfig = Private(VisAggConfigProvider);
   const TabbedAggResponseWriter = Private(AggResponseTabifyResponseWriterProvider);
   const Buckets = Private(AggResponseTabifyBucketsProvider);
-  const notify = createNotifier({ location: 'agg_response/tabify'});
+  const notify = createNotifier({ location: 'agg_response/tabify' });
 
   function tabifyAggResponse(vis, esResponse, respOpts) {
     const write = new TabbedAggResponseWriter(vis, respOpts);
@@ -101,4 +101,4 @@ export default function tabifyAggResponseProvider(Private, createNotifier) {
   }
 
   return notify.timed('tabify agg response', tabifyAggResponse);
-};
+}

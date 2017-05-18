@@ -1,4 +1,8 @@
+/*
+MERGE 5.3.2 with this line ui_framework will not start
 @import "../../dist/ui_framework.css";
+*/
+
 @import "./views/app";
 @import "./components/guide_code_viewer/guide_code_viewer";
 @import "./components/guide_nav/guide_nav";

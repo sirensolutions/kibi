@@ -14,8 +14,7 @@ import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 
-// kibi: added mappings service dependency
-export default function IndexPatternFactory(Private, createNotifier, config, kbnIndex, Promise, safeConfirm, mappings) {
+export default function IndexPatternFactory(Private, createNotifier, config, kbnIndex, Promise, confirmModalPromise, mappings) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const mapper = Private(IndexPatternsMapperProvider);
@@ -157,7 +156,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
 
   function fetchFields(indexPattern) {
     return mapper
-    .getFieldsForIndexPattern(indexPattern, true)
+    .getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true })
     .then(fields => {
       const scripted = indexPattern.getScriptedFields();
       const all = fields.concat(scripted);
@@ -349,7 +348,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
         }
         const confirmMessage = 'Are you sure you want to overwrite this?';
 
-        return safeConfirm(confirmMessage)
+        return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
         .then(() => Promise
           .try(() => {
             const cached = patternCache.get(this.id);
@@ -383,7 +382,11 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
       .clearCache(this)
       .then(() => this._fetchFieldsPath()) // kibi: retrieve the path of each field
       .then(() => fetchFields(this))
-      .then(() => this.save());
+      .then(() => this.save())
+      .catch((err) => {
+        notify.error(err);
+        return Promise.reject(err);
+      });
     }
 
     // kibi: return the field paths sequence in order to support field names with dots
@@ -412,4 +415,4 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
   }
 
   return IndexPattern;
-};
+}

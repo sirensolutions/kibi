@@ -12,7 +12,7 @@ import histogramRows from 'fixtures/vislib/mock_data/histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import 'ui/persisted_state';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [
@@ -46,9 +46,9 @@ dataTypesArray.forEach(function (dataType, i) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
     }));
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(ngMock.inject(function (Private, $injector) {
       vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
-      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(data, persistedState);
     }));

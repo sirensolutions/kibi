@@ -58,7 +58,7 @@ uiModules
       left = `${Math.ceil(left)}px`;
       top = `${Math.ceil(top)}px`;
       maxHeight = `${Math.ceil(maxHeight)}px`;
-      container.css({left, top, 'max-height': maxHeight});
+      container.css({ left, top, 'max-height': maxHeight });
     };
 
     const showMenu = function () {

@@ -48,7 +48,7 @@ describe('Kibi Components', function () {
               },
               params: {
                 queryDefinitions: [
-                  {queryId: 'query1'} // this query depends on selected entity
+                  { queryId: 'query1' } // this query depends on selected entity
                 ]
               }
             };
@@ -69,7 +69,7 @@ describe('Kibi Components', function () {
               },
               params: {
                 queryDefinitions: [
-                  {queryId: 'query2'}
+                  { queryId: 'query2' }
                 ]
               }
             };

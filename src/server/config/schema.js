@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { get } from 'lodash';
-import { randomBytes } from 'crypto';
+import { randomBytes, constants as cryptoConstants } from 'crypto';
 import os from 'os';
 
 import { fromRoot } from '../../utils';
@@ -60,8 +60,19 @@ module.exports = () => Joi.object({
     defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     ssl: Joi.object({
-      cert: Joi.string(),
-      key: Joi.string(),
+      enabled: Joi.boolean().default(false),
+      certificate: Joi.string().when('enabled', {
+        is: true,
+        then: Joi.required(),
+      }),
+      key: Joi.string().when('enabled', {
+        is: true,
+        then: Joi.required()
+      }),
+      keyPassphrase: Joi.string(),
+      certificateAuthorities: Joi.array().single().items(Joi.string()),
+      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
+      cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':')),
       ca: Joi.string() // kibi: added CA parameter for verification purposes
     }).default(),
     cors: Joi.when('$dev', {

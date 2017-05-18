@@ -68,13 +68,13 @@ describe('PostgresQuery', function () {
       const postgresQuery = new PostgresQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
       sinon.stub(postgresQuery, '_executeQuery', function () {
-        return Promise.resolve({fields: [], rows: []});
+        return Promise.resolve({ fields: [], rows: [] });
       });
 
       const generateCacheKeySpy = sinon.spy(postgresQuery, 'generateCacheKey');
 
-      return postgresQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
-        expect(res.results).to.eql({ bindings: []});
+      return postgresQuery.fetchResults({ credentials: { username: 'fred' } }, false, 'variableX').then(function (res) {
+        expect(res.results).to.eql({ bindings: [] });
         sinon.assert.calledOnce(generateCacheKeySpy);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'localhostmydb', 'select * from x', false, 'variableX', 'fred');
       });
@@ -83,11 +83,11 @@ describe('PostgresQuery', function () {
     it('checkIfItIsRelevant', function () {
       const postgresQuery = new PostgresQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
-      sinon.stub(postgresQuery, '_executeQuery').returns(Promise.resolve({fields: [], rows: []}));
+      sinon.stub(postgresQuery, '_executeQuery').returns(Promise.resolve({ fields: [], rows: [] }));
 
       const generateCacheKeySpy = sinon.spy(postgresQuery, 'generateCacheKey');
 
-      return postgresQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+      return postgresQuery.checkIfItIsRelevant({ credentials: { username: 'fred' } }).then(function (res) {
         expect(res).to.equal(QUERY_DEACTIVATED);
         sinon.assert.calledOnce(generateCacheKeySpy);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'localhostmydb', 'select * from x LIMIT 1', 'fred');

@@ -1,6 +1,7 @@
 
 import bluebird, {
-  promisify
+  promisify,
+  filter as filterAsync
 } from 'bluebird';
 import fs from 'fs';
 import _ from 'lodash';
@@ -79,6 +80,15 @@ export default class Common {
     return getUrl.baseUrl(config.servers.elasticsearch);
   }
 
+  navigateToUrl(appName, subUrl) {
+    const appConfig = Object.assign({}, config.apps[appName], {
+      // Overwrite the default hash with the URL we really want.
+      hash: `${appName}/${subUrl}`,
+    });
+    const appUrl = getUrl.noAuth(config.servers.kibana, appConfig);
+    return this.remote.get(appUrl);
+  }
+
   navigateToApp(appName, testStatusPage) {
     const self = this;
     const appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
@@ -96,7 +106,7 @@ export default class Common {
               // that change.  If we got here, fix it.
               self.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
               self.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
-              return esClient.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+              return esClient.updateConfigDoc({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
             }
           }
         })
@@ -160,7 +170,7 @@ export default class Common {
           return currentUrl;
         });
       });
-    };
+    }
 
     return navigateTo(appUrl)
     .then(function (currentUrl) {
@@ -214,6 +224,10 @@ export default class Common {
     return Try.try(block);
   }
 
+  tryMethod(object, method, ...args) {
+    return this.try(() => object[method](...args));
+  }
+
   log(...args) {
     Log.log(...args);
   }
@@ -258,11 +272,27 @@ export default class Common {
     }
   }
 
-  findTestSubject(selector) {
+  findTestSubject(selector, timeout = defaultFindTimeout) {
     this.debug('in findTestSubject: ' + testSubjSelector(selector));
+    let originalFindTimeout = null;
     return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      .findDisplayedByCssSelector(testSubjSelector(selector));
+      .getFindTimeout()
+      .then((findTimeout) => originalFindTimeout = findTimeout)
+      .setFindTimeout(timeout)
+      .findDisplayedByCssSelector(testSubjSelector(selector))
+      .then(
+        (result) => this.remote.setFindTimeout(originalFindTimeout)
+          .finally(() => result),
+        (error) => this.remote.setFindTimeout(originalFindTimeout)
+          .finally(() => { throw error; }),
+      );
+  }
+
+  async findAllTestSubjects(selector) {
+    this.debug('in findAllTestSubjects: ' + testSubjSelector(selector));
+    const remote = this.remote.setFindTimeout(defaultFindTimeout);
+    const all = await remote.findAllByCssSelector(testSubjSelector(selector));
+    return await filterAsync(all, el => el.isDisplayed());
   }
 
 }

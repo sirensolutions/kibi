@@ -12,13 +12,12 @@ import _ from 'lodash';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
-import PersistedStateProvider from 'ui/persisted_state/persisted_state';
+import { PersistedState } from 'ui/persisted_state';
 
 export default function VisFactory(createNotifier, Private) {
   const aggTypes = Private(AggTypesIndexProvider);
   const visTypes = Private(RegistryVisTypesProvider);
   const AggConfigs = Private(VisAggConfigsProvider);
-  const PersistedState = Private(PersistedStateProvider);
 
   const notify = createNotifier({
     location: 'Vis'
@@ -84,8 +83,15 @@ export default function VisFactory(createNotifier, Private) {
 
   Vis.prototype.setState = function (state) {
     this.title = state.title || '';
-    this.type = state.type || this.type;
-    if (_.isString(this.type)) this.type = visTypes.byName[this.type];
+    const type = state.type || this.type;
+    if (_.isString(type)) {
+      this.type = visTypes.byName[type];
+      if (!this.type) {
+        throw new Error(`Invalid type "${type}"`);
+      }
+    } else {
+      this.type = type;
+    }
 
     // kibi: visualization type versioning
     this.version = this.type.version;
@@ -187,4 +193,4 @@ export default function VisFactory(createNotifier, Private) {
   };
 
   return Vis;
-};
+}

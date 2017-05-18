@@ -45,8 +45,10 @@ export default class HeaderPage {
   }
 
   clickTimepicker() {
-    return PageObjects.common.findTestSubject('globalTimepickerButton')
-    .click();
+    return PageObjects.common.try(() => {
+      return PageObjects.common.findTestSubject('globalTimepickerButton')
+        .click();
+    });
   }
 
   isTimepickerOpen() {
@@ -81,7 +83,7 @@ export default class HeaderPage {
     .findByClassName('kbn-timepicker-go')
     .click()
     .then(function () {
-      return self.isGlobalLoadingIndicatorHidden();
+      return self.waitUntilLoadingHasFinished();
     });
   }
 
@@ -104,10 +106,7 @@ export default class HeaderPage {
       return this.clickGoButton();
     })
     .then(() => {
-      return this.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return this.clickTimepicker();
+      return this.waitUntilLoadingHasFinished();
     });
   }
 
@@ -126,6 +125,23 @@ export default class HeaderPage {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button[ng-if="notif.accept"]')
     .click();
+  }
+
+  async waitUntilLoadingHasFinished() {
+    try {
+      await this.isGlobalLoadingIndicatorVisible();
+    } catch (exception) {
+      if (exception.name === 'ElementNotVisible') {
+        // selenium might just have been too slow to catch it
+      } else {
+        throw exception;
+      }
+    }
+    await this.isGlobalLoadingIndicatorHidden();
+  }
+
+  isGlobalLoadingIndicatorVisible() {
+    return PageObjects.common.findTestSubject('globalLoadingIndicator', defaultFindTimeout / 5);
   }
 
   isGlobalLoadingIndicatorHidden() {

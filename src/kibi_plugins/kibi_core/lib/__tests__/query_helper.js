@@ -26,7 +26,7 @@ describe('Query Helper', function () {
     }
   };
 
-  const credentials = {user: 'user', password: 'password'};
+  const credentials = { user: 'user', password: 'password' };
 
   const searchResponse = {
     hits: {
@@ -159,8 +159,8 @@ describe('Query Helper', function () {
         });
 
         it('replace in single where value is an array of integers', function () {
-          var s = '[@doc[_source][numerical_ids]@]';
-          var expected = '[1,2]';
+          const s = '[@doc[_source][numerical_ids]@]';
+          const expected = '[1,2]';
           return queryHelper.replaceVariablesUsingEsDocument(s, options)
           .then(function (ret) {
             assertions();
@@ -169,8 +169,8 @@ describe('Query Helper', function () {
         });
 
         it('replace in single where value is an array strings', function () {
-          var s = '[@doc[_source][string_ids]@]';
-          var expected = '["a","b"]';
+          const s = '[@doc[_source][string_ids]@]';
+          const expected = '["a","b"]';
           return queryHelper.replaceVariablesUsingEsDocument(s, options)
           .then(function (ret) {
             assertions();
@@ -179,8 +179,8 @@ describe('Query Helper', function () {
         });
 
         it('replace in single where value is an array of mixed strings and integers', function () {
-          var s = '[@doc[_source][mixed_ids]@]';
-          var expected = '[1,"a",2,"b"]';
+          const s = '[@doc[_source][mixed_ids]@]';
+          const expected = '[1,"a",2,"b"]';
           return queryHelper.replaceVariablesUsingEsDocument(s, options).then(function (ret) {
             assertions();
             expect(ret).to.equal(expected);
@@ -189,12 +189,12 @@ describe('Query Helper', function () {
 
         it('replace in an array of objects with name and value', function () {
           const sA = [
-            {name: 'param1', value: 'select * from table1 where id = \'@doc[_source][id]@\''},
-            {name: 'param2', value: 'select * from table1 where id = \'@doc[_id]@\''}
+            { name: 'param1', value: 'select * from table1 where id = \'@doc[_source][id]@\'' },
+            { name: 'param2', value: 'select * from table1 where id = \'@doc[_id]@\'' }
           ];
           const expectedA = [
-            {name: 'param1', value: 'select * from table1 where id = \'id1\''},
-            {name: 'param2', value: 'select * from table1 where id = \'_id1\''}
+            { name: 'param1', value: 'select * from table1 where id = \'id1\'' },
+            { name: 'param2', value: 'select * from table1 where id = \'_id1\'' }
           ];
 
           return queryHelper.replaceVariablesUsingEsDocument(sA, options)
@@ -227,10 +227,10 @@ describe('Query Helper', function () {
       it('ignore the elastic document and variables', function () {
         const path = '';
         const headers = [
-          { name: 'header1', value: 'header1value'}
+          { name: 'header1', value: 'header1value' }
         ];
         const params = [
-          { name: 'param1', value: 'param1value'}
+          { name: 'param1', value: 'param1value' }
         ];
         const body = 'body';
 
@@ -252,10 +252,10 @@ describe('Query Helper', function () {
       it('should not modify supplied params, headers and body', function () {
         const path = 'path/$auth_token';
         const headers = [
-          { name: 'header1', value: 'header1value $auth_token'}
+          { name: 'header1', value: 'header1value $auth_token' }
         ];
         const params = [
-          { name: 'param1', value: 'param1value  $auth_token'}
+          { name: 'param1', value: 'param1value  $auth_token' }
         ];
         const body = 'body $auth_token';
         const variables = {
@@ -263,10 +263,10 @@ describe('Query Helper', function () {
         };
 
         const expHeaders = [
-          { name: 'header1', value: 'header1value $auth_token'}
+          { name: 'header1', value: 'header1value $auth_token' }
         ];
         const expParams = [
-          { name: 'param1', value: 'param1value  $auth_token'}
+          { name: 'param1', value: 'param1value  $auth_token' }
         ];
         const expBody = 'body $auth_token';
         const expPath = 'path/$auth_token';
@@ -286,10 +286,10 @@ describe('Query Helper', function () {
       it('ignore the elastic document but use variables', function () {
         const path = 'path/$auth_token';
         const headers = [
-          { name: 'header1', value: 'header1value $auth_token'}
+          { name: 'header1', value: 'header1value $auth_token' }
         ];
         const params = [
-          { name: 'param1', value: 'param1value  $auth_token'}
+          { name: 'param1', value: 'param1value  $auth_token' }
         ];
         const body = 'body $auth_token';
 
@@ -299,10 +299,10 @@ describe('Query Helper', function () {
 
         const expected = {
           headers: [
-            { name: 'header1', value: 'header1value 123456'}
+            { name: 'header1', value: 'header1value 123456' }
           ],
           params: [
-            { name: 'param1', value: 'param1value  123456'}
+            { name: 'param1', value: 'param1value  123456' }
           ],
           body: 'body 123456',
           path: 'path/123456'

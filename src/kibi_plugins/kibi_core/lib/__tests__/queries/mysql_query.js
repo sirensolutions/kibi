@@ -68,13 +68,13 @@ describe('MysqlQuery', function () {
       const mysqlQuery = new MysqlQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
       sinon.stub(mysqlQuery, '_executeQuery', function () {
-        return Promise.resolve({rows: [], fields: []});
+        return Promise.resolve({ rows: [], fields: [] });
       });
 
       const generateCacheKeySpy = sinon.spy(mysqlQuery, 'generateCacheKey');
 
-      return mysqlQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
-        expect(res.results).to.eql({ bindings: []});
+      return mysqlQuery.fetchResults({ credentials: { username: 'fred' } }, false, 'variableX').then(function (res) {
+        expect(res.results).to.eql({ bindings: [] });
         sinon.assert.calledOnce(generateCacheKeySpy);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'localhostmydb', 'select * from x', false, 'variableX', 'fred');
       });
@@ -83,11 +83,11 @@ describe('MysqlQuery', function () {
     it('checkIfItIsRelevant', function () {
       const mysqlQuery = new MysqlQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute query to skip query execution
-      sinon.stub(mysqlQuery, '_executeQuery').returns(Promise.resolve({rows: [], fields: []}));
+      sinon.stub(mysqlQuery, '_executeQuery').returns(Promise.resolve({ rows: [], fields: [] }));
 
       const generateCacheKeySpy = sinon.spy(mysqlQuery, 'generateCacheKey');
 
-      return mysqlQuery.checkIfItIsRelevant({credentials: {username: 'fred'}})
+      return mysqlQuery.checkIfItIsRelevant({ credentials: { username: 'fred' } })
       .then(function (res) {
         expect(res).to.equal(QUERY_DEACTIVATED);
         sinon.assert.calledOnce(generateCacheKeySpy);

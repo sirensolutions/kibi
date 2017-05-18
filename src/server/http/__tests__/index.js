@@ -10,9 +10,12 @@ describe('routes', function () {
   beforeEach(function () {
     kbnServer = kbnTestServer.createServer({
       plugins: {
-        scanDirs: [
-          fromRoot('src/core_plugins'),
-          fromRoot('src/kibi_plugins') // siren: added path to the kibi plugins folder
+        // kibi: explicitly add the required plugins
+        paths: [
+          fromRoot('src/core_plugins/kibana'),
+          fromRoot('src/core_plugins/elasticsearch'),
+          fromRoot('src/kibi_plugins/kibi_core'),
+          fromRoot('src/kibi_plugins/saved_objects_api')
         ]
       }
     });

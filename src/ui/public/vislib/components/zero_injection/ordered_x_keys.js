@@ -43,12 +43,14 @@ export default function OrderedXKeysUtilService(Private) {
 
       if (dateInterval) {
         next = moment(val);
-        while (next < gapEdge) {
+        // siren: allows histogram to be interval safe
+        while (next < gapEdge && vals.length < 50) {
           vals.push(next.valueOf());
           next.add(dateInterval);
         }
       } else {
-        while (next < gapEdge) {
+        // siren: allows histogram to be interval safe
+        while (next < gapEdge && vals.length < 50) {
           vals.push(next);
           next += interval;
         }

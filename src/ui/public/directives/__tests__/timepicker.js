@@ -233,6 +233,22 @@ describe('timepicker directive', function () {
       done();
     });
 
+    it('disables the submit button if the year is negative', function (done) {
+      let button;
+      button = $elem.find('button[disabled]');
+      expect(button.length).to.be(0);
+
+      // Make the form invalid
+      $scope.relative.count = 9999;
+      $scope.relative.unit = 'y';
+      $scope.formatRelative();
+      $scope.$digest();
+
+      button = $elem.find('button[disabled]');
+      expect(button.length).to.be(1);
+      done();
+    });
+
     it('has a dropdown bound to relative.unit that contains all of the intervals', function (done) {
       const select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
       expect(select.length).to.be(1);

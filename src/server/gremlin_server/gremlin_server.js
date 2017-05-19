@@ -27,8 +27,9 @@ function startServer(self, fulfill, reject) {
 
     isJavaVersionOk(self).then(function () {
 
-      if (config.get('kibi_core.gremlin_server.ssl.ca')) {
-        self.ca = fs.readFileSync(config.get('kibi_core.gremlin_server.ssl.ca'));
+      if (config.has('kibi_core.gremlin_server.ssl.ca')) {
+        const ca = config.get('kibi_core.gremlin_server.ssl.ca');
+        self.ca = fs.readFileSync(ca);
       }
 
       if (path.parse(gremlinServerPath).ext !== '.jar') {
@@ -50,11 +51,12 @@ function startServer(self, fulfill, reject) {
 
         self.url = config.get('kibi_core.gremlin_server.url');
         const serverURL = url.parse(self.url);
+        const esUrl = config.get('elasticsearch.url');
 
         const args = [
           '-jar', gremlinServerPath,
           '-Djava.security.egd=file:/dev/./urandom',
-          '--elasticsearch.url=' + config.get('elasticsearch.url'),
+          '--elasticsearch.url=' + esUrl,
           '--server.port=' + serverURL.port
         ];
         if (serverURL.hostname !== '0.0.0.0') {
@@ -65,28 +67,29 @@ function startServer(self, fulfill, reject) {
           args.unshift(gremlinServerRemoteDebug);
         }
 
-        const logConfigPath = config.get('kibi_core.gremlin_server.log_conf_path');
-        if (logConfigPath) {
+        if (config.has('kibi_core.gremlin_server.log_conf_path')) {
+          const logConfigPath = config.get('kibi_core.gremlin_server.log_conf_path');
           args.push('--logging.config=' + logConfigPath);
         }
 
-        const elasticsearchCA = config.get('elasticsearch.ssl.ca');
-        if (elasticsearchCA) {
+        if (config.has('elasticsearch.ssl.ca')) {
+          const elasticsearchCA = config.get('elasticsearch.ssl.ca');
           args.push('--elasticsearch.ssl.ca=' + elasticsearchCA);
         }
 
-        const elasticsearchVerifyHostname = config.get('elasticsearch.ssl.verify');
-        if (elasticsearchVerifyHostname) {
+        if (config.has('elasticsearch.ssl.verify')) {
           args.push('--elasticsearch.ssl.verify=true');
         } else {
           args.push('--elasticsearch.ssl.verify=false');
         }
 
-        if (config.get('kibi_core.gremlin_server.ssl.key_store')) {
+        if (config.has('kibi_core.gremlin_server.ssl.key_store')) {
+          const sslKeyStore = config.get('kibi_core.gremlin_server.ssl.key_store');
+          const sslKeyStorePsw = config.get('kibi_core.gremlin_server.ssl.key_store_password');
           args.push('--server.ssl.enabled=true');
-          args.push('--server.ssl.key-store=' + config.get('kibi_core.gremlin_server.ssl.key_store'));
-          args.push('--server.ssl.key-store-password=' + config.get('kibi_core.gremlin_server.ssl.key_store_password'));
-        } else if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
+          args.push('--server.ssl.key-store=' + sslKeyStore);
+          args.push('--server.ssl.key-store-password=' + sslKeyStorePsw);
+        } else if (config.has('server.ssl.key') && config.has('server.ssl.cert')) {
           const msg = 'Since you are using Elasticsearch Shield, you should configure the SSL for the gremlin server ' +
             'by configuring the key store in kibi.yml\n' +
             'The following properties are required:\n' +

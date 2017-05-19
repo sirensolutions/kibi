@@ -48,15 +48,15 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
           // the authentication plugin).
           let type = fetchParams.type;
           if (_.isArray(indexList) && indexList.length === 0) {
-            indexList.push(kbnIndex);
+            index.push(kbnIndex);
             type = 'null';
             body = emptySearch();
           } else {
             index = indexList;
           }
           return angular.toJson({
-            index: indexList,
-            type: type,
+            index,
+            type,
             search_type: fetchParams.search_type,
             ignore_unavailable: true,
             preference: sessionId,

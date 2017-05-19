@@ -23,6 +23,7 @@ import SavedObjectSourceProvider from 'ui/courier/data_source/savedobject_source
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 // kibi: end
 
+// kibi: include savedObjectsAPI dependencies
 export default function SavedObjectFactory(
   esAdmin, kbnIndex, Promise, Private, createNotifier, confirmModalPromise, indexPatterns,
   savedObjectsAPI, savedObjectsAPITypes

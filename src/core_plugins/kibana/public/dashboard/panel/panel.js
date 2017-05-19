@@ -92,6 +92,9 @@ uiModules
         $scope.uiState = $scope.createChildUiState(getPersistedStateId($scope.panel), uiState);
 
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
+          // siren: For some unknown reason the vis object doesn't has his own id. This must be investigated in the future.
+          $scope.savedObj.vis.id = $scope.panel.id;
+          // siren: end
           $scope.savedObj.vis.setUiState($scope.uiState);
           $scope.savedObj.vis.listeners.click = $scope.getVisClickHandler();
           $scope.savedObj.vis.listeners.brush = $scope.getVisBrushHandler();

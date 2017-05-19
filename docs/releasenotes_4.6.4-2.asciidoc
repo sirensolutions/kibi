@@ -24,6 +24,6 @@
 * Improved - Relation filtering is now enabled in the Graph Browser timebar [Enterprise Edition only]
 * Improved - Graph Browser performance improved after user removes or crops graph [Enterprise Edition only]
 * Improved - No longer adding elements if they are already present on the graph in Graph Browser [Enterprise Edition only]
-* Improved - Access Control Plugin now handles Kerberos/SPNEGO/JWT authentication [Enterprise Edition only]
+* Improved - Access Control Plugin now handles Kerberos/SPNEGO authentication [Enterprise Edition only]
 * Improved - Results of expansion are now added to the Graph Browser timebar [Enterprise Edition only]
 * Improved - A remove all button has been added to the Graph Browser to remove all nodes at once [Enterprise Edition only]

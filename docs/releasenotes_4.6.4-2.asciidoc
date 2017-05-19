@@ -1,0 +1,29 @@
+=== Kibi 4.6.4-2 Release Notes
+
+==== Kibi Changes
+
+* Fixed - Relational panel layout missing after page refresh
+* Fixed - Tooltip showing undefined for range limits
+* Fixed - Enhanced search not displaying columns in saved visualisations
+* Fixed - Fix zoom in multiwidget visualization when subselecting time
+* Fixed - Hide labels in Graph Browser if labels are null or undefined [Enterprise Edition only]
+* Fixed - Stop highlighted nodes remaining highlighted after toggling highlight button [Enterprise Edition only]
+* Fixed - Graph Browser now handles the return from other dashboards more efficiently [Enterprise Edition only]
+* Fixed - Filter button in Graph Browser now reflects deletion of the live filter on filter bar [Enterprise Edition only]
+
+* Improved - Multiple negations of join filters now separated into separate queries
+* Improved - Update default gremlin server during startup
+* Improved - Allow the use of filters in visualisations
+* Improved - Remove deprecation warning when sorting asc by count value
+* Improved - Try the first available index when the default index is unavailable due to auth error
+* Improved - Self relations on the same field are now not generating an edge [Enterprise Edition only]
+* Improved - Live filter performance improved when it is the only filter applied [Enterprise Edition only]
+* Improved - Add warning if configured relations, index or index-pattern are missing [Enterprise Edition only]
+* Improved - Removed warning for long URLs (the URLs are no longer used to make requests) [Enterprise Edition only]
+* Improved - Add button to Graph Browser to pause result fetching [Enterprise Edition only]
+* Improved - Relation filtering is now enabled in the Graph Browser timebar [Enterprise Edition only]
+* Improved - Graph Browser performance improved after user removes or crops graph [Enterprise Edition only]
+* Improved - No longer adding elements if they are already present on the graph in Graph Browser [Enterprise Edition only]
+* Improved - Access Control Plugin now handles Kerberos/SPNEGO/JWT authentication [Enterprise Edition only]
+* Improved - Results of expansion are now added to the Graph Browser timebar [Enterprise Edition only]
+* Improved - A remove all button has been added to the Graph Browser to remove all nodes at once [Enterprise Edition only]

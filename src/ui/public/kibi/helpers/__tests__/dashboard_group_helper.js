@@ -231,8 +231,7 @@ describe('Kibi Components', function () {
 
         it('no current dashboard', function (done) {
           dashboardGroupHelper.computeGroups().then(function (groups) {
-            // computeGroups should return all 5 groups, even when no dashboard is selected
-            expect(groups).to.have.length(5);
+            expect(groups).to.have.length(4);
             done();
           }).catch(done);
         });
@@ -248,30 +247,27 @@ describe('Kibi Components', function () {
         it('computeGroups 1', function (done) {
           dashboardGroupHelper.computeGroups().then(function (groups) {
 
-            expect(groups).to.have.length(5);
+            expect(groups).to.have.length(4);
 
             expect(groups[0].title).to.equal('Group 1');
             expect(groups[0].dashboards).to.have.length(2);
             expect(groups[0].dashboards[0].id).to.match(/^Companies|Articles$/);
             expect(groups[0].dashboards[1].id).to.match(/^Companies|Articles$/);
 
-            expect(groups[1].title).to.equal('Group 2');
-            expect(groups[1].dashboards).to.have.length(0);
+            expect(groups[1].title).to.equal('time testing 1');
+            expect(groups[1].dashboards).to.have.length(1);
+            expect(groups[1].dashboards[0].id).to.equal('time-testing-1');
+            expect(groups[1].dashboards[0].title).to.equal('time testing 1');
 
-            expect(groups[2].title).to.equal('time testing 1');
+            expect(groups[2].title).to.equal('time testing 2');
             expect(groups[2].dashboards).to.have.length(1);
-            expect(groups[2].dashboards[0].id).to.equal('time-testing-1');
-            expect(groups[2].dashboards[0].title).to.equal('time testing 1');
+            expect(groups[2].dashboards[0].id).to.equal('time-testing-2');
+            expect(groups[2].dashboards[0].title).to.equal('time testing 2');
 
-            expect(groups[3].title).to.equal('time testing 2');
+            expect(groups[3].title).to.equal('time testing 3');
             expect(groups[3].dashboards).to.have.length(1);
-            expect(groups[3].dashboards[0].id).to.equal('time-testing-2');
-            expect(groups[3].dashboards[0].title).to.equal('time testing 2');
-
-            expect(groups[4].title).to.equal('time testing 3');
-            expect(groups[4].dashboards).to.have.length(1);
-            expect(groups[4].dashboards[0].id).to.equal('time-testing-3');
-            expect(groups[4].dashboards[0].title).to.equal('time testing 3');
+            expect(groups[3].dashboards[0].id).to.equal('time-testing-3');
+            expect(groups[3].dashboards[0].title).to.equal('time testing 3');
 
             done();
           }).catch(done);
@@ -279,18 +275,26 @@ describe('Kibi Components', function () {
       });
 
       describe('dashboards do not exist', function () {
-        beforeEach(init({ savedDashboardGroups: fakeSavedDashboardGroups }));
+        beforeEach(init({
+          savedDashboardGroups: fakeSavedDashboardGroups,
+          savedDashboards: [
+            {
+              id: 'Companies',
+              title: 'Companies'
+            }
+          ]
+        }));
 
         it('computeGroups 2', function (done) {
           dashboardGroupHelper.computeGroups()
-          .then(() => done('this should fail'))
-          .catch(function (err) {
-            // here if there are groups but there is no dashboards we should get an error
-            expect(err.message).to.be(
-              '"Group 1" dashboard group contains non existing dashboard "Companies". Edit dashboard group to remove non existing dashboard'
-            );
+          .then((groups) => {
+            expect(groups).to.have.length(1);
+            expect(groups[0].dashboards).to.have.length(1);
+            expect(groups[0].dashboards[0].id).to.be('Companies');
+            expect(groups[0].dashboards).to.have.length(1);
             done();
-          });
+          })
+          .catch(done);
         });
       });
 

@@ -1,6 +1,5 @@
 define(function (require) {
   const isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
-  const MissingDashboardError = require('ui/kibi/errors/missing_dashboard_error');
 
   return function DashboardGroupHelperFactory(
       $timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http, config) {
@@ -222,40 +221,27 @@ define(function (require) {
           return [];
         }
         // here first fetch all dashboards to be able to verify that dashboards mentioned in the group still exists
-        return savedDashboards.find().then(function (respDashboards) {
+        return savedDashboards
+        .find()
+        .then(function (respDashboards) {
           const listOfDashboards = _.map(respDashboards.hits, function (hit) {
             return hit.id;
           });
 
           const dashboardGroups1 = [];
-          let fail = '';
           // first iterate over existing groups
           _.each(respGroups.hits, function (group) {
 
-            // ignores empties dashboard objects inside a dashboard group
+            // ignore empty dashboard objects inside a dashboard group
             group.dashboards = _.filter(group.dashboards, function (dashboard) {
-              return dashboard.id !== undefined && dashboard.title !== undefined;
+              return dashboard.id !== undefined && dashboard.title !== undefined &&
+                listOfDashboards.indexOf(dashboard.id) !== -1;
             });
 
             // selected dashboard
             let selected;
-            let dashboards = [];
-            const dashboardsArray = group.dashboards;
-            // check that all dashboards still exists
-            // in case there is one which does not display a warning
-            _.each(dashboardsArray, function (d) {
-              if (listOfDashboards.indexOf(d.id) === -1) {
-                fail = '"' + group.title + '"' + ' dashboard group contains non existing dashboard "' + d.id + '". ' +
-                  'Edit dashboard group to remove non existing dashboard';
-                return false;
-              }
-            });
 
-            if (fail) {
-              return false; // to break the loop
-            }
-
-            dashboards = _.map(dashboardsArray, function (d) {
+            const dashboards = _.map(group.dashboards, function (d) {
               const dashboard = self._getDashboardForGroup(group.id, group.title, d);
               if (currentDashboardId && currentDashboardId === dashboard.id) {
                 selected = dashboard;
@@ -279,6 +265,11 @@ define(function (require) {
               selected = dashboards[0];
             }
 
+            // if there are no dashboards omit the group
+            if (dashboards.length === 0) {
+              return;
+            }
+
             dashboardGroups1.push({
               id: group.id,
               title: group.title,
@@ -291,10 +282,6 @@ define(function (require) {
             });
 
           }); // end of each
-
-          if (fail) {
-            return Promise.reject(new MissingDashboardError(fail));
-          }
 
           return dashboardGroups1;
         });

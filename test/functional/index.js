@@ -40,7 +40,7 @@ define(function (require) {
       'intern/dojo/node!./apps/dashboard',
       'intern/dojo/node!./status_page'
     ].filter((suite) => {
-      if (!requestedApps) return true;
+      if (!requestedApps || !requestedApps.length) return true;
       return requestedApps.reduce((previous, app) => {
         return previous || ~suite.indexOf(app);
       }, false);

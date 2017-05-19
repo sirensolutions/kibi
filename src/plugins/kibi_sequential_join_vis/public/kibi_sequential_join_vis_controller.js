@@ -14,7 +14,7 @@ define(function (require) {
   require('ui/modules')
   .get('kibana/kibi_sequential_join_vis', ['kibana'])
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
-                                                           globalState, Promise, kbnIndex, config, kacConfiguration, savedDashboards) {
+                                                           globalState, Promise, kbnIndex, config, savedDashboards) {
     const searchHelper = new SearchHelper(kbnIndex);
     const edit = chrome.onVisualizeTab();
 
@@ -181,6 +181,8 @@ define(function (require) {
         // if access control enabled filter out buttons which do not hava access to
         // either source or target dashboards
         let getButtonDefs = Promise.resolve(validatedButtonsDefs);
+        const kacConfiguration = chrome.getInjected('kacConfiguration');
+
         if (kacConfiguration && kacConfiguration.acl && kacConfiguration.acl.enabled === true) {
           getButtonDefs = savedDashboards.find().then((dashboards) => {
             // iterate over the buttonsDefs and remove the

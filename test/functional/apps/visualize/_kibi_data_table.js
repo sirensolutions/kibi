@@ -15,7 +15,6 @@ bdd.describe('visualize app', function describeIndexTests() {
   bdd.describe('kibi data table', function indexPatternCreation() {
     bdd.it('should display columns of the saved search', async function () {
       const savedSearchName = 'mysavedsearch';
-      const vizName = 'kibidatatable1';
 
       // remove the timestamp in the URL
       await PageObjects.common.navigateToApp('discover');
@@ -31,6 +30,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       await PageObjects.header.waitForToastMessageGone();
 
       await PageObjects.header.clickVisualize();
+      await PageObjects.visualize.createNewVisualization();
       await PageObjects.visualize.clickKibiDataTable();
 
       PageObjects.common.debug('select search');
@@ -55,6 +55,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       await PageObjects.header.clickVisualize();
       await PageObjects.header.clickVisualize();
 
+      await PageObjects.visualize.createNewVisualization();
       await PageObjects.visualize.clickKibiDataTable();
       PageObjects.common.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();

@@ -352,6 +352,17 @@ export default class VisualizePage {
     });
   }
 
+  /**
+   * createNewVisualization click on the button on the visualize landing page to create a new visualization
+   *
+   * @author kibi
+   */
+  createNewVisualization() {
+    PageObjects.common.debug('click create new visualization button');
+    return PageObjects.common.findTestSubject('createNewVisualization')
+    .click();
+  }
+
   saveVisualization(vizName) {
     return PageObjects.common.findTestSubject('visualizeSaveButton')
     .click()

@@ -73,7 +73,6 @@ module.exports = () => Joi.object({
       certificateAuthorities: Joi.array().single().items(Joi.string()),
       supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
       cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':')),
-      ca: Joi.string() // kibi: added CA parameter for verification purposes
     }).default(),
     cors: Joi.when('$dev', {
       is: true,

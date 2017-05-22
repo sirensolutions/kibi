@@ -23,8 +23,8 @@ uiRoutes
 });
 
 uiRoutes
-.when('/management/kibana/objects/:service', {
-  redirectTo: '/management/kibana/objects'
+.when('/management/siren/objects/:service', {
+  redirectTo: '/management/siren/objects'
 });
 
 uiModules.get('apps/management')

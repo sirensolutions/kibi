@@ -129,26 +129,12 @@ export default class DashboardPage {
   // entry, or at least to a single page of results
   loadSavedDashboard(dashName) {
     const self = this;
-    return this.gotoDashboardLandingPage()
-    .then(function filterDashboard() {
-      PageObjects.common.debug('Load Saved Dashboard button clicked');
-      return PageObjects.common.findTestSubject('searchFilter')
-        .click()
-        .type(dashName.replace('-',' '));
-        // TODO: KIBI5: restore when the filter is backed by ES
-        //.then(() => {
-          //return PageObjects.header.isGlobalLoadingIndicatorHidden();
-        //})
-        //.then(() => {
-          //return PageObjects.common.sleep(1000);
-        //})
-    })
-    .then(() => {
-      return PageObjects.header.waitUntilLoadingHasFinished();
-    })
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
+    PageObjects.common.debug('Load Saved Dashboard button clicked');
+    // kibi: use the search input from the sidebar
+    return this.findTimeout
+    .findByCssSelector('input[name="dashboards-filter"]')
+    .click()
+    .type(dashName.replace('-',' '))
     .then(function clickDashboardByLinkedText() {
       PageObjects.common.debug('filtered on dashboard name');
       return self.clickDashboardByLinkText(dashName);

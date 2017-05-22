@@ -1,7 +1,8 @@
 define(function (require) {
   const _ = require('lodash');
   const moment = require('moment');
-  const { IndexPatternMissingIndices } = require('ui/errors');
+  // kibi: added authorization error
+  const { IndexPatternMissingIndices, IndexPatternAuthorizationError } = require('ui/errors');
 
   require('ui/directives/validate_index_name');
   require('ui/directives/auto_select_if_only_one');
@@ -89,6 +90,11 @@ define(function (require) {
         if (err instanceof IndexPatternMissingIndices) {
           notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
         }
+        // kibi: warn if the index pattern cannot be retrieved because of an authorization error
+        else if (err instanceof IndexPatternAuthorizationError) {
+          notify.warning('Could not locate indices matching the pattern, access was forbidden.');
+        }
+        // kibi; end
         else notify.fatal(err);
       });
     };
@@ -175,6 +181,9 @@ define(function (require) {
       return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
       .catch(function (err) {
         if (err instanceof IndexPatternMissingIndices) return;
+        // kibi: return on authorization errors
+        if (err instanceof IndexPatternAuthorizationError) return;
+        // kibi: end
         notify.error(err);
       })
       .then(function (existing) {
@@ -233,7 +242,11 @@ define(function (require) {
             fetchFieldsError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
             return [];
           }
-
+          // kibi: notify authorization errors
+          if (err instanceof IndexPatternAuthorizationError) {
+            fetchFieldsError = 'Unable to fetch mapping, access to this index pattern was denied.';
+            return [];
+          }
           throw err;
         });
       })

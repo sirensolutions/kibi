@@ -6,7 +6,6 @@ define(function (require) {
   function IndexPatternsProvider(savedObjectsAPI, createNotifier, Private, kbnIndex) {
   // kibi: end
     let self = this;
-    let _ = require('lodash');
     let errors = require('ui/errors');
 
     let IndexPattern = Private(require('ui/index_patterns/_index_pattern'));

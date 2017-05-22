@@ -1,3 +1,7 @@
+// kibi: import authorization error
+import { IndexPatternAuthorizationError } from 'ui/errors';
+// kibi: end
+
 define(function (require) {
   const _ = require('lodash');
   require('plugins/kibana/settings/sections/indices/_indexed_fields');
@@ -9,9 +13,19 @@ define(function (require) {
   .when('/settings/indices/:indexPatternId', {
     template: require('plugins/kibana/settings/sections/indices/_edit.html'),
     resolve: {
-      indexPattern: function ($route, courier) {
+      indexPattern: function ($route, courier, Promise, createNotifier, kbnUrl) { // kibi: added Promise, createNotifier, kbnUrl
         return courier.indexPatterns.get($route.current.params.indexPatternId)
-        .catch(courier.redirectWhenMissing('/settings/indices'));
+        // kibi: handle authorization errors
+        .catch((error) => {
+          if (error instanceof IndexPatternAuthorizationError) {
+            createNotifier().warning(`Access to index pattern ${$route.current.params.indexPatternId} is forbidden`);
+            kbnUrl.redirect('/settings/indices');
+            return Promise.halt();
+          } else {
+            return courier.redirectWhenMissing('/settings/indices')(error);
+          }
+        });
+        // kibi: end
       }
     }
   });

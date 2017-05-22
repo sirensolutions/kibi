@@ -147,7 +147,7 @@ describe('Kibi Directives', function () {
             dashboardId: 'dashboard2',
             count: 24,
             queries: [ getDefaultQuery() ],
-            filters: [{filter: 'dash2query'}],
+            filters: [{ filter: 'dash2query' }],
             isPruned: true
           }
         ]));
@@ -221,7 +221,7 @@ describe('Kibi Directives', function () {
               dashboardId: 'dashboard1',
               count: 42,
               queries: [ getDefaultQuery() ],
-              filters: [{filter: 'dash1query'}],
+              filters: [{ filter: 'dash1query' }],
               isPruned: false
             },
             {
@@ -249,7 +249,7 @@ describe('Kibi Directives', function () {
               dashboardId: 'dashboard1',
               count: 42,
               queries: [ getDefaultQuery() ],
-              filters: [{filter: '2filtersDash1Message'}],
+              filters: [{ filter: '2filtersDash1Message' }],
               isPruned: false
             },
             {
@@ -276,8 +276,8 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard1',
               count: 42,
-              queries: [{query: 'saved_with_dash'}, {query: 'set_on_search_bar'}],
-              filters: [{filter: '2queryDash1Message'}],
+              queries: [{ query: 'saved_with_dash' }, { query: 'set_on_search_bar' }],
+              filters: [{ filter: '2queryDash1Message' }],
               isPruned: false
             },
             {
@@ -304,8 +304,8 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard1',
               count: 42,
-              queries: [{query: 'saved_with_dash'}, {query: 'set_on_search_bar'}],
-              filters: [{filter: '1query2filtersDash1Message'}],
+              queries: [{ query: 'saved_with_dash' }, { query: 'set_on_search_bar' }],
+              filters: [{ filter: '1query2filtersDash1Message' }],
               isPruned: false
             },
             {

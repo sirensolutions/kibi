@@ -44,6 +44,7 @@
         </button>
 
         <!-- Create visualization button -->
+        <!--kibi: added test subject to be able to click on the button during tests-->
         <a
           class="kuiButton kuiButton--primary"
           href="#/visualize/new"
@@ -51,6 +52,7 @@
           ng-if="listingController.getSelectedItemsCount() === 0"
           tooltip="Create new visualization"
           tooltip-append-to-body="true"
+          data-test-subj="createNewVisualization"
         >
           <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
         </a>

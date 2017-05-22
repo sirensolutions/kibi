@@ -1,3 +1,4 @@
+import chrome from 'ui/chrome';
 import Notifier from 'ui/notify/notifier';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import sinon from 'auto-release-sinon';
@@ -65,10 +66,19 @@ describe('Kibi Sequential Join Visualization Controller', function () {
   function init({ enableAcl = true, currentDashboardId = 'myCurrentDashboard' } = {}) {
     ngMock.module('kibana/kibi_sequential_join_vis', $provide => {
       $provide.constant('kacConfiguration', { acl: { enabled: enableAcl } });
+
       $provide.service('getAppState', function () {
         return () => new MockState({ filters: [] });
       });
     });
+
+    chrome.getInjected = function () {
+      return {
+        acl: {
+          enabled: enableAcl
+        }
+      };
+    };
 
     ngMock.module('app/dashboard', function ($provide) {
       $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboard', fakeSavedDashboards));

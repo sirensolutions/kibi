@@ -14,7 +14,7 @@ import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
 function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise,
-  kbnIndex, config, kacConfiguration, savedDashboards, timefilter) {
+  kbnIndex, config, savedDashboards, timefilter) {
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
   const searchHelper = new SearchHelper(kbnIndex);
@@ -172,8 +172,8 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
 
     if (!edit) {
       let getButtonDefs;
-
-      if (_.get(kacConfiguration, 'acl.enabled')) {
+      const kacConfiguration = chrome.getInjected('kacConfiguration');
+      if (kacConfiguration && kacConfiguration.acl && kacConfiguration.acl.enabled === true) {
         getButtonDefs = savedDashboards.find().then((dashboards) => {
           // iterate over the original definitions and remove the ones that depend on missing dashboards
           return _.filter(originalButtonDefs, (btn) => {

@@ -234,8 +234,7 @@ describe('timepicker directive', function () {
     });
 
     it('disables the submit button if the year is negative', function (done) {
-      let button;
-      button = $elem.find('button[disabled]');
+      let button = $elem.find('button[disabled]');
       expect(button.length).to.be(0);
 
       // Make the form invalid

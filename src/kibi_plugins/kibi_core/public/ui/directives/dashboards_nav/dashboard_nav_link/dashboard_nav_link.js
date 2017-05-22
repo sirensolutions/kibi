@@ -1,12 +1,14 @@
 import dashboardNavLinkTemplate from './dashboard_nav_link.html';
 import './dashboard_nav_link.less';
 import uiModules from 'ui/modules';
+import jQuery from 'jquery';
 import groupMenuTemplate from 'ui/kibi/directives/kibi_menu_template_kibi_nav_bar.html';
 import _ from 'lodash';
+import 'kibi-qtip2';
 
 uiModules
 .get('kibana')
-.directive('dashboardNavLink', (dashboardGroups, kibiState, dashboardsNavState, createNotifier) => {
+.directive('dashboardNavLink', ($sce, dashboardGroups, kibiState, dashboardsNavState, createNotifier) => {
   const numeral = require('numeral')();
 
   return {
@@ -17,7 +19,7 @@ uiModules
       group: '='
     },
     template: dashboardNavLinkTemplate,
-    link: function ($scope) {
+    link: function ($scope, $element) {
       const notify = createNotifier({
         location: 'Dashboard Navigator'
       });
@@ -54,9 +56,48 @@ uiModules
         }
         return false;
       };
+      const anchor = jQuery($element).find('.dashboards-nav-link');
 
-      $scope.$watchGroup([ 'group.selected.title', 'group.selected.count' ], () => {
-        delete $scope.countHumanNotation;
+      $scope.showFilterIconMessage = function () {
+        $scope.tooltipContent = $scope.tooltipContent + $scope.group.selected.filterIconMessage;
+        $scope.refreshTooltipContent();
+      };
+
+      $scope.removeFilterIconMessage = function () {
+        $scope.setDefaultTooltipContent();
+        $scope.refreshTooltipContent();
+      };
+
+      $scope.refreshTooltipContent = function () {
+        anchor.qtip('option', 'content.text', $scope.tooltipContent);
+      };
+
+      $scope.initQtip = function () {
+        anchor.qtip({
+          content: {
+            title: 'Dashboard',
+            text: function () {
+              return $scope.tooltipContent;
+            }
+          },
+          position: {
+            my: 'left top',
+            at: 'right center'
+          },
+          show: {
+            event: 'mouseenter',
+            solo: true
+          },
+          hide: {
+            event: 'mouseleave'
+          },
+          style: {
+            classes: 'qtip-light qtip-rounded qtip-shadow'
+          }
+        });
+      };
+
+      $scope.setDefaultTooltipContent = function () {
         $scope.tooltipContent = $scope.group.title;
         if ($scope.group.dashboards.length > 1) {
           $scope.tooltipContent += ` (${$scope.group.selected.title})`;
@@ -70,6 +111,13 @@ uiModules
           }
           $scope.tooltipContent += ` (${$scope.group.selected.count})`;
         }
+      };
+
+      $scope.$watchGroup([ 'group.selected.title', 'group.selected.count' ], () => {
+        delete $scope.countHumanNotation;
+        $scope.setDefaultTooltipContent();
+        $scope.refreshTooltipContent();
+        $scope.initQtip();
       });
 
       $scope.isDashboardLoaded = Boolean(kibiState._getCurrentDashboardId());

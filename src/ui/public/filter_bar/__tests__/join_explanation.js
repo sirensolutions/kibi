@@ -1,5 +1,4 @@
 import FieldFormatProvider from 'ui/registry/field_formats';
-import JoinExplanationHelperProvider from 'ui/filter_bar/join_explanation';
 import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import noDigestPromises from 'test_utils/no_digest_promises';
 /*eslint no-use-before-define: 1*/
@@ -7,9 +6,9 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-let joinExplanationHelper;
 let joinSequenceFilters;
 let fieldFormat;
+let joinExplanation;
 
 describe('Kibi Components', function () {
   describe('Join Explanation Helper', function () {
@@ -33,9 +32,9 @@ describe('Kibi Components', function () {
         });
       });
 
-      ngMock.inject(function (Private) {
-        joinExplanationHelper = Private(JoinExplanationHelperProvider);
+      ngMock.inject(function (Private, _joinExplanation_) {
         fieldFormat = Private(FieldFormatProvider);
+        joinExplanation = _joinExplanation_;
       });
 
       joinSequenceFilters = {
@@ -217,7 +216,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceGroup ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceGroup ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.be(expected);
         done();
@@ -249,7 +248,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -283,7 +282,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -315,7 +314,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -349,7 +348,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -381,7 +380,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -415,7 +414,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -447,7 +446,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -493,7 +492,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -525,7 +524,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -557,7 +556,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -591,7 +590,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -624,7 +623,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -664,7 +663,7 @@ describe('Kibi Components', function () {
         }
       ]);
 
-      joinExplanationHelper.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -719,7 +718,7 @@ describe('Kibi Components', function () {
         '</li>' +
       '</ul>';
 
-      joinExplanationHelper.getFilterExplanations(filters).then(function (expl) {
+      joinExplanation.getFilterExplanations(filters).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal(expected);
         done();
@@ -751,7 +750,7 @@ describe('Kibi Components', function () {
         }
       ];
 
-      joinExplanationHelper.getFilterExplanations(filters).then(function (expl) {
+      joinExplanation.getFilterExplanations(filters).then(function (expl) {
         expect(expl.length).to.equal(1);
         expect(expl[0]).to.equal('');
         done();

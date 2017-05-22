@@ -18,8 +18,8 @@ uiRoutes
 
 uiModules
 .get('kibana')
-.service('dashboardGroups', (createNotifier, es, $timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise,
-  kbnIndex) => {
+.service('dashboardGroups', (createNotifier, es, $timeout, kibiState, Private, savedDashboards,
+                             savedDashboardGroups, Promise, kbnIndex, joinExplanation) => {
   const notify = createNotifier();
   const dashboardHelper = Private(DashboardHelperProvider);
   const queryBuilder = Private(QueryBuilderProvider);
@@ -36,22 +36,6 @@ uiModules
       title: this._shortenDashboardName(groupTitle, dashboardDef.title),
       savedSearchId: dashboardDef.savedSearchId
     };
-  };
-
-  const _constructFilterIconMessage = function (filters, queries) {
-    if (queries || filters) {
-      const nFilters = _.reject(filters, 'meta.fromSavedSearch').length;
-      const hasQuery = !kibiState._isDefaultQuery(queries[0]);
-
-      if (hasQuery && nFilters) {
-        return `This dashboard has a query and ${nFilters} filter${nFilters > 1 ? 's' : ''} set.`;
-      } else if (hasQuery) {
-        return 'This dashboard has a query set.';
-      } else if (nFilters) {
-        return `This dashboard has ${nFilters} filter${nFilters > 1 ? 's' : ''} set.`;
-      }
-    }
-    return null;
   };
 
   const _updateCountOnMetadata = function (metadata, responses) {
@@ -260,12 +244,14 @@ uiModules
           _.each(g.dashboards, (d) => {
             const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
             if (foundDashboardMetadata) {
-              d.count = foundDashboardMetadata.count;
-              d.isPruned = foundDashboardMetadata.isPruned;
-              d.filterIconMessage = _constructFilterIconMessage(
+              joinExplanation.constructFilterIconMessage(
                 foundDashboardMetadata.filters,
                 foundDashboardMetadata.queries
-              );
+              ).then(filterIconMessage => {
+                d.count = foundDashboardMetadata.count;
+                d.isPruned = foundDashboardMetadata.isPruned;
+                d.filterIconMessage = filterIconMessage;
+              });
             } else if (_.contains(ids, d.id)) {
               // count for that dashboard was requested but is not in the metadata, likely because it doesn't have a savedSearchId
               delete d.count;
@@ -288,9 +274,14 @@ uiModules
         _.each(group.dashboards, d => {
           const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
           if (foundDashboardMetadata) {
-            d.count = foundDashboardMetadata.count;
-            d.isPruned = foundDashboardMetadata.isPruned;
-            d.filterIconMessage = _constructFilterIconMessage(foundDashboardMetadata.filters, foundDashboardMetadata.queries);
+            joinExplanation.constructFilterIconMessage(
+              foundDashboardMetadata.filters,
+              foundDashboardMetadata.queries
+            ).then(filterIconMessage => {
+              d.count = foundDashboardMetadata.count;
+              d.isPruned = foundDashboardMetadata.isPruned;
+              d.filterIconMessage = filterIconMessage;
+            });
           }
         });
         this.emit('groupsMetadataUpdated', groupId);

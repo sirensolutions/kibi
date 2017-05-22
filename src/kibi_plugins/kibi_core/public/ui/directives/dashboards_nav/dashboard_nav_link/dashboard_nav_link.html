@@ -5,10 +5,6 @@
   <a
     class="anchor"
     ng-click="selectDashboard()"
-    tooltip="{{ tooltipContent }}"
-    tooltip-placement="right"
-    tooltip-popup-delay="0"
-    tooltip-append-to-body="1"
   >
     <div class="icon">
       <i
@@ -39,11 +35,11 @@
         <span
            ng-if="group.selected.filterIconMessage"
            aria-hidden="true"
-           data-toggle="tooltip"
-           data-placement="bottom"
-           title="{{group.selected.filterIconMessage}}"
            >
-           <i class="fa fa-filter"/>
+           <i class="fa fa-filter"
+           ng-mouseover="showFilterIconMessage()"
+           ng-mouseleave="removeFilterIconMessage()"
+           />
         </span>
           <!--join pruning indicator-->
           <span

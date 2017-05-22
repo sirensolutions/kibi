@@ -114,6 +114,7 @@ let dashboardGroups;
 let appState;
 let kibiState;
 let es;
+let joinExplanation;
 
 let setSelectedDashboardIdStub;
 let switchDashboardStub;
@@ -133,6 +134,33 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
       const mockTimeout = fn => Promise.resolve(fn());
       mockTimeout.cancel = _.noop;
       return mockTimeout;
+    });
+
+    $provide.service('joinExplanation', () => {
+      return {
+        constructFilterIconMessage: (filters, queries) => {
+          const defaultQuery = {
+            query_string: {
+              analyze_wildcard: true,
+              query: '*'
+            }
+          };
+          let explanationString = '';
+          const nFilters = _.reject(filters, 'meta.fromSavedSearch').length;
+          const hasQuery = !_.isEqual(queries[0], defaultQuery);
+          if (hasQuery || nFilters) {
+            if(nFilters) {
+              explanationString += `filters: ${nFilters}`;
+            }
+            if (hasQuery) {
+              explanationString += ` queries: ${queries.length - 1}`;
+            }
+            return Promise.resolve(explanationString);
+          } else {
+            return Promise.resolve(null);
+          }
+        }
+      };
     });
   });
 
@@ -156,7 +184,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches || []));
   });
 
-  ngMock.inject(function (Private, _es_, _dashboardGroups_, _kibiState_) {
+  ngMock.inject(function (Private, _es_, _dashboardGroups_, _kibiState_, _joinExplanation_) {
     const dashboardHelper = Private(DashboardHelperProvider);
     switchDashboardStub = sinon.stub(dashboardHelper, 'switchDashboard');
     kibiState = _kibiState_;
@@ -166,6 +194,8 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
     setSelectedDashboardIdStub = sinon.stub(kibiState, 'setSelectedDashboardId');
     es = _es_;
+    joinExplanation = _joinExplanation_;
+
   });
 }
 
@@ -625,7 +655,7 @@ describe('Kibi Services', function () {
           const groups = dashboardGroups.getGroups();
           const myGroup = _.find(groups, 'id', 'mygroup');
           const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
-          expect(myDashboard.filterIconMessage).to.be('This dashboard has 1 filter set.');
+          expect(myDashboard.filterIconMessage).to.be('filters: 1');
         });
       });
 
@@ -656,7 +686,7 @@ describe('Kibi Services', function () {
         });
       });
 
-      it('should say there is 1 query', function () {
+      it('should return query text for 1 query', function () {
         sinon.stub(es, 'msearch').returns(Promise.resolve({
           responses: [
             {
@@ -679,11 +709,11 @@ describe('Kibi Services', function () {
           const groups = dashboardGroups.getGroups();
           const myGroup = _.find(groups, 'id', 'mygroup');
           const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
-          expect(myDashboard.filterIconMessage).to.be('This dashboard has a query set.');
+          expect(myDashboard.filterIconMessage).to.be(' queries: 1');
         });
       });
 
-      it('should say there is 1 query and 1 filter', function () {
+      it('should return query and filter text for 1 query and 1 filter', function () {
         sinon.stub(es, 'msearch').returns(Promise.resolve({
           responses: [
             {
@@ -707,7 +737,7 @@ describe('Kibi Services', function () {
           const groups = dashboardGroups.getGroups();
           const myGroup = _.find(groups, 'id', 'mygroup');
           const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
-          expect(myDashboard.filterIconMessage).to.be('This dashboard has a query and 1 filter set.');
+          expect(myDashboard.filterIconMessage).to.be('filters: 1 queries: 1');
         });
       });
 
@@ -735,7 +765,7 @@ describe('Kibi Services', function () {
           const groups = dashboardGroups.getGroups();
           const myGroup = _.find(groups, 'id', 'mygroup');
           const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
-          expect(myDashboard.filterIconMessage).to.be('This dashboard has a query and 2 filters set.');
+          expect(myDashboard.filterIconMessage).to.be('filters: 2 queries: 1');
         });
       });
     });

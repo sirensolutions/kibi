@@ -15,11 +15,10 @@ const module = uiModules.get('kibana');
 // kibi: imports
 import 'ui/kibi/directives/kibi_entity_clipboard';
 import 'ui/kibi/styles/explanation';
-import JoinExplainProvider from 'ui/filter_bar/join_explanation';
 import MarkFilterBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
-module.directive('filterBar', function (Private, Promise, getAppState, kibiState, config, createNotifier) {
+module.directive('filterBar', function (Private, Promise, getAppState, kibiState, config, createNotifier, joinExplanation) {
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
   const mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
   const extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
@@ -29,7 +28,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
   const privateFilterFieldRegex = /(^\$|meta)/;
 
   // kibi: added some helpers
-  const joinExplain = Private(JoinExplainProvider);
   const markFiltersBySelectedEntities = Private(MarkFilterBySelectedEntitiesProvider);
 
   const notify = createNotifier({
@@ -209,10 +207,10 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
         })
         // kibi: join filter explanation
         .then(function () {
-          return joinExplain.getFilterExplanations(filters);
+          return joinExplanation.getFilterExplanations(filters);
         })
         .then(function (explanations) {
-          return joinExplain.initQtip(explanations);
+          return joinExplanation.initQtip(explanations);
         })
         // kibi: added by kibi to mark filters which depends on selected entities
         .then(() => Promise.all([
@@ -248,7 +246,7 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
       // .exists
       // .missing
       // .script
-      $scope.recreateFilterLabel = joinExplain.createLabel;
+      $scope.recreateFilterLabel = joinExplanation.createFilterLabel;
 
       // kibi: Get the state for the dashboard ID and add the join_set filter to the appState if it exists
       const addJoinSetFilter = function (dashboardId) {

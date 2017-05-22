@@ -2,6 +2,10 @@
 @import (reference) "~ui/kibi/styles/kibi_variables";
 
 // kibi: join explanation qtip
+.qtip {
+  max-width: 600px !important;
+}
+
 .qtip-content{
 
   table.sequence{
@@ -51,6 +55,17 @@
     margin:0 0 0 16px;
   }
 
+  &-inner > ul {
+    text-align: left;
+    margin-left: 0;
+    padding-left: 0;
+    list-style-type: none;
+  }
+
+  & > ul > li > li {
+    margin-left: 14px;
+    padding-left: 0;
+  }
 }
 
 .qtip-content > ul {

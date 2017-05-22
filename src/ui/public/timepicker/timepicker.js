@@ -157,6 +157,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         // kibi: positive value check added for year
         const year = parsed ? parsed._d.getFullYear() : undefined;
         $scope.relative.preview =  parsed && year > 0  ? parsed.format($scope.format) : undefined;
+        // kibi: end
         return parsed;
       };
 

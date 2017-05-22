@@ -173,8 +173,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     if (!edit) {
       let getButtonDefs;
       const kacConfiguration = chrome.getInjected('kacConfiguration');
-
-      if (kacConfiguration && kacConfiguration.acl && _.get(kacConfiguration, 'acl.enabled')) {
+      if (kacConfiguration && kacConfiguration.acl && kacConfiguration.acl.enabled === true) {
         getButtonDefs = savedDashboards.find().then((dashboards) => {
           // iterate over the original definitions and remove the ones that depend on missing dashboards
           return _.filter(originalButtonDefs, (btn) => {

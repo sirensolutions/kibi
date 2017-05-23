@@ -7,6 +7,11 @@ const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_siz
   * Returns a clone of the query with `"all_fields": true` set on any `query_string` queries
   */
 function getHighlightQuery(query) {
+  // kibi: do not include join queries into the highlight query
+  if (query.join_sequence || query.join_set) {
+    return;
+  }
+
   const clone = _.cloneDeep(query);
 
   if (
@@ -17,9 +22,9 @@ function getHighlightQuery(query) {
     clone.query_string.all_fields = true;
   } else if (_.has(clone, 'bool.must')) {
     if (Array.isArray(clone.bool.must)) {
-      clone.bool.must = clone.bool.must.map(getHighlightQuery);
+      clone.bool.must = _(clone.bool.must).map(getHighlightQuery).compact().value();
     } else {
-      clone.bool.must = getHighlightQuery(clone.bool.must);
+      clone.bool.must = getHighlightQuery(clone.bool.must) || [];
     }
   }
 

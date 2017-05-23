@@ -43,6 +43,29 @@ describe('getHighlightRequest', () => {
     expect(getHighlightRequest).to.be.a(Function);
   });
 
+  describe('kibi', function () {
+    it('should not add join queries to the highlight_query query', () => {
+      const queries = {
+        bool: {
+          must: [
+            {
+              join_sequence: {}
+            },
+            {
+              join_set: {}
+            },
+            queryStringQuery
+          ]
+        }
+      };
+      getHighlightRequest = getHighlightRequestProvider(config);
+      const request = getHighlightRequest(queries);
+      expect(request.fields['*']).to.have.property('highlight_query');
+      expect(request.fields['*'].highlight_query.bool.must).to.have.length(1);
+      expect(request.fields['*'].highlight_query.bool.must[0].query_string).to.have.property('all_fields');
+    });
+  });
+
   it('should add the all_fields param with query_string query without modifying original query', () => {
     getHighlightRequest = getHighlightRequestProvider(config);
     const request = getHighlightRequest(queryStringQuery);

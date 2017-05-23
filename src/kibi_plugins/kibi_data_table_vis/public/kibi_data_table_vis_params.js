@@ -107,7 +107,6 @@ uiModules
             $scope.vis.params.columnAliases[index] = columnName;
           }
         });
-        _.remove($scope.vis.params.columnAliases, column => !_.contains($scope.vis.params.columns, column));
       }
 
       $scope.$watch('vis.params.templateId', function (templateId) {

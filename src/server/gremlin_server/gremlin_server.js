@@ -67,20 +67,31 @@ function startServer(self, fulfill, reject) {
           args.unshift(gremlinServerRemoteDebug);
         }
 
-        if (config.has('kibi_core.gremlin_server.log_conf_path')) {
+        if (config.has('kibi_core.gremlin_server.log_conf_path') && config.get('kibi_core.gremlin_server.log_conf_path') !== '') {
           const logConfigPath = config.get('kibi_core.gremlin_server.log_conf_path');
           args.push('--logging.config=' + logConfigPath);
         }
 
-        if (config.has('elasticsearch.ssl.ca')) {
-          const elasticsearchCA = config.get('elasticsearch.ssl.ca');
-          args.push('--elasticsearch.ssl.ca=' + elasticsearchCA);
+        if (config.has('elasticsearch.ssl.certificateAuthorities')) {
+          const elasticsearchCAs = config.get('elasticsearch.ssl.certificateAuthorities');
+          _.each(elasticsearchCAs, (ca) => {
+            args.push('--elasticsearch.ssl.ca=' + ca);
+          });
         }
 
-        if (config.has('elasticsearch.ssl.verify')) {
-          args.push('--elasticsearch.ssl.verify=true');
-        } else {
-          args.push('--elasticsearch.ssl.verify=false');
+        if (config.has('elasticsearch.ssl.verificationMode')) {
+          const verificationMode = config.get('elasticsearch.ssl.verificationMode');
+          switch (verificationMode) {
+            case 'none':
+              args.push('--elasticsearch.ssl.verify=false');
+              break;
+            case 'certificate':
+            case 'full':
+              args.push('--elasticsearch.ssl.verify=true');
+              break;
+            default:
+              throw new Error(`Unknown ssl verificationMode: ${verificationMode} while starting Gremlin Server`);
+          }
         }
 
         if (config.has('kibi_core.gremlin_server.ssl.key_store')) {
@@ -89,7 +100,7 @@ function startServer(self, fulfill, reject) {
           args.push('--server.ssl.enabled=true');
           args.push('--server.ssl.key-store=' + sslKeyStore);
           args.push('--server.ssl.key-store-password=' + sslKeyStorePsw);
-        } else if (config.has('server.ssl.key') && config.has('server.ssl.cert')) {
+        } else if (config.has('server.ssl.key') && config.has('server.ssl.certificate')) {
           const msg = 'Since you are using Elasticsearch Shield, you should configure the SSL for the gremlin server ' +
             'by configuring the key store in kibi.yml\n' +
             'The following properties are required:\n' +

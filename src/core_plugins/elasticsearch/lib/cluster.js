@@ -1,5 +1,5 @@
 import elasticsearch from 'elasticsearch';
-import { get, set, isEmpty, cloneDeep, pick } from 'lodash';
+import { get, set, isEmpty, cloneDeep, pick, merge } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import Boom from 'boom';
 
@@ -53,7 +53,14 @@ export class Cluster {
   }
 
   createClient = configOverrides => {
-    const config = Object.assign({}, this._getClientConfig(), configOverrides);
+    // kibi:
+    // We use lodash.merge instead of Object.assign
+    // as the merge allow to override single property of a nested default config object
+    // while when using assign when creating the client
+    // you had to pass the complete nested config object
+    // such as elasticsearch.ssl
+    const config = merge({}, this._getClientConfig(), configOverrides);
+    // kibi: end
     return new elasticsearch.Client(parseConfig(config));
   }
 

@@ -213,16 +213,22 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     vis.setUiState($scope.uiState);
 
     //siren: allows restore the uiState after click edit visualization on dashboard
-    if (sessionStorage.get('__panelid__')) {
-      $scope.uiState.fromString(JSON.stringify(sessionStorage.get('__uistate__')));
-      vis.setUiState($scope.uiState);
-      $scope.uiState.on('set', () => {
-        sessionStorage.set('__uistate__', $scope.vis.getUiState().toJSON());
-        sessionStorage.set('__panelid__', {
-          id: sessionStorage.get('__panelid__').id,
-          updated: true
+    const __panelid = sessionStorage.get('__panelid__');
+    if (__panelid) {
+      if (__panelid.id === $scope.savedVis.id) {
+        $scope.uiState.fromString(JSON.stringify(sessionStorage.get('__uistate__')));
+        vis.setUiState($scope.uiState);
+        $scope.uiState.on('set', () => {
+          sessionStorage.set('__uistate__', $scope.vis.getUiState().toJSON());
+          sessionStorage.set('__panelid__', {
+            id: sessionStorage.get('__panelid__').id,
+            updated: true
+          });
         });
-      });
+      } else {
+        sessionStorage.remove('__panelid__');
+        sessionStorage.remove('__uistate__');
+      }
     }
 
     $scope.timefilter = timefilter;

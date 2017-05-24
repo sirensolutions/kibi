@@ -348,7 +348,8 @@ function expectElasticsearchGetQuery(server, req, configGet) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   sinon.assert.calledOnce(callWithRequest);
   const [reqPassed, method, params] = callWithRequest.args[0];
-  expect(reqPassed).to.be(req);
+  // kibi: handled by the saved_objects_api
+  //expect(reqPassed).to.be(req);
   expect(method).to.be('get');
   expect(params).to.eql({
     index: configGet('kibana.index'),
@@ -361,7 +362,8 @@ function expectElasticsearchUpdateQuery(server, req, configGet, doc) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   sinon.assert.calledOnce(callWithRequest);
   const [reqPassed, method, params] = callWithRequest.args[0];
-  expect(reqPassed).to.be(req);
+  // kibi: handled by the saved_objects_api
+  //expect(reqPassed).to.be(req);
   expect(method).to.be('update');
   expect(params).to.eql({
     index: configGet('kibana.index'),
@@ -402,7 +404,8 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
         return callWithRequest(withReq, method, params);
       }
 
-      expect(withReq).to.be(req);
+      // kibi: handled by the saved_objects_api
+      //expect(withReq).to.be(req);
       switch (method) {
         case 'get':
           return Promise.resolve({ _source: getResult });

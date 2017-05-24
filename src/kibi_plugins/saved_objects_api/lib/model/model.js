@@ -234,7 +234,7 @@ export default class Model {
 
       this._setCredentials(parameters, request);
 
-      await this._cluster.callWithRequest(request, 'index', parameters);
+      await this._cluster.callWithRequest({}, 'index', parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware[responseMiddlewareMethod](this, id, body, request, response);
       }
@@ -268,7 +268,7 @@ export default class Model {
       };
 
       this._setCredentials(parameters, request);
-      const response = await this._cluster.callWithRequest(request, 'update', parameters);
+      const response = await this._cluster.callWithRequest({}, 'update', parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.patchResponse(this, id, fields, request, response);
       }
@@ -418,7 +418,7 @@ export default class Model {
         id: id
       };
       this._setCredentials(parameters, request);
-      const response = await this._cluster.callWithRequest(request, 'get', parameters, options);
+      const response = await this._cluster.callWithRequest({}, 'get', parameters, options);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.getResponse(this, id, request, response);
       }

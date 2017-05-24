@@ -10,7 +10,7 @@ import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_objec
 
 uiModules
 .get('app/dashboard')
-.directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector, getObjectLoadersForDashboard) {
+.directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector, getObjectLoadersForDashboard, sessionStorage) {
   const filterManager = Private(FilterManagerProvider);
 
   const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
@@ -74,6 +74,18 @@ uiModules
     link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;
 
+      //siren: allows restore the uiState after click edit visualization on dashboard
+      $scope.edit = function () {
+        if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
+          sessionStorage.set('__panelid__', {
+            id: $scope.savedObj.vis.id,
+            updated: false
+          });
+          sessionStorage.set('__uistate__', $scope.savedObj.vis.getUiState().toJSON());
+        }
+        window.location.href = $scope.editUrl;
+      };
+
       /**
        * Initializes the panel for the saved object.
        * @param {{savedObj: SavedObject, editUrl: String}} savedObjectInfo
@@ -92,6 +104,17 @@ uiModules
         $scope.uiState = $scope.createChildUiState(getPersistedStateId($scope.panel), uiState);
 
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
+          //siren: allows restore the uiState after click edit visualization on dashboard
+          const __panelid = sessionStorage.get('__panelid__');
+          if (__panelid) {
+            if (__panelid.id === $scope.panel.id && __panelid.updated) {
+              $scope.uiState.fromString(JSON.stringify(sessionStorage.get('__uistate__')));
+              sessionStorage.remove('__panelid__');
+              sessionStorage.remove('__uistate__');
+            }
+          }
+          // kibi: end
+
           // kibi: For some unknown reason the vis object doesn't has his own id. This must be investigated in the future.
           // See issue https://github.com/sirensolutions/kibi-internal/issues/2909
           $scope.savedObj.vis.id = $scope.panel.id;

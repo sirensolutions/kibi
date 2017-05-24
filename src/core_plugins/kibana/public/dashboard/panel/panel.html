@@ -15,7 +15,8 @@
         <span class="fa" ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"></span>
       </a>
       -->
-      <a aria-label="Edit" ng-show="!isFullScreenMode && editUrl" ng-href="{{::editUrl}}">
+      <!-- siren: allows restore the uiState after click edit visualization on dashboard -->
+      <a aria-label="Edit" ng-show="!isFullScreenMode && editUrl" ng-href="{{::editUrl}}" ng-click="edit()">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
       <a aria-label="Move" ng-show="!isExpanded && !isFullScreenMode" class="panel-move">

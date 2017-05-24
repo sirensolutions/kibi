@@ -76,7 +76,7 @@ uiModules
   };
 });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier, kibiState) {
+function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier, kibiState, sessionStorage) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -211,6 +211,18 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     // map-specific information (e.g. mapZoom, mapCenter).
     vis.setUiState($scope.uiState);
 
+    //siren: allows restore the uiState after click edit visualization on dashboard
+    if (sessionStorage.get('__panelid__')) {
+      $scope.uiState.fromString(JSON.stringify(sessionStorage.get('__uistate__')));
+      vis.setUiState($scope.uiState);
+      $scope.uiState.on('set', () => {
+        sessionStorage.set('__uistate__', $scope.vis.getUiState().toJSON());
+        sessionStorage.set('__panelid__', {
+          id: sessionStorage.get('__panelid__').id,
+          updated: true
+        });
+      });
+    }
 
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');

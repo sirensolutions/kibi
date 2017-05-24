@@ -66,34 +66,39 @@ export default function setupSettings(kbnServer, server, config) {
 
   async function getUserProvided(req, { ignore401Errors = false } = {}) {
     assertRequest(req);
-    const { callWithRequest, errors } = server.plugins.elasticsearch.getCluster('admin');
+    const { errors } = server.plugins.elasticsearch.getCluster('admin');
+    const savedObjetsAPI = server.plugins.saved_objects_api;
 
     // If the ui settings status isn't green, we shouldn't be attempting to get
     // user settings, since we can't be sure that all the necessary conditions
     // (e.g. elasticsearch being available) are met.
-    if (status.state !== 'green') {
+    if (status.state !== 'green' || savedObjetsAPI.status.state !== 'green') {
       return hydrateUserSettings({});
     }
 
-    const params = getClientSettings(config);
-    const allowedErrors = [errors[404], errors[403], errors.NoConnections];
-    if (ignore401Errors) allowedErrors.push(errors[401]);
+    const configModel = savedObjetsAPI.getModel('config');
 
-    return Bluebird.resolve(callWithRequest(req, 'get', params, { wrap401Errors: !ignore401Errors }))
-      .catch(...allowedErrors, err => ({}))
-      .then(resp => resp._source || {})
-      .then(source => hydrateUserSettings(source));
+    let userSettings = {};
+    try {
+      const resp = await configModel.get(config.get('pkg.kibiVersion'), req, { wrap401Errors: !ignore401Errors });
+      userSettings = resp._source;
+    } catch (err) {
+      if (err.status === 401 && !ignore401Errors) {
+        throw err;
+      }
+      if (!(err instanceof errors.NoConnections) && err.status !== 403 && err.status !== 404) {
+        throw err;
+      }
+    }
+    return hydrateUserSettings(userSettings);
   }
 
   async function setMany(req, changes) {
     assertRequest(req);
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-    const clientParams = {
-      ...getClientSettings(config),
-      body: { doc: changes }
-    };
-    return callWithRequest(req, 'update', clientParams)
-      .then(() => ({}));
+    const configModel = server.plugins.saved_objects_api.getModel('config');
+
+    await configModel.patch(config.get('pkg.kibiVersion'), changes, req);
+    return {};
   }
 
   async function set(req, key, value) {

@@ -407,7 +407,7 @@ export default class Model {
    * @return {Object} The object instance having the specified id.
    * @throws {NotFoundError} if the object does not exist.
    */
-  async get(id, request) {
+  async get(id, request, options) {
     try {
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.getRequest(this, id, request);
@@ -418,7 +418,7 @@ export default class Model {
         id: id
       };
       this._setCredentials(parameters, request);
-      const response = await this._cluster.callWithRequest({}, 'get', parameters);
+      const response = await this._cluster.callWithRequest({}, 'get', parameters, options);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.getResponse(this, id, request, response);
       }

@@ -76,7 +76,8 @@ uiModules
   };
 });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier, kibiState, sessionStorage) {
+function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier,
+  kibiState, sessionStorage) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);

@@ -10,7 +10,8 @@ import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_objec
 
 uiModules
 .get('app/dashboard')
-.directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector, getObjectLoadersForDashboard, sessionStorage) {
+.directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private,
+  $injector, getObjectLoadersForDashboard, sessionStorage) {
   const filterManager = Private(FilterManagerProvider);
 
   const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {

@@ -8,7 +8,8 @@ export const mappings = {
       }
     }
   },
-  // siren: added mappings for the session object
+  // kibi: removed mapping for config.buildNum as in Kibi config object is a singleton
+  // kibi: added mappings for the session object
   url: {
     properties: {
       sirenSession: {
@@ -17,7 +18,7 @@ export const mappings = {
       }
     }
   },
-  // siren: end
+  // kibi: end
   server: {
     properties: {
       uuid: {

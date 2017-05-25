@@ -122,6 +122,10 @@ uiModules
           filterManager.add(field, value, operator, index);
         };
 
+        $scope.border = !$scope.$parent.opts.ui.hideBorder;
+        $scope.$on('border', function (event, enabled) {
+          $scope.border = enabled;
+        });
       }
 
       loadSavedObject(getObjectLoadersForDashboard(), $scope.panel)

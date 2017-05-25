@@ -17,6 +17,7 @@
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
 :searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
 :searchguard-kerberos-ref: https://github.com/floragunncom/search-guard-auth-http-kerberos/wiki
+:searchguard-jwt-ref: https://github.com/floragunncom/search-guard-authbackend-jwt
 :searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
 :searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
 :searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-5.4.0
@@ -73,7 +74,9 @@ include::searchguard_integration.asciidoc[]
 
 include::kerberos.asciidoc[]
 
-include::external_datasources.asciidoc[]
+include::jwt.asciidoc[]
+
+include::shield_integration.asciidoc[]
 
 include::kibi_gremlin_server.asciidoc[]
 

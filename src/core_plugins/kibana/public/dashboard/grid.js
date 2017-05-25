@@ -48,6 +48,11 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
        * @type {function}
        */
       toggleExpand: '=',
+       /**
+       *
+       * @type {Object}
+       */
+      opts: '=',
     },
     link: function ($scope, $el) {
       const notify = createNotifier();

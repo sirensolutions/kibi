@@ -12,7 +12,7 @@ the object can be called only if both Kibi and the container page are in the sam
 
 === Methods
 
-`generateShortUrl(shareAsEmbed, displayNavBar)`
+==== generateShortUrl(shareAsEmbed, displayNavBar)
 
 Generates a shortened URL containing the current Kibi state and returns
 a promise fulfilled with the URL.
@@ -43,6 +43,38 @@ document.getElementById('kibiframe')
 
 If possible, it is recommended to purge old documents of type `url` from the `.kibi`
 index periodically; old documents can be identified by looking at the `createDate` attribute.
+
+==== setJWTToken(token)
+
+Sets or updates the JWT token for the current session if
+<<jwt-authentication,JWT authentication support>> is enabled; returns a Promise
+once the token has been sent to the backend.
+
+**Parameters**:
+
+- `jwtToken`: a base64 encoded JWT token.
+
+**Sample usage**:
+
+Put the following code in the container page, replacing `kibiframe` with the ID
+of the frame in which Kibi is embedded:
+
+```
+document.getElementById('kibiframe')
+.contentWindow
+.kibi
+.setJWTToken(`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraWJpdXNlciJ9.kZhLu15FwxrX4hPE1ciyzw_NufZ_oH7aSGpLZHachPg`)
+.then(function() {
+  console.log('JWT token set.');
+})
+.catch(function(error) {
+  console.log('An error occurred setting the token.');
+});
+```
+
+Once the token is set, you can change the Kibi URL and the user should be
+authenticated; the application should call the method again with an updated
+token before the current one expires.
 
 endif::[]
 

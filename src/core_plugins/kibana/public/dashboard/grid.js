@@ -49,7 +49,7 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
        */
       toggleExpand: '=',
        /**
-       *
+       * kibi: Used to access a borders option for the panel from parent options.
        * @type {Object}
        */
       opts: '=',

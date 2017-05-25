@@ -80,6 +80,7 @@ uiModules
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
           sessionStorage.set('kibi_panel_id', {
             id: $scope.savedObj.vis.id,
+            panel: getPersistedStateId($scope.panel),
             updated: false
           });
           sessionStorage.set('kibi_ui_state', $scope.savedObj.vis.getUiState().toJSON());
@@ -109,7 +110,7 @@ uiModules
           // kibi: allows restore the uiState after click edit visualization on dashboard
           const __panelid = sessionStorage.get('kibi_panel_id');
           if (__panelid) {
-            if (__panelid.id === $scope.panel.id && __panelid.updated) {
+            if (__panelid.id === $scope.panel.id && __panelid.panel === getPersistedStateId($scope.panel) && __panelid.updated) {
               $scope.uiState.fromString(JSON.stringify(sessionStorage.get('kibi_ui_state')));
               sessionStorage.remove('kibi_panel_id');
               sessionStorage.remove('kibi_ui_state');

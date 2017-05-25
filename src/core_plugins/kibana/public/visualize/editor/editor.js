@@ -222,6 +222,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
           sessionStorage.set('kibi_ui_state', $scope.vis.getUiState().toJSON());
           sessionStorage.set('kibi_panel_id', {
             id: sessionStorage.get('kibi_panel_id').id,
+            panel: sessionStorage.get('kibi_panel_id').panel,
             updated: true
           });
         });

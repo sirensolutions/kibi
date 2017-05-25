@@ -75,17 +75,18 @@ uiModules
     link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;
 
-      //siren: allows restore the uiState after click edit visualization on dashboard
+      // kibi: allows restore the uiState after click edit visualization on dashboard
       $scope.edit = function () {
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
-          sessionStorage.set('__panelid__', {
+          sessionStorage.set('kibi_panel_id', {
             id: $scope.savedObj.vis.id,
             updated: false
           });
-          sessionStorage.set('__uistate__', $scope.savedObj.vis.getUiState().toJSON());
+          sessionStorage.set('kibi_ui_state', $scope.savedObj.vis.getUiState().toJSON());
         }
         window.location.href = $scope.editUrl;
       };
+      // kibi: end
 
       /**
        * Initializes the panel for the saved object.
@@ -105,13 +106,13 @@ uiModules
         $scope.uiState = $scope.createChildUiState(getPersistedStateId($scope.panel), uiState);
 
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
-          //siren: allows restore the uiState after click edit visualization on dashboard
-          const __panelid = sessionStorage.get('__panelid__');
+          // kibi: allows restore the uiState after click edit visualization on dashboard
+          const __panelid = sessionStorage.get('kibi_panel_id');
           if (__panelid) {
             if (__panelid.id === $scope.panel.id && __panelid.updated) {
-              $scope.uiState.fromString(JSON.stringify(sessionStorage.get('__uistate__')));
-              sessionStorage.remove('__panelid__');
-              sessionStorage.remove('__uistate__');
+              $scope.uiState.fromString(JSON.stringify(sessionStorage.get('kibi_ui_state')));
+              sessionStorage.remove('kibi_panel_id');
+              sessionStorage.remove('kibi_ui_state');
             }
           }
           // kibi: end

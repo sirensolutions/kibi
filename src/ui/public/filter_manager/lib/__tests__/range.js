@@ -11,7 +11,7 @@ describe('Filter Manager', function () {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
     }));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
+    beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       expected = _.cloneDeep(require('fixtures/filter_skeleton'));
     }));

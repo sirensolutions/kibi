@@ -1,7 +1,7 @@
 <div class="sidebar-container">
   <form
     class="sidebar-list"
-    ng-submit="visualizeEditor.$invalid ? dontApply() : stageEditableVis()"
+    ng-submit="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
     name="visualizeEditor"
     novalidate
   ><!-- see http://goo.gl/9kgz5w -->
@@ -24,13 +24,13 @@
               Data
             </a>
           </li>
-          <li ng-class="{active: sidebar.section == 'options'}">
+          <li ng-repeat="tab in vis.type.params.optionTabs" ng-class="{active: sidebar.section == tab.name}">
             <a
               class="vis-editor-subnav-link"
-              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'options'}"
-              ng-click="sidebar.section='options'"
+              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == tab.name}"
+              ng-click="sidebar.section=tab.name"
             >
-              Options
+              {{tab.title}}
             </a>
           </li>
         </ul>
@@ -56,8 +56,8 @@
           >
             <button class="btn-success navbar-btn-link"
               type="submit"
-              ng-disabled="!vis.dirty">
-
+              ng-disabled="!vis.dirty || visualizeEditor.errorCount() > 0"
+            >
               <i class="fa fa-play"></i>
             </button>
           </li>
@@ -100,11 +100,9 @@
 
     </div>
 
-    <div class="vis-editor-config" ng-show="sidebar.section == 'options'">
-      <!-- vis options -->
-      <vis-editor-vis-options vis="vis" saved-vis="savedVis" ui-state="uiState"></vis-editor-vis-options>
+    <div class="vis-editor-config" ng-repeat="tab in vis.type.params.optionTabs" ng-show="sidebar.section == tab.name">
+      <vis-editor-vis-options vis="vis" saved-vis="savedVis" ui-state="uiState" editor="tab.editor"></vis-editor-vis-options>
     </div>
-
 
   </form>
 </div>

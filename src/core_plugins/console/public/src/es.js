@@ -1,5 +1,6 @@
-let _ = require('lodash');
-let $ = require('jquery');
+import { stringify as formatQueryString } from 'querystring'
+
+import $ from 'jquery';
 
 let esVersion = [];
 
@@ -7,16 +8,13 @@ module.exports.getVersion = function () {
   return esVersion;
 };
 
-module.exports.send = function (method, path, data, server, disable_auth_alert) {
+module.exports.send = function (method, path, data) {
   var wrappedDfd = $.Deferred();
 
   console.log("Calling " + path);
   if (data && method == "GET") {
     method = "POST";
   }
-
-  // delayed loading for circular references
-  var settings = require("./settings");
 
   let contentType;
   if (data) {
@@ -38,13 +36,13 @@ module.exports.send = function (method, path, data, server, disable_auth_alert) 
   }
 
   var options = {
-    url: '../api/console/proxy?uri=' + encodeURIComponent(path),
-    data: method == "GET" ? null : data,
+    url: '../api/console/proxy?' + formatQueryString({ path, method }),
+    data,
     contentType,
     cache: false,
     crossDomain: true,
-    type: method,
-    dataType: "text", // disable automatic guessing
+    type: 'POST',
+    dataType: 'text', // disable automatic guessing
   };
 
 

@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/paginated_table';
@@ -10,8 +9,6 @@ describe('paginated table', function () {
   let $rootScope;
   let $compile;
   let $scope;
-  let $elScope;
-  let $orderBy;
   const defaultPerPage = 10;
 
   const makeData = function (colCount, rowCount) {
@@ -68,10 +65,9 @@ describe('paginated table', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (_$rootScope_, _$compile_, $filter) {
+  beforeEach(ngMock.inject(function (_$rootScope_, _$compile_) {
     $rootScope = _$rootScope_;
     $compile = _$compile_;
-    $orderBy = $filter('orderBy');
     $scope = $rootScope.$new();
   }));
 
@@ -121,7 +117,6 @@ describe('paginated table', function () {
       const rowCount = 7;
       const perPageCount = 10;
       const data = makeData(3, rowCount);
-      const pageCount = Math.ceil(rowCount / perPageCount);
 
       renderTable(data.columns, data.rows, perPageCount, null, false);
       const tableRows = $el.find('tbody tr');

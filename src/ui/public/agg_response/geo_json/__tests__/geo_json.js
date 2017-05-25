@@ -12,7 +12,7 @@ describe('GeoJson Agg Response Converter', function () {
   let tabify;
   let convert;
   let esResponse;
-  let aggs;
+  let expectedAggs;
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
@@ -30,8 +30,7 @@ describe('GeoJson Agg Response Converter', function () {
       type: 'tile_map',
       aggs: [
         { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
-        { schema: 'split', type: 'terms', params: { field: '@tags' } },
-        { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3 } }
+        { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3, useGeocentroid: false } }
       ],
       params: {
         isDesaturated: true,
@@ -39,17 +38,16 @@ describe('GeoJson Agg Response Converter', function () {
       }
     });
 
-    aggs = {
+    expectedAggs = {
       metric: vis.aggs[0],
-      split: vis.aggs[1],
-      geo: vis.aggs[2]
+      geo: vis.aggs[1]
     };
   }));
 
   [ { asAggConfigResults: true }, { asAggConfigResults: false } ].forEach(function (tableOpts) {
 
     function makeTable() {
-      return _.sample(_.sample(tabify(vis, esResponse, tableOpts).tables).tables);
+      return _.sample(tabify(vis, esResponse, tableOpts).tables);
     }
 
     function makeSingleChart(table) {
@@ -74,8 +72,8 @@ describe('GeoJson Agg Response Converter', function () {
 
         expect(chart.title).to.be(table.title());
         expect(chart.tooltipFormatter).to.be.a('function');
-        expect(chart.valueFormatter).to.be(aggs.metric.fieldFormatter());
-        expect(chart.geohashGridAgg).to.be(aggs.geo);
+        expect(chart.valueFormatter).to.be(expectedAggs.metric.fieldFormatter());
+        expect(chart.geohashGridAgg).to.be(expectedAggs.geo);
         expect(chart.geoJson).to.be.an('object');
       });
 
@@ -118,8 +116,8 @@ describe('GeoJson Agg Response Converter', function () {
           before(function () {
             table = makeTable();
             chart = makeSingleChart(table);
-            geoColI = _.findIndex(table.columns, { aggConfig: aggs.geo });
-            metricColI = _.findIndex(table.columns, { aggConfig: aggs.metric });
+            geoColI = _.findIndex(table.columns, { aggConfig: expectedAggs.geo });
+            metricColI = _.findIndex(table.columns, { aggConfig: expectedAggs.metric });
           });
 
           it('should be geoJson format', function () {

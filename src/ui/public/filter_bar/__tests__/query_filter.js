@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import './_get_filters';
@@ -14,7 +13,6 @@ import MockState from 'fixtures/mock_state';
 
 let queryFilter;
 let EventEmitter;
-let $rootScope;
 
 describe('Query Filter', function () {
   describe('Module', function () {
@@ -25,7 +23,6 @@ describe('Query Filter', function () {
     }));
 
     beforeEach(ngMock.inject(function (_$rootScope_, Private) {
-      $rootScope = _$rootScope_;
       queryFilter = Private(FilterBarQueryFilterProvider);
       EventEmitter = Private(EventsProvider);
     }));

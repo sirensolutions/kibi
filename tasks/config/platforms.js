@@ -1,8 +1,8 @@
 import { endsWith } from 'lodash';
 
-module.exports = function (grunt) {
-  const { resolve } = require('path');
+import { resolve } from 'path';
 
+module.exports = function (grunt) {
   const version = grunt.config.get('pkg.kibi_version'); // kibi: use kibi version instead of kibana one
   const nodeVersion = grunt.config.get('nodeVersion');
   const rootPath = grunt.config.get('root');

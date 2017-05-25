@@ -14,7 +14,9 @@ docViewsRegistry.register(function () {
         indexPattern: '=',
         filter: '=',
         columns: '=',
-        columnAliases: '='
+        columnAliases: '=',
+        onAddColumn: '=',
+        onRemoveColumn: '='
       },
       controller: function ($scope) {
         $scope.mapping = $scope.indexPattern.fields.byName;
@@ -35,8 +37,19 @@ docViewsRegistry.register(function () {
         });
         // kibi: end
 
-        $scope.toggleColumn = function (fieldName) {
-          _.toggleInOut($scope.columns, fieldName);
+        $scope.canToggleColumns = function canToggleColumn() {
+          return (
+            _.isFunction($scope.onAddColumn)
+            && _.isFunction($scope.onRemoveColumn)
+          );
+        };
+
+        $scope.toggleColumn = function toggleColumn(columnName) {
+          if ($scope.columns.includes(columnName)) {
+            $scope.onRemoveColumn(columnName);
+          } else {
+            $scope.onAddColumn(columnName);
+          }
         };
 
         $scope.showArrayInObjectsWarning = function (row, field) {

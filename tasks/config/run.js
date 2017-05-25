@@ -1,7 +1,8 @@
+import { format } from 'url';
+import { resolve } from 'path';
+import chromedriver from 'chromedriver';
 module.exports = function (grunt) {
   const platform = require('os').platform();
-  const { format } = require('url');
-  const { resolve } = require('path');
   const root = p => resolve(__dirname, '../../', p);
 
   // kibi: replaced scrpit name with kibi
@@ -10,7 +11,6 @@ module.exports = function (grunt) {
   // kibi: end
 
   const uiConfig = require(root('test/server_config'));
-  const chromedriver = require('chromedriver');
 
   const stdDevArgs = [
     '--env.name=development',
@@ -189,5 +189,4 @@ module.exports = function (grunt) {
       ]
     }
   };
-
 };

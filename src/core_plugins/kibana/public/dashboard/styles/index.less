@@ -49,14 +49,12 @@ dashboard-grid {
   }
 
   .gs-w {
-    border: 2px dashed transparent;
 
     .panel .panel-heading .btn-group {
       display: none;
     }
 
     &:hover {
-      border-color: @kibanaGray4;
 
       dashboard-panel {
         .visualize-show-spy {
@@ -68,10 +66,33 @@ dashboard-grid {
       }
 
     }
+    .panel--edit-mode {
+      border-color: @kibanaGray4;
+      .visualize-show-spy {
+        visibility: visible;
+      }
+      .panel-heading .btn-group {
+        display: block !important;
+      }
+    }
   }
 
   i.remove {
     cursor: pointer;
+  }
+}
+
+.panel {
+  border: 2px dashed transparent;
+}
+
+.panel--edit-mode {
+  border-color: @kibanaGray4;
+  .visualize-show-spy {
+    visibility: visible;
+  }
+  .panel-heading .btn-group {
+    display: block !important;
   }
 }
 
@@ -103,7 +124,6 @@ dashboard-panel {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    border: 0 solid transparent;
 
     &.panel-border{
        border: 1px solid @panel-border;

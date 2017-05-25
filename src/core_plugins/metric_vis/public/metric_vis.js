@@ -1,17 +1,21 @@
 import 'plugins/metric_vis/metric_vis.less';
 import 'plugins/metric_vis/metric_vis_controller';
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
 import VisSchemasProvider from 'ui/vis/schemas';
 import metricVisTemplate from 'plugins/metric_vis/metric_vis.html';
 import metricVisParamsTemplate from 'plugins/metric_vis/metric_vis_params.html';
+import visTypesRegistry from 'ui/registry/vis_types';
+import image from './images/icon-number.svg';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
 
 // register the provider with the visTypes registry
-require('ui/registry/vis_types').register(MetricVisProvider);
+visTypesRegistry.register(MetricVisProvider);
 
 function MetricVisProvider(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -20,9 +24,9 @@ function MetricVisProvider(Private) {
   return new TemplateVisType({
     name: 'metric',
     title: 'Metric',
-    description: 'One big number for all of your one big number needs. Perfect for showing ' +
-      'a count of hits, or the exact average of a numeric field.',
-    icon: 'fa-calculator',
+    image,
+    description: 'Display a calculation as a single number',
+    category: VisType.CATEGORY.DATA,
     template: metricVisTemplate,
     params: {
       defaults: {
@@ -38,6 +42,7 @@ function MetricVisProvider(Private) {
         name: 'metric',
         title: 'Metric',
         min: 1,
+        aggFilter: ['!derivative'],
         defaults: [
           { type: 'count', schema: 'metric' }
         ]

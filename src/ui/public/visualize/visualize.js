@@ -1,9 +1,7 @@
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
-import $ from 'jquery';
 import _ from 'lodash';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 import visualizeTemplate from 'ui/visualize/visualize.html';
 import 'angular-sanitize';
@@ -18,17 +16,13 @@ import KibiSpyDataProvider from 'ui/kibi/spy/kibi_spy_data';
 uiModules
 .get('kibana/directive', ['ngSanitize'])
 .directive('visualize', function (kibiState, createNotifier, SavedVis, indexPatterns, Private, config, $timeout) {
-
+  const notify = createNotifier({
+    location: 'Visualize'
+  });
 
   // kibi: to hold onto stats about msearch requests from visualizations like the relational filter
   // This is then displayed in the multisearch spy mode
   const KibiSpyData = Private(KibiSpyDataProvider);
-
-  const visTypes = Private(RegistryVisTypesProvider);
-
-  const notify = createNotifier({
-    location: 'Visualize'
-  });
 
   return {
     restrict: 'E',
@@ -167,6 +161,16 @@ uiModules
         applyClassNames();
       });
 
+      function updateVisAggs() {
+        const enabledState = $scope.editableVis.getEnabledState();
+        const shouldUpdate = enabledState.aggs.length !== $scope.vis.aggs.length;
+
+        if (shouldUpdate) {
+          $scope.vis.setState(enabledState);
+          $scope.editableVis.dirty = false;
+        }
+      }
+
       $scope.$watch('vis', prereq(function (vis, oldVis) {
         const $visEl = getVisEl();
         if (!$visEl) return;
@@ -189,6 +193,7 @@ uiModules
       }));
 
       $scope.$watchCollection('vis.params', prereq(function () {
+        updateVisAggs();
         if ($scope.renderbot) $scope.renderbot.updateParams();
       }));
 
@@ -222,7 +227,7 @@ uiModules
         }));
       }
 
-      $scope.$watch('esResp', prereq(function (resp, prevResp) {
+      $scope.$watch('esResp', prereq(function (resp) {
         if (!resp) return;
         $scope.renderbot.render(resp);
       }));

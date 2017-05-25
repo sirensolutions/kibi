@@ -12,7 +12,7 @@ describe('get columns', function () {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
   }));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     getColumns = Private(AggResponseTabifyGetColumnsProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
@@ -97,7 +97,6 @@ describe('get columns', function () {
 
     expect(columns).to.have.length(12);
     for (let i = 0; i < columns.length; i += 3) {
-      const counts = { buckets: 0, metrics: 0 };
       columns.slice(i, i + 3).forEach(checkColumns);
     }
   });

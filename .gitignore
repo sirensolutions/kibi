@@ -5,9 +5,7 @@
 .node_binaries
 node_modules
 trash
-/optimize/bundles
-/optimize/testdev
-/optimize/testUiServer
+/optimize
 target
 /build
 .jruby
@@ -26,14 +24,16 @@ target
 data
 disabledPlugins
 webpackstats.json
-config/kibi.dev.yml
+config/*
+!config/kibi.yml
 coverage
 selenium
 .babelcache.json
+.webpack.babelcache
 *.swp
 *.swo
 *.out
-src/ui_framework/doc_site/build/*.js*
+ui_framework/doc_site/build/*.js*
 yarn.lock
 
 ###

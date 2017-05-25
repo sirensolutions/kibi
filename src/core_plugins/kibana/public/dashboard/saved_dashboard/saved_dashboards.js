@@ -1,9 +1,15 @@
-import _ from 'lodash';
-import Scanner from 'ui/utils/scanner';
 import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard';
 import uiModules from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+
+// kibi: imports
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
+// kibi: end
+
+const module = uiModules.get('app/dashboard');
+
+// bring in the factory
+
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.

@@ -64,6 +64,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
 
       // select some fields to display as columns
+      // KIBI5: use the doc_table service
       await PageObjects.visualize.toggleTableRowDetails();
       await PageObjects.visualize.toggleColumn('@tags');
       await PageObjects.visualize.toggleColumn('agent');

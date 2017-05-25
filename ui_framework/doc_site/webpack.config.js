@@ -18,11 +18,24 @@ module.exports = {
     ]
   },
 
+  // These are necessasry for using Enzyme with Webpack (https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md).
+  externals: {
+    'react/lib/ExecutionEnvironment': true,
+    'react/lib/ReactContext': true,
+    'react/addons': true,
+  },
+
   module: {
     loaders: [{
-      test: /\.jsx?$/,
+      test: /\.json$/,
+      loader: 'json-loader',
+    }, {
+      test: /\.js$/,
       loader: 'babel',
       exclude: /node_modules/,
+      query: {
+        presets: ['es2015', 'react'],
+      },
     }, {
       test: /\.scss$/,
       loaders: ['style', 'css', 'postcss', 'sass'],

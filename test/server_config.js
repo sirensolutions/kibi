@@ -41,11 +41,15 @@ module.exports = {
   },
   apps: {
     status_page: {
-      pathname: 'status'
+      pathname: '/status'
     },
     discover: {
       pathname: kibanaURL,
       hash: '/discover',
+    },
+    context: {
+      pathname: kibanaURL,
+      hash: '/context',
     },
     visualize: {
       pathname: kibanaURL,

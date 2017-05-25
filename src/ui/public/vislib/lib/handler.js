@@ -1,12 +1,13 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import errors from 'ui/errors';
+import { NoResults } from 'ui/errors';
 import Binder from 'ui/binder';
 import VislibLibLayoutLayoutProvider from './layout/layout';
 import VislibLibChartTitleProvider from './chart_title';
 import VislibLibAlertsProvider from './alerts';
 import VislibAxisProvider from './axis/axis';
+import VislibGridProvider from './chart_grid';
 import VislibVisualizationsVisTypesProvider from '../visualizations/vis_types';
 
 export default function HandlerBaseClass(Private) {
@@ -15,6 +16,7 @@ export default function HandlerBaseClass(Private) {
   const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);
   const Axis = Private(VislibAxisProvider);
+  const Grid = Private(VislibGridProvider);
 
   /**
    * Handles building all the components of the visualization
@@ -39,6 +41,7 @@ export default function HandlerBaseClass(Private) {
       this.valueAxes = visConfig.get('valueAxes').map(axisArgs => new Axis(visConfig, axisArgs));
       this.chartTitle = new ChartTitle(visConfig);
       this.alerts = new Alerts(this, visConfig.get('alerts'));
+      this.grid = new Grid(this, visConfig.get('grid'));
 
       if (visConfig.get('type') === 'point_series') {
         this.data.stackData(this);
@@ -101,7 +104,7 @@ export default function HandlerBaseClass(Private) {
       const dataType = this.data.type;
 
       if (!dataType) {
-        throw new errors.NoResults();
+        throw new NoResults();
       }
     }
 

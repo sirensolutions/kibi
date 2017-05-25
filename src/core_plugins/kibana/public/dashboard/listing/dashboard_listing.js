@@ -7,7 +7,6 @@ import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constan
 export function DashboardListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
   const confirmModal = $injector.get('confirmModal');
-  const kbnUrl = $injector.get('kbnUrl');
   const Notifier = $injector.get('Notifier');
   const pagerFactory = $injector.get('pagerFactory');
   const Private = $injector.get('Private');

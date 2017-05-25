@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
@@ -14,6 +13,7 @@ describe('ui/courier/fetch/strategy/search', () => {
   let IndexPattern;
 
   beforeEach(ngMock.module('kibana'));
+
   beforeEach(ngMock.inject((Private) => {
     search = Private(SearchStrategyProvider);
     IndexPattern = Private(StubIndexPatternProvider);
@@ -42,7 +42,7 @@ describe('ui/courier/fetch/strategy/search', () => {
       });
     });
 
-    context('when indexList is not empty', () => {
+    describe('when indexList is not empty', () => {
       it('includes the index', () => {
         return search.reqsFetchParamsToBody(reqsFetchParams).then(value => {
           expect(_.includes(value, '"index":["logstash-123"]')).to.be(true);
@@ -50,11 +50,10 @@ describe('ui/courier/fetch/strategy/search', () => {
       });
     });
 
-    context('when indexList is empty', () => {
+    describe('when indexList is empty', () => {
       beforeEach(() => {
         reqsFetchParams.forEach(request => request.index = []);
       });
-
       const emptyMustNotQuery = JSON.stringify({
         query: {
           bool: {
@@ -73,7 +72,7 @@ describe('ui/courier/fetch/strategy/search', () => {
       });
     });
 
-    context('when passed IndexPatterns', () => {
+    describe('when passed IndexPatterns', () => {
       it(' that are out of range, queries .kibana', () => {
         // Check out https://github.com/elastic/kibana/issues/10905 for the reasons behind this
         // test. When an IndexPattern is out of time range, it returns an array that is then stored in a cache.  This
@@ -98,7 +97,7 @@ describe('ui/courier/fetch/strategy/search', () => {
           }
         ];
         return search.reqsFetchParamsToBody(reqsFetchParams).then(value => {
-          const indexLineMatch = value.match(/"index":\[".kibi"\]/g);
+          const indexLineMatch = value.match(/"index":\[".kibana"\]/g);
           expect(indexLineMatch).to.not.be(null);
           expect(indexLineMatch.length).to.be(2);
           const queryLineMatch = value.match(/"query":\{"bool":\{"must_not":\[\{"match_all":\{\}\}\]\}\}/g);
@@ -106,7 +105,6 @@ describe('ui/courier/fetch/strategy/search', () => {
           expect(queryLineMatch.length).to.be(2);
         });
       });
-
     });
   });
 

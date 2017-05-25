@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import rowsToFeatures from 'ui/agg_response/geo_json/rows_to_features';
 import AggResponseGeoJsonTooltipFormatterProvider from 'ui/agg_response/geo_json/_tooltip_formatter';
-export default function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
+export default function TileMapConverterFn(Private) {
 
   const tooltipFormatter = Private(AggResponseGeoJsonTooltipFormatterProvider);
 
@@ -15,10 +15,12 @@ export default function TileMapConverterFn(Private, timefilter, $compile, $rootS
 
     const geoI = columnIndex('segment');
     const metricI = columnIndex('metric');
+    const centroidI = _.findIndex(table.columns, (col) => col.aggConfig.type.name === 'geo_centroid');
+
     const geoAgg = _.get(table.columns, [geoI, 'aggConfig']);
     const metricAgg = _.get(table.columns, [metricI, 'aggConfig']);
 
-    const features = rowsToFeatures(table, geoI, metricI);
+    const features = rowsToFeatures(table, geoI, metricI, centroidI);
     const values = features.map(function (feature) {
       return feature.properties.value;
     });

@@ -7,19 +7,21 @@ import chrome from 'ui/chrome';
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
 
+import { SavedObjectNotFound } from 'ui/errors';
+import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
+import { DashboardViewMode } from './dashboard_view_mode';
+import { TopNavIds } from './top_nav/top_nav_ids';
+import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 import dashboardTemplate from 'plugins/kibana/dashboard/dashboard.html';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import DocTitleProvider from 'ui/doc_title';
-import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
-import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
-import { FilterUtils } from './filter_utils';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
-import errors from 'ui/errors';
+// kibi: need to call private on dashboard_state
+import DashboardStateProvider from './dashboard_state';
 import notify from 'ui/notify';
 
 // kibi: imports
@@ -51,9 +53,7 @@ uiRoutes
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     resolve: {
-      dash: function (
-        savedDashboards, Notifier, $route, $location, courier, kbnUrl, AppState,
-        kibiDefaultDashboardTitle, createNotifier) {
+      dash: function (savedDashboards, $route, courier, kbnUrl, AppState, kibiDefaultDashboardTitle, createNotifier) {
         const id = $route.current.params.id;
         return savedDashboards.get(id);
           // kibi: here we handle the default dashboard title
@@ -72,79 +72,65 @@ uiRoutes
           savedDashboards.find('', 1),
           getDefaultDashboard
         ])
-          .then(([
-                  { total: totalFirst, hits: [ firstDashboard ] },
-                  { total: totalDefault, hits: [ defaultDashboard ] }
-                ]) => {
-            if (!totalFirst) {
-              return savedDashboards.get();
-            }
-            // select the first dashboard if default_dashboard_title is not set or does not exist
-            let dashboardId = firstDashboard.id;
-            if (totalDefault === 0) {
-              notify.error(`The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
-                Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`);
-            } else if (totalDefault > 0) {
-              dashboardId = defaultDashboard.id;
-            }
-            kbnUrl.redirect(`/dashboard/${dashboardId}`);
-            return Promise.halt();
-          })
-          // kibi: end
-          .catch((error) => {
-            // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
-            // See https://github.com/elastic/kibana/issues/10951 for more context.
-            if (error instanceof errors.SavedObjectNotFound && id === 'create') {
-              // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
-              kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
-              notify.error(
-                'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
-            } else {
-              throw error;
-            }
-          })
-          .catch(courier.redirectWhenMissing({
-            'dashboard' : DashboardConstants.LANDING_PAGE_PATH
-          }));
-      }
-    }
-  })
-  // kibi: this path is used to show an empty dashboard when creating a new one
-  .when('/dashboard/new-dashboard/create/', {
-    template: dashboardTemplate,
-    resolve: {
-      dash: function (savedDashboards) {
-        return savedDashboards.get();
+        .then(([
+                { total: totalFirst, hits: [ firstDashboard ] },
+                { total: totalDefault, hits: [ defaultDashboard ] }
+              ]) => {
+          if (!totalFirst) {
+            return savedDashboards.get();
+          }
+          // select the first dashboard if default_dashboard_title is not set or does not exist
+          let dashboardId = firstDashboard.id;
+          if (totalDefault === 0) {
+            notify.error(`The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
+              Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`);
+          } else if (totalDefault > 0) {
+            dashboardId = defaultDashboard.id;
+          }
+          kbnUrl.redirect(`/dashboard/${dashboardId}`);
+          return Promise.halt();
+        })
+        // kibi: end
+        .catch((error) => {
+          // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
+          // See https://github.com/elastic/kibana/issues/10951 for more context.
+          if (error instanceof SavedObjectNotFound && id === 'create') {
+            // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
+            kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
+            notify.error(
+              'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
+          } else {
+            throw error;
+          }
+        })
+        .catch(courier.redirectWhenMissing({
+          'dashboard' : DashboardConstants.LANDING_PAGE_PATH
+        }));
       }
     }
   });
 
-app.directive('dashboardApp', function (createNotifier, courier, AppState, timefilter, kbnUrl, Private) {
+app.directive('dashboardApp', function (createNotifier, courier, AppState, timefilter, quickRanges, kbnUrl, confirmModal, Private) {
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function (
-      $scope, $rootScope, $route, $routeParams, $location, Private, getAppState,
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState,
       // kibi: added dashboardGroups, kibiState, config
       dashboardGroups, kibiState, config) {
-
-      const queryFilter = Private(FilterBarQueryFilterProvider);
-
-      // kibi: added
-      const numeral = require('numeral')();
-      const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper'));
-      // kibi: end
-
-      const notify = createNotifier({
-        location: 'Dashboard'
-      });
+      const filterBar = Private(FilterBarQueryFilterProvider);
+      const docTitle = Private(DocTitleProvider);
+      const notify = createNotifier({ location: 'Dashboard' });
 
       const dash = $scope.dash = $route.current.locals.dash;
+      if (dash.id) {
+        docTitle.change(dash.title);
+      }
 
       // kibi: adds information about the group membership and stats
+      const numeral = require('numeral')();
       function getMetadata() {
         delete dash.group;
         if (dash.id) {
@@ -162,12 +148,16 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       }).on('dashboardsMetadataUpdated', () => {
         getMetadata();
       });
-
-      const dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
+      getMetadata();
       // kibi: end
 
+      // kibi: get the DashboardState class
+      const DashboardState = Private(DashboardStateProvider);
+      const dashboardState = new DashboardState(dash, AppState);
+
+      // kibi: time from the kibi state.
+      const dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
       if (dashboardTime) {
-        // kibi: time from the kibi state.
         // this allows to set a time (not save it with a dashboard), switch between dashboards, and
         // still retain the time set until the app is reloaded
         timefilter.time.mode = dashboardTime.m;
@@ -176,150 +166,95 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         if (dash.refreshInterval) {
           timefilter.refreshInterval = dash.refreshInterval;
         }
-      } else if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
-        // time saved with the dashboard
-        timefilter.time.mode = dash.timeMode;
-        timefilter.time.to = dash.timeTo;
-        timefilter.time.from = dash.timeFrom;
-        if (dash.refreshInterval) {
-          timefilter.refreshInterval = dash.refreshInterval;
+      }
+      // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
+      // normal cross app navigation.
+      else if (!getAppState.previouslyStored()) {
+        if (dashboardState.getIsTimeSavedWithDashboard()) {
+          dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
         }
-      } else {
-        // default time
-        const timeDefaults = config.get('timepicker:timeDefaults');
-        timefilter.time.mode = timeDefaults.mode;
-        timefilter.time.to = timeDefaults.to;
-        timefilter.time.from = timeDefaults.from;
+        else {
+          // kibi: set default time
+          const { mode, from, to } = config.get('timepicker:timeDefaults');
+          timefilter.time.mode = mode;
+          timefilter.time.to = to;
+          timefilter.time.from = from;
+        }
       }
 
-      // kibi: the listener below is needed to react when the global time is changed by the user
-      // either directly in time widget or by clicking on histogram chart etc
-      const saveWithChangesHandler = function () {
-        if (dash.id && !kibiState._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to)) {
-          kibiState._saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
-          kibiState.save();
-        }
+      // Part of the exposed plugin API - do not remove without careful consideration.
+      this.appStatus = {
+        dirty: !dash.id
       };
-      $scope.$listen(timefilter, 'fetch', saveWithChangesHandler);
-
-      // kibi: get the filters and query from the kibi state
-      const dashboardQuery = kibiState._getDashboardProperty(dash.id, kibiState._properties.query);
-      // do not take pinned filters !
-      const dashboardFilters = kibiState._getDashboardProperty(dash.id, kibiState._properties.filters);
-
-      const matchQueryFilter = function (filter) {
-        return filter.query && filter.query.query_string && !filter.meta;
-      };
-
-      const extractQueryFromFilters = function (filters) {
-        const filter = _.find(filters, matchQueryFilter);
-        if (filter) return filter.query;
-      };
-
-      const stateDefaults = {
-        id: dash.id, // kibi: added to identity a dashboard in helper methods
-        title: dash.title,
-        panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
-        options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
-        uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
-        // kibi: get the query from the kibi state, and if unset get the one the searchsource
-        query: dashboardQuery || extractQueryFromFilters(dash.searchSource.getOwn('filter')) || getEmptyQueryOptionHelper.getQuery(),
-        // kibi: get the filters from the kibi state, and if unset get the one the searchsource
-        filters: dashboardFilters || _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
-
-        // MERGE 5.3.2 check maybe moving some of our logic to this method would be better
-        //query: FilterUtils.getQueryFilterForDashboard(dash),
-        //filters: FilterUtils.getFilterBarsForDashboard(dash),
-      };
-
-      let stateMonitor;
-      const $state = $scope.state = new AppState(stateDefaults);
-      const $uiState = $scope.uiState = $state.makeStateful('uiState');
-      const $appStatus = $scope.appStatus = this.appStatus = {};
-
-      $scope.$watchCollection('state.options', function (newVal, oldVal) {
-        if (!angular.equals(newVal, oldVal)) $state.save();
+      dashboardState.stateMonitor.onChange(status => {
+        this.appStatus.dirty = status.dirty || !dash.id;
       });
 
-      $scope.$watch('state.options.darkTheme', setDarkTheme);
-
-      $scope.topNavMenu = getTopNavConfig(kbnUrl);
-
-      $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
-
-      $scope.refresh = _.bindKey(courier, 'fetch');
+      dashboardState.applyFilters(dashboardState.getQuery(), filterBar.getFilters());
+      let pendingVisCount = _.size(dashboardState.getPanels());
 
       timefilter.enabled = true;
-      $scope.timefilter = timefilter;
-      $scope.$listen(timefilter, 'fetch', $scope.refresh);
       dash.searchSource.highlightAll(true);
+      dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);
 
-      const docTitle = Private(DocTitleProvider);
+      // Following the "best practice" of always have a '.' in your ng-models –
+      // https://github.com/angular/angular.js/wiki/Understanding-Scopes
+      $scope.model = {
+        query: dashboardState.getQuery(),
+        darkTheme: dashboardState.getDarkTheme(),
+        timeRestore: dashboardState.getTimeRestore(),
+        title: dashboardState.getTitle()
+      };
 
-      function init() {
-        getMetadata(); // siren: calls getMetadata to fetch dashboard related info
-        updateQueryOnRootSource();
+      $scope.panels = dashboardState.getPanels();
+      $scope.refresh = (...args) => {
+        $rootScope.$broadcast('fetch');
+        courier.fetch(...args);
+      };
+      $scope.timefilter = timefilter;
+      $scope.expandedPanel = null;
+      $scope.dashboardViewMode = dashboardState.getViewMode();
 
-        if (dash.id) {
-          docTitle.change(dash.title);
-        }
+      $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
+      $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
+      $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
+      $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
+      $scope.getDashTitle = () => getDashboardTitle(
+        dashboardState.getTitle(),
+        dashboardState.getViewMode(),
+        dashboardState.getIsDirty(timefilter));
+      $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
+      $scope.saveState = () => dashboardState.saveState();
+      $scope.getShouldShowEditHelp = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
+      $scope.getShouldShowViewHelp = () => !dashboardState.getPanels().length && dashboardState.getIsViewMode();
 
-        initPanelIndexes();
-
-        // watch for state changes and update the appStatus.dirty value
-        stateMonitor = stateMonitorFactory.create($state, stateDefaults);
-        stateMonitor.onChange((status) => {
-          $appStatus.dirty = status.dirty || !dash.id;
-        });
-
-        $scope.$on('$destroy', () => {
-          stateMonitor.destroy();
-          dash.destroy();
-
-          // Remove dark theme to keep it from affecting the appearance of other apps.
-          setDarkTheme(false);
-        });
-
-        $scope.$emit('application.load');
-      }
-
-      function initPanelIndexes() {
-        // find the largest panelIndex in all the panels
-        let maxIndex = getMaxPanelIndex();
-
-        // ensure that all panels have a panelIndex
-        $scope.state.panels.forEach(function (panel) {
-          if (!panel.panelIndex) {
-            panel.panelIndex = maxIndex++;
-          }
-        });
-      }
-
-      function getMaxPanelIndex() {
-        let maxId = $scope.state.panels.reduce(function (id, panel) {
-          return Math.max(id, panel.panelIndex || id);
-        }, 0);
-        return ++maxId;
-      }
-
-      function updateQueryOnRootSource() {
-        const filters = queryFilter.getFilters();
-        if ($state.query) {
-          dash.searchSource.set('filter', _.union(filters, [{
-            query: $state.query
-          }]));
+      $scope.toggleExpandPanel = (panelIndex) => {
+        if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
+          $scope.expandedPanel = null;
         } else {
-          dash.searchSource.set('filter', filters);
+          $scope.expandedPanel =
+            dashboardState.getPanels().find((panel) => panel.panelIndex === panelIndex);
         }
-      }
+      };
 
-      function setDarkTheme(enabled) {
-        const theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
-        chrome.removeApplicationClass(['theme-dark', 'theme-light']);
-        chrome.addApplicationClass(theme);
-      }
+      $scope.filterResults = function () {
+        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
+        $scope.refresh();
+      };
 
+      // called by the saved-object-finder when a user clicks a vis
+      $scope.addVis = function (hit) {
+        pendingVisCount++;
+        dashboardState.addNewPanel(hit.id, 'visualization');
+        notify.info(`Visualization successfully added to your dashboard`);
+      };
+
+      $scope.addSearch = function (hit) {
+        pendingVisCount++;
+        dashboardState.addNewPanel(hit.id, 'search');
+        notify.info(`Search successfully added to your dashboard`);
+      };
 
       /**
        * Creates a child ui state for the panel. It's passed the ui state to use, but needs to
@@ -329,129 +264,136 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
        * @returns {Object}
        */
       $scope.createChildUiState = function createChildUiState(path, uiState) {
-        return $scope.uiState.createChild(path, uiState, true);
+        return dashboardState.uiState.createChild(path, uiState, true);
       };
 
-      $scope.saveState = function saveState() {
-        $state.save();
-      };
+      $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
 
-      $scope.onPanelRemoved = (panelIndex) => {
-        _.remove($scope.state.panels, function (panel) {
-          if (panel.panelIndex === panelIndex) {
-            $scope.uiState.removeChild(getPersistedStateId(panel));
-            return true;
-          } else {
-            return false;
-          }
-        });
-        $state.save();
-      };
+      $scope.$watch('model.darkTheme', () => {
+        dashboardState.setDarkTheme($scope.model.darkTheme);
+        updateTheme();
+      });
+      $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
+      $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
 
-
-      $scope.brushEvent = brushEvent;
-      $scope.filterBarClickHandler = filterBarClickHandler;
-      $scope.expandedPanel = null;
-      $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
-      $scope.toggleExpandPanel = (panelIndex) => {
-        if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
-          $scope.expandedPanel = null;
-        } else {
-          $scope.expandedPanel =
-            $scope.state.panels.find((panel) => panel.panelIndex === panelIndex);
+      $scope.$listen(timefilter, 'fetch', () => {
+        // kibi: the listener below is needed to react when the global time is changed by the user
+        // either directly in time widget or by clicking on histogram chart etc
+        const { mode, from, to } = timefilter.time;
+        if (dash.id && !kibiState._isDefaultTime(mode, from, to)) {
+          kibiState._saveTimeForDashboardId(dash.id, mode, from, to);
+          kibiState.save();
         }
+        // kibi: end
+        $scope.refresh();
+      });
+
+      function updateViewMode(newMode) {
+        $scope.topNavMenu = getTopNavConfig(newMode, navActions); // eslint-disable-line no-use-before-define
+        dashboardState.switchViewMode(newMode);
+        $scope.dashboardViewMode = newMode;
+      }
+
+      const onChangeViewMode = (newMode) => {
+        const isPageRefresh = newMode === dashboardState.getViewMode();
+        const isLeavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
+        const willLoseChanges = isLeavingEditMode && dashboardState.getIsDirty(timefilter);
+
+        if (!willLoseChanges) {
+          updateViewMode(newMode);
+          return;
+        }
+
+        function revertChangesAndExitEditMode() {
+          dashboardState.resetState();
+          kbnUrl.change(dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL);
+          // This is only necessary for new dashboards, which will default to Edit mode.
+          updateViewMode(DashboardViewMode.VIEW);
+
+          // We need to do a hard reset of the timepicker. appState will not reload like
+          // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
+          // reload will cause it not to sync.
+          if (dashboardState.getIsTimeSavedWithDashboard()) {
+            dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
+          }
+        }
+
+        confirmModal(
+          getUnsavedChangesWarningMessage(dashboardState.getChangedFilterTypes(timefilter)),
+          {
+            onConfirm: revertChangesAndExitEditMode,
+            onCancel: _.noop,
+            confirmButtonText: 'Yes, lose changes',
+            cancelButtonText: 'No, keep working',
+            defaultFocusedButton: ConfirmationButtonTypes.CANCEL
+          }
+        );
+      };
+
+      const navActions = {};
+      navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
+      navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
+
+      updateViewMode(dashboardState.getViewMode());
+
+      $scope.save = function () {
+        return dashboardState.saveDashboard(angular.toJson, timefilter).then(function (id) {
+          $scope.kbnTopNav.close('save');
+          if (id) {
+            notify.info(`Saved Dashboard as "${dash.title}"`);
+            $rootScope.$emit('kibi:dashboard:changed', id); // kibi: allow helpers to react to dashboard changes
+            if (dash.id !== $routeParams.id) {
+              kbnUrl.change(createDashboardEditUrl(dash.id));
+            } else {
+              docTitle.change(dash.lastSavedTitle);
+              updateViewMode(DashboardViewMode.VIEW);
+            }
+          }
+        }).catch(notify.fatal);
       };
 
       // kibi: update root source on kibiState reset
       $scope.$listen(kibiState, 'reset_app_state_query', function () {
-        updateQueryOnRootSource();
-        $state.save();
-        $scope.refresh();
+        $scope.filterResults();
       });
       // kibi: end
 
       // update root source when filters update
-      $scope.$listen(queryFilter, 'update', function () {
-        updateQueryOnRootSource();
-        $state.save();
+      $scope.$listen(filterBar, 'update', function () {
+        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
       });
 
       // update data when filters fire fetch event
-      $scope.$listen(queryFilter, 'fetch', $scope.refresh);
+      $scope.$listen(filterBar, 'fetch', $scope.refresh);
 
-      $scope.getDashTitle = function () {
-        return dash.lastSavedTitle || `${dash.title} (unsaved)`;
-      };
+      $scope.$on('$destroy', () => {
+        dashboardState.destroy();
 
-      $scope.newDashboard = function () {
-        // kibi: changed from '/dashboard' because now there's a specific path for dashboard creation
-        kbnUrl.change('/dashboard/new-dashboard/create', {});
-      };
+        // Remove dark theme to keep it from affecting the appearance of other apps.
+        setLightTheme();
+      });
 
-      $scope.filterResults = function () {
-        updateQueryOnRootSource();
-        $state.save();
-        $scope.refresh();
-      };
+      function updateTheme() {
+        dashboardState.getDarkTheme() ? setDarkTheme() : setLightTheme();
+      }
 
-      $scope.save = function () {
-        // kibi: lock the dashboard so kibi_state._getCurrentDashboardId ignore the change for a moment
-        dash.locked = true;
-        // kibi added previousDashId
-        const previousDashId = dash.id;
+      function setDarkTheme() {
+        chrome.removeApplicationClass(['theme-light']);
+        chrome.addApplicationClass('theme-dark');
+      }
 
-        $state.save();
+      function setLightTheme() {
+        chrome.removeApplicationClass(['theme-dark']);
+        chrome.addApplicationClass('theme-light');
+      }
 
-        const timeRestoreObj = _.pick(timefilter.refreshInterval, ['display', 'pause', 'section', 'value']);
-
-        dash.panelsJSON = angular.toJson($state.panels);
-        dash.uiStateJSON = angular.toJson($uiState.getChanges());
-        // kibi: save the timepicker mode
-        dash.timeMode = dash.timeRestore ? timefilter.time.mode : undefined;
-        dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
-        dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
-        dash.refreshInterval = dash.timeRestore ? timeRestoreObj : undefined;
-        dash.optionsJSON = angular.toJson($state.options);
-
-        dash.save()
-          .then(function (id) {
-            delete dash.locked; // kibi: our lock for the dashboard!
-            stateMonitor.setInitialState($state.toJSON());
-            $scope.kbnTopNav.close('save');
-            if (id) {
-              notify.info('Saved Dashboard as "' + dash.title + '"');
-              $rootScope.$emit('kibi:dashboard:changed', id); // kibi: allow helpers to react to dashboard changes
-              if (dash.id !== $routeParams.id) {
-                kbnUrl.change('/dashboard/{{id}}', { id: dash.id });
-              } else {
-                docTitle.change(dash.lastSavedTitle);
-              }
-            }
-          })
-          .catch((err) => {
-            // kibi: if the dashboard can't be saved rollback the dashboard id
-            dash.id = previousDashId;
-            delete dash.locked; // kibi: our lock for the dashboard!
-            $scope.configTemplate.close('save');
-            notify.error(err);
-            // kibi: end
-          });
-      };
-
-      let pendingVis = _.size($state.panels);
       $scope.$on('ready:vis', function () {
-        if (pendingVis) pendingVis--;
-        if (pendingVis === 0) {
-          $state.save();
+        if (pendingVisCount > 0) pendingVisCount--;
+        if (pendingVisCount === 0) {
+          dashboardState.saveState();
           $scope.refresh();
         }
       });
-
-      // called by the saved-object-finder when a user clicks a vis
-      $scope.addVis = function (hit) {
-        pendingVis++;
-        $state.panels.push(createPanelState(hit.id, 'visualization', getMaxPanelIndex()));
-      };
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
         $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] });
@@ -464,15 +406,9 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
           `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
       };
 
-      $scope.addSearch = function (hit) {
-        pendingVis++;
-        $state.panels.push(createPanelState(hit.id, 'search', getMaxPanelIndex()));
-      };
-
-      // Setup configurable values for config directive, after objects are initialized
       $scope.opts = {
+        displayName: dash.getDisplayName(),
         dashboard: dash,
-        ui: $state.options,
         save: $scope.save,
         addVis: $scope.addVis,
         addNewVis,
@@ -480,27 +416,26 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         timefilter: $scope.timefilter
       };
 
-      // kibi: If you click the back/forward browser button:
-      // 1. The $locationChangeSuccess event is fired when you click back/forward browser button.
-      $rootScope.$on('$locationChangeSuccess', () => $rootScope.actualLocation = $location.url());
-      // 2. The following watcher is fired.
-      $rootScope.$watch(() => { return $location.url(); }, (newLocation, oldLocation) => {
-        if ($rootScope.actualLocation === newLocation) {
-          /* kibi: Here we execute init() if the newLocation is equal to the URL we saved during
-          the $locationChangeSuccess event above. */
-          init();
-        }
-      });
-      /* kibi: If you click an ordinary hyperlink, the above order is reversed.
-         First, you have the watcher fired, then the $locationChangeSuccess event.
-         That's why the actualLocation and newLocation will never be equal inside the watcher callback
-         if you click on an ordinary hyperlink.
-       */
-      init();
+      $scope.$emit('application.load');
 
-      $scope.showEditHelpText = () => {
-        return !$scope.state.panels.length;
-      };
+      // KIBI5: try to add this back
+      //// kibi: If you click the back/forward browser button:
+      //// 1. The $locationChangeSuccess event is fired when you click back/forward browser button.
+      //$rootScope.$on('$locationChangeSuccess', () => $rootScope.actualLocation = $location.url());
+      //// 2. The following watcher is fired.
+      //$rootScope.$watch(() => { return $location.url(); }, (newLocation, oldLocation) => {
+        //if ($rootScope.actualLocation === newLocation) {
+          //[> kibi: Here we execute init() if the newLocation is equal to the URL we saved during
+          //the $locationChangeSuccess event above. */
+          //init();
+        //}
+      //});
+      //[> kibi: If you click an ordinary hyperlink, the above order is reversed.
+         //First, you have the watcher fired, then the $locationChangeSuccess event.
+         //That's why the actualLocation and newLocation will never be equal inside the watcher callback
+         //if you click on an ordinary hyperlink.
+       //*/
+      //init();
     }
   };
 });

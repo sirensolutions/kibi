@@ -1,6 +1,5 @@
-const _ = require('lodash');
-const logoUrl = require('./logo.png');
-const moment = require('moment-timezone');
+import _ from 'lodash';
+import moment from 'moment-timezone';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -27,7 +26,7 @@ require('./vis');
 require('ui/saved_objects/saved_object_registry').register(require('plugins/timelion/services/saved_sheet_register'));
 
 // TODO: Expose an api for dismissing notifications
-const unsafeNotifications = require('ui/notify')._notifs;
+const unsafeNotifications = require('ui/notify').default._notifs;
 
 require('ui/routes').enable();
 

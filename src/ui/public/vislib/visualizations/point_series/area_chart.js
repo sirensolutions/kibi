@@ -79,9 +79,8 @@ export default function AreaChartFactory(Private) {
       // Append path
       const path = layer.append('path')
       .attr('data-label', data.label)
-      .style('fill', () => {
-        return color(data.label);
-      })
+      .style('fill', () => color(data.label))
+      .style('stroke', () => color(data.label))
       .classed('overlap_area', function () {
         return isOverlapping;
       })
@@ -96,7 +95,8 @@ export default function AreaChartFactory(Private) {
 
       function y1(d) {
         const y0 = d.y0 || 0;
-        return yScale(y0 + d.y);
+        const y = d.y || 0;
+        return yScale(y0 + y);
       }
 
       function y0(d) {
@@ -119,13 +119,15 @@ export default function AreaChartFactory(Private) {
       }
 
       // update
-      path.attr('d', function (d) {
+      path.attr('d', function () {
         const area = getArea()
         .defined(function (d) {
           return !_.isNull(d.y);
         })
         .interpolate(interpolate);
-        return area(data.values);
+        return area(data.values.filter(function (d) {
+          return !_.isNull(d.y);
+        }));
       });
 
       return path;
@@ -185,10 +187,11 @@ export default function AreaChartFactory(Private) {
       }
 
       function cy(d) {
+        const y = d.y || 0;
         if (isOverlapping) {
-          return yScale(d.y);
+          return yScale(y);
         }
-        return yScale(d.y0 + d.y);
+        return yScale(d.y0 + y);
       }
 
       // update
@@ -205,6 +208,15 @@ export default function AreaChartFactory(Private) {
       return circles;
     }
 
+    addPathEvents(path) {
+      const events = this.events;
+      if (this.handler.visConfig.get('enableHover')) {
+        const hover = events.addHoverEvent();
+        const mouseout = events.addMouseoutEvent();
+        path.call(hover).call(mouseout);
+      }
+    }
+
     /**
      * Renders d3 visualization
      *
@@ -219,7 +231,8 @@ export default function AreaChartFactory(Private) {
           const svg = self.chartEl.append('g');
           svg.data([self.chartData]);
 
-          self.addPath(svg, self.chartData);
+          const path = self.addPath(svg, self.chartData);
+          self.addPathEvents(path);
           const circles = self.addCircles(svg, self.chartData);
           self.addCircleEvents(circles);
 

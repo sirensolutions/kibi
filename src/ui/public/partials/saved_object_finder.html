@@ -1,9 +1,12 @@
-<form role="form" class="form-inline">
-  <div class="container-fluid">
+<form
+  role="form"
+  class="kuiVerticalRhythm"
+>
+  <div class="kuiBar">
     <!--kibi: filter visualizations based on the savedSearchId -->
-    <div class="row" ng-if="kibi.onDashboardPage && type === 'visualizations'">
-      <div class="input-group form-group finder-form col-md-7">
-        <div class="visualisation-filter-checkbox">
+    <div class="kuiBarSection">
+      <div class="kuiSearchInput fullWidth">
+        <div ng-if="kibi.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
           <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch" />
           <label class="based-saved-search" ng-if="savedSearchId">
             Based on the saved search of the current dashboard: {{savedSearchId}}
@@ -17,40 +20,54 @@
       </div>
     </div>
     <!-- kibi: end -->
-
-    <div class="row">
-      <div class="input-group form-group finder-form col-md-7">
-        <span class="input-group-addon savedObjectFinderSearchIcon">
-          <span class="fa fa-search"></span>
-        </span>
+    <div class="kuiBarSection">
+      <div class="kuiSearchInput fullWidth">
+        <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
         <input
+          class="kuiSearchInput__input"
           input-focus
           ng-model="filter"
-          ng-attr-placeholder="{{finder.properties.nouns | label }} Filter..."
+          ng-attr-placeholder="{{ finder.properties.nouns | label }} Filter..."
           ng-keydown="finder.filterKeyDown($event)"
-          class="form-control"
           name="filter"
           type="text"
           autocomplete="off"
-        />
+        >
       </div>
-      <div class="finder-hit-count col-md-2">
-        <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
-      </div>
-      <div class="finder-manage-object col-md-2" ng-if="onAddNew">
-        <a class="small" ng-click="onAddNew()">
-          Add new {{finder.properties.noun}}
-        </a>
-      </div>
-      <div class="finder-manage-object col-md-2" ng-if="!useLocalManagement">
-        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">
-          Manage {{finder.properties.nouns}}
-        </a>
+    </div>
+
+    <div class="kuiBarSection">
+      <p class="kuiText kuiSubduedText">
+        {{ paginationCount }} of {{ finder.hitCount }}
+      </p>
+
+      <div class="kuiButtonGroup">
+        <button
+          class="kuiButton kuiButton--basic"
+          ng-if="onAddNew"
+          ng-click="onAddNew()"
+          data-test-subj="addNewSavedObjectLink"
+        >
+          Add new {{ finder.properties.noun }}
+        </button>
+
+        <button
+          class="kuiButton kuiButton--basic"
+          ng-if="!useLocalManagement"
+          ng-click="finder.manageObjects(finder.properties.name)"
+        >
+          Manage {{ finder.properties.nouns }}
+        </button>
       </div>
     </div>
   </div>
 </form>
-<paginate list="finder.hits" per-page="8">
+
+<paginate
+  list="finder.hits"
+  per-page="20"
+  class="kuiVerticalRhythm"
+>
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
     <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
       <span class="paginate-heading">
@@ -71,12 +88,11 @@
       <a ng-href="{{finder.makeUrl(hit)}}"
           ng-blur="finder.hitBlur($event)"
           ng-click="finder.preventClick($event)">
-          <i aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></i>
+          <span aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></span>
           <!-- kibi: style the title to differentiate it from the description -->
           <span ng-class="kibiTitle">
             {{hit.title}}
           </span>
-          <!-- kibi: end -->
           <p ng-if="hit.description" ng-bind="hit.description"></p>
       </a>
     </li>
@@ -86,7 +102,4 @@
       <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
     </li>
   </ul>
-  <div class="finder-hit-count">
-     <span>{{paginationCount}} of {{finder.hitCount}}</span>
-  </div>
 </paginate>

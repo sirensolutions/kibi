@@ -2,7 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 
 import metadata from 'ui/metadata';
-import 'babel/polyfill';
+import 'babel-polyfill';
 import 'ui/timefilter';
 import 'ui/notify';
 import 'ui/private';
@@ -11,6 +11,15 @@ import 'ui/storage';
 import 'ui/directives/kbn_src';
 import 'ui/watch_multi';
 import './services';
+
+import angularApi from './api/angular';
+import appsApi from './api/apps';
+import controlsApi from './api/controls';
+import navApi from './api/nav';
+import templateApi from './api/template';
+import themeApi from './api/theme';
+import translationsApi from './api/translations';
+import xsrfApi from './api/xsrf';
 
 const chrome = {};
 const internals = _.defaults(
@@ -28,13 +37,14 @@ const internals = _.defaults(
   }
 );
 
-require('./api/apps')(chrome, internals);
-require('./api/xsrf')(chrome, internals);
-require('./api/nav')(chrome, internals);
-require('./api/angular')(chrome, internals);
-require('./api/controls')(chrome, internals);
-require('./api/template')(chrome, internals);
-require('./api/theme')(chrome, internals);
+appsApi(chrome, internals);
+xsrfApi(chrome, internals);
+navApi(chrome, internals);
+angularApi(chrome, internals);
+controlsApi(chrome, internals);
+templateApi(chrome, internals);
+themeApi(chrome, internals);
+translationsApi(chrome, internals);
 
 chrome.bootstrap = function () {
   chrome.setupAngular();

@@ -1,6 +1,5 @@
 import chrome from 'ui/chrome';
 import Notifier from 'kibie/notify/notifier';
-import { intersection } from 'lodash';
 
 const notify = new Notifier({ location: 'Scripting Lang Service' });
 

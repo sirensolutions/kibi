@@ -23,6 +23,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import 'ui/kibi/directives/kibi_param_entity_uri';
 import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
 import HasAnyOfVisSavedSearchesATimeField from 'ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field';
+// kibi: end
 
 uiRoutes
 .when(VisualizeConstants.CREATE_PATH, {
@@ -72,11 +73,11 @@ uiModules
   return {
     restrict: 'E',
     controllerAs: 'visualizeApp',
-    controller: VisEditor,
+    controller: Editor,
   };
 });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier, kibiState) {
+function Editor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier, kibiState) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -85,7 +86,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   // kibi: added by kibi
   const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
   const hasAnyOfVisSavedSearchesATimeField = Private(HasAnyOfVisSavedSearchesATimeField);
-  const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper')); // kibi: added by Kibi
   // kibi: end
 
   const notify = createNotifier({
@@ -162,7 +162,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || getEmptyQueryOptionHelper.getQuery(),
+    query: searchSource.getOwn('query') || { query_string: { query: '*' } },
     filters: searchSource.getOwn('filter') || [],
     vis: savedVisState
   };
@@ -271,6 +271,12 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
     };
 
+    $scope.$watchMulti([
+      'searchSource.get("index").timeFieldName',
+      'vis.type.requiresTimePicker',
+    ], function ([timeField, requiresTimePicker]) {
+      timefilter.enabled = Boolean(timeField || requiresTimePicker);
+    });
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -328,6 +334,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   }
 
   $scope.fetch = function () {
+    // This is used by some plugins to trigger a fetch (Timelion and Time Series Visual Builder)
+    $rootScope.$broadcast('fetch');
     $state.save();
     searchSource.set('filter', queryFilter.getFilters());
     if (!$state.linked) searchSource.set('query', $state.query);
@@ -346,6 +354,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   $scope.doSave = function () {
     // vis.title was not bound and it's needed to reflect title into visState
     $state.vis.title = savedVis.title;
+    $state.vis.type = savedVis.type || $state.vis.type;
     savedVis.visState = $state.vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 

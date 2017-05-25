@@ -6,7 +6,7 @@ import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.htm
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
-import deleteProvider from 'ui/kibi/helpers/delete_helper';
+import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
 
 uiRoutes
 .when('/management/siren/objects/:service/:id', {
@@ -24,7 +24,7 @@ uiModules.get('apps/management')
       const serviceObj = registry.get($routeParams.service);
       const service = $injector.get(serviceObj.service);
 
-      const deleteHelper = Private(deleteProvider); // kibi: run some checks before deleting an object
+      const deleteHelper = Private(DeleteHelperProvider); // kibi: run some checks before deleting an object
 
       /**
        * Creates a field definition and pushes it to the memo stack. This function

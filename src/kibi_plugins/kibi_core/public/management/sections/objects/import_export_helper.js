@@ -72,7 +72,7 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
       }
     }
 
-    executeSequentially(docs, services, notify) {
+    executeSequentially(docs, services, notify, overwriteAll) {
       const functionArray = [];
       _.each(docs, function (doc) {
         functionArray.push(function (previousOperationResult) {
@@ -106,10 +106,17 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
             }
           }
 
-          return service.get().then(function (obj) {
+          return service.get()
+          .then(function (obj) {
             obj.id = doc._id;
-            return obj.applyESResp(doc).then(function () {
-              return obj.save();
+            return obj.applyESResp(doc)
+            .then(() => {
+              return obj.save({ confirmOverwrite : !overwriteAll });
+            })
+            .catch((err) => {
+              // swallow errors here so that the remaining promise chain executes
+              err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
+              notify.error(err);
             });
           });
           // end
@@ -162,7 +169,7 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
       });
     }
 
-    importDocuments(docs, services, notify) {
+    importDocuments(docs, services, notify, overwriteAll) {
       // kibi: change the import to sequential to solve the dependency problem between objects
       // as visualisations could depend on searches
       // lets order the export to make sure that searches comes before visualisations
@@ -199,7 +206,7 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
 
       return this.loadIndexPatterns(indexPatternDocuments, notify).then(() => {
         return this.loadConfig(configDocument, notify).then(() => {
-          return this.executeSequentially(docs, services, notify);
+          return this.executeSequentially(docs, services, notify, overwriteAll);
         });
       });
     }

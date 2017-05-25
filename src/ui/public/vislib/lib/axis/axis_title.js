@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import $ from 'jquery';
-export default function AxisTitleFactory(Private) {
+export default function AxisTitleFactory() {
 
   class AxisTitle {
     constructor(axisConfig) {
@@ -10,6 +10,10 @@ export default function AxisTitleFactory(Private) {
 
     render() {
       d3.select(this.axisConfig.get('rootEl')).selectAll(this.elSelector).call(this.draw());
+    }
+
+    destroy() {
+      $(this.axisConfig.get('rootEl')).find(this.elSelector).find('svg').remove();
     }
 
     draw() {
@@ -23,17 +27,20 @@ export default function AxisTitleFactory(Private) {
           const div = d3.select(el);
           const width = $(el).width();
           const height = $(el).height();
+          const titlePadding = 15;
+          const axisPrefix = config.isHorizontal() ? 'x' : 'y';
 
           const svg = div.append('svg')
-          .attr('width', width)
-          .attr('height', height);
+            .attr('width', width)
+            .attr('height', height)
+            .attr('class', `axis-title ${axisPrefix}-axis-title`);
 
           const bbox = svg.append('text')
           .attr('transform', function () {
             if (config.isHorizontal()) {
-              return 'translate(' + width / 2 + ',11)';
+              return `translate(${width / 2},${titlePadding})`;
             }
-            return 'translate(11,' + height / 2 + ') rotate(270)';
+            return `translate(${titlePadding},${height / 2}) rotate(270)`;
           })
           .attr('text-anchor', 'middle')
           .text(config.get('title.text'))

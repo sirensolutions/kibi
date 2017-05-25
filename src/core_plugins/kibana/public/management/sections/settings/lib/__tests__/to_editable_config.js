@@ -18,7 +18,7 @@ describe('Settings', function () {
         expect(invoke({ value: [] }).type).to.be('array');
       });
 
-      context('when given a setting definition object', function () {
+      describe('when given a setting definition object', function () {
         let def;
         beforeEach(function () {
           def = {
@@ -44,14 +44,14 @@ describe('Settings', function () {
           expect(invoke({ def }).options).to.equal(def.options);
         });
 
-        context('that contains a type', function () {
+        describe('that contains a type', function () {
           it('sets that type', function () {
             def.type = 'something';
             expect(invoke({ def }).type).to.equal(def.type);
           });
         });
 
-        context('that contains a value of type array', function () {
+        describe('that contains a value of type array', function () {
           it('sets type to array', function () {
             def.value = [];
             expect(invoke({ def }).type).to.equal('array');
@@ -59,7 +59,7 @@ describe('Settings', function () {
         });
       });
 
-      context('when not given a setting definition object', function () {
+      describe('when not given a setting definition object', function () {
         it('is marked as custom', function () {
           expect(invoke().isCustom).to.be.true;
         });

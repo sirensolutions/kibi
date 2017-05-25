@@ -1,6 +1,5 @@
 import 'ui/filters/short_dots';
-import _ from 'lodash';
-import errors from 'ui/errors';
+import { IndexPatternMissingIndices } from 'ui/errors';
 import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
@@ -11,13 +10,11 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import uiModules from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
-function IndexPatternsProvider(createNotifier, Private, Promise, kbnIndex, savedObjectsAPI) {
+function IndexPatternsProvider(Private, Promise, kbnIndex, savedObjectsAPI) {
   const self = this;
 
   const IndexPattern = Private(IndexPatternsIndexPatternProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
-
-  const notify = createNotifier({ location: 'IndexPatterns Service' });
 
   self.get = function (id) {
     if (!id) return self.make();
@@ -44,7 +41,7 @@ function IndexPatternsProvider(createNotifier, Private, Promise, kbnIndex, saved
   };
 
   self.errors = {
-    MissingIndices: errors.IndexPatternMissingIndices
+    MissingIndices: IndexPatternMissingIndices
   };
 
   self.cache = patternCache;

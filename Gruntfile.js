@@ -1,4 +1,4 @@
-require('babel/register')(require('./src/optimize/babel_options').node);
+require('./src/optimize/babel/register');
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
@@ -57,7 +57,7 @@ module.exports = function (grunt) {
     init: true,
     config: config,
     loadGruntTasks: {
-      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*', 'intern']
+      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*']
     }
   });
 

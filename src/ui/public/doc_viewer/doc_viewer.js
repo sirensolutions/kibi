@@ -1,4 +1,3 @@
-import { each } from 'lodash';
 import $ from 'jquery';
 import uiModules from 'ui/modules';
 import DocViewsProvider from 'ui/registry/doc_views';
@@ -16,9 +15,11 @@ uiModules.get('kibana')
       indexPattern: '=',
       filter: '=?',
       columns: '=?',
-      columnAliases: '=?'
+      columnAliases: '=?',
+      onAddColumn: '=?',
+      onRemoveColumn: '=?'
     },
-    template: function ($el, $attr) {
+    template: function ($el) {
       const $viewer = $('<div class="doc-viewer">');
       $el.append($viewer);
       const $tabs = $('<ul class="nav nav-tabs">');
@@ -31,7 +32,15 @@ uiModules.get('kibana')
           </li>`);
         $tabs.append($tab);
         // kibi: added columnAliases to $viewAttrs
-        const $viewAttrs = 'hit="hit" index-pattern="indexPattern" filter="filter" columns="columns" column-aliases="columnAliases"';
+        const $viewAttrs = `
+          hit="hit"
+          index-pattern="indexPattern"
+          filter="filter"
+          columns="columns"
+          on-add-column="onAddColumn"
+          on-remove-column="onRemoveColumn"
+          column-aliases="columnAliases"
+        `;
         const $ext = $(`<render-directive ${$viewAttrs} ng-if="mode == '${view.name}'" definition="docViews['${view.name}'].directive">
           </render-directive>`);
         $ext.html(view.directive.template);

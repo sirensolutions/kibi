@@ -1,24 +1,20 @@
 import _ from 'lodash';
 import moment from 'moment';
-import sinon from 'auto-release-sinon';
 import aggResp from 'fixtures/agg_resp/date_histogram';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggTypesBucketsCreateFilterDateHistogramProvider from 'ui/agg_types/buckets/create_filter/date_histogram';
-import TimeBucketsProvider from 'ui/time_buckets';
 import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
-
     let vis;
     let agg;
     let field;
     let filter;
     let bucketKey;
     let bucketStart;
-    let getIntervalStub;
     let intervalOptions;
 
     let init;
@@ -27,11 +23,10 @@ describe('AggConfig Filters', function () {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
     }));
-    beforeEach(ngMock.inject(function (Private, $injector) {
+    beforeEach(ngMock.inject(function (Private) {
       const Vis = Private(VisProvider);
       const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       const createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
-      const TimeBuckets = Private(TimeBucketsProvider);
       intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
 
       init = function (interval, duration) {

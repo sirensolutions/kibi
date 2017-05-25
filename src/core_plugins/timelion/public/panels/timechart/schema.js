@@ -1,10 +1,10 @@
 require('./flot');
 require('plugins/timelion/panels/timechart/timechart.less');
-const _ = require('lodash');
-const $ = require('jquery');
-const moment = require('moment-timezone');
-const observeResize = require('plugins/timelion/lib/observe_resize');
-const calculateInterval = require('plugins/timelion/lib/calculate_interval');
+import _ from 'lodash';
+import $ from 'jquery';
+import moment from 'moment-timezone';
+import observeResize from 'plugins/timelion/lib/observe_resize';
+import calculateInterval from 'plugins/timelion/lib/calculate_interval';
 
 const SET_LEGEND_NUMBERS_DELAY = 50;
 
@@ -14,8 +14,9 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
       help: 'Draw a timeseries chart',
       render: function ($scope, $elem) {
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
-        const timezone = Private(require('plugins/timelion/services/timezone'))();
+        const tickFormatters = require('plugins/timelion/services/tick_formatters')();
         const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
+        const generateTicks = Private(require('plugins/timelion/panels/timechart/tick_generator'));
 
         // TODO: I wonder if we should supply our own moment that sets this every time?
         // could just use angular's injection to provide a moment service?
@@ -103,13 +104,13 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           $rootScope.$broadcast('timelionPlotLeave');
         });
 
-        $scope.$on('timelionPlotHover', function (angularEvent, flotEvent, pos, time) {
+        $scope.$on('timelionPlotHover', function (angularEvent, flotEvent, pos) {
           if (!$scope.plot) return;
           $scope.plot.setCrosshair(pos);
           debouncedSetLegendNumbers(pos);
         });
 
-        $scope.$on('timelionPlotLeave', function (angularEvent, flotEvent, pos, time) {
+        $scope.$on('timelionPlotLeave', function () {
           if (!$scope.plot) return;
           $scope.plot.clearCrosshair();
           clearLegendNumbers();
@@ -147,7 +148,11 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
             }
 
             if (y != null) {
-              legendValueNumbers.eq(i).text('(' + y.toFixed(precision) + ')');
+              let label = y.toFixed(precision);
+              if (series.yaxis.tickFormatter) {
+                label = series.yaxis.tickFormatter(label, series.yaxis);
+              }
+              legendValueNumbers.eq(i).text(`(${label})`);
             } else {
               legendValueNumbers.eq(i).empty();
             }
@@ -162,14 +167,14 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
 
         let legendScope = $scope.$new();
         function drawPlot(plotConfig) {
-
-          if (!plotConfig || !plotConfig.length) {
-            $elem.empty();
-            return;
-          }
-
           if (!$('.chart-canvas', $elem).length) $elem.html(template);
           const canvasElem = $('.chart-canvas', $elem);
+
+          // we can't use `$.plot` to draw the chart when the height or width is 0
+          // so, we'll need another event to trigger drawPlot to actually draw it
+          if (canvasElem.height() === 0 || canvasElem.width() === 0) {
+            return;
+          }
 
           const title = _(plotConfig).map('_title').compact().last();
           $('.chart-top-title', $elem).text(title == null ? '' : title);
@@ -224,11 +229,19 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
             return series;
           });
 
-          try {
-            $scope.plot = $.plot(canvasElem, _.compact(series), options);
-          } catch (e) {
-            setTimeout(drawPlot, 500);
+          if (options.yaxes) {
+            options.yaxes.forEach(yaxis => {
+              if (yaxis && yaxis.units) {
+                yaxis.tickFormatter = tickFormatters[yaxis.units.type];
+                const byteModes = ['bytes', 'bytes/s'];
+                if (byteModes.includes(yaxis.units.type)) {
+                  yaxis.tickGenerator = generateTicks;
+                }
+              }
+            });
           }
+
+          $scope.plot = $.plot(canvasElem, _.compact(series), options);
 
           if ($scope.plot) {
             $scope.$emit('renderComplete');

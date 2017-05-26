@@ -201,6 +201,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       // Following the "best practice" of always have a '.' in your ng-models –
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
       $scope.model = {
+        hideBorders: dashboardState.getHideBorders(), // kibi: toggle borders around panels
         query: dashboardState.getQuery(),
         darkTheme: dashboardState.getDarkTheme(),
         timeRestore: dashboardState.getTimeRestore(),
@@ -243,11 +244,6 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         $scope.refresh();
       };
 
-      function hideBorders(enabled) {
-        $scope.$broadcast('border', !enabled);
-      }
-
-
       /**
        * Creates a child ui state for the panel. It's passed the ui state to use, but needs to
        * be generated from the parent (why, I don't know yet).
@@ -265,6 +261,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         dashboardState.setDarkTheme($scope.model.darkTheme);
         updateTheme();
       });
+      $scope.$watch('model.hideBorders', () => dashboardState.setHideBorders($scope.model.hideBorders));
       $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
       $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
 

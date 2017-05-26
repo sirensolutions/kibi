@@ -145,6 +145,17 @@ class DashboardState {
     return this.appState.query;
   }
 
+  // kibi: toggle borders around panels
+  getHideBorders() {
+    return this.appState.options.hideBorders;
+  }
+
+  // kibi: toggle borders around panels
+  setHideBorders(hideBorders) {
+    this.appState.options.hideBorders = hideBorders;
+    this.saveState();
+  }
+
   getDarkTheme() {
     return this.appState.options.darkTheme;
   }

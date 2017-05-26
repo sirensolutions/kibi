@@ -85,10 +85,11 @@
     <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.click('edit');" aria-label="Edit">Edit</a> button in the menu bar above to start working on your new dashboard.
   </div>
 
-  <!-- kibi: opts is added for access to border options -->
+  <!--kibi: added hideBorders options to toggle borders around panels-->
   <dashboard-grid
     ng-show="!hasExpandedPanel()"
     on-panel-removed="onPanelRemoved"
+    hide-borders="model.hideBorders"
     dashboard-view-mode="dashboardViewMode"
     panels="panels"
     get-vis-click-handler="getFilterBarClickHandler"
@@ -97,13 +98,14 @@
     toggle-expand="toggleExpandPanel"
     create-child-ui-state="createChildUiState"
     toggle-expand="toggleExpandPanel"
-    opts="opts"
   ></dashboard-grid>
 
+  <!--kibi: added hideBorders options to toggle borders around panels-->
   <dashboard-panel ng-if="hasExpandedPanel()"
                    panel="expandedPanel"
                    is-full-screen-mode="!chrome.getVisible()"
                    is-expanded="true"
+                   hide-borders="model.hideBorders"
                    dashboard-view-mode="dashboardViewMode"
                    get-vis-click-handler="getFilterBarClickHandler"
                    get-vis-brush-handler="getBrushEvent"

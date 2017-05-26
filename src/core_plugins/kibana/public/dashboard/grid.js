@@ -14,6 +14,11 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
     restrict: 'E',
     scope: {
       /**
+       * toggle borders around panels
+       * @author kibi
+       */
+      hideBorders: '=',
+      /**
        * What view mode the dashboard is currently in - edit or view only.
        * @type {DashboardViewMode}
        */
@@ -202,6 +207,7 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
                   panel="findPanelByPanelIndex(${panel.panelIndex}, panels)"
                   is-full-screen-mode="isFullScreenMode"
                   is-expanded="false"
+                  hide-borders="hideBorders"
                   dashboard-view-mode="dashboardViewMode"
                   get-vis-click-handler="getVisClickHandler"
                   get-vis-brush-handler="getVisBrushHandler"

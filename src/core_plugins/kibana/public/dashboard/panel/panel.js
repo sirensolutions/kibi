@@ -29,6 +29,11 @@ uiModules
     template: panelTemplate,
     scope: {
       /**
+       * toggle borders around panels
+       * @author kibi
+       */
+      hideBorders: '=',
+      /**
        * What view mode the dashboard is currently in - edit or view only.
        * @type {DashboardViewMode}
        */
@@ -167,10 +172,14 @@ uiModules
           filterManager.add(field, value, operator, index);
         };
 
-        $scope.border = !$scope.$parent.opts.ui.hideBorder;
-        $scope.$on('border', function (event, enabled) {
-          $scope.border = enabled;
+        // kibi: toggle borders around panels
+        $scope.border = !$scope.hideBorders;
+        $scope.$watch('hideBorders', hideBorders => {
+          if (hideBorders !== undefined) {
+            $scope.border = !$scope.hideBorders;
+          }
         });
+        // kibi: end
       }
 
       $scope.loadedPanel = loadSavedObject(getObjectLoadersForDashboard(), $scope.panel)

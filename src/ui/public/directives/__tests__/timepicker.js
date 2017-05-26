@@ -173,19 +173,12 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('should have a $scope.setQuick() that calls handler', function (done) {
+    it('should have a $scope.setQuick() that calls handler', function () {
       $scope.setQuick('now', 'now');
-// MERGE 5.3.2 fix it
-// <<<<<<< HEAD
-//       sinon.assert.calledOnce(syncTimeTo); // kibi: added to test if syncTimeTo is called
-//       expect($scope.from).to.be('now');
-//       expect($scope.to).to.be('now');
-// =======
-//       sinon.assert.calledOnce($parentScope.updateFilter);
-//       expect($parentScope.updateFilter.firstCall.args[0]).to.be('now');
-//       expect($parentScope.updateFilter.firstCall.args[1]).to.be('now');
-// >>>>>>> v5.3.2
-      done();
+      sinon.assert.calledOnce(syncTimeTo); // kibi: added to test if syncTimeTo is called
+      sinon.assert.calledOnce($parentScope.updateFilter);
+      expect($parentScope.updateFilter.firstCall.args[0]).to.be('now');
+      expect($parentScope.updateFilter.firstCall.args[1]).to.be('now');
     });
   });
 
@@ -215,8 +208,7 @@ describe('timepicker directive', function () {
     });
 
     it('disables the submit button if the form is invalid', function (done) {
-      let button;
-      button = $elem.find('button[disabled]');
+      let button = $elem.find('button[disabled]');
       expect(button.length).to.be(0);
 
       // Make the form invalid
@@ -229,18 +221,20 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('disables the submit button if the year is negative', function () {
-      let button = $elem.find('button[disabled]');
-      expect(button.length).to.be(0);
+    describe('kibi', function () {
+      it('disables the submit button if the year is negative', function () {
+        let button = $elem.find('button[disabled]');
+        expect(button).to.have.length(0);
 
-      // Make the form invalid
-      $scope.relative.from.count = 9999;
-      $scope.relative.from.unit = 'y';
-      $scope.formatRelative();
-      $scope.$digest();
+        // Make the form invalid
+        $scope.relative.from.count = 9999;
+        $scope.relative.from.unit = 'y';
+        $scope.formatRelative('from');
+        $scope.$digest();
 
-      button = $elem.find('button[disabled]');
-      expect(button.length).to.be(1);
+        button = $elem.find('button[disabled]');
+        expect(button).to.have.length(1);
+      });
     });
 
     it('has a dropdown bound to relative.from.unit that contains all of the intervals', function (done) {

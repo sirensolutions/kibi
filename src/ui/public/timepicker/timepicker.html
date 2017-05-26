@@ -52,15 +52,15 @@
                       greater-than="-1"
                       min="0"
                       type="number"
-                      class="kibi-from-input form-control">
+                      class="kibi-from-input form-control"/>
                   </div>
                   <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
                     <select
                       ng-model="relative.from.unit"
                       ng-options="opt.value as opt.text for opt in relativeOptions"
                       ng-change="formatRelative('from')"
-                      class="form-control col-xs-2">
-                    </select>
+                      class="form-control col-xs-2"
+                    ></select>
                   </div>
                   <br>
                   <div class="small">
@@ -69,7 +69,7 @@
                         ng-model="relative.from.round"
                         ng-checked="relative.from.round"
                         ng-change="formatRelative('from')"
-                        type="checkbox">
+                        type="checkbox"/>
                       round to the {{units[relative.from.unit.substring(0,1)]}}
                     </label>
                     <div
@@ -119,15 +119,7 @@
                   </div>
                 </div>
 
-                <div class="kbn-timepicker-section">
-                  <label>&nbsp;</label>
-                  <br>
-                  <div class="form-group">
-                    <button type="submit" class="btn btn-primary kbn-timepicker-go" ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()">
-                      Go
-                    </button>
-                  </div>
-                </div>
+                <!--kibi: removed Go button and rely on the kibi_sync_time_to directive instead-->
               </form>
             </div>
 

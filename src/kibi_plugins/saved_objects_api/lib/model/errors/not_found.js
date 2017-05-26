@@ -1,7 +1,7 @@
 /**
  * Thrown when an object is not found.
  */
-export default class NotFoundError {
+export default class NotFoundError extends Error {
   /**
    * Creates a new NotFoundError.
    *
@@ -9,9 +9,19 @@ export default class NotFoundError {
    * @param {Error} inner - An optional error that caused the NotFoundError.
    */
   constructor(message, inner) {
+    super(message);
     this.name = 'NotFoundError';
-    this.message = message;
     this.inner = inner;
-    this.stack = new Error().stack;
+
+    return new Proxy(this, {
+      get(target, name) {
+        const value = target[name];
+
+        if (value) {
+          return value;
+        }
+        return inner[name];
+      }
+    });
   }
 }

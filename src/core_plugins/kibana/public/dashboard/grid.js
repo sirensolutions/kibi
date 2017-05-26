@@ -53,6 +53,11 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
        * @type {function}
        */
       toggleExpand: '=',
+       /**
+       * kibi: Used to access a borders option for the panel from parent options.
+       * @type {Object}
+       */
+      opts: '=',
     },
     link: function ($scope, $el) {
       const notify = createNotifier();

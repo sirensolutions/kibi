@@ -335,6 +335,8 @@ CRUD:
 SEARCH:
   - "indices:data/read/search*"
   - "indices:data/read/msearch*"
+  - "indices:siren/plan*"
+  - "indices:siren/mplan*"
   - SUGGEST
 
 SUGGEST:
@@ -361,8 +363,8 @@ CLUSTER_MONITOR:
 CLUSTER_COMPOSITE_OPS_RO:
   - "indices:data/read/mget"
   - "indices:data/read/msearch"
+  - "indices:siren/mplan"
   - "indices:data/read/mtv"
-  - "indices:data/read/coordinate-msearch*"
   - "indices:admin/aliases/exists*"
   - "indices:admin/aliases/get*"
 
@@ -377,7 +379,7 @@ KIBI_CLUSTER:
   - "indices:data/read/scroll"
   - "cluster:internal/data/transfer/*"
   - "indices:data/read/msearch*"
-  - "indices:siren/task/msearch*"
+  - "indices:siren/mplan*"
   - CLUSTER_COMPOSITE_OPS_RO
 
 KIBI_READONLY:
@@ -385,6 +387,9 @@ KIBI_READONLY:
   - "indices:data/read/get*"
   - "indices:data/read/mget*"
   - "indices:data/read/search*"
+  - "indices:siren/mplan"
+  - "indices:siren/plan"
+  - "indices:siren/task/search"
   - "indices:admin/mappings/get*"
   - "indices:admin/mappings/fields/get*"
   - "indices:admin/validate/query*"
@@ -398,7 +403,7 @@ KIBI_READWRITE:
   - "indices:data/write/delete*"
   - "indices:data/write/index*"
   - "indices:data/write/update*"
-  - "KIBI_READONLY
+  - KIBI_READONLY
 ----
 
 This file contains named groups of permissions which can be used in the roles
@@ -449,6 +454,16 @@ logstash:
         - CRUD
         - CREATE_INDEX
 
+# Permissions for a Marvel agent.
+marvel:
+  cluster:
+    - indices:admin/template/get
+    - indices:admin/template/put
+  indices:
+    '?marvel*':
+      '*':
+        - ALL
+
 # Permissions for a Sentinl user.
 sentinl:
   cluster:
@@ -489,12 +504,13 @@ kibiserver:
         - ALL
     '?kibiaccess':
       '*':
-        - ALL
+        - ALL    
 
 # Permissions for a Kibi administrator (read-write access to the .kibi index).
 kibiadmin:
   cluster:
     - KIBI_CLUSTER
+    - cluster:admin/plugin/siren/license/put
   indices:
     '*':
       '*':
@@ -523,10 +539,10 @@ kibiuser:
     'article':
       '*':
         - KIBI_READONLY
-    'company':
+    'investment':
       '*':
         - KIBI_READONLY
-    'investment':
+    'company':
       '*':
         - KIBI_READONLY
     'investor':
@@ -1030,7 +1046,6 @@ default) to users by adding the following permissions on the `null` type in
 each user role:
 
 - `indices:data/read/search`
-- `indices:data/read/coordinate-search`
 
 E.g.:
 

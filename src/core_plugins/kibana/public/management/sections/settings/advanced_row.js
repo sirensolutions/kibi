@@ -27,12 +27,12 @@ uiModules.get('apps/management')
         conf.loading = true;
         fn()
           .then(function () {
-            conf.loading = conf.editing = false;
+            conf.loading = false;
+            conf.editing = false;
           })
-          // siren: cancel edit and notify error
+          // siren: not loading anymore but stay in edit mode so that the user may fix what's wrong with his change
           .catch((error) => {
-            config.set(conf.name, conf.defVal);
-            notify.error(error);
+            conf.loading = false;
           });
           // siren: end
       };
@@ -56,17 +56,7 @@ uiModules.get('apps/management')
             return config.remove(conf.name);
           }
 
-          // siren: added to allow for custom validation step before saving the value
-          let value = conf.unsavedValue;
-          if (conf.validator) {
-            value = $scope.validator(conf.validator, conf.unsavedValue);
-            if (value instanceof Error) {
-              conf.loading = false;
-              return Promise.reject(`Wrong value set for: ${conf.name}. ${value.message}`);
-            }
-          }
-          return config.set(conf.name, value);
-          // siren: end
+          return config.set(conf.name, conf.unsavedValue);
         });
       };
 
@@ -78,29 +68,6 @@ uiModules.get('apps/management')
         return loading(conf, function () {
           return config.remove(conf.name);
         });
-      };
-
-      // siren: custom validator for value
-      $scope.validator = function (validator, val) {
-        switch (validator) {
-          case 'positiveIntegerValidator':
-            if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
-              return new Error('Should be positive integer but was [' + val + '].');
-            }
-            return parseInt(val);
-          default:
-            return new Error('Unknown validator [' + validator + '] for [' + val + '].');
-        }
-      };
-      //  siren: end
-
-      $scope.isDefaultValue = (conf) => {
-        // conf.isCustom = custom setting, provided by user, so there is no notion of
-        // having a default or non-default value for it
-        return conf.isCustom
-          || conf.value === undefined
-          || conf.value === ''
-          || String(conf.value) === String(conf.defVal);
       };
     }
   };

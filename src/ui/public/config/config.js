@@ -1,5 +1,5 @@
 import angular from 'angular';
-import { cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
+import { isEqual, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
 import uiModules from 'ui/modules';
 import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
 const module = uiModules.get('kibana/config');
@@ -56,8 +56,39 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     return scope.$on(`change:config`, update);
   }
 
+  // kibi: custom validator for value
+  const _validators = function (validator, val) {
+    if (val === null) {
+      // unset the value
+      return null;
+    }
+    switch (validator) {
+      case 'positiveIntegerValidator':
+        if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
+          throw `Should be a positive integer but was [${val}].`;
+        }
+        return parseInt(val);
+      default:
+        throw `Unknown validator [${validator}] for [${val}].`;
+    }
+  };
+  // kibi: end
+
   function change(key, value) {
     const declared = config.isDeclared(key);
+
+    // kibi: added to allow for custom validation step before saving the value
+    if (declared && settings[key].validator) {
+      try {
+        value = _validators(settings[key].validator, value);
+      } catch (err) {
+        const validationError = new Error(`Wrong value set for: ${key}. ${err}`);
+        notify.error(validationError);
+        return Promise.reject(validationError);
+      }
+    }
+    // kibi: end
+
     const oldVal = declared ? settings[key].userValue : undefined;
     const newVal = key in defaults && defaults[key].defaultValue === value ? null : value;
     const unchanged = oldVal === newVal;
@@ -74,6 +105,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
       .catch(reason => {
         localUpdate(key, initialVal, config.get(key));
         notify.error(reason);
+        throw reason; // kibi: rethrow the error so that it is handled downstream in the UI
       });
   }
 
@@ -91,9 +123,15 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     } else {
       const { type } = settings[key];
       if (type === 'json' && typeof value !== 'string') {
-        settings[key].userValue = angular.toJson(value);
-      } else {
+        if (!isEqual(value, JSON.parse(settings[key].value))) {
+          settings[key].userValue = angular.toJson(value);
+        } else {
+          delete settings[key].userValue;
+        }
+      } else if (value !== settings[key].value) {
         settings[key].userValue = value;
+      } else {
+        delete settings[key].userValue;
       }
     }
   }

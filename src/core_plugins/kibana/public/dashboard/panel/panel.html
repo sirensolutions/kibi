@@ -19,10 +19,12 @@
       >
         <span class="fa" ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"></span>
       </a>
+      <!-- kibi: allows restore the uiState after click edit visualization on dashboard -->
       <a aria-label="Edit"
          data-test-subj="dashboardPanelEditLink"
          ng-show="!isViewOnlyMode() && editUrl"
          ng-href="{{::editUrl}}"
+         ng-click="edit()"
       >
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>

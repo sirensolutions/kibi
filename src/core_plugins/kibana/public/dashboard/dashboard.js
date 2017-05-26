@@ -243,18 +243,10 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         $scope.refresh();
       };
 
-      // called by the saved-object-finder when a user clicks a vis
-      $scope.addVis = function (hit) {
-        pendingVisCount++;
-        dashboardState.addNewPanel(hit.id, 'visualization');
-        notify.info(`Visualization successfully added to your dashboard`);
-      };
+      function hideBorders(enabled) {
+        $scope.$broadcast('border', !enabled);
+      }
 
-      $scope.addSearch = function (hit) {
-        pendingVisCount++;
-        dashboardState.addNewPanel(hit.id, 'search');
-        notify.info(`Search successfully added to your dashboard`);
-      };
 
       /**
        * Creates a child ui state for the panel. It's passed the ui state to use, but needs to

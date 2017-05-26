@@ -1,12 +1,17 @@
+import Notifier from 'ui/notify/notifier';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 describe('config component', function () {
   let config;
   let $scope;
+  let $timeout;
+  let $httpBackend;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
+  beforeEach(ngMock.inject(function (_$httpBackend_, _$timeout_, $injector, Private) {
+    $timeout = _$timeout_;
+    $httpBackend = _$httpBackend_;
     config = $injector.get('config');
     $scope = $injector.get('$rootScope');
   }));
@@ -42,6 +47,54 @@ describe('config component', function () {
     it('stores a value in a previously unknown config key', function () {
       expect(config.set).withArgs('unrecognizedProperty', 'somevalue').to.not.throwException();
       expect(config.get('unrecognizedProperty')).to.be('somevalue');
+    });
+
+    describe('kibi - validators', function () {
+      beforeEach(function () {
+        $httpBackend.whenPOST('/api/kibana/settings/kibi:panel_vertical_size').respond(200);
+        $httpBackend.whenDELETE('/api/kibana/settings/kibi:panel_vertical_size').respond(200);
+      });
+
+      afterEach(function () {
+        config.set('kibi:panel_vertical_size', null);
+        $timeout.flush();
+      });
+
+      it('should fail on negative number', function () {
+        return config.set('kibi:panel_vertical_size', -1)
+        .then(() => expect().fail('should fail'))
+        .catch(err => {
+          expect(err.message).to.contain('Should be a positive integer');
+          expect(Notifier.prototype._notifs).to.have.length(1);
+          expect(Notifier.prototype._notifs[0].type).to.be('danger');
+          expect(Notifier.prototype._notifs[0].content)
+            .to.contain('Should be a positive integer');
+          Notifier.prototype._notifs.length = 0;
+        });
+      });
+
+      it('should fail when given anything but a number', function () {
+        return config.set('kibi:panel_vertical_size', 'not a number')
+        .then(() => expect().fail('should fail'))
+        .catch(err => {
+          expect(err.message).to.contain('Should be a positive integer');
+          expect(Notifier.prototype._notifs).to.have.length(1);
+          expect(Notifier.prototype._notifs[0].type).to.be('danger');
+          expect(Notifier.prototype._notifs[0].content)
+            .to.contain('Should be a positive integer');
+          Notifier.prototype._notifs.length = 0;
+        });
+      });
+
+      it('should accept a positive integer', function () {
+        config.set('kibi:panel_vertical_size', 20);
+        expect(config.get('kibi:panel_vertical_size')).to.be(20);
+      });
+
+      it('should accept zero', function () {
+        config.set('kibi:panel_vertical_size', 0);
+        expect(config.get('kibi:panel_vertical_size')).to.be(0);
+      });
     });
   });
 

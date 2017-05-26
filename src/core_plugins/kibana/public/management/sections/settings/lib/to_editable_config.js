@@ -19,9 +19,7 @@ function toEditableConfig({ def, name, value, isCustom }) {
     defVal: def.value,
     type: getValType(def, value),
     description: def.description,
-    options: def.options,
-    // kibi: added to allow for custom validation function
-    validator: def.validator
+    options: def.options
   };
 
   const editor = getEditorType(conf);

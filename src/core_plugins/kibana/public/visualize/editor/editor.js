@@ -73,11 +73,12 @@ uiModules
   return {
     restrict: 'E',
     controllerAs: 'visualizeApp',
-    controller: Editor,
+    controller: VisEditor,
   };
 });
 
-function Editor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier, kibiState) {
+function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier, kibiState,
+  sessionStorage) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -211,6 +212,26 @@ function Editor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUr
     // map-specific information (e.g. mapZoom, mapCenter).
     vis.setUiState($scope.uiState);
 
+    // kibi: allows restore the uiState after click edit visualization on dashboard
+    const kibiPanelId = sessionStorage.get('kibi_panel_id');
+    if (kibiPanelId) {
+      if (kibiPanelId.id === $scope.savedVis.id) {
+        $scope.uiState.fromString(JSON.stringify(sessionStorage.get('kibi_ui_state')));
+        vis.setUiState($scope.uiState);
+        $scope.uiState.on('set', () => {
+          sessionStorage.set('kibi_ui_state', $scope.vis.getUiState().toJSON());
+          sessionStorage.set('kibi_panel_id', {
+            id: sessionStorage.get('kibi_panel_id').id,
+            panel: sessionStorage.get('kibi_panel_id').panel,
+            updated: true
+          });
+        });
+      } else {
+        sessionStorage.remove('kibi_panel_id');
+        sessionStorage.remove('kibi_ui_state');
+      }
+    }
+    // kibi: end
 
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');

@@ -38,7 +38,8 @@ uiRoutes
   }
 });
 
-function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngineClient, savedDatasources, $element, $routeParams) {
+function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngineClient, savedDatasources, $element, $routeParams,
+  $timeout) {
   $scope.isJDBC = kibiUtils.isJDBC;
   $scope.isSPARQL = kibiUtils.isSPARQL;
   $scope.isSQL = kibiUtils.isSQL;
@@ -163,6 +164,10 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
         } else {
           $scope.preview.templateId = 'kibi-table-jade';
         }
+
+        $timeout(() => {
+          $scope.$apply();
+        });
         return $scope.preview();
       }).catch(notify.error);
     }

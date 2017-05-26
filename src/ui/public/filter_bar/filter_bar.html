@@ -14,7 +14,7 @@
   <!--kibi: added kibi CSS classes for coloring kibi-specific filters.-->
   <!--kibi: added data-test-subj to be able to test join filters-->
   <div class="filter"
-       ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled, join: filter.join_set || filter.join_sequence, dependsOnSelectedEntities: filter.meta.dependsOnSelectedEntities && filter.meta.markDependOnSelectedEntities, dependsOnSelectedEntitiesDisabled: filter.meta.dependsOnSelectedEntitiesDisabled && filter.meta.dependsOnSelectedEntities }">
+       ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled, join: filter.join_set || filter.join_sequence, dependsOnSelectedEntities: filter.meta.dependsOnSelectedEntities && filter.meta.markDependOnSelectedEntities, dependsOnSelectedEntitiesDisabled: filter.meta.dependsOnSelectedEntitiesDisabled && filter.meta.dependsOnSelectedEntities }"
        ng-repeat="filter in filters track by $index"
        data-test-subj="{{filter.join_set ? 'join_set' : (filter.join_sequence ? 'join_sequence' : 'regular')}}"
   >

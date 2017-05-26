@@ -1,10 +1,12 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import { DashboardState } from '../dashboard_state';
+// kibi: we need to call Private on this
+import DashboardStateProvider from '../dashboard_state';
 
 describe('DashboardState', function () {
   let AppState;
+  let DashboardState;
   let dashboardState;
   let savedDashboard;
   let SavedDashboard;
@@ -16,7 +18,8 @@ describe('DashboardState', function () {
   }
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
+  beforeEach(ngMock.inject(function ($injector, Private) {
+    DashboardState = Private(DashboardStateProvider);
     timefilter = $injector.get('timefilter');
     quickTimeRanges = $injector.get('quickRanges');
     AppState = $injector.get('AppState');

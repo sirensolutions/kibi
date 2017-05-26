@@ -12,7 +12,7 @@ import { DashboardViewMode } from '../dashboard_view_mode';
 
 uiModules
 .get('app/dashboard')
-.directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector, getObjectLoadersForDashboard) {
+.directive('dashboardPanel', function (savedVisualizations, savedSearches, Private, $injector, getObjectLoadersForDashboard) {
   const filterManager = Private(FilterManagerProvider);
 
   const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {

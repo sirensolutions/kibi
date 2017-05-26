@@ -68,10 +68,22 @@ describe('SearchSource', function () {
         },
         query: 'google',
         filter: [
+          // this is a query from the search bar
           {
             query: {
               query_string: {
                 query: 'torrent'
+              }
+            }
+          },
+          // this is a query from the filter bar
+          {
+            meta: {
+              disabled: false
+            },
+            query: {
+              query_string: {
+                query: 'linux'
               }
             }
           },
@@ -94,8 +106,9 @@ describe('SearchSource', function () {
         expect(query.filtered.query.bool.must).to.have.length(2);
         expect(query.filtered.query.bool.must[0].query_string.query).to.be('google');
         expect(query.filtered.query.bool.must[1].query_string.query).to.be('torrent');
-        expect(query.filtered.filter.bool.must).to.have.length(1);
-        expect(query.filtered.filter.bool.must[0].query.match.message).not.to.be(undefined);
+        expect(query.filtered.filter.bool.must).to.have.length(2);
+        expect(query.filtered.filter.bool.must[0].query.query_string.query).to.be('linux');
+        expect(query.filtered.filter.bool.must[1].query.match.message).to.be('toto');
       });
     });
   });

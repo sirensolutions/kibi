@@ -156,21 +156,7 @@ module.exports = function (kibana) {
 
         enterprise_enabled: Joi.boolean().default(false),
         elasticsearch: Joi.object({
-          auth_plugin: Joi.string().allow('').default(''),
-          transport_client: Joi.object({
-            username: Joi.string().allow('').default(''),
-            password: Joi.string().allow('').default(''),
-            ssl: Joi.object({
-              ca: Joi.string().allow('').default(''),
-              ca_password: Joi.string().allow('').default(''),
-              ca_alias: Joi.string().allow('').default(''),
-              key_store: Joi.string().allow('').default(''),
-              key_store_password: Joi.string().allow('').default(''),
-              key_store_alias: Joi.string().allow('').default(''),
-              verify_hostname: Joi.boolean().default(true),
-              verify_hostname_resolve: Joi.boolean().default(false)
-            })
-          })
+          auth_plugin: Joi.string().allow('').default('')
         }),
         gremlin_server: Joi.object({
           log_conf_path: Joi.string().allow('').default(''),
@@ -178,9 +164,9 @@ module.exports = function (kibana) {
           path: Joi.string().allow('').default(''),
           url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://127.0.0.1:8080'),
           ssl: Joi.object({
-            key_store: Joi.string().default(''),
-            key_store_password: Joi.string().default(''),
-            ca: Joi.string().allow('').default('')
+            key_store: Joi.string(),
+            key_store_password: Joi.string(),
+            ca: Joi.string()
           })
         }),
 

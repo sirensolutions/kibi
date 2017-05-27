@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import 'ui/promises';
-import Notifier from 'ui/notify/notifier';
+import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 
 export default function LooperFactory($timeout, Promise) {
   const notify = new Notifier();

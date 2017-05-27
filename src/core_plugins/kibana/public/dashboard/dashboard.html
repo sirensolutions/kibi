@@ -11,31 +11,31 @@
       <div
         data-transclude-slot="topLeftCorner"
       >
-        <!-- siren: adds group icon, bigger title and stats -->
-        <i
-          ng-show="dash.id"
-          ng-if="dash.group.iconCss"
-          class="dashboard-icon-image {{dash.group.iconCss}}"
-        ></i>
-        <img
-          ng-show="dash.id"
-          ng-if="dash.group.iconUrl"
-          ng-src="dashboard-icon-image {{dash.group.iconUrl}}"
-        />
         <div class="kuiLocalBreadcrumbs" data-test-subj="breadcrumbs">
           <div class="kuiLocalBreadcrumb">
             <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
           </div>
           <div class="kuiLocalBreadcrumb">
+            <!-- siren: adds group icon, bigger title and stats -->
+            <i
+              ng-show="dash.id"
+              ng-if="dash.group.iconCss"
+              class="dashboard-icon-image {{dash.group.iconCss}}"
+            ></i>
+            <img
+              ng-show="dash.id"
+              ng-if="dash.group.iconUrl"
+              ng-src="dashboard-icon-image {{dash.group.iconUrl}}"
+            />
             {{ getDashTitle() }}
+            <span
+              ng-show="dash.id && dash.group.selected.count !== undefined"
+              class="dashboard-stats"
+            >
+              ({{dash.group.selected.formatedCount}})
+            </span>
           </div>
         </div>
-        <span
-          ng-show="dash.id && dash.group.selected.count !== undefined"
-          class="dashboard-stats"
-        >
-          ({{dash.group.selected.formatedCount}})
-        </span>
       </div>
 
       <!-- Search. -->

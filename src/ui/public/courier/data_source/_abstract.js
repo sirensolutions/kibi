@@ -322,7 +322,10 @@ define(function (require) {
                 }
               });
               // siren: extract the query_string queries so that they contribute to the scoring
-              const userQueries = _(flatState.filters).remove(filter => _.has(filter.query, 'query_string.query')).map('query').value();
+              const userQueries = _(flatState.filters)
+                .remove(filter => _.has(filter.query, 'query_string.query') && !filter.meta)
+                .map('query')
+                .value();
 
               flatState.body.query = {
                 filtered: {

@@ -137,12 +137,14 @@ registry.register(function ($document, $location) {
     hideButton() {
       return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources');
     },
-    controller($scope) {
-      $scope.sectionName = _getSectionName($location);
-      $scope.displayName = _getDisplayName($location);
-      $scope.makeUrl = function (hit) {
-        return `#/management/siren/${_getSectionName($location)}/${hit.id}`;
-      };
+    locals: {
+      controller($scope) {
+        $scope.sectionName = _getSectionName($location);
+        $scope.displayName = _getDisplayName($location);
+        $scope.makeUrl = function (hit) {
+          return `#/management/siren/${_getSectionName($location)}/${hit.id}`;
+        };
+      }
     },
     testId: 'open'
   };

@@ -20,9 +20,6 @@ export default function ($compile) {
       };
       this.locals = new Map();
 
-      // kibi: navbar extensions can pass controllers
-      this.controllers = [];
-
       this.addItems(opts);
     }
 

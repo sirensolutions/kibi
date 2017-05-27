@@ -240,27 +240,31 @@ uiModules
 
       return this._getDashboardsMetadata(ids, forceCountsUpdate)
       .then(metadata => {
-        _.each(this.getGroups(), (g) => {
-          _.each(g.dashboards, (d) => {
+        const promises = [];
+        _.each(this.getGroups(), g => {
+          _.each(g.dashboards, d => {
             const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
             if (foundDashboardMetadata) {
-              joinExplanation.constructFilterIconMessage(
+              promises.push(joinExplanation.constructFilterIconMessage(
                 foundDashboardMetadata.filters,
                 foundDashboardMetadata.queries
               ).then(filterIconMessage => {
                 d.count = foundDashboardMetadata.count;
                 d.isPruned = foundDashboardMetadata.isPruned;
                 d.filterIconMessage = filterIconMessage;
-              });
+              }));
             } else if (_.contains(ids, d.id)) {
               // count for that dashboard was requested but is not in the metadata, likely because it doesn't have a savedSearchId
               delete d.count;
               delete d.isPruned;
               delete d.filterIconMessage;
+              promises.push(Promise.resolve());
             }
           });
         });
-        this.emit('dashboardsMetadataUpdated', ids);
+        return Promise.all(promises).then(() => {
+          this.emit('dashboardsMetadataUpdated', ids);
+        });
       });
     }
 
@@ -271,10 +275,10 @@ uiModules
 
       return this._getDashboardsMetadata(dashboardIds)
       .then(metadata => {
-        _.each(group.dashboards, d => {
+        return Promise.map(group.dashboards, d => {
           const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
           if (foundDashboardMetadata) {
-            joinExplanation.constructFilterIconMessage(
+            return joinExplanation.constructFilterIconMessage(
               foundDashboardMetadata.filters,
               foundDashboardMetadata.queries
             ).then(filterIconMessage => {
@@ -283,8 +287,10 @@ uiModules
               d.filterIconMessage = filterIconMessage;
             });
           }
+        })
+        .then(() => {
+          this.emit('groupsMetadataUpdated', groupId);
         });
-        this.emit('groupsMetadataUpdated', groupId);
       });
     }
 

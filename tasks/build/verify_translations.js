@@ -31,7 +31,10 @@ export default function (grunt) {
       },
       plugins: {
         initialize: true,
-        scanDirs: [fromRoot('src/core_plugins')]
+        scanDirs: [
+          fromRoot('src/core_plugins'),
+          fromRoot('src/kibi_plugins') // kibi: load saved_objects_api plugin
+        ]
       },
       uiSettings: {
         enabled: false

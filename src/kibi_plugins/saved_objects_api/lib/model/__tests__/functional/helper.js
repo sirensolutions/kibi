@@ -79,6 +79,13 @@ export default class ModelTestHelper {
   }
 
   /**
+   * Returns an instance of the admin cluster used by the model class being tested.
+   */
+  getCluster() {
+    return this._cluster;
+  }
+
+  /**
    * Reloads specified scenario.
    *
    * @param {Object} scenario - The scenario to reload.
@@ -113,6 +120,8 @@ export default class ModelTestHelper {
 
   /**
    * Tests the creation of a new object through the specified model class.
+   *
+   * @param request - An optional HAPI request mock.
    */
   async testCreation() {
     const id = `${this._prefix}1`;

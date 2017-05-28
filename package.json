@@ -265,7 +265,8 @@
     "supertest-as-promised": "2.0.2",
     "webpack-dev-server": "1.14.1",
 
-    "mockery": "1.4.0"
+    "mockery": "1.4.0",
+    "grunt-mocha-istanbul": "5.0.2"
   },
   "engines": {
     "node": "6.10.2",

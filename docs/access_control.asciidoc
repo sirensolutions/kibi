@@ -10,30 +10,35 @@ used by the <<graph_browser,graph browser>> visualization) must be configured to
 [float]
 == Enabling HTTPS in Kibi
 
-HTTPS support in Kibi can be enabled natively or by putting a reverse SSL proxy in front of it (e.g. nginx).
+SSL support in the Kibi HTTP interface can be enabled natively or by putting a reverse SSL proxy in front of it (e.g. nginx).
 
 [float]
-=== Native HTTPS support
+=== Native SSL support
 
-Native HTTPS support can be enabled by copying certificate and key files to a
+Native SSL support can be enabled by copying certificate and key files to a
 location readable by the Kibi process and setting the following parameters
 in `config/kibi.yml`:
 
-- **server.ssl.cert**: path to a certificate.
-- **server.ssl.key**: path to the certificate key.
+- `server.ssl.enabled`: set to `true` to enable SSL.
+- `server.ssl.certificate`: path to a certificate.
+- `server.ssl.key`: path to the certificate key.
+- `server.ssl.keyPassphrase`: the passphrase of the certificate key; if the key is not encrypted the parameter can be omitted.
 
-Both files must be PEM encoded.
+Certificate and key files must be PEM encoded.
 
 E.g.:
 
 [source,yaml]
 ----
-server.ssl.cert: "pki/server.crt"
+server.ssl.enabled: true
+server.ssl.certificate: "pki/server.crt"
 server.ssl.key: "pki/server.key"
 ----
 
 The Kibi EE demo distribution includes a sample certificate and key in the `pki`
 directory.
+
+NOTE: For additional SSL settings please refer to the <<settings,settings chapter>>.
 
 [float]
 == Enabling HTTPS in Gremlin Server

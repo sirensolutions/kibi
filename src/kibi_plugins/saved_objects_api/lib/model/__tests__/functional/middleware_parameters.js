@@ -89,7 +89,7 @@ describe('saved_objects_api/functional', function () {
 
       it('should set client parameters when creating an object.', async () => {
         const model = helper.getInstance();
-        await model.create('idx1', {title: '1'}, request);
+        await model.create('idx1', { title: '1' }, request);
 
         sinon.assert.callCount(callWithRequestSpy, 3);
         sinon.assert.calledWith(callWithRequestSpy, {}, 'indices.getMapping', parametersMatch);
@@ -99,7 +99,7 @@ describe('saved_objects_api/functional', function () {
 
       it('should set client parameters when indexing an object.', async () => {
         const model = helper.getInstance();
-        await model.update('idx1', {title: '1'}, request);
+        await model.update('idx1', { title: '1' }, request);
 
         sinon.assert.callCount(callWithRequestSpy, 3);
         sinon.assert.calledWith(callWithRequestSpy, {}, 'indices.getMapping', parametersMatch);
@@ -109,8 +109,8 @@ describe('saved_objects_api/functional', function () {
 
       it('should set client parameters when patching an object.', async () => {
         const model = helper.getInstance();
-        await model.create('idx1', {title: '1'}, request);
-        await model.patch('idx1', {title: '2'}, request);
+        await model.create('idx1', { title: '1' }, request);
+        await model.patch('idx1', { title: '2' }, request);
 
         sinon.assert.callCount(callWithRequestSpy, 4);
         sinon.assert.calledWith(callWithRequestSpy, {}, 'indices.getMapping', parametersMatch);
@@ -121,7 +121,7 @@ describe('saved_objects_api/functional', function () {
 
       it('should set client parameters when retrieving an object.', async () => {
         const model = helper.getInstance();
-        await model.create('idx1', {title: '1'}, request);
+        await model.create('idx1', { title: '1' }, request);
         callWithRequestSpy.restore();
 
         callWithRequestSpy = sinon.spy(helper.getCluster(), 'callWithRequest');
@@ -133,7 +133,7 @@ describe('saved_objects_api/functional', function () {
 
       it('should set client parameters when deleting an object.', async () => {
         const model = helper.getInstance();
-        await model.create('idx1', {title: '1'}, request);
+        await model.create('idx1', { title: '1' }, request);
         callWithRequestSpy.restore();
 
         callWithRequestSpy = sinon.spy(helper.getCluster(), 'callWithRequest');
@@ -149,7 +149,7 @@ describe('saved_objects_api/functional', function () {
         callWithRequestSpy.restore();
 
         for (let i = 0; i < 101; i++) {
-          await model.create(`idx-${i}`, {title: `${i}`}, request);
+          await model.create(`idx-${i}`, { title: `${i}` }, request);
         }
 
         callWithRequestSpy = sinon.spy(helper.getCluster(), 'callWithRequest');
@@ -185,7 +185,7 @@ describe('saved_objects_api/functional', function () {
         }
       });
 
-      const parametersMatch = sinon.match.has('headers', {authorization: 'root'});
+      const parametersMatch = sinon.match.has('headers', { authorization: 'root' });
 
       for (const key of Object.keys(requests)) {
         createSuite(key, requests[key], parametersMatch, rootMiddleware);
@@ -195,8 +195,8 @@ describe('saved_objects_api/functional', function () {
 
     describe('with no middleware', () => {
 
-      const parametersMatch = sinon.match.has('headers', {authorization: 'user'});
-      createSuite('processing an authenticated request', { headers: { authorization: 'user'}}, parametersMatch);
+      const parametersMatch = sinon.match.has('headers', { authorization: 'user' });
+      createSuite('processing an authenticated request', { headers: { authorization: 'user' } }, parametersMatch);
 
       createSuite('processing a non authenticated request', { headers: { accept: 'application/json' } },
         sinon.match(value => !!!value.headers));

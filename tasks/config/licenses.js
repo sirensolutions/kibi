@@ -58,7 +58,7 @@ module.exports = function () {
         // kibi: add our licenses
         'JSONSelect@0.4.0': ['MIT'],
         'cycle@1.0.3': ['Public domain'],
-        'jison-lex@0.2.1': ['UNLICENSE'],
+        'jison-lex@0.2.1': ['MIT'],
         'jison@0.4.13': ['MIT'],
         'nomnom@1.5.2': ['MIT'],
       }

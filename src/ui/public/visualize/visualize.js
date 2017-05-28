@@ -168,7 +168,6 @@ uiModules
       });
 
       $scope.$watch('vis', prereq(function (vis, oldVis) {
-        //debugger;
         const $visEl = getVisEl();
         if (!$visEl) return;
 

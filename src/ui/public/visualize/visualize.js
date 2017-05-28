@@ -168,6 +168,7 @@ uiModules
       });
 
       $scope.$watch('vis', prereq(function (vis, oldVis) {
+        //debugger;
         const $visEl = getVisEl();
         if (!$visEl) return;
 
@@ -224,6 +225,15 @@ uiModules
 
       $scope.$watch('esResp', prereq(function (resp, prevResp) {
         if (!resp) return;
+
+        // kibi: This is needed by multichart to stop re-render es responses
+        //       can be used too to change the response before render process take place
+        if ($scope.vis.esResponseAdapter) {
+          $scope.renderbot.render($scope.vis.esResponseAdapter(resp, prevResp));
+          return;
+        }
+        // kibi: end
+
         $scope.renderbot.render(resp);
       }));
 

@@ -305,7 +305,7 @@ trusted network or display an authentication popup where the user can enter its
 domain credentials.
 
 If an HTTP request to the cluster contains an HTTP Basic authorization header,
-it will still be authenticated by the http_authenticator defined in
+it will still be authenticated by the HTTP authenticator defined in
 `basic_internal_auth_domain`; it is necessary to leave this enabled as the Kibi
 backend uses this method to authenticate with the cluster.
 

@@ -13,8 +13,9 @@ import { DashboardViewMode } from '../dashboard_view_mode';
 uiModules
 .get('app/dashboard')
 .directive('dashboardPanel', function (savedVisualizations, savedSearches, Private, $injector, getObjectLoadersForDashboard,
-  sessionStorage) {
+  sessionStorage, kibiState) {
   const filterManager = Private(FilterManagerProvider);
+  const doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
 
   const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);
@@ -114,6 +115,33 @@ uiModules
           $scope.$destroy();
         });
 
+        // kibi: For some unknown reason the vis object doesn't has his own id. This must be investigated in the future.
+        // See issue https://github.com/sirensolutions/kibi-internal/issues/2909
+        $scope.savedObj.vis.id = $scope.panel.id;
+        // kibi: end
+
+        // kibi: added handle the entity selection events
+        $scope.dependsOnSelectedEntities = false;
+        if ($scope.savedObj && $scope.savedObj.vis) {
+          // there could be no vis object if we visualise saved search
+          doesVisDependsOnSelectedEntities($scope.savedObj.vis).then(function (does) {
+            $scope.dependsOnSelectedEntities = does;
+          });
+        }
+
+        $scope.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI());
+        $scope.selectedEntitiesDisabled = kibiState.isSelectedEntityDisabled();
+
+        // react to changes about the selected entity
+        $scope.$listen(kibiState, 'save_with_changes', (diff) => {
+          if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+              diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1) {
+            $scope.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI());
+            $scope.selectedEntitiesDisabled = kibiState.isSelectedEntityDisabled();
+          }
+        });
+        // kibi: end
+
         // create child ui state from the savedObj
         const uiState = $scope.savedObj.uiStateJSON ? JSON.parse($scope.savedObj.uiStateJSON) : {};
         $scope.uiState = $scope.createChildUiState(getPersistedStateId($scope.panel), uiState);
@@ -130,10 +158,6 @@ uiModules
           }
           // kibi: end
 
-          // kibi: For some unknown reason the vis object doesn't has his own id. This must be investigated in the future.
-          // See issue https://github.com/sirensolutions/kibi-internal/issues/2909
-          $scope.savedObj.vis.id = $scope.panel.id;
-          // kibi: end
           $scope.savedObj.vis.setUiState($scope.uiState);
           $scope.savedObj.vis.listeners.click = $scope.getVisClickHandler();
           $scope.savedObj.vis.listeners.brush = $scope.getVisBrushHandler();

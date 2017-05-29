@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import Notifier from 'ui/notify/notifier';
+import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 import SimpleEmitter from 'ui/utils/simple_emitter';
 
 export default function EventsProvider(Private, Promise) {

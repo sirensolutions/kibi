@@ -1,4 +1,4 @@
-import Notifier from 'ui/notify/notifier';
+import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 
 import ErrorHandlersProvider from '../../_error_handlers';
 

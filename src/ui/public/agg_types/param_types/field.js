@@ -4,7 +4,7 @@ import editorHtml from 'ui/agg_types/controls/field.html';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 import 'ui/filters/field_type';
 import IndexedArray from 'ui/indexed_array';
-import Notifier from 'ui/notify/notifier';
+import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 
 export default function FieldAggParamFactory(Private, $filter) {
   const BaseAggParam = Private(AggTypesParamTypesBaseProvider);

@@ -123,7 +123,7 @@ uiModules
 
         // kibi: added handle the entity selection events
         $scope.dependsOnSelectedEntities = false;
-        if ($scope.savedObj && $scope.savedObj.vis) {
+        if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
           // there could be no vis object if we visualise saved search
           doesVisDependsOnSelectedEntities($scope.savedObj.vis).then(function (does) {
             $scope.dependsOnSelectedEntities = does;

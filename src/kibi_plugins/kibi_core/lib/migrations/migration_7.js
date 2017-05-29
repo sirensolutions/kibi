@@ -26,6 +26,27 @@ export default class Migration7 extends Migration {
     return 'Move configuration object to singleton';
   }
 
+  async _getConfigurations() {
+    return await this._client.search({
+      index: this._index,
+      type: 'config',
+      size: 1000,
+      body: {
+        sort: {
+          _script: {
+            type: 'number',
+            script: {
+              lang: 'painless',
+              // buildNum is indexed as a string
+              inline: 'Integer.parseInt(doc.buildNum.value)'
+            },
+            order: 'desc'
+          }
+        }
+      }
+    });
+  }
+
   async count() {
     const existingConfigs = await this._client.count({
       index: this._index,
@@ -43,7 +64,15 @@ export default class Migration7 extends Migration {
       });
     } catch (err) {
       if (err.status === 404) {
-        return 1;
+        const configurations = await this._getConfigurations();
+        let onlySnapshots = true;
+        for (const hit of configurations.hits.hits) {
+          if (!hit._id.endsWith('-SNAPSHOT')) {
+            onlySnapshots = false;
+            break;
+          }
+        }
+        return onlySnapshots ? 0 : 1;
       }
       throw err;
     }
@@ -55,27 +84,17 @@ export default class Migration7 extends Migration {
     if (count === 0) {
       return 0;
     }
-    const configurations = await this._client.search({
-      index: this._index,
-      type: 'config',
-      size: 1,
-      body: {
-        sort: {
-          _script: {
-            type: 'number',
-            script: {
-              lang: 'painless',
-              // buildNum is indexed as a string
-              inline: 'Integer.parseInt(doc.buildNum.value)'
-            },
-            order: 'desc'
-          }
-        }
+    const configurations = await this._getConfigurations();
+    let configuration;
+    for (const hit of configurations.hits.hits) {
+      if (!hit._id.endsWith('-SNAPSHOT')) {
+        configuration = hit._source;
+        break;
       }
-    });
-    const configuration = configurations.hits.hits[0]._source;
+    }
     delete configuration.buildNum;
     await this._client.create({
+      refresh: true,
       index: this._index,
       type: 'config',
       id: 'kibi',

@@ -8,7 +8,7 @@ export default [
     index: {
       _index: '.kibi',
       _type: 'config',
-      _id: '5.2.2'
+      _id: '5.2.2-SNAPSHOT'
     }
   },
   {

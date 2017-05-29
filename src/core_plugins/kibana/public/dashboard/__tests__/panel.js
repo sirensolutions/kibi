@@ -16,9 +16,10 @@ describe('dashboard panel', function () {
     ngMock.module('kibana', $provide => {
       $provide.constant('kibiDatasourcesSchema', {});
     });
-    ngMock.inject(($rootScope, $compile, esAdmin, savedObjectsAPI) => {
-      // kibi: use the savedObjectsAPI instead of esAdmin
+    ngMock.inject(($rootScope, $compile, esAdmin, savedObjectsAPI, kibiState) => {
+      // kibi: use the savedObjectsAPI instead of esAdmin, inject getEntityURI() for check in panel.js
       sinon.stub(savedObjectsAPI, 'mget').returns(Promise.resolve({ docs: [ mockDocResponse ] }));
+      sinon.stub(kibiState, 'getEntityURI').returns({ index: 'a', type: 'b', id: 'c' });
       sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
         '.kibana': {
           mappings: {

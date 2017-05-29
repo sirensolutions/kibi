@@ -4,7 +4,7 @@ import AuthorizationError from './errors/authorization';
 import AuthenticationError from './errors/authentication';
 import NotFoundError from './errors/not_found';
 import ConflictError from './errors/conflict';
-import { get, set, isString } from 'lodash';
+import { get, set, isString, cloneDeep, merge } from 'lodash';
 
 
 /**
@@ -103,7 +103,8 @@ export default class Model {
   /**
    * Creates the mappings for the type managed by this model.
    *
-   * @param {Object} request - An optional HAPI request.
+   * @param {Object} request - An optional HAPI request or an object
+   *                            containing Elasticsearch client parameters.
    */
   async createMappings(request) {
     if (await this.hasMappings(request)) {
@@ -119,13 +120,14 @@ export default class Model {
       body: body
     };
     this._setCredentials(parameters, request);
-    await this._cluster.callWithRequest({}, 'indices.putMapping', parameters);
+    return await this._cluster.callWithRequest({}, 'indices.putMapping', parameters);
   }
 
   /**
    * Checks if the mappings for the type have been defined.
    *
-   * @param {Object} request - An optional HAPI request.
+   * @param {Object} request - An optional HAPI request or an object
+   *                            containing Elasticsearch client parameters.
    */
   async hasMappings(request) {
     if (!this.schema) {
@@ -144,7 +146,12 @@ export default class Model {
   /**
    * Creates a new object instance.
    *
-   * Arguments and response can be modified or validated by middlewares.
+   * Middlewares can:
+   *
+   * - validate the parameters by implementing createRequest and updateRequest
+   * - return custom ES client parameters from createRequest and updateRequest;
+   *   parameters are merged.
+   * - alter the return value  by implementing createResponse.
    *
    * @param {String} id - The object id.
    * @param {Object} body - The object body.
@@ -165,13 +172,6 @@ export default class Model {
         requestMiddlewareMethod = 'updateRequest';
       }
 
-      for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware[requestMiddlewareMethod](this, id, body, request);
-      }
-
-      this._prepare(body);
-
-      await this.createMappings(request);
       const parameters = {
         id: id,
         index: this._config.get('kibana.index'),
@@ -179,8 +179,15 @@ export default class Model {
         body: body,
         refresh: true
       };
-
       this._setCredentials(parameters, request);
+
+      for (const middleware of this._plugin.getMiddlewares()) {
+        merge(parameters, await middleware[requestMiddlewareMethod](this, id, body, request));
+      }
+
+      this._prepare(body);
+
+      await this.createMappings(parameters);
 
       response = await this._cluster.callWithRequest({}, 'create', parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
@@ -195,7 +202,11 @@ export default class Model {
   /**
    * Updates an existing object.
    *
-   * Arguments and response can be modified or validated by middlewares.
+   * Middlewares can:
+   *
+   * - validate the parameters by implementing updateRequest
+   * - return custom ES client parameters from updateRequest; parameters are merged.
+   * - alter the return value  by implementing createResponse.
    *
    * @param {String} id - The object id.
    * @param {Object} body - The object body.
@@ -217,13 +228,6 @@ export default class Model {
         responseMiddlewareMethod = 'createResponse';
       }
 
-      for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware[requestMiddlewareMethod](this, id, body, request);
-      }
-
-      this._prepare(body);
-
-      await this.createMappings(request);
       const parameters = {
         id: id,
         index: this._config.get('kibana.index'),
@@ -231,8 +235,15 @@ export default class Model {
         body: body,
         refresh: true
       };
-
       this._setCredentials(parameters, request);
+
+      for (const middleware of this._plugin.getMiddlewares()) {
+        merge(parameters, await middleware[requestMiddlewareMethod](this, id, body, request));
+      }
+
+      this._prepare(body);
+
+      await this.createMappings(parameters);
 
       await this._cluster.callWithRequest({}, 'index', parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
@@ -247,16 +258,18 @@ export default class Model {
   /**
    * Partially updates an existing object.
    *
+   * Middlewares can:
+   *
+   * - validate the parameters by implementing patchRequest
+   * - return custom ES client parameters from patchRequest; parameters are merged.
+   * - alter the return value  by implementing patchResponse.
+   *
    * @param {String} id - The object id.
    * @param {Object} fields - The changed fields.
    * @param {Object} request - An optional HAPI request.
    */
   async patch(id, fields, request) {
     try {
-      for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware.patchRequest(this, id, fields, request);
-      }
-
       const parameters = {
         id: id,
         index: this._config.get('kibana.index'),
@@ -268,6 +281,11 @@ export default class Model {
       };
 
       this._setCredentials(parameters, request);
+
+      for (const middleware of this._plugin.getMiddlewares()) {
+        merge(parameters, await middleware.patchRequest(this, id, fields, request));
+      }
+
       const response = await this._cluster.callWithRequest({}, 'update', parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.patchResponse(this, id, fields, request, response);
@@ -281,7 +299,11 @@ export default class Model {
   /**
    * Searches objects of the type managed by this model.
    *
-   * Arguments and response can be modified and validated by middlewares.
+   * Middlewares can:
+   *
+   * - validate the parameters by implementing patchRequest
+   * - return custom ES client parameters from patchRequest; parameters are merged.
+   * - alter the return value  by implementing patchResponse.
    *
    * @param {Number} size - The number of results to return. If not set, returns all objects matching the search.
    * @param {String} search - An optional search string or query body.
@@ -292,8 +314,11 @@ export default class Model {
    */
   async search(size, search, request, exclude) {
     try {
+      const commonParameters = {};
+      this._setCredentials(commonParameters, request);
+
       for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware.searchRequest(this, size, search, request);
+        merge(commonParameters, await middleware.searchRequest(this, size, search, request));
       }
 
       let body;
@@ -324,6 +349,7 @@ export default class Model {
         type: this._type,
         body: body,
       };
+      merge(parameters, commonParameters);
 
       if (exclude && exclude.length > 0) {
         parameters.body._source = {
@@ -338,7 +364,6 @@ export default class Model {
         parameters.scroll = '1m';
       }
 
-      this._setCredentials(parameters, request);
       let response = await this._cluster.callWithRequest({}, 'search', parameters);
       let scrollId = response._scroll_id;
 
@@ -349,19 +374,17 @@ export default class Model {
           if (hits.length === response.hits.total) {
             break;
           }
-          parameters = {
+          parameters = merge({
             scroll: '1m',
             scrollId
-          };
-          this._setCredentials(parameters, request);
+          }, commonParameters);
           response = await this._cluster.callWithRequest({}, 'scroll', parameters);
           scrollId = response._scroll_id;
         }
 
-        parameters = {
+        parameters = merge({
           scrollId
-        };
-        this._setCredentials(parameters, request);
+        }, commonParameters);
 
         try {
           await this._cluster.callWithRequest({}, 'clearScroll', parameters);
@@ -409,15 +432,17 @@ export default class Model {
    */
   async get(id, request, options) {
     try {
-      for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware.getRequest(this, id, request);
-      }
       const parameters = {
         index: this._config.get('kibana.index'),
         type: this._type,
         id: id
       };
       this._setCredentials(parameters, request);
+
+      for (const middleware of this._plugin.getMiddlewares()) {
+        merge(parameters, await middleware.getRequest(this, id, request));
+      }
+
       const response = await this._cluster.callWithRequest({}, 'get', parameters, options);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.getResponse(this, id, request, response);
@@ -442,9 +467,6 @@ export default class Model {
    */
   async delete(id, request) {
     try {
-      for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware.deleteRequest(this, id, request);
-      }
       const parameters = {
         index: this._config.get('kibana.index'),
         type: this._type,
@@ -452,6 +474,10 @@ export default class Model {
         refresh: true
       };
       this._setCredentials(parameters, request);
+      for (const middleware of this._plugin.getMiddlewares()) {
+        merge(parameters, await middleware.deleteRequest(this, id, request));
+      }
+
       await this._cluster.callWithRequest({}, 'delete', parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.deleteResponse(this, id, request);

@@ -43,7 +43,7 @@ function applyConfig(config) {
   Notifier.applyConfig({
     // kibi: set the awesomeDemoMode and shieldAuthorizationWarning flag
     awesomeDemoMode: config.get('kibi:awesomeDemoMode'),
-    shieldAuthorizationWarning: config.isDeclared(authWarningKey) ? config.get(authWarningKey) : false,
+    shieldAuthorizationWarning: config.isDeclared(authWarningKey) ? config.get(authWarningKey) : true,
     // kibi: end
     bannerLifetime: config.get('notifications:lifetime:banner'),
     errorLifetime: config.get('notifications:lifetime:error'),

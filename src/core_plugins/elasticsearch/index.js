@@ -51,7 +51,7 @@ module.exports = function ({ Plugin }) {
         startupTimeout: number().default(5000),
         logQueries: boolean().default(false),
         ssl: sslSchema,
-        apiVersion: Joi.string().default('master'),
+        apiVersion: Joi.string().default('5.x'),
         // kibi: we set the list of plugins during health checks
         plugins: Joi.array().default([]),
         // kibi: end
@@ -71,7 +71,7 @@ module.exports = function ({ Plugin }) {
           startupTimeout: number().default(5000),
           logQueries: boolean().default(false),
           ssl: sslSchema,
-          apiVersion: Joi.string().default('master'),
+          apiVersion: Joi.string().default('5.x'),
         }).default()
       }).default();
     },
@@ -118,7 +118,7 @@ module.exports = function ({ Plugin }) {
       }
     },
 
-    init(server, options) {
+    init(server) {
       const kibanaIndex = server.config().get('kibana.index');
       const clusters = createClusters(server);
 

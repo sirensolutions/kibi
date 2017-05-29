@@ -1,17 +1,19 @@
 import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
+import * as columnActions from 'ui/doc_table/actions/columns';
 import 'plugins/kibana/dashboard/panel/get_object_loaders_for_dashboard';
 import FilterManagerProvider from 'ui/filter_manager';
 import uiModules from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/panel/panel.html';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_object';
+import { DashboardViewMode } from '../dashboard_view_mode';
 
 uiModules
 .get('app/dashboard')
-.directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private,
-  $injector, getObjectLoadersForDashboard, sessionStorage) {
+.directive('dashboardPanel', function (savedVisualizations, savedSearches, Private, $injector, getObjectLoadersForDashboard,
+  sessionStorage) {
   const filterManager = Private(FilterManagerProvider);
 
   const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
@@ -26,6 +28,16 @@ uiModules
     restrict: 'E',
     template: panelTemplate,
     scope: {
+      /**
+       * toggle borders around panels
+       * @author kibi
+       */
+      hideBorders: '=',
+      /**
+       * What view mode the dashboard is currently in - edit or view only.
+       * @type {DashboardViewMode}
+       */
+      dashboardViewMode: '=',
       /**
        * Whether or not the dashboard this panel is contained on is in 'full screen mode'.
        * @type {boolean}
@@ -60,12 +72,12 @@ uiModules
        * Returns a click handler for a visualization.
        * @type {function}
        */
-      getVisClickHandler: '&',
+      getVisClickHandler: '=',
       /**
        * Returns a brush event handler for a visualization.
        * @type {function}
        */
-      getVisBrushHandler: '&',
+      getVisBrushHandler: '=',
       /**
        * Call when changes should be propagated to the url and thus saved in state.
        * @type {function}
@@ -132,15 +144,27 @@ uiModules
           $scope.panel.columns = $scope.panel.columns || $scope.savedObj.columns;
           $scope.panel.sort = $scope.panel.sort || $scope.savedObj.sort;
 
-          // If the user updates the sort direction or columns in a saved search, we want to save that
-          // to the ui state so the share url will show our temporary modifications.
-          $scope.$watchCollection('panel.columns', function () {
+          $scope.setSortOrder = function setSortOrder(columnName, direction) {
+            $scope.panel.sort = [columnName, direction];
             $scope.saveState();
-          });
+          };
 
-          $scope.$watchCollection('panel.sort', function () {
-            $scope.saveState();
-          });
+          $scope.addColumn = function addColumn(columnName) {
+            $scope.savedObj.searchSource.get('index').popularizeField(columnName, 1);
+            columnActions.addColumn($scope.panel.columns, columnName);
+            $scope.saveState();  // sync to sharing url
+          };
+
+          $scope.removeColumn = function removeColumn(columnName) {
+            $scope.savedObj.searchSource.get('index').popularizeField(columnName, 1);
+            columnActions.removeColumn($scope.panel.columns, columnName);
+            $scope.saveState();  // sync to sharing url
+          };
+
+          $scope.moveColumn = function moveColumn(columnName, newIndex) {
+            columnActions.moveColumn($scope.panel.columns, columnName, newIndex);
+            $scope.saveState();  // sync to sharing url
+          };
         }
 
         $scope.filter = function (field, value, operator) {
@@ -148,16 +172,25 @@ uiModules
           filterManager.add(field, value, operator, index);
         };
 
-        $scope.border = !$scope.$parent.opts.ui.hideBorder;
-        $scope.$on('border', function (event, enabled) {
-          $scope.border = enabled;
+        // kibi: toggle borders around panels
+        $scope.border = !$scope.hideBorders;
+        $scope.$watch('hideBorders', hideBorders => {
+          if (hideBorders !== undefined) {
+            $scope.border = !$scope.hideBorders;
+          }
         });
+        // kibi: end
       }
 
-      loadSavedObject(getObjectLoadersForDashboard(), $scope.panel)
+      $scope.loadedPanel = loadSavedObject(getObjectLoadersForDashboard(), $scope.panel)
         .then(initializePanel)
         .catch(function (e) {
           $scope.error = e.message;
+
+          // Dashboard listens for this broadcast, once for every visualization (pendingVisCount).
+          // We need to broadcast even in the event of an error or it'll never fetch the data for
+          // other visualizations.
+          $scope.$root.$broadcast('ready:vis');
 
           // If the savedObjectType matches the panel type, this means the object itself has been deleted,
           // so we shouldn't even have an edit link. If they don't match, it means something else is wrong
@@ -172,6 +205,13 @@ uiModules
 
           $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
         });
+
+      /**
+       * @returns {boolean} True if the user can only view, not edit.
+       */
+      $scope.isViewOnlyMode = () => {
+        return $scope.dashboardViewMode === DashboardViewMode.VIEW || $scope.isFullScreenMode;
+      };
     }
   };
 });

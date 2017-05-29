@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -11,7 +10,6 @@ import VislibComponentsColorColorPaletteProvider from 'ui/vis/components/color/c
 describe('Vislib Color Module Test Suite', function () {
   let seedColors;
   let mappedColors;
-  let config;
 
   describe('Color (main)', function () {
     let previousConfig;
@@ -67,7 +65,7 @@ describe('Vislib Color Module Test Suite', function () {
       }).to.throwError();
     });
 
-    context('when array is not composed of numbers, strings, or undefined values', function () {
+    describe('when array is not composed of numbers, strings, or undefined values', function () {
       it('should throw an error', function () {
         expect(function () {
           getColors(arrayOfObjects);
@@ -83,7 +81,7 @@ describe('Vislib Color Module Test Suite', function () {
       });
     });
 
-    context('when input is an array of strings, numbers, or undefined values', function () {
+    describe('when input is an array of strings, numbers, or undefined values', function () {
       it('should not throw an error', function () {
         expect(function () {
           getColors(arr);

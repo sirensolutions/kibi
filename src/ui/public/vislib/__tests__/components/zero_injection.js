@@ -1,4 +1,3 @@
-import angular from 'angular';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -203,18 +202,6 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     ]
   };
 
-  const childrenObject = {
-    children: []
-  };
-  const seriesObject = {
-    series: []
-  };
-  const rowsObject = {
-    rows: []
-  };
-  const columnsObject = {
-    columns: []
-  };
   const emptyObject = {};
   const str = 'string';
   const number = 24;

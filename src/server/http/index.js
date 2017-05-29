@@ -1,21 +1,23 @@
 import { format, parse } from 'url';
 import { resolve } from 'path';
 import _ from 'lodash';
-import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
 import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
+import shortUrlLookupProvider from './short_url_lookup';
+import setupConnectionMixin from './setup_connection';
+import registerHapiPluginsMixin from './register_hapi_plugins';
+import xsrfMixin from './xsrf';
 
 module.exports = async function (kbnServer, server, config) {
-
   server = kbnServer.server = new Hapi.Server();
 
-  const shortUrlLookup = require('./short_url_lookup')(server);
-  await kbnServer.mixin(require('./register_hapi_plugins'));
-  await kbnServer.mixin(require('./setup_connection'));
+  const shortUrlLookup = shortUrlLookupProvider(server);
+  await kbnServer.mixin(setupConnectionMixin);
+  await kbnServer.mixin(registerHapiPluginsMixin);
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
@@ -179,5 +181,5 @@ module.exports = async function (kbnServer, server, config) {
 
   kbnServer.mixin(versionCheckMixin);
 
-  return kbnServer.mixin(require('./xsrf'));
+  return kbnServer.mixin(xsrfMixin);
 };

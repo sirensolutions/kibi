@@ -104,7 +104,7 @@ describe('SearchSource', function () {
 
   describe('#index()', function () {
     describe('auto-sourceFiltering', function () {
-      context('new index pattern assigned', function () {
+      describe('new index pattern assigned', function () {
         it('generates a source filter', function () {
           const source = new SearchSource();
           expect(source.get('index')).to.be(undefined);
@@ -123,7 +123,7 @@ describe('SearchSource', function () {
         });
       });
 
-      context('new index pattern assigned over another', function () {
+      describe('new index pattern assigned over another', function () {
         it('replaces source filter with new', function () {
           const source = new SearchSource();
           source.set('index', indexPattern);
@@ -144,7 +144,7 @@ describe('SearchSource', function () {
         });
       });
 
-      context('ip assigned before custom source filter', function () {
+      describe('ip assigned before custom source filter', function () {
         it('custom source filter becomes new source', function () {
           const source = new SearchSource();
           const football = {};
@@ -166,7 +166,7 @@ describe('SearchSource', function () {
         });
       });
 
-      context('ip assigned after custom source filter', function () {
+      describe('ip assigned after custom source filter', function () {
         it('leaves the custom filter in place', function () {
           const source = new SearchSource();
           const football = {};

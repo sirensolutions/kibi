@@ -16,7 +16,7 @@
         <!-- NOTE: do not remove kbn-timepicker-go class as it is used in tests -->
         <button
           type="submit"
-          ng-if="mode == 'absolute'"
+          ng-if="mode === 'absolute'"
           class="btn btn-primary kbn-timepicker-go"
           ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to"
           ng-click="syncTimeTo()">Apply</button>
@@ -26,9 +26,9 @@
         <!-- NOTE: do not remove kbn-timepicker-go class as it is used in tests -->
         <button
           type="submit"
-          ng-if="mode == 'relative'"
+          ng-if="mode === 'relative'"
           class="btn btn-primary kbn-timepicker-go"
-          ng-disabled="!relative.preview"
+          ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()"
           ng-click="syncTimeTo()">Apply</button>
       </td>
     </tr>

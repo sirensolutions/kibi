@@ -1,6 +1,5 @@
 import Joi from 'joi';
-import { get } from 'lodash';
-import { randomBytes, constants as cryptoConstants } from 'crypto';
+import { constants as cryptoConstants } from 'crypto';
 import os from 'os';
 
 import { fromRoot } from '../../utils';
@@ -49,6 +48,21 @@ module.exports = () => Joi.object({
     exclusive: Joi.boolean().default(false)
   }).default(),
 
+  cpu: Joi.object({
+    cgroup: Joi.object({
+      path: Joi.object({
+        override: Joi.string().default()
+      })
+    })
+  }),
+
+  cpuacct: Joi.object({
+    cgroup: Joi.object({
+      path: Joi.object({
+        override: Joi.string().default()
+      })
+    })
+  }),
 
   server: Joi.object({
     uuid: Joi.string().guid().default(),
@@ -142,32 +156,44 @@ module.exports = () => Joi.object({
     lazyPrebuild: Joi.boolean().default(false),
     lazyProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
-    unsafeCache: Joi
-      .alternatives()
-      .try(
-        Joi.boolean(),
-        Joi.string().regex(/^\/.+\/$/)
-      )
-      .default('/[\\/\\\\](node_modules|bower_components)[\\/\\\\]/'),
-    sourceMaps: Joi
-      .alternatives()
-      .try(
-        Joi.string().required(),
-        Joi.boolean()
-      )
-      .default(Joi.ref('$dev')),
+    unsafeCache: Joi.when('$prod', {
+      is: true,
+      then: Joi.boolean().valid(false),
+      otherwise: Joi
+        .alternatives()
+        .try(
+          Joi.boolean(),
+          Joi.string().regex(/^\/.+\/$/)
+        )
+        .default(true),
+    }),
+    sourceMaps: Joi.when('$prod', {
+      is: true,
+      then: Joi.boolean().valid(false),
+      otherwise: Joi
+        .alternatives()
+        .try(
+          Joi.string().required(),
+          Joi.boolean()
+        )
+        .default('#cheap-source-map'),
+    }),
     profile: Joi.boolean().default(false)
   }).default(),
-
   status: Joi.object({
-    allowAnonymous: Joi.boolean().default(false)
+    allowAnonymous: Joi.boolean().default(false),
+    v6ApiFormat: Joi.boolean().default(false)
   }).default(),
   tilemap: Joi.object({
-    manifestServiceUrl: Joi.string().default('https://tiles.elastic.co/v2/manifest'),
+    manifestServiceUrl: Joi.when('$dev', {
+      is: true,
+      then: Joi.string().default('https://tiles-stage.elastic.co/v2/manifest'),
+      otherwise: Joi.string().default('https://tiles.elastic.co/v2/manifest')
+    }),
     url: Joi.string(),
     options: Joi.object({
       attribution: Joi.string(),
-      minZoom: Joi.number().min(1, 'Must not be less than 1').default(1),
+      minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
       maxZoom: Joi.number().default(10),
       tileSize: Joi.number(),
       subdomains: Joi.array().items(Joi.string()).single(),
@@ -183,6 +209,10 @@ module.exports = () => Joi.object({
     // them off when we turn off the elasticsearch plugin (like we do in the
     // optimizer half of the dev server)
     enabled: Joi.boolean().default(true)
+  }).default(),
+
+  i18n: Joi.object({
+    defaultLocale: Joi.string().default('en'),
   }).default(),
 
 }).default();

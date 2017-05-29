@@ -6,7 +6,7 @@ import AxisTitleProvider from './axis_title';
 import AxisLabelsProvider from './axis_labels';
 import AxisScaleProvider from './axis_scale';
 import AxisConfigProvider from './axis_config';
-import errors from 'ui/errors';
+import { VislibError } from 'ui/errors';
 
 export default function AxisFactory(Private) {
   const ErrorHandler = Private(ErrorHandlerProvider);
@@ -47,7 +47,6 @@ export default function AxisFactory(Private) {
       }
     }
 
-
     _stackNegAndPosVals(data) {
       const cache = {};
       data.forEach(series => {
@@ -70,6 +69,7 @@ export default function AxisFactory(Private) {
       const elSelector = this.axisConfig.get('elSelector');
       const rootEl = this.axisConfig.get('rootEl');
       $(rootEl).find(elSelector).find('svg').remove();
+      this.axisTitle.destroy();
     }
 
     getAxis(length) {
@@ -116,7 +116,6 @@ export default function AxisFactory(Private) {
     adjustSize() {
       const config = this.axisConfig;
       const style = config.get('style');
-      const margin = this.visConfig.get('style.margin');
       const chartEl = this.visConfig.get('el');
       const position = config.get('position');
       const axisPadding = 5;
@@ -163,18 +162,19 @@ export default function AxisFactory(Private) {
 
     validate() {
       if (this.axisConfig.isLogScale() && this.axisConfig.isPercentage()) {
-        throw new errors.VislibError(`Can't mix percentage mode with log scale.`);
+        throw new VislibError(`Can't mix percentage mode with log scale.`);
       }
     }
 
     draw() {
+      const svgs = [];
       const self = this;
       const config = this.axisConfig;
       const style = config.get('style');
 
       return function (selection) {
         const n = selection[0].length;
-        if (config.get('show') && self.axisTitle) {
+        if (config.get('show') && self.axisTitle && ['left', 'top'].includes(config.get('position'))) {
           self.axisTitle.render(selection);
         }
         selection.each(function () {
@@ -193,6 +193,8 @@ export default function AxisFactory(Private) {
             .attr('width', width)
             .attr('height', height);
 
+            svgs.push(svg);
+
             const axisClass = self.axisConfig.isHorizontal() ? 'x' : 'y';
             svg.append('g')
             .attr('class', `${axisClass} axis ${config.get('id')}`)
@@ -210,9 +212,14 @@ export default function AxisFactory(Private) {
               .style('stroke-opacity', style.opacity);
             }
             if (self.axisLabels) self.axisLabels.render(svg);
-            svg.call(self.adjustSize());
           }
         });
+
+        if (self.axisTitle && ['right', 'bottom'].includes(config.get('position'))) {
+          self.axisTitle.render(selection);
+        }
+
+        svgs.forEach(svg => svg.call(self.adjustSize()));
       };
     }
   }

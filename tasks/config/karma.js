@@ -1,4 +1,4 @@
-import { times, zipObject } from 'lodash';
+import { times } from 'lodash';
 
 // kibi: imports
 import serverConfig from '../../test/server_config';

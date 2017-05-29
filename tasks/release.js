@@ -1,10 +1,8 @@
+import readline from 'readline';
+import url from 'url';
+import fs from 'fs';
+import path from 'path';
 module.exports = function (grunt) {
-  const readline = require('readline');
-  const url = require('url');
-  const fs = require('fs');
-  const path = require('path');
-  const _ = require('lodash');
-
   // build, then zip and upload to s3
   grunt.registerTask('release', [
     '_release:confirmUpload',
@@ -42,44 +40,7 @@ module.exports = function (grunt) {
     });
   });
 
-  grunt.registerTask('_release:setS3Uploads', function () {
-    const { sha, version } = grunt.config.get('build');
-
-    const uploads = grunt.config.get('platforms')
-    .reduce(function (files, platform) {
-      return files.concat(
-        platform.tarName,
-        platform.tarName + '.sha1.txt',
-        platform.zipName,
-        platform.zipName + '.sha1.txt',
-        platform.rpmName,
-        platform.rpmName && platform.rpmName + '.sha1.txt',
-        platform.debName,
-        platform.debName && platform.debName + '.sha1.txt'
-      );
-    }, [])
-    .filter(function (filename) {
-      if (_.isUndefined(filename)) return false;
-      try {
-        fs.accessSync('target/' + filename, fs.F_OK);
-        return true;
-      } catch (e) {
-        return false;
-      }
-    })
-    .map(function (filename) {
-      const src = `target/${filename}`;
-
-      const shortSha = sha.substr(0, 7);
-      const dest = `kibana/staging/${version}-${shortSha}/kibana/${filename}`;
-
-      return { src, dest };
-    });
-    grunt.config.set('s3.release.upload', uploads);
-  });
-
   grunt.registerTask('_release:complete', function () {
-    const { sha, version } = grunt.config.get('build');
     const config = grunt.config.get('aws_s3.staging.files');
 
     grunt.log.ok('Builds uploaded');

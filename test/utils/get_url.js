@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const url = require('url');
+import _ from 'lodash';
+import url from 'url';
 
 /**
 * Converts a config and a pathname to a url
@@ -23,7 +23,7 @@ const url = require('url');
 module.exports = getUrl;
 
 function getUrl(config, app) {
-  return url.format(_.assign(config, app));
+  return url.format(_.assign({}, config, app));
 }
 
 getUrl.noAuth = function getUrlNoAuth(config, app) {

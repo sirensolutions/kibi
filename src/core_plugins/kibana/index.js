@@ -1,5 +1,8 @@
+import { resolve } from 'path';
+
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
+
 import manageUuid from './server/lib/manage_uuid';
 import ingest from './server/routes/api/ingest';
 import search from './server/routes/api/search';
@@ -13,6 +16,7 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
+
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -58,7 +62,7 @@ module.exports = function (kibana) {
                 config: tilemapConfig,
               },
               manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
-            },
+            }
           };
         },
       },
@@ -108,12 +112,17 @@ module.exports = function (kibana) {
           linkToLastSubUrl: false
         },
       ],
+
       injectDefaultVars(server, options) {
         return {
           kbnIndex: options.index,
           kbnBaseUrl
         };
       },
+
+      translations: [
+        resolve(__dirname, './translations/en.json')
+      ]
     },
 
     preInit: async function (server) {
@@ -128,7 +137,7 @@ module.exports = function (kibana) {
       }
     },
 
-    init: function (server, options) {
+    init: function (server) {
       // uuid
       manageUuid(server);
       // routes
@@ -136,9 +145,7 @@ module.exports = function (kibana) {
       search(server);
       settings(server);
       scripts(server);
-
       server.expose('systemApi', systemApi);
     }
   });
-
 };

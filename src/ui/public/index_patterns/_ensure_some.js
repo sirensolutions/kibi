@@ -1,12 +1,8 @@
-import errors from 'ui/errors';
-export default function EnsureSomeIndexPatternsFn(Private, createNotifier, $location, kbnUrl) {
-  const notify = createNotifier();
-
+export default function EnsureSomeIndexPatternsFn(kbnUrl) {
   return function ensureSomeIndexPatterns() {
     return function promiseHandler(patterns) {
       if (!patterns || patterns.length === 0) {
-        // notify.warning(new errors.NoDefinedIndexPatterns());
-        kbnUrl.redirectPath('/management/siren/index');
+        kbnUrl.redirectPath('/management/siren/index'); // kibi: changed path from /management/kibana/index to /management/siren/index
       }
 
       return patterns;

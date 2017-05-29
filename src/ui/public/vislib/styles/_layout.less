@@ -174,10 +174,7 @@
 }
 
 .x-axis-title {
-  min-height: 0px;
-  max-height: 15px;
   min-width: 20px;
-  overflow: hidden;
 }
 
 .x-axis-div {
@@ -185,6 +182,10 @@
   min-width: 20px;
   margin: 0px 5px;
   width: 100%;
+}
+
+.x-axis-div svg {
+  float: left; /* for some reason svg wont get positioned in top left corner of container div without this */
 }
 
 .axis-wrapper-top .axis-div svg {

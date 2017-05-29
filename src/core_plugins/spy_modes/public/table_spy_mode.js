@@ -1,18 +1,15 @@
-import { saveAs } from '@spalger/filesaver';
-import _ from 'lodash';
 import 'ui/agg_table';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
+import spyModesRegistry from 'ui/registry/spy_modes';
 
 const allowSpyMode = function (visType) {
   return !visType.requiresMultiSearch && visType.name !== 'kibi-data-table';
 };
 
-function VisSpyTableProvider($rootScope, Private) {
+function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
-
   const PER_PAGE_DEFAULT = 10;
-
 
   return {
     name: 'table',
@@ -21,7 +18,7 @@ function VisSpyTableProvider($rootScope, Private) {
     // kibi: do not show if the vis is incompatible with this mode
     allowSpyMode,
     template: tableSpyModeTemplate,
-    link: function tableLinkFn($scope, $el) {
+    link: function tableLinkFn($scope) {
       $rootScope.$watchMulti.call($scope, [
         'vis',
         'esResp'
@@ -49,4 +46,4 @@ function VisSpyTableProvider($rootScope, Private) {
   };
 }
 
-require('ui/registry/spy_modes').register(VisSpyTableProvider);
+spyModesRegistry.register(VisSpyTableProvider);

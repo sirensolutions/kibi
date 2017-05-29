@@ -1,10 +1,8 @@
 import _ from 'lodash';
-import angular from 'angular';
 import moment from 'moment';
 import 'ui/state_management/global_state';
 import 'ui/config';
 import EventsProvider from 'ui/events';
-import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
 import TimefilterLibDiffTimeProvider from 'ui/timefilter/lib/diff_time';
 import TimefilterLibDiffIntervalProvider from 'ui/timefilter/lib/diff_interval';
 import uiRoutes from 'ui/routes';
@@ -22,7 +20,6 @@ uiModules
 .get('kibana')
 .service('timefilter', function (Private, globalState, $rootScope, config) {
   const Events = Private(EventsProvider);
-  const diff = Private(UtilsDiffTimePickerValsProvider);
 
   function convertISO8601(stringTime) {
     const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
@@ -95,7 +92,7 @@ uiModules
     return filter;
   };
 
-  Timefilter.prototype.getBounds = function (timefield) {
+  Timefilter.prototype.getBounds = function () {
     return {
       min: parseWithPrecision(this.time.from, false, $rootScope.kibiTimePrecision),
       max: parseWithPrecision(this.time.to, true, $rootScope.kibiTimePrecision)

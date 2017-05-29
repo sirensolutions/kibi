@@ -1,0 +1,21 @@
+.kuiCardGroup {
+  display: flex;
+  border: 1px solid $cardBorderColor;
+  border-radius: $globalBorderRadius;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+  .kuiCardGroup__card {
+    flex: 1 1 0%;
+    border: none;
+    border-radius: 0;
+
+    & + & {
+      border-left: 1px solid $cardBorderColor;
+    }
+  }
+
+  .kuiCardGroup__cardDescription {
+    flex: 1 1 auto;
+  }

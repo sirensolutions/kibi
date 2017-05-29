@@ -6,9 +6,7 @@ import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('tabifyAggResponse Integration', function () {
-
   let Vis;
-  let Buckets;
   let indexPattern;
   let tabifyAggResponse;
 
@@ -16,7 +14,7 @@ describe('tabifyAggResponse Integration', function () {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
   }));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
@@ -254,7 +252,7 @@ describe('tabifyAggResponse Integration', function () {
         minimalColumns: false
       });
 
-      expectRootGroup(tabbed, function expectTable(table, splitKey) {
+      expectRootGroup(tabbed, function expectTable(table) {
         expectColumns(table, [src, os, avg]);
 
         table.rows.forEach(function (row) {

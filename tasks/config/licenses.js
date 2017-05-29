@@ -1,4 +1,4 @@
-module.exports = function (grunt) {
+module.exports = function () {
   return {
     options: {
       licenses: [
@@ -53,11 +53,12 @@ module.exports = function (grunt) {
         'ripemd160@0.2.0': ['MIT'],
         'select@1.0.6': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
+        'ua-parser-js@0.7.12': ['MIT'],
 
         // kibi: add our licenses
         'JSONSelect@0.4.0': ['MIT'],
         'cycle@1.0.3': ['Public domain'],
-        'jison-lex@0.2.1': ['Unlicense'],
+        'jison-lex@0.2.1': ['MIT'],
         'jison@0.4.13': ['MIT'],
         'nomnom@1.5.2': ['MIT'],
       }

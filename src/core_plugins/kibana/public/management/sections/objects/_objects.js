@@ -11,11 +11,9 @@ import uiModules from 'ui/modules';
 import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
-import objectActionsRegistry from 'ui/registry/object_actions';
+import ObjectActionsRegistry from 'ui/registry/object_actions';
 import ImportExportProvider from 'plugins/kibi_core/management/sections/objects/import_export_helper';
 // kibi: end
-
-const MAX_SIZE = Math.pow(2, 31) - 1;
 
 uiRoutes
 .when('/management/siren/objects', {
@@ -50,7 +48,7 @@ uiModules.get('apps/management')
       $scope.selectedItems = [];
 
       // kibi: object actions registry
-      $scope.objectActions = Private(objectActionsRegistry).toJSON();
+      $scope.objectActions = Private(ObjectActionsRegistry).toJSON();
       // kibi: end
 
       this.areAllRowsChecked = function areAllRowsChecked() {
@@ -77,8 +75,7 @@ uiModules.get('apps/management')
 
         $q.all(services).then(function (data) {
           $scope.services = sortBy(data, 'title');
-          let tab = $scope.services[0];
-          if ($state.tab) $scope.currentTab = tab = find($scope.services, { title: $state.tab });
+          if ($state.tab) $scope.currentTab = find($scope.services, { title: $state.tab });
 
           $scope.$watch('state.tab', function (tab) {
             if (!tab) $scope.changeTab($scope.services[0]);
@@ -218,16 +215,28 @@ uiModules.get('apps/management')
           return;
         }
 
-        // kibi: change the import to sequential to solve the dependency problem between objects
-        // as visualisations could depend on searches
-        // lets order the export to make sure that searches comes before visualisations
-        // then also import object sequentially to avoid errors
-        return importExportHelper.importDocuments(docs, $scope.services, notify)
-        .then(refreshKibanaIndex)
-        .then(() => queryEngineClient.clearCache()) // kibi: to clear backend cache
-        .then(importExportHelper.reloadQueries) // kibi: to clear backend cache
-        .then(refreshData)
-        .catch(notify.error);
+        return new Promise((resolve) => {
+          confirmModal(
+            `If any of the objects already exist, do you want to automatically overwrite them?`, {
+              confirmButtonText: `Yes, overwrite all`,
+              cancelButtonText: `No, prompt me for each one`,
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            }
+          );
+        })
+        .then((overwriteAll) => {
+          // kibi: change the import to sequential to solve the dependency problem between objects
+          // as visualisations could depend on searches
+          // lets order the export to make sure that searches comes before visualisations
+          // then also import object sequentially to avoid errors
+          return importExportHelper.importDocuments(docs, $scope.services, notify, overwriteAll)
+          .then(refreshKibanaIndex)
+          .then(() => queryEngineClient.clearCache()) // kibi: to clear backend cache
+          .then(importExportHelper.reloadQueries) // kibi: to clear backend cache
+          .then(refreshData)
+          .catch(notify.error);
+        });
       };
 
       // TODO: Migrate all scope methods to the controller.

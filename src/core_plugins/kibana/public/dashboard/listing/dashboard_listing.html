@@ -12,7 +12,10 @@
   </div>
 </kbn-top-nav>
 
-<div class="kuiViewContent kuiViewContent--constrainedWidth">
+<div
+  class="kuiViewContent kuiViewContent--constrainedWidth"
+  data-test-subj="dashboardLandingPage"
+>
   <!-- ControlledTable -->
   <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
     <!-- ToolBar -->
@@ -99,8 +102,10 @@
             class="kuiButton kuiButton--primary kuiButton--iconText"
             href="{{listingController.getCreateDashboardHref()}}"
           >
-            <span class="kuiButton__icon kuiIcon fa-plus"></span>
-            Create a dashboard
+            <span class="kuiButton__inner">
+              <span class="kuiButton__icon kuiIcon fa-plus"></span>
+              <span>Create a dashboard</span>
+            </span>
           </a>
         </div>
       </div>

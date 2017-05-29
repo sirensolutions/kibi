@@ -18,9 +18,7 @@ export default function ($compile) {
         interval: intervalTemplate,
         filter: filterTemplate,
       };
-
-      // kibi: navbar extensions can pass controllers
-      this.controllers = [];
+      this.locals = new Map();
 
       this.addItems(opts);
     }
@@ -38,8 +36,9 @@ export default function ($compile) {
         this.opts.push(opt);
         if (!opt.hideButton()) this.menuItems.push(opt);
         if (opt.template) this.templates[opt.key] = opt.template;
-        // kibi: pass the controller
-        if (opt.controller) this.controllers[opt.key] = opt.controller;
+        if (opt.locals) {
+          this.locals.set(opt.key, opt.locals);
+        }
       });
     }
 
@@ -59,6 +58,8 @@ export default function ($compile) {
     open(key) { this.setCurrent(key); }
     close(key) { (!key || this.isCurrent(key)) && this.setCurrent(null); }
     toggle(key) { this.setCurrent(this.isCurrent(key) ? null : key); }
+    click(key) { this.handleClick(this.getItem(key)); }
+    getItem(key) { return this.menuItems.find(i => i.key === key); }
     handleClick(menuItem) {
       if (menuItem.disableButton()) {
         return false;
@@ -112,9 +113,8 @@ export default function ($compile) {
       }
 
       const $childScope = $scope.$new();
-      // kibi: pass the controller to the scope
-      if (this.controllers[currentKey]) {
-        $childScope.controller = this.controllers[currentKey];
+      if (this.locals.has(currentKey)) {
+        Object.assign($childScope, this.locals.get(currentKey));
       }
       const $el = $element.find('#template_wrapper').html(templateToRender).contents();
       $compile($el)($childScope);

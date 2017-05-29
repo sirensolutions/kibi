@@ -7,6 +7,7 @@ import kibanaVersion from './kibana_version';
 import pluginList from './wait_for_plugin_list';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
+import { ensureAllowExplicitIndex } from './ensure_allow_explicit_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -95,7 +96,8 @@ module.exports = function (plugin, server) {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
       .then(waitForEsVersion)
-      .then(ensureNotTribe.bind(this, callAdminAsKibanaUser))
+      .then(() => ensureNotTribe(callAdminAsKibanaUser))
+      .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
       .then(_.partial(migrateConfig, server))
       .then(_.partial(pluginList, plugin, server)) // kibi: added by kibi to know the list of installed plugins

@@ -4,10 +4,10 @@ import keymap from 'ui/utils/key_map';
 import SavedObjectsSavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import uiModules from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
-import 'ui/partials/saved_object_finder.less';
 
 // kibi: imports
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
+// kibi: end
 
 const module = uiModules.get('kibana');
 
@@ -38,7 +38,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
     },
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
-    controller: function ($scope, $element, $timeout) {
+    controller: function ($scope, $element) {
       const self = this;
 
       // kibi: variable to store the checkbox state
@@ -252,7 +252,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         }
       };
 
-      self.hitBlur = function ($event) {
+      self.hitBlur = function () {
         self.selector.index = -1;
         self.selector.enabled = false;
       };
@@ -300,18 +300,6 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
             self.hits = _.sortBy(hits.hits, 'title');
           }
         });
-      }
-
-      function scrollIntoView($element, snapTop) {
-        const el = $element[0];
-
-        if (!el) return;
-
-        if ('scrollIntoViewIfNeeded' in el) {
-          el.scrollIntoViewIfNeeded(snapTop);
-        } else if ('scrollIntoView' in el) {
-          el.scrollIntoView(snapTop);
-        }
       }
     }
   };

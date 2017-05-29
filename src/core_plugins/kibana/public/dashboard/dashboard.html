@@ -11,26 +11,31 @@
       <div
         data-transclude-slot="topLeftCorner"
       >
-        <!-- siren: adds group icon, bigger title and stats -->
-        <i
-          ng-show="dash.id"
-          ng-if="dash.group.iconCss"
-          class="dashboard-icon-image {{dash.group.iconCss}}"
-        ></i>
-        <img
-          ng-show="dash.id"
-          ng-if="dash.group.iconUrl"
-          ng-src="dashboard-icon-image {{dash.group.iconUrl}}"
-        />
-        <span
-          ng-show="dash.id"
-          ng-bind="dash.lastSavedTitle"
-          class="dashboard-title"
-        ></span>
-        <span
-          ng-show="dash.id && dash.group.selected.count !== undefined"
-          class="dashboard-stats"
-          >({{dash.group.selected.formatedCount}})</span>
+        <div class="kuiLocalBreadcrumbs" data-test-subj="breadcrumbs">
+          <div class="kuiLocalBreadcrumb">
+            <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
+          </div>
+          <div class="kuiLocalBreadcrumb">
+            <!-- siren: adds group icon, bigger title and stats -->
+            <i
+              ng-show="dash.id"
+              ng-if="dash.group.iconCss"
+              class="dashboard-icon-image {{dash.group.iconCss}}"
+            ></i>
+            <img
+              ng-show="dash.id"
+              ng-if="dash.group.iconUrl"
+              ng-src="dashboard-icon-image {{dash.group.iconUrl}}"
+            />
+            {{ getDashTitle() }}
+            <span
+              ng-show="dash.id && dash.group.selected.count !== undefined"
+              class="dashboard-stats"
+            >
+              ({{dash.group.selected.formattedCount}})
+            </span>
+          </div>
+        </div>
       </div>
 
       <!-- Search. -->
@@ -48,9 +53,10 @@
               parse-query
               input-focus
               kbn-typeahead-input
-              ng-model="state.query"
+              ng-model="model.query"
               placeholder="Filter..."
               aria-label="Filter input"
+              data-test-subj="dashboardQuery"
               type="text"
               class="kuiLocalSearchInput"
               ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
@@ -59,6 +65,7 @@
               type="submit"
               aria-label="Filter Dashboards"
               class="kuiLocalSearchButton"
+              data-test-subj="dashboardQueryFilterButton"
               ng-disabled="queryInput.$invalid"
             >
               <span class="fa fa-search" aria-hidden="true"></span>
@@ -73,31 +80,35 @@
   <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
-  <div ng-show="showEditHelpText()" class="text-center start-screen">
+  <div ng-show="getShouldShowViewHelp()" class="text-center start-screen">
     <h2>This dashboard is empty. Let's fill it up!</h2>
-    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.open('add'); toggleAddVisualization = !toggleAddVisualization" aria-label="Add visualization">Add</a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't setup a visualization yet visit <a href="#/visualize" title="Visualize">"Visualize"</a> to create your first visualization.</p>
+    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.click('edit');" aria-label="Edit">Edit</a> button in the menu bar above to start working on your new dashboard.
   </div>
 
-  <!-- kibi: opts is added for access to border options -->
+  <!--kibi: added hideBorders options to toggle borders around panels-->
   <dashboard-grid
     ng-show="!hasExpandedPanel()"
     on-panel-removed="onPanelRemoved"
-    panels="state.panels"
-    get-vis-click-handler="filterBarClickHandler(state)"
-    get-vis-brush-handler="brushEvent(state)"
+    hide-borders="model.hideBorders"
+    dashboard-view-mode="dashboardViewMode"
+    panels="panels"
+    get-vis-click-handler="getFilterBarClickHandler"
+    get-vis-brush-handler="getBrushEvent"
     save-state="saveState"
     toggle-expand="toggleExpandPanel"
     create-child-ui-state="createChildUiState"
     toggle-expand="toggleExpandPanel"
-    opts="opts"
   ></dashboard-grid>
 
+  <!--kibi: added hideBorders options to toggle borders around panels-->
   <dashboard-panel ng-if="hasExpandedPanel()"
                    panel="expandedPanel"
                    is-full-screen-mode="!chrome.getVisible()"
                    is-expanded="true"
-                   get-vis-click-handler="filterBarClickHandler(state)"
-                   get-vis-brush-handler="brushEvent(state)"
+                   hide-borders="model.hideBorders"
+                   dashboard-view-mode="dashboardViewMode"
+                   get-vis-click-handler="getFilterBarClickHandler"
+                   get-vis-brush-handler="getBrushEvent"
                    save-state="saveState"
                    create-child-ui-state="createChildUiState"
                    toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)">

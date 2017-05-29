@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import errors from 'ui/errors';
+import { InvalidLogScaleValues, NotEnoughData } from 'ui/errors';
 
-export default function PointSeriesProvider(Private) {
+export default function PointSeriesProvider() {
 
   class PointSeries {
     constructor(handler, seriesEl, seriesData, seriesConfig) {
@@ -17,7 +17,7 @@ export default function PointSeriesProvider(Private) {
     validateDataCompliesWithScalingMethod(data) {
       const invalidLogScale = data.values && data.values.some(d => d.y < 1);
       if (this.getValueAxis().axisConfig.isLogScale() && invalidLogScale) {
-        throw new errors.InvalidLogScaleValues();
+        throw new InvalidLogScaleValues();
       }
     }
 
@@ -29,8 +29,8 @@ export default function PointSeriesProvider(Private) {
 
     getGroupedCount() {
       const stacks = [];
-      return this.baseChart.chartConfig.series.reduce(function (sum, series) {
-        const valueAxis = series.valueAxis;
+      return this.baseChart.chartConfig.series.reduce((sum, series) => {
+        const valueAxis = series.valueAxis || this.baseChart.handler.valueAxes[0].id;
         const isStacked = series.mode === 'stacked';
         const isHistogram = series.type === 'histogram';
         if (!isHistogram) return sum;
@@ -53,7 +53,7 @@ export default function PointSeriesProvider(Private) {
       let i = 0;
       const stacks = [];
       for (const seri of this.baseChart.chartConfig.series) {
-        const valueAxis = seri.valueAxis;
+        const valueAxis = seri.valueAxis || this.baseChart.handler.valueAxes[0].id;
         const isStacked = seri.mode === 'stacked';
         if (!isStacked) {
           if (seri.data === data) return i;
@@ -96,7 +96,7 @@ export default function PointSeriesProvider(Private) {
       const notEnoughData = this.chartData.values.length < 2;
 
       if (notEnoughData) {
-        throw new errors.NotEnoughData(message);
+        throw new NotEnoughData(message);
       }
     }
   }

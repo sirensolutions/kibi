@@ -1,6 +1,5 @@
 import angular from 'angular';
-import { isEqual, once, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
-import uiRoutes from 'ui/routes';
+import { isEqual, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
 import uiModules from 'ui/modules';
 import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
 const module = uiModules.get('kibana/config');
@@ -57,7 +56,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     return scope.$on(`change:config`, update);
   }
 
-  // siren: custom validator for value
+  // kibi: custom validator for value
   const _validators = function (validator, val) {
     if (val === null) {
       // unset the value
@@ -73,7 +72,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
         throw `Unknown validator [${validator}] for [${val}].`;
     }
   };
-  // siren: end
+  // kibi: end
 
   function change(key, value) {
     const declared = config.isDeclared(key);

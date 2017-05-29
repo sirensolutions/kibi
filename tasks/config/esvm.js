@@ -1,12 +1,12 @@
+import serverConfig from '../../test/server_config';
 module.exports = function (grunt) {
   const resolve = require('path').resolve;
   const directory = resolve(__dirname, '../../esvm');
   const dataDir = resolve(directory, 'data_dir');
-  const serverConfig = require('../../test/server_config');
 
   return {
     options: {
-      branch: '5.3',
+      branch: '5.4',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         http: {

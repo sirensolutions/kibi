@@ -26,7 +26,7 @@ export default function fetchService(Private, Promise) {
     return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 
-  function fetchQueued(strategy) {
+  this.fetchQueued = (strategy) => {
     let requests = requestQueue.getStartable(strategy);
 
     //kibi: Adding $$kibiSingleCall = true to a member of a visualization allows to avoid all other requests
@@ -44,13 +44,10 @@ export default function fetchService(Private, Promise) {
     }
     //kibi: end
 
-    if (!requests.length) return Promise.resolve();
-    else return fetchTheseSoon(requests);
-  }
+    return fetchTheseSoon(requests);
+  };
 
-  this.fetchQueued = fetchQueued;
-
-  function fetchASource(source, strategy) {
+  function fetchASource(source) {
     const defer = Promise.defer();
 
     fetchTheseSoon([

@@ -198,7 +198,7 @@ uiModules
         }
         _.each(queryStrings, (queryString) => {
           // only if the query is different than star query
-          if (!kibiState._isDefaultQuery(queryString)) {
+          if (!_.has(queryString, 'query_string.query') || _.get(queryString, 'query_string.query') !== '*') {
             promises.push(explainFilter(queryString, indexId));
           }
         });

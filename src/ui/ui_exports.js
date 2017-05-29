@@ -41,6 +41,16 @@ class UiExports {
     this.consumers.push(consumer);
   }
 
+  addConsumerForType(typeToConsume, consumer) {
+    this.consumers.push({
+      exportConsumer(uiExportType) {
+        if (uiExportType === typeToConsume) {
+          return consumer;
+        }
+      }
+    });
+  }
+
   exportConsumer(type) {
     for (const consumer of this.consumers) {
       if (!consumer.exportConsumer) continue;
@@ -52,7 +62,6 @@ class UiExports {
       case 'app':
       case 'apps':
         return (plugin, specs) => {
-          const id = plugin.id;
           for (const spec of [].concat(specs || [])) {
 
             const app = this.apps.new(_.defaults({}, spec, {
@@ -71,8 +80,8 @@ class UiExports {
 
       case 'link':
       case 'links':
-        return (plugin, spec) => {
-          for (const spec of [].concat(spec || [])) {
+        return (plugin, specs) => {
+          for (const spec of [].concat(specs || [])) {
             this.navLinks.new(spec);
           }
         };

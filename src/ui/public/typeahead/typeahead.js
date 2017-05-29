@@ -111,8 +111,7 @@ typeahead.directive('kbnTypeahead', function () {
         $scope.inputModel.$render();
         self.persistEntry();
 
-        if ($scope.onSelect && ev && ev.type === 'click') {
-          // siren: to remove our fix once the PR upstream is merged https://github.com/elastic/kibana/pull/11100
+        if (ev && ev.type === 'click') {
           $scope.onSelect();
         }
       };
@@ -203,7 +202,7 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       // handle updates to parent scope history
-      $scope.$watch('items', function (items) {
+      $scope.$watch('items', function () {
         if (self.query) {
           self.filterItemsByQuery(self.query);
         }
@@ -219,7 +218,10 @@ typeahead.directive('kbnTypeahead', function () {
       });
     },
 
-    link: function ($scope, $el, attr) {
+    link: function ($scope, $el, attrs) {
+      if (!_.has(attrs, 'onSelect')) {
+        throw new Error('on-select must be defined');
+      }
       // should be defined via setInput() method
       if (!$scope.inputModel) {
         throw new Error('kbn-typeahead-input must be defined');

@@ -10,6 +10,7 @@ export default function (id, mapping) {
 
   return {
     _id: id,
+    _type: 'Test', // kibi: add the type which is sometimes needed, e.g., the detail row of the docTable directive
     _index: 'test',
     _source: fakeVals('original'),
     sort: [id],

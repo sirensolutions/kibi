@@ -1,5 +1,3 @@
-require('../../test/mocha_setup');
-
 module.exports = grunt => ({
   options: {
     timeout: 60000, // kibi: increased default timeout for jenkins build
@@ -11,6 +9,7 @@ module.exports = grunt => ({
   },
   all: {
     src: [
+      'test/mocha_setup.js',
       'test/**/__tests__/**/*.js',
       'src/**/__tests__/**/*.js',
       'plugins/**/lib/**/__tests__/**/*.js', // kibi: Support execution of mocha tests in plugins
@@ -19,6 +18,12 @@ module.exports = grunt => ({
       '!**/_*.js',
       '!plugins/**/public/**', // kibi: Support execution of mocha tests in plugins
       '!plugins/**/node_modules/**' // kibi: Support execution of mocha tests in plugins
+    ]
+  },
+  api: {
+    src: [
+      'test/mocha_setup.js',
+      'test/unit/**/*.js'
     ]
   }
 });

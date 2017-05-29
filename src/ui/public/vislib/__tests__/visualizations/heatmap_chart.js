@@ -23,7 +23,7 @@ const dataTypesArray = [
 ];
 
 describe('Vislib Heatmap Chart Test Suite', function () {
-  dataTypesArray.forEach(function (dataType, i) {
+  dataTypesArray.forEach(function (dataType) {
     const name = dataType[0];
     const data = dataType[1];
 
@@ -65,10 +65,6 @@ describe('Vislib Heatmap Chart Test Suite', function () {
 
       describe('addSquares method', function () {
         it('should append rects', function () {
-          let numOfSeries;
-          let numOfValues;
-          let product;
-
           vis.handler.charts.forEach(function (chart) {
             const numOfRects = chart.chartData.series.reduce((result, series) => {
               return result + series.values.length;
@@ -151,6 +147,10 @@ describe('Vislib Heatmap Chart Test Suite', function () {
         expect(labels[1]).to.be('200 - 400');
         expect(labels[2]).to.be('400 - 500');
         expect(labels[3]).to.be('500 - Infinity');
+      });
+
+      it('should show correcy Y axis title', function () {
+        expect(vis.handler.valueAxes[1].axisConfig.get('title.text')).to.equal('');
       });
     });
   });

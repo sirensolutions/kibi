@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 
-import errors from 'ui/errors';
+import { VersionConflict, RequestFailure } from 'ui/errors';
 import RequestQueueProvider from 'ui/courier/_request_queue';
 import FetchProvider from 'ui/courier/fetch/fetch';
 
@@ -42,7 +42,7 @@ export default function (Promise, Private, es, esAdmin, kbnIndex, savedObjectsAP
 
     return client[method](params)
     .then(function (resp) {
-      if (resp.status === 409) throw new errors.VersionConflict(resp);
+      if (resp.status === 409) throw new VersionConflict(resp);
 
       doc._storeVersion(resp._version);
       doc.id(resp._id);
@@ -91,7 +91,7 @@ export default function (Promise, Private, es, esAdmin, kbnIndex, savedObjectsAP
     })
     .catch(function (err) {
       // cast the error
-      throw new errors.RequestFailure(err);
+      throw new RequestFailure(err);
     });
   };
 }

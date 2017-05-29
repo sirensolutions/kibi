@@ -6,8 +6,6 @@ import ngMock from 'ng_mock';
 import moment from 'moment';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 describe('ui/index_patterns/_calculate_indices', () => {
-
-  let Promise;
   let $rootScope;
   let calculateIndices;
   let es;
@@ -36,7 +34,6 @@ describe('ui/index_patterns/_calculate_indices', () => {
   beforeEach(ngMock.inject((Private, $injector) => {
     $rootScope = $injector.get('$rootScope');
     es = $injector.get('es');
-    Promise = $injector.get('Promise');
     calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   }));
 
@@ -67,7 +64,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
       expect(_.size(constraints['@something'])).to.equal(0);
     });
 
-    context('when given start', () => {
+    describe('when given start', () => {
       beforeEach(() => run({ start: '1234567890' }));
       it('includes max_value', () => {
         expect(constraints['@something']).to.have.property('max_value');
@@ -88,7 +85,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
       });
     });
 
-    context('when given stop', () => {
+    describe('when given stop', () => {
       beforeEach(() => run({ stop: '1234567890' }));
       it('includes min_value', () => {
         expect(constraints['@something']).to.have.property('min_value');
@@ -121,7 +118,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
   describe('response sorting', function () {
     require('test_utils/no_digest_promises').activateForSuite();
 
-    context('when no sorting direction given', function () {
+    describe('when no sorting direction given', function () {
       it('returns the indices in the order that elasticsearch sends them', function () {
         response = {
           indices: {
@@ -137,7 +134,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
       });
     });
 
-    context('when sorting asc', function () {
+    describe('when sorting asc', function () {
       it('resolves to an array of objects, each with index, start, and end properties', function () {
         response = {
           indices: {
@@ -169,7 +166,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
       });
     });
 
-    context('when sorting desc', function () {
+    describe('when sorting desc', function () {
       it('resolves to an array of objects, each with index, min, and max properties', function () {
         response = {
           indices: {

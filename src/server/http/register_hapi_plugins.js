@@ -12,6 +12,6 @@ async function registerPlugins(server) {
   });
 }
 
-export default function (kbnServer, server, config) {
+export default function (kbnServer, server) {
   registerPlugins(server);
 }

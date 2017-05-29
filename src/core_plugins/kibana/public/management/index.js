@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import 'plugins/kibana/management/sections';
 import 'plugins/kibana/management/styles/main.less';
 import 'ui/filters/start_from';
@@ -11,7 +9,6 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import appTemplate from 'plugins/kibana/management/app.html';
 import landingTemplate from 'plugins/kibana/management/landing.html';
-import chrome from 'ui/chrome/chrome';
 import management from 'ui/management';
 import 'ui/kbn_top_nav';
 
@@ -31,8 +28,7 @@ require('ui/index_patterns/route_setup/load_default')({
 
 uiModules
 .get('apps/management')
-.directive('kbnManagementApp', function (Private, $location, timefilter, buildNum, buildSha,
-  kibiVersion, kibiKibanaAnnouncement) {
+.directive('kbnManagementApp', function (Private, $location, timefilter, buildNum, buildSha, kibiVersion, kibiKibanaAnnouncement) {
   return {
     restrict: 'E',
     template: appTemplate,

@@ -1,4 +1,3 @@
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -14,10 +13,8 @@ import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('Filter Bar Directive', function () {
   let $rootScope;
   let $compile;
-  let $timeout;
   let Promise;
   let appState;
-  let queryFilter;
   let mapFilter;
   let $el;
   let $scope;

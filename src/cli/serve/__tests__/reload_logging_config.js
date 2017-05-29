@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import { writeFileSync, readFile } from 'fs';
+import { writeFileSync } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
 import es from 'event-stream';
@@ -33,7 +33,7 @@ describe(`Server logging configuration`, function () {
 
       let asserted = false;
       let json = Infinity;
-      const conf = setLoggingJson(true);
+      setLoggingJson(true);
       const child = spawn(cli, [`--config`, testConfigFile]);
 
       child.on('error', err => {
@@ -41,8 +41,8 @@ describe(`Server logging configuration`, function () {
       });
 
       child.on('exit', code => {
+        expect([null, 0]).to.contain(code);
         expect(asserted).to.eql(true);
-        expect(code === null || code === 0).to.eql(true);
         done();
       });
 

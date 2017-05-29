@@ -1,5 +1,6 @@
-const _ = require('lodash');
-const processFunctionDefinition = require('./server/lib/process_function_definition');
+import _ from 'lodash';
+import processFunctionDefinition from './server/lib/process_function_definition';
+// kibi: register timelion-sheets with the saved_objects_api plugin
 import timelionConfiguration from './server/lib/saved_objects/timelion-sheet';
 
 module.exports = function (server) {

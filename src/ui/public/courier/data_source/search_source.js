@@ -98,6 +98,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
     'from',
     'size',
     'source',
+    'version',
     'inject' // kibi: support dbfilter
   ];
 

@@ -8,7 +8,7 @@
 :siren-join-website: https://github.com/sirensolutions/siren-join/
 :kibana-version: 4.6.4
 :kibana-announcement: https://www.elastic.co/blog/kibana-5-1-2-and-4-6-4-released
-:kibi-version: 4.6.4-3
+:kibi-version: 4.6.4-4-SNAPSHOT
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/
 :elasticsearch-version: 2.4.4
 :shield-ref: https://www.elastic.co/guide/en/shield/2.4/

@@ -100,6 +100,20 @@ uiModules
         }
       }, true);
 
+      $scope.columnAliasesValidation = function () {
+        $scope.columnAliasesValid = true;
+
+        _.each($scope.vis.params.columnAliases, function (alias, index) {
+          $scope.aliasValidStatus[index] = true;
+          for(let i = 0; i < $scope.vis.params.columnAliases.length; i++) {
+            if (index !== i && alias !== '' && $scope.vis.params.columnAliases[i] === alias) {
+              $scope.aliasValidStatus[index] = false;
+              $scope.columnAliasesValid = '';
+            }
+          }
+        });
+      };
+
       function fillColumnAliases() {
         // prepopulate aliases to original names if not defined
         _.each($scope.vis.params.columns, (columnName, index) => {
@@ -118,6 +132,10 @@ uiModules
           $scope.vis.params.columnAliases = [];
         } else {
           fillColumnAliases();
+
+          // status array of aliases initialized true
+          $scope.aliasValidStatus = new Array($scope.vis.params.columnAliases.length).fill(true);
+          $scope.columnAliasesValid = true;
         }
         $rootScope.$emit('kibi:vis:columnAliases-changed', $scope.vis.params.columnAliases);
       }, true);

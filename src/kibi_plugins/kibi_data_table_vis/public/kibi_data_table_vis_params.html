@@ -87,7 +87,9 @@
       </label>
     </div>
 
-    <div ng-if="vis.params.enableColumnAliases">
+    <div class="column-aliases" ng-if="vis.params.enableColumnAliases">
+      <!--This input is necessary so that the form is invalid-->
+      <input type="hidden" ng-model="columnAliasesValid" required/>
       <table class="table">
         <thead>
           <tr>
@@ -98,7 +100,10 @@
         <tbody>
           <tr ng-repeat="column in vis.params.columns">
             <td>{{vis.params.columns[$index]}}</td>
-            <td><input type="text" ng-model="vis.params.columnAliases[$index]" /></td>
+            <td>
+              <div class="duplicate-warning" ng-if="!aliasValidStatus[$index]"> Aliases cannot be duplicated </div>
+              <input type="text" ng-class="{invalid: !aliasValidStatus[$index]}" ng-model="vis.params.columnAliases[$index]" ng-blur="columnAliasesValidation()" required/>
+            </td>
           </tr>
         </tbody>
       </table>

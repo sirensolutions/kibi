@@ -91,10 +91,7 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
         if (req.getSource) {
           const source = req.getSource();
           if (source && source.vis && source.vis.requestAdapter) {
-            const result = source.vis.requestAdapter(req);
-            if (result) {
-              req = result;
-            }
+            source.vis.requestAdapter(req);
           }
         }
       });

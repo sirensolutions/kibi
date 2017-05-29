@@ -1,4 +1,4 @@
-# Kibi 4.6.4-3-SNAPSHOT
+# Kibi 4.6.4-3
 
 Kibi extends Kibana 4.6.4 with data intelligence features; the core feature of
 
@@ -51,8 +51,8 @@ Kibi is Licensed under the Apache License, Version 2.0 (the "License"); you may 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-Please note that Kibi uses the SIREn Join plugin which is licenced as AGPL version 3.0. 
-For more information see the licensing section on Kibi website 
+Please note that Kibi uses the SIREn Join plugin which is licenced as AGPL version 3.0.
+For more information see the licensing section on Kibi website
 
   http://siren.solutions/kibi
 

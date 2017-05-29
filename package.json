@@ -18,7 +18,7 @@
   "private": false,
   "version": "4.6.4",
   "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-1-2-and-4-6-4-released",
-  "kibi_version": "4.6.4-3-SNAPSHOT",
+  "kibi_version": "4.6.4-3",
   "kibi_enterprise_enabled": false,
   "build": {
     "number": 8467,

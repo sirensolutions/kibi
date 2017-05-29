@@ -18,18 +18,27 @@ function GremlinServerHandler(server) {
 
 function startServer(self, fulfill, reject) {
   const config = self.server.config();
-  let gremlinServerPath = config.get('kibi_core.gremlin_server.path');
-  const gremlinServerRemoteDebug = config.get('kibi_core.gremlin_server.debug_remote');
+
+  let gremlinServerPath;
+  if (config.has('kibi_core.gremlin_server.path')) {
+    gremlinServerPath = config.get('kibi_core.gremlin_server.path');
+  }
 
   if (gremlinServerPath) {
-    // regex for ipv4 ip+port
-    const re = /.*?([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]*).*/;
-
     isJavaVersionOk(self).then(function () {
 
       if (config.has('kibi_core.gremlin_server.ssl.ca')) {
         const ca = config.get('kibi_core.gremlin_server.ssl.ca');
-        self.ca = fs.readFileSync(ca);
+        if (ca) {
+          try {
+            self.ca = fs.readFileSync(ca);
+          } catch (error) {
+            const message = 'The configuration property kibi_core.gremlin_server.ca ' +
+                             'does not point to a readable CA file.';
+            self.server.log(['gremlin', 'error'], message);
+            return Promise.reject(new Error(message));
+          }
+        }
       }
 
       if (path.parse(gremlinServerPath).ext !== '.jar') {
@@ -63,13 +72,18 @@ function startServer(self, fulfill, reject) {
           args.push('--server.address=' + serverURL.hostname);
         }
 
-        if (gremlinServerRemoteDebug) {
-          args.unshift(gremlinServerRemoteDebug);
+        if (config.has('kibi_core.gremlin_server.debug_remote')) {
+          const gremlinServerRemoteDebug = config.get('kibi_core.gremlin_server.debug_remote');
+          if (gremlinServerRemoteDebug) {
+            args.unshift(gremlinServerRemoteDebug);
+          }
         }
 
-        if (config.has('kibi_core.gremlin_server.log_conf_path') && config.get('kibi_core.gremlin_server.log_conf_path') !== '') {
+        if (config.has('kibi_core.gremlin_server.log_conf_path')) {
           const logConfigPath = config.get('kibi_core.gremlin_server.log_conf_path');
-          args.push('--logging.config=' + logConfigPath);
+          if (logConfigPath) {
+            args.push('--logging.config=' + logConfigPath);
+          }
         }
 
         if (config.has('elasticsearch.ssl.certificateAuthorities')) {
@@ -90,18 +104,29 @@ function startServer(self, fulfill, reject) {
               args.push('--elasticsearch.ssl.verify=true');
               break;
             default:
-              throw new Error(`Unknown ssl verificationMode: ${verificationMode} while starting Gremlin Server`);
+              const message = `Unknown ssl verificationMode: ${verificationMode} ` +
+                               'while starting Gremlin Server';
+              self.server.log(['gremlin','error'], message);
+              return Promise.reject(new Error(message));
           }
         }
 
         if (config.has('kibi_core.gremlin_server.ssl.key_store')) {
           const sslKeyStore = config.get('kibi_core.gremlin_server.ssl.key_store');
           const sslKeyStorePsw = config.get('kibi_core.gremlin_server.ssl.key_store_password');
-          args.push('--server.ssl.enabled=true');
-          args.push('--server.ssl.key-store=' + sslKeyStore);
-          args.push('--server.ssl.key-store-password=' + sslKeyStorePsw);
+          if (!sslKeyStorePsw) {
+            const message = `The Gremlin Server keystore password was not specified; ` +
+                             'in kibi_core.gremlin_server.ssl.key_store_password';
+            self.server.log(['gremlin','error'], message);
+            return Promise.reject(new Error(message));
+          }
+          if (sslKeyStore && sslKeyStorePsw) {
+            args.push('--server.ssl.enabled=true');
+            args.push('--server.ssl.key-store=' + sslKeyStore);
+            args.push('--server.ssl.key-store-password=' + sslKeyStorePsw);
+          }
         } else if (config.has('server.ssl.key') && config.has('server.ssl.certificate')) {
-          const msg = 'Since you are using Elasticsearch Shield, you should configure the SSL for the gremlin server ' +
+          const msg = 'Since you are using access control, you must enable HTTPS support in Gremlin Server ' +
             'by configuring the key store in kibi.yml\n' +
             'The following properties are required:\n' +
             'kibi_core.gremlin_server.ssl.key_store\n' +
@@ -158,8 +183,10 @@ function startServer(self, fulfill, reject) {
       });
     });
   } else {
-    self.server.log(['gremlin', 'warning'], 'The configuration property kibi_core.gremlin_server.path is empty');
-    fulfill({ message: 'The Kibi gremlin server was not started.', error: true });
+    const message = 'The Gremlin Server jar file was not found. Please check the ' +
+                     'value of the kibi_core.gremlin_server.path configuration property.';
+    self.server.log(['gremlin', 'error'], message);
+    return Promise.reject(new Error(message));
   }
 };
 

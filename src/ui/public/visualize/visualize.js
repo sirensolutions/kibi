@@ -227,7 +227,7 @@ uiModules
         }));
       }
 
-      $scope.$watch('esResp', prereq(function (resp) {
+      $scope.$watch('esResp', prereq(function (resp, prevResp) {
         if (!resp) return;
 
         // kibi: This is needed by multichart to stop re-render es responses

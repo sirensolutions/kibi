@@ -272,22 +272,6 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
     $state.replace();
 
-    // MERGE 5.3.2 Do we need both watchers ??
-    $scope.$watch('indexPattern.timeFieldName', function (timeField) {
-      // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
-      hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField).then((has) => {
-        timefilter.enabled = has;
-      });
-    });
-
-    $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
-      // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
-      hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField).then((has) => {
-        timefilter.enabled = has;
-      });
-    });
-
-
     $scope.getVisualizationTitle = function getVisualizationTitle() {
       return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
     };
@@ -296,7 +280,11 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
       'searchSource.get("index").timeFieldName',
       'vis.type.requiresTimePicker',
     ], function ([timeField, requiresTimePicker]) {
-      timefilter.enabled = Boolean(timeField || requiresTimePicker);
+      // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
+      hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField)
+      .then(hasTimeField => {
+        timefilter.enabled = Boolean(hasTimeField || requiresTimePicker);
+      });
     });
 
     // update the searchSource when filters update
@@ -447,7 +435,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
       if (stage && (isAggregationsChanged || isOptionsChanged)) {
         // kibi: decide to show/hide entity picker and timefilter
         hasAnyOfVisSavedSearchesATimeField(toVis, $scope.searchSource.get('index').timeFieldName)
-        .then((has) => timefilter.enabled = has)
+        .then(hasTimeField => timefilter.enabled = hasTimeField)
         .then(() => doesVisDependsOnSelectedEntities(toVis))
         .then((isEntityDependent) => $scope.holder.entityURIEnabled = isEntityDependent)
         .then($scope.fetch);

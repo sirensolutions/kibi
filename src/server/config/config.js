@@ -39,16 +39,6 @@ module.exports = class Config {
     _.set(this[schemaExts], key, extension);
     this[schema] = null;
 
-// MERGE 5.3.2 review this one is this needed ?
-// <<<<<<< HEAD
-//     const initialVals = _.get(this[pendingSets], key);
-//     if (initialVals) {
-//       this.set(key, initialVals);
-//       unset(this[pendingSets], key);
-//     } else {
-//       this._commit(this[vals]);
-//     }
-// =======
     this.set(key, settings);
   }
 

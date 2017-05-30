@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { IndexPatternMissingIndices } from 'ui/errors';
+import { IndexPatternAuthorizationError, IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
 import RefreshKibanaIndex from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
@@ -231,7 +231,8 @@ uiModules.get('apps/management')
       })
       .catch(function (err) {
         // TODO: we should probably display a message of some kind
-        if (err instanceof IndexPatternMissingIndices) {
+        // kibi: added IndexPatternAuthorizationError
+        if (err instanceof IndexPatternMissingIndices || err instanceof IndexPatternAuthorizationError) {
           fetchFieldsError = $translate.instant('KIBANA-INDICES_MATCH_PATTERN');
           return [];
         }

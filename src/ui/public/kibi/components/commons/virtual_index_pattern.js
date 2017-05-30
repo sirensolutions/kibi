@@ -7,17 +7,19 @@ export default function VirtualIndexPatternFactory(Private) {
   const FieldList = Private(FieldListProvider);
 
   return function VirtualIndexPattern(wrappedIndexPattern, virtualField) {
-    const self = this;
+    const fieldList = new FieldList(wrappedIndexPattern, wrappedIndexPattern.fields.raw.concat(virtualField));
 
-    self.fieldList = new FieldList(wrappedIndexPattern, wrappedIndexPattern.fields.raw.concat(virtualField));
-
-    return new Proxy(wrappedIndexPattern, {
-      get(target, name) {
-        if (name === 'fields') {
-          return self.fieldList;
-        }
-        return target[name];
+    for (const attr in wrappedIndexPattern) {
+      if (typeof wrappedIndexPattern[attr] === 'function') {
+        this[attr] = () => wrappedIndexPattern[attr].apply(wrappedIndexPattern, arguments);
+      } else if (attr !== 'fields') {
+        this[attr] = wrappedIndexPattern[attr];
       }
+    }
+
+    Object.defineProperty(VirtualIndexPattern.prototype, 'fields', {
+      get: () => fieldList,
+      configurable: true
     });
   };
 };

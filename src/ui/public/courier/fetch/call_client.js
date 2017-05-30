@@ -86,6 +86,16 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
       });
     })
     .then(function (reqsFetchParams) {
+      // kibi: call to requestAdapter function of the related visualization
+      reqsFetchParams.forEach(function (req) {
+        if (req.getSource) {
+          const source = req.getSource();
+          if (source && source.vis && source.vis.requestAdapter) {
+            source.vis.requestAdapter(req);
+          }
+        }
+      });
+     // kibi: end
       return strategy.reqsFetchParamsToBody(reqsFetchParams);
     })
     .then(function (body) {

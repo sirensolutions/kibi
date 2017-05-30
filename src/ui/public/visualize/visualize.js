@@ -229,6 +229,15 @@ uiModules
 
       $scope.$watch('esResp', prereq(function (resp) {
         if (!resp) return;
+
+        // kibi: This is needed by multichart to stop re-render es responses
+        //       can be used too to change the response before render process take place
+        if ($scope.vis.esResponseAdapter) {
+          $scope.renderbot.render($scope.vis.esResponseAdapter(resp, prevResp));
+          return;
+        }
+        // kibi: end
+
         $scope.renderbot.render(resp);
       }));
 

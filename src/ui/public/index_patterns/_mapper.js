@@ -154,10 +154,7 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
   }
 
   function handleMissingIndexPattern(err) {
-    // kibi: handle authorization errors
-    if (err.status === 403) {
-      return Promise.reject(new IndexPatternAuthorizationError());
-    } else if (err.status >= 400) {
+    if (err.status >= 400) {
       // transform specific error type
       return Promise.reject(new IndexPatternMissingIndices(err.message));
     } else {

@@ -22,7 +22,6 @@ import { VisualizeConstants } from '../visualize_constants';
 // kibi: imports
 import 'ui/kibi/directives/kibi_param_entity_uri';
 import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
-import HasAnyOfVisSavedSearchesATimeField from 'ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field';
 // kibi: end
 
 uiRoutes
@@ -86,7 +85,6 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
   // kibi: added by kibi
   const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
-  const hasAnyOfVisSavedSearchesATimeField = Private(HasAnyOfVisSavedSearchesATimeField);
   // kibi: end
 
   const notify = createNotifier({
@@ -280,11 +278,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
       'searchSource.get("index").timeFieldName',
       'vis.type.requiresTimePicker',
     ], function ([timeField, requiresTimePicker]) {
-      // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
-      hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField)
-      .then(hasTimeField => {
-        timefilter.enabled = Boolean(hasTimeField || requiresTimePicker);
-      });
+      timefilter.enabled = Boolean(timeField || requiresTimePicker);
     });
 
     // update the searchSource when filters update
@@ -434,10 +428,11 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
        */
       if (stage && (isAggregationsChanged || isOptionsChanged)) {
         // kibi: decide to show/hide entity picker and timefilter
-        hasAnyOfVisSavedSearchesATimeField(toVis, $scope.searchSource.get('index').timeFieldName)
-        .then(hasTimeField => timefilter.enabled = hasTimeField)
-        .then(() => doesVisDependsOnSelectedEntities(toVis))
-        .then((isEntityDependent) => $scope.holder.entityURIEnabled = isEntityDependent)
+        doesVisDependsOnSelectedEntities(toVis)
+        .then((isEntityDependent) => {
+          timefilter.enabled = toVis.type.requiresTimePicker || false;
+          $scope.holder.entityURIEnabled = isEntityDependent;
+        })
         .then($scope.fetch);
       } else {
         $state.save();

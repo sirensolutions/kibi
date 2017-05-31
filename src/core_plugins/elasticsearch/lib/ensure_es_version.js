@@ -70,10 +70,10 @@ export function ensureEsVersion(server, kibanaVersion) {
         lastWarnedNodesForServer.set(server, warningNodeNames);
         server.log(['warning'], {
           tmpl: (
-            `You're running Kibana ${kibanaVersion} with some different versions of ` +
+            `You're running Kibi ${kibanaVersion} with some different versions of ` +
             'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
             `version to prevent compatibility issues: ${warningNodeNames}`
-          ),
+          ), // kibi: replaced Kibana with Kibi
           kibanaVersion,
           nodes: simplifiedNodes,
         });
@@ -83,8 +83,9 @@ export function ensureEsVersion(server, kibanaVersion) {
     if (incompatibleNodes.length) {
       const incompatibleNodeNames = getHumanizedNodeNames(incompatibleNodes);
 
+      //kibi: replaced Kibana with Kibi
       const errorMessage =
-        `This version of Kibana requires Elasticsearch v` +
+        `This version of Kibi requires Elasticsearch v` +
         `${kibanaVersion} on all nodes. I found ` +
         `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(', ')}`;
 

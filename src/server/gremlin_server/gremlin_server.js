@@ -111,7 +111,8 @@ function startServer(self, fulfill, reject) {
           }
         }
 
-        if (config.has('kibi_core.gremlin_server.ssl.key_store')) {
+        if (config.has('kibi_core.gremlin_server.ssl.key_store') &&
+          config.get('kibi_core.gremlin_server.ssl.key_store')) {
           const sslKeyStore = config.get('kibi_core.gremlin_server.ssl.key_store');
           const sslKeyStorePsw = config.get('kibi_core.gremlin_server.ssl.key_store_password');
           if (!sslKeyStorePsw) {
@@ -125,7 +126,7 @@ function startServer(self, fulfill, reject) {
             args.push('--server.ssl.key-store=' + sslKeyStore);
             args.push('--server.ssl.key-store-password=' + sslKeyStorePsw);
           }
-        } else if (config.has('server.ssl.key') && config.has('server.ssl.certificate')) {
+        } else if (config.has('server.ssl.enabled') && config.get('server.ssl.enabled')) {
           const msg = 'Since you are using access control, you must enable HTTPS support in Gremlin Server ' +
             'by configuring the key store in kibi.yml\n' +
             'The following properties are required:\n' +

@@ -116,9 +116,11 @@ uiModules
           $scope.$destroy();
         });
 
-        // kibi: For some unknown reason the vis object doesn't has his own id. This must be investigated in the future.
+        // kibi: For some unknown reason the vis object doesn't have his own id. This must be investigated in the future.
         // See issue https://github.com/sirensolutions/kibi-internal/issues/2909
-        $scope.savedObj.vis.id = $scope.panel.id;
+        if ($scope.savedObj.vis) {
+          $scope.savedObj.vis.id = $scope.panel.id;
+        }
         // kibi: end
 
         // kibi: added handle the entity selection events

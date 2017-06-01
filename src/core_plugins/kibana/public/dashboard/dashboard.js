@@ -24,11 +24,6 @@ import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_cli
 import DashboardStateProvider from './dashboard_state';
 import notify from 'ui/notify';
 
-// kibi: imports
-import 'ui/kibi/directives/kibi_select'; // added as it is needed by src/plugins/kibana/public/dashboard/partials/save_dashboard.html
-import 'ui/kibi/session/siren_session'; // added to make sirenSession service available
-// kibi: end
-
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
   'ngRoute',
@@ -53,56 +48,9 @@ uiRoutes
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     resolve: {
-      dash: function (savedDashboards, $route, courier, kbnUrl, AppState, kibiDefaultDashboardTitle, createNotifier) {
+      dash: function (savedDashboards, $route, courier) {
         const id = $route.current.params.id;
-        return savedDashboards.get(id);
-          // kibi: here we handle the default dashboard title
-          // - get all the dashboards
-          // - if none, just create a new one
-          // - if any try to load the default dashboard if set, otherwise load the first dashboard
-          // - if the default dashboard is missing, load the first dashboard
-          // - if the first dashboard is missing, create a new one
-        let getDefaultDashboard = Promise.resolve({ hits: [] });
-        const notify = createNotifier();
-
-        if (kibiDefaultDashboardTitle) {
-          getDefaultDashboard = savedDashboards.find(kibiDefaultDashboardTitle, 1);
-        }
-        return Promise.all([
-          savedDashboards.find('', 1),
-          getDefaultDashboard
-        ])
-        .then(([
-                { total: totalFirst, hits: [ firstDashboard ] },
-                { total: totalDefault, hits: [ defaultDashboard ] }
-              ]) => {
-          if (!totalFirst) {
-            return savedDashboards.get();
-          }
-          // select the first dashboard if default_dashboard_title is not set or does not exist
-          let dashboardId = firstDashboard.id;
-          if (totalDefault === 0) {
-            notify.error(`The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
-              Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`);
-          } else if (totalDefault > 0) {
-            dashboardId = defaultDashboard.id;
-          }
-          kbnUrl.redirect(`/dashboard/${dashboardId}`);
-          return Promise.halt();
-        })
-        // kibi: end
-        .catch((error) => {
-          // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
-          // See https://github.com/elastic/kibana/issues/10951 for more context.
-          if (error instanceof SavedObjectNotFound && id === 'create') {
-            // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
-            kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
-            notify.error(
-              'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
-          } else {
-            throw error;
-          }
-        })
+        return savedDashboards.get(id)
         .catch(courier.redirectWhenMissing({
           'dashboard' : DashboardConstants.LANDING_PAGE_PATH
         }));
@@ -218,6 +166,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       $scope.dashboardViewMode = dashboardState.getViewMode();
 
       $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
+      $scope.listingPageUrl = () => `#${DashboardConstants.LISTING_PAGE_PATH}`; // kibi: expose listing page path
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
       $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;

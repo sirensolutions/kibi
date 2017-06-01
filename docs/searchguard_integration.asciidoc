@@ -4,7 +4,7 @@
 
 This section offers an overview of how to integrate Search Guard with Kibi; for
 further reference and detailed options please consult the
-{searchguard-ref}[Search Guard documentation].
+{searchguard-ref}/blob/master/README.md[Search Guard documentation].
 
 Before proceeding, make sure that:
 
@@ -243,7 +243,7 @@ files are explained in the next sections and can be used as a general
 guideline.
 
 For additional configuration options please refer to the official
-{searchguard-ref}[Search Guard documentation].
+{searchguard-ref}/blob/master/README.md[Search Guard documentation].
 
 **General configuration (sg_config.yml)**
 

@@ -9,17 +9,29 @@ export function registerFieldCapabilities(server) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       const indices = req.params.indices || '';
 
-      return callWithRequest(req, 'fieldStats', {
+      // kibi: use field_caps instead of field_stats
+      return callWithRequest(req, 'fieldCaps', {
         fields: '*',
-        level: 'cluster',
         index: indices,
         allowNoIndices: false
       })
       .then(
         (res) => {
-          const fields = _.get(res, 'indices._all.fields', {});
-          const fieldsFilteredValues = _.mapValues(fields, (value) => {
-            return _.pick(value, ['searchable', 'aggregatable']);
+          const fields = _.get(res, 'fields', {});
+          const fieldsFilteredValues = _.mapValues(fields, value => {
+            const capabilities = {
+              searchable: false,
+              aggregatable: false
+            };
+            _.each(value, (caps, type) => {
+              if (caps.searchable) {
+                capabilities.searchable = true;
+              }
+              if (caps.aggregatable) {
+                capabilities.aggregatable = true;
+              }
+            });
+            return capabilities;
           });
 
           reply({ fields: fieldsFilteredValues });
@@ -28,6 +40,7 @@ export function registerFieldCapabilities(server) {
           reply(handleESError(error));
         }
       );
+      // kibi: end
     }
   });
 }

@@ -102,6 +102,10 @@ export default function VisFactory(createNotifier, Private) {
       _.cloneDeep(this.type.params.defaults || {})
     );
 
+    // kibi: aditional visualization settings
+    this.settings = _.defaults({}, state.settings);
+    // kibi: end
+
     this.aggs = new AggConfigs(this, state.aggs);
   };
 
@@ -116,7 +120,9 @@ export default function VisFactory(createNotifier, Private) {
         .filter(Boolean),
       listeners: this.listeners,
       // kibi: visualization type versioning
-      version: this.type.version
+      version: this.type.version,
+      // kibi: aditional visualization settings
+      settings: this.settings
     };
   };
 

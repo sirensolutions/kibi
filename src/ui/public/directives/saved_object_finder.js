@@ -61,6 +61,8 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         // The number of items to show in the list
         $scope.perPage = config.get('savedObjects:perPage');
       }
+      this.perPage = $scope.perPage;
+      // kibi: end
 
       // the list that will hold the suggestions
       const $list = $element.find('ul');
@@ -295,10 +297,21 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         .then(function (hits) {
           // ensure that we don't display old results
           // as we can't really cancel requests
+
+          // kibi: filter visualization based on the same saved search as the dashboard if requested
+          const filtered = _.filter(hits.hits, function (hit) {
+            if ($scope.savedSearchId && basedOnSameSavedSearch) {
+              return hit.savedSearchId === $scope.savedSearchId;
+            } else {
+              return true;
+            }
+          });
+
           if (currentFilter === filter) {
-            self.hitCount = hits.total;
-            self.hits = _.sortBy(hits.hits, 'title');
+            self.hitCount = filtered.length;
+            self.hits = _.sortBy(filtered, 'title');
           }
+          // kibi: end
         });
       }
     }

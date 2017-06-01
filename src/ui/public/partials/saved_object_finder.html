@@ -2,24 +2,24 @@
   role="form"
   class="kuiVerticalRhythm"
 >
+  <!--kibi: filter visualizations based on the savedSearchId -->
   <div class="kuiBar">
-    <!--kibi: filter visualizations based on the savedSearchId -->
-    <div class="kuiBarSection">
-      <div class="kuiSearchInput fullWidth">
-        <div ng-if="kibi.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
-          <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch" />
-          <label class="based-saved-search" ng-if="savedSearchId">
-            Based on the saved search of the current dashboard: {{savedSearchId}}
-          </label>
-          <input ng-if="!savedSearchId" type="checkbox" disabled/>
-          <label class="based-saved-search" ng-if="!savedSearchId">
-            To be able to filter visualisations based on dashboard's saved search
-            - associate a saved search when saving this dashboard
-          </label>
-        </div>
+    <div class="fullWidth">
+      <div ng-if="kibi.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
+        <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch"/>
+        <label class="based-saved-search" ng-if="savedSearchId">
+          Based on the saved search of this dashboard ({{savedSearchId}})
+        </label>
+        <input ng-if="!savedSearchId" type="checkbox" disabled/>
+        <label ng-if="!savedSearchId">
+          To be able to filter by saved search, set a saved search when saving this dashboard.
+        </label>
       </div>
     </div>
-    <!-- kibi: end -->
+  </div>
+  <!-- kibi: end -->
+
+  <div class="kuiBar">
     <div class="kuiBarSection">
       <div class="kuiSearchInput fullWidth">
         <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
@@ -37,9 +37,7 @@
     </div>
 
     <div class="kuiBarSection">
-      <p class="kuiText kuiSubduedText">
-        {{ paginationCount }} of {{ finder.hitCount }}
-      </p>
+      <!-- kibi: counts have been moved inside the pagination managed DOM -->
 
       <div class="kuiButtonGroup">
         <button
@@ -63,9 +61,10 @@
   </div>
 </form>
 
+<!-- kibi: show 8 results per page -->
 <paginate
   list="finder.hits"
-  per-page="20"
+  per-page="8"
   class="kuiVerticalRhythm"
 >
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
@@ -82,7 +81,7 @@
       class="list-group-item list-group-menu-item"
       ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
       ng-repeat="hit in page"
-      ng-keydown="finder.hitKeyDown($event, page, paginate)"
+     ng-keydown="finder.hitKeyDown($event, page, paginate)"
       ng-click="finder.onChoose(hit, $event)">
 
       <a ng-href="{{finder.makeUrl(hit)}}"
@@ -102,4 +101,9 @@
       <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
     </li>
   </ul>
+  <!-- kibi: keep page info inside pagination -->
+  <div class="finder-hit-count" ng-if="finder.perPage < finder.hitCount">
+    <span>{{ finder.hitCount }} visualizations</span>
+  </div>
+  <!-- kibi: end -->
 </paginate>

@@ -59,3 +59,6 @@ include::setup/tribe.asciidoc[]
 include::setup/production.asciidoc[]
 
 include::setup/upgrade.asciidoc[]
+
+include::setup/docker.asciidoc[]
+

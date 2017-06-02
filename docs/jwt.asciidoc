@@ -1,12 +1,6 @@
 [[jwt-authentication]]
 == JWT authentication support [Enterprise Edition only]
 
-ifeval::["{enterprise_enabled}" == "false"]
-  NOTE: JWT authentication is available only in Kibi Enterprise Edition.
-endif::[]
-
-ifeval::["{enterprise_enabled}" == "true"]
-
 This section offers an overview of how to integrate Kibi EE with the Search
 Guard JWT authenticator when Kibi is embedded into an iframe by another
 application.
@@ -215,5 +209,3 @@ localStorage should be cleared.
 
 For more information on how to call setJWTToken from the parent frame, please
 refer to the <<cross_frame_communication,cross frame communication>> section.
-
-endif::[]

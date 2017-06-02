@@ -13,9 +13,9 @@ fi
 FOLDER=kibi-$VERSION$SUFFIX
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  asciidoctor -a enterprise_enabled=$EE_ENABLED index.asciidoc
+  asciidoctor -d book index.asciidoc
 else
-  asciidoc -a enterprise_enabled=$EE_ENABLED index.asciidoc
+  asciidoc -d book index.asciidoc
 fi
 mkdir $FOLDER
 cp -R images index.html $FOLDER

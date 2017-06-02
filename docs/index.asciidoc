@@ -2,7 +2,6 @@
 = Kibi User Guide
 :toc: right
 
-:enterprise_enabled: true
 :java-version: 1.8
 :vanguard-version: 5.4.0
 :vanguard-website: https://siren.io/vanguard

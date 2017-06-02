@@ -198,7 +198,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
     // kibi: Multichart needs the savedVis reference
     if (vis.type.name === 'kibi_multi_chart_vis') {
-      vis._savedVis = savedVis;
+      vis._kibiSavedVis = savedVis;
     }
     // kibi: end
 

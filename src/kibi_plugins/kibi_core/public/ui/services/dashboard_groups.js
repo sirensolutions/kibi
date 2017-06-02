@@ -5,7 +5,6 @@ import _ from 'lodash';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
-import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
 import SimpleEmitter from 'ui/utils/simple_emitter';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 
@@ -439,33 +438,26 @@ uiModules
           return [];
         }
         // here first fetch all dashboards to be able to verify that dashboards mentioned in the group still exists
-        return savedDashboards.find().then(function (respDashboards) {
+        return savedDashboards
+        .find()
+        .then(function (respDashboards) {
           const dashboardGroups1 = [];
-          let missingDashboardMsg = '';
           // first iterate over existing groups
           _.each(respGroups.hits, function (group) {
-
-            const dashboardsArray = group.dashboards;
-            // check that all dashboards still exists
-            // in case there is one which does not display a warning
-            _.each(dashboardsArray, function (d) {
-              if (!_.find(respDashboards.hits, 'id', d.id)) {
-                missingDashboardMsg = '"' + group.title + '"' + ' dashboard group contains non existing dashboard "' + d.id + '". ' +
-                  'Edit dashboard group to remove non existing dashboard';
-                return false;
-              }
-            });
-
-            if (missingDashboardMsg) {
-              return false;
-            }
 
             // selected dashboard
             let selected;
 
-            const dashboards = _.map(dashboardsArray, d => {
-              return _getDashboardForGroup.call(self, group.id, group.title, _.find(respDashboards.hits, 'id', d.id));
-            });
+            // ignore empty or non existing dashboard objects inside a dashboard group
+            const dashboards = _.reduce(group.dashboards, (filtered, dashboard) => {
+              if (dashboard.id) {
+                const savedDashboard = _.find(respDashboards.hits, 'id', dashboard.id);
+                if (savedDashboard) {
+                  filtered.push(_getDashboardForGroup.call(self, group.id, group.title, savedDashboard));
+                }
+              }
+              return filtered;
+            }, []);
 
             // try to get the last selected one for this group
             if (dashboards.length > 0) {
@@ -490,10 +482,6 @@ uiModules
             });
 
           }); // end of each
-
-          if (missingDashboardMsg) {
-            return Promise.reject(new MissingDashboardError(missingDashboardMsg));
-          }
 
           return dashboardGroups1;
         });

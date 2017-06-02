@@ -530,18 +530,26 @@ describe('Kibi Services', function () {
       });
 
       describe('dashboards do not exist', function () {
-        beforeEach(() => init({ savedDashboardGroups: fakeSavedDashboardGroups }));
+        beforeEach(() => init({
+          savedDashboardGroups: fakeSavedDashboardGroups,
+          savedDashboards: [
+            {
+              id: 'Companies',
+              title: 'Companies'
+            }
+          ]
+        }));
 
         it('computeGroups 2', function (done) {
           dashboardGroups.computeGroups()
-          .then(() => done('this should fail'))
-          .catch(function (err) {
-            // here if there are groups but there is no dashboards we should get an error
-            expect(err.message).to.be(
-              '"Group 1" dashboard group contains non existing dashboard "Companies". Edit dashboard group to remove non existing dashboard'
-            );
-            done();
-          });
+            .then((groups) => {
+              expect(groups).to.have.length(2);
+              expect(groups[0].dashboards).to.have.length(1);
+              expect(groups[0].dashboards[0].id).to.be('Companies');
+              expect(groups[0].dashboards).to.have.length(1);
+              done();
+            })
+            .catch(done);
         });
       });
 

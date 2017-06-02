@@ -115,7 +115,7 @@ dashboard-panel {
   position: relative;
 
   .panel {
-    margin: 0;
+    margin: 5px; // kibi: keep space between panels
     // maintain the 100% height of the panel
     height: 100%;
     flex: 1;
@@ -127,7 +127,7 @@ dashboard-panel {
 
     &.panel-border{
        border: 1px solid @panel-border;
-       border-radius: 4px;
+       // kibi: remove border-radius: 4px
        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) 0 0 0 rgba(0, 0, 0, 0.5);
     }

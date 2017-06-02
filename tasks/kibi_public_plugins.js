@@ -51,7 +51,7 @@ module.exports = function (grunt) {
 
       unzipper.extract({
         path: pathToUnzip,
-        strip: 1
+        strip: 1 //kibi: remove /kibana folder from archive when unzipping
       });
 
       unzipper.on('extract', () => {

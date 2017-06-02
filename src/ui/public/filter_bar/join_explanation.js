@@ -98,9 +98,6 @@ uiModules
               my: 'top left',
               at: 'bottom center'
             },
-            hide: {
-              event: 'unfocus'
-            },
             style: {
               classes: 'qtip-light qtip-rounded qtip-shadow'
             }

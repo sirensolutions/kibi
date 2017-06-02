@@ -1,3 +1,4 @@
+import VisVisTypeProvider from 'ui/vis/vis_type';
 import templateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
 // we need to load the css ourselves
 import 'plugins/kibi_sequential_join_vis/kibi_sequential_join_vis.less';
@@ -12,15 +13,16 @@ import template from 'plugins/kibi_sequential_join_vis/kibi_sequential_join_vis.
 registry.register(KibiSequentialJoinVisTypeProvider);
 
 function KibiSequentialJoinVisTypeProvider(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(templateVisTypeProvider);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
   return new TemplateVisType({
     name: 'kibi_sequential_join_vis',
-    title: 'Kibi relational filter',
+    title: 'Kibi Relational Filter',
     icon: 'fa-arrows-h',
-    category: 'kibi',
+    category: VisType.CATEGORY.KIBI,
     description: 'Relational widget displays buttons which allow user to switch between dashboards and preserve applied restrictions',
     template,
     params: {

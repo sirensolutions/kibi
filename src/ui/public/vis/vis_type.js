@@ -49,7 +49,7 @@ export default function VisTypeFactory(Private) {
   VisType.CATEGORY = {
     BASIC: 'basic',
     DATA: 'data',
-    KIBI: 'kibi',
+    KIBI: 'kibi', //kibi: Added new Kibi category to group Siren Visualisations
     MAP: 'map',
     OTHER: 'other',
     TIME: 'time',

@@ -38,7 +38,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   const visTypeCategoryToHumanReadableMap = {
     [VisType.CATEGORY.BASIC]: 'Basic Charts',
     [VisType.CATEGORY.DATA]: 'Data',
-    [VisType.CATEGORY.KIBI]: 'Kibi Visualisations',
+    [VisType.CATEGORY.KIBI]: 'Kibi Visualisations', //kibi: Added Kibi Category to wizard
     [VisType.CATEGORY.GRAPHIC]: 'Graphic',
     [VisType.CATEGORY.MAP]: 'Maps',
     [VisType.CATEGORY.OTHER]: 'Other',

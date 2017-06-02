@@ -185,6 +185,11 @@ export default function HandlerBaseClass(Private) {
      * @returns {HTMLElement} Displays the input message
      */
     error(message) {
+      // kibi: Allows to honor the handleNoResults property
+      if (message === 'No results found' && !_.get(this, 'vis.visConfigArgs.handleNoResults')) {
+        return;
+      }
+      // kibi: end
       this.removeAll(this.el);
 
       const div = d3.select(this.el)

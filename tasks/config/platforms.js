@@ -11,26 +11,15 @@ module.exports = function (grunt) {
   return [
     'darwin-x64',
     'linux-x64',
-    'linux-x86',
-    'windows-x86',
-    'windows64' // kibi: we distinguish between windowses as we ship the native bindings for sqlite and node java
+    'linux-x86', // kibi: we still support linux 32 bit
+    'windows-x64'
   ].map(function (baseName) {
-    const win = ['windows-x86', 'windows64'].indexOf(baseName) >= 0; // kibi: include Windows 64
+    const win = baseName === 'windows-x64';
 
-    // kibi: download Node for Windows from the correct locations
-    let nodeUrl = `${baseUri}/node-v${nodeVersion}-${baseName}.tar.gz`;
-    if (baseName === 'windows-x86') {
-      nodeUrl = `${baseUri}/win-x86/node.exe`;
-    } else if (baseName === 'windows64') {
-      nodeUrl = `${baseUri}/win-x64/node.exe`;
-    }
-    // kibi: end
-
+    const nodeUrl = win ? `${baseUri}/win-x64/node.exe` : `${baseUri}/node-v${nodeVersion}-${baseName}.tar.gz`;
     const nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${baseName}`);
 
-    const name = endsWith(baseName, '-x64')
-      ? baseName.replace('-x64', '-x86_64')
-      : baseName;
+    const name = baseName.replace('-x64', '-x86_64');
 
     const nodeShaSums = `${baseUri}/SHASUMS256.txt`;
 

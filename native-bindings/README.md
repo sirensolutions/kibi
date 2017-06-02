@@ -36,11 +36,10 @@ Once you feel you reach it do the following in a Windows VM.
 
 Install nvm for Windows from https://github.com/coreybutler/nvm-windows/releases.
 
-Install the node version set in `.node-version` for both 32 and 64 bit architectures, e.g:
+Install the node version set in `.node-version` for 64 bit architectures, e.g:
 
 ```
 nvm install 6.9.0 64
-nvm install 6.9.0 32
 ```
 
 Install Visual Studio Community 2015 and check C++ support during installation:
@@ -94,47 +93,8 @@ npm install sqlite3@3.1.8
 npm install jdbc@0.3.1
 ```
 
-Copy `node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node` to `resources/nodejavabridges/windows64`.
+Copy `node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node` to `resources/nodejavabridges/windows-x86_64`.
 
-Copy the directory `node_modules/sqlite3/lib/binding/node-v48-win32-x64` into `resources/nodesqlite3bindings/windows64`.
-
-Install and enable node for the 32 bit arch:
-
-```
-nvm use 6.9.0 32
-```
-
-Set the `JAVA_HOME` to the home of the 32 bit JDK, e.g.:
-
-```
-set JAVA_HOME="C:\Program Files (x86)\Java\jdk1.8.0_101"
-```
-
-Set build options:
-
-```
-npm config set python python2.7
-npm config set msvs_version 2015 --global
-```
-
-Install node-gyp globally
-
-```
-npm install -g node-gyp
-```
-
-Create a temporary folder, then change into it and run the following commands:
-
-```
-npm install sqlite3@3.1.8
-npm install jdbc@0.3.1
-```
-
-Copy `node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node` to
-`resources/nodejavabridges/windows-x86`
-
-Copy the directory `node_modules/sqlite3/lib/binding/node-v46-win32-ia32` into
-`resources/nodesqlite3bindings/windows-x86`.
-
+Copy the directory `node_modules/sqlite3/lib/binding/node-v48-win32-x64` into `resources/nodesqlite3bindings/windows-x86_64`.
 
 Make a PR.

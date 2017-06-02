@@ -66,11 +66,7 @@ export default (grunt) => {
         sqliteBindingSrc   = `${__dirname}/../../resources/nodesqlite3bindings/${name}/node-${nodeVersion}-linux-ia32/node_sqlite3.node`;
         sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-linux-ia32';
         break;
-      case 'windows-x86':
-        sqliteBindingSrc   = `${__dirname}/../../resources/nodesqlite3bindings/${name}/node-${nodeVersion}-win32-ia32/node_sqlite3.node`;
-        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-win32-ia32';
-        break;
-      case 'windows64':
+      case 'windows-x86_64':
         sqliteBindingSrc   = `${__dirname}/../../resources/nodesqlite3bindings/${name}/node-${nodeVersion}-win32-x64/node_sqlite3.node`;
         sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-win32-x64';
         break;

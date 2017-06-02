@@ -384,6 +384,7 @@ KIBI_CLUSTER:
 
 KIBI_READONLY:
   - "indices:data/read/field_stats*"
+  - "indices:data/read/field_caps*"
   - "indices:data/read/get*"
   - "indices:data/read/mget*"
   - "indices:data/read/search*"

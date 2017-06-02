@@ -239,9 +239,13 @@ searchguard.kerberos.acceptor_principal: 'HTTP/es.ad.local'
 ----
 
 To disable the Kerberos replay cache in Search Guard, you'll need to set the
-`sun.security.krb5.rcache` JVM property to `none`; this can be done by setting
-the `ES_JAVA_OPTS` environment variable to include
-`-dsun.security.krb5.rcache=none`.
+`sun.security.krb5.rcache` JVM property to `none`; this can be done by
+setting the following line in `config/jvm.options`:
+
+[source,yaml]
+----
+-Dsun.security.krb5.rcache=none
+----
 
 For information on where to set/modify this variable please refer to
 {elastic-ref}setup-service.html[Running as a service on Linux] or

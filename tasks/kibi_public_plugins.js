@@ -10,12 +10,11 @@ module.exports = function (grunt) {
 
   const archives = [
     {
-
       url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.4.0/kibi_radar_vis-5.4.0.zip',
       dest: `${tempFolder}/kibi_radar_vis.zip` // siren: Add temp folder location to filepath
     },
     {
-      url: 'https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.4.0/kibi_timeline_vis-5.4.0.zip',
+      url: 'https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.4.0-1/kibi_timeline_vis-5.4.0-1.zip',
       dest: `${tempFolder}/kibi_timeline_vis.zip` //siren: Add temp folder location to filepath
     }
   ];
@@ -51,7 +50,8 @@ module.exports = function (grunt) {
       unzipper.on('error', reject);
 
       unzipper.extract({
-        path: pathToUnzip
+        path: pathToUnzip,
+        strip: 1
       });
 
       unzipper.on('extract', () => {

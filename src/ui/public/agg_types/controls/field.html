@@ -26,6 +26,7 @@
     name="field"
     required
     ng-model="agg.params.field"
+    ng-class="{'required-field': !agg.params.field}"
     ng-show="indexedFields.length"
     auto-select-if-only-one="indexedFields"
     ng-options="field as field.displayName group by field.type for field in indexedFields"

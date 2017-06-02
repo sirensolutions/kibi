@@ -379,8 +379,10 @@ KIBI_CLUSTER:
   - "indices:data/read/scroll"
   - "cluster:internal/data/transfer/*"
   - "indices:data/read/msearch*"
-  - "indices:siren/mplan*"
   - CLUSTER_COMPOSITE_OPS_RO
+
+KIBI_COMPOSITE:
+  - "indices:siren/mplan*"
 
 KIBI_READONLY:
   - "indices:data/read/field_stats*"
@@ -388,7 +390,6 @@ KIBI_READONLY:
   - "indices:data/read/get*"
   - "indices:data/read/mget*"
   - "indices:data/read/search*"
-  - "indices:siren/mplan"
   - "indices:siren/plan"
   - "indices:siren/task/search"
   - "indices:admin/mappings/get*"
@@ -396,6 +397,7 @@ KIBI_READONLY:
   - "indices:admin/validate/query*"
   - "indices:admin/get*"
   - "indices:admin/version/get*"
+  - KIBI_COMPOSITE
 
 KIBI_READWRITE:
   - "indices:admin/exists*"
@@ -419,6 +421,9 @@ groups plus three Kibi specific groups:
   that a role has access to.
 - **KIBI_CLUSTER**: sets the permission to read results from scrolling
   searches and send composite requests.
+- **KIBI_COMPOSITE**: groups all the permissions to execute composite requests
+  not recognized by Search Guard; the group has to be granted on all indices
+  to roles that have access only to a subset of indices (e.g. kibinoinvestor).
 
 **Roles (sg_roles.yml)**
 
@@ -549,6 +554,9 @@ kibiuser:
     'investor':
       '*':
         - KIBI_READONLY
+    '*':
+      '*':
+        - KIBI_COMPOSITE
 
 # Permissions for a Kibi user (read only), with no access to the investor index.
 kibinoinvestor:
@@ -567,6 +575,9 @@ kibinoinvestor:
     'investment':
       '*':
         - KIBI_READONLY
+    '*':
+      '*':
+        - KIBI_COMPOSITE
 ----
 
 The file defines the following roles:
@@ -1064,7 +1075,7 @@ kibiuser:
         - KIBI_READONLY
     '*':
       '*':
-        - KIBI_MSEARCH
+        - KIBI_COMPOSITE
     watcher_alarms*:
       '*':
         - KIBI_READONLY

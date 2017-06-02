@@ -70,7 +70,9 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
             }
           }
         });
-        $elem.text(display.from + ' to ' + display.to);
+
+        //kibi: 'to' removed new line added
+        $elem.text(display.from + '\n' + display.to);
       }
 
       $scope.$watch('from', stringify);

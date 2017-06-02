@@ -49,6 +49,7 @@ export default function VisTypeFactory(Private) {
   VisType.CATEGORY = {
     BASIC: 'basic',
     DATA: 'data',
+    KIBI: 'kibi',
     MAP: 'map',
     OTHER: 'other',
     TIME: 'time',

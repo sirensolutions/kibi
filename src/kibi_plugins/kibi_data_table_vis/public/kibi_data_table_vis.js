@@ -22,6 +22,7 @@ function KibiDataTableVisTypeProvider(Private) {
     name: 'kibi-data-table',
     title: 'Enhanced search results',
     icon: 'fa-th',
+    category: 'kibi',
     description: 'Display search results - just like "searches" - but allows one to click and select a result. ' +
                  'In Kibi other components can listen and react to these selections.',
     template,

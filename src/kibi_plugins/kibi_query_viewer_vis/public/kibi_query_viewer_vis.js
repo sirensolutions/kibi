@@ -18,6 +18,7 @@ function KibiQueryViewerVisTypeProvider(Private) {
     name: 'kibiqueryviewervis',
     title: 'Kibi query viewer',
     icon: 'fa-file-text',
+    category: 'kibi',
     description: 'Your SQL/SPARQL queries results here (which can be parametric with the Kibi currently selected entity)',
     template,
     params: {

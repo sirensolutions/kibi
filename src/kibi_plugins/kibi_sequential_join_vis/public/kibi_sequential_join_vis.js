@@ -20,6 +20,7 @@ function KibiSequentialJoinVisTypeProvider(Private) {
     name: 'kibi_sequential_join_vis',
     title: 'Kibi relational filter',
     icon: 'fa-arrows-h',
+    category: 'kibi',
     description: 'Relational widget displays buttons which allow user to switch between dashboards and preserve applied restrictions',
     template,
     params: {

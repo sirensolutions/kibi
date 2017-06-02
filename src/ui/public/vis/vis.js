@@ -103,7 +103,7 @@ export default function VisFactory(createNotifier, Private) {
     );
 
     // kibi: aditional visualization settings
-    this.settings = _.defaults({}, state.settings);
+    this.kibiSettings = _.defaults({}, state.kibiSettings);
     // kibi: end
 
     this.aggs = new AggConfigs(this, state.aggs);
@@ -122,7 +122,7 @@ export default function VisFactory(createNotifier, Private) {
       // kibi: visualization type versioning
       version: this.type.version,
       // kibi: aditional visualization settings
-      settings: this.settings
+      kibiSettings: this.kibiSettings
     };
   };
 

@@ -1,9 +1,8 @@
-import angular from 'angular';
 import _ from 'lodash';
 import uiModules from 'ui/modules';
 
 uiModules
-.get('dashboard_groups_editor/services/saved_dashboard_groups')
+.get('plugins/kibi_core/saved_objects/dashboard_groups')
 .factory('SavedDashboardGroup', function (courier) {
 
   _.class(SavedDashboardGroup).inherits(courier.SavedObject);

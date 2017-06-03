@@ -43,8 +43,6 @@ function _getSectionName($location) {
 function _getMethod($document, $location, name) {
   const sectionName = _getSectionName($location);
   switch (sectionName) {
-    case 'dashboardgroups':
-      return angular.element($document.find('#dashboard_groups_editor')).data(name);
     case 'templates':
       return angular.element($document.find('#templates_editor')).data(name);
     case 'relations':

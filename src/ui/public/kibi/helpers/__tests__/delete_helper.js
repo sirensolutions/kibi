@@ -66,7 +66,7 @@ describe('Kibi Components', function () {
         $provide.constant('kibiDefaultDashboardTitle', '');
       });
 
-      ngMock.module('dashboard_groups_editor/services/saved_dashboard_groups', function ($provide) {
+      ngMock.module('kibi_core/saved_objects/dashboard_groups', function ($provide) {
         $provide.service('savedDashboardGroups', (Promise, Private) => {
           return mockSavedObjects(Promise, Private)('savedDashboardGroups', fakeSavedDashboardGroups);
         });

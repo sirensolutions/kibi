@@ -1,11 +1,11 @@
-import 'plugins/kibi_core/management/sections/kibi_dashboard_groups/services/_saved_dashboard_group';
 import uiModules from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
-import savedDashboardGroups from 'plugins/kibi_core/management/sections/kibi_dashboard_groups/services/saved_dashboard_groups_register';
+import 'plugins/kibi_core/saved_objects/dashboard_groups/_saved_dashboard_group';
+import register from 'plugins/kibi_core/saved_objects/dashboard_groups/register';
 
-savedObjectRegistry.register(savedDashboardGroups);
+savedObjectRegistry.register(register);
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
@@ -16,7 +16,7 @@ require('plugins/kibana/management/saved_object_registry').register({
 
 // This is the only thing that gets injected into controllers
 uiModules
-.get('dashboard_groups_editor/services/saved_dashboard_groups')
+.get('kibi_core/saved_objects/dashboard_groups')
 .service('savedDashboardGroups', function (savedObjectsAPI, Private, SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl) {
   const options = {
     caching: {
@@ -32,7 +32,7 @@ uiModules
   const savedDashboardGroupLoader = new SavedObjectLoader(SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl, options);
 
   savedDashboardGroupLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/management/siren/dashboardgroups/{{id}}', { id: id });
+    return kbnUrl.eval('#/management/siren/objects/savedDashboardGroups/{{id}}', { id });
   };
 
   return savedDashboardGroupLoader;

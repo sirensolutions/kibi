@@ -77,3 +77,4 @@ to the url set in `kibi.yml`.
 The Kibi EE demo distribution includes a sample keystore and CA bundle
 in the `pki` directory.
 
+endif::[]

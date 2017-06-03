@@ -1,8 +1,13 @@
 import _ from 'lodash';
 import Notifier from 'kibie/notify/notifier';
-import { NoDefaultIndexPattern } from 'ui/errors';
+import { IndexPatternAuthorizationError, NoDefaultIndexPattern } from 'ui/errors';
 import GetIdsProvider from '../_get_ids';
 import uiRoutes from 'ui/routes';
+
+// kibi: imports
+import RootSearchSourceProvider from 'ui/courier/data_source/_root_search_source';
+// kibi: end
+
 const notify = new Notifier({
   location: 'Index Patterns'
 });
@@ -13,7 +18,8 @@ module.exports = function (opts) {
   let defaultRequiredToasts = null;
 
   uiRoutes
-  .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
+  .addSetupWork(function loadDefaultIndexPattern(indexPatterns, Private, Promise, $route, config) {
+    const rootSearchSource = Private(RootSearchSourceProvider);
     const getIds = Private(GetIdsProvider);
     const route = _.get($route, 'current.$$route');
 
@@ -37,6 +43,31 @@ module.exports = function (opts) {
           throw new NoDefaultIndexPattern();
         }
       }
+
+      // kibi: handle authorization errors when accessing the default index
+      return notify.event('loading default index pattern', function loadIndexPattern(indexPattern) {
+        const indexPatternId = indexPattern || defaultId;
+        return indexPatterns.get(indexPatternId).then(function (pattern) {
+          if (indexPatternId !== defaultId) {
+            config.set('defaultIndex', indexPatternId);
+            defaultId = indexPatternId;
+          }
+          rootSearchSource.getGlobalSource().set('index', pattern);
+          notify.log('index pattern set to', indexPatternId);
+        })
+        .catch(err => {
+          if (err instanceof IndexPatternAuthorizationError) {
+            if (patterns.length) {
+              return loadIndexPattern(patterns.pop());
+            } else {
+              // kibi: unset the defaultIndex since none of the known index patterns can be accessed
+              config.remove('defaultIndex');
+              throw new NoDefaultIndexPattern();
+            }
+          }
+          throw err;
+        });
+      });
     });
   })
   .afterWork(

@@ -1,7 +1,9 @@
+import BaseError from './base';
+
 /**
  * Thrown when saving an object would generate a conflict.
  */
-export default class ConflictError extends Error {
+export default class ConflictError extends BaseError {
   /**
    * Creates a new ConflictError.
    *
@@ -9,20 +11,7 @@ export default class ConflictError extends Error {
    * @param {Error} inner - An optional error that caused the ConflictError.
    */
   constructor(message, inner) {
-    super(message);
+    super(message, inner);
     this.name = 'ConflictError';
-    this.inner = inner;
-
-    return new Proxy(this, {
-      get(target, name) {
-        const value = target[name];
-
-        if (value) {
-          return value;
-        }
-        return inner[name];
-      }
-    });
   }
-
 }

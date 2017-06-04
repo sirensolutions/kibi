@@ -44,7 +44,39 @@ describe('getHighlightRequest', () => {
   });
 
   describe('kibi', function () {
-    it('should not add join queries to the highlight_query query', () => {
+    it('should remove join queries from the highlight_query for a query with must and must not clauses', () => {
+      const queries = {
+        bool: {
+          must: [
+            {
+              join_sequence: {}
+            },
+            {
+              join_set: {}
+            },
+            queryStringQuery
+          ],
+          must_not: [
+            {
+              join_sequence: {}
+            },
+            {
+              join_set: {}
+            },
+            queryStringQuery
+          ]
+        }
+      };
+      getHighlightRequest = getHighlightRequestProvider(config);
+      const request = getHighlightRequest(queries);
+      expect(request.fields['*']).to.have.property('highlight_query');
+      expect(request.fields['*'].highlight_query.bool.must).to.have.length(1);
+      expect(request.fields['*'].highlight_query.bool.must_not).to.have.length(1);
+      expect(request.fields['*'].highlight_query.bool.must[0].query_string).to.have.property('all_fields');
+      expect(request.fields['*'].highlight_query.bool.must_not[0].query_string).to.have.property('all_fields');
+    });
+
+    it('should remove join queries from the highlight_query for a query with must clauses', () => {
       const queries = {
         bool: {
           must: [
@@ -64,6 +96,7 @@ describe('getHighlightRequest', () => {
       expect(request.fields['*'].highlight_query.bool.must).to.have.length(1);
       expect(request.fields['*'].highlight_query.bool.must[0].query_string).to.have.property('all_fields');
     });
+
   });
 
   it('should add the all_fields param with query_string query without modifying original query', () => {

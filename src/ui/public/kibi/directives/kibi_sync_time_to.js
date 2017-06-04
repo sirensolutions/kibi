@@ -1,6 +1,5 @@
 import 'ui/kibi/directives/kibi_sync_time_to.less';
 import _ from 'lodash';
-import moment from 'moment';
 import kibiTemplate from 'ui/kibi/directives/kibi_sync_time_to.html';
 import kibanaTemplate from 'ui/kibi/directives/kibana_sync_time_to.html';
 import uiModules from 'ui/modules';
@@ -8,7 +7,7 @@ import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
 
 uiModules
 .get('ui/kibi/kibi_sync_time_to')
-.directive('kibiSyncTimeTo', function ($injector, Private) {
+.directive('kibiSyncTimeTo', function (timefilter, $injector, Private) {
   const hasKibiState = $injector.has('kibiState');
 
   function linkWithKibiState($scope, $el, $attrs) {
@@ -78,7 +77,7 @@ uiModules
     const copyTimeToDashboards = function (dashboards) {
       _.each(dashboards, (d) => {
         if (d.selected) {
-          kibiState._saveTimeForDashboardId(d.id, $scope.mode, $scope.from, $scope.to);
+          kibiState._saveTimeForDashboardId(d.id, $scope.mode, timefilter.time.from, timefilter.time.to);
         }
       });
     };

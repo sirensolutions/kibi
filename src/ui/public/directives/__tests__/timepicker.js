@@ -400,17 +400,6 @@ describe('timepicker directive', function () {
       done();
     });
 
-    it('should parse the time of scope.from and scope.to to set its own variables', function (done) {
-      $scope.setQuick('now-30m', 'now');
-      sinon.assert.calledOnce(syncTimeTo); // kibi: added to test if syncTimeTo is called
-      $scope.setMode('absolute');
-      $scope.$digest();
-
-      expect($scope.absolute.from.valueOf()).to.be(moment().subtract(30, 'minutes').valueOf());
-      expect($scope.absolute.to.valueOf()).to.be(moment().valueOf());
-      done();
-    });
-
     it('should update its own variables if timefilter time is updated', function (done) {
       $scope.setMode('absolute');
       $scope.$digest();

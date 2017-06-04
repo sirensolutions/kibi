@@ -38,7 +38,7 @@ export default class Migration7 extends Migration {
             script: {
               lang: 'painless',
               // buildNum is indexed as a string
-              inline: 'Integer.parseInt(doc.buildNum.value)'
+              inline: 'Integer.parseInt(doc.buildNum.value ?: "0")'
             },
             order: 'desc'
           }

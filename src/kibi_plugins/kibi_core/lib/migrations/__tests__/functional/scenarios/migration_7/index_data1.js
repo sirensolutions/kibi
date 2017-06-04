@@ -1,7 +1,7 @@
 /**
  * Defines the following objects:
  *
- * - a configuration
+ * - three old configurations, one without buildNum
  */
 export default [
   {
@@ -14,5 +14,26 @@ export default [
   {
     buildNum: '123',
     'dateFormat:tz': 'UTC'
+  },
+  {
+    index: {
+      _index: '.kibi',
+      _type: 'config',
+      _id: '5.8.2'
+    }
+  },
+  {
+    'dateFormat:tz': 'Europe/Oslo'
+  },
+  {
+    index: {
+      _index: '.kibi',
+      _type: 'config',
+      _id: '5.4.2'
+    }
+  },
+  {
+    buildNum: '1',
+    'dateFormat:tz': 'Europe/Rome'
   }
 ];

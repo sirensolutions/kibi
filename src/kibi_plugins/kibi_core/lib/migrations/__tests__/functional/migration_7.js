@@ -1,4 +1,3 @@
-import elasticsearch from 'elasticsearch';
 import expect from 'expect.js';
 import requirefrom from 'requirefrom';
 import Migration from '../../migration_7';
@@ -36,7 +35,6 @@ describe('kibi_core/migrations/functional', function () {
   };
 
   describe('Kibi Core Migration 7 - Functional test', function () {
-    let infoSpy;
     let Scenario;
 
     async function snapshot() {

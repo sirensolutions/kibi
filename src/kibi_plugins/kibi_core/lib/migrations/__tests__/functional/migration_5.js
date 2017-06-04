@@ -14,7 +14,6 @@ import Scenario7 from './scenarios/migration_5/scenario7';
 
 import url from 'url';
 
-const packageJson = requirefrom('src/utils')('package_json');
 const serverConfig = requirefrom('test')('server_config');
 const wrapAsync = requirefrom('src/test_utils')('wrap_async');
 const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
@@ -139,8 +138,8 @@ describe('kibi_core/migrations/functional', function () {
           expect(before.size).to.equal(after.size);
 
           // get the relations
-          const originalRelations = JSON.parse(before.get(packageJson.kibi_version)._source['kibi:relations']);
-          const upgradedRelations = JSON.parse(after.get(packageJson.kibi_version)._source['kibi:relations']);
+          const originalRelations = JSON.parse(before.get('kibi')._source['kibi:relations']);
+          const upgradedRelations = JSON.parse(after.get('kibi')._source['kibi:relations']);
 
           const original = before.get('buttons');
           const upgraded = after.get('buttons');

@@ -7,13 +7,27 @@
       <input
           name="dashboards-filter"
           ng-show="!isDashboardsNavOnEditMode"
+          ng-class="{collapsed: !isDashboardsNavOpen}"
           aria-label="Filter"
           ng-model="dashboardFilter"
-          class="form-control span12"
+          class="form-control span12 dashboards-filter"
           type="text"
           placeholder="Filter"
         />
     </form>
+
+    <!-- Create dashboard button -->
+    <a
+     class="kuiButton kuiButton--primary new-dashboard"
+     ng-class="{collapsed: !isDashboardsNavOpen}"
+     ng-show="!isDashboardsNavOnEditMode"
+     href="{{getCreateDashboardHref()}}"
+     aria-label="Create new dashboard"
+     tooltip="Create new dashboard"
+     tooltip-append-to-body="true"
+     >
+     <span class="kuiButton__icon kuiIcon fa-plus"></span>
+    </a>
   </div>
 
   <div class="links" ng-click="toggleDashboardsNav($event)">

@@ -21,6 +21,11 @@ uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true
   })
+  // kibi: redirect to landing page by default
+  .when('/dashboard/', {
+    redirectTo: DashboardConstants.LANDING_PAGE_PATH
+  })
+  // kibi: end
   // kibi: separate listing and landing routes
   .when(DashboardConstants.LISTING_PAGE_PATH, {
     template: dashboardListingTemplate,

@@ -159,13 +159,17 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
           preview = parsed && parsed._d.getFullYear() > 0 ? parsed.format($scope.format) : undefined;
         }
         _.set($scope, `relative.${key}.preview`, preview);
+
+        // kibi: set value for display absolute time
+        _.set($scope, `relative.${key}.value`, parsed ? parsed._d : undefined);
         return parsed;
       };
 
       $scope.applyRelative = function () {
+        // kibi: display absolute time
         $scope.onFilterSelect({
-          from: getRelativeString('from'),
-          to:  getRelativeString('to')
+          from: moment($scope.relative.from.value),
+          to: moment($scope.relative.to.value)
         });
       };
 

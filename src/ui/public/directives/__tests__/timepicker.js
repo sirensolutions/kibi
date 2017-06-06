@@ -312,26 +312,37 @@ describe('timepicker directive', function () {
       $scope.relative.from.round = false;
       $scope.relative.from.count = 1;
       $scope.relative.from.unit = 's';
+      $scope.formatRelative('from');
       $scope.applyRelative();
       sinon.assert.calledOnce($parentScope.updateFilter);
-      expect($parentScope.updateFilter.getCall(0).args[0]).to.be('now-1s');
+      expect($scope.relative.from.value.getSeconds().toString()).to.be('5');
+      expect($parentScope.updateFilter.getCall(0).args[0]._d.getSeconds().toString()).to.be('5');
 
       $scope.relative.from.count = 2;
       $scope.relative.from.unit = 'm';
+      $scope.formatRelative('from');
       $scope.applyRelative();
-      expect($parentScope.updateFilter.getCall(1).args[0]).to.be('now-2m');
+      expect($scope.relative.from.value.getMinutes().toString()).to.be('4');
 
       $scope.relative.from.count = 3;
       $scope.relative.from.unit = 'h';
+      $scope.formatRelative('from');
       $scope.applyRelative();
-      expect($parentScope.updateFilter.getCall(2).args[0]).to.be('now-3h');
+      expect($scope.relative.from.value.getHours().toString()).to.be('4');
+      expect($parentScope.updateFilter.getCall(2).args[0]._d.getHours().toString()).to.be('4');
 
       // Enable rounding
       $scope.relative.from.round = true;
       $scope.relative.from.count = 7;
       $scope.relative.from.unit = 'd';
+      $scope.formatRelative('from');
       $scope.applyRelative();
-      expect($parentScope.updateFilter.getCall(3).args[0]).to.be('now-7d/d');
+      expect($scope.relative.from.value.getDate().toString()).to.be('25');
+      expect($scope.relative.from.value.getHours().toString()).to.be('0');
+      expect($scope.relative.from.value.getSeconds().toString()).to.be('0');
+      expect($parentScope.updateFilter.getCall(3).args[0]._d.getDate().toString()).to.be('25');
+      expect($parentScope.updateFilter.getCall(3).args[0]._d.getHours().toString()).to.be('0');
+      expect($parentScope.updateFilter.getCall(3).args[0]._d.getSeconds().toString()).to.be('0');
 
       done();
     });

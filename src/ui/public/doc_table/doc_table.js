@@ -11,7 +11,7 @@ import uiModules from 'ui/modules';
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('kibana')
-.directive('docTable', function (config, createNotifier, getAppState, pagerFactory, $filter) {
+.directive('docTable', function (courier, config, createNotifier, getAppState, pagerFactory, $filter) {
   return {
     restrict: 'E',
     template: html,
@@ -32,7 +32,9 @@ uiModules.get('kibana')
       // added cellClickHandlers and columnAliases
       // to make them available to the scope of kibiTableRow and kibiTableHeader
       cellClickHandlers: '=',
-      columnAliases: '=?'
+      columnAliases: '=?',
+      // kibi: increase the number of results that are retrieved
+      increaseSample: '@?'
     },
     link: function ($scope) {
       const notify = createNotifier();
@@ -41,6 +43,23 @@ uiModules.get('kibana')
         sorting: $scope.sorting,
         columns: $scope.columns
       };
+
+      // kibi: increase the number of results retrieved
+      $scope.size = parseInt(config.get('discover:sampleSize'));
+
+      $scope.increaseSize = function () {
+        if ($scope.size < $scope.totalHitCount) {
+          const newSize = $scope.size * 2;
+          if (newSize >= $scope.totalHitCount) {
+            $scope.size = $scope.totalHitCount;
+          } else {
+            $scope.size = newSize;
+          }
+          $scope.searchSource.size($scope.size);
+          courier.fetch();
+        }
+      };
+      // kibi: end
 
       const prereq = (function () {
         const fns = [];
@@ -95,7 +114,7 @@ uiModules.get('kibana')
 
         $scope.indexPattern = $scope.searchSource.get('index');
 
-        $scope.searchSource.size(config.get('discover:sampleSize'));
+        $scope.searchSource.size($scope.size);
         $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
         // Set the watcher after initialization

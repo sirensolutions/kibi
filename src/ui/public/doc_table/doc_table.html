@@ -15,7 +15,14 @@
           ng-if="shouldShowLimitedResultsWarning()"
           class="kuiToolBarText kuiSubduedText"
         >
-          {{ limitedResultsWarning }}
+          <!--kibi: allow to get more results-->
+          <div ng-if="increaseSample">
+            Viewing {{ size }} results.
+            <a ng-click="increaseSize()">See more !</a>
+          </div>
+          <div ng-if="!increaseSample">
+            {{ limitedResultsWarning }}
+          </div>
         </div>
         <!-- Pagination -->
         <tool-bar-pager-text
@@ -66,7 +73,14 @@
           ng-if="shouldShowLimitedResultsWarning()"
           class="kuiToolBarText kuiSubduedText"
         >
-          {{ limitedResultsWarning }}
+          <!--kibi: allow to get more results-->
+          <div ng-if="increaseSample">
+            Viewing {{ size }} results.
+            <a ng-click="increaseSize()">See more !</a>
+          </div>
+          <div ng-if="!increaseSample">
+            {{ limitedResultsWarning }}
+          </div>
         </div>
         <!-- Pagination -->
         <tool-bar-pager-text

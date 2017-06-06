@@ -8,6 +8,7 @@ import './dashboard_draggable/dashboard_draggable_item';
 import './dashboard_draggable/dashboard_draggable_handle';
 import dashboardsNavTemplate from './dashboards_nav.html';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
+import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
 import uiModules from 'ui/modules';
 
 uiModules
@@ -58,6 +59,10 @@ uiModules
 
       updateGlobalNav();
       updateDashboardsNav();
+
+      $scope.getCreateDashboardHref = function () {
+        return `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
+      };
 
       $scope.toggleDashboardsNav = (event, force) => {
         if (event.target === event.currentTarget || force) {

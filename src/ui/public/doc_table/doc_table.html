@@ -1,3 +1,8 @@
+<!-- kibi:
+  In all tables:
+  column-aliases was added
+  cell-click-handlers was added
+-->
 <div
   class="doc-table-container"
   ng-if="hits.length"
@@ -27,8 +32,10 @@
       </div>
     </div>
     <table class="kbn-table table" ng-if="indexPattern">
+      <!--kibi: pass the column aliases-->
       <thead
         kbn-table-header
+        column-aliases="columnAliases"
         columns="columns"
         index-pattern="indexPattern"
         sort-order="sorting"
@@ -39,6 +46,8 @@
       <tbody>
         <tr ng-repeat="row in pageOfItems|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
           kbn-table-row="row"
+          column-aliases="columnAliases"
+          cell-click-handlers="cellClickHandlers"
           columns="columns"
           sorting="sorting"
           index-pattern="indexPattern"
@@ -76,8 +85,10 @@
   </div>
 
   <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern" data-test-subj="docTable">
+    <!--kibi: pass the column aliases-->
     <thead
       kbn-table-header
+      column-aliases="columnAliases"
       columns="columns"
       index-pattern="indexPattern"
       sort-order="sorting"
@@ -88,6 +99,8 @@
     <tbody>
       <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
         kbn-table-row="row"
+        column-aliases="columnAliases"
+        cell-click-handlers="cellClickHandlers"
         columns="columns"
         sorting="sorting"
         index-pattern="indexPattern"
@@ -108,3 +121,4 @@
   <h2><i class="fa fa-meh-o"></i></h2>
   <h4>No results found</h4>
 </div>
+

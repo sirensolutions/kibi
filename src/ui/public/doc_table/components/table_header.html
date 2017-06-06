@@ -4,8 +4,9 @@
     <span>Time <i ng-class="headerClass(indexPattern.timeFieldName)" ng-click="cycleSortOrder(indexPattern.timeFieldName)" tooltip="Sort by time"></i></span>
   </th>
   <th ng-repeat="name in columns" data-test-subj="docTableHeaderField">
+    <!-- kibi: added columnAliases[name] to the condition -->
     <span class="table-header-name">
-      {{name | shortDots}} <i ng-class="headerClass(name)" ng-click="cycleSortOrder(name)" tooltip="{{tooltip(name)}}" tooltip-append-to-body="1"></i>
+      {{(columnAliases[$index] || name) | shortDots}} <i ng-class="headerClass(name)" ng-click="cycleSortOrder(name)" tooltip="{{tooltip(name)}}" tooltip-append-to-body="1"></i>
     </span>
     <span class="table-header-move">
       <i

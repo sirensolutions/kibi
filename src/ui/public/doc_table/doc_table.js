@@ -27,6 +27,12 @@ uiModules.get('kibana')
       onChangeSortOrder: '=?',
       onMoveColumn: '=?',
       onRemoveColumn: '=?',
+
+      // kibi:
+      // added cellClickHandlers and columnAliases
+      // to make them available to the scope of kibiTableRow and kibiTableHeader
+      cellClickHandlers: '=',
+      columnAliases: '=?'
     },
     link: function ($scope) {
       const notify = createNotifier();
@@ -122,7 +128,23 @@ uiModules.get('kibana')
           return $scope.searchSource.onResults().then(onResults);
         }).catch(notify.fatal);
 
-        $scope.searchSource.onError(notify.error).catch(notify.fatal);
+        $scope.searchSource
+        // kibi: notify the user what to do if more results cannot be retrieved
+        .onError((error) => {
+          if (error.message) {
+            const matches = error.message.match(/from \+ size must be less than or equal to: \[(\d+)]/);
+            if (matches) {
+              const message = `Can't retrieve more than ${matches[1]} results.` +
+                              'Please check the index.max_result_window Elasticsearch index setting.';
+              const expError = new Error(message);
+              expError.stack = message;
+              return notify.error(expError);
+            }
+          }
+          notify.error(error);
+        })
+        // kibi: end
+        .catch(notify.fatal);
       }));
 
       $scope.pageOfItems = [];

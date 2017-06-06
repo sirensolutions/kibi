@@ -15,26 +15,11 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       onChangeSortOrder: '=?',
       onRemoveColumn: '=?',
       onMoveColumn: '=?',
+      // kibi: list of column aliases
+      columnAliases: '=?',
     },
     template: headerHtml,
     controller: function ($rootScope, $scope) {
-      // KIBI5 are these two things needed ?
-      // kibi: listen to the kibi:add:column event for adding extra columns to the table
-      //const off = $rootScope.$on('kibi:add:column', function (event, column) {
-        //if (column) {
-          //$scope.columns.splice(column.index, 0, column.fieldName);
-        //}
-      //});
-      //$scope.$on('$destroy', off);
-
-      //$scope.onRemoveColumnWrap = function (fieldName) {
-        //// kibi: emit kibi:remove:column in order to clean the clickOptions on a column
-        //const ind = $scope.columns.indexOf(fieldName);
-        //$scope.columns.splice(ind, 1);
-        //$rootScope.$emit('kibi:remove:column', { fieldName, index: ind });
-      //};
-      // kibi: end
-
       const isSortableColumn = function isSortableColumn(columnName) {
         return (
           !!$scope.indexPattern
@@ -45,6 +30,12 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
 
       $scope.tooltip = function (column) {
         if (!isSortableColumn(column)) return '';
+        // kibi: use the column alias for the tooltip
+        if ($scope.columnAliases && $scope.columnAliases.length) {
+          const index = $scope.columns.indexOf(column);
+          return 'Sort by ' + shortDotsFilter($scope.columnAliases[index]);
+        }
+        // kibi: end
         return 'Sort by ' + shortDotsFilter(column);
       };
 

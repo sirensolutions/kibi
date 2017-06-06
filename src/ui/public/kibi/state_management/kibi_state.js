@@ -214,7 +214,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
         this[this._properties.test_selected_entity] = { index, type, id, column };
       }
     } else {
-      throw new Error('Cannot set entity URI because you are not in dashboard/visualize/settings');
+      throw new Error('Cannot set entity URI because you are not on dashboard/visualize/managament');
     }
   };
 
@@ -224,7 +224,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     } else if (onVisualizePage() || onManagementPage()) {
       return this[this._properties.test_selected_entity];
     }
-    throw new Error('Cannot get entity URI because you are not on dashboard/visualize/settings');
+    throw new Error('Cannot get entity URI because you are not on dashboard/visualize/managament');
   };
 
   KibiState.prototype.isSelectedEntityDisabled = function () {

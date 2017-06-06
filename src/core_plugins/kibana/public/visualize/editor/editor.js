@@ -234,6 +234,14 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
+    // kibi: force stage
+    $rootScope.$on('stageEditableVis', stage => {
+      if (stage) {
+        $scope.stageEditableVis();
+      }
+    });
+    // kibi: end
+
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
       $appStatus.dirty = status.dirty;
@@ -413,8 +421,8 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
       //verify this before we copy the "new" state
       const isAggregationsChanged = !fromVis.aggs.jsonDataEquals(toVis.aggs);
-      // siren: some information to toggle the pickers is contained in the params
-      const isOptionsChanged = !_.isEqual(fromVis.params, toVis.params);
+      // kibi: some information to toggle the pickers is contained in the params
+      const isParamsChanged = !_.isEqual(fromVis.params, toVis.params);
 
       const view = fromVis.getEnabledState();
       const full = fromVis.getState();
@@ -426,7 +434,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
        * Only fetch (full ES round trip), if the play-button has been pressed (ie. 'stage' variable) and if there
        * has been changes in the Data-tab.
        */
-      if (stage && (isAggregationsChanged || isOptionsChanged)) {
+      if (stage && (isAggregationsChanged || isParamsChanged)) {
         // kibi: decide to show/hide entity picker and timefilter
         doesVisDependsOnSelectedEntities(toVis)
         .then((isEntityDependent) => {

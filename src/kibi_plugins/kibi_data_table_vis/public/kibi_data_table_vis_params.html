@@ -15,18 +15,21 @@
       <ul>
         <li ng-repeat="clickOption in vis.params.clickOptions" class="queryOptionArea">
           <div class="header">
-            <h2>Click handler {{$index + 1}} <i tooltip="{{ clickOption.duplicateError.msg }}" ng-if="clickOption.duplicateError.msg" style="color: #e74c3c;" class="fa fa-danger"></i></h2>
+            <h2>Click handler {{$index + 1}} <i tooltip="{{ clickHandlerValidationStates[$index].message }}" ng-if="clickHandlerValidationStates[$index].message" style="color: #e74c3c;" class="fa fa-danger"></i></h2>
             <!--This input is necessary so that the form is invalid-->
-            <input type="hidden" ng-model="clickHandlerValidationStates[$index].state" required />
+            <input force-dirty name="clickHandlerValidation" type="hidden" ng-model="clickHandlerValidationStates[$index].state" required />
           </div>
 
           <div class="enhanced-search-content" ng-class="{ queryOptionAreaError: clickHandlerValidationStates[$index].message }">
 
             <div class="form-group">
               <label>Column</label>
-              <select class="form-control" ng-options="column for column in vis.params.columns"
-                      required ng-model="clickOption.columnField">
-              </select>
+              <select name="column"
+                      class="form-control"
+                      ng-options="column for column in vis.params.columns"
+                      ng-model="clickOption.columnField"
+                      required
+              ></select>
             </div>
 
             <div class="form-group">
@@ -36,7 +39,11 @@
               </a>
               </label>
               </br>
-              <select required ng-model="clickOption.type" class="form-control">
+              <select name="type"
+                      class="form-control"
+                      ng-model="clickOption.type"
+                      required
+              >
                 <option value="link">Follow the URL</option>
                 <option value="select">Select the document</option>
               </select>
@@ -89,7 +96,7 @@
 
     <div class="column-aliases" ng-if="vis.params.enableColumnAliases">
       <!--This input is necessary so that the form is invalid-->
-      <input type="hidden" ng-model="columnAliasesValid" required/>
+      <input force-dirty name="columnAliasesValidation" type="hidden" ng-model="columnAliasesValid" required/>
       <table class="table">
         <thead>
           <tr>
@@ -99,10 +106,18 @@
         </thead>
         <tbody>
           <tr ng-repeat="column in vis.params.columns">
-            <td>{{vis.params.columns[$index]}}</td>
+            <td>{{ column }}</td>
             <td>
-              <div class="duplicate-warning" ng-if="!aliasValidStatus[$index]"> Aliases cannot be duplicated </div>
-              <input type="text" ng-class="{invalid: !aliasValidStatus[$index]}" ng-model="vis.params.columnAliases[$index]" ng-blur="columnAliasesValidation()" required/>
+              <div class="duplicate-warning" ng-if="!aliasValidStatus[$index]">
+                Aliases cannot be duplicated
+              </div>
+              <input type="text"
+                     ng-class="{ 'readonly-input': vis.params.queryFieldName === column, invalid: !aliasValidStatus[$index] }"
+                     ng-model="vis.params.columnAliases[$index]"
+                     ng-blur="columnAliasesValidation()"
+                     ng-readonly="vis.params.queryFieldName === column"
+                     required
+              />
             </td>
           </tr>
         </tbody>
@@ -163,6 +178,7 @@
       <kibi-array-param-add required label="query" model="vis.params.queryDefinitions"></kibi-array-param-add>
     </div>
   </section>
+
   <section>
     <div class="header">
       <h2>Viewer</h2>

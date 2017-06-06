@@ -57,8 +57,6 @@ uiModules
       // Visualization controller integration
       // ====================================
 
-      $scope.rejectQueryFieldName = columnName => !$scope.vis.params.enableQueryFields || columnName !== $scope.vis.params.queryFieldName;
-
       $scope.jumpToTemplate = function () {
         kbnUrl.change('/management/siren/templates/' + $scope.vis.params.templateId);
       };
@@ -214,6 +212,20 @@ uiModules
         clickHandlersChanged();
         _checkForDuplicates();
       }, true);
+    }
+  };
+})
+.directive('forceDirty', function () {
+  return {
+    require: 'ngModel',
+    link: function (scope, elm, attrs, ctrl) {
+      ctrl.$validators.noDuplicates = function (modelValue, viewValue) {
+        if (viewValue) {
+          return true;
+        }
+        ctrl.$setDirty();
+        return false;
+      };
     }
   };
 });

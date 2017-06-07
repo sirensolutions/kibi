@@ -10,7 +10,7 @@ import uiModules from 'ui/modules';
 import 'ui/kibi/components/query_engine_client/query_engine_client';
 import VirtualIndexPatternProvider from 'ui/kibi/components/commons/virtual_index_pattern';
 
-function KibiDataTableVisController(courier, $window, createNotifier, confirmModal, kibiState, $rootScope, $scope, Private) {
+function KibiDataTableVisController(getAppState, courier, $window, createNotifier, confirmModal, kibiState, $rootScope, $scope, Private) {
   const dashboardHelper = Private(DashboardHelperProvider);
   const VirtualIndexPattern = Private(VirtualIndexPatternProvider);
   const filterManager = Private(FilterManagerProvider);
@@ -26,6 +26,36 @@ function KibiDataTableVisController(courier, $window, createNotifier, confirmMod
     $scope.vis.params.templateId = templateId;
     $scope.customView = Boolean(templateId);
     $scope.showCustomView = Boolean(templateId);
+  });
+
+  /**
+   * extract fields from query
+   *
+   * @param query string a query_string query
+   * @returns a list of fields occuring in the query
+   */
+  function extractFieldsFromQuery(query) {
+    const fieldRegex = /([^\s]+)([\s]+)*:/g;
+    let match;
+    const fields = [];
+    while (match = fieldRegex.exec(query)) {
+      fields.push(match[1].replace(/[\s]*:/g, ''));
+    }
+    return fields;
+  }
+
+  // check if there are no results and the search contains an alias set
+  $scope.$watch('hits', hits => {
+    if (hits && hits.length === 0) {
+      const $state = getAppState();
+      const fields = extractFieldsFromQuery($state.query.query_string.query);
+      _.each(fields, function (field) {
+        if (_.contains($scope.vis.params.columnAliases, field) && !(_.contains($scope.vis.params.columns, field))) {
+          const alias = $scope.vis.params.columns[_.indexOf($scope.vis.params.columnAliases, field)];
+          return notify.warning(`You seem to be using an alias: [${field}]. The actual field name you probably want is: [${alias}]`);
+        }
+      });
+    }
   });
 
   // NOTE: filter to enable little icons in doc-viewer to filter and add/remove columns

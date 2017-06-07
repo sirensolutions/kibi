@@ -18,6 +18,7 @@ describe('Kibi Components', function () {
     let $timeout;
     let $rootScope;
     let kibiState;
+    let timefilter;
     let savedDashboards;
     let $el;
     let directiveScope;
@@ -159,15 +160,16 @@ describe('Kibi Components', function () {
         }
       );
 
-      ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector, _$timeout_) {
+      ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector, _$timeout_, _timefilter_) {
         kibiState = _kibiState_;
+        timefilter = _timefilter_;
         $timeout = _$timeout_;
         $rootScope = _$rootScope_;
         directiveScope = $rootScope.$new();
         directiveScope.mode = mode;
         if (expectedTime) {
-          directiveScope.from = expectedTime.f;
-          directiveScope.to = expectedTime.t;
+          timefilter.time.from = expectedTime.f;
+          timefilter.time.to = expectedTime.t;
           directiveScope.mode = expectedTime.m;
         }
         spyApplyRelative = directiveScope.applyRelative = sinon.spy();

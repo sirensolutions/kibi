@@ -53,9 +53,9 @@ uiModules
         removeRemoveClickOptionsListener();
       });
 
-      // ====================================
-      // Visualization controller integration
-      // ====================================
+      // ===========
+      // custom view
+      // ===========
 
       $scope.jumpToTemplate = function () {
         kbnUrl.change('/management/siren/templates/' + $scope.vis.params.templateId);
@@ -88,10 +88,6 @@ uiModules
         });
       };
       $scope.columnAliasesValidation();
-
-      $scope.$watch('vis.params.templateId', function (templateId) {
-        $rootScope.$emit('kibi:vis:templateId-changed', templateId);
-      }, true);
 
       function populateColumnAliases() {
         // prepopulate aliases to original names if not defined

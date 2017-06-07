@@ -1,4 +1,5 @@
 import uiModules from 'ui/modules';
+
 /**
 * kibiTemplatedResult directive.
 *
@@ -23,8 +24,7 @@ uiModules
       mode: '@',
       cellClickHandlers: '=',
       queryColumn: '=',
-      columnAliases: '=?',
-      options: '='
+      columnAliases: '=?'
     },
     compile: function (tElem, tAttrs) {
       return function (scope, iElem, iAttrs) {

@@ -40,7 +40,13 @@ uiModules.get('kibana')
       // kibi: increase the number of results that are retrieved
       increaseSample: '@?',
       // kibi: export hits as CSV
-      csv: '@?'
+      csv: '@?',
+      // kibi: custom view
+      templateId: '=?',
+      showCustomView: '=?',
+      customView: '=?',
+      customViewerMode: '=?',
+      // kibi: end
     },
     link: function ($scope) {
       const notify = createNotifier();

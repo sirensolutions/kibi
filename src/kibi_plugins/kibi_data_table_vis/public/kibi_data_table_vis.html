@@ -1,17 +1,15 @@
 <div ng-controller="KibiDataTableVisController" class="kibi-data-table-vis">
 
-  <div class="small-note" ng-if="vis.params.templateId">
-    <kibi-table-sorting options="savedObj" ng-if="savedObj.sorting && savedObj.showCustomView"></kibi-table-sorting>
+  <div class="small-note" ng-show="customView">
+    <kibi-table-sorting
+      columns="vis.params.columns"
+      sorting="vis.params.sort"
+      ng-if="vis.params.sort && showCustomView"
+    ></kibi-table-sorting>
     <a
-      ng-if="showCustomView"
       class="pull-right"
       ng-click='showCustomView = !showCustomView'
-    >Change back to Standard View</a>
-    <a
-       ng-if="!showCustomView"
-       class="pull-right"
-       ng-click='showCustomView = !showCustomView'
-    >Change to Custom View</a>
+      >Switch to {{ showCustomView ? 'Standard' : 'Custom' }} View</a>
   </div>
 
   <doc-table
@@ -20,10 +18,13 @@
     on-move-column="onMoveColumn"
     search-source="searchSource"
     sorting="vis.params.sort"
-    columns="vis.params.columns"
-    template-id="vis.params.templateId"
-    custom-viewer-mode="customViewerMode"
     filter="filter"
+    columns="vis.params.columns"
+
+    custom-viewer-mode="customViewerMode"
+    custom-view="customView"
+    show-custom-view="showCustomView"
+    template-id="vis.params.templateId"
     cell-click-handlers="cellClickHandlers"
     column-aliases="vis.params.columnAliases"
     increase-sample="true"

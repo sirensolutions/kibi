@@ -43,7 +43,22 @@
         ></tool-bar-pager-buttons>
       </div>
     </div>
-    <table class="kbn-table table" ng-if="indexPattern">
+
+    <div
+      kibi-custom-view
+      ng-if="customView"
+      ng-show="showCustomView"
+      template-id="templateId"
+      mode="{{customViewerMode}}"
+      hits="pageOfItems"
+      columns="columns"
+      column-aliases="columnAliases"
+      index-pattern="indexPattern"
+      filter="filter"
+      cell-click-handlers="cellClickHandlers"
+    ></div>
+
+    <table class="kbn-table table" ng-if="indexPattern" ng-show="!showCustomView">
       <!--kibi: pass the column aliases-->
       <thead
         kbn-table-header
@@ -70,21 +85,13 @@
           on-remove-column="onRemoveColumn"
         ></tr>
       </tbody>
-      <!--kibi: support CSV export-->
-      <tfoot ng-if="csv">
-        <tr>
-          <!--span all columns with the little white space at the start and the optional time column-->
-          <td colspan="{{ 1 + (indexPattern.hasTimeField() ? 1 : 0) + columns.length}}">
-            <a class="small" ng-click="exportAsCsv(hits, indexPattern, columns)">
-              Export as CSV <i aria-hidden="true" class="fa fa-download"></i>
-            </a>
-          </td>
-        </tr>
-      </tfoot>
-      <!--kibi: end-->
     </table>
     <!-- ToolBarFooter -->
     <div class="kuiBar docTableBar">
+      <!--kibi: support CSV export-->
+      <a ng-if="csv" class="small" ng-click="exportAsCsv(hits, indexPattern, columns)">
+        Export as CSV <i aria-hidden="true" class="fa fa-download"></i>
+      </a>
       <div class="kuiBarSection">
         <div
           ng-if="shouldShowLimitedResultsWarning()"
@@ -115,37 +122,54 @@
     </div>
   </div>
 
-  <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern" data-test-subj="docTable">
-    <!--kibi: pass the column aliases-->
-    <thead
-      kbn-table-header
-      column-aliases="columnAliases"
+  <div ng-if="infiniteScroll">
+    <!--kibi: added custom view support-->
+    <div
+      kibi-custom-view
+      ng-if="customView"
+      ng-show="showCustomView"
+      template-id="templateId"
+      mode="{{customViewerMode}}"
+      hits="hits"
       columns="columns"
+      column-aliases="columnAliases"
       index-pattern="indexPattern"
-      sort-order="sorting"
-      on-change-sort-order="onChangeSortOrder"
-      on-move-column="onMoveColumn"
-      on-remove-column="onRemoveColumn"
-    ></thead>
-    <tbody>
-      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
-        kbn-table-row="row"
+      filter="filter"
+      cell-click-handlers="cellClickHandlers"
+    ></div>
+
+    <table class="kbn-table table" ng-if="indexPattern" data-test-subj="docTable" ng-show="!showCustomView">
+      <!--kibi: pass the column aliases-->
+      <thead
+        kbn-table-header
         column-aliases="columnAliases"
-        cell-click-handlers="cellClickHandlers"
         columns="columns"
-        sorting="sorting"
         index-pattern="indexPattern"
-        filter="filter"
-        class="discover-table-row"
-        ng-class="{'discover-table-row--highlight': row['$$_isAnchor']}"
-        data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
-        on-add-column="onAddColumn"
+        sort-order="sorting"
         on-change-sort-order="onChangeSortOrder"
+        on-move-column="onMoveColumn"
         on-remove-column="onRemoveColumn"
-      ></tr>
-    </tbody>
-  </table>
-  <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
+      ></thead>
+      <tbody>
+        <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
+          kbn-table-row="row"
+          column-aliases="columnAliases"
+          cell-click-handlers="cellClickHandlers"
+          columns="columns"
+          sorting="sorting"
+          index-pattern="indexPattern"
+          filter="filter"
+          class="discover-table-row"
+          ng-class="{'discover-table-row--highlight': row['$$_isAnchor']}"
+          data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
+          on-add-column="onAddColumn"
+          on-change-sort-order="onChangeSortOrder"
+          on-remove-column="onRemoveColumn"
+        ></tr>
+      </tbody>
+    </table>
+    <kbn-infinite-scroll more="addRows"></kbn-infinite-scroll>
+  </div>
 </div>
 
 <div ng-if="hits != null && !hits.length" class="table-vis-error">

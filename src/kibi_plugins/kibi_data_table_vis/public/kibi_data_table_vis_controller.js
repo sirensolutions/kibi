@@ -22,12 +22,6 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
   $scope.customView = Boolean($scope.vis.params.templateId);
   $scope.showCustomView = Boolean($scope.vis.params.templateId);
 
-  $scope.$watch('vis.params.templateId', function (templateId) {
-    $scope.vis.params.templateId = templateId;
-    $scope.customView = Boolean(templateId);
-    $scope.showCustomView = Boolean(templateId);
-  });
-
   /**
    * extract fields from query
    *
@@ -271,13 +265,10 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
       $rootScope.$emit('kibi:column:move', columnName, newIndex);
     };
 
-    const removeVisTemplateIdChangedHandler = $rootScope.$on('kibi:vis:templateId-changed', function (event, templateId) {
-      $scope.vis.params.templateId = templateId;
+    $scope.$watch('vis.params.templateId', function (templateId) {
       $scope.customViewerMode = 'record';
-    });
-
-    $scope.$on('$destroy', function () {
-      removeVisTemplateIdChangedHandler();
+      $scope.customView = Boolean(templateId);
+      $scope.showCustomView = Boolean(templateId);
     });
   }
 }

@@ -84,10 +84,6 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
       };
 
       // kibi: cell actions
-      $scope.$watch('cellClickHandlers', function () {
-        createSummaryRow($scope.row);
-      }, true);
-
       $scope.$listen(kibiState, 'save_with_changes', function (diff) {
         if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
             diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1 ||
@@ -145,9 +141,16 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
               mapping[indexPattern.timeFieldName].filterable
               && _.isFunction($scope.filter)
             ),
-            column: indexPattern.timeFieldName
+            column: indexPattern.timeFieldName,
+            // kibi: pass data for the click event
+            isClickable: false,
+            hasSelectedEntity: false,
+            isSelectedEntityDisabled: false
+            // kibi: end
           }));
         }
+
+        $scope.clickHandlers = {};
 
         $scope.columns.forEach(function (column) {
           const isFilterable = $scope.flattenedRow[column] !== undefined
@@ -155,25 +158,34 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
             && mapping[column].filterable
             && _.isFunction($scope.filter);
 
+          // kibi: add cell click actions
+          let hasSelectedEntity = false;
+          let isSelectedEntityDisabled = false;
+          if (_.isFunction($scope.cellClickHandlers)) {
+            const cellClickHandlers = $scope.cellClickHandlers($scope.flattenedRow, column);
+            $scope.clickHandlers[column] = cellClickHandlers.clickHandler;
+            hasSelectedEntity = cellClickHandlers.hasSelectedEntity;
+            isSelectedEntityDisabled = cellClickHandlers.isSelectedEntityDisabled;
+          }
+          // kibi: end
+
           newHtmls.push(cellTemplate({
             timefield: false,
             sourcefield: (column === '_source'),
             formatted: _displayField(row, column, true),
             filterable: isFilterable,
-            column
+            column,
+            // kibi: pass data for the click event
+            isClickable: Boolean($scope.clickHandlers[column]),
+            hasSelectedEntity,
+            isSelectedEntityDisabled
+            // kibi: end
           }));
         });
 
         let $cells = $el.children();
         newHtmls.forEach(function (html, i) {
           const $cell = $cells.eq(i);
-
-          // kibi: add cell click actions
-          const hasTimeField = indexPattern.hasTimeField();
-          if ($scope.cellClickHandlers && hasTimeField ? i >= 2 : i >= 1) { // skip over the openRow and the time column
-            $scope.cellClickHandlers(row, $cell, $scope.columns[hasTimeField ? i - 2 : i - 1]);
-          }
-          // kibi: end
 
           if ($cell.data('discover:html') === html) return;
 

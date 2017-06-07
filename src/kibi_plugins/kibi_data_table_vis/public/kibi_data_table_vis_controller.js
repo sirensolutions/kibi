@@ -39,43 +39,52 @@ function KibiDataTableVisController(courier, $window, createNotifier, confirmMod
   const _constructCellOnClicksObject = function () {
     const clickOptions = _.groupBy($scope.vis.params.clickOptions, 'columnField');
 
-    $scope.cellClickHandlers = function (row, cell, column) {
-      // Remove click CSS style for every cell
-      cell.removeClass('click');
-      cell.removeClass('selectedEntityCell disabled');
-      cell.css('cursor', 'auto');
-      cell.off('click');
+    $scope.cellClickHandlers = function (row, column) {
+      let hasSelectedEntity = false;
+      const clickHandlers = [];
 
       if (clickOptions[column]) {
-        // Style the cell value as a link
-        cell.addClass('click');
-        cell.css('cursor', 'pointer');
-
         _.each(clickOptions[column], clickHandler => {
-          const { type } = clickHandler;
+          switch (clickHandler.type) {
+            case 'select':
+              const { _index, _type, _id } = row;
 
-          if (type === 'select' &&
-            kibiState.isEntitySelected(row.$$_flattened._index, row.$$_flattened._type, row.$$_flattened._id, column)) {
-            if (kibiState.isSelectedEntityDisabled()) {
-              cell.addClass('selectedEntityCell disabled');
-            } else {
-              cell.addClass('selectedEntityCell');
-            }
-          }
-          cell.bind('click', function (e) {
-            e.preventDefault();
-            switch (type) {
-              case 'link':
-                const valueField = clickHandler.valueField;
-                let idValue = row.$$_flattened[valueField];
-                const uriFormat = clickHandler.uriFormat;
+              hasSelectedEntity = kibiState.isEntitySelected(_index, _type, _id, column);
+
+              clickHandlers.push(function () {
+                const entity = {
+                  index: _index,
+                  type: _type,
+                  id: _id,
+                  column
+                };
+
+                kibiState.disableSelectedEntity(false);
+                kibiState.setEntityURI(entity);
+                kibiState.save();
+
+                // switch to a different dashboard only if user gave one in settings
+                const targetDashboardId = clickHandler.targetDashboardId;
+                if (targetDashboardId) {
+                  return dashboardHelper.switchDashboard(targetDashboardId);
+                } else {
+                  // Call courier.fetch to update visualizations
+                  // This will update all the visualisations, not only the one
+                  // which strictly depend on selected entityURI
+                  courier.fetch();
+                }
+              });
+              break;
+            case 'link':
+              clickHandlers.push(function () {
+                const { valueField, uriFormat } = clickHandler;
+                let idValue = row[valueField];
 
                 // Check if idValue is an array; if so, use the first
                 // element of the array as the value and display a warning
                 if (idValue instanceof Array && idValue.length > 0) {
                   notify.warning(
-                    'Field [' + valueField + '] used in an click handler contains more than one value.' +
-                    'The first value will be used.'
+                    `Field [${valueField}] used in an click handler contains more than one value. The first value will be used.`
                   );
                   idValue = idValue[0];
                 }
@@ -94,33 +103,28 @@ function KibiDataTableVisController(courier, $window, createNotifier, confirmMod
                 if (win) {
                   win.focus();
                 }
-                break;
-              case 'select':
-                const entity = {
-                  index: row.$$_flattened._index,
-                  type: row.$$_flattened._type,
-                  id: row.$$_flattened._id,
-                  column
-                };
-                kibiState.disableSelectedEntity(false);
-                kibiState.setEntityURI(entity);
-                kibiState.save();
-
-                // switch to a different dashboard only if user gave one in settings
-                const targetDashboardId = clickHandler.targetDashboardId;
-                if (targetDashboardId) {
-                  return dashboardHelper.switchDashboard(targetDashboardId);
-                } else {
-                  // Call courier.fetch to update visualizations
-                  // This will update all the visualisations, not only the one
-                  // which strictly depend on selected entityURI
-                  courier.fetch();
-                }
-                break;
-            }
-          });
+              });
+              break;
+            default:
+              notify.error(`Unknown click action of type ${clickHandler.type} on the column ${column}`);
+          }
         });
       }
+
+      const clickHandlersFn = function () {
+        for (const fn of clickHandlers) {
+          fn();
+        }
+      };
+
+      const ret = {
+        hasSelectedEntity,
+        isSelectedEntityDisabled: hasSelectedEntity && kibiState.isSelectedEntityDisabled(),
+      };
+      if (clickHandlers.length) {
+        ret.clickHandler = clickHandlersFn;
+      }
+      return ret;
     };
   };
   _constructCellOnClicksObject();
@@ -180,9 +184,9 @@ function KibiDataTableVisController(courier, $window, createNotifier, confirmMod
   // TODO
   //dashboardState.getIsEditMode();
   if (configMode) {
-    $scope.$watchCollection('vis.params.clickOptions', () => {
+    $scope.$watch('vis.params.clickOptions', () => {
       _constructCellOnClicksObject();
-    });
+    }, true);
 
     $scope.$watchMulti([ 'vis.params.queryFieldName', 'vis.params.joinElasticsearchField', '[]vis.params.queryDefinitions' ], () => {
       _constructQueryColumnObject();

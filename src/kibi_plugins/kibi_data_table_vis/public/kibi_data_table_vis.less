@@ -2,6 +2,11 @@
 @import (reference) "~ui/styles/variables.less";
 
 doc-table {
+  span.filters-visible {
+    background-color: transparent !important;
+    float: left;
+  }
+
   td.selectedEntityCell {
     background-color: @entity-bg;
     color: #fff !important;
@@ -29,6 +34,7 @@ doc-table {
   }
 
   .click {
+    cursor: pointer;
     color: @link-color;
     text-decoration: underline;
     cursor: pointer;

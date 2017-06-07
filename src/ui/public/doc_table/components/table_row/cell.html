@@ -8,9 +8,19 @@ if (timefield) {
   attributes='class="discover-table-datafield"';
 }
 %>
-<td <%= attributes %> data-test-subj="docTableField">
+<td
+  <%= attributes %>
+  data-test-subj="docTableField"
+  <%
+     // kibi: make the cell clickable
+     if (isClickable) {
+  %>
+    ng-class="{ click: clickHandlers['<%- column %>'], selectedEntityCell: <%= hasSelectedEntity %>, disabled: <%= isSelectedEntityDisabled %> }" ng-click="clickHandlers['<%- column %>']($event)"
+  <% } %>
+>
   <%= formatted %>
-  <span class="table-cell-filter">
+  <!--kibi: added filters-visible class in order to display the filter icons over the selected cell color-->
+  <span class="table-cell-filter" ng-class="{ 'filters-visible': <%= hasSelectedEntity %> }">
     <% if (filterable) { %>
       <span
         ng-click="inlineFilter($event, '+')"

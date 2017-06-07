@@ -2,12 +2,6 @@
 
 == Kerberos/SPNEGO authentication support [Enterprise Edition only]
 
-ifeval::["{enterprise_enabled}" == "false"]
-  NOTE: Kerberos authentication is available only in Kibi Enterprise Edition.
-endif::[]
-
-ifeval::["{enterprise_enabled}" == "true"]
-
 This section offers an overview of how to enable Kerberos/SPNEGO authentication
 in Kibi EE.
 
@@ -239,9 +233,13 @@ searchguard.kerberos.acceptor_principal: 'HTTP/es.ad.local'
 ----
 
 To disable the Kerberos replay cache in Search Guard, you'll need to set the
-`sun.security.krb5.rcache` JVM property to `none`; this can be done by setting
-the `ES_JAVA_OPTS` environment variable to include
-`-dsun.security.krb5.rcache=none`.
+`sun.security.krb5.rcache` JVM property to `none`; this can be done by
+setting the following line in `config/jvm.options`:
+
+[source,yaml]
+----
+-Dsun.security.krb5.rcache=none
+----
 
 For information on where to set/modify this variable please refer to
 {elastic-ref}setup-service.html[Running as a service on Linux] or
@@ -413,5 +411,3 @@ if you need to provide both authentications for different networks, it is
 possible to start an additional Kibi instance with
 `kibi_access_control.backend.searchguard.authenticator` set to `http-basic` or
 not set at all.
-
-endif::[]

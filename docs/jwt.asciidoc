@@ -1,0 +1,211 @@
+[[jwt-authentication]]
+== JWT authentication support [Enterprise Edition only]
+
+This section offers an overview of how to integrate Kibi EE with the Search
+Guard JWT authenticator when Kibi is embedded into an iframe by another
+application.
+
+Before enabling JWT support you should setup Kibi and Search Guard as described
+in the <<searchguard_integration,Search Guard integration>> chapter and ensure
+that it works as expected.
+
+=== Pre requisites
+
+[float]
+==== Search Guard add-on
+JWT authentication support require the installation of the commercial Search
+Guard Kerberos JWT HTTP Authentication add-on; to install it, download the
+correct jar for your Search Guard version from {searchguard-jwt-ref}[this page]
+and copy it to the `plugins/search-guard-2` directory on each node, then
+perform a rolling restart of the cluster.
+
+[float]
+==== Kibi proxy
+It is required that Kibi and the container application are published on the
+same domain to allow cross frame communication; this can be achieved by
+implementing a proxy to Kibi in the container application routes or configuring
+a reverse proxy on a path in the application server configuration.
+
+[float]
+==== JWT token issuance
+The application that embeds Kibi is responsible for generating JWT tokens;
+https://jwt.io/[jwt.io] provides a good overview of the technology, a browser
+based debugging tool and a list of libraries for several platforms.
+
+The {searchguard-ref}/blob/master/jwt.md[Search Guard documentation] provides an
+overview of all the claims supported by the add-on and a list of all the
+configuration options.
+
+**The application must specify an expiration date claim (`exp`) to
+avoid creating tokens with unlimited duration**.
+
+=== Configuration
+
+Once the add-on has been installed in the cluster, you need to modify
+`sg_config.yml` file and upload it to the cluster using `sgadmin`; **if you are
+using the Search Guard management API make sure to include only the
+`sg_config.yml` in the sgadmin configuration directory or you will overwrite
+internal users, actiongroups, roles and mappings defined through the API**
+
+To enable JWT authentication over HTTP, you need to add a JWT authenticator
+stanza to `searchguard.authc`; an example `sg_config.yml` follows:
+
+[source,yaml]
+----
+searchguard:
+  dynamic:
+    http:
+      anonymous_auth_enabled: false
+      xff:
+        enabled: false
+    authc:
+      jwt_auth_domain:
+        enabled: true
+        order: 1
+        http_authenticator:
+          type: jwt
+          challenge: false
+          config:
+            signing_key: "cGFzc3dvcmQ="
+            jwt_header: "Authorization"
+        authentication_backend:
+          type: noop
+     basic_internal_auth_domain:
+        enabled: true
+        order: 2
+        http_authenticator:
+          type: basic
+          challenge: true
+        authentication_backend:
+          type: internal
+----
+
+With the above configuration, Search Guard will check if the `Authorization`
+header contains a JWT token signed with the signing key specified in
+`http_authenticator.signing_key`.
+
+The signing key must be encoded using the `base64` algorithm; in the example
+above the decoded key is `password`.
+
+If the token is decoded successfully, Search Guard will validate the following
+claims:
+
+- `iat` - Issued At: the date when the token was issued (optional).
+- `exp` - Expiration Time: the date after which the token should expired; this
+  claim is optional but it is recommended to set it, otherwise tokens will have
+  unlimited duration.
+- `nbf` - Not Before: the date before which the token should be rejected (optional).
+
+NOTE: All dates are expressed as seconds since the Epoch in UTC.
+
+If time claims are validated, Search Guard will get the username from the
+Subject claim (`sub`), assign role mappings and evaluate role permissions.
+
+If an HTTP request to the cluster contains an HTTP Basic authorization header
+it will be authenticated by the HTTP authenticator defined in
+`basic_internal_auth_domain`; it is necessary to leave this enabled as the Kibi
+backend uses this method to authenticate with the cluster.
+
+[float]
+===== Roles
+
+It is possible to specify user roles in a token claim by setting the
+`roles_key` attribute in the authenticator configuration to the desired claim
+name, e.g.:
+
+[source,yaml]
+----
+#...
+      jwt_auth_domain:
+        enabled: true
+        order: 1
+        http_authenticator:
+          type: jwt
+          challenge: false
+          config:
+            roles_key: "roles"
+            signing_key: "cGFzc3dvcmQ="
+            jwt_header: "Authorization"
+#...
+----
+
+Once the attribute is set and the configuration is updated, it is possible to
+assign backend roles to the user by setting the claim defined in
+`http_authenticator.config.roles_key` in the token payload, e.g. :
+
+[source,json]
+----
+{
+  "sub": "kibiuser",
+  "exp": 1495711765,
+  "roles": "sales,marketing"
+}
+----
+
+Please note that in order to map roles set in the JWT token to Search Guard
+roles you will need to define a role mapping such as the following:
+
+._JWT role mapping_
+image::images/access_control/jwtmapping.png["JWT role mapping",align="center"]
+
+=== Verification
+
+To verify that Search Guard JWT authentication is working correctly
+you can generate a JWT token from your application and pass it to
+Elasticsearch using curl's `-H` option, e.g.:
+
+[source,shell]
+----
+curl -k -H "Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraWJpdXNlciJ9.tqCYxJsORvro59Q01J9HUeFpQtauc81CcTlS5bVl93Y" https://localhost:9200/_searchguard/authinfo
+----
+
+To test if it is working correctly before the application is ready,
+you can use the https://jwt.io/#debugger[jwt.io debugger] to generate
+tokens using the signing key defined in `sg_config.yml`.
+
+=== Kibi configuration
+
+To enable JWT support in Kibi, set the
+`kibi_access_control.backends.searchguard.authenticator` option to
+`http-jwt`, in `kibi.yml` e.g.:
+
+[source,yaml]
+----
+kibi_access_control:
+  #... existing options
+  backends:
+    searchguard:
+      #... existing options
+      authenticator: 'http-jwt'
+----
+
+Then restart Kibi and open it in a browser; you should get a blank page and the
+URL should end with `login`.
+
+To test JWT authentication, open your browser console (`CTRL+SHITF+I` on Chrome
+and Firefox) and call `setJWTToken` of the `kibi` object, e.g.:
+
+[source,javascript]
+----
+.kibi
+.setJWTToken(yourtoken)
+.then(function() {
+  console.log('JWT token set.');
+})
+.catch(function(error) {
+  console.log('An error occurred setting the token.');
+});
+----
+
+Once the token is set, Kibi will store it in an encrypted cookie and send
+it in every request to the backend; the backend will then forward the
+JWT token to Search Guard to authenticate the user.
+
+After the token is set, you can switch to the desired Kibi URL by
+simply changing `location.href`.
+
+When the user is logged out from the main application, sessionStorage and
+localStorage should be cleared.
+
+For more information on how to call setJWTToken from the parent frame, please
+refer to the <<cross_frame_communication,cross frame communication>> section.

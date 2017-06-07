@@ -1,7 +1,6 @@
 import angular from 'angular';
 import _ from 'lodash';
 import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
-import SearchHelper from 'ui/kibi/helpers/search_helper';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
 export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState, getAppState, createNotifier, Private, $rootScope,
@@ -120,7 +119,6 @@ export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, glob
       }
     });
 
-    const self = this;
     this.delayExecutionHelper = new DelayExecutionHelper(
       (data, alreadyCollectedData) => {
         if (alreadyCollectedData.ids === undefined) {

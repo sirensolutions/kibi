@@ -430,9 +430,15 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
         // kibi: decide to show/hide entity picker and timefilter
         doesVisDependsOnSelectedEntities(toVis)
         .then((isEntityDependent) => {
-          timefilter.enabled = toVis.type.requiresTimePicker || false;
+          const index = searchSource.get("index");
+          if ((index && index.timeFieldName) || toVis.type.requiresTimePicker) {
+            timefilter.enabled = true;
+          } else {
+            timefilter.enabled = false;
+          }
           $scope.holder.entityURIEnabled = isEntityDependent;
         })
+        // kibi: end
         .then($scope.fetch);
       } else {
         $state.save();

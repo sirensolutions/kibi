@@ -95,7 +95,7 @@ describe('State Management', function () {
 
       disableFiltersIfOutdatedSpy = sinon.spy(kibiState, 'disableFiltersIfOutdated');
 
-      sinon.stub(elasticsearchPlugins, 'get').returns([ 'siren-platform' ]);
+      sinon.stub(elasticsearchPlugins, 'get').returns([ 'siren-vanguard' ]);
 
       config = _config_;
       const defaultTime = {

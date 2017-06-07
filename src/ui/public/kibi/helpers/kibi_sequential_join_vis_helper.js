@@ -259,14 +259,14 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
           pattern: button.sourceIndexPatternId,
           path: button.sourceField,
           indices: sourceIndices,
-          // default siren-platform parameters
+          // default siren-vanguard parameters
           termsEncoding: 'long'
         },
         {
           pattern: button.targetIndexPatternId,
           path: button.targetField,
           indices: targetIndices,
-          // default siren-platform parameters
+          // default siren-vanguard parameters
           termsEncoding: 'long'
         }
       ]

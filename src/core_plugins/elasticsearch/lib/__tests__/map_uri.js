@@ -11,7 +11,7 @@ describe('plugins/elasticsearch', function () {
         return {
           get(key) {
             if (key === 'elasticsearch.plugins') {
-              return [ 'siren-platform' ];
+              return [ 'siren-vanguard' ];
             }
           }
         };

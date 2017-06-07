@@ -107,7 +107,7 @@ uiModules
 
         if (enabled && !installed) {
           notify.error(
-            'The siren-platform plugin is enabled but not installed. ' +
+            'The siren-vanguard plugin is enabled but not installed. ' +
             'Please install the plugin and restart Kibi, or disable the relational panel in Management / Relations'
           );
         }

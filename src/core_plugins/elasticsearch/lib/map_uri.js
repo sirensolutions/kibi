@@ -35,8 +35,8 @@ export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
     const reqSubPath = request.path.replace(proxyPrefix, '');
     mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
 
-    // kibi: replace _search with _msearch to use siren-platform when available
-    if (sirenAction && elasticsearchPlugins && contains(elasticsearchPlugins, 'siren-platform')) {
+    // kibi: replace _search with _msearch to use siren-vanguard when available
+    if (sirenAction && elasticsearchPlugins && contains(elasticsearchPlugins, 'siren-vanguard')) {
       if (reqSubPath.endsWith('_search') || reqSubPath.endsWith('_msearch')) {
         mappedUrlComponents.pathname = joinPaths(esUrlBasePath, `siren/${trimLeft(reqSubPath, '/')}`);
       }

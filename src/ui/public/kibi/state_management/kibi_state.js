@@ -996,9 +996,9 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     // on a dashboard without associated savedSearch
     const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds);
 
-    // check siren-platform plugin
+    // check siren-vanguard plugin
     if (this.isRelationalPanelButtonEnabled() && !this.isSirenJoinPluginInstalled()) {
-      const error = 'The Siren Platform plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
+      const error = 'The Siren Vanguard plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
         'or disable the relational panel in Management / Relations';
       return Promise.reject(new Error(error));
     }
@@ -1186,7 +1186,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
   KibiState.prototype.isSirenJoinPluginInstalled = function () {
     const plugins = elasticsearchPlugins.get();
-    return plugins.indexOf('siren-platform') !== -1;
+    return plugins.indexOf('siren-vanguard') !== -1;
   };
 
   return new KibiState();

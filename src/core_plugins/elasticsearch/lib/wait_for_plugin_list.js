@@ -28,34 +28,34 @@ module.exports = function (plugin, server) {
         if (elasticsearchPlugins.indexOf(pluginEntry.component) === -1) {
           elasticsearchPlugins.push(pluginEntry.component);
         }
-        if (pluginEntry.component === 'siren-platform') {
+        if (pluginEntry.component === 'siren-vanguard') {
           detectedSirenJoin = true;
         }
       });
 
       config.set('elasticsearch.plugins', elasticsearchPlugins);
 
-      // 2 if siren-platform detected verify that it is installed on all data nodes
+      // 2 if siren-vanguard detected verify that it is installed on all data nodes
       if (detectedSirenJoin) {
         _.each(nodeList, function (nodeEntry) {
           const nodeName = nodeEntry.name;
           const nodeRole = nodeEntry['node.role'];
           const nodeIp = nodeEntry.ip;
-          // we only check that siren-platform is installed on data nodes
+          // we only check that siren-vanguard is installed on data nodes
           if (nodeRole === 'd') {
             let foundCorrespondingNode = false;
             _.each(pluginList, function (pluginEntry) {
               const nName = pluginEntry.name;
               const pName = pluginEntry.component;
-              if (pName === 'siren-platform' && nName === nodeName) {
+              if (pName === 'siren-vanguard'  && nName === nodeName) {
                 foundCorrespondingNode = true;
                 return false;
               }
             });
             if (!foundCorrespondingNode) {
               plugin.status.red(
-                'Siren Platform plugin is missing at data node:[' + nodeName + '] ip:[' + nodeIp + ']\n' +
-                'Siren Platform plugin should be installed on all data nodes.'
+                'Siren Vanguard plugin is missing at data node:[' + nodeName + '] ip:[' + nodeIp + ']\n' +
+                'Siren Vanguard plugin should be installed on all data nodes.'
               );
             }
           }

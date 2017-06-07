@@ -325,7 +325,7 @@ export default function sirenJoin(server) {
     if (targetIndex.types && targetIndex.types.length > 0) {
       join.types = targetIndex.types;
     }
-    // KIBI5: add those parameters when supported by siren-platform
+    // KIBI5: add those parameters when supported by siren-vanguard
     //if (orderBy) {
       //join.orderBy = orderBy;
     //}

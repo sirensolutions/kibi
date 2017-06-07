@@ -1,9 +1,8 @@
-import 'plugins/kibi_core/management/sections/kibi_dashboard_groups/services/saved_dashboard_groups';
+import 'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 import dashboardNavEditLinkTemplate from './dashboard_nav_edit_link.html';
 import './dashboard_nav_edit_link.less';
 import uiModules from 'ui/modules';
-import _ from 'lodash';
 
 uiModules
 .get('kibana')

@@ -1,0 +1,5 @@
+=== Kibi 4.6.4-4 Release Notes
+
+==== Kibi Changes
+
+* Fixed: Authentication error when using JWT with the graph browser plugin

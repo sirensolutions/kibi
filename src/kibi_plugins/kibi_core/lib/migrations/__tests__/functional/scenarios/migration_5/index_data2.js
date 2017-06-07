@@ -1,7 +1,3 @@
-import requirefrom from 'requirefrom';
-
-const packageJson = requirefrom('src/utils')('package_json');
-
 /**
  * Defines the following objects:
  *
@@ -13,11 +9,11 @@ module.exports = [
     index: {
       _index: '.kibi',
       _type: 'config',
-      _id: packageJson.kibi_version
+      _id: 'kibi'
     }
   },
   {
-    buildNum: packageJson.build.number,
+    buildNum: '123',
     'dateFormat:tz': 'UTC',
     'kibi:relations': JSON.stringify({
       relationsIndices: [

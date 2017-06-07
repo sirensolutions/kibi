@@ -55,23 +55,28 @@ export default class Migration5 extends Migration {
   }
 
   async upgrade() {
-    const objects = await this.scrollSearch(this._index, 'config,visualization');
-    if (objects.length === 0) {
+    const config = await this._client.get({
+      index: this._index,
+      type: 'config',
+      ignore: [404],
+      id: 'kibi'
+    });
+    if (!config.found) {
+      return 0;
+    }
+    const visualizations = await this.scrollSearch(this._index, 'visualization');
+    if (visualizations.length === 0) {
       return 0;
     }
     let body = '';
     let upgraded = 0;
-
-    const config = _(objects)
-    .remove('_type', 'config')
-    .find('_id', pkg.kibi_version);
 
     let relations = { relationsIndices: [], relationsDashboards: [] };
     if (config._source['kibi:relations']) {
       relations = JSON.parse(config._source['kibi:relations']);
     }
 
-    for (const obj of objects) {
+    for (const obj of visualizations) {
       const visState = JSON.parse(obj._source.visState);
       const modified = await this._upgradeVisualization(relations, visState);
 
@@ -86,7 +91,7 @@ export default class Migration5 extends Migration {
 
     if (upgraded > 0) {
       // if the kibi:relations changed
-      body += this._bulkIndex(this._index, 'config', pkg.kibi_version, { 'kibi:relations': JSON.stringify(relations) });
+      body += this._bulkIndex(this._index, 'config', 'kibi', { 'kibi:relations': JSON.stringify(relations) });
 
       await this._client.bulk({
         refresh: true,

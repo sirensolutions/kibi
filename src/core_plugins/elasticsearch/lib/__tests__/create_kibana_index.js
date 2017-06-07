@@ -45,27 +45,6 @@ describe('plugins/elasticsearch', function () {
         });
       });
 
-      it('should be created with mappings for config.buildNum', function () {
-        const fn = createKibanaIndex(server);
-        return fn.then(function () {
-          const params = callWithInternalUser.args[0][1];
-          expect(params)
-            .to.have.property('body');
-          expect(params.body)
-            .to.have.property('mappings');
-          expect(params.body.mappings)
-            .to.have.property('config');
-          expect(params.body.mappings.config)
-            .to.have.property('properties');
-          expect(params.body.mappings.config.properties)
-            .to.have.property('buildNum');
-          expect(params.body.mappings.config.properties.buildNum)
-            .to.have.property('type', 'string');
-          expect(params.body.mappings.config.properties.buildNum)
-            .to.have.property('index', 'not_analyzed');
-        });
-      });
-
       it('should be created with 1 shard and default replica', function () {
         const fn = createKibanaIndex(server);
         return fn.then(function () {

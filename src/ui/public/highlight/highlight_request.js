@@ -3,6 +3,26 @@ import highlightTags from './highlight_tags';
 
 const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_size (limit of a java int)
 
+// kibi: added _walkHighlightClauses function
+/**
+ * Removes join sequences and sets from a query.
+ *
+ * @param {Object} query - The query to modify.
+ * @param {String} clauses - The name of the list of clauses (e.g. must or must_not).
+ * @private
+ */
+function _walkHighlightClauses(query, clauses) {
+  if (!query[clauses]) {
+    return;
+  }
+  if (Array.isArray(query[clauses])) {
+    query[clauses] = _(query[clauses]).map(getHighlightQuery).compact().value();
+  } else {
+    query[clauses] = getHighlightQuery(query[clauses]) || [];
+  }
+}
+// kibi: end
+
 /**
   * Returns a clone of the query with `"all_fields": true` set on any `query_string` queries
   */
@@ -20,13 +40,13 @@ function getHighlightQuery(query) {
     && !_.has(clone, ['query_string', 'fields'])
   ) {
     clone.query_string.all_fields = true;
-  } else if (_.has(clone, 'bool.must')) {
-    if (Array.isArray(clone.bool.must)) {
-      clone.bool.must = _(clone.bool.must).map(getHighlightQuery).compact().value();
-    } else {
-      clone.bool.must = getHighlightQuery(clone.bool.must) || [];
-    }
   }
+  // kibi: check must and must_not
+  else if (clone.bool) {
+    _walkHighlightClauses(clone.bool, 'must');
+    _walkHighlightClauses(clone.bool, 'must_not');
+  }
+  // kibi: end
 
   return clone;
 }

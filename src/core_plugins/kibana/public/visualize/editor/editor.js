@@ -196,6 +196,12 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     $scope.editableVis = editableVis;
     $scope.state = $state;
 
+    // kibi: Multichart needs the savedVis reference
+    if (vis.type.name === 'kibi_multi_chart_vis') {
+      vis._kibiSavedVis = savedVis;
+    }
+    // kibi: end
+
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
     $scope.appStatus = $appStatus;

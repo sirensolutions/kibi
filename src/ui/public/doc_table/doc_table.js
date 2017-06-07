@@ -10,8 +10,12 @@ import uiModules from 'ui/modules';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
+// kibi: imports
+import ExportAsCsvProvider from 'plugins/kibi_data_table_vis/actions/csv_export';
+// kibi:end
+
 uiModules.get('kibana')
-.directive('docTable', function (courier, config, createNotifier, getAppState, pagerFactory, $filter) {
+.directive('docTable', function (Private, courier, config, createNotifier, getAppState, pagerFactory, $filter) {
   return {
     restrict: 'E',
     template: html,
@@ -34,7 +38,9 @@ uiModules.get('kibana')
       cellClickHandlers: '=',
       columnAliases: '=?',
       // kibi: increase the number of results that are retrieved
-      increaseSample: '@?'
+      increaseSample: '@?',
+      // kibi: export hits as CSV
+      csv: '@?'
     },
     link: function ($scope) {
       const notify = createNotifier();
@@ -43,6 +49,9 @@ uiModules.get('kibana')
         sorting: $scope.sorting,
         columns: $scope.columns
       };
+
+      // kibi: add exportAsCsv to the scope
+      $scope.exportAsCsv = Private(ExportAsCsvProvider);
 
       // kibi: increase the number of results retrieved
       $scope.size = parseInt(config.get('discover:sampleSize'));

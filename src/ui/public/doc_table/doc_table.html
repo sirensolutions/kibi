@@ -10,6 +10,11 @@
 >
   <div ng-if="!infiniteScroll">
     <div class="kuiBar docTableBar">
+      <!--kibi: support CSV export-->
+      <a ng-if="csv" class="small" ng-click="exportAsCsv(hits, indexPattern, columns)">
+        Export as CSV <i aria-hidden="true" class="fa fa-download"></i>
+      </a>
+      <!--kibi: end-->
       <div class="kuiBarSection">
         <div
           ng-if="shouldShowLimitedResultsWarning()"
@@ -65,6 +70,18 @@
           on-remove-column="onRemoveColumn"
         ></tr>
       </tbody>
+      <!--kibi: support CSV export-->
+      <tfoot ng-if="csv">
+        <tr>
+          <!--span all columns with the little white space at the start and the optional time column-->
+          <td colspan="{{ 1 + (indexPattern.hasTimeField() ? 1 : 0) + columns.length}}">
+            <a class="small" ng-click="exportAsCsv(hits, indexPattern, columns)">
+              Export as CSV <i aria-hidden="true" class="fa fa-download"></i>
+            </a>
+          </td>
+        </tr>
+      </tfoot>
+      <!--kibi: end-->
     </table>
     <!-- ToolBarFooter -->
     <div class="kuiBar docTableBar">

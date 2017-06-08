@@ -308,7 +308,8 @@ define(function (require) {
 
     $scope.$listen(kibiState, 'save_with_changes', function (diff) {
       if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
-          diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1) {
+          diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1 ||
+          diff.indexOf(kibiState._properties.dashboards) !== -1) {
         updateButtons.call(this, 'Relations changes');
       }
     });

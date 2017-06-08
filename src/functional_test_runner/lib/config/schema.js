@@ -59,8 +59,16 @@ export const schema = Joi.object().keys({
 
   servers: Joi.object().keys({
     webdriver: urlPartsSchema(),
-    kibana: urlPartsSchema(),
+    // kibi: several tests refer to a Kibana index here
+    kibana: urlPartsSchema().keys({
+      index: Joi.string().default('.kibana')
+    }),
+    // kibi: end
     elasticsearch: urlPartsSchema(),
+    // kibi: compatibility with legacy test configuration
+    testserver: urlPartsSchema(),
+    karma: urlPartsSchema()
+    // kibi: end
   }).default(),
 
   // definition of apps that work with `common.navigateToApp()`

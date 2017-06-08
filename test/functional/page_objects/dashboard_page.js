@@ -45,7 +45,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      await retry.try(() => getRemote().findByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`).click());
+      // kibi: in kibi the breadcrumb goes to the dashboard listing page
+      await retry.try(() => getRemote().findByCssSelector(`a[href="#${DashboardConstants.LISTING_PAGE_PATH}"]`).click());
     }
 
     async gotoDashboardLandingPage() {
@@ -78,6 +79,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('Clicking edit');
       return testSubjects.click('dashboardEditMode');
     }
+
+    // kibi: reset button
+    clickReset() {
+      log.debug('Clicking reset');
+      return testSubjects.click('reset');
+    }
+    // kibi: end
 
     getIsInViewMode() {
       log.debug('getIsInViewMode');
@@ -383,12 +391,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getFilters(timeout = defaultFindTimeout) {
-      return await find.allByCssSelector('.filter-bar > .filter', timeout);
+      return await find.allByCssSelector('filter-bar .filter', timeout); // kibi: filters are in filter-bar
     }
 
     async getFilterDescriptions(timeout = defaultFindTimeout) {
       const filters = await find.allByCssSelector(
-        '.filter-bar > .filter > .filter-description',
+        'filter-bar .filter > .filter-description', // kibi: filters are in filter-bar
         timeout);
       return _.map(filters, async (filter) => await filter.getVisibleText());
     }

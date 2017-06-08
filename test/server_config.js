@@ -13,10 +13,9 @@ module.exports = {
       hostname: process.env.TEST_KIBANA_HOSTNAME || 'localhost',
       port: parseInt(process.env.TEST_KIBANA_PORT, 10) || 5620,
       auth: shield.kibanaUser.username + ':' + shield.kibanaUser.password,
-      // kibi: set the index to .kibana to reuse fixtures and tests
-      index: '.kibana',
       username: shield.kibanaUser.username,
-      password: shield.kibanaUser.password
+      password: shield.kibanaUser.password,
+      index: '.kibana' // kibi: set default index to .kibana to reuse upstream fixtures
     },
     elasticsearch: {
       protocol: process.env.TEST_ES_PROTOCOL || 'http',
@@ -35,6 +34,7 @@ module.exports = {
     karma: {
       port: parseInt(process.env.TEST_KARMA_PORT, 10) || 9876
     }
+    // kibi: end
   },
   apps: {
     status_page: {

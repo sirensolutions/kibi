@@ -28,9 +28,9 @@ export default function ({ getService, getPageObjects }) {
           'Markdown',
           'Tag Cloud',
           // kibi: kibi visualizations
-          'Enhanced search results',
-          'Kibi query viewer',
-          'Kibi relational filter'
+          'Kibi Enhanced Search Results',
+          'Kibi Query Viewer',
+          'Kibi Relational Filter'
         ];
 
         // find all the chart types and make sure there all there

@@ -1,18 +1,18 @@
 import { get } from 'lodash';
 
 export class KibanaServerUiSettings {
-  constructor(log, es, kibanaVersion) {
+  constructor(log, es) { // kibi: removed kibanaVersion
     this.es = es;
     this.log = log;
-    this.kibanaVersion = kibanaVersion;
+    // kibi: removed kibanaVersion
   }
 
   async _docParams() {
-    const { kibanaVersion } = this;
+    // kibi: removed kibanaVersion
     return {
       index: '.kibana',
       type: 'config',
-      id: await kibanaVersion.get()
+      id: 'kibi' // kibi: in Kibi the configuration document is always called 'kibi'
     };
   }
 

@@ -36,8 +36,8 @@ export function KibanaServerProvider({ getService }) {
         const exists = await uiSettings.existInEs();
         const state = await status.getOverallState();
 
-        if (exists && state === 'green') {
-          log.debug(`Kibana uiSettings are in elasticsearch and the server is reporting a green status`);
+        if (state === 'green') { // kibi: check only if state is green
+          log.debug(`The server is reporting a green status`);
           return;
         }
 
@@ -52,8 +52,7 @@ export function KibanaServerProvider({ getService }) {
           continue;
         }
 
-        const docState = exists ? 'exists' : `doesn't exist`;
-        throw new Error(`Kibana never stabilized: config doc ${docState} and status is ${state}`);
+        throw new Error(`Kibana never stabilized: status is ${state}`); // kibi: check only the status
       }
     }
   }

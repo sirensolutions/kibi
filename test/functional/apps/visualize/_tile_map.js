@@ -55,12 +55,16 @@ export default function ({ getService, getPageObjects }) {
 
       function tokenize(row) {
         const tokens = row.split(' ');
+        // kibi: lo vede che stuzzica?
+        if (tokens.length === 1) {
+          return row;
+        }
         return {
-          geohash: tokens[0],
-          count: tokens[1],
-          lat: Math.floor(parseFloat(tokens[4])),
-          lon: Math.floor(parseFloat(tokens[6]))
+          count: tokens[0],
+          lat: Math.floor(parseFloat(tokens[3])),
+          lon: Math.floor(parseFloat(tokens[5]))
         };
+        // kibi: end
       }
 
       expect(actual.map(tokenize)).to.eql(expected.map(tokenize));
@@ -70,12 +74,12 @@ export default function ({ getService, getPageObjects }) {
     describe('tile map chart', function indexPatternCreation() {
 
       it('should show correct tile map data on default zoom level', function () {
-        const expectedTableData = ['9 5,787 { "lat": 37.22448418632405, "lon": -103.01935195013255 }',
-          'd 5,600 { "lat": 37.44271478370398, "lon": -81.72692197253595 }',
-          'c 1,319 { "lat": 47.72720855392425, "lon": -109.84745063951028 }',
-          'b 999 { "lat": 62.04130042948433, "lon": -155.28087269195967 }',
-          'f 187 { "lat": 45.656166475784175, "lon": -82.45831044201545 }',
-          '8 108 { "lat": 18.85260305600241, "lon": -156.5148810390383 }'];
+        const expectedTableData = ['9', '5,787 { "lat": 37.22448418632405, "lon": -103.01935195013255 }',
+          'd', '5,600 { "lat": 37.44271478370398, "lon": -81.72692197253595 }',
+          'c', '1,319 { "lat": 47.72720855392425, "lon": -109.84745063951028 }',
+          'b', '999 { "lat": 62.04130042948433, "lon": -155.28087269195967 }',
+          'f', '187 { "lat": 45.656166475784175, "lon": -82.45831044201545 }',
+          '8', '108 { "lat": 18.85260305600241, "lon": -156.5148810390383 }'];
 
         return PageObjects.visualize.collapseChart()
           .then(function () {

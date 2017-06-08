@@ -37,10 +37,10 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct time range string by timepicker', async function () {
         let actualTimeString = await PageObjects.discover.getTimespanText();
-        const expectedTimeString = `${fromTimeString} to ${toTimeString}`;
+        const expectedTimeString = `${fromTimeString} ${toTimeString}`;
 
         // kibi: added this to strip new lines as we are formatting the range in a different way
-        // after our formatting we get "fromDate\n to\n toDate" insted of "fromDate to toDate"
+        // after our formatting we get "fromDate\n toDate" insted of "fromDate toDate"
         actualTimeString = actualTimeString.replace(/\n/g, ' ');
         // kibi: end
 

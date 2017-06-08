@@ -1,9 +1,9 @@
 export function VisualizePageProvider({ getService, getPageObjects }) {
+  const log = getService('log'); // kibi: import log
   const remote = getService('remote');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -16,7 +16,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * @author kibi
      */
     getColumnNames() {
-      return this.remote
+      return remote
       .setFindTimeout(defaultFindTimeout * 2)
       .findAllByClassName('table-header-name')
       .then(columns => {
@@ -37,8 +37,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * @author kibi
      */
     toggleColumn(column) {
-      PageObjects.common.debug(`toggle column [${column}]`);
-      return PageObjects.common.findTestSubject(`toggle-${column}-column`)
+      log.debug(`toggle column [${column}]`);
+      return testSubjects.find(`toggle-${column}-column`)
       .click();
     }
 
@@ -49,8 +49,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * @author kibi
      */
     toggleTableRowDetails() {
-      PageObjects.common.debug('toggleTableRowDetails');
-      return PageObjects.common.findTestSubject('tableRowDetails')
+      log.debug('toggleTableRowDetails');
+      return testSubjects.find('docTableExpandToggleColumn')
       .click();
     }
 
@@ -60,8 +60,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * @author kibi
      */
     createNewVisualization() {
-      PageObjects.common.debug('click create new visualization button');
-      return PageObjects.common.findTestSubject('createNewVisualization')
+      log.debug('click create new visualization button');
+      return testSubjects.find('createNewVisualization')
       .click();
     }
 
@@ -71,10 +71,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * @author kibi
      */
     clickKibiDataTable() {
-      PageObjects.common.debug('clickKibiDataTable');
+      log.debug('clickKibiDataTable');
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Enhanced search results')
+      .findByPartialLinkText('Enhanced Search Results')
       .click();
     }
 

@@ -64,23 +64,35 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function (actualCaption) {
           expect(actualCaption).to.contain(expectedCaption);
-        });
+        })
+        // kibi: hide share panel
+        .then(() => PageObjects.discover.clickShare());
+        // kibi: end
       });
 
       it('should show the correct formatted URL', async function () {
         // kibi: the URL is always shortened
         const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
-        await PageObjects.common.try(async function() {
-          PageObjects.common.saveScreenshot('Discover-shorten-url-button');
+        return PageObjects.discover.clickShare()
+        .then(() => PageObjects.header.waitUntilLoadingHasFinished())
+        // kibi: end
+        .then(() => {
           return PageObjects.discover.getSharedUrl()
           .then(function (actualUrl) {
             expect(actualUrl).to.match(re);
           });
-        });
+        })
+        // kibi: hide share panel
+        .then(() => PageObjects.discover.clickShare());
+        // kibi: end
       });
 
       it('should show toast message for copy to clipboard', function () {
-        return PageObjects.discover.clickCopyToClipboard()
+        // kibi: open share panel
+        return PageObjects.discover.clickShare()
+        .then(() => PageObjects.header.waitUntilLoadingHasFinished())
+        .then(() => PageObjects.discover.clickCopyToClipboard())
+        // kibi: end
         .then(function () {
           return PageObjects.header.getToastMessage();
         })
@@ -90,15 +102,22 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function () {
           return PageObjects.header.waitForToastMessageGone();
-        });
+        })
+        // kibi: hide share panel
+        .then(() => PageObjects.discover.clickShare());
+        // kibi: end
       });
 
       // kibi: removed test "shorten URL button should produce a short URL"
       // as we removed the button
 
-      // NOTE: This test has to run immediately after the test above
       it('should show toast message for copy to clipboard', function () {
-        return PageObjects.discover.clickCopyToClipboard()
+        // kibi: open share panel
+        return PageObjects.discover.clickShare()
+        .then(() => PageObjects.header.waitUntilLoadingHasFinished())
+        .then(() => PageObjects.discover.clickCopyToClipboard())
+        // kibi: end
+        .then(() => PageObjects.discover.clickCopyToClipboard())
         .then(function () {
           return PageObjects.header.getToastMessage();
         })
@@ -107,7 +126,10 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function () {
           return PageObjects.header.waitForToastMessageGone();
-        });
+        })
+        // kibi: hide share panel
+        .then(() => PageObjects.discover.clickShare());
+        // kibi: end
       });
     });
   });

@@ -60,7 +60,7 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
     filterManager.add(field, value, operator, index);
   };
 
-  const _constructCellOnClicksObject = function () {
+  const _populateClickHandlers = function () {
     const clickOptions = _.groupBy($scope.vis.params.clickOptions, 'columnField');
 
     $scope.cellClickHandlers = function (row, column) {
@@ -68,8 +68,8 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
       const clickHandlers = [];
 
       if (clickOptions[column]) {
-        _.each(clickOptions[column], clickHandler => {
-          switch (clickHandler.type) {
+        _.each(clickOptions[column], clickOption => {
+          switch (clickOption.type) {
             case 'select':
               const { _index, _type, _id } = row;
 
@@ -88,7 +88,7 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
                 kibiState.save();
 
                 // switch to a different dashboard only if user gave one in settings
-                const targetDashboardId = clickHandler.targetDashboardId;
+                const { targetDashboardId } = clickOption;
                 if (targetDashboardId) {
                   return dashboardHelper.switchDashboard(targetDashboardId);
                 } else {
@@ -101,7 +101,7 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
               break;
             case 'link':
               clickHandlers.push(function () {
-                const { valueField, uriFormat } = clickHandler;
+                const { valueField, uriFormat } = clickOption;
                 let idValue = row[valueField];
 
                 // Check if idValue is an array; if so, use the first
@@ -130,7 +130,7 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
               });
               break;
             default:
-              notify.error(`Unknown click action of type ${clickHandler.type} on the column ${column}`);
+              notify.error(`Unknown click action of type ${clickOption.type} on the column ${column}`);
           }
         });
       }
@@ -151,7 +151,7 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
       return ret;
     };
   };
-  _constructCellOnClicksObject();
+  _populateClickHandlers();
 
   function _hasRelationalColumn() {
     return Boolean($scope.vis.params.queryFieldName);
@@ -171,32 +171,33 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
     }
   });
 
-  const _constructQueryColumnObject = function () {
-    if (_hasRelationalColumn()) {
-      const { queryFieldName: name, queryDefinitions, joinElasticsearchField } = $scope.vis.params;
-      const virtualField = {
-        count: 0,
-        displayName: name,
-        name,
-        type: 'string'
-      };
-      const indexPattern = $scope.searchSource.get('index');
-      const virtualIndexPattern = new VirtualIndexPattern(indexPattern, virtualField);
-      $scope.searchSource.index(virtualIndexPattern);
-
-      const relationalColumn = {
-        queryDefs: queryDefinitions,
-        // it is the field from table to do the comparison
-        sourcePath: indexPattern.fields.byName[joinElasticsearchField].path,
-        fieldName: name
-      };
-      if (!kibiState.isSelectedEntityDisabled()) {
-        relationalColumn.entityURI = kibiState.getEntityURI();
-      }
-      $scope.searchSource.inject([ relationalColumn ]);
+  const _addRelationalColumn = function () {
+    if (!_hasRelationalColumn()) {
+      return;
     }
+    const { queryFieldName: name, queryDefinitions, joinElasticsearchField } = $scope.vis.params;
+    const virtualField = {
+      count: 0,
+      displayName: name,
+      name,
+      type: 'string'
+    };
+    const indexPattern = $scope.searchSource.get('index');
+    const virtualIndexPattern = new VirtualIndexPattern(indexPattern, virtualField);
+    $scope.searchSource.index(virtualIndexPattern);
+
+    const relationalColumn = {
+      queryDefs: queryDefinitions,
+      // it is the field from table to do the comparison
+      sourcePath: indexPattern.fields.byName[joinElasticsearchField].path,
+      fieldName: name
+    };
+    if (!kibiState.isSelectedEntityDisabled()) {
+      relationalColumn.entityURI = kibiState.getEntityURI();
+    }
+    $scope.searchSource.inject([ relationalColumn ]);
   };
-  _constructQueryColumnObject();
+  _addRelationalColumn();
 
   // when autoupdate is on we detect the refresh here for template visualization
   $scope.$watch('esResponse', function (resp) {
@@ -209,11 +210,11 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
   //dashboardState.getIsEditMode();
   if (configMode) {
     $scope.$watch('vis.params.clickOptions', () => {
-      _constructCellOnClicksObject();
+      _populateClickHandlers();
     }, true);
 
     $scope.$watchMulti([ 'vis.params.queryFieldName', 'vis.params.joinElasticsearchField', '[]vis.params.queryDefinitions' ], () => {
-      _constructQueryColumnObject();
+      _addRelationalColumn();
     });
 
     $scope.onAddColumn = function (columnName) {
@@ -246,7 +247,7 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
       if (clicks > 0) {
         const plural = clicks > 1;
         confirmModal(
-          `There ${plural ? 'is' : 'are'} ${clicks} click action${plural ? 's' : ''} configured with the ${columnName} column.`, {
+          `There ${plural ? 'are' : 'is'} ${clicks} click action${plural ? 's' : ''} configured with the ${columnName} column.`, {
             confirmButtonText: 'Yes, remove the column',
             onConfirm: () => {
               $rootScope.$emit('removeClickOptions', columnName);

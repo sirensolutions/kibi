@@ -1,15 +1,12 @@
 import Notifier from 'ui/notify/notifier';
-import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import angular from 'angular';
+import '../kibi_data_table_vis_params';
 
-let $scope;
-let $elem;
-
-describe('Kibi data table', function () {
-  require('../kibi_data_table_vis_params');
+describe('Kibi data table params', function () {
+  let $scope;
 
   function init(params) {
     ngMock.module('kibi_datasources/services/saved_datasources', function ($provide) {
@@ -22,7 +19,7 @@ describe('Kibi data table', function () {
         params: params
       };
 
-      $elem = angular.element('<kibi-data-table-vis-params></kibi-data-table-vis-params>');
+      const $elem = angular.element('<kibi-data-table-vis-params></kibi-data-table-vis-params>');
       $compile($elem)($scope);
 
       $scope.$digest();

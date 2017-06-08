@@ -30,7 +30,7 @@ module.exports = function (grunt) {
       .filter(key => key.startsWith('ciShard-'))
       .map(key => `karma:${key}`);
 
-    grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
+    grunt.log.ok(`Running browser tests in ${ciShardTasks.length} shards`);
 
     grunt.task.run([
       'run:testServer',

@@ -9,7 +9,9 @@ export function renameColumn(params, oldColumnName, newColumnName) {
   }
 
   const oldIndexInColumns = params.columns.indexOf(oldColumnName);
-  params.columnAliases.splice(oldIndexInColumns, 1, newColumnName);
+  if (params.columnAliases.length) {
+    params.columnAliases.splice(oldIndexInColumns, 1, newColumnName);
+  }
   params.columns.splice(oldIndexInColumns, 1, newColumnName);
 }
 
@@ -17,7 +19,9 @@ export function renameColumn(params, oldColumnName, newColumnName) {
  * Adds a new column as well as its alias
  */
 export function addColumn(params, columnName) {
-  columnsActions.addColumn(params.columnAliases, columnName);
+  if (params.columnAliases.length) {
+    columnsActions.addColumn(params.columnAliases, columnName);
+  }
   columnsActions.addColumn(params.columns, columnName);
 }
 
@@ -26,7 +30,9 @@ export function addColumn(params, columnName) {
  */
 export function removeColumn(params, columnName) {
   const oldIndex = params.columns.indexOf(columnName);
-  columnsActions.removeColumn(params.columnAliases, params.columnAliases[oldIndex]);
+  if (params.columnAliases.length) {
+    columnsActions.removeColumn(params.columnAliases, params.columnAliases[oldIndex]);
+  }
   columnsActions.removeColumn(params.columns, columnName);
 }
 
@@ -35,6 +41,8 @@ export function removeColumn(params, columnName) {
  */
 export function moveColumn(params, columnName, newIndex) {
   const oldIndex = params.columns.indexOf(columnName);
-  columnsActions.moveColumn(params.columnAliases, params.columnAliases[oldIndex], newIndex);
+  if (params.columnAliases.length) {
+    columnsActions.moveColumn(params.columnAliases, params.columnAliases[oldIndex], newIndex);
+  }
   columnsActions.moveColumn(params.columns, columnName, newIndex);
 }

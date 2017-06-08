@@ -63,7 +63,8 @@ define(function (require) {
     };
   });
 
-  function VisEditor($scope, $route, timefilter, AppState, kbnUrl, $timeout, courier, kibiState, Private, Promise, createNotifier) {
+  function VisEditor($scope, $route, timefilter, AppState, kbnUrl, $timeout, courier, kibiState, Private, Promise, createNotifier,
+    sessionStorage, $rootScope) {
     // kibi: dependencies added by kibi
     const doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
     const hasAnyOfVisSavedSearchesATimeField = Private(require('ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field'));
@@ -154,6 +155,32 @@ define(function (require) {
       $scope.state = $state;
       $scope.uiState = $state.makeStateful('uiState');
       $scope.appStatus = $appStatus;
+
+      // kibi: Multichart needs the savedVis reference
+      if (vis.type.name === 'kibi_multi_chart_vis') {
+        vis._kibiSavedVis = savedVis;
+      }
+      // kibi: end
+
+      // kibi: allows restore the uiState after click edit visualization on dashboard
+      const kibiPanelId = sessionStorage.get('kibi_panel_id');
+      if (kibiPanelId) {
+        if (kibiPanelId.id === $scope.savedVis.id) {
+          $scope.uiState.fromString(JSON.stringify(sessionStorage.get('kibi_ui_state')));
+          $scope.uiState.on('set', () => {
+            sessionStorage.set('kibi_ui_state', $scope.uiState.toJSON());
+            sessionStorage.set('kibi_panel_id', {
+              id: sessionStorage.get('kibi_panel_id').id,
+              panel: sessionStorage.get('kibi_panel_id').panel,
+              updated: true
+            });
+          });
+        } else {
+          sessionStorage.remove('kibi_panel_id');
+          sessionStorage.remove('kibi_ui_state');
+        }
+      }
+      // kibi: end
 
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
@@ -255,6 +282,10 @@ define(function (require) {
     }
 
     $scope.fetch = function () {
+      // kibi: backport fetch event from kibana 5+
+      $rootScope.$broadcast('fetch');
+      // kibi: end
+
       $state.save();
       searchSource.set('filter', queryFilter.getFilters());
       if (!$state.linked) searchSource.set('query', $state.query);

@@ -13,7 +13,7 @@
       {{::savedObj.title}}
     </span>
     <div class="btn-group">
-      <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{::editUrl}}">
+      <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{::editUrl}}" ng-click="edit()">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
       <a aria-label="Remove" ng-show="chrome.getVisible()" ng-click="remove()">

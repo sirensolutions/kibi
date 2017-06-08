@@ -3,7 +3,8 @@ define(function (require) {
   const $ = require('jquery');
   require('ui/modules')
   .get('app/dashboard')
-  .directive('dashboardPanel', function (kibiState, savedVisualizations, savedSearches, Private, $injector, createNotifier) {
+  .directive('dashboardPanel', function (kibiState, savedVisualizations, savedSearches, Private, $injector, createNotifier,
+    sessionStorage) {
     const _ = require('lodash');
     const loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
     const filterManager = Private(require('ui/filter_manager'));
@@ -38,6 +39,20 @@ define(function (require) {
         // receives $scope.panel from the dashboard grid directive, seems like should be isolate?
         $scope.$watch('id', function () {
           if (!$scope.panel.id || !$scope.panel.type) return;
+
+          // kibi: allows restore the uiState after click edit visualization on dashboard
+          $scope.edit = function () {
+            if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
+              sessionStorage.set('kibi_panel_id', {
+                id: $scope.savedObj.vis.id,
+                panel: getPanelId($scope.panel),
+                updated: false
+              });
+              sessionStorage.set('kibi_ui_state', $scope.savedObj.vis.getUiState().toJSON());
+            }
+            window.location.href = $scope.editUrl;
+          };
+          // kibi: end
 
           loadPanel($scope.panel, $scope)
           .then(function (panelConfig) {
@@ -76,6 +91,17 @@ define(function (require) {
             // create child ui state from the savedObj
             const uiState = panelConfig.uiState || {};
             $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState, true);
+
+            // kibi: allows restore the uiState after click edit visualization on dashboard
+            const __panelid = sessionStorage.get('kibi_panel_id');
+            if (__panelid) {
+              if (__panelid.id === $scope.panel.id && __panelid.panel === getPanelId(panelConfig.panel) && __panelid.updated) {
+                $scope.uiState.fromString(JSON.stringify(sessionStorage.get('kibi_ui_state')));
+                sessionStorage.remove('kibi_panel_id');
+                sessionStorage.remove('kibi_ui_state');
+              }
+            }
+            // kibi: end
 
             $scope.filter = function (field, value, operator) {
               const index = $scope.savedObj.searchSource.get('index').id;

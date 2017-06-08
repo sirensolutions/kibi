@@ -188,6 +188,18 @@ define(function (require) {
 
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
           if (!resp) return;
+
+          // kibi: This is needed by multichart to stop re-render es responses
+          //       can be used too to change the response before render process take place
+          if ($scope.vis.esResponseAdapter) {
+            const result = $scope.vis.esResponseAdapter(resp);
+            if (result) {
+              $scope.renderbot.render(result);
+              return;
+            }
+          }
+          // kibi: end
+
           $scope.renderbot.render(resp);
         }));
 
@@ -196,6 +208,14 @@ define(function (require) {
             oldRenderbot.destroy();
           }
         });
+
+        // kibi: Backport from 5.4, adds getUiState() to the vis object.
+        if ($scope.vis) {
+          $scope.vis.getUiState = () => {
+            return $scope.uiState;
+          };
+        }
+        // kibi: end
 
         $scope.$on('$destroy', function () {
           if ($scope.renderbot) {

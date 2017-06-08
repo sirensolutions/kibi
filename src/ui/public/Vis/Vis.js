@@ -79,6 +79,10 @@ define(function (require) {
         _.cloneDeep(this.type.params.defaults || {})
       );
 
+      // kibi: aditional visualization settings
+      this.kibiSettings = _.defaults({}, state.kibiSettings);
+      // kibi: end
+
       this.aggs = new AggConfigs(this, state.aggs);
     };
 
@@ -91,7 +95,9 @@ define(function (require) {
           return agg.toJSON();
         }).filter(Boolean),
         listeners: this.listeners,
-        version: this.type.version
+        version: this.type.version,
+        // kibi: aditional visualization settings
+        kibiSettings: this.kibiSettings
       };
     };
 

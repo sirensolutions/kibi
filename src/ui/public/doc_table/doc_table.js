@@ -11,7 +11,7 @@ import uiModules from 'ui/modules';
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 // kibi: imports
-import ExportAsCsvProvider from 'plugins/kibi_data_table_vis/actions/csv_export';
+import { ExportAsCsvProvider } from 'plugins/kibi_data_table_vis/actions/csv_export';
 // kibi:end
 
 uiModules.get('kibana')

@@ -1,7 +1,7 @@
 import { saveAs } from '@spalger/filesaver';
 import { get, isObject, map } from 'lodash';
 
-const toCsv = function (config, rows, indexPattern, columns) {
+export function toCsv(config, rows, indexPattern, columns) {
   const separator = config.get('csv:separator');
   const quoteValues = config.get('csv:quoteValues');
   const nonAlphaNumRE = /[^a-zA-Z0-9]/;
@@ -40,7 +40,7 @@ const toCsv = function (config, rows, indexPattern, columns) {
   return csvRows.map(row => `${row.join(separator)}\r\n`).join('');
 };
 
-export default function exportAsCsvFactory(config) {
+export function ExportAsCsvProvider(config) {
   return function exportAsCsv(rows, indexPattern, columns) {
     const csv = new Blob([ toCsv(config, rows, indexPattern, columns) ], { type: 'text/plain' });
     saveAs(csv, 'kibi-table.csv');

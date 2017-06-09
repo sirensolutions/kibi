@@ -53,7 +53,6 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
   });
 
   // NOTE: filter to enable little icons in doc-viewer to filter and add/remove columns
-  // TODO check if needed
   $scope.filter = function (field, value, operator) {
     // here grab the index
     const index = $scope.searchSource.get('index').id;

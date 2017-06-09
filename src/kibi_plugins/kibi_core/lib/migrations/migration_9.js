@@ -75,17 +75,12 @@ export default class Migration9 extends Migration {
       return array;
     }, []);
 
-    let count = 0;
     await this._client.bulk({
+      refresh: true,
       body: bulkRequests
-    }, (error, resp) => {
-      if (!error && resp && !resp.errors) {
-        count = resp.items.length;
-      }
     });
 
-    await this._client.indices.refresh();
-    return count;
+    return bulkRequests.length;
   }
 
 }

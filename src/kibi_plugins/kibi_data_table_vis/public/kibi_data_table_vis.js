@@ -44,7 +44,12 @@ function KibiDataTableVisTypeProvider(Private) {
         if (!vis.params.columns.length) {
           vis.params.columns = _.clone(savedSearch.columns);
         }
-        vis.params.sort = _.clone(savedSearch.sort);
+
+        const uiState = JSON.parse(this.uiStateJSON); // init method is called with this set to the saved visualization
+        if (!uiState.sort) {
+          uiState.sort = _.clone(savedSearch.sort);
+          this.uiStateJSON = JSON.stringify(uiState);
+        }
       }
     },
     version: 2

@@ -78,8 +78,9 @@ uiModules
     .then(function (vis) {
       // kibi: allow the plugin to initialize some parameters based on the linked savedSearch
       if (self.vis.type.init) {
-        self.vis.type.init(self.vis, self.savedSearch);
+        self.vis.type.init.call(self, self.vis, self.savedSearch);
       }
+      // kibi: end
 
       self.searchSource.aggs(function () {
         self.vis.requesting();

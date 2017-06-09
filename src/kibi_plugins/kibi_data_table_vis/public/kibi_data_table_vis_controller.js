@@ -206,8 +206,15 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
     }
   });
 
-  // TODO
-  //dashboardState.getIsEditMode();
+  $scope.sorting = $scope.uiState.get('sort');
+  $scope.uiState.on('change', function () {
+    $scope.sorting = $scope.uiState.get('sort');
+  });
+
+  $scope.onChangeSortOrder = function (columnName, newDirection) {
+    $scope.uiState.set('sort', [ columnName, newDirection ]);
+  };
+
   if (configMode) {
     $scope.$watch('vis.params.clickOptions', () => {
       _populateClickHandlers();

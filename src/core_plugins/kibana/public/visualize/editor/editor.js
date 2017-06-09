@@ -235,7 +235,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
     // kibi: force stage
-    $rootScope.$on('stageEditableVis', stage => {
+    const removeStageEditableVisHandler = $rootScope.$on('stageEditableVis', stage => {
       if (stage) {
         $scope.stageEditableVis();
       }
@@ -251,6 +251,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
       // kibi: remove the test_selected_entity
       kibiState.removeTestEntityURI();
       kibiState.save();
+      removeStageEditableVisHandler();
     });
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);

@@ -1,5 +1,6 @@
 import * as onPage from 'ui/kibi/utils/on_page';
 import MockState from 'fixtures/mock_state';
+import mockUiState from 'fixtures/mock_ui_state';
 import Notifier from 'ui/notify/notifier';
 import expect from 'expect.js';
 import _ from 'lodash';
@@ -38,11 +39,13 @@ describe('Kibi data table controller', function () {
         });
       }
 
+
       $window = _$window_;
       $parentScope = $rootScope;
       $parentScope.searchSource = searchSource;
       _.assign($parentScope, props);
 
+      $parentScope.uiState = mockUiState;
       sinon.stub(onPage, 'onVisualizePage').returns(true);
 
       courier = {

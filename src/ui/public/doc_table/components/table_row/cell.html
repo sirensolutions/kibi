@@ -15,7 +15,7 @@ if (timefield) {
      // kibi: make the cell clickable
      if (isClickable) {
   %>
-    ng-class="{ click: clickHandlers['<%- column %>'], selectedEntityCell: <%= hasSelectedEntity %>, disabled: <%= isSelectedEntityDisabled %> }" ng-click="clickHandlers['<%- column %>']($event)"
+    ng-class="{ 'cell-click': clickHandlers['<%- column %>'], selectedEntityCell: <%= hasSelectedEntity %>, disabled: <%= isSelectedEntityDisabled %> }" ng-click="clickHandlers['<%- column %>']($event)"
   <% } %>
 >
   <%= formatted %>

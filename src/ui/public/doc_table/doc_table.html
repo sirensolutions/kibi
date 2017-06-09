@@ -23,7 +23,7 @@
           <!--kibi: allow to get more results-->
           <div ng-if="increaseSample">
             Viewing {{ size }} results.
-            <a ng-click="increaseSize()">See more !</a>
+            <a name="increase-sample-link" ng-click="increaseSize()">See more !</a>
           </div>
           <div ng-if="!increaseSample">
             {{ limitedResultsWarning }}

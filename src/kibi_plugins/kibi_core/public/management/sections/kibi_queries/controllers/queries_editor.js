@@ -259,6 +259,15 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
     }
   };
 
+  $scope.rejectTinkerpop = function (item) {
+    if (item) {
+      if (item.type === 'tinkerpop3') {
+        return true;
+      }
+    }
+    return false;
+  };
+
   //TODO understand how the validation was done in object editor
   $scope.aceLoaded = function (editor) {
     return;

@@ -2145,6 +2145,16 @@ body {
   display: flex;
   border-bottom: 2px solid #E4E4E4; }
 
+/* kibi: added kibi-break-tabs class to fixed the tabs in management/siren/objects */
+.kuiTabs.kibi-break-tabs {
+  display: flex;
+  flex-wrap: wrap;}
+
+.kuiTabs.kibi-break-tabs button {
+  flex: auto;
+  padding: 8px 10px; }
+/* kibi: end */
+
 /**
  * 1. Override button styles (some of which are from Bootstrap).
  * 2. Adding a border shifts tabs right by 1px, so we need to shift them back.
@@ -2158,7 +2168,7 @@ body {
           appearance: none;
   /* 1 */
   cursor: pointer;
-  padding: 10px 30px;
+  padding: 10px 10px;
   font-size: 14px;
   color: #9fa3a7;
   background-color: #FFF;

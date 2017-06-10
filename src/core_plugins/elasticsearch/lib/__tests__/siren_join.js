@@ -72,35 +72,9 @@ describe('Join querying', function () {
         expect(actual).to.eql([
           {
             bool: {
-              must: [
-                {
-                  join: {
-                    indices: [
-                      '.kibi'
-                    ],
-                    types: [
-                      'type'
-                    ],
-                    on: [ 'id', 'id' ],
-                    request: {
-                      query: {
-                        bool: {
-                          must_not: [
-                            {
-                              match_all: {}
-                            }
-                          ]
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  type: {
-                    value: 'type'
-                  }
-                }
-              ]
+              must: [{
+                match_none: {}
+              }]
             }
           }
         ]);
@@ -150,27 +124,7 @@ describe('Join querying', function () {
                                   bool: {
                                     must: [
                                       {
-                                        join: {
-                                          indices: ['.kibi'],
-                                          on: [ 'id', 'id' ],
-                                          types: ['type'],
-                                          request: {
-                                            query: {
-                                              bool: {
-                                                must_not: [
-                                                  {
-                                                    match_all: {}
-                                                  }
-                                                ]
-                                              }
-                                            }
-                                          }
-                                        }
-                                      },
-                                      {
-                                        type: {
-                                          value: 'type'
-                                        }
+                                        match_none: {}
                                       }
                                     ]
                                   }
@@ -546,113 +500,6 @@ describe('Join querying', function () {
         targetIndices: [ 'i2' ],
         targetTypes: [ 't2', 't22' ],
         targetPath: 'id2'
-      });
-      const expected = {
-        bool: {
-          must: builder.toObject()
-        }
-      };
-      const actual = joinSet(query);
-      expect(actual).to.eql(expected);
-    });
-
-    xit('in a bool clause, advanced join options', function () {
-      const query = {
-        bool: {
-          must: [
-            {
-              join_set: {
-                focus: 'i1',
-                relations: [
-                  [
-                    {
-                      pattern: 'i1',
-                      indices: [ 'i1' ],
-                      types: [ 'cafard' ],
-                      path: 'id1',
-                      termsEncoding: 'long',
-                      orderBy: 'doc_score',
-                      maxTermsPerShard: 10
-                    },
-                    {
-                      pattern: 'i2',
-                      indices: [ 'i2' ],
-                      types: [ 'cafard' ],
-                      path: 'id2',
-                      termsEncoding: 'long',
-                      orderBy: 'doc_score',
-                      maxTermsPerShard: 100
-                    }
-                  ]
-                ]
-              }
-            }
-          ]
-        }
-      };
-      const builder = new JoinBuilder();
-      builder.addJoin({
-        sourceTypes: 'cafard',
-        sourcePath: 'id1',
-        targetIndices: [ 'i2' ],
-        targetTypes: 'cafard',
-        targetPath: 'id2',
-        termsEncoding: 'long',
-        orderBy: 'doc_score',
-        maxTermsPerShard: 100
-      });
-      const expected = {
-        bool: {
-          must: builder.toObject()
-        }
-      };
-      const actual = joinSet(query);
-      expect(actual).to.eql(expected);
-    });
-
-    xit('in a bool clause, advanced join options maxTermsPerShard should not be passed if === -1', function () {
-      const query = {
-        bool: {
-          must: [
-            {
-              join_set: {
-                focus: 'i1',
-                relations: [
-                  [
-                    {
-                      pattern: 'i1',
-                      indices: [ 'i1' ],
-                      types: [ 'cafard' ],
-                      path: 'id1',
-                      termsEncoding: 'long',
-                      orderBy: 'doc_score',
-                      maxTermsPerShard: 100
-                    },
-                    {
-                      pattern: 'i2',
-                      indices: [ 'i2' ],
-                      types: [ 'cafard' ],
-                      path: 'id2',
-                      termsEncoding: 'long',
-                      orderBy: 'doc_score',
-                      maxTermsPerShard: -1
-                    }
-                  ]
-                ]
-              }
-            }
-          ]
-        }
-      };
-      const builder = new JoinBuilder();
-      builder.addJoin({
-        sourceTypes: 'cafard',
-        sourcePath: 'id1',
-        targetIndices: [ 'i2' ],
-        targetTypes: 'cafard',
-        targetPath: 'id2',
-        termsEncoding: 'long',
-        orderBy: 'doc_score'
       });
       const expected = {
         bool: {
@@ -1222,41 +1069,6 @@ describe('Join querying', function () {
         targetIndices: [ 'i0' ],
         targetTypes: 'cafard',
         targetPath: 'id0'
-      });
-      const actual = joinSet(query);
-      expect(actual).to.eql(builder.toObject());
-    });
-
-    xit('accepts orderBy and maxTermsPerShard parameters', function () {
-      const query = [
-        {
-          join_set: {
-            focus: 'i1',
-            relations: [
-              [
-                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
-                {
-                  pattern: 'i2',
-                  indices: [ 'i2' ],
-                  types: [ 'cafard' ],
-                  path: 'id2',
-                  orderBy: 'doc_score',
-                  maxTermsPerShard: '10'
-                }
-              ]
-            ]
-          }
-        }
-      ];
-      const builder = new JoinBuilder();
-      builder.addJoin({
-        sourceTypes: 'cafard',
-        sourcePath: 'id1',
-        targetIndices: [ 'i2' ],
-        targetTypes: 'cafard',
-        targetPath: 'id2',
-        orderBy: 'doc_score',
-        maxTermsPerShard: '10'
       });
       const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
@@ -2263,20 +2075,12 @@ describe('Join querying', function () {
                       bool: {
                         must: [
                           {
-                            join: {
-                              indices: [ '.kibi' ],
-                              on: [ 'id', 'companyid' ],
-                              request: {
-                                query: {
-                                  bool: {
-                                    must_not: [
-                                      {
-                                        match_all: {}
-                                      }
-                                    ]
-                                  }
+                            bool: {
+                              must: [
+                                {
+                                  match_none: {}
                                 }
-                              }
+                              ]
                             }
                           }
                         ]
@@ -2346,20 +2150,10 @@ describe('Join querying', function () {
         const actual = joinSequence(query);
         expect(actual).to.eql([
           {
-            join: {
-              indices: ['.kibi'],
-              on: [ 'companyid', 'id' ],
-              request: {
-                query: {
-                  bool: {
-                    must_not: [
-                      {
-                        match_all: {}
-                      }
-                    ]
-                  }
-                }
-              }
+            bool: {
+              must: [{
+                match_none: {}
+              }]
             }
           }
         ]);
@@ -2445,20 +2239,10 @@ describe('Join querying', function () {
         const actual = joinSequence(query);
         expect(actual).to.eql([
           {
-            join: {
-              indices: [ '.kibi' ],
-              on: [ 'ip', 'ip' ],
-              request: {
-                query: {
-                  bool: {
-                    must_not: [
-                      {
-                        match_all: {}
-                      }
-                    ]
-                  }
-                }
-              }
+            bool: {
+              must: [{
+                match_none: {}
+              }]
             }
           }
         ]);

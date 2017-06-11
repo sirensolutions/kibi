@@ -13,7 +13,7 @@ import uiModules from 'ui/modules';
 
 uiModules
 .get('kibana')
-.directive('dashboardsNav', ($rootScope, dashboardsNavState, globalNavState, createNotifier, dashboardGroups) => {
+.directive('dashboardsNav', ($rootScope, dashboardsNavState, globalNavState, createNotifier, dashboardGroups, kbnUrl) => {
   return {
     restrict: 'E',
     replace: true,
@@ -69,6 +69,10 @@ uiModules
           event.preventDefault();
           dashboardsNavState.setOpen(!dashboardsNavState.isOpen());
         }
+      };
+
+      $scope.createDashboard = () => {
+        kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {});
       };
 
       $scope.$on('$destroy', () => {

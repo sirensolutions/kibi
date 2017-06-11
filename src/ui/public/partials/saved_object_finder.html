@@ -103,7 +103,7 @@
   </ul>
   <!-- kibi: keep page info inside pagination -->
   <div class="finder-hit-count" ng-if="finder.perPage < finder.hitCount">
-    <span>{{ finder.hitCount }} visualizations</span>
+    <span>{{ finder.hitCount }} {{ finder.properties.nouns }}</span>
   </div>
   <!-- kibi: end -->
 </paginate>

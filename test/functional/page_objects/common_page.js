@@ -213,7 +213,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const url = await remote.getCurrentUrl();
         if (!url.includes(path)) {
-          throw new Error('Url not found');
+          throw new Error(`Url ${url} does not include path ${path}`); // kibi: show more info
         }
       });
     }

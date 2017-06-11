@@ -147,7 +147,7 @@ class DashboardState {
 
   // kibi: toggle borders around panels
   getHideBorders() {
-    return this.appState.options.hideBorders;
+    return this.appState.options.hideBorders || false;
   }
 
   // kibi: toggle borders around panels

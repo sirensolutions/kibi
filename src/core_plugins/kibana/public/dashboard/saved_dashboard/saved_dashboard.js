@@ -26,7 +26,7 @@ module.factory('SavedDashboard', function (courier, config) {
         panelsJSON: '[]',
         optionsJSON: angular.toJson({
           darkTheme: config.get('dashboard:defaultDarkTheme'),
-          hideBorder: false //siren: set it false as default
+          hideBorders: false //siren: set it false as default
         }),
         uiStateJSON: '{}',
         version: 1,

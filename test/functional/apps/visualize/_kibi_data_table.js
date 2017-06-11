@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitForToastMessageGone();
 
         await PageObjects.header.clickVisualize();
+        await PageObjects.header.clickVisualize();
         await PageObjects.visualize.createNewVisualization();
         await PageObjects.visualize.clickKibiDataTable();
 

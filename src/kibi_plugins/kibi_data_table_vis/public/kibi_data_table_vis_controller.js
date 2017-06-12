@@ -214,6 +214,12 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
     $scope.uiState.set('sort', [ columnName, newDirection ]);
   };
 
+  $scope.$watch('sorting', sorting => {
+    if ($scope.customView && $scope.showCustomView) {
+      $scope.uiState.setSilent('sort', sorting);
+    }
+  });
+
   if (configMode) {
     $scope.$watch('vis.params.clickOptions', () => {
       _populateClickHandlers();

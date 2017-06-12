@@ -3,8 +3,8 @@
   <div class="small-note" ng-show="customView">
     <kibi-table-sorting
       columns="vis.params.columns"
-      sorting="vis.params.sort"
-      ng-if="vis.params.sort && showCustomView"
+      sorting="sorting"
+      ng-show="sorting && showCustomView"
     ></kibi-table-sorting>
     <a
       class="pull-right"

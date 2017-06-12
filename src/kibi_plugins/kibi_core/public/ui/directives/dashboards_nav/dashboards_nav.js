@@ -94,8 +94,10 @@ uiModules
       $scope.newDashboardGroup = event => {
         event.preventDefault();
         dashboardGroups.newGroup().then((groupId) => {
-          notify.info('New dashboard group was successfuly created');
-          $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
+          if (groupId) {
+            notify.info('New dashboard group was successfuly created');
+            $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
+          }
         })
         .catch (notify.error);
       };

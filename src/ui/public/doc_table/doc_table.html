@@ -20,14 +20,7 @@
           ng-if="shouldShowLimitedResultsWarning()"
           class="kuiToolBarText kuiSubduedText"
         >
-          <!--kibi: allow to get more results-->
-          <div ng-if="increaseSample">
-            Viewing {{ size }} results.
-            <a name="increase-sample-link" ng-click="increaseSize()">See more !</a>
-          </div>
-          <div ng-if="!increaseSample">
-            {{ limitedResultsWarning }}
-          </div>
+        {{ limitedResultsWarning }}
         </div>
         <!-- Pagination -->
         <tool-bar-pager-text
@@ -37,7 +30,7 @@
         ></tool-bar-pager-text>
         <tool-bar-pager-buttons
           has-previous-page="pager.hasPreviousPage"
-          has-next-page="pager.hasNextPage"
+          has-next-page="hasNextPage"
           on-page-next="onPageNext"
           on-page-previous="onPagePrevious"
         ></tool-bar-pager-buttons>
@@ -97,14 +90,7 @@
           ng-if="shouldShowLimitedResultsWarning()"
           class="kuiToolBarText kuiSubduedText"
         >
-          <!--kibi: allow to get more results-->
-          <div ng-if="increaseSample">
-            Viewing {{ size }} results.
-            <a ng-click="increaseSize()">See more !</a>
-          </div>
-          <div ng-if="!increaseSample">
-            {{ limitedResultsWarning }}
-          </div>
+        {{ limitedResultsWarning }}
         </div>
         <!-- Pagination -->
         <tool-bar-pager-text
@@ -114,7 +100,7 @@
         ></tool-bar-pager-text>
         <tool-bar-pager-buttons
           has-previous-page="pager.hasPreviousPage"
-          has-next-page="pager.hasNextPage"
+          has-next-page="hasNextPage"
           on-page-next="onPageNext"
           on-page-previous="onPagePrevious"
         ></tool-bar-pager-buttons>

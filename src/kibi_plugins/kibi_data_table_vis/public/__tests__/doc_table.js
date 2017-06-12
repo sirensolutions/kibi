@@ -200,7 +200,6 @@ describe('Kibi doc table extra features', function () {
       return hits;
     };
     const columnContent = (lb, up) => _.range(lb, up + 1).map(i => `myvalue ${i}`, '').join('');
-    const increaseSampleSelector = 'a[name=increase-sample-link]';
     const pageRightSelector = 'button:has(> .fa-chevron-right)';
 
     init({
@@ -218,10 +217,6 @@ describe('Kibi doc table extra features', function () {
 
     expect(getTableColumn()).to.be(columnContent(1, 50));
 
-    const increaseSample = $elem.find(increaseSampleSelector);
-
-    expect(increaseSample).to.have.length(1);
-
     // get more results
     searchSource.crankResults({
       hits: {
@@ -229,17 +224,17 @@ describe('Kibi doc table extra features', function () {
         hits: _createHits(100)
       }
     });
-    increaseSample.click();
-    $scope.$digest();
-
-    // the link does not appear anymore since there are more pages
-    expect($elem.find(increaseSampleSelector)).to.have.length(0);
 
     // go to the next page
     $elem.find(pageRightSelector).click();
     $scope.$digest();
 
     expect(getTableColumn()).to.be(columnContent(51, 100));
+    // three calls to searchSource.onResults:
+    // 1. at the start when there is no result
+    // 2. when there are 50 results
+    // 3. when there are 100
+    expect(searchSource.getOnResultsCount()).to.be(3);
   });
 
   it('should add a click action on a cell', function () {

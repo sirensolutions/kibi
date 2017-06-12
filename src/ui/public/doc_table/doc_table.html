@@ -71,7 +71,7 @@
         on-remove-column="onRemoveColumn"
       ></thead>
       <tbody>
-        <tr ng-repeat="row in pageOfItems|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
+        <tr ng-repeat="row in pageOfItems track by row._index+row._type+row._id+row._score+row._version"
           kbn-table-row="row"
           column-aliases="columnAliases"
           cell-click-handlers="cellClickHandlers"

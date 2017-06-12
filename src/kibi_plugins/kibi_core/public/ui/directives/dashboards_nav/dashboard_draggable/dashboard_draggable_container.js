@@ -104,8 +104,21 @@ uiModules
 
         $scope.isSaving = true;
         dashboardGroups.renumberGroups().then(() => {
-          // Changes the dashboard order inside a group
-          if (sourceGroup.id === targetGroup.id && !sourceGroup.virtual && !targetGroup.virtual) {
+          if (sourceItemScope.isDashboard && sourceGroup.id !== targetGroup.id && !sourceGroup.virtual && targetGroup.virtual) {
+            // Removes a dashboard from one group and put in the correct order
+            return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
+              const sourceItemId = savedSourceGroup.dashboards[sourceItem].id;
+              savedSourceGroup.dashboards.splice(sourceItem, 1);
+              return savedSourceGroup.save().then(() => {
+                return savedDashboards.get(sourceItemId).then(savedDashboard => {
+                  savedDashboard.priority = targetGroup.priority - (sibling ? 5 : -5);
+                  return savedDashboard.save();
+                });
+              });
+            });
+          }
+          else if (sourceGroup.id === targetGroup.id && !sourceGroup.virtual && !targetGroup.virtual) {
+            // Changes the dashboard order inside a group
             return savedDashboardGroups.get(sourceGroup.id).then(savedGroup => {
               const swap = _.clone(savedGroup.dashboards[sourceItem]);
               savedGroup.dashboards.splice(sourceItem, 1);

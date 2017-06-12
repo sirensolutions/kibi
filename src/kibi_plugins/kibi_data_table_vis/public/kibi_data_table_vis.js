@@ -9,6 +9,7 @@ import 'plugins/kibi_data_table_vis/kibi_data_table_vis_params';
 // register the provider with the visTypes registry
 import registry from 'ui/registry/vis_types';
 import _ from 'lodash';
+import { toJson } from 'angular';
 import template from 'plugins/kibi_data_table_vis/kibi_data_table_vis.html';
 import 'plugins/kibi_data_table_vis/custom_view/kibi_custom_view';
 import 'plugins/kibi_data_table_vis/custom_view/kibi_table_sorting';
@@ -48,7 +49,7 @@ function KibiDataTableVisTypeProvider(Private) {
         const uiState = JSON.parse(this.uiStateJSON); // init method is called with this set to the saved visualization
         if (!uiState.sort) {
           uiState.sort = _.clone(savedSearch.sort);
-          this.uiStateJSON = JSON.stringify(uiState);
+          this.uiStateJSON = toJson(uiState);
         }
       }
     },

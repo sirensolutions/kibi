@@ -115,7 +115,6 @@ export default function ({ getService, getPageObjects }) {
         // kibi: open share panel
         return PageObjects.discover.clickShare()
         .then(() => PageObjects.header.waitUntilLoadingHasFinished())
-        .then(() => PageObjects.discover.clickCopyToClipboard())
         // kibi: end
         .then(() => PageObjects.discover.clickCopyToClipboard())
         .then(function () {

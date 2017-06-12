@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
+  const kibanaServer = getService('kibanaServer'); // kibi: import kibanaServer
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
@@ -9,7 +10,10 @@ export default function ({ getService, getPageObjects }) {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
-    before(function () {
+    before(async function () {
+      // kibi: ensure  that timezone is set to UTC
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC' });
+
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
       .then(function () {

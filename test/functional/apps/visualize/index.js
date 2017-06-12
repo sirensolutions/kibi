@@ -9,7 +9,7 @@ export default function ({ getService, loadTestFile }) {
     this.timeout(config.get('timeouts.test'));
 
     before(function () {
-      remote.setWindowSize(1280,800);
+      remote.setWindowSize(1600, 1080); // kibi: increased browser size
 
       log.debug('Starting visualize before method');
       const logstash = esArchiver.loadIfNeeded('logstash_functional');

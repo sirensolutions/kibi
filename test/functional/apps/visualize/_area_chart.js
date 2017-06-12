@@ -1,12 +1,16 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
+  const kibanaServer = getService('kibanaServer'); // kibi: import kibanaServer
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('visualize app', function describeIndexTests() {
-    before(function () {
+    before(async function () {
+      // kibi: ensure  that timezone is set to UTC
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC' });
+
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 
@@ -140,30 +144,30 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data', function () {
-        const expectedTableData = [ 'September 20th 2015, 00:00:00.000 37',
-          'September 20th 2015, 03:00:00.000 202',
-          'September 20th 2015, 06:00:00.000 740',
-          'September 20th 2015, 09:00:00.000 1,437',
-          'September 20th 2015, 12:00:00.000 1,371',
-          'September 20th 2015, 15:00:00.000 751',
-          'September 20th 2015, 18:00:00.000 188',
-          'September 20th 2015, 21:00:00.000 31',
-          'September 21st 2015, 00:00:00.000 42',
-          'September 21st 2015, 03:00:00.000 202',
-          'September 21st 2015, 06:00:00.000 683',
-          'September 21st 2015, 09:00:00.000 1,361',
-          'September 21st 2015, 12:00:00.000 1,415',
-          'September 21st 2015, 15:00:00.000 707',
-          'September 21st 2015, 18:00:00.000 177',
-          'September 21st 2015, 21:00:00.000 27',
-          'September 22nd 2015, 00:00:00.000 32',
-          'September 22nd 2015, 03:00:00.000 175',
-          'September 22nd 2015, 06:00:00.000 707',
-          'September 22nd 2015, 09:00:00.000 1,408',
-          'September 22nd 2015, 12:00:00.000 1,355',
-          'September 22nd 2015, 15:00:00.000 726',
-          'September 22nd 2015, 18:00:00.000 201',
-          'September 22nd 2015, 21:00:00.000 29'
+        const expectedTableData = [ 'September 20th 2015, 00:00:00.000', '37',
+          'September 20th 2015, 03:00:00.000', '202',
+          'September 20th 2015, 06:00:00.000', '740',
+          'September 20th 2015, 09:00:00.000', '1,437',
+          'September 20th 2015, 12:00:00.000', '1,371',
+          'September 20th 2015, 15:00:00.000', '751',
+          'September 20th 2015, 18:00:00.000', '188',
+          'September 20th 2015, 21:00:00.000', '31',
+          'September 21st 2015, 00:00:00.000', '42',
+          'September 21st 2015, 03:00:00.000', '202',
+          'September 21st 2015, 06:00:00.000', '683',
+          'September 21st 2015, 09:00:00.000', '1,361',
+          'September 21st 2015, 12:00:00.000', '1,415',
+          'September 21st 2015, 15:00:00.000', '707',
+          'September 21st 2015, 18:00:00.000', '177',
+          'September 21st 2015, 21:00:00.000', '27',
+          'September 22nd 2015, 00:00:00.000', '32',
+          'September 22nd 2015, 03:00:00.000', '175',
+          'September 22nd 2015, 06:00:00.000', '707',
+          'September 22nd 2015, 09:00:00.000', '1,408',
+          'September 22nd 2015, 12:00:00.000', '1,355',
+          'September 22nd 2015, 15:00:00.000', '726',
+          'September 22nd 2015, 18:00:00.000', '201',
+          'September 22nd 2015, 21:00:00.000', '29'
         ];
 
         return PageObjects.visualize.collapseChart()

@@ -93,6 +93,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('are added when a pie chart slice is clicked', async function () {
+        await PageObjects.dashboard.setTimepickerInDataRange(); // kibi: set time range to display pie
         await PageObjects.dashboard.filterOnPieSlice();
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);

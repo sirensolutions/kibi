@@ -54,6 +54,9 @@ export default function ({ getPageObjects }) {
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
+        // kibi: reset time to default
+        await PageObjects.dashboard.clickReset();
+
         const prettyPrint = await PageObjects.header.getPrettyDuration();
         expect(prettyPrint).to.equal('Today');
       });
@@ -69,6 +72,9 @@ export default function ({ getPageObjects }) {
         await PageObjects.header.setQuickTime('Today');
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+
+        // kibi: reset time to default
+        await PageObjects.dashboard.clickReset();
 
         const fromTimeNext = await PageObjects.header.getFromTime();
         const toTimeNext = await PageObjects.header.getToTime();

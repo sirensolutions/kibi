@@ -298,9 +298,6 @@ export default function sirenJoin(server) {
     if (!targetIndex) {
       throw new Error('The target index must be defined');
     }
-    const orderBy = targetIndex.orderBy;
-    const maxTermsPerShard = targetIndex.maxTermsPerShard;
-    const termsEncoding = targetIndex.termsEncoding;
 
     const join = {
       indices: _.isArray(targetIndex.indices) ? targetIndex.indices : [ targetIndex.indices ],
@@ -325,30 +322,17 @@ export default function sirenJoin(server) {
     if (targetIndex.types && targetIndex.types.length > 0) {
       join.types = targetIndex.types;
     }
-    // KIBI5: add those parameters when supported by siren-vanguard
-    //if (orderBy) {
-      //join.orderBy = orderBy;
-    //}
-    //if (maxTermsPerShard && maxTermsPerShard > -1) {
-      //join.maxTermsPerShard = maxTermsPerShard;
-    //}
-    //if (termsEncoding) {
-      //join.termsEncoding = termsEncoding;
-    //}
 
-    let child = join.request.query.bool;
+    const child = join.request.query.bool;
 
-    // If there are no target indices, set the query to return no results.
-    if (targetIndex.indices.length === 0) {
-      join.indices = [ kibiIndex ];
-      join.request.query = {
-        bool: {
-          must_not: [
-            { match_all: {} }
-          ]
-        }
+    // If there are no target indices, replace the join with a match_none query
+    if (join.indices.length === 0) {
+      const matchNone = { match_none: {} };
+      addJoinToParent(query, matchNone, [], negate);
+      return {
+        join: matchNone,
+        child: null
       };
-      child = null;
     }
 
     addJoinToParent(query, { join }, sourceIndex.types, negate);

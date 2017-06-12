@@ -1,15 +1,14 @@
 <div ng-controller="KibiDataTableVisController" class="kibi-data-table-vis">
 
-  <div class="small-note" ng-show="customView">
+  <div class="custom-view" ng-show="customView">
+    <a
+      ng-click='showCustomView = !showCustomView'
+      >Switch to {{ showCustomView ? 'standard' : 'custom' }} template</a>
     <kibi-table-sorting
       columns="vis.params.columns"
       sorting="sorting"
       ng-show="sorting && showCustomView"
     ></kibi-table-sorting>
-    <a
-      class="pull-right"
-      ng-click='showCustomView = !showCustomView'
-      >Switch to {{ showCustomView ? 'standard' : 'custom' }} template</a>
   </div>
 
   <doc-table

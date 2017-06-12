@@ -20,7 +20,8 @@
 
   .icon {
     color: @white;
-    display: inline;
+    display: inline-block;
+    position: absolute;
     width: @icon-width;
     text-align: center;
     .icon-placeholder {
@@ -30,11 +31,21 @@
     }
   }
   .edit-content {
-    display: inline;
+    display: inline-block;
+    margin-left: 25px;
+    width: 88%;
     .title {
       color: #ebf7fa;
-      display: inline;
+      display: inline-block;
+      width: 80%;
       padding-left: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.collapsed {
+        width:50%;
+      }
     }
     .action {
       color: @actions;
@@ -66,7 +77,15 @@
     margin-left: 16px;
     padding-left: 4px;
     color: @kibanaGray5;
-    display: inline;
+    display: inline-block;
+    width: 90%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+     &.collapsed {
+        width:50%;
+      }
   }
   .action {
     color: @actions;
@@ -95,5 +114,9 @@
   padding-right: 5px;
   &:hover {
     color: @link-hover-color;
+  }
+
+  &.collapsed {
+    display:none
   }
 }

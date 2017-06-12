@@ -1,11 +1,8 @@
-<div ng-show="entityUriHolder.visible"
+<div ng-show="entityUriHolder.visible && entityUriHolder.entityURIEnabled"
      class="form-group document-selection-widget">
-  <p class="small-note" ng-if="entityUriHolder.entityURIEnabled">
+  <p class="small-note">
     A query requires the selection of a document; you can set
     a sample selection for testing using the dropdowns below.
-  </p>
-  <p class="small-note" ng-if="!entityUriHolder.entityURIEnabled">
-    There are no queries that require the selection of a document.
   </p>
 
   <form name="entityURI" ng-if="!!c">

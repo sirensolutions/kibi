@@ -36,7 +36,8 @@ export function KibanaServerProvider({ getService }) {
         const exists = await uiSettings.existInEs();
         const state = await status.getOverallState();
 
-        if (state === 'green') { // kibi: check only if state is green
+        // kibi: check only if state is green as the configuration is not created automatically during startup.
+        if (state === 'green') {
           log.debug(`The server is reporting a green status`);
           return;
         }
@@ -52,7 +53,8 @@ export function KibanaServerProvider({ getService }) {
           continue;
         }
 
-        throw new Error(`Kibana never stabilized: status is ${state}`); // kibi: check only the status
+        // kibi: check only the status as the configuration is not created automatically during startup
+        throw new Error(`Kibana never stabilized: status is ${state}`);
       }
     }
   }

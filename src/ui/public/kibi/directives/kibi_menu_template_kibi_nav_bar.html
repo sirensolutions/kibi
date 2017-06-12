@@ -8,9 +8,8 @@
       <br/>
       <span ng-if="dashboard.count !== undefined && dashboard.savedSearchId" class="smallNumber">Count: {{dashboard.count}}</span>
       <span ng-if="dashboard.count === undefined && dashboard.savedSearchId" class="spinner"></span>
-      <span ng-if="dashboard.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
-            data-placement="bottom" title="{{dashboard.filterIconMessage}}">
-        <i class="fa fa-filter"/>
+      <span ng-if="dashboard.filterIconMessage">
+        <i class="fa fa-filter" qtip="{{ dashboard.filterIconMessage }}"/>
       </span>
       <span ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
             data-placement="bottom"

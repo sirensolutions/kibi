@@ -186,4 +186,33 @@ uiModules
       kibiMenuTemplateShowOnHover: '@'  // boolean, default false - when true menu is shown also on hover
     }
   };
+})
+.directive('qtip', function () {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      element.qtip({
+        content: {
+          title: 'Dashboard',
+          text: function () {
+            return attrs.qtip;
+          }
+        },
+        position: {
+          my: 'left top',
+          at: 'right center'
+        },
+        show: {
+          event: 'mouseenter',
+          solo: true
+        },
+        hide: {
+          event: 'mouseleave'
+        },
+        style: {
+          classes: 'qtip-light qtip-rounded qtip-shadow'
+        }
+      });
+    }
+  };
 });

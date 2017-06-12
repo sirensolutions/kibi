@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { IndexPatternAuthorizationError, IndexPatternMissingIndices } from 'ui/errors';
+import { IndexPatternAuthorizationError, IndexPatternMissingIndices } from 'ui/errors'; // kibi: import auth error
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
 import RefreshKibanaIndex from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
@@ -89,6 +89,11 @@ uiModules.get('apps/management')
       if (err instanceof IndexPatternMissingIndices) {
         notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
       }
+      // kibi: warn if the index pattern cannot be retrieved because of an authorization error
+      else if (err instanceof IndexPatternAuthorizationError) {
+        notify.warning('Could not locate indices matching the pattern, access was forbidden.');
+      }
+      // kibi: end
       else notify.fatal(err);
     });
   };
@@ -175,6 +180,9 @@ uiModules.get('apps/management')
     return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
     .catch(function (err) {
       if (err instanceof IndexPatternMissingIndices) return;
+      // kibi: return on authorization errors
+      if (err instanceof IndexPatternAuthorizationError) return;
+      // kibi: end
       notify.error(err);
     })
     .then(function (existing) {
@@ -230,13 +238,15 @@ uiModules.get('apps/management')
         skipIndexPatternCache: true,
       })
       .catch(function (err) {
-        // TODO: we should probably display a message of some kind
-        // kibi: added IndexPatternAuthorizationError
-        if (err instanceof IndexPatternMissingIndices || err instanceof IndexPatternAuthorizationError) {
+        if (err instanceof IndexPatternMissingIndices) {
           fetchFieldsError = $translate.instant('KIBANA-INDICES_MATCH_PATTERN');
           return [];
         }
-
+        // kibi: notify authorization errors
+        if (err instanceof IndexPatternAuthorizationError) {
+          fetchFieldsError = 'Unable to fetch mapping, access to this index pattern was denied.';
+          return [];
+        }
         throw err;
       });
     })

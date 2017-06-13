@@ -257,7 +257,15 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
 
         function revertChangesAndExitEditMode() {
           dashboardState.resetState();
-          kbnUrl.change(dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL);
+
+          // kibi: Ensure dashboard counts update on exiting edit mode
+          if (dash.id) {
+            dashboardGroups.selectDashboard(dash.id);
+          } else {
+            kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
+          }
+          // kibi: end
+
           // This is only necessary for new dashboards, which will default to Edit mode.
           updateViewMode(DashboardViewMode.VIEW);
 

@@ -27,39 +27,47 @@ export default class Migration9 extends Migration {
     return 'Delete gremlin server saved queries.';
   }
 
-  async getTinkerpopDatasourcesIds() {
-    const datasources = await this.scrollSearch(this._index, 'datasource');
-    const datasourceIds = datasources.reduce((array, obj) => {
-      const datasourceType = obj._source.datasourceType;
-      if (datasourceType === 'tinkerpop3') {
-        array.push(obj._id);
+  async count() {
+    const items = await this.scrollSearch(this._index, [ 'query', 'datasource' ]);
+    const tinkerpop3Datasources = items.reduce((array, obj) => {
+      if (obj._type === 'datasource') {
+        const datasourceType = obj._source.datasourceType;
+        if (datasourceType === 'tinkerpop3') {
+          array.push(obj._id);
+        }
       }
       return array;
     }, []);
-    return datasourceIds;
-  }
 
-  async count() {
-    const queries = await this.scrollSearch(this._index, this._type);
-    const tinkerpop3Datasources = await this.getTinkerpopDatasourcesIds();
-
-    return queries.reduce((count, obj) => {
-      const datasourceId = obj._source.datasourceId;
-      if (_.includes(tinkerpop3Datasources, datasourceId)) {
-        count++;
+    return items.reduce((count, obj) => {
+      if (obj._type === 'query') {
+        const datasourceId = obj._source.datasourceId;
+        if (_.includes(tinkerpop3Datasources, datasourceId)) {
+          count++;
+        }
       }
       return count;
     }, 0);
   }
 
   async upgrade() {
-    const queries = await this.scrollSearch(this._index, this._type);
-    const tinkerpop3Datasources = await this.getTinkerpopDatasourcesIds();
+    const items = await this.scrollSearch(this._index, [ 'query', 'datasource' ]);
+    const tinkerpop3Datasources = items.reduce((array, obj) => {
+      if (obj._type === 'datasource') {
+        const datasourceType = obj._source.datasourceType;
+        if (datasourceType === 'tinkerpop3') {
+          array.push(obj._id);
+        }
+      }
+      return array;
+    }, []);
 
-    const tinkerPopQueryIds = queries.reduce((array, obj) => {
-      const datasourceId = obj._source.datasourceId;
-      if (_.includes(tinkerpop3Datasources, datasourceId)) {
-        array.push(obj._id);
+    const tinkerPopQueryIds = items.reduce((array, obj) => {
+      if (obj._type === 'query') {
+        const datasourceId = obj._source.datasourceId;
+        if (_.includes(tinkerpop3Datasources, datasourceId)) {
+          array.push(obj._id);
+        }
       }
       return array;
     }, []);

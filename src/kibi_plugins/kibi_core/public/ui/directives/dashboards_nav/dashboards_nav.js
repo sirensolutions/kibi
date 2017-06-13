@@ -65,7 +65,7 @@ uiModules
       };
 
       $scope.toggleDashboardsNav = (event, force) => {
-        if (!$scope.isDashboardsNavOnEditMode && (event.target === event.currentTarget || force)) {
+        if (event.target === event.currentTarget || force) {
           event.preventDefault();
           dashboardsNavState.setOpen(!dashboardsNavState.isOpen());
         }

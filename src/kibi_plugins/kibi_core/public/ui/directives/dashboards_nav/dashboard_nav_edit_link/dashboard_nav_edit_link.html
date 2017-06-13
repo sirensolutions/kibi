@@ -21,7 +21,7 @@
     </div>
 
     <div class="edit-content">
-      <div class="title">
+      <div class="title" ng-class="{collapsed: !isSidebarOpen}">
         {{group.title}}
       </div>
       <a
@@ -48,9 +48,9 @@
   <div ng-if="!group.virtual">
     <div ng-repeat="dashboard in group.dashboards">
       <div class="dashboards-nav-edit-link-dashboard" dashboard-draggable-item="$index">
-        <div class="dashboards-nav-edit-link-dragbar" dashboard-draggable-handle>
+        <div class="dashboards-nav-edit-link-dragbar" ng-class="{collapsed: !isSidebarOpen}" dashboard-draggable-handle>
         </div>
-        <div class="dashboard-nav-title">
+        <div class="dashboard-nav-title" ng-class="{collapsed: !isSidebarOpen}" dashboard="dashboard" dashboard-nav-edit-tooltip>
           {{dashboard.title}}
         </div>
       </div>

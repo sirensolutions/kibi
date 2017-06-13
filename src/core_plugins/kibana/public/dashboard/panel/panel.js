@@ -11,10 +11,13 @@ import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state'
 import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_object';
 import { DashboardViewMode } from '../dashboard_view_mode';
 
+// kibi: imports
+import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
+// kibi: end
+
 uiModules
 .get('app/dashboard')
-.directive('dashboardPanel', function (savedVisualizations, savedSearches, Private, $injector, getObjectLoadersForDashboard,
-  sessionStorage, kibiState) {
+.directive('dashboardPanel', function (savedVisualizations, savedSearches, Private, $injector, getObjectLoadersForDashboard, kibiState) {
   const filterManager = Private(FilterManagerProvider);
   const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
 
@@ -92,12 +95,13 @@ uiModules
       // kibi: allows restore the uiState after click edit visualization on dashboard
       $scope.edit = function () {
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
-          sessionStorage.set('kibi_panel_id', {
+          const kibiPanelId = {
             id: $scope.savedObj.vis.id,
             panel: getPersistedStateId($scope.panel),
             updated: false
-          });
-          sessionStorage.set('kibi_ui_state', $scope.savedObj.vis.getUiState().toJSON());
+          };
+          hashedItemStoreSingleton.setItem('kibi_panel_id', JSON.stringify(kibiPanelId));
+          hashedItemStoreSingleton.setItem('kibi_ui_state', $scope.savedObj.vis.getUiState().toString());
         }
         window.location.href = $scope.editUrl;
       };
@@ -151,12 +155,13 @@ uiModules
 
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
           // kibi: allows restore the uiState after click edit visualization on dashboard
-          const __panelid = sessionStorage.get('kibi_panel_id');
+          const __panelid = hashedItemStoreSingleton.getItem('kibi_panel_id');
           if (__panelid) {
-            if (__panelid.id === $scope.panel.id && __panelid.panel === getPersistedStateId($scope.panel) && __panelid.updated) {
-              $scope.uiState.fromString(JSON.stringify(sessionStorage.get('kibi_ui_state')));
-              sessionStorage.remove('kibi_panel_id');
-              sessionStorage.remove('kibi_ui_state');
+            const { id, panel, updated } = JSON.parse(__panelid);
+            if (id === $scope.panel.id && panel === getPersistedStateId($scope.panel) && updated) {
+              $scope.uiState.fromString(hashedItemStoreSingleton.getItem('kibi_ui_state'));
+              hashedItemStoreSingleton.removeItem('kibi_panel_id');
+              hashedItemStoreSingleton.removeItem('kibi_ui_state');
             }
           }
           // kibi: end

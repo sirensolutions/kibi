@@ -22,6 +22,7 @@ import { VisualizeConstants } from '../visualize_constants';
 // kibi: imports
 import 'ui/kibi/directives/kibi_param_entity_uri';
 import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
+import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
 uiRoutes
@@ -76,8 +77,8 @@ uiModules
   };
 });
 
-function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier, kibiState,
-  sessionStorage) {
+function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier,
+  kibiState) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -217,22 +218,24 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     vis.setUiState($scope.uiState);
 
     // kibi: allows restore the uiState after click edit visualization on dashboard
-    const kibiPanelId = sessionStorage.get('kibi_panel_id');
+    const kibiPanelId = hashedItemStoreSingleton.getItem('kibi_panel_id');
     if (kibiPanelId) {
-      if (kibiPanelId.id === $scope.savedVis.id) {
-        $scope.uiState.fromString(JSON.stringify(sessionStorage.get('kibi_ui_state')));
+      const { id, panel } = JSON.parse(kibiPanelId);
+      if (id === $scope.savedVis.id) {
+        $scope.uiState.fromString(hashedItemStoreSingleton.getItem('kibi_ui_state'));
         vis.setUiState($scope.uiState);
         $scope.uiState.on('set', () => {
-          sessionStorage.set('kibi_ui_state', $scope.vis.getUiState().toJSON());
-          sessionStorage.set('kibi_panel_id', {
-            id: sessionStorage.get('kibi_panel_id').id,
-            panel: sessionStorage.get('kibi_panel_id').panel,
+          hashedItemStoreSingleton.setItem('kibi_ui_state', $scope.vis.getUiState().toString());
+          const kibiPanelId = {
+            id,
+            panel,
             updated: true
-          });
+          };
+          hashedItemStoreSingleton.setItem('kibi_panel_id', JSON.stringify(kibiPanelId));
         });
       } else {
-        sessionStorage.remove('kibi_panel_id');
-        sessionStorage.remove('kibi_ui_state');
+        hashedItemStoreSingleton.removeItem('kibi_panel_id');
+        hashedItemStoreSingleton.removeItem('kibi_ui_state');
       }
     }
     // kibi: end

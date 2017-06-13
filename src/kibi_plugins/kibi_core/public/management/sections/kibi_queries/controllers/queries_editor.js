@@ -221,6 +221,8 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
 
     $scope.holder.jsonPreview = '';
     $scope.holder.htmlPreview = '';
+    //used for no result display in html viewer
+    $scope.noResult = false;
 
     const entity = kibiState.getEntityURI();
     if ($scope.query.id && (!$scope.holder.entityURIEnabled || entity)) {
@@ -253,6 +255,10 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
         } else if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {
           $scope.holder.jsonPreview = JSON.stringify(resp.data.snippets[0], null, ' ');
           $scope.holder.htmlPreview = resp.data.snippets[0].html;
+
+          if(resp.data.snippets[0].data.results && resp.data.snippets[0].data.results.bindings.length === 0) {
+            $scope.noResult = true;
+          }
         }
         $scope.spinIt = false;
       }).catch(notify.error);

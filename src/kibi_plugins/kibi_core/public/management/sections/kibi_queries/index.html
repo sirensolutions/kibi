@@ -409,7 +409,7 @@
           <div class="tab-content">
             <div role="tabpanel" class="tab-pane" ng-class="holder.htmlPreviewActive ? 'active' : ''" >
               <div class="spinner large" ng-show="spinIt"></div>
-              <div class="html_preview_content" kibi-dynamic-html="holder.htmlPreview"></div>
+              <div class="html_preview_content" kibi-dynamic-html="holder.htmlPreview" ng-class="{'no-result': noResult}"></div>
             </div>
             <div role="tabpanel" class="tab-pane" ng-class="holder.jsonPreviewActive ? 'active' : ''" >
               <pre class="json_preview_content" ng-show="holder.jsonPreview !== ''">{{holder.jsonPreview}}</pre>

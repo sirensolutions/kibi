@@ -28,7 +28,7 @@ export default function (Private) {
     this.routes = IndexPattern.routes;
 
     // kibi: stub the paths array
-    this.paths = [];
+    this.paths = {};
     _.each(fields, field => {
       this.paths[field.name] = field.path;
     });

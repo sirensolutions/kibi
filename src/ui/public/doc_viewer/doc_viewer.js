@@ -15,7 +15,7 @@ uiModules.get('kibana')
       indexPattern: '=',
       filter: '=?',
       columns: '=?',
-      columnAliases: '=?',
+      columnAliases: '=?', // kibi: column aliases
       onAddColumn: '=?',
       onRemoveColumn: '=?'
     },

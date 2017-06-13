@@ -1,6 +1,50 @@
 @import (reference) "~ui/kibi/styles/kibi_variables.less";
 @import (reference) "~ui/styles/variables.less";
 
+doc-table {
+  span.filters-visible {
+    background-color: transparent !important;
+    float: left;
+  }
+
+  td.selectedEntityCell {
+    background-color: @entity-bg;
+    color: #fff !important;
+
+    &.disabled {
+      opacity: 0.6;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.3) 10px, rgba(255, 255, 255, 0.3) 20px);
+    }
+
+    .truncate-by-height {
+      color: #fff !important;
+
+      &:before {
+        content: " ";
+        width: 100%;
+        height: 15px;
+        position: absolute;
+        left: 0;
+      }
+    }
+  }
+
+  .cell-click {
+    cursor: pointer;
+    color: @link-color;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: @link-hover-color;
+    }
+  }
+
+  .cell-click div.truncate-by-height {
+    .cell-click
+  }
+}
+
 //needed for cell shifting issue in IE11
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
   .kibi-data-table-vis { overflow-x: auto; overflow-y: auto; zoom: 1; }
@@ -9,100 +53,114 @@
 
 .kibi-data-table-vis {
   padding: 5px;
-  width: 100%;
-}
+  .custom-view {
+    display: flex;
+    flex-direction: row;
+    color: @st-dark-gray;
 
-.kibi-data-table-vis-params section {
-  border-top: 1px #dedede solid;
-  margin-bottom: 15px;
-
-  &:first-child {
-    margin-top: 15px;
-    border-top: none;
-  }
-
-  .help-icon {
-    vertical-align: top;
-    margin-top:3px;
-  }
-
-  .inline-help {
-    padding: 4px;
-    background: #ffffca;
-    border: 1px solid #222;
-    color: #222;
+    .sorting {
+      padding-left: 50px;
+    }
   }
 }
 
-.kibi-data-table-vis-params section h2 {
-  font-size: 14px;
-  font-weight: bold;
-  margin: 5px 0 15px 0;
-
-  i {
-    color: #777;
+.kibi-data-table-vis-params {
+  .readonly-input {
+    background-color: @kibanaGray5;
   }
-}
 
-.kibi-data-table-vis-params section ul {
-  padding: 0;
-  margin: 0;
-}
+  section {
+    border-top: 1px #dedede solid;
+    margin-bottom: 15px;
 
-.kibi-data-table-vis-params div.queryOptionAreaError {
-  border: 2px @state-danger-bg solid;
-}
+    &:first-child {
+      margin-top: 15px;
+      border-top: none;
+    }
 
-.kibi-data-table-vis-params li.queryOptionArea {
-  margin-bottom: 15px;
-  padding: 5px;
-  position: relative;
-}
+    .help-icon {
+      vertical-align: top;
+      margin-top:3px;
+    }
 
-.kibi-data-table-vis-params li.queryOptionArea div.rightCorner {
-  position: absolute;
-  right: 0;
-  top: 0;
-}
+    .inline-help {
+      padding: 4px;
+      background: #ffffca;
+      border: 1px solid #222;
+      color: #222;
+    }
+  }
 
-.kibi-data-table-vis-params li.queryOptionArea .header {
-  background-color: #fff;
-}
+  section h2 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 5px 0 15px 0;
 
-.kibi-data-table-vis-params li.queryOptionArea .header h2 {
-  font-size: 14px;
-  margin: 2px 0;
-  font-weight: bold;
-  padding: 0;
-}
+    i {
+      color: #777;
+    }
+  }
 
-.kibi-data-table-vis-params li .enhanced-search-content {
-  background-color: #ecf0f1;
-  padding: 0 4px;
-}
+  section ul {
+    padding: 0;
+    margin: 0;
+  }
 
-.kibi-data-table-vis-params li .enhanced-search-content .form-group {
-  margin-bottom: 5px;
-}
+  div.queryOptionAreaError {
+    border: 2px @state-danger-bg solid;
+  }
 
-.kibi-data-table-vis-params li .enhanced-search-content .form-group:first-child {
-  margin-top: 4px;
-}
+  li.queryOptionArea {
+    margin-bottom: 15px;
+    padding: 5px;
+    position: relative;
+  }
 
-.kibi-data-table-vis-params li .enhanced-search-content input[type='text'] {
-  border-color: #B4BCC2;
-}
+  li.queryOptionArea div.rightCorner {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
 
-.kibi-data-table-vis-params li .enhanced-search-content input[type='text']:focus {
-  border-color: #444;
-}
+  li.queryOptionArea .header {
+    background-color: #fff;
+  }
 
-.kibi-data-table-vis-params li .enhanced-search-content select {
-  border-color: #B4BCC2;
-}
+  li.queryOptionArea .header h2 {
+    font-size: 14px;
+    margin: 2px 0;
+    font-weight: bold;
+    padding: 0;
+  }
 
-.kibi-data-table-vis-params li .enhanced-search-content select:focus {
-  border-color: #444;
+  li .enhanced-search-content {
+    background-color: #ecf0f1;
+    padding: 0 4px;
+  }
+
+  li .enhanced-search-content .form-group {
+    margin-bottom: 5px;
+  }
+
+  li .enhanced-search-content .form-group:first-child {
+    margin-top: 4px;
+  }
+
+  li .enhanced-search-content input[type='text'] {
+    border-color: #B4BCC2;
+  }
+
+  li .enhanced-search-content input[type='text']:focus {
+    border-color: #444;
+  }
+
+  li .enhanced-search-content select {
+    border-color: #B4BCC2;
+  }
+
+  li .enhanced-search-content select:focus {
+    border-color: #444;
+  }
 }
 
 .kibi-data-table-vis,

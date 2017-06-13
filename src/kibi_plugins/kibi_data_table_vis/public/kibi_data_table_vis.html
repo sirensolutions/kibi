@@ -1,31 +1,35 @@
 <div ng-controller="KibiDataTableVisController" class="kibi-data-table-vis">
 
-  <div class="small-note" ng-if="vis.params.templateId">
-    <kibi-table-sorting options="savedObj" ng-if="savedObj.sorting && savedObj.showCustomView"></kibi-table-sorting>
+  <div class="custom-view" ng-show="customView">
     <a
-      ng-if="savedObj.showCustomView"
-      class="pull-right"
-      ng-click='savedObj.showCustomView = !savedObj.showCustomView'
-    >Change back to Standard View</a>
-    <a
-       ng-if="!savedObj.showCustomView"
-       class="pull-right"
-       ng-click='savedObj.showCustomView = !savedObj.showCustomView'
-    >Change to Custom View</a>
+      ng-click='showCustomView = !showCustomView'
+      >Switch to {{ showCustomView ? 'standard' : 'custom' }} template</a>
+    <kibi-table-sorting
+      columns="vis.params.columns"
+      sorting="sorting"
+      ng-show="sorting && showCustomView"
+    ></kibi-table-sorting>
   </div>
 
-  <kibi-doc-table
-    options="savedObj"
+  <doc-table
+    on-add-column="onAddColumn"
+    on-remove-column="onRemoveColumn"
+    on-move-column="onMoveColumn"
+    on-change-sort-order="onChangeSortOrder"
     search-source="searchSource"
-    sorting="savedObj.sorting"
-    columns="savedObj.columns"
-    template-id="savedObj.templateId"
-    custom-viewer-mode="customViewerMode"
+    sorting="sorting"
     filter="filter"
+    columns="vis.params.columns"
+
+    custom-viewer-mode="customViewerMode"
+    custom-view="customView"
+    show-custom-view="showCustomView"
+    template-id="vis.params.templateId"
     cell-click-handlers="cellClickHandlers"
-    query-column="queryColumn"
-    column-aliases="savedObj.columnAliases"
-    class="panel-content">
-  </kibi-doc-table>
+    column-aliases="vis.params.columnAliases"
+    increase-sample="true"
+    csv="true"
+    hits="hits"
+  ></doc-table>
 
 </div>

@@ -83,7 +83,7 @@ uiModules.get('kibana/courier')
      * individual errors are routed to their respective requests.
      */
     self.fetch = function () {
-      fetch.fetchQueued(searchStrategy).then(function () {
+      return fetch.fetchQueued(searchStrategy).then(function () {
         searchLooper.restart();
       });
     };

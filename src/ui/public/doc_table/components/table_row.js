@@ -26,7 +26,7 @@ const MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl) {
+module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSerializer, kbnUrl) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -39,6 +39,10 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       row: '=kbnTableRow',
       onAddColumn: '=?',
       onRemoveColumn: '=?',
+      // kibi: column aliases
+      columnAliases: '=?',
+      // kibi: associate an action when clicking on a cell
+      cellClickHandlers: '=?'
     },
     link: function ($scope, $el) {
       $el.after('<tr>');
@@ -79,9 +83,20 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         $compile($detailsTr)($detailsScope);
       };
 
+      // kibi: cell actions
+      $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+        if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+            diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1 ||
+            diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
+          createSummaryRow($scope.row);
+        }
+      });
+      // kibi: end of cell actions
+
       $scope.$watchMulti([
         'indexPattern.timeFieldName',
         'row.highlight',
+        'row.fields', // kibi: react to changes to fields in order to support the relational column
         '[]columns'
       ], function () {
         createSummaryRow($scope.row, $scope.row._id);
@@ -126,9 +141,16 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
               mapping[indexPattern.timeFieldName].filterable
               && _.isFunction($scope.filter)
             ),
-            column: indexPattern.timeFieldName
+            column: indexPattern.timeFieldName,
+            // kibi: pass data for the click event
+            isClickable: false,
+            hasSelectedEntity: false,
+            isSelectedEntityDisabled: false
+            // kibi: end
           }));
         }
+
+        $scope.clickHandlers = {};
 
         $scope.columns.forEach(function (column) {
           const isFilterable = $scope.flattenedRow[column] !== undefined
@@ -136,18 +158,35 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
             && mapping[column].filterable
             && _.isFunction($scope.filter);
 
+          // kibi: add cell click actions
+          let hasSelectedEntity = false;
+          let isSelectedEntityDisabled = false;
+          if (_.isFunction($scope.cellClickHandlers)) {
+            const cellClickHandlers = $scope.cellClickHandlers($scope.flattenedRow, column);
+            $scope.clickHandlers[column] = cellClickHandlers.clickHandler;
+            hasSelectedEntity = cellClickHandlers.hasSelectedEntity;
+            isSelectedEntityDisabled = cellClickHandlers.isSelectedEntityDisabled;
+          }
+          // kibi: end
+
           newHtmls.push(cellTemplate({
             timefield: false,
             sourcefield: (column === '_source'),
             formatted: _displayField(row, column, true),
             filterable: isFilterable,
-            column
+            column,
+            // kibi: pass data for the click event
+            isClickable: Boolean($scope.clickHandlers[column]),
+            hasSelectedEntity,
+            isSelectedEntityDisabled
+            // kibi: end
           }));
         });
 
         let $cells = $el.children();
         newHtmls.forEach(function (html, i) {
           const $cell = $cells.eq(i);
+
           if ($cell.data('discover:html') === html) return;
 
           const reuse = _.find($cells.slice(i + 1), function (cell) {
@@ -155,6 +194,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           });
 
           const $target = reuse ? $(reuse).detach() : $(html);
+
           $target.data('discover:html', html);
           const $before = $cells.eq(i - 1);
           if ($before.size()) {

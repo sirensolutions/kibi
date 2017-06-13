@@ -12,7 +12,7 @@ export default function VirtualIndexPatternFactory(Private) {
     // Could be solved by a Proxy class but currently Proxy is not fully supported by all browsers.
     const wrap = attr => {
       if (typeof wrappedIndexPattern[attr] === 'function') {
-        this[attr] = () => wrappedIndexPattern[attr].apply(wrappedIndexPattern, arguments);
+        this[attr] = (...args) => wrappedIndexPattern[attr].apply(wrappedIndexPattern, args);
       } else if (attr !== 'fields') {
         this[attr] = wrappedIndexPattern[attr];
       }

@@ -10,8 +10,12 @@ import uiModules from 'ui/modules';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
+// kibi: imports
+import { ExportAsCsvProvider } from 'plugins/kibi_data_table_vis/actions/csv_export';
+// kibi:end
+
 uiModules.get('kibana')
-.directive('docTable', function (config, createNotifier, getAppState, pagerFactory, $filter) {
+.directive('docTable', function (Private, courier, config, createNotifier, getAppState, pagerFactory, $filter) {
   return {
     restrict: 'E',
     template: html,
@@ -27,6 +31,22 @@ uiModules.get('kibana')
       onChangeSortOrder: '=?',
       onMoveColumn: '=?',
       onRemoveColumn: '=?',
+
+      // kibi:
+      // added cellClickHandlers and columnAliases
+      // to make them available to the scope of kibiTableRow and kibiTableHeader
+      cellClickHandlers: '=',
+      columnAliases: '=?',
+      // kibi: increase the number of results that are retrieved
+      increaseSample: '@?',
+      // kibi: export hits as CSV
+      csv: '@?',
+      // kibi: custom view
+      templateId: '=?',
+      showCustomView: '=?',
+      customView: '=?',
+      customViewerMode: '=?',
+      // kibi: end
     },
     link: function ($scope) {
       const notify = createNotifier();
@@ -35,6 +55,17 @@ uiModules.get('kibana')
         sorting: $scope.sorting,
         columns: $scope.columns
       };
+
+      // kibi: add exportAsCsv to the scope
+      $scope.exportAsCsv = Private(ExportAsCsvProvider);
+
+      // kibi: increase the number of results retrieved
+      $scope.size = parseInt(config.get('discover:sampleSize'));
+
+      $scope.hasNextPage = function () {
+        return $scope.increaseSample ? $scope.pager.totalItems < $scope.totalHitCount : $scope.pager.hasNextPage;
+      };
+      // kibi: end
 
       const prereq = (function () {
         const fns = [];
@@ -89,7 +120,7 @@ uiModules.get('kibana')
 
         $scope.indexPattern = $scope.searchSource.get('index');
 
-        $scope.searchSource.size(config.get('discover:sampleSize'));
+        $scope.searchSource.size($scope.size);
         $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
         // Set the watcher after initialization
@@ -116,19 +147,60 @@ uiModules.get('kibana')
           // We limit the number of returned results, but we want to show the actual number of hits, not
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;
-          $scope.pager = pagerFactory.create($scope.hits.length, 50, 1);
+          // kibi: start the page
+          let startingPage = 1;
+          if ($scope.increaseSample && $scope.pager) {
+            startingPage = $scope.pager.pageCount;
+          }
+          $scope.pager = pagerFactory.create($scope.hits.length, 50, startingPage);
           calculateItemsOnPage();
 
           return $scope.searchSource.onResults().then(onResults);
         }).catch(notify.fatal);
 
-        $scope.searchSource.onError(notify.error).catch(notify.fatal);
+        $scope.searchSource
+        // kibi: notify the user what to do if more results cannot be retrieved
+        .onError((error) => {
+          if (error.message) {
+            const matches = error.message.match(/from \+ size must be less than or equal to: \[(\d+)]/);
+            if (matches) {
+              const message = `Can't retrieve more than ${matches[1]} results.` +
+                              'Please check the index.max_result_window Elasticsearch index setting.';
+              const expError = new Error(message);
+              expError.stack = message;
+              return notify.error(expError);
+            }
+          }
+          notify.error(error);
+        })
+        // kibi: end
+        .catch(notify.fatal);
       }));
 
       $scope.pageOfItems = [];
       $scope.onPageNext = () => {
-        $scope.pager.nextPage();
-        calculateItemsOnPage();
+        const _onPageNext = function () {
+          $scope.pager.nextPage();
+          calculateItemsOnPage();
+        };
+
+        // kibi: fetch more results if possible
+        if (!$scope.pager.hasNextPage && $scope.increaseSample) {
+          if ($scope.size < $scope.totalHitCount) {
+            const newSize = $scope.size * 2;
+            if (newSize >= $scope.totalHitCount) {
+              $scope.size = $scope.totalHitCount;
+            } else {
+              $scope.size = newSize;
+            }
+            $scope.searchSource.size($scope.size);
+            return courier.fetch()
+            .then(() => {
+              _onPageNext();
+            });
+          }
+        }
+        _onPageNext();
       };
 
       $scope.onPagePrevious = () => {
@@ -137,8 +209,10 @@ uiModules.get('kibana')
       };
 
       $scope.shouldShowLimitedResultsWarning = () => (
-        !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount
+        // kibi: do not show warning if the increaseSample option is enabled
+        !$scope.increaseSample && !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount
       );
     }
   };
 });
+

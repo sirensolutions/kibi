@@ -10,14 +10,28 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html';
 
+// kibi: import authorization error
+import { IndexPatternAuthorizationError } from 'ui/errors';
+// kibi: end
+
 uiRoutes
 .when('/management/siren/indices/:indexPatternId', {
   template: editTemplate,
   resolve: {
-    indexPattern: function ($route, courier) {
+    indexPattern: function ($route, courier, Promise, createNotifier, kbnUrl) { // kibi: added Promise, createNotifier, kbnUrl
       return courier.indexPatterns
-        .get($route.current.params.indexPatternId)
-        .catch(courier.redirectWhenMissing('/management/siren/index'));
+      .get($route.current.params.indexPatternId)
+      // kibi: handle authorization errors
+      .catch((error) => {
+        if (error instanceof IndexPatternAuthorizationError) {
+          createNotifier().warning(`Access to index pattern ${$route.current.params.indexPatternId} is forbidden`);
+          kbnUrl.redirect('/management/siren/indices');
+          return Promise.halt();
+        } else {
+          return courier.redirectWhenMissing('/management/siren/indices')(error);
+        }
+      });
+      // kibi: end
     }
   }
 });

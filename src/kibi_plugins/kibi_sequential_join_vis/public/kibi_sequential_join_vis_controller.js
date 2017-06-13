@@ -1,22 +1,25 @@
+import _ from 'lodash';
+import moment from 'moment';
+
+import chrome from 'ui/chrome';
+import UiModules from 'ui/modules';
+import { IndexPatternAuthorizationError } from 'ui/errors';
+
+import { onVisualizePage } from 'ui/kibi/utils/on_page';
+
 import QueryFilterProvider from 'ui/filter_bar/query_filter';
 import KibiSequentialJoinVisHelperProvider from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
 import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
-import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
-import { onVisualizePage } from 'ui/kibi/utils/on_page';
-import _ from 'lodash';
-import chrome from 'ui/chrome';
-import moment from 'moment';
 import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
-import uiModules from 'ui/modules';
+
 import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
 function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise,
   kbnIndex, config, savedDashboards, timefilter) {
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
-  const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
   const searchHelper = new SearchHelper(kbnIndex);
   const edit = onVisualizePage();
 
@@ -60,10 +63,11 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       .catch((error) => {
         // If computing the indices failed because of an authorization error
         // set indices to an empty array and mark the button as forbidden.
-        if (error.status !== 403) {
-          throw error;
+        if (error instanceof IndexPatternAuthorizationError) {
+          button.forbidden = true;
+          button.disabled = true;
+          return { button, indices: [] };
         }
-        button.forbidden = true;
         if ($scope.btnCountsEnabled() || updateOnClick) {
           return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
           .then((query) => {
@@ -380,6 +384,6 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   updateButtons('init');
 }
 
-uiModules
+UiModules
 .get('kibana/kibi_sequential_join_vis', ['kibana'])
 .controller('KibiSequentialJoinVisController', controller);

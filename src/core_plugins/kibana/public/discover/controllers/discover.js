@@ -29,6 +29,7 @@ import StateProvider from 'ui/state_management/state';
 
 // kibi: imports
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
+import { IndexPatternAuthorizationError } from 'ui/errors';
 // kibi: end
 
 const app = uiModules.get('apps/discover', [
@@ -45,7 +46,8 @@ uiRoutes
   template: indexTemplate,
   reloadOnSearch: false,
   resolve: {
-    ip: function (Promise, courier, config, $location, Private) {
+    // kibi: added createNotifier, kbnUrl
+    ip: function (Promise, courier, config, $location, Private, createNotifier, kbnUrl) {
       const State = Private(StateProvider);
       return courier.indexPatterns.getIds()
       .then(function (list) {
@@ -54,7 +56,7 @@ uiRoutes
          *  the load order of AppState conflicts with the load order of many other things
          *  so in order to get the name of the index we should use, and to switch to the
          *  default if necessary, we parse the appState with a temporary State object and
-         *  then destroy it immediatly after we're done
+         *  then destroy it immediately after we're done
          *
          *  @type {State}
          */
@@ -70,15 +72,33 @@ uiRoutes
           loaded: courier.indexPatterns.get(id),
           stateVal: state.index,
           stateValFound: specified && exists
+        })
+        // kibi: redirect if access to index pattern is forbidden
+        .catch(error => {
+          if (error instanceof IndexPatternAuthorizationError) {
+            createNotifier().warning(`Access to index pattern ${id} is forbidden.`);
+            kbnUrl.redirect('/discover');
+            return Promise.halt();
+          }
         });
       });
     },
-    savedSearch: function (courier, savedSearches, $route) {
+    // kibi: added createNotifier, Promise, kbnUrl
+    savedSearch: function (courier, savedSearches, $route, createNotifier, Promise, kbnUrl) {
       return savedSearches.get($route.current.params.id)
-      .catch(courier.redirectWhenMissing({
-        'search': '/discover',
-        'index-pattern': '/management/siren/objects/savedSearches/' + $route.current.params.id
-      }));
+      .catch(error => {
+        // kibi: redirect if access to index pattern in saved search is forbidden
+        if (error instanceof IndexPatternAuthorizationError) {
+          createNotifier().warning(`Access to index pattern in search ${$route.current.params.id} is forbidden.`);
+          kbnUrl.redirect('/discover');
+          return Promise.halt();
+        }
+
+        return courier.redirectWhenMissing({
+          'search': '/discover',
+          'index-pattern': '/settings/objects/savedSearches/' + $route.current.params.id
+        })(error);
+      });
     }
   }
 });

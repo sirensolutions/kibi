@@ -213,7 +213,8 @@ Query.prototype.getHtml = function (queryDef, options) {
       error: err,
       data: {
         config: {
-          id: that.id
+          id: that.id,
+          label: that.config.label
         }
       }
     });

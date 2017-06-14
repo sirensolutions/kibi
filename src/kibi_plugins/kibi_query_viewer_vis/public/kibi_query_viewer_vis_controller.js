@@ -101,7 +101,7 @@ uiModules
           }
 
           if (snippet.error) {
-            let msg = `Error processing query <b>${snippet.data.config.id}</b>:<br/><pre>${snippet.error.message}</pre>`;
+            let msg = `Error processing query <b>${snippet.data.config.label}</b>:<br/><pre>${snippet.error.message}</pre>`;
             if (configMode) {
               if (snippet.data.results) {
                 const results = JSON.stringify(snippet.data.results, null, ' ');

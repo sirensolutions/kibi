@@ -1,8 +1,9 @@
 import Promise from 'bluebird';
 
 class MissingSelectedDocument {
-  constructor(id) {
+  constructor(id, label) {
     this.id = id;
+    this.label = label;
   }
 
   fetchResults(options, onlyIds) {
@@ -20,7 +21,7 @@ class MissingSelectedDocument {
 
   getHtml(queryDef, options) {
     let classes = 'results-not-ok-less-verbose';
-    let html = `The query ${this.id} needs a document to be selected`;
+    let html = `The query <b>${this.label}</b> needs a document to be selected`;
 
     if (options.verbose) {
       classes = 'results-not-ok-verbose';

@@ -111,6 +111,18 @@ describe('Kibi Directives', function () {
 
         return $scope.updateKibiState('a*', 'b1', 'c')
         .then(() => {
+          sinon.assert.calledWith(esStub, {
+            size: 1,
+            index: 'a*',
+            body: {
+              query: {
+                ids: {
+                  type: 'b1',
+                  values: [ 'c' ]
+                }
+              }
+            }
+          });
           sinon.assert.notCalled(Notifier.prototype.warning);
           sinon.assert.notCalled(Notifier.prototype.error);
           // the empty saved entity in the KibiState will reset the selected entity in the directive
@@ -144,6 +156,18 @@ describe('Kibi Directives', function () {
 
         return $scope.updateKibiState('two-and-more-*', 't', 'c')
         .then(() => {
+          sinon.assert.calledWith(esStub, {
+            size: 1,
+            index: 'two-and-more-*',
+            body: {
+              query: {
+                ids: {
+                  type: 't',
+                  values: [ 'c' ]
+                }
+              }
+            }
+          });
           sinon.assert.called(Notifier.prototype.warning);
           sinon.assert.notCalled(Notifier.prototype.error);
           // the empty saved entity in the KibiState will reset the selected entity in the directive
@@ -166,6 +190,18 @@ describe('Kibi Directives', function () {
 
         return $scope.updateKibiState('empty-*', 't', 'c')
         .then(() => {
+          sinon.assert.calledWith(esStub, {
+            size: 1,
+            index: 'empty-*',
+            body: {
+              query: {
+                ids: {
+                  type: 't',
+                  values: [ 'c' ]
+                }
+              }
+            }
+          });
           sinon.assert.called(Notifier.prototype.warning);
           sinon.assert.notCalled(Notifier.prototype.error);
           // the empty saved entity in the KibiState will reset the selected entity in the directive

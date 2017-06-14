@@ -26,13 +26,8 @@ an appropriate pattern. The "pattern" can also simply be the name of a single in
 comparisons. Kibi reads the index mapping to list all of the fields that contain a timestamp. If your
 index doesn't have time-based data, disable the *Index contains time-based events* option.
 +
-WARNING: Using event times to create index names is *deprecated* in this release of Kibi. Support for
-this functionality will be removed entirely in the next major Kibi release. Elasticsearch 2.1 includes
-sophisticated date parsing APIs that Kibi uses to determine date information, removing the need to
-specify dates in the index pattern name.
-+
 . Click *Create* to add the index pattern. This first pattern is automatically configured as the default.
-When you have more than one index pattern, you can designate which one to use as the default by clicking 
+When you have more than one index pattern, you can designate which one to use as the default by clicking
 on the star icon above the index pattern title from *Management > Index Patterns*.
 
 All done! Kibi is now connected to your Elasticsearch data. Kibi displays a read-only list of fields
@@ -52,7 +47,7 @@ You're ready to dive in to your data:
 * Chart and map your data from the <<visualize, Visualize>> page.
 * Create and view custom dashboards from the <<dashboard, Dashboard>> page.
 
-For a step-by-step introduction to these core Kibi concepts, see the <<getting-started,
+For a step-by-step introduction to these core Kibi concepts, see the <<getting_started,
 Getting Started>> tutorial.
 
 [float]

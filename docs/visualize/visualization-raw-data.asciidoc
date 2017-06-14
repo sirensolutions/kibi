@@ -26,5 +26,5 @@ The visualization saved state presented in JSON format.
 
 To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
 *Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it
-is stored in Elasticsearch. A formatted export contains the results of any applicable 
+is stored in Elasticsearch. A formatted export contains the results of any applicable
 <<managing-fields,field formatters>>.

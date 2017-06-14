@@ -3,7 +3,7 @@
 
 == The demo distribution
 The quickest way to get started with Kibi is to download the Kibi demo
-distribution from {downloads-ref}[the downloads page].
+distribution from {download-ref}[the downloads page].
 
 The Kibi demo distribution includes a ready to use Elasticsearch cluster in
 the `elasticsearch` directory; the cluster contains five indices:
@@ -72,7 +72,7 @@ image::images/getting_started/demo_pie_filter.png["The dashboard with the filter
 NOTE: To disable a filter, just move the mouse over it and click on the
 checkbox icon; you can disable all the filters applied to the dashboard by
 clicking on _Actions_ and then _Disable_; for more information about filtering,
-please read the <<visualize-filters, filters>> chapter.
+please read the <<_filters, filters>> chapter.
 
 == Relational Filters
 The <<relational_filter, Relational Filter>> visualization allows to
@@ -189,7 +189,7 @@ the drop-downs.
 Click the green *Apply changes* button image:images/apply-changes-button.png[] to add an external ring with the new
 results.
 
-NOTE: read the <<aggregation-builder>> chapter for an in-depth explanation of
+NOTE: read the <<createvis, Create A Visualization>> chapter for an in-depth explanation of
 aggregations.
 
 Besides defining groups to aggregate, queries can be used as filters; click

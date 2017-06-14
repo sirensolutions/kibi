@@ -13,14 +13,14 @@ The relational filter visualization allows to "pivot" from a dashboard
 to another by creating a join between multiple indices based on their
 relations. This allows to interactivelly build the sequence of dashboards to join.
 
-The relational filter visualzation is configured based on the <<kibi-settings-relation,relationships>> between indices defined in the settings tab.
+The relational filter visualzation is configured based on the <<kibi-settings-relations,relationships>> between indices defined in the settings tab.
 For example, let's take the following indices:
 
 [horizontal]
 _article_:: an index containing articles; each document in the index has a field called `companies` which is an array that contains the ID of companies mentioned in the article. This index is displayed on the dashboard entitled `Articles`.
 _company_:: an index containing information about companies; each document in the index has a field called `id` that contains the ID of the company. This index is displayed on the dashboard entitled `Companies`.
 
-Both indices are <<kibi-settings-relation,configured>> so that they are joined on the field `companies` of `article` with the the field `id` of `company`. Then, it is possible to use that configuration in order to create a relational filter that would filter companies based on connected articles (or vice-versa).
+Both indices are <<kibi-settings-relations,configured>> so that they are joined on the field `companies` of `article` with the the field `id` of `company`. Then, it is possible to use that configuration in order to create a relational filter that would filter companies based on connected articles (or vice-versa).
 
 In the _Articles_ dashboard, the relational filter visualization is displayed as a button which indicates the number of documents in the _Companies_ dashboard that are mentioned in the articles of the current dashboard.
 
@@ -47,7 +47,7 @@ the filter is defined by the following parameters:
 ** $DASHBOARD is a source dashboard name.
 * _Source dashboard_: optional parameter that indicates on which dashboard the relational filter should appear in.
 * _Target dashboard_: the dashboard to join the current dashboard with. The current dashboard is equal to the previous field if set.
-* _Relation_: the label of the relation between indices to use for this relational filter. This is set in the <<kibi-settings-relation,relations>> settings tab.
+* _Relation_: the label of the relation between indices to use for this relational filter. This is set in the <<kibi-settings-relations,relations>> settings tab.
 
 The screenshot below shows the configuration of a relation from the `Articles` dashboard to the `Companies` dashboard, using the `mentions` relation:
 

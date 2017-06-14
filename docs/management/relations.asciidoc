@@ -27,7 +27,7 @@ relationships have defined. You can add a new relationship by clicking on the
 
 image::images/relations_settings/indices_settings.png["Graph of Index Patterns",align="center"]
 
-A relation is also indicated on the <<kbn-settings-indices,Indices>> tab thanks
+A relation is also indicated on the <<index-patterns,Index Patterns>> Management application thanks
 to the icon image:images/relations_settings/index_relation_icon.png["Index
 relation icon"].  If you hover the mouse over it, a tooltip message is
 displayed indicating the index pattern and field that field is joined with.

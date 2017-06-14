@@ -16,14 +16,21 @@ the `elasticsearch` directory; the cluster contains five indices:
 `.kibi`:: Kibi configuration
 
 The indices have been populated through https://www.elastic.co/products/logstash[Logstash]
-from the SQLite database in `kibi/crunchbase.db`; the Logstash configuration
-used to populate the indices is described in the <<logstash>> chapter.
+from the SQLite database in `kibi/crunchbase.db`, as described in the <<logstash>> chapter.
 
 NOTE: The demo dataset has been built from a sample of articles gathered from
 tech blogs in 2013 and from data about companies, investments and investors in
 the CrunchBase 2013 Snapshot, which is copyright (C) 2013 AOL Inc.
 
-The current CrunchBase dataset is available at http://data.crunchbase.com/.
+== Users
+
+You can access the demo as three different users:
+
+- `kibiadmin`: has read access to all data indices and can modify the Kibi configuration.
+- `kibiuser`: has read access to all data indices but cannot modify the Kibi configuration.
+- `kibinoinvestor`: has read access to all data indices except `investor`; the user has no access to the `Investors` dashboard.
+
+The password for all users is `password`.
 
 == Search
 After starting Elasticsearch and Kibi, as described in the <<setup, Setup chapter>>,

@@ -10,6 +10,7 @@ class InactivatedQuery {
     const self = this;
     return Promise.resolve({
       queryId: self.id,
+      label: self.label,
       ids: [],
       queryActivated: false,
       data: {

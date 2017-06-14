@@ -9,6 +9,7 @@ class MissingSelectedDocument {
   fetchResults(options, onlyIds) {
     return Promise.resolve({
       queryId: this.id,
+      label: this.label,
       ids: [],
       queryActivated: false,
       data: {
@@ -29,6 +30,7 @@ class MissingSelectedDocument {
     }
     return Promise.resolve({
       queryId: this.id,
+      label: this.label,
       queryActivated: true,
       html,
       classes,

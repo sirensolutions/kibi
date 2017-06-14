@@ -63,7 +63,7 @@ module.exports = function createProxy(server, method, path, config) {
           req.on('data', (chunk) => chunks.push(chunk));
           req.on('end', () => {
             const dataToPass = {
-              savedQueries: {}, //TODO: Stephane I think this should be an array - for now it works as there is only one inject;
+              savedQueries: {},
               credentials: {}
             };
 

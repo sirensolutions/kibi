@@ -190,6 +190,8 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       return self._executeQuery(query).then(function (results) {
         // =============== here process the data ============
         const data = {
+          queryId: self.id,
+          label: self.config.label,
           ids: [],
           queryActivated: true
         };

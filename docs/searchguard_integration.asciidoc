@@ -715,6 +715,7 @@ $ bash plugins/search-guard-2/tools/sgadmin.sh \
   -kspass password \
   -h localhost \
   -p 9330 \
+  -rl \
   -nhnv
 ----
 
@@ -732,6 +733,7 @@ configuration:
 - **-p**: the transport port of the node specified in the **-h** option.
 - **-nhnv**: disables host name verification; remove this option if you installed
   node certificates with the correct hostname (recommended in production).
+- **-rl**: reloads the configuration and flushes the internal cache.
 
 By default the number of replicas for the `searchguard` index will be set at
 creation time to the number of data nodes - 1.

@@ -20,33 +20,33 @@ handlebars.registerHelper('getVariableValue', function (binding, name, type, opt
   }
 });
 
-function Query(server, snippetDefinition, cache) {
+function Query(server, queryDefinition, cache) {
   this.server = server;
   this.serverConfig = server.config();
   this.log = logger(server, 'abstract_query');
   this.callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 
-  this.id = snippetDefinition.id;
+  this.id = queryDefinition.id;
 
   const config = {
-    id: snippetDefinition.id,
-    label: snippetDefinition.label || '',
-    description: snippetDefinition.description || '',
-    activationQuery: snippetDefinition.activationQuery || '',
-    resultQuery: snippetDefinition.resultQuery || '',
-    datasourceId: snippetDefinition.datasourceId || null,
-    datasource: snippetDefinition.datasource,
-    rest_params: snippetDefinition.rest_params || [],
-    rest_headers: snippetDefinition.rest_headers || [],
-    rest_variables: snippetDefinition.rest_variables || [],
-    rest_body: snippetDefinition.rest_body || '',
-    rest_method: snippetDefinition.rest_method || 'GET',
-    rest_path: snippetDefinition.rest_path || '',
-    rest_resp_status_code: snippetDefinition.rest_resp_status_code || 200,
-    activation_rules: snippetDefinition.activation_rules || [],
-    tags: snippetDefinition.tags || [],
-    entityWeight: snippetDefinition.entityWeight || 0.3,
-    queryPrefixes: snippetDefinition.queryPrefixes || {}
+    id: queryDefinition.id,
+    label: queryDefinition.label || '',
+    description: queryDefinition.description || '',
+    activationQuery: queryDefinition.activationQuery || '',
+    resultQuery: queryDefinition.resultQuery || '',
+    datasourceId: queryDefinition.datasourceId || null,
+    datasource: queryDefinition.datasource,
+    rest_params: queryDefinition.rest_params || [],
+    rest_headers: queryDefinition.rest_headers || [],
+    rest_variables: queryDefinition.rest_variables || [],
+    rest_body: queryDefinition.rest_body || '',
+    rest_method: queryDefinition.rest_method || 'GET',
+    rest_path: queryDefinition.rest_path || '',
+    rest_resp_status_code: queryDefinition.rest_resp_status_code || 200,
+    activation_rules: queryDefinition.activation_rules || [],
+    tags: queryDefinition.tags || [],
+    entityWeight: queryDefinition.entityWeight || 0.3,
+    queryPrefixes: queryDefinition.queryPrefixes || {}
   };
 
   this.config = config;
@@ -96,25 +96,6 @@ Query.prototype._extractIdsFromSql = function (rows, idVariableName) {
     }
   });
   return _.uniq(ids);
-};
-
-Query.prototype._returnAnEmptyQueryResultsPromise = function (message) {
-  const self = this;
-  const data = {
-    head: {
-      vars: []
-    },
-    config: {
-      label: self.config.label,
-      esFieldName: self.config.esFieldName
-    },
-    ids: [],
-    results: {
-      bindings: []
-    },
-    warning: message
-  };
-  return Promise.resolve(data);
 };
 
 Query.prototype._fetchTemplate = function (templateId) {

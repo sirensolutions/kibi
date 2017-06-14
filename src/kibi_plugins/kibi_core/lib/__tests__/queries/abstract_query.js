@@ -278,30 +278,6 @@ describe('AbstractQuery', function () {
 
   });
 
-  describe('._returnAnEmptyQueryResultsPromise', function () {
-
-    it('should return a promise resolved with the given message', function () {
-      const query = new AbstractQuery(fakeServer, {});
-      return query._returnAnEmptyQueryResultsPromise('test message').then(function (value) {
-        expect(value).to.eql({
-          head: {
-            vars: []
-          },
-          config: {
-            label: '',
-            esFieldName: undefined
-          },
-          ids: [],
-          results: {
-            bindings: []
-          },
-          warning: 'test message'
-        });
-      });
-    });
-
-  });
-
   describe('._checkIfSelectedDocumentRequiredAndNotPresent', function () {
 
     describe('with empty selections', function () {

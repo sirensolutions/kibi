@@ -171,19 +171,19 @@ include::filter_pinning.asciidoc[]
 [[dashboard-groups]]
 == Dashboard Groups
 
-Dashboards can be organized in dashboard groups; dashboard groups are displayed
+Dashboards can be organized in dashboard groups. Dashboard groups are displayed
 as tabs just like dashboards.
 
 Clicking on a dashboard group will display the first dashboard in the group
-by default; the other dashboards in the group can be selected through the
+by default, the other dashboards in the group can be selected through the
 dropdown menu embedded in the tab:
 
 image::images/dashboard/dashboardgroup_tab.png["A dashboard group tab",align="center"]
 
-If the dashboard is associated with a saved search the count of documents on the dashboard is displayed next to the dashboard name.
+If the dashboard is associated with a saved search, the count of documents on the dashboard is displayed next to the dashboard name.
 Two additional indicators that might be displayed are:
 
-* _Filters/Queries indicator_ - the filter icon is displayed if there are any filter or query on the dashboard
+* _Filters/Queries indicator_ - the filter icon is displayed if there are any filter or query currently applied on the dashboard
 * _Pruned joins indicator_ - a star symbol is displayed if any of the join operations was pruned
 
 An example image below was taken on the *Articles detailed per source* dashboard.

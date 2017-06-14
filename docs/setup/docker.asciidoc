@@ -1,8 +1,8 @@
 [[docker]]
 == Running Kibi on Docker
-Docker images for Kibi are available from Dockerhub sirensolutions organization.
+Docker images for Kibi are available from https://hub.docker.com/u/sirensolutions/[Dockerhub `sirensolutions`] organization.
 
-=== Pulling the image
+=== Pulling the Image
 Obtaining Kibi for Docker is as simple as issuing a +docker pull+ command
 
 ifeval::["{release-state}"=="unreleased"]
@@ -23,7 +23,7 @@ docker pull sirensolutions/kibi-community-demo-full:latest
 docker run -d -p 5606:5606 -p 9220:9220 sirensolutions/kibi-community-demo-full:latest
 --------------------------------------------
 
-or for specific version, e.g.: {version}
+or for specific version, e.g., {version}:
 
 ["source","sh",subs="attributes"]
 --------------------------------------------

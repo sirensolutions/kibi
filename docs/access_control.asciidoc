@@ -1,5 +1,5 @@
 [[access_control]]
-= Authentication and access control [Enterprise Edition only]
+= Authentication and Access Control [Enterprise Edition only]
 
 Kibi EE can be integrated with Elasticsearch clusters protected by either
 Search Guard or Elastic x-pack.
@@ -13,9 +13,9 @@ used by the <<graph_browser,graph browser>> visualization) must be configured to
 SSL support in the Kibi HTTP interface can be enabled natively or by putting a reverse SSL proxy in front of it (e.g. nginx).
 
 [float]
-=== Native SSL support
+=== Native SSL Support
 
-Native SSL support can be enabled by copying certificate and key files to a
+Native SSL support can be enabled by copying the certificate and key files to a
 location readable by the Kibi process and setting the following parameters
 in `config/kibi.yml`:
 
@@ -24,7 +24,7 @@ in `config/kibi.yml`:
 - `server.ssl.key`: path to the certificate key.
 - `server.ssl.keyPassphrase`: the passphrase of the certificate key; if the key is not encrypted the parameter can be omitted.
 
-Certificate and key files must be PEM encoded.
+The certificate and key files must be PEM encoded.
 
 E.g.:
 
@@ -52,10 +52,10 @@ To enable HTTPS in the Gremlin Server, set the following parameters in the
 - **url**: the URL of the Gremlin Server endpoint; make sure that the protocol is set to `https`.
 - **ssl.key_store**: the path to the Gremlin Server certificate in Java KeyStore format.
 - **ssl.key_store_password**: the password of the Gremlin Server certificate keystore.
-- **ssl.ca**: set to the path of the certification authority chain bundle that
+- **ssl.ca**: the path of the certification authority chain bundle that
   can be used to validate requests from Kibi to the Gremlin API; you can omit
   this parameter if the certificates for the Kibi HTTPS interface have been
-  issue and signed by a public authority.
+  issued and signed by a public authority.
 
 E.g.:
 

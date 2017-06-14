@@ -126,6 +126,16 @@ export default class HashedItemStore {
     this._sessionStorage.removeItem(oldestIndexedItem.hash);
   }
 
+  /**
+   * removeItem removes the item related to a specific hash
+   *
+   * @param hash string the key
+   * @author kibi
+   */
+  removeItem(hash) {
+    this._sessionStorage.removeItem(hash);
+  }
+
   _touchHash(hash) {
     // Touching a hash indicates that it's been used recently, so it won't be the first in line
     // when we remove items to free up storage space.

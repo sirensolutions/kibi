@@ -96,8 +96,8 @@ uiModules
       $scope.edit = function () {
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
           const kibiPanelId = {
-            id: $scope.savedObj.vis.id,
-            panel: getPersistedStateId($scope.panel),
+            visId: $scope.savedObj.vis.id,
+            panelId: getPersistedStateId($scope.panel),
             updated: false
           };
           hashedItemStoreSingleton.setItem('kibi_panel_id', JSON.stringify(kibiPanelId));
@@ -157,8 +157,8 @@ uiModules
           // kibi: allows restore the uiState after click edit visualization on dashboard
           const __panelid = hashedItemStoreSingleton.getItem('kibi_panel_id');
           if (__panelid) {
-            const { id, panel, updated } = JSON.parse(__panelid);
-            if (id === $scope.panel.id && panel === getPersistedStateId($scope.panel) && updated) {
+            const { visId, panelId, updated } = JSON.parse(__panelid);
+            if (visId === $scope.panel.id && panelId === getPersistedStateId($scope.panel) && updated) {
               $scope.uiState.fromString(hashedItemStoreSingleton.getItem('kibi_ui_state'));
               hashedItemStoreSingleton.removeItem('kibi_panel_id');
               hashedItemStoreSingleton.removeItem('kibi_ui_state');

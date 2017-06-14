@@ -220,15 +220,15 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     // kibi: allows restore the uiState after click edit visualization on dashboard
     const kibiPanelId = hashedItemStoreSingleton.getItem('kibi_panel_id');
     if (kibiPanelId) {
-      const { id, panel } = JSON.parse(kibiPanelId);
-      if (id === $scope.savedVis.id) {
+      const { visId, panelId } = JSON.parse(kibiPanelId);
+      if (visId === $scope.savedVis.id) {
         $scope.uiState.fromString(hashedItemStoreSingleton.getItem('kibi_ui_state'));
         vis.setUiState($scope.uiState);
         $scope.uiState.on('set', () => {
           hashedItemStoreSingleton.setItem('kibi_ui_state', $scope.vis.getUiState().toString());
           const kibiPanelId = {
-            id,
-            panel,
+            visId,
+            panelId,
             updated: true
           };
           hashedItemStoreSingleton.setItem('kibi_panel_id', JSON.stringify(kibiPanelId));

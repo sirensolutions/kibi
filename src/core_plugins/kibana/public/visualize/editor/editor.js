@@ -367,6 +367,10 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     if ($scope.vis.type.requiresMultiSearch || $scope.vis.type.requiresSearch) {
       courier.fetch();
     }
+    // kibi: update the entityURIEnabled flag in case the visualization is being edited
+    if ($route.current.locals.isEntityDependent === undefined) {
+      isVisualizationEntityDependent(vis);
+    }
   };
 
   /**
@@ -426,6 +430,19 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     searchSource.inherits(parentsParent);
   };
 
+  /**
+   * isVisualizationEntityDependent checks if the current visualization requires a document to be selected
+   *
+   * @param vis
+   * @returns {undefined}
+   */
+  function isVisualizationEntityDependent(vis) {
+    return doesVisDependsOnSelectedEntities(vis)
+    .then((isEntityDependent) => {
+      $scope.holder.entityURIEnabled = isEntityDependent;
+    });
+  }
+
   function transferVisState(fromVis, toVis, stage) {
     return function () {
 
@@ -446,16 +463,10 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
        */
       if (stage && (isAggregationsChanged || isParamsChanged)) {
         // kibi: decide to show/hide entity picker and timefilter
-        doesVisDependsOnSelectedEntities(toVis)
-        .then((isEntityDependent) => {
-          const index = searchSource.get("index");
-          if ((index && index.timeFieldName) || toVis.type.requiresTimePicker) {
-            timefilter.enabled = true;
-          } else {
-            timefilter.enabled = false;
-          }
-          $scope.holder.entityURIEnabled = isEntityDependent;
-        })
+        const index = searchSource.get("index");
+        timefilter.enabled = (index && index.timeFieldName) || toVis.type.requiresTimePicker;
+
+        isVisualizationEntityDependent(toVis)
         // kibi: end
         .then($scope.fetch);
       } else {

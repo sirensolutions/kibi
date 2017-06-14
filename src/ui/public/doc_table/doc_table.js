@@ -41,6 +41,7 @@ uiModules.get('kibana')
       increaseSample: '@?',
       // kibi: export hits as CSV
       csv: '@?',
+      pageSize: '=?',
       // kibi: custom view
       templateId: '=?',
       showCustomView: '=?',
@@ -114,7 +115,6 @@ uiModules.get('kibana')
         if ($scope.columns.length === 0) $scope.columns.push('_source');
       });
 
-
       $scope.$watch('searchSource', prereq(function () {
         if (!$scope.searchSource) return;
 
@@ -148,11 +148,13 @@ uiModules.get('kibana')
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;
           // kibi: start the page
+          // if page size is changed and hits length same as pager.totalItems startingPage should be 1
           let startingPage = 1;
-          if ($scope.increaseSample && $scope.pager) {
+          if ($scope.increaseSample && $scope.pager && ($scope.pager.totalItems !== $scope.hits.length)) {
             startingPage = $scope.pager.pageCount;
           }
-          $scope.pager = pagerFactory.create($scope.hits.length, 50, startingPage);
+
+          $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize, startingPage);
           calculateItemsOnPage();
 
           return $scope.searchSource.onResults().then(onResults);

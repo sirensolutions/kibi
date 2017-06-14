@@ -39,6 +39,7 @@ describe('Kibi doc table extra features', function () {
           show-custom-view="showCustomView"
           custom-view="customView"
           custom-viewer-mode="customViewerMode"
+          page-size="pageSize"
         ></doc-table>
       `);
       angular.element($document[0].body).attr('class', 'kibi-data-table-vis').append($elem);
@@ -235,6 +236,43 @@ describe('Kibi doc table extra features', function () {
     // 2. when there are 50 results
     // 3. when there are 100
     expect(searchSource.getOnResultsCount()).to.be(3);
+  });
+
+  it('if custom page size is set should display sample according to custom page size', function () {
+    const _createHits = number => {
+      const hits = [];
+
+      for (let i = 0; i < number; i++) {
+        const hit = {
+          _index: 'aaa',
+          _type: 'AAA',
+          _id: i + 1,
+          _source: {
+            aaa: `myvalue ${i + 1}`
+          }
+        };
+        hits.push(hit);
+      }
+      return hits;
+    };
+    const columnContent = (lb, up) => _.range(lb, up + 1).map(i => `myvalue ${i}`, '').join('');
+    const pageRightSelector = 'button:has(> .fa-chevron-right)';
+
+    init({
+      columns: [ 'aaa' ],
+      increaseSample: true,
+      pageSize: 20
+    });
+
+    searchSource.crankResults({
+      hits: {
+        total: 5000,
+        hits: _createHits(50)
+      }
+    });
+    $scope.$digest();
+
+    expect(getTableColumn()).to.be(columnContent(1, 20));
   });
 
   it('should add a click action on a cell', function () {

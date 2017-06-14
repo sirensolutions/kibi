@@ -52,6 +52,7 @@ function KibiDataTableVisTypeProvider(Private) {
           this.uiStateJSON = toJson(uiState);
         }
       }
+      vis.params.pageSize = vis.params.pageSize || 50;
     },
     version: 2
   });

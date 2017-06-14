@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { once, merge } from 'lodash';
 import libesvm from 'libesvm';
 
-const VERSION = 'master';
+const VERSION = '5.4'; // kibi: use a working branch
 const DIRECTORY = resolve(__dirname, '../../../../esvm/functional_test_runner_tests');
 
 const createCluster = (options = {}) => {

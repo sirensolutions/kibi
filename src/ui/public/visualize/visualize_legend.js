@@ -97,7 +97,7 @@ uiModules.get('kibana')
 
         // Hierarchical and tabular data set their aggConfigResult parameter
         // differently because of how the point is rewritten between the two. So
-        // we need to check if the point.orig is set, if not use try the point.aggConfigResult
+        // we need to check if the point.orig is set, if not try to use the point.aggConfigResult
         if (legendData.orig) {
           aggConfigResult = legendData.orig.aggConfigResult;
         } else if (legendData.values) {

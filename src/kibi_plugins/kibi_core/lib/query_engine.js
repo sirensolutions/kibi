@@ -526,8 +526,6 @@ QueryEngine.prototype.clearCache =  function () {
  * Order is given by the priority value.
  */
 QueryEngine.prototype._getQueries = function (queryIds, options) {
-  const self = this;
-
   if (this.queries.length === 0) {
     return Promise.reject(
       new Error('There are no queries in memory. Create a new query or reload the existing ones from elastic search index')
@@ -555,8 +553,8 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
     for (const id of queryIds) {
       let exists = false;
 
-      for (let j = 0; j < self.queries.length; j++) {
-        if (id === self.queries[j].id) {
+      for (let j = 0; j < this.queries.length; j++) {
+        if (id === this.queries[j].id) {
           exists = true;
           break;
         }
@@ -591,7 +589,7 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
         case Symbols.QUERY_RELEVANT:
           return query;
         case Symbols.QUERY_DEACTIVATED:
-          return new InactivatedQuery(self.server, query.id, query.config.label);
+          return new InactivatedQuery(this.server, query.id, query.config.label);
         case Symbols.SELECTED_DOCUMENT_NEEDED:
           return new MissingSelectedDocumentQuery(query.id, query.config.label);
       }

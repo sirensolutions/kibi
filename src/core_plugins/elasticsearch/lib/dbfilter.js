@@ -1,6 +1,5 @@
-const util = require('./util');
-const _ = require('lodash');
-const Promise = require('bluebird');
+import util from './util';
+import Promise from 'bluebird';
 
 /**
  * Evaluate the custom dbfilter query and replace it with the equivalent ElasticSearch query.
@@ -16,13 +15,13 @@ module.exports = function (queryEngine, json, credentials) {
         throw err;
       }
 
-      const queryid = data.queryid;
+      const queryId = data.queryid;
       const queryVariableName = data.queryVariableName;
       const path = data.path;
       const entity = data.entity;
       const negate = data.negate;
 
-      if (queryid === undefined) {
+      if (queryId === undefined) {
         throw new Error('Missing queryid field in the dbfilter object: ' + data);
       }
       if (queryVariableName === undefined) {
@@ -33,49 +32,52 @@ module.exports = function (queryEngine, json, credentials) {
       }
 
       const options = {
-        selectedDocuments: [entity]
+        selectedDocuments: [ entity ]
       };
       if (credentials) {
         options.credentials = credentials;
       }
 
-      return queryEngine.getIdsFromQueries([{ queryId: queryid, queryVariableName: queryVariableName }], options)
-      .then(function createObject(queries) {
-        return new Promise(function (fulfill, reject) {
-          const filter = {};
+      return queryEngine.getIdsFromQueries([ { queryId, queryVariableName } ], options)
+      .then(function createObject([ query ]) {
+        const filter = {};
+        const clause = negate ? 'must_not' : 'should';
 
-          if (queries[0].ids.length === 0) {
-            // empty bool
-            // GH-117: need to put here a filter that will match nothing
-            filter[negate ? 'must_not' : 'should'] = [
-              {
-                term: {
-                  snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
-                }
+        if (query.ids.length === 0) {
+          // empty bool
+          // GH-117: need to put here a filter that will match nothing
+          filter[clause] = [
+            {
+              term: {
+                snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
               }
-            ];
-            fulfill(filter);
-          } else {
-            filter[negate ? 'must_not' : 'should'] = [];
-            const filterId = {
-              terms: {}
-            };
-            filterId.terms[path] = queries[0].ids;
-            filter[negate ? 'must_not' : 'should'].push(filterId);
-            fulfill(filter);
-          }
-        });
+            }
+          ];
+        } else {
+          filter[clause] = [
+            {
+              terms: {
+                [ path ]: query.ids
+              }
+            }
+          ];
+        }
+        return [
+          query.queryId,
+          query.label,
+          { bool: filter }
+        ];
       });
     });
 
-    const promises = _.map(objects, function (object) {
-      return object.value;
-    });
-
-    return Promise.all(promises).then(function (data) {
+    return Promise.map(objects, object => object.value)
+    .then(function (data) {
       for (let i = 0; i < data.length; i++) {
+        const [ queryId, queryLabel, esFilter ] = data[i];
         const path = objects[i].path;
-        util.replace(json, path, label, 'bool', data[i]);
+        const oldBucketLabel = path.pop();
+        const newBucketLabel = oldBucketLabel.replace(queryId, queryLabel);
+        util.replace(json, path, oldBucketLabel, newBucketLabel, esFilter);
       }
       return json;
     });

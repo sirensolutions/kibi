@@ -149,6 +149,8 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
         transform: function (body, resp) {
           let msg;
           const data = {
+            queryId: self.id,
+            label: self.config.label,
             results: {}
           };
           if (resp.statusCode !== self.config.rest_resp_status_code) {

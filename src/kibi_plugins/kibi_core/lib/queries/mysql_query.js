@@ -162,6 +162,8 @@ MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) 
 
     return self._executeQuery(query, connectionString, timeout).then(function (results) {
       const data = {
+        queryId: self.id,
+        label: self.config.label,
         ids: [],
         queryActivated: true
       };

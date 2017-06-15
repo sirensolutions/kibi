@@ -13,7 +13,7 @@ uiModules
     options = options || {};
     options.selectedDocuments = _.compact(options.selectedDocuments);
 
-    if (queryDefs && !(queryDefs instanceof Array) && (typeof queryDefs === 'object')) {
+    if (queryDefs && !(queryDefs instanceof Array) && typeof queryDefs === 'object') {
       queryDefs = [queryDefs];
     }
 

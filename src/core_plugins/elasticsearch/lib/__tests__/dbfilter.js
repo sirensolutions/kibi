@@ -1,9 +1,9 @@
-const util = require('../util');
-const dbFilter = require('../dbfilter');
-const expect = require('expect.js');
-const Promise = require('bluebird');
-const _ = require('lodash');
-const buffer = require('buffer');
+import util from '../util';
+import dbFilter from '../dbfilter';
+import expect from 'expect.js';
+import Promise from 'bluebird';
+import _ from 'lodash';
+import buffer from 'buffer';
 
 /**
  * This query engine always throws an error
@@ -18,28 +18,47 @@ const queryEngineError = {
  * This query engine returns ids depending of the query id
  */
 const queryEngine = {
-  getIdsFromQueries: function (queryDefs, options) {
-    const results = [];
-    _.each(queryDefs, function (queryDef) {
-
+  getIdsFromQueries(queryDefs, options) {
+    const results = _.map(queryDefs, function (queryDef) {
       switch (queryDef.queryId) {
         case 'SteQuery':
-          results.push({ ids: [ 'aaa', 'bbb', 'ccc' ], queryActivated: true });
-          break;
+          return {
+            queryId: queryDef.queryId,
+            label: `Label of ${queryDef.queryId}`,
+            ids: [ 'aaa', 'bbb', 'ccc' ],
+            queryActivated: true
+          };
         case 'not relevant':
-          results.push({ ids: [], queryActivated: false });
-          break;
+          return {
+            queryId: queryDef.queryId,
+            label: `Label of ${queryDef.queryId}`,
+            ids: [],
+            queryActivated: false
+          };
         case 'ste':
-          results.push({ ids: [ 'aaa', 'ddd' ], queryActivated: true });
-          break;
+          return {
+            queryId: queryDef.queryId,
+            label: `Label of ${queryDef.queryId}`,
+            ids: [ 'aaa', 'ddd' ],
+            queryActivated: true
+          };
         case 'ets':
-          results.push({ ids: [ 'ccc', 'ddd' ], queryActivated: true });
-          break;
+          return {
+            queryId: queryDef.queryId,
+            label: `Label of ${queryDef.queryId}`,
+            ids: [ 'ccc', 'ddd' ],
+            queryActivated: true
+          };
         default:
-          results.push({ ids: [], queryActivated: true });
+          return {
+            queryId: queryDef.queryId,
+            label: `Label of ${queryDef.queryId}`,
+            ids: [],
+            queryActivated: true
+          };
       }
     });
-    return Promise.all(results);
+    return Promise.resolve(results);
   }
 };
 
@@ -53,6 +72,7 @@ describe('Error handling', function () {
     };
 
     dbFilter(queryEngine, query)
+    .then(() => done(new Error('should fail')))
     .catch(function (err) {
       expect(err).not.to.be(undefined);
       expect(err.message).to.match(/Missing queryVariableName in the dbfilter object.*/i);
@@ -67,6 +87,7 @@ describe('Error handling', function () {
     };
 
     dbFilter(queryEngine, query)
+    .then(() => done(new Error('should fail')))
     .catch(function (err) {
       expect(err).not.to.be(undefined);
       done();
@@ -84,6 +105,7 @@ describe('Error handling', function () {
     };
 
     dbFilter(queryEngineError, query)
+    .then(() => done(new Error('should fail')))
     .catch(function (err) {
       expect(err).not.to.be(undefined);
       expect(err.message).to.match(/this should fail/i);
@@ -93,39 +115,40 @@ describe('Error handling', function () {
 });
 
 describe('Special paths', function () {
-  it('path with double quote', function (done) {
+  it('path with double quote', function () {
     const query = {
       foo: 'bar',
       'f"y': {
-        dbfilter: {
-          queryid: 'SteQuery',
-          queryVariableName: 'xxx',
-          path: 'ohoh',
+        SteQuery: {
+          dbfilter: {
+            queryid: 'SteQuery',
+            queryVariableName: 'xxx',
+            path: 'ohoh',
+          }
         }
       }
     };
     const expected = {
       foo: 'bar',
       'f"y': {
-        bool: {
-          should: [
-            {
-              terms: {
-                ohoh: ['aaa', 'bbb', 'ccc']
+        'Label of SteQuery': {
+          bool: {
+            should: [
+              {
+                terms: {
+                  ohoh: ['aaa', 'bbb', 'ccc']
+                }
               }
-            }
-          ]
+            ]
+          }
         }
       }
     };
 
-    dbFilter(queryEngine, query)
-      .then(function (data) {
-        expect(data).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
+    return dbFilter(queryEngine, query)
+    .then(function (data) {
+      expect(data).to.eql(expected);
+    });
   });
 });
 
@@ -140,66 +163,362 @@ describe('DB Filter test', function () {
     ]
   };
 
-  it('query not activated at root', function (done) {
+  it('query not activated at root', function () {
     const query = {
-      dbfilter: {
-        queryid: 'not relevant',
-        queryVariableName: 'xxx',
-        path: 'ahah'
+      'not relevant': {
+        dbfilter: {
+          queryid: 'not relevant',
+          queryVariableName: 'xxx',
+          path: 'ahah'
+        }
       }
     };
     const expected = {
-      bool: {
-        should: [
-          {
-            term: {
-              snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+      'Label of not relevant': {
+        bool: {
+          should: [
+            {
+              term: {
+                snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+              }
+            }
+          ]
+        }
+      }
+    };
+
+    return dbFilter(queryEngine, query)
+    .then(function (data) {
+      expect(data).to.eql(expected);
+    });
+  });
+
+  it('query with no result', function () {
+    const query = {
+      noresult: {
+        dbfilter: {
+          queryid: 'noresult',
+          queryVariableName: 'xxx',
+          path: 'ahah'
+        }
+      },
+      nested: {
+        notRelevantKeep: {
+          foo: 'bar',
+          'not relevant': {
+            dbfilter: {
+              queryid: 'not relevant',
+              queryVariableName: 'xxx',
+              path: 'ahah'
             }
           }
-        ]
+        }
+      }
+    };
+    const expected = {
+      'Label of noresult': {
+        bool: {
+          should: [
+            {
+              term: {
+                snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+              }
+            }
+          ]
+        }
+      },
+      nested: {
+        notRelevantKeep: {
+          foo: 'bar',
+          'Label of not relevant': {
+            bool: {
+              should: [
+                {
+                  term: {
+                    snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    };
+
+    return dbFilter(queryEngine, query)
+    .then(function (data) {
+      expect(data).to.eql(expected);
+    });
+  });
+
+  it('nothing to replace', function () {
+    const query = {
+      foo: 'bar'
+    };
+
+    return dbFilter(queryEngine, query)
+    .then(function (data) {
+      expect(data).to.eql(query);
+    });
+  });
+
+  it('entity field is optional', function () {
+    const query = {
+      foo: 'bar',
+      SteQuery: {
+        dbfilter: {
+          queryid: 'SteQuery',
+          queryVariableName: 'xxx',
+          path: 'ohoh'
+        }
+      }
+    };
+    const expected = {
+      foo: 'bar',
+      'Label of SteQuery': {
+        bool: expectedBool
       }
     };
 
     dbFilter(queryEngine, query)
     .then(function (data) {
       expect(data).to.eql(expected);
-      done();
-    }).catch(function (err) {
-      done(err);
     });
   });
 
-  it('query with no result', function (done) {
+  it('replace root object', function () {
     const query = {
-      dbfilter: {
-        queryid: 'noresult',
-        queryVariableName: 'xxx',
-        path: 'ahah'
-      },
-      nested: {
-        notRelevantKeep: {
-          foo: 'bar',
-          dbfilter: {
-            queryid: 'not relevant',
-            queryVariableName: 'xxx',
-            path: 'ahah'
+      foo: 'bar',
+      SteQuery: {
+        dbfilter: {
+          queryid: 'SteQuery',
+          queryVariableName: 'xxx',
+          path: 'ohoh',
+          entity: ''
+        }
+      }
+    };
+    const expected = {
+      foo: 'bar',
+      'Label of SteQuery': {
+        bool: expectedBool
+      }
+    };
+
+    return dbFilter(queryEngine, query)
+    .then(function (data) {
+      expect(data).to.eql(expected);
+    });
+  });
+
+  it('replace nested filter', function () {
+    const query = {
+      foo: 'bar',
+      very: {
+        deep: {
+          SteQuery: {
+            dbfilter: {
+              queryid: 'SteQuery',
+              queryVariableName: 'xxx',
+              path: 'ohoh',
+              entity: ''
+            }
           }
         }
       }
     };
     const expected = {
+      foo: 'bar',
+      very: {
+        deep: {
+          'Label of SteQuery': {
+            bool: expectedBool
+          }
+        }
+      }
+    };
+
+    return dbFilter(queryEngine, query)
+    .then(function (data) {
+      expect(data).to.eql(expected);
+    });
+  });
+
+  it('replace multiple custom dbfilters', function () {
+    const query = {
+      SteQuery: {
+        dbfilter: {
+          queryid: 'SteQuery',
+          queryVariableName: 'xxx',
+          path: 'ahah',
+          entity: ''
+        }
+      },
+      foo: 'bar',
+      very: {
+        deep: {
+          SteQuery: {
+            dbfilter: {
+              queryid: 'SteQuery',
+              queryVariableName: 'xxx',
+              path: 'ohoh',
+              entity: ''
+            }
+          }
+        }
+      }
+    };
+    const expected = {
+      'Label of SteQuery': {
+        bool: {
+          should: [
+            {
+              terms: {
+                ahah: ['aaa', 'bbb', 'ccc']
+              }
+            }
+          ]
+        }
+      },
+      foo: 'bar',
+      very: {
+        deep: {
+          'Label of SteQuery': {
+            bool: expectedBool
+          }
+        }
+      }
+    };
+
+    return dbFilter(queryEngine, query)
+    .then(function (data) {
+      expect(data).to.eql(expected);
+    });
+  });
+});
+
+describe('post process hook test', function () {
+  const expected = {
+    foo: 'bar',
+    'Label of SteQuery': {
       bool: {
         should: [
           {
-            term: {
-              snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+            terms: {
+              ohoh: ['aaa', 'bbb', 'ccc']
             }
           }
         ]
-      },
-      nested: {
-        notRelevantKeep: {
-          foo: 'bar',
+      }
+    }
+  };
+
+  it('one query', function () {
+    const query = {
+      foo: 'bar',
+      SteQuery: {
+        dbfilter: {
+          queryid: 'SteQuery',
+          queryVariableName: 'xxx',
+          path: 'ohoh'
+        }
+      }
+    };
+
+    return util.getQueriesAsPromise(new buffer.Buffer(JSON.stringify(query).concat('\n')))
+    .map(function (query) {
+      return dbFilter(queryEngine, query);
+    })
+    .then(function (data) {
+      expect(data.length).to.eql(1);
+      expect(data[0]).to.eql(expected);
+    });
+  });
+
+  it('multiple queries', function () {
+    const query1 = {
+      bar: 'foo'
+    };
+    const query2 = {
+      foo: 'bar',
+      SteQuery: {
+        dbfilter: {
+          queryid: 'SteQuery',
+          queryVariableName: 'xxx',
+          path: 'ohoh',
+        }
+      }
+    };
+
+    return util.getQueriesAsPromise(new buffer.Buffer(JSON.stringify(query1).concat('\n', JSON.stringify(query2), '\n')))
+    .map(function (query) {
+      return dbFilter(queryEngine, query);
+    })
+    .then(function (data) {
+      expect(data.length).to.eql(2);
+      expect(data[0]).to.eql(query1);
+      expect(data[1]).to.eql(expected);
+    });
+  });
+});
+
+
+describe('query negation', function () {
+
+  it('empty ids negate true', function () {
+    const query = {
+      foo: 'bar',
+      path: {
+        'NOT emptyIdsQuery': {
+          dbfilter: {
+            queryid: 'emptyIdsQuery',
+            queryVariableName: 'xxx',
+            path: 'ohoh',
+            negate: true
+          }
+        }
+      }
+    };
+    const expected = {
+      foo: 'bar',
+      path: {
+        'NOT Label of emptyIdsQuery': {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+
+    return dbFilter(queryEngine, query).then(function (data) {
+      expect(data).to.eql(expected);
+    });
+  });
+
+  it('empty ids negate false', function () {
+    const query = {
+      foo: 'bar',
+      path: {
+        emptyIdsQuery: {
+          dbfilter: {
+            queryid: 'emptyIdsQuery',
+            queryVariableName: 'xxx',
+            path: 'ohoh',
+            negate: false
+          }
+        }
+      }
+    };
+    const expected = {
+      foo: 'bar',
+      path: {
+        'Label of emptyIdsQuery': {
           bool: {
             should: [
               {
@@ -213,324 +532,45 @@ describe('DB Filter test', function () {
       }
     };
 
-    dbFilter(queryEngine, query)
+    return dbFilter(queryEngine, query).then(function (data) {
+      expect(data).to.eql(expected);
+    });
+  });
+
+  it('simple query', function () {
+    const query = {
+      foo: 'bar',
+      path: {
+        'NOT SteQuery': {
+          dbfilter: {
+            queryid: 'SteQuery',
+            queryVariableName: 'xxx',
+            path: 'ohoh',
+            negate: true
+          }
+        }
+      }
+    };
+    const expected = {
+      foo: 'bar',
+      path: {
+        'NOT Label of SteQuery': {
+          bool: {
+            must_not: [
+              {
+                terms: {
+                  ohoh: ['aaa', 'bbb', 'ccc']
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+
+    return dbFilter(queryEngine, query)
     .then(function (data) {
       expect(data).to.eql(expected);
-      done();
-    }).catch(function (err) {
-      done(err);
     });
   });
-
-  it('nothing to replace', function (done) {
-    const query = {
-      foo: 'bar'
-    };
-
-    dbFilter(queryEngine, query)
-      .then(function (data) {
-        expect(data).to.eql(query);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-  });
-
-  it('entity field is optional', function (done) {
-    const query = {
-      foo: 'bar',
-      dbfilter: {
-        queryid: 'SteQuery',
-        queryVariableName: 'xxx',
-        path: 'ohoh'
-      }
-    };
-    const expected = {
-      foo: 'bar',
-      bool: expectedBool
-    };
-
-    dbFilter(queryEngine, query)
-      .then(function (data) {
-        expect(data).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-  });
-
-  it('replace root object', function (done) {
-    const query = {
-      foo: 'bar',
-      dbfilter: {
-        queryid: 'SteQuery',
-        queryVariableName: 'xxx',
-        path: 'ohoh',
-        entity: ''
-      }
-    };
-    const expected = {
-      foo: 'bar',
-      bool: expectedBool
-    };
-
-    dbFilter(queryEngine, query)
-      .then(function (data) {
-        expect(data).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-  });
-
-  it('replace nested filter', function (done) {
-    const query = {
-      foo: 'bar',
-      very: {
-        deep: {
-          dbfilter: {
-            queryid: 'SteQuery',
-            queryVariableName: 'xxx',
-            path: 'ohoh',
-            entity: ''
-          }
-        }
-      }
-    };
-    const expected = {
-      foo: 'bar',
-      very: {
-        deep: {
-          bool: expectedBool
-        }
-      }
-    };
-
-    dbFilter(queryEngine, query)
-      .then(function (data) {
-        expect(data).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-  });
-
-  it('replace multiple custom dbfilters', function (done) {
-    const query = {
-      dbfilter: {
-        queryid: 'SteQuery',
-        queryVariableName: 'xxx',
-        path: 'ahah',
-        entity: ''
-      },
-      foo: 'bar',
-      very: {
-        deep: {
-          dbfilter: {
-            queryid: 'SteQuery',
-            queryVariableName: 'xxx',
-            path: 'ohoh',
-            entity: ''
-          }
-        }
-      }
-    };
-    const expected = {
-      bool: {
-        should: [
-          {
-            terms: {
-              ahah: ['aaa', 'bbb', 'ccc']
-            }
-          }
-        ]
-      },
-      foo: 'bar',
-      very: {
-        deep: {
-          bool: expectedBool
-        }
-      }
-    };
-
-    dbFilter(queryEngine, query)
-      .then(function (data) {
-        expect(data).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-  });
 });
-
-describe('post process hook test', function () {
-  const expected = {
-    foo: 'bar',
-    bool: {
-      should: [
-        {
-          terms: {
-            ohoh: ['aaa', 'bbb', 'ccc']
-          }
-        }
-      ]
-    }
-  };
-
-  it('one query', function (done) {
-    const query = {
-      foo: 'bar',
-      dbfilter: {
-        queryid: 'SteQuery',
-        queryVariableName: 'xxx',
-        path: 'ohoh'
-      }
-    };
-
-    util.getQueriesAsPromise(new buffer.Buffer(JSON.stringify(query).concat('\n')))
-      .map(function (query) {
-        return dbFilter(queryEngine, query);
-      })
-      .then(function (data) {
-        expect(data.length).to.eql(1);
-        expect(data[0]).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-  });
-
-  it('multiple queries', function (done) {
-    const query1 = {
-      bar: 'foo'
-    };
-    const query2 = {
-      foo: 'bar',
-      dbfilter: {
-        queryid: 'SteQuery',
-        queryVariableName: 'xxx',
-        path: 'ohoh',
-      }
-    };
-
-    util.getQueriesAsPromise(new buffer.Buffer(JSON.stringify(query1).concat('\n', JSON.stringify(query2), '\n')))
-      .map(function (query) {
-        return dbFilter(queryEngine, query);
-      })
-      .then(function (data) {
-        expect(data.length).to.eql(2);
-        expect(data[0]).to.eql(query1);
-        expect(data[1]).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-  });
-});
-
-
-describe('query negation', function () {
-
-  it('empty ids negate true', function (done) {
-    const query = {
-      foo: 'bar',
-      path: {
-        dbfilter: {
-          queryid: 'emptyIdsQuery',
-          queryVariableName: 'xxx',
-          path: 'ohoh',
-          negate: true
-        }
-      }
-    };
-    const expected = {
-      foo: 'bar',
-      path: {
-        bool: {
-          must_not: [{
-            term: {
-              snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
-            }
-          }]
-        }
-      }
-    };
-
-    dbFilter(queryEngine, query).then(function (data) {
-      expect(data).to.eql(expected);
-      done();
-    }).catch(function (err) {
-      done(err);
-    });
-  });
-
-  it('empty ids negate false', function (done) {
-    const query = {
-      foo: 'bar',
-      path: {
-        dbfilter: {
-          queryid: 'emptyIdsQuery',
-          queryVariableName: 'xxx',
-          path: 'ohoh',
-          negate: false
-        }
-      }
-    };
-    const expected = {
-      foo: 'bar',
-      path: {
-        bool: {
-          should: [{
-            term: {
-              snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
-            }
-          }]
-        }
-      }
-    };
-
-    dbFilter(queryEngine, query).then(function (data) {
-      expect(data).to.eql(expected);
-      done();
-    }).catch(function (err) {
-      done(err);
-    });
-  });
-
-  it('simple query', function (done) {
-    const query = {
-      foo: 'bar',
-      path: {
-        dbfilter: {
-          queryid: 'SteQuery',
-          queryVariableName: 'xxx',
-          path: 'ohoh',
-          negate: true
-        }
-      }
-    };
-    const expected = {
-      foo: 'bar',
-      path: {
-        bool: {
-          must_not: [
-            {
-              terms: {
-                ohoh: ['aaa', 'bbb', 'ccc']
-              }
-            }
-          ]
-        }
-      }
-    };
-
-    dbFilter(queryEngine, query)
-      .then(function (data) {
-        expect(data).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-  });
-});
-

@@ -88,7 +88,7 @@ uiModules
 
         if (path.indexOf('*') !== -1) {
           return es.search({
-            size: 0,
+            size: 1,
             index: path,
             body: {
               query: {

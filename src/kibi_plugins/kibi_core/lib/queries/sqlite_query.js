@@ -184,15 +184,14 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
     .then(function (rows) {
       const data = {
         ids: [],
-        queryActivated: true
+        queryActivated: true,
+        queryId: self.id,
+        label: self.config.label
       };
 
       if (!onlyIds) {
         let fields;
 
-        data.head = {
-          vars: []
-        };
         data.config = {
           label: self.config.label,
           esFieldName: self.config.esFieldName
@@ -216,9 +215,9 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
           })
         };
 
-        if (fields) {
-          data.head.vars = fields;
-        }
+        data.head = {
+          vars: fields || []
+        };
       }
 
       if (idVariableName) {

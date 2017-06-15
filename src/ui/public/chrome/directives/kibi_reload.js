@@ -10,7 +10,7 @@ UiModules
         e.stopPropagation();
 
         // to force reload put kibi-reload="true" in the html
-        const forcedReload = new Boolean(attr.kibiReload);
+        const forcedReload = Boolean(attr.kibiReload);
         const newWindow = $window.open($window.location.origin + $window.location.pathname + '#/?clearSirenSession=true');
         if (newWindow) {
           // NOTE: without this little wait firefox will end up with blank window

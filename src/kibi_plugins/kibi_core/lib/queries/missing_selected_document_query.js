@@ -1,13 +1,15 @@
 import Promise from 'bluebird';
 
 class MissingSelectedDocument {
-  constructor(id) {
+  constructor(id, label) {
     this.id = id;
+    this.label = label;
   }
 
   fetchResults(options, onlyIds) {
     return Promise.resolve({
       queryId: this.id,
+      label: this.label,
       ids: [],
       queryActivated: false,
       data: {
@@ -20,7 +22,7 @@ class MissingSelectedDocument {
 
   getHtml(queryDef, options) {
     let classes = 'results-not-ok-less-verbose';
-    let html = `The query ${this.id} needs a document to be selected`;
+    let html = `The query <b>${this.label}</b> needs a document to be selected`;
 
     if (options.verbose) {
       classes = 'results-not-ok-verbose';
@@ -28,6 +30,7 @@ class MissingSelectedDocument {
     }
     return Promise.resolve({
       queryId: this.id,
+      label: this.label,
       queryActivated: true,
       html,
       classes,

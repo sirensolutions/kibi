@@ -120,6 +120,8 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
     }
 
     return self._executeQuery(query, endpointUrl, timeout).then(function (data) {
+      data.queryId = self.id;
+      data.label = self.config.label;
       if (idVariableName) {
         data.ids = self._extractIds(data, idVariableName);
       } else {

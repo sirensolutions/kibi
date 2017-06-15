@@ -219,11 +219,11 @@ describe('Query Engine', function () {
       .then(([ result1, result2 ]) => {
         expect(result1.queryId).to.be('query1');
         expect(result1.queryActivated).to.be(true);
-        expect(result1.html).to.be('The query query1 needs a document to be selected');
+        expect(result1.html).to.be('The query <b>Query 1</b> needs a document to be selected');
 
         expect(result2.queryId).to.be('query2');
         expect(result2.queryActivated).to.be(true);
-        expect(result2.html).to.be('The query query2 needs a document to be selected');
+        expect(result2.html).to.be('The query <b>Query 2</b> needs a document to be selected');
       });
     });
   });

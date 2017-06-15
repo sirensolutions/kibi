@@ -1,6 +1,6 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
-const kibiUtils = require('kibiutils');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import kibiUtils from 'kibiutils';
 
 // The string used for separating the componements of a JSON path
 const PATH_SEPARATOR = '!"£$%^&*_+';
@@ -10,7 +10,7 @@ const PATH_SEPARATOR = '!"£$%^&*_+';
  * output of the apply callback.
  */
 exports.traverse = function (json, label, apply) {
-  return _traverse0(json, [], label, apply, '');
+  return _traverse0(json, [], label, apply, []);
 };
 
 /**
@@ -23,22 +23,17 @@ function _traverse0(json, objects, label, apply, curPath) {
       if (attribute === label) {
         // attribute to modify is found
         if (json[attribute] === null || typeof (json[attribute]) !== 'object') {
-          apply(new Error('Unexpected value for [' + label + ']. ' +
-            'Got ' + json[attribute] + ' of type [' + typeof (json[attribute]) + ']'), null);
+          apply(new Error(`Unexpected value for [${label}]. Got ${json[attribute]} of type [${typeof (json[attribute])}]`), null);
         } else {
           objects.push({
-            path: curPath.length === 0 ? [] : curPath.split(PATH_SEPARATOR),
+            path: Array.from(curPath),
             value: apply(null, json[attribute])
           });
         }
       }
       // Go down to the nested object
       if (json[attribute] !== null && typeof (json[attribute]) === 'object') {
-        if (curPath) {
-          _traverse0(json[attribute], objects, label, apply, curPath + PATH_SEPARATOR + attribute);
-        } else {
-          _traverse0(json[attribute], objects, label, apply, attribute);
-        }
+        _traverse0(json[attribute], objects, label, apply, [ ...curPath, attribute ]);
       }
     }
   }

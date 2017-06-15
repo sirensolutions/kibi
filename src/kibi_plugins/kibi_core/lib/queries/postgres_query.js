@@ -247,6 +247,8 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
 
     return self._executeQuery(query, connectionString).then(function (result) {
       const data = {
+        queryId: self.id,
+        label: self.config.label,
         ids: [],
         queryActivated: true
       };

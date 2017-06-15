@@ -1,4 +1,3 @@
-import { onVisualizePage } from 'ui/kibi/utils/on_page';
 import 'ui/kibi/styles/external_query_terms_filter.less';
 import _ from 'lodash';
 import BucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
@@ -14,7 +13,7 @@ export default function RelatedEntitiesAggDefinition(Private, createNotifier, ki
     name: 'external_query_terms_filter',
     dslName: 'filters',
     title: 'External Query Terms Filter',
-    createFilter: createFilter,
+    createFilter,
     params: [
       {
         name: 'queryDefinitions',
@@ -26,12 +25,6 @@ export default function RelatedEntitiesAggDefinition(Private, createNotifier, ki
           params.filters = {};
 
           const queryDefinitions = aggConfig.params.queryDefinitions;
-          if (!_.size(queryDefinitions)) {
-            return;
-          }
-
-          const configurationMode = onVisualizePage();
-
           if (!_(queryDefinitions).pluck('queryId').compact().size()) {
             return;
           }
@@ -41,16 +34,16 @@ export default function RelatedEntitiesAggDefinition(Private, createNotifier, ki
             // validate the definition and do not add any filter if e.g. id == ''
             if (queryDef.queryId && queryDef.joinElasticsearchField && queryDef.queryVariableName) {
               const id = queryDef.queryId;
-              // here we need a label for each one for now it is queryid
-              const label = (queryDef.negate ? 'Not-' : '') + id;
+              // the label of the bucket gets the query title by the dbfilter lib
+              const label = (queryDef.negate ? 'NOT ' : '') + id;
 
               const dbfilter = {
                 queryid: id,
-                negate: queryDef.negate ? true : false,
+                negate: Boolean(queryDef.negate),
                 queryVariableName: queryDef.queryVariableName,
                 path: queryDef.joinElasticsearchField
               };
-              if (kibiState.isSelectedEntityDisabled()) {
+              if (!kibiState.isSelectedEntityDisabled()) {
                 dbfilter.entity = kibiState.getEntityURI();
               }
               json[label] = { dbfilter };

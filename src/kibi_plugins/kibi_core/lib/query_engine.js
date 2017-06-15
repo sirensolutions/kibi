@@ -526,8 +526,6 @@ QueryEngine.prototype.clearCache =  function () {
  * Order is given by the priority value.
  */
 QueryEngine.prototype._getQueries = function (queryIds, options) {
-  const self = this;
-
   if (this.queries.length === 0) {
     return Promise.reject(
       new Error('There are no queries in memory. Create a new query or reload the existing ones from elastic search index')
@@ -552,12 +550,11 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
   // if all === false
   // check that all requested queryIds exists and if not reject
   if (!all && queryIds) {
-    for (let i = 0; i < queryIds.length; i++) {
-      const id = queryIds[i];
+    for (const id of queryIds) {
       let exists = false;
 
-      for (let j = 0; j < self.queries.length; j++) {
-        if (id === self.queries[j].id) {
+      for (let j = 0; j < this.queries.length; j++) {
+        if (id === this.queries[j].id) {
           exists = true;
           break;
         }
@@ -582,51 +579,39 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
   // it means that the requested query is not loaded in memory
   // reject with meaningful error
   if (withRightId.length === 0) {
-    return Promise.reject(
-      new Error('Non of the requested queries ' + JSON.stringify(queryIds, null, ' ') + ' were found in memory')
-    );
+    return Promise.reject(new Error(`Non of the requested queries ${JSON.stringify(queryIds, null, ' ')} were found in memory`));
   }
-  const fromRightFolder = withRightId;
 
-  const promises = _.map(fromRightFolder, function (query) {
-    return query.checkIfItIsRelevant(options);
-  });
-
-  return Promise.all(promises).then(function (queryResponses) {
-    // order the list prepare the list
-    // go over responces and create an array on template objects for which ask queries returned true
-
-    const filteredQueries = _.map(queryResponses, function (resp, i) {
-      switch (resp) {
+  return Promise.map(withRightId, query => {
+    return query.checkIfItIsRelevant(options)
+    .then(isQueryRelevant => {
+      switch (isQueryRelevant) {
         case Symbols.QUERY_RELEVANT:
-          return fromRightFolder[i]; // here important to use fromRightFolder !!!
+          return query;
         case Symbols.QUERY_DEACTIVATED:
-          return new InactivatedQuery(self.server, fromRightFolder[i].id);
+          return new InactivatedQuery(this.server, query.id, query.config.label);
         case Symbols.SELECTED_DOCUMENT_NEEDED:
-          return new MissingSelectedDocumentQuery(fromRightFolder[i].id);
+          return new MissingSelectedDocumentQuery(query.id, query.config.label);
       }
     });
-
+  })
+  .then(function (queryResponses) {
     // order templates as they were ordered in queryIds array
     // but do it only if NOT special case ALL
 
     if (all) {
-      return filteredQueries;
-    } else {
-      const  filteredSortedQueries = [];
-
-      _.each(queryIds, function (id) {
-        const found = _.find(filteredQueries, function (query) {
-          return query.id === id;
-        });
-        if (found) {
-          filteredSortedQueries.push(found);
-        }
-      });
-
-      return filteredSortedQueries;
+      return queryResponses;
     }
+    const filteredSortedQueries = [];
 
+    _.each(queryIds, function (id) {
+      const found = _.find(queryResponses, 'id', id);
+      if (found) {
+        filteredSortedQueries.push(found);
+      }
+    });
+
+    return filteredSortedQueries;
   });
 };
 
@@ -671,7 +656,6 @@ QueryEngine.prototype.getQueriesHtml = function (queryDefs, options) {
   return self._init().then(function () {
     return self._getQueries(queryIds, options)
     .then(function (queries) {
-
       return Promise.map(queries, query => {
         const queryDef = self._getQueryDefById(queryDefs, query.id);
         return query.getHtml(queryDef, options);

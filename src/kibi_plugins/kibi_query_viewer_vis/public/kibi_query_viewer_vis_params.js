@@ -60,11 +60,11 @@ uiModules
       };
 
       $scope.editTemplate = function (index) {
-        kbnUrl.change('/management/templates/' + $scope.vis.params.queryDefinitions[index].templateId);
+        kbnUrl.change('/management/siren/templates/' + $scope.vis.params.queryDefinitions[index].templateId);
       };
 
       $scope.editQuery = function (index) {
-        kbnUrl.change('/management/queries/' + $scope.vis.params.queryDefinitions[index].queryId);
+        kbnUrl.change('/management/siren/queries/' + $scope.vis.params.queryDefinitions[index].queryId);
       };
 
       $scope.filterTemplates = function (item) {

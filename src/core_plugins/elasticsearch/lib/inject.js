@@ -114,7 +114,7 @@ exports._runInject = function (query, queryEngine, credentials) {
       throw new Error('Missing fieldName field in the inject object: ' + query);
     }
 
-    return queryEngine.getIdsFromQueries(queryDefs, { selectedDocuments: [entityURI], credentials })
+    return queryEngine.getIdsFromQueries(queryDefs, { selectedDocuments: [ entityURI ], credentials })
     .then(function (setOfIds) {
       return function (hit) {
         const res = {
@@ -122,14 +122,13 @@ exports._runInject = function (query, queryEngine, credentials) {
           value: []
         };
 
-        const ids = kibiUtils.getValuesAtPath(hit._source, sourcePath);
+        const idsInHit = kibiUtils.getValuesAtPath(hit._source, sourcePath);
         // for each result set of a query
-        for (let i = 0; i < setOfIds.length; i++) {
+        for (const { ids, label } of setOfIds) {
           // for each result in the set for that query
-          for (let j = 0; j < setOfIds[i].ids.length; j++) {
-            const id = setOfIds[i].ids[j];
-            if (_.contains(ids, id)) {
-              res.value.push(queryDefs[i].queryId);
+          for (const id of ids) {
+            if (_.contains(idsInHit, id)) {
+              res.value.push(label);
               break;
             }
           }

@@ -6,6 +6,8 @@ import uiModules from 'ui/modules';
 
 // kibi: imports
 import CacheHelper from 'ui/kibi/helpers/cache_helper';
+import findByParam from 'ui/utils/find_by_param';
+// kibi: end
 
 uiModules.get('kibana')
 .directive('visualizeLegend', function (Private, getAppState) {
@@ -91,7 +93,24 @@ uiModules.get('kibana')
 
       $scope.canFilter = function (legendData) {
         // kibi: we cache the value to avoid going into a loop of digests
-        const cacheKey = legendData.values.aggConfigResult.key + legendData.values.aggConfigResult.value;
+        let aggConfigResult;
+
+        // Hierarchical and tabular data set their aggConfigResult parameter
+        // differently because of how the point is rewritten between the two. So
+        // we need to check if the point.orig is set, if not try to use the point.aggConfigResult
+        if (legendData.orig) {
+          aggConfigResult = legendData.orig.aggConfigResult;
+        } else if (legendData.values) {
+          aggConfigResult = findByParam(legendData.values, 'aggConfigResult');
+        } else {
+          aggConfigResult = legendData.aggConfigResult;
+        }
+
+        if (!aggConfigResult) {
+          return;
+        }
+
+        const cacheKey = aggConfigResult.key + aggConfigResult.value;
         if (cache && cache.get(cacheKey)) {
           return cache.get(cacheKey);
         }

@@ -20,7 +20,7 @@ template will not be rendered.
 The screenshots below show the configuration and output of a Templated query
 viewer visualization for a selected company:
 
-image::images/kibi_query_viewer/kibi_query_viewer_config.png["Configuration of a Kibi query viewer visualization",align="center"]
+image::images/kibi_query_viewer/kibi_query_viewer_config_5.png["Configuration of a Kibi query viewer visualization",align="center"]
 
 [float]
 [[kibi_query_viewer_advanced]]

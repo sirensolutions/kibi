@@ -6,10 +6,9 @@ programmable validators and a variety of configurable actions.
 
 Sentinl is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana via its integrated App and Spy integration.
 
-Kibi EE extends Sentinl with support for Vanguard join features.
+Kibi  extends Sentinl with support for Vanguard join features.
 
 [float]
 == Documentation
 
 The full Sentinl documentation is available https://github.com/sirensolutions/sentinl/wiki[here].
-

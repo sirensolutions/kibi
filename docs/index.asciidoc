@@ -1,6 +1,7 @@
 [[kibi-guide]]
 = Kibi User Guide
 :toc: right
+:docinfo: shared
 
 :java-version: 1.8
 :vanguard-version: 5.4.0
@@ -11,8 +12,10 @@
 :kibana-ref: https://www.elastic.co/guide/en/kibana/5.4
 :kibi-version: {version}
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.4/
+:logstash-ref: https://www.elastic.co/guide/en/logstash/
 :es-ref: {elastic-ref}
 :elasticsearch-version: 5.4.0
+:es-default-port: 9220
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
 :searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
 :searchguard-kerberos-ref: https://github.com/floragunncom/search-guard-auth-http-kerberos/wiki

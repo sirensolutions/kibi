@@ -1,7 +1,7 @@
 [[access_control]]
-= Authentication and Access Control [Enterprise Edition only]
+= Authentication and Access Control
 
-Kibi EE can be integrated with Elasticsearch clusters protected by either
+Kibi  can be integrated with Elasticsearch clusters protected by either
 Search Guard or Elastic x-pack.
 
 In this scenario, both Kibi and Gremlin Server (the backend component
@@ -35,7 +35,7 @@ server.ssl.certificate: "pki/server.crt"
 server.ssl.key: "pki/server.key"
 ----
 
-The Kibi EE demo distribution includes a sample certificate and key in the `pki`
+The Kibi  demo distribution includes a sample certificate and key in the `pki`
 directory.
 
 NOTE: For additional SSL settings please refer to the <<settings,settings chapter>>.
@@ -74,5 +74,5 @@ After restarting Kibi, click on **Settings**, then click on **Datasources**,
 and make sure that the URL of the `Kibi Gremlin Server` datasource is equal
 to the url set in `kibi.yml`.
 
-The Kibi EE demo distribution includes a sample keystore and CA bundle
+The Kibi  demo distribution includes a sample keystore and CA bundle
 in the `pki` directory.

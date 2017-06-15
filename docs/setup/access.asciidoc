@@ -22,7 +22,7 @@ image::images/kibi-status-page.png[]
 === Collecting Elasticsearch Diagnostics
 
 The *Elasticsearch diagnostics* button generates a single file by collecting different metrics about your elasticsearch cluster.
-All collected information are saved to a local file and never transfered over a network.
-User can see a full list of elasticsearch API calls by clicking the more info icon next to the button.
+All collected information are saved to a local file and never transferred over a network.
+You can see a full list of elasticsearch API calls by clicking the more info icon next to the button.
 
 image::images/kibi_status_page_diagnostics_help.png[]

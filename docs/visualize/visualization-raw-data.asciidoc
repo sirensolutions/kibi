@@ -1,6 +1,6 @@
 [float]
 [[vis-spy]]
-== Visualization Spy
+=== Visualization Spy
 
 To display the raw data behind the visualization, click the image:images/spy-open-button.png[] button in the bottom left corner of the container. The visualization spy panel will open. Use the select input to view detailed information about the raw data.
 

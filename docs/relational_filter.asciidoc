@@ -24,11 +24,11 @@ Both indices are <<kibi-settings-relations,configured>> so that they are joined 
 
 In the _Articles_ dashboard, the relational filter visualization is displayed as a button which indicates the number of documents in the _Companies_ dashboard that are mentioned in the articles of the current dashboard.
 
-The screenshot below shows the button for the relation described in the example; there are 18237 companies mentioned in the 618155 articles currently displayed:
+The screenshot below shows the button for the relation described in the example; there are 18011 companies mentioned in the 602,000 articles currently displayed:
 
 image::images/relational_filter/relational_filter_companies_source.png["Relational filter button on the Articles dashboard",align="center", width="400"]
 
-Clicking on the button will switch you to the _Companies_ dashboard and display the 18237 companies; the relational filter is displayed in the filter bar, as displayed below:
+Clicking on the button will switch you to the _Companies_ dashboard and display the 18011 companies; the relational filter is displayed in the filter bar, as displayed below:
 
 image::images/relational_filter/relational_filter_companies_target.png["Relational filter on the Companies dashboard",align="center", width="400"]
 
@@ -77,7 +77,7 @@ Hovering over the blue filter displays an explanation. It indicates that the rel
 
 image::images/relational_filter/example_2.png["Relational filter explanation",align="center"]
 
-Next, we add a regular filter to the `Companies` dashboard by clicking on the `USA` row of the `Companies by Country` visualization.
+Next, we add a regular filter to the `Companies` dashboard by clicking on the image:images/PositiveFilter.jpg["Positive Filter"] in the `USA` row of the `Companies by Country` visualization.
 
 image::images/relational_filter/example_3.png["Relational filter explanation",align="center"]
 
@@ -95,7 +95,7 @@ NOTE: The sequence of the joins in the explanation are shown in reverse, i.e., t
 [[relational-filter_viewing-detailed-information]]
 === Viewing Detailed Information
 
-To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed
+To display the raw data behind the visualization, click the image:images/spy-open-button.png["Spy Open Button"] at the bottom left of the container. Tabs with detailed
 information about the raw data replace the visualization, as in this example:
 
 image::images/relational_filter/spy.png["Spy panel of the relational filter visualization",align="center"]

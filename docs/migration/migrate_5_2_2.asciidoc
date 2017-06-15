@@ -1,8 +1,8 @@
-[[breaking-changes-5.2.2]]
-== Breaking changes in Kibi 5.2.2
+[[breaking-changes-5.4.0]]
+== Breaking changes in Kibi 5.4.0
 
 This section list the changes in Kibi/Kibana that you need to be aware of
-when migrating to Kibi 5.2.2.
+when migrating to Kibi 5.4.0
 
 [float]
 === URL changes for DEB/RPM packages

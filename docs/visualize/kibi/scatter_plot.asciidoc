@@ -1,5 +1,5 @@
 [[kibi_scatter_plot]]
-== Kibi Scatter Plot [Enterprise Edition only]
+== Kibi Scatter Plot
 
 This visualization displays a scatter plot chart
 in four different modes: _Straight_, _Significant terms_, _Any aggregator_, _Filtered aggregator_.
@@ -37,7 +37,7 @@ for distributing the values across X axis. Doing so allows to show the data dist
 
 [float]
 === Significant terms
-image::images/scatter_plot/significant_terms_mode.png["Significant term",align="center"]
+image::images/scatter_plot/significant_terms_mode_5.png["Significant term",align="center"]
 
 In this mode the chart is built from a _Significant terms_ aggregation query result.
 The X values are taken from the *bg_count* field and the Y values from *doc_count* field.
@@ -51,7 +51,7 @@ The X values are taken from the *bg_count* field and the Y values from *doc_coun
 
 [float]
 === Any aggregator
-image::images/scatter_plot/any_aggregator_mode.png["Any aggregator",align="center"]
+image::images/scatter_plot/any_aggregator_mode_5.png["Any aggregator",align="center"]
 
 The chart is built from a _Date Histogram_, _Histogram_, _Terms_ or _Significant terms_ aggregation query result.
 
@@ -64,7 +64,7 @@ The chart is built from a _Date Histogram_, _Histogram_, _Terms_ or _Significant
 
 [float]
 === Filtered aggregator
-image::images/scatter_plot/filtered_aggregator_mode.png["Filtered aggregator",align="center"]
+image::images/scatter_plot/filtered_aggregator_mode_5.png["Filtered aggregator",align="center"]
 
 The chart is built from a _Date Histogram_, _Histogram_, _Terms_ or _Significant terms_ aggregation query result.
 The X and Y values are taken from _Filters_ aggregation results.

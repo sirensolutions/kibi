@@ -1,5 +1,5 @@
 [[bubble_diagram]]
-== Bubble Diagram [Enterprise Edition only]
+== Bubble Diagram
 
 The Bubble Diagram visualization displays series of data grouped into packed circles.
 

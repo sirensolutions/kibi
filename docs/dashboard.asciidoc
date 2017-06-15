@@ -32,14 +32,13 @@ NOTE: You can change the default theme in the *Advanced* section of the *Setting
 [[saving-dashboards]]
 == Saving Dashboards
 
-To save the dashboard, click the *Save Dashboard* image:images/SaveVis.png[Save]
-button:
+To save the dashboard, click the *Save* button:
 
 image::images/dashboard/save_dashboard.png["Saving a dashboard",align="center"]
 
 The name of the dashboard can be set in the *Save As* field.
 
-If *Store time with dashboard* is checked, the time filter currently set will
+If *Store time with dashboard* is checked, the time filter image:images/dashboard/time_filter.png["Time Filter"] currently set will
 be restored when the dashboard is opened.
 
 To display the number of Elasticsearch documents displayed by the dashboard
@@ -57,7 +56,7 @@ when sharing a dashboard on a public facing server.
 NOTE: To view shared dashboards users must be able to access Kibi; keep
 this in mind if your Kibi instance is protected by an authentication proxy.
 
-To share a dashboard, click the *Share* button image:images/share-dashboard.png[] to display the _Sharing_ panel.
+To share a dashboard, click the *Share* button to display the _Sharing_ panel.
 
 image:images/sharing-panel.png[]
 
@@ -73,8 +72,7 @@ To embed a dashboard, copy the embed code from the _Share_ display into your ext
 [[adding-visualizations-to-a-dashboard]]
 == Adding Visualizations to a Dashboard
 
-To add a visualization to the dashboard, click the *Add Visualization* image:images/add-visualisation-button.png[Plus]
-button in the toolbar panel, then select a previously created visualization
+To add a visualization to the dashboard, click the *Add* button in the toolbar panel, then select a previously created visualization
 from the list:
 
 image::images/dashboard/add_vis.png["Adding a visualization to the dashboard",align="center"]
@@ -88,9 +86,9 @@ NOTE: If you see a message about the container's height or width being too
 small, <<resizing-containers,resize the container>>.
 
 == Reset all dashboards to their default state
-
+image:images/remove-all-filters_5.png[float="right",align="center"]
 One can save with dashboard some specific filters, a custom query or a certain time range.
-If you click on the *Reset the time, filters, and queries from all dashboards to their default saved state* image:images/remove-all-filters.png[Minus] button in the toolbar panel, the temporary filters/queries/time set on **all** dashboards would be removed, reverted to a dashboard's default state with the saved filters/query/time.
+If you click on the *Reset* button in the toolbar panel, the temporary filters/queries/time set on **all** dashboards would be removed, reverted to a dashboard's default state with the saved filters/query/time.
 
 NOTE: If the <<kibi-settings-relations,relational panel>> is <<kibi-advanced-settings-relationalPanel,enabled>>, clicking this button does not remove the <<_filters,filter>>. If you want to do so, you need to disable the relational panel in the <<kibi-settings-relations,Relations settings>>.
 
@@ -178,7 +176,7 @@ Clicking on a dashboard group will display the first dashboard in the group
 by default, the other dashboards in the group can be selected through the
 dropdown menu embedded in the tab:
 
-image::images/dashboard/dashboardgroup_tab.png["A dashboard group tab",align="center"]
+image::images/dashboard/dashboardgroup_tab_5.png["A dashboard group tab",align="center"]
 
 If the dashboard is associated with a saved search, the count of documents on the dashboard is displayed next to the dashboard name.
 Two additional indicators that might be displayed are:

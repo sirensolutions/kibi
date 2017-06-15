@@ -1,5 +1,5 @@
 [[kibi_vector_map]]
-== Kibi Vector Map [Enterprise Edition only]
+== Kibi Vector Map
 
 This visualization displays a vector map from the data in the current set of Elasticsearch documents.
 

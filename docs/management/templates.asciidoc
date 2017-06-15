@@ -33,4 +33,4 @@ click on the _save_ button and select a query from the list;
 depending on the query you selected, the <<query-variables,_EntityURI_>> may
 need to be set.
 
-image::images/external_sources/templates_editor.png["Query template editor",align="center"]
+image::images/external_sources/templates_editor_5.png["Query template editor",align="center"]

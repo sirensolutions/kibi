@@ -446,6 +446,12 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
   function transferVisState(fromVis, toVis, stage) {
     return function () {
 
+      // kibi: hook before save the state, usefull for multichart
+      if ($scope.vis._kibiBeforeTransferState) {
+        $scope.vis._kibiBeforeTransferState(fromVis, toVis, stage);
+      }
+      // kibi: end
+
       //verify this before we copy the "new" state
       const isAggregationsChanged = !fromVis.aggs.jsonDataEquals(toVis.aggs);
       // kibi: some information to toggle the pickers is contained in the params

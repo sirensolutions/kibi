@@ -2,7 +2,7 @@ import angular from 'angular';
 import _ from 'lodash';
 define(function () {
   // kibi: require savedObjectsAPITypes and Promise
-  return function MappingSetupService(kbnIndex, esAdmin, savedObjectsAPITypes) {
+  return function MappingSetupService(kbnIndex, esAdmin, savedObjectsAPITypes, Promise) {
     const mappingSetup = this;
 
     const json = {

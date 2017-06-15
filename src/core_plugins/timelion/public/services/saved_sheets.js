@@ -1,5 +1,5 @@
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
-// siren: timelion-sheet saved object via savedObjectsAPI
+// kibi: timelion-sheet saved object via savedObjectsAPI
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 
 define(function (require) {
@@ -16,8 +16,11 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedSheets', function (savedObjectsAPI, Private, SavedSheet, kbnIndex, esAdmin, kbnUrl) {
-    // siren: timelion-sheet saved object via savedObjectsAPI
+  module.service('savedSheets', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedSheet,
+                                          kbnIndex, esAdmin, kbnUrl) {
+    // kibi: timelion-sheet is saved through the savedObjectsAPI
+    savedObjectsAPITypes.add('timelion-sheet');
+
     const options = {
       caching: {
         find: true,

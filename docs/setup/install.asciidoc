@@ -16,8 +16,10 @@ The `zip` package is the only supported package for Windows.
 `docker`::
 
 Kibi Docker images are available at {dockerhub-ref}.
-
++
 <<docker>>
+
+include::docker.asciidoc[]
 
 include::install/targz.asciidoc[]
 

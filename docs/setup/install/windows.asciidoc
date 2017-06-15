@@ -2,12 +2,12 @@
 === Install Kibi on Windows
 
 Kibi can be installed on Windows using the `.zip` package;
-zip packages can be downloaded from the {download-ref}[download page];
-the demo versions contain a pre-configured Elasticsearch cluster in addition to
+zip packages can be downloaded from the {download-ref}[download page].
+The demo versions contain a pre-configured Elasticsearch cluster in addition to
 Kibi.
 
 [[windows-running]]
-==== Running Kibi from the command line
+==== Running Kibi from the Command Line
 
 Kibi can be started from the command line as follows:
 
@@ -20,18 +20,18 @@ By default, Kibi runs in the foreground, prints its logs to `STDOUT`,
 and can be stopped by pressing `Ctrl-C`.
 
 [[windows-configuring]]
-==== Configuring Kibi via config file
+==== Configuring Kibi via Config File
 
 Kibi loads its configuration from the `config/kibi.yml`
-file by default.  The format of this config file is explained in
+file by default. The format of this config file is explained in
 <<settings>>.
 
 [[windows-layout]]
-==== Directory layout of `.zip` archive
+==== Directory Layout of `.zip` Archive
 
 The `.zip` package is entirely self-contained.
 
-This is very convenient because you don't have to create any directories to
+This is very convenient because you do not have to create any directories to
 start using Kibi, and uninstalling Kibi is as easy as removing the directory.
 However, it is advisable to change the default locations of the config and data
 directories so that you do not delete important data later on.
@@ -63,13 +63,13 @@ directories so that you do not delete important data later on.
  d|
 
 | optimize
-  | Transpiled source code. Certain administrative actions (e.g. plugin install)
+  | Transpiled source code. Certain administrative actions, e.g., `plugin install`,
     result in the source code being retranspiled on the fly.
   | %KIBI_HOME%\optimize
  d|
 
 | plugins
-  | Plugin files location. Each plugin will be contained in a subdirectory.
+  | The location of the plugin files. Each plugin will be contained in a subdirectory.
   | %KIBI_HOME%\plugins
  d|
 

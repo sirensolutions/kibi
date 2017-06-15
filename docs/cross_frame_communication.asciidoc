@@ -1,7 +1,7 @@
 [[cross_frame_communication]]
-= Cross frame communication [Enterprise Edition only]
+= Cross Frame Communication [Enterprise Edition only]
 
-To allow cross frame communication Kibi exposes an object at **window.kibi**;
+To allow cross frame communication, Kibi exposes an object at **window.kibi**;
 the object can be called only if both Kibi and the container page are in the same domain.
 
 [float]

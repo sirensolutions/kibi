@@ -14,7 +14,7 @@ including:
 
 [[supported-platforms]]
 [float]
-== Supported platforms
+== Supported Platforms
 
 Packages of Kibi are provided for and tested against Linux, Mac OS and
 Windows. Since Kibi runs on Node.js, we include the necessary Node.js
@@ -23,25 +23,25 @@ version of Node.js is not supported.
 
 [float]
 [[elasticsearch-version]]
-== Elasticsearch version
+== Elasticsearch Version
 
 Kibi should be configured to run against an Elasticsearch node of the same
 version. This is the officially supported configuration.
 
-Running different major version releases of Kibi and Elasticsearch (e.g.
-Kibi 5.x and Elasticsearch 2.x) is not supported, nor is running a minor
-version of Kibi that is newer than the version of Elasticsearch (e.g. Kibi
-5.4 and Elasticsearch 5.0).
+Running different major version releases of Kibi and Elasticsearch, e.g.,
+Kibi 5.x and Elasticsearch 2.x, is not supported, nor is running a minor
+version of Kibi that is newer than the version of Elasticsearch, e.g., Kibi
+5.4 and Elasticsearch 5.0.
 
 Running a minor version of Elasticsearch that is higher than Kibi will
 generally work in order to facilitate an upgrade process where Elasticsearch
-is upgraded first (e.g. Kibi 5.2.2 and Elasticsearch 5.4). In this
-configuration, a warning will be logged on Kibi server startup, so it's only
+is upgraded first, e.g., Kibi 5.2.2 and Elasticsearch 5.4. In this
+configuration, a warning will be logged on Kibi server startup, so it is only
 meant to be temporary until Kibi is upgraded to the same version as
 Elasticsearch.
 
-Running different patch version releases of Kibi and Elasticsearch (e.g.  Kibi
-5.4.1-1 and Elasticsearch 5.4) is generally supported, though we encourage
+Running different patch version releases of Kibi and Elasticsearch, e.g,  Kibi
+5.4.1-1 and Elasticsearch 5.4, is generally supported, though we encourage
 users to run the same versions of Kibi and Elasticsearch down to the patch
 version.
 --
@@ -59,6 +59,4 @@ include::setup/tribe.asciidoc[]
 include::setup/production.asciidoc[]
 
 include::setup/upgrade.asciidoc[]
-
-include::setup/docker.asciidoc[]
 

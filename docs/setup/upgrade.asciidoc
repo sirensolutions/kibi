@@ -1,5 +1,5 @@
 [[upgrade]]
-== Upgrading from a previous version
+== Upgrading from a Previous Version
 
 NOTE: Before upgrading make sure to check the <<breaking-changes>> section.
 
@@ -7,9 +7,10 @@ An existing Kibi installation can be upgraded as follows:
 
 - backup the `.kibi` index.
 - backup the Kibi configuration file (`config/kibi.yml`)
-- backup the .kibiaccess if ACL (Access Control Layer) is enabled.
-- {es-ref}setup-upgrade.html[upgrade Elasticsearch]; before restarting each node, make sure to install a compatible version of the
-  {vanguard-website}#compatibility[SIREn Join] plugin and access control plugins if required.
+- backup the `.kibiaccess` if ACL (Access Control Layer) is enabled.
+- {es-ref}setup-upgrade.html[upgrade Elasticsearch];
+- before restarting each Elasticsearch node, make sure to install a compatible version of the
+  {vanguard-website}#compatibility[Vanguard] plugin and access control plugins if required.
 - download and extract the new Kibi version.
 - copy the previous configuration file to the `config` directory of the new installation.
 - copy the files from the `data` directory in your old installation of the new installation.
@@ -18,7 +19,7 @@ An existing Kibi installation can be upgraded as follows:
 - execute the <<kibi-upgrade-command, upgrade command>>.
 
 [float]
-=== Backing up and Restoring the Kibi indices.
+=== Backing up and Restoring the Kibi Indices.
 
 Before upgrading it is strongly recommended to have a backup of the `.kibi` index; the recommended way to perform regular backups of
 Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapshot and restore modules].
@@ -38,7 +39,7 @@ You can know more about its options by executing the following:
 $ ./bin/kibi backup --help
 ----
 
-For example, the following line will dump in `<MY_FOLDER>` the `.kibi` index, and the `.kibiaccess` index if the option `kibi_access_control.acl.enabled` is true in `kibi.yml`:
+For example, the following line will dump in `<MY_FOLDER>` the `.kibi` index and the `.kibiaccess` index if the option `kibi_access_control.acl.enabled` is true in `kibi.yml`:
 
 [source,shell]
 ----

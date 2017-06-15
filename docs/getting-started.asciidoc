@@ -38,7 +38,7 @@ start your web browser and navigate to {start-url}.
 
 By default, Kibi displays the _Articles_ dashboard; <<dashboard, dashboards>>
 can be configured to display multiple <<visualize, visualizations>> on the
-documents stored in a specific index or returned by a <<save-search,saved search>> on an index.
+documents stored in a specific index or returned by a <<save-search,saved search>> on an index pattern.
 
 Each dashboard is represented by a tab containing the dashboard title and
 the number of documents available to visualizations.
@@ -46,7 +46,7 @@ the number of documents available to visualizations.
 image::images/getting_started/demo_overview.png["The articles dashboard",align="center"]
 
 You can quickly search specific articles through the search input in the
-navigation bar; for example, let's find all the articles written about
+navigation bar. For example, let's find all the articles written about
 _wireless_ or _wifi_:
 
 image::images/getting_started/demo_dashboard_search.png["The dashboard search bar",align="center"]
@@ -60,7 +60,7 @@ Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query
 syntax], or {elastic-ref}query-dsl.html[Elasticsearch Query DSL].
 
 == Filters
-Visualizations can be used to create filters; for example, you can see all the
+Visualizations can be used to create filters. For example, you can see all the
 articles about _wireless_ or _wifi_ published by TechCrunch by clicking on
 the _TechCrunch_ slice inside the _Articles by Source_ <<pie-chart, pie chart>>
 visualization:
@@ -74,9 +74,9 @@ checkbox icon; you can disable all the filters applied to the dashboard by
 clicking on _Actions_ and then _Disable_; for more information about filtering,
 please read the <<visualize-filters, filters>> chapter.
 
-== Relational filters
+== Relational Filters
 The <<relational_filter, Relational Filter>> visualization allows to
-create cross-dashboard filters; for example, by looking at the _Companies_
+create cross-dashboard filters. For example, by looking below at the _Companies_
 button in the dashboard, you can see that there are 342 companies mentioned in
 the TechCrunch articles about _wireless_ or _wifi_.
 
@@ -88,13 +88,13 @@ visualize the data about these 342 companies:
 image::images/getting_started/demo_companies_dashboard_overview.png["Relational filter from Articles to Companies",align="center"]
 
 The relational filter created by clicking on the button is displayed in the
-filter bar, and can be disabled or deleted just like any other filter; moving
+filter bar, and can be disabled or deleted just like any other filter. Moving
 the mouse over the filter will display the list of joined indices and their
 filters:
 
 image::images/getting_started/relational_filter_explanation.png["Relational filter in the filter bar",align="center"]
 
-Relational filter can be accumulated; for example, if you click on the
+Relational filter can be accumulated. For example, if you click on the
 `Investment rounds -->` button, you will see data about the 298 investment
 rounds related to a subset of 342 companies mentioned in the TechCrunch articles
 about _wireless_ or _wifi_.
@@ -107,7 +107,7 @@ configuration editor:
 
 image::images/getting_started/relational_filter_config.png["Relational filter configuration",align="center", width="300"]
 
-As you can see, it is possible to set two different values for label displayed
+As you can see, it is possible to set two different values for the label displayed
 on the button and for the label displayed in the filter; it is also possible
 to use a single configuration for all the dashboards, as the visualization will
 display only buttons relevant to the currently displayed dashboard.
@@ -117,7 +117,7 @@ Click on the _Dashboard_ tab to go back to the Companies dashboard.
 NOTE: for more informations about relational filters, please read the
 <<relational_filter>> chapter.
 
-== Query based aggregations
+== Query Based Aggregations
 
 It is possible to get additional information about companies by using the
 results of queries on SQL databases (or any of the datasources supported by
@@ -130,7 +130,7 @@ by number of employees:
 image::images/getting_started/demo_query_companies.png["SQL based aggregations",align="center"]
 
 `Companies "With competitors"` and `Top 500 companies (HR count)` are <<datasource-queries, queries>>
-on the SQLite database; the records returned by the queries are used to filter
+on the SQLite database. The records returned by the queries are used to filter
 Elasticsearch documents, which can be then aggregated in a metric.
 
 To better understand this feature, let's have a look at the
@@ -155,7 +155,7 @@ the _Query on Companies_ visualization to customize its configuration:
 image::images/getting_started/dashboard_edit_query_vis.png["Editing the Query on Companies visualization",align="center"]
 
 The _metrics_ section defines the aggregations on Elasticsearch documents,
-displayed as columns in the table; the _buckets_ section defines the groups
+displayed as columns in the table. The _buckets_ section defines the groups
 of Elasticsearch documents aggregated by metrics, displayed as row headers
 in the table.
 
@@ -171,12 +171,12 @@ image::images/getting_started/query_vis_filter_agg.png["Configuration of an exte
 The filter is configured to execute the query `Top 500 companies (HR count)`
 on the SQLite database and return the group of Elasticsearch documents from
 the current search whose `id` is equal to one of the id's in the query
-results; the documents are then processed by the _Count_ metric.
+results. The documents are then processed by the _Count_ metric.
 
-Let's add a new aggregation to show the average number of employees; click
+Let's add a new aggregation to show the average number of employees. Click
 on _Add metrics_ inside the _metrics_ section, then select `Metric` as the
 metric type; select `Average` as the aggregation and `number_of_employees`
-as the field, the click on the green button to apply changes.
+as the field, then click on the green button to apply changes.
 
 Save the visualization by clicking on the _Save_ button, confirm that you
 want to overwrite the existing visualization, then click on the _Dashboard_
@@ -199,7 +199,7 @@ the top 500 by number of employees:
 
 image::images/getting_started/query_vis_filterbar.png["Filter dashboard using a SQL query",align="center"]
 
-== Datasource entity selection
+== Datasource Entity Selection
 
 It is possible to select a company entity (record) in the SQLite database (
 and entities in <<external_datasources, external datasources>> in general) by
@@ -210,7 +210,7 @@ for example, click on `Baidu` in _Companies Table_:
 
 image::images/getting_started/entity_selection.png["Entity selection",align="center", width="800"]
 
-Selecting an entity enables additional queries on external datasources; for
+Selecting an entity enables additional queries on external datasources. For
 example, in the _Query on Companies_ visualization you can see that, amongst
 the top 500 companies by number of employees mentioned in articles about
 `wireless` or `wifi`, `Baidu` has one competitor and there are five companies
@@ -227,7 +227,7 @@ like this:
 
 Selecting an entity also enables the display of additional data in the
 _Company Info_ visualization; by clicking on the _(show)_ links you can
-toggle the list of companies in the same domain and competitors; the data in
+toggle the list of companies in the same domain and competitors. The data in
 the tables is fetched from queries on the SQLite database, using the selected
 company ID as a parameter. The queries are rendered using
 <<kibi_query_viewer, customizable templates>>, which will be introduced
@@ -240,10 +240,10 @@ over the purple box.
 NOTE: for additional documentation about entity selection, please read the
 <<entity_selection>> section in the <<external_datasources>> chapter.
 
-== Enhanced search results
+== Enhanced Search Results
 
 The <<enhanced_search_results>> visualization displays the current set of
-Elasticsearch documents as a table; for example, _Companies Table_ is
+Elasticsearch documents as a table. For example, _Companies Table_ is
 configured to display the following fields:
 
 - Time (foundation date)
@@ -257,7 +257,7 @@ configured to display the following fields:
 image::images/getting_started/companies_table.png["Companies table",align="center"]
 
 By clicking on the pencil icon, you can choose which fields to display and
-customize the order of the columns; if the index is time based, the `Time`
+customize the order of the columns. If the index is time based, the `Time`
 column will be always displayed.
 
 For example, expand the first row by clicking on the right arrow, then scroll
@@ -269,9 +269,9 @@ Click on the arrows to move the column to the desired position:
 
 image::images/getting_started/companies_table_colmove.png["Column positioning",align="center"]
 
-=== Click handlers
+=== Click Handlers
 
-You can define click handlers on cells to perform several actions; let's add a
+You can define click handlers on cells to perform several actions. Let's add a
 click handler to open the company homepage when clicking on the cell displaying
 the URL.
 
@@ -289,13 +289,13 @@ an homepage URL in the preview displayed on the right:
 image::images/getting_started/click_handler_url.png["URL click handler",align="center"]
 
 [float]
-=== Relational column
+=== Relational Column
 
 The relational column can be enabled to display if an Elasticsearch document
 is matched by a query on the SQLite database.
 
 For example, in the _Companies Table_, you can see that `Verizon` is in the
-top 50 companies by number of employees by looking at the Why Relevant? column
+top 50 companies by number of employees by looking at the `Why Relevant?` column
 because the `label-not-analyzed` field of the corresponding Elasticsearch
 document is matched by the `label` column in at least one of the records
 returned by the `Top 50 companies (HR count)` query.
@@ -309,7 +309,7 @@ image::images/getting_started/relational_column_example.png["Relational column e
 image::images/getting_started/relational_column_config.png["Relational column configuration",align="center"]
 
 [float]
-=== Saving the visualization
+=== Saving the Visualization
 
 Click on the save button in the top right to save the visualization, then
 click on the _Dashboard_ tab to go back to the Companies dashboard.
@@ -318,7 +318,7 @@ NOTE: for additional documentation about this visualization, please read the
 <<enhanced_search_results>> chapter.
 
 [float]
-== Query templates
+== Query Templates
 
 _Company Info_, which is an instance of a Kibi query viewer visualization,
 displays the results of three SQL queries by rendering their results through

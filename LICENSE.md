@@ -1,4 +1,4 @@
-Copyright 2015–2017 SIREn Solutions
+Copyright 2015–2017 Siren Solutions
 
 TODO: MERGE 5.3.2 Are we changing the LICENCE ??
 

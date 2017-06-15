@@ -2,19 +2,19 @@
 == Introduction
 
 Kibi is an open source data intelligence platform built upon
-{kibana-announcement}[Kibana {kibana-version}]. +
+{kibana-announcement}[Kibana {kibana-version}].
 Kibi {kibi-version} supports Elasticsearch {elasticsearch-version}
 and the Vanguard plugin version {vanguard-version}.
 
 Kibi allows to perform complex analytics on large volumes of data by providing
 customizable visualizations (charts, maps, metrics and tables) on Elasticsearch
-searches; visualizations can be organized into multiple dashboards.
+searches. Visualizations can be organized into multiple dashboards.
 
 Search results can be filtered interactively through a variety of techniques
-(date ranges, full text queries, field value matching); by setting up relations
-between indices it is possible to filter search results matching documents in a
-different dashboard, for example by displaying only companies that received
-investments in a particular year.
+(date ranges, full text queries, field value matching). By setting up relations
+between indices, it is possible to filter search results matching documents in a
+different dashboard, e.g., by displaying
+only companies that received investments in a particular year.
 
 In addition, search results can be filtered and augmented by queries on multiple
 external datasources such as SQL databases and REST APIs; queries on external
@@ -23,7 +23,7 @@ datasources can also be used as aggregations in visualizations.
 In addition to visualizations provided by Kibana, Kibi provides:
 
 - The <<relational_filter, Relational Filter>> visualization, which allows
-to configure relations between fields in different indices and apply
+to configure relations between fields in different indices and to apply
 cross-dashboard filters (pivoting).
 
 - The <<timeline,Kibi Timeline>> visualization, which displays a timeline
@@ -36,23 +36,23 @@ with multiple groups of data coming from different indices.
 - The <<bubble_diagram,Bubble Diagram>> visualization, which displays series of
   data grouped into packed circles.
 
-- The <<kibi_scatter_plot,Scatter plot>> visualization, which displays a
+- The <<kibi_scatter_plot,Scatter Plot>> visualization, which displays a
   scatter plot chart in different modes.
 
-- The <<kibi_box_plot,Box plot>> visualization, which displays a box plot chart
-  from the data in the current set of Elasticsearch documents.
+- The <<kibi_box_plot,Box Plot>> visualization, which displays a box plot chart
+  from the data.
 
 - The <<kibi_vector_map,Kibi Vector Map>> visualization, which displays a
-  vector map where countries are colored based on aggregated field value.
+  vector map where countries are colored based on aggregated field values.
 
 - The <<kibi_horizontal_bar_chart,Kibi Horizontal Bar Chart>> visualization,
   which displays a horizontal bar chart.
 
-- The <<kibi_multi_chart,Multi chart>> visualization, which displays a
-  different type of charts for the same data and allow save and select multiple
+- The <<kibi_multi_chart,Multi Chart>> visualization, which displays
+  different types of charts for the same data and allow to save and to select multiple
   aggregation configurations.
 
-- The <<enhanced_search_results,Enhanced search results>> visualization, which
+- The <<enhanced_search_results,Enhanced Search Results>> visualization, which
   displays query results in a table.
 
 - The <<kibi_query_viewer,Kibi Query Viewer>>, which enables the
@@ -69,11 +69,10 @@ plugin {vanguard-version}] for Elasticsearch.
 [float]
 === How does Kibi compare to Kibana?
 
-Kibi is currently developed as a fork of Kibana {kibana-version}; although
+Kibi is currently developed as a fork of Kibana {kibana-version}. Although
 configuration objects are mostly the same, it is recommended to keep Kibi and
 Kibana in separate indices.
 
 === What's new in Kibi v{kibi-version}
 
-This new version of Kibi provides many improvements and new features.
-To see all changes check <<releasenotes,full release notes>>
+To see all the changes, please check the <<releasenotes,full release notes>>.

@@ -1,10 +1,10 @@
 [[logstash]]
-= Loading data into Elasticsearch
+= Loading Data into Elasticsearch
 
 This chapter contains basic information on how to load data into Elasticsearch
 for evaluation purposes.
 
-== From a SQL database using Logstash
+== From a SQL Database using Logstash
 
 The indices in the Kibi demo distribution have been populated by running
 four https://www.elastic.co/products/logstash[Logstash] configurations over
@@ -15,7 +15,7 @@ The database has the following schema:
 image::images/logstash/crunchbase-schema.png["SQLite database schema",align="center"]
 
 [float]
-=== Index setup
+=== Index Setup
 
 Before loading data, we need to setup indices and mappings; for
 example, let's create an index called `company-minimal` in the Elasticsearch
@@ -42,16 +42,16 @@ command:
 curl -X DELETE http://localhost:9220/company-minimal
 
 [float]
-=== Mapping definition
+=== Mapping Definition
 
-Mappings allow to configure how documents are stored in the index; for example,
+Mappings allow to configure how documents are stored in the index. For example,
 they allow to define how fields are matched by the search engine and set their
 type (string, dates, numbers, locations etc.).
 
 NOTE: for detailed documentation about indices and mappings we recommend
 reading the {elastic-ref}index.html[Elasticsearch Reference].
 
-Let's define a simple mapping to describe a company; the mapping will define
+Let's define a simple mapping to describe a company. The mapping will define
 the following fields:
 
 - `id`: the id of the company in the SQLite database
@@ -112,10 +112,10 @@ response:
 -----
 
 [float]
-=== SQL query definition
+=== SQL Query Definition
 
 To extract the values that will be loaded to the index by Logstash, we need to
-write a SQL query; open a text editor and paste the following one:
+write a SQL query. Open a text editor and paste the following one:
 
 [source,sql]
 ----
@@ -137,7 +137,7 @@ Save the file to `demo/example/company-minimal.sql`
 inside the directory where you extracted the demo distribution.
 
 [float]
-=== Logstash configuration
+=== Logstash Configuration
 
 We now need to write a Logstash configuration to process the records returned
 by the query and populate the `company-minimal` index.
@@ -212,7 +212,7 @@ and the https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.htm
 documentation.
 
 [float]
-=== Browsing the index in Kibi
+=== Browsing the Index in Kibi
 
 Open {start-url} in your browser, click on the _Settings_ tab then on _Indices_ .
 
@@ -231,10 +231,10 @@ the loaded fields:
 
 image::images/logstash/company-minimal-expand.png["Viewing all the fields in a document",align="center"]
 
-=== Demo distribution data loading script
+=== Script to Load the Demo Data
 
-The complete demo data loading process can be repeatead by running the
-`demo/sql/bin/index_crunchbase_sqlite.sh` script; the script performs the
+The complete demo data loading process can be repeated by running the
+`demo/sql/bin/index_crunchbase_sqlite.sh` script. The script performs the
 following actions:
 
 - Creates a copy of the database in the directory containing Logstash

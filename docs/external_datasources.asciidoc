@@ -1,26 +1,26 @@
 [[external_datasources]]
-= External datasources
+= External Datasources
 
 Kibi provides visualizations and aggregations to integrate data from external
-datasources; this section explains how to setup datasources and configure
+datasources. This section explains how to setup datasources and configure
 <<datasource-queries, queries>> and <<datasource-templates, query templates>>.
 
 [float]
 == Configuration
 
-To create a new external datasource navigate to "Setttings/Datasources"
-First fill datasource title, name and pick the type
-Kibi supports following datasource types:
+To create a new external datasource navigate to "Settings/Datasources"
+First fill the datasource title and name then pick one of the types
+Kibi supports:
 
 * REST
 * SQLite
 * MySQL
 * PostgreSQL
 
-After selecting the datasource type additional parameters will appear.
-Below list of additional mandatory parameters for each datasource type:
+After selecting the datasource type, additional parameters will appear.
+Below is a list of additional mandatory parameters for each datasource type:
 
-*Common parameters*
+*Common Parameters*
 
 * timeout - connection timeout in milliseconds
 * cache_enabled - enable server side cache for this datasource

@@ -3,6 +3,7 @@ const angular = require('angular');
 const notify = require('ui/notify');
 const saveAs = require('@spalger/filesaver').saveAs;
 const esUrls = require('./kibi_es_apis_calls');
+import chrome from 'ui/chrome';
 
 module.exports = function (data, $http, kibiIndexName) {
   return function () {
@@ -22,7 +23,7 @@ module.exports = function (data, $http, kibiIndexName) {
         const promises = _.map(esUrls, (urlPart) => {
           // get list of index patterns
           const url = urlPart.replace(/\$KIBI_INDICES_LIST/, indexes);
-          return $http.get('elasticsearch/' + url).then((results) => {
+          return $http.get(chrome.getBasePath() + '/elasticsearch/' + url).then((results) => {
             return formatResults(urlPart, results.data);
           });
         });

@@ -715,7 +715,23 @@ $ bash plugins/search-guard-2/tools/sgadmin.sh \
   -kspass password \
   -h localhost \
   -p 9330 \
-  -rl \
+  -nhnv
+----
+
+To reload the configuration you have to use the same same command with the
+`-rl` flag instead of `-cd`, e.g.:
+
+[source,bash]
+----
+$ bash plugins/search-guard-2/tools/sgadmin.sh \
+  -rl
+  -cn kibi-distribution \
+  -ts config/truststore.jks \
+  -tspass password \
+  -ks ../kibi/pki/searchguard/CN\=sgadmin-keystore.jks \
+  -kspass password \
+  -h localhost \
+  -p 9330 \
   -nhnv
 ----
 

@@ -182,10 +182,8 @@
     <div class="header">
       <h2>Page size</h2>
     </div>
-    <!--kibi: investigate why require does not work without that hidden input !-->
-    <input type="hidden" ng-model="vis.params.enablePageResize" ng-init="vis.params.enablePageResize = true" />
-    <div class="form-group" ng-if="vis.params.enablePageResize">
-      <input type="number" min="1" ng-model="vis.params.pageSize" class="form-control" required/>
+    <div class="form-group">
+      <input type="number" ng-minlength="1" min="1" ng-model="vis.params.pageSize" class="form-control" required/>
     </div>
   </section>
   <section>

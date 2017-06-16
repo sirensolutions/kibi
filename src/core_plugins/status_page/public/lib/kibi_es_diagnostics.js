@@ -32,7 +32,7 @@ module.exports = function (data, $http, kibiIndexName) {
 
         Promise.all(promises).then((results) => {
           const blob = new Blob([results.join('\n')], { type: 'application/text' });
-          saveAs(blob, 'diagniostics.txt');
+          saveAs(blob, 'diagnostics.txt');
         });
       }
     }).catch((err) => {

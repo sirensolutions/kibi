@@ -8,7 +8,7 @@ const TimelionSheetConfiguration = {
     title: Joi.string(),
     hits: Joi.number().integer(),
     description: Joi.string().default(null),
-    timelion_sheet: Joi.array().items(Joi.string()),
+    timelion_sheet: Joi.string(),
     timelion_interval: Joi.string(),
     timelion_other_interval: Joi.string(),
     timelion_chart_height: Joi.number().integer(),

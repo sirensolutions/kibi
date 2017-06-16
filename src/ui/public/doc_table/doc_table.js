@@ -41,6 +41,7 @@ uiModules.get('kibana')
       increaseSample: '@?',
       // kibi: export hits as CSV
       csv: '@?',
+      // kibi: resize hit count per page
       pageSize: '=?',
       // kibi: custom view
       templateId: '=?',
@@ -154,7 +155,7 @@ uiModules.get('kibana')
             startingPage = $scope.pager.pageCount;
           }
 
-          $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize, startingPage);
+          $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize || 50, startingPage);
           calculateItemsOnPage();
 
           return $scope.searchSource.onResults().then(onResults);

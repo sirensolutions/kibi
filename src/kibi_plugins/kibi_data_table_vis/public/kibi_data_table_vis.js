@@ -35,7 +35,8 @@ function KibiDataTableVisTypeProvider(Private) {
         clickOptions: [],
         queryDefinitions: [],
         columns: [],
-        columnAliases: []
+        columnAliases: [],
+        pageSize: 50
       },
       editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
     },
@@ -52,7 +53,6 @@ function KibiDataTableVisTypeProvider(Private) {
           this.uiStateJSON = toJson(uiState);
         }
       }
-      vis.params.pageSize = vis.params.pageSize || 50;
     },
     version: 2
   });

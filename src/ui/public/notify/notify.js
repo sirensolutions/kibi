@@ -1,5 +1,6 @@
 import modules from 'ui/modules';
-import Notifier from 'kibie/notify/notifier';
+import uiNotifier from 'ui/notify/notifier'; // kibi: import stock notifier
+import Notifier from 'kibie/notify/notifier'; // kibi: import ee notifier
 import 'ui/notify/directives';
 import { kbnIndex } from 'ui/metadata';
 const module = modules.get('kibana/notify');
@@ -17,12 +18,16 @@ module.factory('Notifier', function () {
 
 // teach Notifier how to use angular interval services
 module.run(function (config, $interval, $compile) {
-  Notifier.applyConfig({
-    setInterval: $interval,
-    clearInterval: $interval.cancel
-  });
-  applyConfig(config);
-  Notifier.$compile = $compile;
+  // kibi: do this for all notifiers ...
+  for (const Class of [Notifier, uiNotifier]) {
+    Class.applyConfig({
+      setInterval: $interval,
+      clearInterval: $interval.cancel
+    });
+    applyConfig(config);
+    Class.$compile = $compile;
+  }
+  // kibi: end
 });
 
 // if kibana is not included then the notify service can't

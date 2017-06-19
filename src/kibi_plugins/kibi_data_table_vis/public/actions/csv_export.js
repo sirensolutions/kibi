@@ -1,48 +1,62 @@
 import { saveAs } from '@spalger/filesaver';
-import { get, isObject, map } from 'lodash';
+import { isObject, map } from 'lodash';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 
-export function toCsv(config, rows, indexPattern, columns) {
-  const separator = config.get('csv:separator');
-  const quoteValues = config.get('csv:quoteValues');
-  const nonAlphaNumRE = /[^a-zA-Z0-9]/;
-  const allDoubleQuoteRE = /"/g;
+export default function ExportAsCsvProvider(Private, config) {
+  const stringFormat = Private(RegistryFieldFormatsProvider).getDefaultInstance('string');
 
-  if (indexPattern.hasTimeField()) {
-    columns = [ indexPattern.timeFieldName, ...columns ];
-  }
+  function toCsv(config, rows, indexPattern, columns) {
+    const separator = config.get('csv:separator');
+    const quoteValues = config.get('csv:quoteValues');
+    const nonAlphaNumRE = /[^a-zA-Z0-9]/;
+    const allDoubleQuoteRE = /"/g;
 
-  function escape(val) {
-    if (isObject(val)) {
-      val = val.valueOf();
+    if (indexPattern.hasTimeField()) {
+      columns = [ indexPattern.timeFieldName, ...columns ];
     }
-    val = String(val);
-    if (quoteValues && nonAlphaNumRE.test(val)) {
-      val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
-    }
-    return val;
-  }
 
-  // escape each cell in each row
-  const csvRows = rows.map(function (row) {
-    return map(columns, (column, i) => {
-      if (i === 0 && indexPattern.hasTimeField()) {
-        const text = indexPattern.formatField(row, column);
-        return escape(text);
-      } else {
-        return escape(get(row._source, column));
+    function convert(hit, val, fieldName) {
+      if (fieldName === '_source') {
+        return JSON.stringify(hit._source);
       }
+
+      const field = indexPattern.fields.byName[fieldName];
+      if (!field) {
+        return stringFormat.convert(val, 'text');
+      }
+      return field.format.getConverterFor('text')(val, field, hit);
+    }
+
+    function escape(val) {
+      if (isObject(val)) {
+        val = val.valueOf();
+      }
+      val = String(val);
+      if (quoteValues && nonAlphaNumRE.test(val)) {
+        val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
+      }
+      return val;
+    }
+
+    // escape each cell in each row
+    const csvRows = rows.map(function (row) {
+      const flattenRow = indexPattern.flattenHit(row);
+      return map(columns, column => escape(convert(row, flattenRow[column], column)));
     });
-  });
 
-  // add the columns to the rows
-  csvRows.unshift(columns.map(escape));
+    // add the columns to the rows
+    csvRows.unshift(columns.map(escape));
 
-  return csvRows.map(row => `${row.join(separator)}\r\n`).join('');
-};
+    return csvRows.map(row => `${row.join(separator)}\r\n`).join('');
+  };
 
-export function ExportAsCsvProvider(config) {
-  return function exportAsCsv(rows, indexPattern, columns) {
+  function exportAsCsv(rows, indexPattern, columns) {
     const csv = new Blob([ toCsv(config, rows, indexPattern, columns) ], { type: 'text/plain' });
     saveAs(csv, 'kibi-table.csv');
+  };
+
+  return {
+    toCsv,
+    exportAsCsv
   };
 }

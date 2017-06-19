@@ -386,6 +386,10 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       value: false,
       description: 'Set to true to use filters from dashboards on expansion'
     },
+    'kibi:graphStatesLimit': {
+      value: 5,
+      description: 'Set how many undo/redo steps you want to maintain in memory'
+    },
     'kibi:graphExpansionLimit' : {
       value: 500,
       description: 'Limit the number of elements to retrieve during the graph expansion'

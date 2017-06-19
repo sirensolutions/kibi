@@ -31,7 +31,8 @@ module.exports = function (kibana) {
       },
       hacks: [
         'plugins/timelion/lib/panel_registry',
-        'plugins/timelion/panels/timechart/timechart'
+        'plugins/timelion/panels/timechart/timechart',
+        'plugins/timelion/services/saved_sheets' // kibi: display sheets in management/objects.
       ],
       visTypes: [
         'plugins/timelion/vis'

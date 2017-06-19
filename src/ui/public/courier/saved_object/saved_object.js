@@ -367,7 +367,15 @@ export default function SavedObjectFactory(
         return Promise.resolve();
       }
 
-      return getTitleAlreadyExists(this, esAdmin)
+      // kibi: pass savedObjectsAPI instead of esAdmin for objects managed by it
+      let client;
+      if (savedObjectsAPITypes.has(esType)) {
+        client = savedObjectsAPI;
+      } else {
+        client = esAdmin;
+      }
+      return getTitleAlreadyExists(this, client)
+      // kibi: end
         .then((duplicateTitle) => {
           if (!duplicateTitle) return true;
           const confirmMessage =

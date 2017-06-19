@@ -34,7 +34,9 @@ describe('Saved Object', function () {
     // Allows the type 'dashboard' to be used.
     // Unfortunately we need to use bluebird here instead of native promises because there is
     // a call to finally.
-    sinon.stub(esAdminStub.indices, 'getFieldMapping').returns(BluebirdPromise.resolve({
+
+    // kibi: stub savedObjectsAPI
+    sinon.stub(savedObjectsAPIStub.indices, 'getFieldMapping').returns(BluebirdPromise.resolve({
       '.kibana' : {
         'mappings': {
           'dashboard': {}
@@ -47,8 +49,10 @@ describe('Saved Object', function () {
     // kibi: end
 
     // Necessary to avoid a timeout condition.
-    sinon.stub(esAdminStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
-    sinon.stub(esAdminStub.indices, 'refresh').returns(BluebirdPromise.resolve());
+    // kibi: stub savedObjectsAPI
+    sinon.stub(savedObjectsAPIStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
+    sinon.stub(savedObjectsAPIStub.indices, 'refresh').returns(BluebirdPromise.resolve());
+    // kibi: end
   }
 
   /**
@@ -75,8 +79,12 @@ describe('Saved Object', function () {
    * @param {Object} mockDocResponse
    */
   function stubESResponse(mockDocResponse) {
+    // kibi: stub savedObjectsAPI
     sinon.stub(savedObjectsAPIStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
     sinon.stub(savedObjectsAPIStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(savedObjectsAPIStub, 'search').returns(BluebirdPromise.resolve({ hits: { total: 0 } }));
+    // kibi: end
+
     // Stub out search for duplicate title:
     sinon.stub(esAdminStub, 'search').returns(BluebirdPromise.resolve({ hits: { total: 0 } }));
 

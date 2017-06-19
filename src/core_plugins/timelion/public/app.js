@@ -208,9 +208,11 @@ app.controller('timelion', function (
       $scope.stats = resp.stats;
       $scope.sheet = resp.sheet;
       _.each(resp.sheet, function (cell) {
-        if (cell.exception) {
-          $scope.state.selected = cell.plot;
+        // kibi: notify errors in sheets
+        if (cell.failed) {
+          notify.error(cell.reason);
         }
+        // kibi: end
       });
       $scope.running = false;
     })

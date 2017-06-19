@@ -32,6 +32,13 @@ define(function (require) {
       })
       // data, status, headers, config
       .success(function (resp) {
+        // kibi: notify errors in sheets
+        resp.sheet.forEach(cell => {
+          if (cell.failed) {
+            notify.error(cell.reason);
+          }
+        });
+        // kibi: end
         $scope.sheet = resp.sheet;
       })
       .error(function (resp) {

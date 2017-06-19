@@ -1,4 +1,3 @@
-
 import _ from 'lodash';
 import Promise from 'bluebird';
 import parseSheet from './lib/parse_sheet.js';
@@ -14,6 +13,39 @@ module.exports = function (tlConfig) {
   let queryCache = {};
   const stats = {};
   let sheet;
+
+  // kibi: error wrapper
+  /**
+   * Wraps a generic error to provide more information.
+   *
+   * @param {Error} error - a generic error
+   * @param {Number} cell - Timelion cell index.
+   * @returns {Object} a wrapped error with a message and a statusCode.
+   */
+  function wrapError(error, cell) {
+    let statusCode = error.statusCode;
+    if (error.status) {
+      statusCode = error.status;
+    }
+    if (!statusCode) {
+      statusCode = 500;
+    }
+    let message = _.get(error, 'body.reason');
+    if (!message) {
+      message = error.msg;
+    }
+    if (!message) {
+      message = error.message;
+    }
+    if (error.path) {
+      message += ` - Path: ${error.path}`;
+    }
+    if (cell) {
+      message = `Error in cell ${cell}: ${message}`;
+    }
+    return { message, statusCode, cell };
+  }
+  // kibi: end
 
   function throwWithCell(cell, exception) {
     throw new Error(' in cell #' + (cell + 1) + ': ' + exception.message);
@@ -141,13 +173,17 @@ module.exports = function (tlConfig) {
         const functionDef = tlConfig.server.plugins.timelion.getFunction(query.function);
         const resolvedDatasource = resolvedDatasources[i];
 
+        // kibi: return rejections instead of throwing an exception
         if (resolvedDatasource.isRejected()) {
-          if (resolvedDatasource.reason().isBoom) {
-            throw resolvedDatasource.reason();
-          } else {
-            throwWithCell(query.cell, resolvedDatasource.reason());
-          }
+          const reason = resolvedDatasource.reason();
+          sheet[i] = {
+            failed: true,
+            cell: query.cell,
+            reason: wrapError(reason, query.cell)
+          };
+          return;
         }
+        // kibi: end
 
         queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value();
       });
@@ -182,11 +218,18 @@ module.exports = function (tlConfig) {
     sheet = parseSheet(request.sheet);
     return preProcessSheet(sheet).then(function () {
       return _.map(sheet, function (chainList, i) {
+        if (chainList.failed) {
+          return chainList;
+        }
         return resolveChainList(chainList).then(function (seriesList) {
           stats.sheetTime = (new Date()).getTime();
           return seriesList;
         }).catch(function (e) {
-          throwWithCell(i, e);
+          return {
+            failed: true,
+            cell: i,
+            reason: wrapError(e, i)
+          };
         });
       });
     });

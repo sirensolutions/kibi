@@ -32,6 +32,7 @@ module.exports = class KbnServer {
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
+    this.cleaningArray = []; // Kibi: added to manage cleanup functions through shutdown_manager
 
     this.ready = constant(this.mixin(
       // sets this.config, reads this.settings
@@ -100,12 +101,10 @@ module.exports = class KbnServer {
    */
   async listen() {
     const { server, config } = this;
-    this.cleaningArray = []; // Kibi: added to manage cleanup functions through shutdown_manager
 
     await this.ready();
     await fromNode(cb => server.start(cb));
     await require('./shutdown_manager')(this, server); // kibi: added here to manage pid and gremlin server shutdown
-    await require('./gremlin_server')(this, server, config); // kibi: added here to manage gremlin server
 
     if (isWorker) {
       // help parent process know when we are ready

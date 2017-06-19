@@ -8,13 +8,13 @@ import uiModules from 'ui/modules';
 
 const chrome = require('ui/chrome')
 .setRootTemplate(require('plugins/status_page/status_page.html'))
-.setRootController('ui', function ($http, $scope, kbnIndex, $window) {
+.setRootController('ui', function ($http, $scope, kbnIndex) {
   const ui = this;
   ui.loading = false;
 
   // kibi: added to be able to save diagnostics as json
   $scope.esUrls = require('./lib/kibi_es_apis_calls');
-  $scope.esDiagnostics = require('./lib/kibi_es_diagnostics')(ui, $http, kbnIndex, $window);
+  $scope.esDiagnostics = require('./lib/kibi_es_diagnostics')(ui, $http, kbnIndex);
   // kibi: end
 
   ui.refresh = function () {

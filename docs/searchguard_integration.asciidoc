@@ -377,6 +377,7 @@ CLUSTER_COMPOSITE_OPS:
 
 KIBI_CLUSTER:
   - "indices:data/read/scroll"
+  - "indices:data/read/scroll/clear"
   - "cluster:internal/data/transfer/*"
   - "indices:data/read/msearch*"
   - CLUSTER_COMPOSITE_OPS_RO
@@ -460,13 +461,21 @@ logstash:
         - CRUD
         - CREATE_INDEX
 
-# Permissions for a Marvel agent.
-marvel:
+# Permissions for an X-Pack monitoring agent.
+monitoring:
   cluster:
-    - indices:admin/template/get
-    - indices:admin/template/put
+    - CLUSTER_MONITOR
+    - 'indices:admin/aliases'
+    - 'indices:admin/template/get'
+    - 'indices:admin/template/put'
+    - 'cluster:admin/ingest/pipeline/get'
+    - 'cluster:admin/ingest/pipeline/put'
+    - 'indices:data/write/bulk'
   indices:
     '?marvel*':
+      '*':
+        - ALL
+    '?monitoring*':
       '*':
         - ALL
 
@@ -494,13 +503,15 @@ sentinl:
 # Permissions for the Kibi server process.
 kibiserver:
   cluster:
-      - cluster:monitor/nodes/info
-      - cluster:monitor/health
-      - cluster:monitor/main
-      - cluster:monitor/state
-      - cluster:monitor/nodes/stats
-      - KIBI_CLUSTER
-      - CLUSTER_COMPOSITE_OPS
+    - cluster:admin/xpack/monitoring/bulk
+    - cluster:monitor/nodes/info
+    - cluster:monitor/xpack/info
+    - cluster:monitor/health
+    - cluster:monitor/main
+    - cluster:monitor/state
+    - cluster:monitor/nodes/stats
+    - KIBI_CLUSTER
+    - CLUSTER_COMPOSITE_OPS
   indices:
     '*':
       '*':
@@ -589,7 +600,7 @@ The file defines the following roles:
   indices.
 - **sentinl**: defines the permission for a Sentinl user; the role is
   not required if the Sentinl plugin is not installed.
-- **marvel**: defines the permissions for a Marvel agent.
+- **monitoring**: defines the permissions for an X-Pack monitoring agent.
 - **kibiserver**: defines the permissions for the Kibi server process.
 - **kibiadmin**: defines the permissions for a Kibi user with read/write
   access to the .kibi index.
@@ -637,7 +648,7 @@ CN=demouser:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 sentinl:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-marvel:
+monitoring:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 ----
 
@@ -690,9 +701,9 @@ sentinl:
   users:
     - sentinl
 
-marvel:
+monitoring:
   users:
-    - marvel
+    - monitoring
 ----
 
 The file defines the assignment of roles to users; users authenticating through
@@ -1270,8 +1281,72 @@ console.proxyConfig:
       ca: "pki/searchguard/ca.pem"
 ----
 
-`sense.proxyConfig.ssl.ca` must point to the CA certificate bundle, so it can
+`console.proxyConfig.ssl.ca` must point to the CA certificate bundle, so it can
 be set to the same value as the `elasticsearch.ssl.ca` parameter.
+
+=== X-Pack monitoring configuration
+
+In order to store monitoring data in a cluster secured by Search Guard it is
+required to configure agent exporters to submit data over an authenticated
+HTTPS connection.
+
+The exporter configuration in `elasticsearch.yml` must include the following
+parameters:
+
+- `type`: `http`.
+- `host`: an array of URLs that will be contacted by the exporter.
+- `auth.username`: the username of the Marvel agent user.
+- `auth.password`: the password of the Marvel agent user.
+- `ssl.truststore.path`: the path to the CA certificate truststore (this will
+  usually be the same as the one specified in the Search Guard configuration).
+- `ssl.truststore.password`: the password of the CA certificate truststore.
+
+For example, the following configuration defines an exporters which sends data
+to the cluster at `https://localhost:9220`, authenticating as the `monitoring`
+user:
+
+[source,yaml]
+----
+xpack.monitoring.exporters:
+  id1:
+    type: http
+    host: ["https://localhost:9220"]
+
+    auth:
+      username: monitoring
+      password: password
+
+    ssl:
+      truststore.path: truststore.jks
+      truststore.password: password
+----
+
+=== X-Pack plugin for Kibana
+
+The X-Pack security plugin is not compatible with Kibi access control; you can disable
+it by adding the following lines to the `kibi.yml` file:
+
+[source,yaml]
+----
+xpack:
+  security:
+    enabled: false
+----
+
+To enable Kibana monitoring in X-Pack, you'll need to grant the
+`cluster:admin/xpack/monitoring/bulk` permission to the `kibiserver` role; the permission
+can be added to the existing permissions in the `cluster` section of the role.
+
+If you do not need Kibana monitoring, you can add the following lines to `kibi.yml` to disable it:
+
+[source,yaml]
+----
+xpack:
+  monitoring:
+    kibana:
+      collection:
+        enabled: false
+----
 
 === Handling of authorization errors
 

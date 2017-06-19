@@ -35,7 +35,8 @@ function KibiDataTableVisTypeProvider(Private) {
         clickOptions: [],
         queryDefinitions: [],
         columns: [],
-        columnAliases: []
+        columnAliases: [],
+        pageSize: 50
       },
       editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
     },

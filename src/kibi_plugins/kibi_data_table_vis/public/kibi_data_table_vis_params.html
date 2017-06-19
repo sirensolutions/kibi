@@ -178,7 +178,15 @@
       <kibi-array-param-add required label="query" model="vis.params.queryDefinitions"></kibi-array-param-add>
     </div>
   </section>
-
+  <section>
+    <div class="header">
+      <h2>Page size</h2>
+    </div>
+    <!-- kibi: investigate why required does not work without ng-if="true" !-->
+    <div class="form-group" ng-if="true">
+      <input type="number" min="1" ng-model="vis.params.pageSize" class="form-control" required/>
+    </div>
+  </section>
   <section>
     <div class="header">
       <h2>Custom template</h2>

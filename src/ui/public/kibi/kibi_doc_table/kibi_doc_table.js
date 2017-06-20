@@ -103,15 +103,23 @@ define(function (require) {
           }
 
           // escape each cell in each row
+          const stringFormat = fieldFormats.getDefaultInstance('string');
+
+          function convert(hit, val, fieldName) {
+            if (fieldName === '_source') {
+              return JSON.stringify(hit._source);
+            }
+
+            const field = $scope.indexPattern.fields.byName[fieldName];
+            if (!field) {
+              return stringFormat.convert(val, 'text');
+            }
+            return field.format.getConverterFor('text')(val, field, hit);
+          }
+
           const csvRows = rows.map(function (row) {
-            return _.map(columns, (column, i) => {
-              if (i === 0 && $scope.indexPattern.timeFieldName) {
-                const text = $scope.indexPattern.formatField(row, column);
-                return escape(text);
-              } else {
-                return escape(_.get(row._source, column));
-              }
-            });
+            const flattenRow = $scope.indexPattern.flattenHit(row);
+            return _.map(columns, column => escape(convert(row, flattenRow[column], column)));
           });
 
           // add the columns to the rows

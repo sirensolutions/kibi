@@ -255,6 +255,13 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
    */
 
   const updateButtons = function (reason) {
+    if (!kibiState.isSirenJoinPluginInstalled()) {
+      notify.error(
+        'This version of Kibi Relational filter requires the Vanguard plugin. Please install it and restart Kibi.'
+      );
+      return;
+    }
+
     if (edit) {
       return;
     }
@@ -263,12 +270,6 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       console.log(`Updating counts on the relational buttons because: ${reason}`);
     }
     const self = this;
-
-    if (!kibiState.isSirenJoinPluginInstalled()) {
-      return Promise.reject(new Error(
-        'This version of Kibi Relational filter requires the Siren Platform plugin. Please install it and restart Kibi.'
-      ));
-    }
 
     let promise;
     if (!$scope.buttons || !$scope.buttons.length) {

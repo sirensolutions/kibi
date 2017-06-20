@@ -2,9 +2,9 @@
 == Templates
 
 You can define templates to format the results of a query on an
-<<external_datasource>>[external datasource] datasource and the results of an
-Elasticsearch query in a <<enhanced_search_results>>[Enhanced search results
-visualization].
+<<external_datasource, external datasource>> datasource and the results of an
+Elasticsearch query in a <<enhanced_search_results, Enhanced search results
+visualization>>.
 
 Kibi supports three template engines:
 
@@ -34,4 +34,3 @@ depending on the query you selected, the <<query-variables,_EntityURI_>> may
 need to be set.
 
 image::images/external_sources/templates_editor.png["Query template editor",align="center"]
-

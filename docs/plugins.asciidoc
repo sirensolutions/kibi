@@ -75,7 +75,7 @@ To update a plugin, remove the current version and reinstall the plugin.
 To remove a plugin, use the `remove` command, as in the following example:
 
 [source,shell]
-$ bin/kibi-plugin remove 
+$ bin/kibi-plugin remove
 
 You can also remove a plugin manually by deleting the plugin's subdirectory under the `plugins/` directory.
 
@@ -127,15 +127,3 @@ path to that configuration file each time you use the `bin/kibi plugin` command.
 64:: Unknown command or incorrect option parameter
 74:: I/O error
 70:: Other error
-
-[float]
-[[plugin-switcher]]
-== Switching Plugin Functionality
-
-The Kibi UI serves as a framework that can contain several different plugins. You can switch between these
-plugins by clicking the image:images/app-button.png[Plugin Chooser] *Plugin chooser* button to display icons for the
-installed plugins:
-
-image::images/app-picker.png[]
-
-Click a plugin's icon to switch to that plugin's functionality.

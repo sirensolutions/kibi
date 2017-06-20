@@ -22,8 +22,8 @@
 :searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-5.4.0
 :kibi-ref: http://siren.solutions/kibi/docs/current/
 :dockerhub-ref: https://hub.docker.com/u/sirensolutions/
-:download-ref: https://support.siren.solutions
 :start-url: http://localhost:5606
+:download-ref: https://support.siren.io
 :kibi-default-port: 5606
 
 :k4issue: https://github.com/elastic/kibana/issues/
@@ -76,6 +76,8 @@ include::kerberos.asciidoc[]
 include::jwt.asciidoc[]
 
 include::shield_integration.asciidoc[]
+
+include::external_datasources.asciidoc[]
 
 include::kibi_gremlin_server.asciidoc[]
 

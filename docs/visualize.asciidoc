@@ -25,34 +25,30 @@ To create a visualization:
 . Choose the visualization type:
 +
 [horizontal]
+<<xy-chart,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
 <<enhanced_search_results,Enhanced search results>>:: Display an interactive
 table of documents returned by an Elasticsearch query.
 <<kibi_query_viewer,Kibi Query Viewer>>:: Display the results of
 queries on external datasources in Jade/Handlebards templates.
 <<relational_filter,Relational Filter>>:: Apply cross-dashboard filters
 based on the relations between different indices.
-<<multi-chart,Multi chart>>:: Display multiple visualization configurations.
-<<area-chart,Area chart>>:: Visualize the total contribution of several
-different series.
+<<kibi_multi_chart,Multi chart>>:: Display multiple visualization configurations.
 <<data-table,Data table>>:: Display the raw data of a composed aggregation.
-<<line-chart,Line chart>>:: Compare different series.
 <<markdown-widget,Markdown widget>>:: Display free-form information or
 instructions.
 <<metric-chart,Metric>>:: Display a single number.
 <<pie-chart,Pie chart>>:: Display each source's contribution to a total.
 <<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
-<<heatmap,Heat map>>:: Display data as a heat map.
+<<heatmap-chart,Heat map>>:: Display data as a heat map.
 <<tilemap,Tile map>>:: Use tile maps to associate the results of an aggregation with geographic points.
-<<vertical-bar-chart,Vertical bar chart>>:: Graph values in a bar chart.
 <<timeline,Kibi Timeline>>:: Displays series of data coming from different
 saved searches on a single timeline component.
-<<scatter_plot, Scatter plot>>:: Display data in a scatter plot chart.
+<<kibi_scatter_plot, Scatter plot>>:: Display data in a scatter plot chart.
 <<radar_chart, Radar Chart>>:: Display multivariate data in a two-dimensional chart.
 <<graph_browser, Kibi Graph Browser>>:: Display a graph visualization starting from a selected document
-<<box_plot, Box plot>>:: Display data in a box plot.
+<<kibi_box_plot, Box plot>>:: Display data in a box plot.
 <<bubble_diagram, Kibi Bubble Diagram>>:: Display series of data grouped into packed circles.
-<<vector_map, Kibi Bubble Diagram>>:: Display series of data grouped into packed circles.
-<<horizontal_bar_chart, Horizontal Bar Chart>>:: Graph values in a horizontal bar chart.
+<<kibi_horizontal_bar_chart, Horizontal Bar Chart>>:: Graph values in a horizontal bar chart.
 
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the index pattern for the indices that
@@ -124,11 +120,7 @@ include::visualize/kibi/kibi_query_viewer.asciidoc[]
 
 include::visualize/kibi/multi_chart.asciidoc[]
 
-include::visualize/area.asciidoc[]
-
 include::visualize/datatable.asciidoc[]
-
-include::visualize/line.asciidoc[]
 
 include::visualize/markdown.asciidoc[]
 
@@ -142,7 +134,7 @@ include::visualize/heatmap.asciidoc[]
 
 include::visualize/tilemap.asciidoc[]
 
-include::visualize/vertbar.asciidoc[]
+include::visualize/xychart.asciidoc[]
 
 include::visualize/kibi/timeline.asciidoc[]
 
@@ -159,4 +151,3 @@ include::visualize/kibi/bubble_diagram.asciidoc[]
 include::visualize/kibi/vector_map.asciidoc[]
 
 include::visualize/kibi/horizontal_bar_chart.asciidoc[]
-

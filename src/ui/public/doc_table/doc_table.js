@@ -116,6 +116,21 @@ uiModules.get('kibana')
         if ($scope.columns.length === 0) $scope.columns.push('_source');
       });
 
+      // Kibi: cache the last filters.
+      let previousFilters = getAppState().filters;
+      /**
+       * Kibi: checks if the filters are changed.
+       */
+      const areFilterChanged = function () {
+        const filters = getAppState().filters;
+        if (previousFilters.length !== filters || !_(previousFilters).differenceWith(filters, _.isEqual).isEmpty()) {
+          previousFilters = filters;
+          return true;
+        } else {
+          return false;
+        }
+      };
+
       $scope.$watch('searchSource', prereq(function () {
         if (!$scope.searchSource) return;
 
@@ -151,7 +166,7 @@ uiModules.get('kibana')
           // kibi: start the page
           // if page size is changed and hits length same as pager.totalItems startingPage should be 1
           let startingPage = 1;
-          if ($scope.increaseSample && $scope.pager && ($scope.pager.totalItems !== $scope.hits.length)) {
+          if (!areFilterChanged() && $scope.increaseSample && $scope.pager && ($scope.pager.totalItems !== $scope.hits.length)) {
             startingPage = $scope.pager.pageCount;
           }
 

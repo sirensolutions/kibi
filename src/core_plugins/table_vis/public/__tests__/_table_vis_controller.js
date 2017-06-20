@@ -7,7 +7,7 @@ import tabifyPm from 'ui/agg_response/tabify/tabify';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import StateManagementAppStateProvider from 'ui/state_management/app_state';
-describe('Controller', function () {
+describe('Table Vis Controller', function () {
   let $rootScope;
   let $compile;
   let Private;
@@ -47,6 +47,29 @@ describe('Controller', function () {
               ranges: [
                 { from: 0, to: 1000 },
                 { from: 1000, to: 2000 }
+              ]
+            }
+          }
+        ]
+      }
+    );
+  }
+
+  function OneExternalQueryVis(params) {
+    return new Vis(
+      Private(FixturesStubbedLogstashIndexPatternProvider),
+      {
+        type: 'table',
+        params: params || {},
+        aggs: [
+          {
+            type: 'external_query_terms_filter',
+            schema: 'bucket',
+            params: {
+              queryDefinitions: [
+                {
+                  queryId: 'my-dashed-query'
+                }
               ]
             }
           }
@@ -187,5 +210,36 @@ describe('Controller', function () {
 
     expect(spiedTabify).to.have.property('callCount', 1);
     expect(spiedTabify.firstCall.args[2]).to.have.property('partialRows', false);
+  });
+
+  describe('kibi', function () {
+    it('converts external_query_terms_filter aggs row values to the query label', function () {
+      const tabifyResponse = {
+        tables: [
+          {
+            rows: [
+              [{
+                aggConfig: {
+                  __type: {
+                    name: 'external_query_terms_filter'
+                  }
+                },
+                key: 'my-dashed-query - my query label',
+                value:  'my-dashed-query - my query label',
+                type: 'bucket'
+              }]
+            ]
+          }
+        ]
+      };
+
+      const stubbedTabify = sinon.stub().returns(tabifyResponse);
+      Private.stub(tabifyPm, stubbedTabify);
+
+      initController(new OneExternalQueryVis());
+      attachEsResponseToScope(fixtures.oneExternalQueryFilterBucket);
+
+      expect($scope.tableGroups.tables[0].rows[0][0].value).to.eql('my query label');
+    });
   });
 });

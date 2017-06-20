@@ -44,5 +44,30 @@ describe('AggConfig Filters', function () {
       expect(filter.meta).to.have.property('index', indexPattern.id);
 
     });
+    describe('kibi', function () {
+      it('should separate compound query and get raw key', function () {
+        const vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            {
+              type: 'filters',
+              schema: 'segment',
+              params: {
+                filters: [
+                  { input: { query: { query_string: { query: 'not-my-compound-query' } } } },
+                  { input: { query: { query_string: { query: 'my-compound-query' } } } }
+                ]
+              }
+            }
+          ]
+        });
+
+        const aggConfig = vis.aggs.byTypeName.filters[0];
+        const filter = createFilter(aggConfig, 'my-compound-query - my compound query');
+        expect(_.omit(filter, 'meta')).to.eql(aggConfig.params.filters[1].input);
+        expect(filter.meta).to.have.property('index', indexPattern.id);
+
+      });
+    });
   });
 });

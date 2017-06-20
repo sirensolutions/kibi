@@ -44,6 +44,18 @@ module.controller('KbnTableVisController', function ($scope, $element, Private) 
         return table.rows.length > 0;
       });
 
+      // kibi: remove ID from start of query for display in table .e.g "99a8sdf87ag - google" -> "google"
+      // if the query is an external_query_terms_filter
+      tableGroups.tables.map(table => {
+        if (table && table.rows) {
+          table.rows.map(row => {
+            if(row[0].aggConfig.__type.name === 'external_query_terms_filter') {
+              row[0].value = row[0].value.split(' - ')[1];
+            }
+          });
+        }
+      });
+
       $element.trigger('renderComplete');
     }
 
@@ -53,4 +65,3 @@ module.controller('KbnTableVisController', function ($scope, $element, Private) 
     }
   });
 });
-

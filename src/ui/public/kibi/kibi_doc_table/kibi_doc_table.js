@@ -39,6 +39,8 @@ define(function (require) {
         cellClickHandlers: '=',
         queryColumn: '=',
         columnAliases: '=?',
+        // kibi: resize hit count per page
+        pageSize: '=?',
         options: '='
       },
       link: function ($scope) {

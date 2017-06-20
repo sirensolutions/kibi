@@ -84,6 +84,12 @@ define(function (require) {
           });
 
           $scope.$watch('page', self.changePage);
+
+          // rerender table if custom page size is changed
+          $scope.$on('pageSizeChanged', function (event, args) {
+            self.perPage = args;
+            self.renderList();
+          });
           $scope.$watchCollection(self.getList, function (list) {
             $scope.list = list;
             self.renderList();

@@ -36,6 +36,13 @@ describe('Kibi doc table', function () {
     });
   };
 
+   /**
+   * getTableColumn returns the column content
+   */
+  function getTableColumn() {
+    return _.trim($elem.find('.discover-table-datafield').text());
+  };
+
   const destroy = function () {
     $scope.$destroy();
     $parentScope.$destroy();
@@ -54,7 +61,8 @@ describe('Kibi doc table', function () {
         search-source="searchSource"
         columns="columns"
         column-aliases="columnAliases"
-        options="options">
+        options="options"
+        page-size="pageSize">
       </kibi-doc-table>`);
     ngMock.inject(function (Private) {
       searchSource = Private(require('fixtures/stubbed_search_source'));
@@ -373,6 +381,45 @@ describe('Kibi doc table', function () {
 
         const csv = $scope.toCsv();
         expect(csv).to.eql('time,"_index","_type","_id",one,two\r\n"August 29th 2016, 00:00:00.000",myindex,mytype,myid,1,2\r\n');
+      });
+    });
+
+    describe('Page size option', function () {
+      it('should display sample according to custom page size', function () {
+        const _createHits = number => {
+          const hits = [];
+
+          for (let i = 0; i < number; i++) {
+            const hit = {
+              _index: 'aaa',
+              _type: 'AAA',
+              _id: i + 1,
+              _source: {
+                label: `myvalue ${i + 1}`
+              }
+            };
+            hits.push(hit);
+          }
+          return hits;
+        };
+        const columnContent = (lb, up) => _.range(lb, up + 1).map(i => `myvalue ${i}`, '').join('');
+
+        init($elem, {
+          searchSource: searchSource,
+          columns: ['label'],
+          columnAliases: [],
+          pageSize: 20
+        });
+
+        searchSource.crankResults({
+          hits: {
+            total: 5000,
+            hits: _createHits(50)
+          }
+        });
+        $scope.$digest();
+
+        expect(getTableColumn()).to.be(columnContent(1, 20));
       });
     });
 

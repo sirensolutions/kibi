@@ -19,6 +19,7 @@ define(function (require) {
       sorting: $scope.vis.params.sort,
       customView: $scope.vis.params.templateId ? true : false,
       showCustomView: $scope.vis.params.templateId ? true : false,
+      pageSize: $scope.vis.params.pageSize
     };
 
     $scope.$watch('vis.params.templateId', function (templateId) {
@@ -65,8 +66,17 @@ define(function (require) {
       }
     });
 
+    // update table if custom page size is changed
+    const checkPageSize = function () {
+      if ($scope.vis.params.pageSize !==  $scope.savedObj.pageSize) {
+        $scope.savedObj.pageSize = $scope.vis.params.pageSize;
+        $rootScope.$broadcast('pageSizeChanged',$scope.vis.params.pageSize);
+      }
+    };
+
     if (configMode) {
       const removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
+        checkPageSize();
         _constructQueryColumnObject();
         _constructCellOnClicksObject();
         $scope.searchSource.fetchQueued();

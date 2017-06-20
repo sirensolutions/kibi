@@ -176,9 +176,7 @@ function startServer(self, fulfill, reject) {
         }
       });
     })
-    .catch((javaError) => {
-      reject(javaError);
-    });
+    .catch(reject);
   } else {
     const message = 'The Gremlin Server jar file was not found. Please check the ' +
                      'value of the kibi_core.gremlin_server.path configuration property.';

@@ -74,18 +74,15 @@ uiModules
           let timer;
           const check = function () {
             const appState = getAppState();
+            if (timer) {
+              $timeout.cancel(timer);
+            }
             if (appState) {
-              if (timer) {
-                $timeout.cancel(timer);
-              }
               // leaving this console log print to have an idea how long this takes on different systems
               console.log('Got app state during dashboard_group service initailization after ' + (i * 10) + 'ms');
               return fulfill();
             }
             if (++i > MAX) {
-              if (timer) {
-                $timeout.cancel(timer);
-              }
               return reject(new Error('Could not get an app during dashboard_group service initialization'));
             }
             timer = $timeout(check, 10);

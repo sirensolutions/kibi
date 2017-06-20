@@ -5,7 +5,7 @@ Install [asciidoctor](http://asciidoctor.org/#installation)
 In the `/docs` folder, run the following in a terminal
 
 ```
-asciidoctor -a enterprise_enabled=true -d book index.asciidoc
+asciidoctor -d book index.asciidoc
 ```
 
 NOTE: error/warning messages that refer to `invalid part, must have at least one section (e.g., chapter, appendix, etc.)` can safely be ignored.

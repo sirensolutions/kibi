@@ -119,16 +119,29 @@ let joinExplanation;
 let setSelectedDashboardIdStub;
 let switchDashboardStub;
 
-function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards, savedDashboardGroups, savedSearches } = {}) {
+function init({
+  currentDashboardId = 'Articles',
+  indexPatterns,
+  savedDashboards,
+  savedDashboardGroups,
+  savedSearches,
+  getAppStateUndefined = false
+} = {}) {
   ngMock.module('kibana', function ($provide) {
     $provide.constant('kibiEnterpriseEnabled', false);
     $provide.constant('kbnDefaultAppId', 'dashboard');
     $provide.constant('kibiDefaultDashboardTitle', 'Articles');
 
     appState = new MockState({ filters: [] });
-    $provide.service('getAppState', () => {
-      return function () { return appState; };
-    });
+    if (getAppStateUndefined === true) {
+      $provide.service('getAppState', () => {
+        return function () { return undefined; };
+      });
+    } else {
+      $provide.service('getAppState', () => {
+        return function () { return appState; };
+      });
+    }
 
     $provide.service('$timeout', () => {
       const mockTimeout = fn => Promise.resolve(fn());
@@ -195,7 +208,6 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     setSelectedDashboardIdStub = sinon.stub(kibiState, 'setSelectedDashboardId');
     es = _es_;
     joinExplanation = _joinExplanation_;
-
   });
 }
 
@@ -203,6 +215,24 @@ describe('Kibi Services', function () {
   describe('DashboardGroups Service', function () {
 
     noDigestPromises.activateForSuite();
+
+    describe('init', function () {
+
+      it('Should fail if getAppState returns undefined', function (done) {
+        init({
+          getAppStateUndefined: true
+        });
+
+        dashboardGroups.init()
+        .then(() => {
+          done(new Error('Should reject as getAppState returns undefined'));
+        })
+        .catch((err) => {
+          expect(err.message).to.equal('Could not get an app during dashboard_group service initialization');
+          done();
+        });
+      });
+    });
 
     describe('copy', function () {
       beforeEach(init);

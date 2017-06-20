@@ -5,6 +5,7 @@ import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
 export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState, getAppState, createNotifier, Private, $rootScope,
   savedDashboards, timefilter) {
+
   const notify = createNotifier({
     location: 'Kibi Navbar helper'
   });
@@ -38,7 +39,7 @@ export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, glob
 
   function KibiNavBarHelper() {
     const updateCountsOnAppStateChange = function (diff) {
-      if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
+      if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1 && diff.indexOf('init') === -1) {
         return;
       }
       // when appState changed get connected and selected dashboards

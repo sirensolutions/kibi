@@ -104,12 +104,12 @@ describe('plugins/elasticsearch', function () {
       });
 
       describe('debug tags', function () {
-        it('getCountsOnButton', function () {
+        it('getCountsOnButtons', function () {
           const func = mapUri(stubCluster(), '/elasticsearch', serverWithoutSirenPlugin, false);
 
           request.path = '/elasticsearch/_search';
           request.query = {
-            getCountsOnButton: '',
+            getCountsOnButtons: '',
             size: 100
           };
           func(request, (err, upstreamUri, upstreamHeaders) => {

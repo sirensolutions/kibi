@@ -18,7 +18,7 @@ uiRoutes
 uiModules
 .get('kibana')
 .service('dashboardGroups', (createNotifier, es, $timeout, kibiState, Private, savedDashboards,
-                             savedDashboardGroups, Promise, kbnIndex, joinExplanation) => {
+                             savedDashboardGroups, Promise, kbnIndex, joinExplanation, getAppState) => {
   const notify = createNotifier();
   const dashboardHelper = Private(DashboardHelperProvider);
   const queryBuilder = Private(QueryBuilderProvider);
@@ -65,10 +65,40 @@ uiModules
     constructor() {
       super();
       this.init = _.once(() => {
+        // NOTE: It is important to wait until appState is fully ready before doing the init
+        // this prevents situations where appState was not ready yet
+        // causing dashboard meta to be computed incorectly due to missing filters or queries
+        const appStateReady = new Promise((fulfill, reject) => {
+          const MAX = 500;
+          let i = 0;
+          let timer;
+          const check = function () {
+            const appState = getAppState();
+            if (appState) {
+              if (timer) {
+                $timeout.cancel(timer);
+              }
+              // leaving this console log print to have an idea how long this takes on different systems
+              console.log('Got app state during dashboard_group service initailization after ' + (i * 10) + 'ms');
+              return fulfill();
+            }
+            if (++i > MAX) {
+              if (timer) {
+                $timeout.cancel(timer);
+              }
+              return reject(new Error('Could not get an app during dashboard_group service initialization'));
+            }
+            timer = $timeout(check, 10);
+          };
+          check();
+        });
+
         const groupsPromise = this.computeGroups('init');
-        const metadataPromise = groupsPromise.then(groups => {
-          const dashboardIds = _.map(groups, 'selected.id');
-          return this.updateMetadataOfDashboardIds(dashboardIds);
+        const metadataPromise = appStateReady.then(() => {
+          return groupsPromise.then(groups => {
+            const dashboardIds = _.map(groups, 'selected.id');
+            return this.updateMetadataOfDashboardIds(dashboardIds);
+          });
         });
 
         return Promise.all([ groupsPromise, metadataPromise ])
@@ -217,7 +247,10 @@ uiModules
             if (lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {
               _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
             } else {
-              return es.msearch({ body: countsQuery })
+              return es.msearch({
+                body: countsQuery,
+                getCountsOnTabs: '' // ?getCountsOnTabs= has no meaning it is just useful to filter when inspecting requests
+              })
               .then(response => {
                 lastFiredMultiCountsQuery = countsQuery;
                 lastMultiCountsQueryResults = response.responses;

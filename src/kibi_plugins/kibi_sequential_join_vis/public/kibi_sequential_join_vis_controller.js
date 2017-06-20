@@ -17,7 +17,7 @@ import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
 import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
-function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise,
+function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, es, createNotifier, globalState, Promise,
   kbnIndex, config, savedDashboards, timefilter) {
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const searchHelper = new SearchHelper(kbnIndex);
@@ -86,13 +86,14 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       }).join('');
       const duration = moment();
 
-      // ?getCountsOnButton has no meaning it is just useful to filter when inspecting requests
-      return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnButton', query)
-      .then((response) => {
+      return es.msearch({
+        body: query,
+        getCountsOnButtons: '' // ?getCountsOnButtons= has no meaning it is just useful to filter when inspecting requests
+      })
+      .then((data) => {
         if ($scope.multiSearchData) {
           $scope.multiSearchData.setDuration(duration.diff() * -1);
         }
-        const data = response.data;
         _.each(data.responses, function (hit, i) {
           const stats = {
             index: results[i].button.targetIndexPatternId,

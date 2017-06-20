@@ -5,6 +5,7 @@ import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
 export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState, getAppState, createNotifier, Private, $rootScope,
   savedDashboards, timefilter) {
+
   const notify = createNotifier({
     location: 'Kibi Navbar helper'
   });

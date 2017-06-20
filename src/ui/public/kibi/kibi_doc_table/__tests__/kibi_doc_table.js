@@ -341,6 +341,39 @@ describe('Kibi doc table', function () {
         });
         expect(call.args[1]).to.be('my-table.csv');
       });
+
+      it('should output meta fields', function () {
+        init($elem, {
+          savedVis: {
+            id: 'my-table'
+          },
+          searchSource,
+          columns: []
+        });
+
+        $scope.columns = [
+          '_index',
+          '_type',
+          '_id',
+          'one',
+          'two'
+        ];
+        $scope.hits = [
+          {
+            _index: 'myindex',
+            _type: 'mytype',
+            _id: 'myid',
+            _source: {
+              one: 1,
+              two: 2,
+              time: '08/29/2016'
+            }
+          }
+        ];
+
+        const csv = $scope.toCsv();
+        expect(csv).to.eql('time,"_index","_type","_id",one,two\r\n"August 29th 2016, 00:00:00.000",myindex,mytype,myid,1,2\r\n');
+      });
     });
 
     it('should set the source filtering definition', function () {
@@ -348,3 +381,4 @@ describe('Kibi doc table', function () {
     });
   });
 });
+

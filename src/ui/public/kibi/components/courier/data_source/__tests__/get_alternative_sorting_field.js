@@ -16,7 +16,7 @@ describe('Kibi Components', function () {
       const field = {
         type: 'label',
         type: 'string',
-        subfields: [
+        multifields: [
           {
             name: 'label.rawstringanalyzed',
             type: 'string',
@@ -29,20 +29,22 @@ describe('Kibi Components', function () {
     });
 
 
-    it('Should return correct alternative field of type keyword if present', function () {
+    it('Should return the first correct alternative field of type keyword if present', function () {
       const expected = {
         name: 'label.rawkeyword',
         type: 'keyword'
       };
 
+      const notExpected = {
+        name: 'label.rawstring',
+        type: 'string'
+      };
+
       const field = {
         name: 'label',
         type: 'string',
-        subfields: [
-          {
-            name: 'label.rawstring',
-            type: 'string'
-          },
+        multifields: [
+          notExpected,
           expected
         ]
       };
@@ -50,22 +52,24 @@ describe('Kibi Components', function () {
       expect(getAlternativeSortingField(field)).to.eql(expected);
     });
 
-    it('Should return correct alternative field of type string and not analyzed if present', function () {
+    it('Should return the first correct alternative field of type string and not analyzed if present', function () {
       const expected = {
         name: 'label.rawstringNOTanalyzed',
         type: 'string',
         analyzed: false
       };
 
+      const notExpected = {
+        name: 'label.rawstringanalyzed',
+        type: 'string',
+        analyzed: true
+      };
+
       const field = {
         name: 'label',
         type: 'string',
-        subfields: [
-          {
-            name: 'label.rawstringanalyzed',
-            type: 'string',
-            analyzed: true
-          },
+        multifields: [
+          notExpected,
           expected
         ]
       };

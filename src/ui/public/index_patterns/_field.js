@@ -80,17 +80,17 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     // conflict info
     obj.writ('conflictDescriptions');
 
-    // kibi: add path sequence and subfields properties
+    // kibi: add path sequence and multifields properties
     obj.comp('path', indexPattern.paths && indexPattern.paths[spec.name] || []);
 
-    const subfields = filter(indexPattern.fields, (f) => {
+    const multifields = filter(indexPattern.fields, (f) => {
       const nameMatched = f.name.indexOf(spec.name + '.') === 0;
       // if name starts with same prefix + dot
       // do another check to make sure that the field is a subfield
       // and NOT just another field with a "dot" in it
       return nameMatched && indexPattern.kibiPathsFetched && !Boolean(indexPattern.paths[f.name]);
     });
-    obj.comp('subfields', subfields);
+    obj.comp('multifields', multifields);
     // kibi: end
 
     return obj.create();

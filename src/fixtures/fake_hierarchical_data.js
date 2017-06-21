@@ -528,23 +528,23 @@ data.oneFilterBucket = {
 };
 
 data.oneExternalQueryFilterBucket = {
-  'took': 11,
-  'timed_out': false,
-  '_shards': {
-    'total': 1,
-    'successful': 1,
-    'failed': 0
+  took: 11,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    failed: 0
   },
-  'hits': {
-    'total': 0,
-    'max_score': 0,
-    'hits': []
+  hits: {
+    total: 0,
+    max_score: 0,
+    hits: []
   },
-  'aggregations': {
-    'agg_2': {
-      'buckets': {
+  aggregations: {
+    agg_2: {
+      buckets: {
         'my-dashed-query - my query label': {
-          'doc_count': 4844
+          doc_count: 4844
         }
       }
     }

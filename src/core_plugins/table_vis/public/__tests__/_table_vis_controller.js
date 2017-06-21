@@ -55,7 +55,7 @@ describe('Table Vis Controller', function () {
     );
   }
 
-  function OneExternalQueryVis(params) {
+  function getExternalQueryVis(params) {
     return new Vis(
       Private(FixturesStubbedLogstashIndexPatternProvider),
       {
@@ -236,7 +236,7 @@ describe('Table Vis Controller', function () {
       const stubbedTabify = sinon.stub().returns(tabifyResponse);
       Private.stub(tabifyPm, stubbedTabify);
 
-      initController(new OneExternalQueryVis());
+      initController(getExternalQueryVis());
       attachEsResponseToScope(fixtures.oneExternalQueryFilterBucket);
 
       expect($scope.tableGroups.tables[0].rows[0][0].value).to.eql('my query label');

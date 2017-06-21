@@ -11,6 +11,7 @@ define(function (require) {
       scope: {
         columns: '=',
         columnAliases: '=?',
+        cellClickHandlers: '=',
         indexPattern: '=',
         options: '='
       },
@@ -21,6 +22,14 @@ define(function (require) {
           if (!$scope.indexPattern) return;
           const sortable = _.get($scope.indexPattern.fields.byName[field], 'sortable');
           return sortable;
+        };
+
+        $scope.filterableColumn = function (name) {
+          if ($scope.cellClickHandlers
+            && $scope.cellClickHandlers[name] && $scope.cellClickHandlers[name][0].type ==='filter') {
+            return true;
+          }
+          return false;
         };
 
         $scope.tooltip = function (column) {

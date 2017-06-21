@@ -6,6 +6,7 @@ import 'ui/directives/truncated';
 import 'ui/directives/infinite_scroll';
 import 'ui/doc_table/components/table_header';
 import 'ui/doc_table/components/table_row';
+import compareFilterArrays from 'ui/filter_bar/lib/compare_filter_arrays';
 import uiModules from 'ui/modules';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
@@ -124,8 +125,7 @@ uiModules.get('kibana')
       const areFilterChanged = function () {
         const filters = _.cloneDeep(getAppState().filters);
 
-        if (previousFilters.length !== filters.length
-          || !_.isEqual(_.flattenDeep(previousFilters), _.flattenDeep(filters))) {
+        if (!compareFilterArrays(filters, previousFilters)) {
           previousFilters = filters;
           return true;
         }
@@ -166,7 +166,7 @@ uiModules.get('kibana')
           $scope.totalHitCount = resp.hits.total;
           // kibi: start the page
           let startingPage = 1;
-          if (!areFilterChanged() && $scope.pager) {
+          if (!areFilterChanged() && $scope.increaseSample && $scope.pager) {
             startingPage = $scope.pager.currentPage;
           }
 

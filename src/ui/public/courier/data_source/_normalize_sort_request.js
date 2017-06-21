@@ -49,7 +49,7 @@ export default function normalizeSortRequest(config) {
       // kibi: For improved sorting experiense lets try to do 2 things
       // 1) if there is a valid type try to use it and ignore defaultSortOptions
       // 2) if the type is text or string try to find a subtype which is either keyword or not analyzed string
-      if (indexField.type && indexField.type !== 'conflict') {
+      if (indexField && indexField.sortable && indexField.type && indexField.type !== 'conflict') {
         const alternativeSortingField = getAlternativeSortingField(indexField);
         if (alternativeSortingField) {
           sortField = alternativeSortingField.name;

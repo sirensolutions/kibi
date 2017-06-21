@@ -117,18 +117,19 @@ uiModules.get('kibana')
       });
 
       // Kibi: cache the last filters.
-      let previousFilters = getAppState().filters;
+      let previousFilters = _.cloneDeep(getAppState().filters);
       /**
        * Kibi: checks if the filters are changed.
        */
       const areFilterChanged = function () {
-        const filters = getAppState().filters;
-        if (previousFilters.length !== filters || !_(previousFilters).differenceWith(filters, _.isEqual).isEmpty()) {
+        const filters = _.cloneDeep(getAppState().filters);
+
+        if (previousFilters.length !== filters.length
+          || !_.isEqual(_.flattenDeep(previousFilters), _.flattenDeep(filters))) {
           previousFilters = filters;
           return true;
-        } else {
-          return false;
         }
+        return false;
       };
 
       $scope.$watch('searchSource', prereq(function () {
@@ -164,10 +165,9 @@ uiModules.get('kibana')
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;
           // kibi: start the page
-          // if page size is changed and hits length same as pager.totalItems startingPage should be 1
           let startingPage = 1;
-          if (!areFilterChanged() && $scope.increaseSample && $scope.pager && ($scope.pager.totalItems !== $scope.hits.length)) {
-            startingPage = $scope.pager.pageCount;
+          if (!areFilterChanged() && $scope.pager) {
+            startingPage = $scope.pager.currentPage;
           }
 
           $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize || 50, startingPage);

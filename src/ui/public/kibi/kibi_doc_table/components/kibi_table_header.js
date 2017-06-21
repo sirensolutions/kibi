@@ -26,7 +26,7 @@ define(function (require) {
 
         $scope.filterableColumn = function (name) {
           if ($scope.cellClickHandlers
-            && $scope.cellClickHandlers[name] && $scope.cellClickHandlers[name][0].type ==='filter') {
+            && $scope.cellClickHandlers[name] && $scope.cellClickHandlers[name][0].type === 'filter') {
             return true;
           }
           return false;

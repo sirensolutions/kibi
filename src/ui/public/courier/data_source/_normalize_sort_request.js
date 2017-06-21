@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import getAlternativeSortingField from 'ui/kibi/components/courier/data_source/get_alternative_sorting_field';
 
 export default function normalizeSortRequest(config) {
   const defaultSortOptions = config.get('sort:options');
@@ -44,6 +45,20 @@ export default function normalizeSortRequest(config) {
         sortValue = { order: sortValue };
       }
       sortValue = _.defaults({}, sortValue, defaultSortOptions);
+
+      // kibi: For improved sorting experiense lets try to do 2 things
+      // 1) if there is a valid type try to use it and ignore defaultSortOptions
+      // 2) if the type is text or string try to find a subtype which is either keyword or not analyzed string
+      if (indexField.type && indexField.type !== 'conflict') {
+        const alternativeSortingField = getAlternativeSortingField(indexField);
+        if (alternativeSortingField) {
+          sortField = alternativeSortingField.name;
+          sortValue.unmapped_type = alternativeSortingField.type;
+        } else {
+          sortValue.unmapped_type = indexField.type;
+        }
+      }
+      // kibi: end
 
       if (sortField === '_score') {
         delete sortValue.unmapped_type;

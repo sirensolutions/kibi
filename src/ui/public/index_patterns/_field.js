@@ -2,6 +2,8 @@ import ObjDefine from 'ui/utils/obj_define';
 import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import IndexPatternsFieldTypesProvider from 'ui/index_patterns/_field_types';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { filter } from 'lodash';
+
 export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope, createNotifier) {
   const notify = createNotifier({ location: 'IndexPattern Field' });
   const FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
@@ -78,8 +80,18 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     // conflict info
     obj.writ('conflictDescriptions');
 
-    // kibi: add path sequence
+    // kibi: add path sequence and subfields properties
     obj.comp('path', indexPattern.paths && indexPattern.paths[spec.name] || []);
+
+    const subfields = filter(indexPattern.fields, (f) => {
+      const nameMatched = f.name.indexOf(spec.name + '.') === 0;
+      // if name starts with same prefix + dot
+      // do another check to make sure that the field is a subfield
+      // and NOT just another field with a "dot" in it
+      return nameMatched && indexPattern.kibiPathsFetched && !Boolean(indexPattern.paths[f.name]);
+    });
+    obj.comp('subfields', subfields);
+    // kibi: end
 
     return obj.create();
   }

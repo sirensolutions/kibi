@@ -113,8 +113,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
     if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
       promise = indexPattern.refreshFields();
     }
-    return promise.then(() => initFields(indexPattern))
-    .then(() => indexPattern.kibiPathsFetched = true);
+    return promise.then(() => initFields(indexPattern));
   }
 
   function setId(indexPattern, id) {
@@ -395,6 +394,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
       return mapper.getPathsSequenceForIndexPattern(this)
       .then(paths => {
         this.paths = paths;
+        this.kibiPathsFetched = true;
       });
     }
     // kibi: end

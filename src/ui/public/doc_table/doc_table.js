@@ -119,8 +119,9 @@ uiModules.get('kibana')
 
       // Kibi: cache the last filters.
       let previousFilters = _.cloneDeep(getAppState().filters);
+      let queryChanged = false;
       /**
-       * Kibi: checks if the filters are changed.
+       * Kibi: checks if the filters or the query are changed.
        */
       const areFilterChanged = function () {
         const filters = _.cloneDeep(getAppState().filters);
@@ -128,29 +129,19 @@ uiModules.get('kibana')
         if (!compareFilterArrays(filters, previousFilters)) {
           previousFilters = filters;
           return true;
+        } else if (queryChanged) {
+          return true;
         }
         return false;
       };
 
-      $scope.$watch('searchSource', prereq(function () {
+      const refreshTable = prereq(function () {
         if (!$scope.searchSource) return;
 
         $scope.indexPattern = $scope.searchSource.get('index');
 
         $scope.searchSource.size($scope.size);
         $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
-
-        // Set the watcher after initialization
-        $scope.$watchCollection('sorting', function (newSort, oldSort) {
-          // Don't react if sort values didn't really change
-          if (newSort === oldSort) return;
-          $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
-          $scope.searchSource.fetchQueued();
-        });
-
-        $scope.$on('$destroy', function () {
-          if ($scope.searchSource) $scope.searchSource.destroy();
-        });
 
         // TODO: we need to have some way to clean up result requests
         $scope.searchSource.onResults().then(function onResults(resp) {
@@ -161,18 +152,24 @@ uiModules.get('kibana')
           if ($scope.searchSource !== $scope.searchSource) return;
 
           $scope.hits = resp.hits.hits;
+          // kibi: start the page
+          let startingPage = 1;
+          if ($scope.increaseSample && $scope.pager && ($scope.totalHitCount === resp.hits.total) && !areFilterChanged()) {
+            startingPage = $scope.pager.currentPage;
+          }
+
           // We limit the number of returned results, but we want to show the actual number of hits, not
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;
-          // kibi: start the page
-          let startingPage = 1;
-          if (!areFilterChanged() && $scope.increaseSample && $scope.pager) {
-            startingPage = $scope.pager.currentPage;
-          }
 
           $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize || 50, startingPage);
           calculateItemsOnPage();
 
+          // Kibi: Fetching more results when the query changes would cause errors
+          if (queryChanged) {
+            queryChanged = false;
+            return;
+          }
           return $scope.searchSource.onResults().then(onResults);
         }).catch(notify.fatal);
 
@@ -193,7 +190,36 @@ uiModules.get('kibana')
         })
         // kibi: end
         .catch(notify.fatal);
-      }));
+      });
+      $scope.$watch('searchSource', refreshTable);
+
+      // Kibi: catch query changes
+      const removeGetAppStateHandler = $scope.$watch(getAppState, (appState) => {
+        if (appState) {
+          appState.on('save_with_changes', function (diff) {
+            const checkQuery = _.find(diff, function (o) {
+              return o === 'query';
+            });
+            if (checkQuery) {
+              queryChanged = true;
+              refreshTable();
+            }
+          });
+        }
+      });
+
+      // Set the watcher after initialization
+      $scope.$watchCollection('sorting', function (newSort, oldSort) {
+        // Don't react if sort values didn't really change
+        if (!$scope.searchSource || newSort === oldSort) return;
+        $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
+        $scope.searchSource.fetchQueued();
+      });
+
+      $scope.$on('$destroy', function () {
+        if ($scope.searchSource) $scope.searchSource.destroy();
+        removeGetAppStateHandler();
+      });
 
       $scope.pageOfItems = [];
       $scope.onPageNext = () => {

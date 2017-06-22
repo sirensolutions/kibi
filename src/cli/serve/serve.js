@@ -24,6 +24,18 @@ const pathCollector = function () {
   };
 };
 
+//kibi: Check if there is a plugins folder and return its path if it does
+const getPluginsFolder = function () {
+  try {
+    statSync(fromRoot('plugins'));
+    return fromRoot('plugins');
+  } catch (err) {
+    console.warn('[WARNING] plugins folder is missing, please create one and restart kibi ...');
+    return null;
+  }
+};
+// kibi
+
 const configPathCollector = pathCollector();
 const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
@@ -99,7 +111,7 @@ module.exports = function (program) {
     'times to specify multiple directories',
     pluginDirCollector,
     [
-      fromRoot('plugins'),
+      getPluginsFolder(), // kibi: Check if plugins folder exists
       fromRoot('src/core_plugins'),
       // kibi: point to kibi core plugins
       fromRoot('src/kibi_plugins')

@@ -83,10 +83,12 @@ export default class Migration9 extends Migration {
       return array;
     }, []);
 
-    await this._client.bulk({
-      refresh: true,
-      body: bulkRequests
-    });
+    if (bulkRequests.length) {
+      await this._client.bulk({
+        refresh: true,
+        body: bulkRequests
+      });
+    }
 
     return bulkRequests.length;
   }

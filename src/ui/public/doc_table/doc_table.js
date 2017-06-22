@@ -6,7 +6,6 @@ import 'ui/directives/truncated';
 import 'ui/directives/infinite_scroll';
 import 'ui/doc_table/components/table_header';
 import 'ui/doc_table/components/table_row';
-import compareFilterArrays from 'ui/filter_bar/lib/compare_filter_arrays';
 import uiModules from 'ui/modules';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
@@ -117,23 +116,21 @@ uiModules.get('kibana')
         if ($scope.columns.length === 0) $scope.columns.push('_source');
       });
 
-      // Kibi: cache the last filters.
-      let previousFilters = _.cloneDeep(getAppState().filters);
-      let queryChanged = false;
-      /**
-       * Kibi: checks if the filters or the query are changed.
-       */
-      const areFilterChanged = function () {
-        const filters = _.cloneDeep(getAppState().filters);
+      // Kibi: filters and query flags set on appState changes.
+      let filtersOrQueryChanged = false;
 
-        if (!compareFilterArrays(filters, previousFilters)) {
-          previousFilters = filters;
-          return true;
-        } else if (queryChanged) {
-          return true;
+      // Kibi: catch query changes
+      const removeGetAppStateHandler = $scope.$watch(getAppState, (appState) => {
+        if (appState) {
+          appState.on('save_with_changes', function (diff) {
+            const checkQuery = _.indexOf(diff, 'query');
+            const checkFilters = _.indexOf(diff, 'filters');
+            if (checkQuery !== -1 || checkFilters !== -1) {
+              filtersOrQueryChanged = true;
+            }
+          });
         }
-        return false;
-      };
+      });
 
       const refreshTable = prereq(function () {
         if (!$scope.searchSource) return;
@@ -142,6 +139,19 @@ uiModules.get('kibana')
 
         $scope.searchSource.size($scope.size);
         $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
+
+        // Set the watcher after initialization
+        $scope.$watchCollection('sorting', function (newSort, oldSort) {
+          // Don't react if sort values didn't really change
+          if (!$scope.searchSource || newSort === oldSort) return;
+          $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
+          $scope.searchSource.fetchQueued();
+        });
+
+        $scope.$on('$destroy', function () {
+          removeGetAppStateHandler();
+          if ($scope.searchSource) $scope.searchSource.destroy();
+        });
 
         // TODO: we need to have some way to clean up result requests
         $scope.searchSource.onResults().then(function onResults(resp) {
@@ -154,7 +164,7 @@ uiModules.get('kibana')
           $scope.hits = resp.hits.hits;
           // kibi: start the page
           let startingPage = 1;
-          if ($scope.increaseSample && $scope.pager && ($scope.totalHitCount === resp.hits.total) && !areFilterChanged()) {
+          if ($scope.increaseSample && $scope.pager && ($scope.totalHitCount === resp.hits.total) && !filtersOrQueryChanged) {
             startingPage = $scope.pager.currentPage;
           }
 
@@ -165,11 +175,9 @@ uiModules.get('kibana')
           $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize || 50, startingPage);
           calculateItemsOnPage();
 
-          // Kibi: Fetching more results when the query changes would cause errors
-          if (queryChanged) {
-            queryChanged = false;
-            return;
-          }
+          // Kibi: reset the flag
+          filtersOrQueryChanged = false;
+
           return $scope.searchSource.onResults().then(onResults);
         }).catch(notify.fatal);
 
@@ -192,34 +200,6 @@ uiModules.get('kibana')
         .catch(notify.fatal);
       });
       $scope.$watch('searchSource', refreshTable);
-
-      // Kibi: catch query changes
-      const removeGetAppStateHandler = $scope.$watch(getAppState, (appState) => {
-        if (appState) {
-          appState.on('save_with_changes', function (diff) {
-            const checkQuery = _.find(diff, function (o) {
-              return o === 'query';
-            });
-            if (checkQuery) {
-              queryChanged = true;
-              refreshTable();
-            }
-          });
-        }
-      });
-
-      // Set the watcher after initialization
-      $scope.$watchCollection('sorting', function (newSort, oldSort) {
-        // Don't react if sort values didn't really change
-        if (!$scope.searchSource || newSort === oldSort) return;
-        $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
-        $scope.searchSource.fetchQueued();
-      });
-
-      $scope.$on('$destroy', function () {
-        if ($scope.searchSource) $scope.searchSource.destroy();
-        removeGetAppStateHandler();
-      });
 
       $scope.pageOfItems = [];
       $scope.onPageNext = () => {

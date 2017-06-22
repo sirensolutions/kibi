@@ -20,7 +20,7 @@ describe('Kibi doc table extra features', function () {
       $provide.service('getAppState', function () {
         return function () { return appState; };
       });
-    })
+    });
 
     ngMock.module('templates_editor/services/saved_templates', function ($provide) {
       $provide.service('savedTemplates', (Promise, Private) => mockSavedObjects(Promise, Private)('savedTemplates', templates));

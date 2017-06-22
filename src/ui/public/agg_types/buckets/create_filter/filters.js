@@ -2,6 +2,10 @@ import buildQueryFilter from 'ui/filter_manager/lib/query';
 import _ from 'lodash';
 export default function CreateFilterFiltersProvider() {
   return function (aggConfig, key) {
+    // kibi: need to split the compound dbfilter query to remove the label
+    // e.g. "8as7df7a89sdf - my query" -> "8as7df7a89sdf"
+    key = key.split(' - ')[0];
+
     // have the aggConfig write agg dsl params
     const dslFilters = _.get(aggConfig.toDsl(), 'filters.filters');
     const filter = dslFilters[key];

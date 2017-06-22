@@ -76,7 +76,7 @@ module.exports = function (queryEngine, json, credentials) {
         const [ queryId, queryLabel, esFilter ] = data[i];
         const path = objects[i].path;
         const oldBucketLabel = path.pop();
-        const newBucketLabel = oldBucketLabel.replace(queryId, queryLabel);
+        const newBucketLabel = oldBucketLabel.replace(queryId, `${queryId} - ${queryLabel}`);
         util.replace(json, path, oldBucketLabel, newBucketLabel, esFilter);
       }
       return json;

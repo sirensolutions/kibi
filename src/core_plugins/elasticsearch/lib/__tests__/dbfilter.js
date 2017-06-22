@@ -131,7 +131,7 @@ describe('Special paths', function () {
     const expected = {
       foo: 'bar',
       'f"y': {
-        'Label of SteQuery': {
+        'SteQuery - Label of SteQuery': {
           bool: {
             should: [
               {
@@ -174,7 +174,7 @@ describe('DB Filter test', function () {
       }
     };
     const expected = {
-      'Label of not relevant': {
+      'not relevant - Label of not relevant': {
         bool: {
           should: [
             {
@@ -216,7 +216,7 @@ describe('DB Filter test', function () {
       }
     };
     const expected = {
-      'Label of noresult': {
+      'noresult - Label of noresult': {
         bool: {
           should: [
             {
@@ -230,7 +230,7 @@ describe('DB Filter test', function () {
       nested: {
         notRelevantKeep: {
           foo: 'bar',
-          'Label of not relevant': {
+          'not relevant - Label of not relevant': {
             bool: {
               should: [
                 {
@@ -275,7 +275,7 @@ describe('DB Filter test', function () {
     };
     const expected = {
       foo: 'bar',
-      'Label of SteQuery': {
+      'SteQuery - Label of SteQuery': {
         bool: expectedBool
       }
     };
@@ -300,7 +300,7 @@ describe('DB Filter test', function () {
     };
     const expected = {
       foo: 'bar',
-      'Label of SteQuery': {
+      'SteQuery - Label of SteQuery': {
         bool: expectedBool
       }
     };
@@ -331,7 +331,7 @@ describe('DB Filter test', function () {
       foo: 'bar',
       very: {
         deep: {
-          'Label of SteQuery': {
+          'SteQuery - Label of SteQuery': {
             bool: expectedBool
           }
         }
@@ -369,7 +369,7 @@ describe('DB Filter test', function () {
       }
     };
     const expected = {
-      'Label of SteQuery': {
+      'SteQuery - Label of SteQuery': {
         bool: {
           should: [
             {
@@ -383,7 +383,7 @@ describe('DB Filter test', function () {
       foo: 'bar',
       very: {
         deep: {
-          'Label of SteQuery': {
+          'SteQuery - Label of SteQuery': {
             bool: expectedBool
           }
         }
@@ -400,7 +400,7 @@ describe('DB Filter test', function () {
 describe('post process hook test', function () {
   const expected = {
     foo: 'bar',
-    'Label of SteQuery': {
+    'SteQuery - Label of SteQuery': {
       bool: {
         should: [
           {
@@ -482,7 +482,7 @@ describe('query negation', function () {
     const expected = {
       foo: 'bar',
       path: {
-        'NOT Label of emptyIdsQuery': {
+        'NOT emptyIdsQuery - Label of emptyIdsQuery': {
           bool: {
             must_not: [
               {
@@ -518,7 +518,7 @@ describe('query negation', function () {
     const expected = {
       foo: 'bar',
       path: {
-        'Label of emptyIdsQuery': {
+        'emptyIdsQuery - Label of emptyIdsQuery': {
           bool: {
             should: [
               {
@@ -554,7 +554,7 @@ describe('query negation', function () {
     const expected = {
       foo: 'bar',
       path: {
-        'NOT Label of SteQuery': {
+        'NOT SteQuery - Label of SteQuery': {
           bool: {
             must_not: [
               {

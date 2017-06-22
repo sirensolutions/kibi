@@ -6,6 +6,7 @@ import 'ui/private';
 import 'ui/doc_table';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import MockState from 'fixtures/mock_state';
 
 describe('Kibi doc table extra features', function () {
   let $elem;
@@ -14,6 +15,13 @@ describe('Kibi doc table extra features', function () {
   let searchSource;
 
   const init = function (props, templates = []) {
+    ngMock.module('kibana', function ($provide) {
+      const appState = new MockState({ filters: [] });
+      $provide.service('getAppState', function () {
+        return function () { return appState; };
+      });
+    })
+
     ngMock.module('templates_editor/services/saved_templates', function ($provide) {
       $provide.service('savedTemplates', (Promise, Private) => mockSavedObjects(Promise, Private)('savedTemplates', templates));
     });

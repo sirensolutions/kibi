@@ -31,11 +31,12 @@
       options="options"
     ></div>
 
-    <table class="kbn-table table" ng-if="indexPattern" ng-show="!options.showCustomView">
+    <table class="kbn-table table agg-table-paginated" ng-if="indexPattern" ng-show="!options.showCustomView">
       <thead
         kibi-table-header
         columns="columns"
         column-aliases="columnAliases"
+        cell-click-handlers="cellClickHandlers"
         index-pattern="indexPattern"
         options="options"
       ></thead>
@@ -80,11 +81,12 @@
       options="options"
     ></div>
 
-    <table class="kbn-table table" ng-if="indexPattern" ng-show="!options.showCustomView">
+    <table class="kbn-table table agg-table-paginated" ng-if="indexPattern" ng-show="!options.showCustomView">
       <thead
         kibi-table-header
         columns="columns"
         column-aliases="columnAliases"
+        cell-click-handlers="cellClickHandlers"
         index-pattern="indexPattern"
         options="options"
       ></thead>

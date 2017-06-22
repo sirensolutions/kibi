@@ -29,6 +29,7 @@ define(function (require) {
     const detailsHtml = require('ui/kibi/kibi_doc_table/components/kibi_table_row/details.html');
     const cellTemplate = _.template(noWhiteSpace(require('ui/kibi/kibi_doc_table/components/kibi_table_row/cell.html')));
     const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
     const notify = createNotifier({
       location: 'Enhanced search results'
@@ -166,76 +167,106 @@ define(function (require) {
 
                 const type = clickHandler.type;
 
-                // Style the cell value as a link
-                $cell.addClass('click');
+                // With filter type we want to reproduce the same UI as for the normal table
+                if (type === 'filter') {
+                  $cell.addClass('cell-hover')
+                  .css('cursor', 'cell')
+                  .bind('click', function (e) {
+                    e.preventDefault();
 
-                if (type === 'select' &&
-                    kibiState.isEntitySelected(row.$$_flattened._index, row.$$_flattened._type, row.$$_flattened._id, column)) {
-                  if (kibiState.isSelectedEntityDisabled()) {
-                    $cell.addClass('selectedEntityCell disabled');
-                  } else {
-                    $cell.addClass('selectedEntityCell');
-                  }
-                }
+                    const cellValue = row.$$_flattened[column];
+                    const index = row.$$_flattened._index;
 
-                $cell.css('cursor', 'pointer').bind('click', function (e) {
-                  e.preventDefault();
-
-                  if (type === 'link') {
-                    const valueField = clickHandler.valueField;
-                    let idValue = row.$$_flattened[valueField];
-                    const uriFormat = clickHandler.uriFormat;
-
-                    // Check if idValue is an array; if so, use the first
-                    // element of the array as the value and display a warning
-                    if (idValue instanceof Array && idValue.length > 0) {
-                      notify.warning(
-                          'Field [' + valueField + '] used in an click handler contains more than one value.' +
-                          'The first value will be used.'
-                          );
-                      idValue = idValue[0];
-                    }
-
-                    // skip event handling if no value is set
-                    if (!idValue) {
-                      return;
-                    }
-                    // open the URL in a new tab
-                    let win;
-                    if (uriFormat.trim() === '@URL@') {
-                      win = $window.open(idValue, '_blank');
-                    } else {
-                      win = $window.open(uriFormat.replace(/@URL@/g, encodeURIComponent(idValue)), '_blank');
-                    }
-                    if (win) {
-                      win.focus();
-                    }
-
-                  } else if (type === 'select') {
-                    const entity = {
-                      index: row.$$_flattened._index,
-                      type: row.$$_flattened._type,
-                      id: row.$$_flattened._id,
-                      column
+                    const matchQuery = {};
+                    matchQuery[column] = {
+                      query: cellValue,
+                      type: 'phrase'
                     };
-                    kibiState.disableSelectedEntity(false);
-                    kibiState.setEntityURI(entity);
-                    kibiState.save();
+                    const tmpFilter = {
+                      meta: {
+                        index: row.$$_flattened._index,
+                        disabled: false,
+                        negate: false,
+                      },
+                      query: {
+                        match: matchQuery
+                      }
+                    };
 
-                    // switch to a different dashboard only if user gave one in settings
-                    const targetDashboardId = clickHandler.targetDashboardId;
-                    if (targetDashboardId) {
-                      return dashboardHelper.switchDashboard(targetDashboardId);
+
+                    queryFilter.addFilters(tmpFilter);
+                  });
+                } else {
+                  // Style the cell value as a link
+                  $cell.addClass('click');
+
+                  if (type === 'select' &&
+                      kibiState.isEntitySelected(row.$$_flattened._index, row.$$_flattened._type, row.$$_flattened._id, column)) {
+                    if (kibiState.isSelectedEntityDisabled()) {
+                      $cell.addClass('selectedEntityCell disabled');
                     } else {
-                      // Call courier.fetch to update visualizations
-                      // This will update all the visualisations, not only the one
-                      // which strictly depend on selected entityURI
-                      courier.fetch();
+                      $cell.addClass('selectedEntityCell');
                     }
                   }
 
-                });
+                  $cell.css('cursor', 'pointer').bind('click', function (e) {
+                    e.preventDefault();
 
+                    if (type === 'link') {
+                      const valueField = clickHandler.valueField;
+                      let idValue = row.$$_flattened[valueField];
+                      const uriFormat = clickHandler.uriFormat;
+
+                      // Check if idValue is an array; if so, use the first
+                      // element of the array as the value and display a warning
+                      if (idValue instanceof Array && idValue.length > 0) {
+                        notify.warning(
+                            'Field [' + valueField + '] used in an click handler contains more than one value.' +
+                            'The first value will be used.'
+                            );
+                        idValue = idValue[0];
+                      }
+
+                      // skip event handling if no value is set
+                      if (!idValue) {
+                        return;
+                      }
+                      // open the URL in a new tab
+                      let win;
+                      if (uriFormat.trim() === '@URL@') {
+                        win = $window.open(idValue, '_blank');
+                      } else {
+                        win = $window.open(uriFormat.replace(/@URL@/g, encodeURIComponent(idValue)), '_blank');
+                      }
+                      if (win) {
+                        win.focus();
+                      }
+
+                    } else if (type === 'select') {
+                      const entity = {
+                        index: row.$$_flattened._index,
+                        type: row.$$_flattened._type,
+                        id: row.$$_flattened._id,
+                        column
+                      };
+                      kibiState.disableSelectedEntity(false);
+                      kibiState.setEntityURI(entity);
+                      kibiState.save();
+
+                      // switch to a different dashboard only if user gave one in settings
+                      const targetDashboardId = clickHandler.targetDashboardId;
+                      if (targetDashboardId) {
+                        return dashboardHelper.switchDashboard(targetDashboardId);
+                      } else {
+                        // Call courier.fetch to update visualizations
+                        // This will update all the visualisations, not only the one
+                        // which strictly depend on selected entityURI
+                        courier.fetch();
+                      }
+                    }
+
+                  });
+                }
               });
 
             }

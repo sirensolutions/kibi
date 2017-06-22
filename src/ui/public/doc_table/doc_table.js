@@ -66,7 +66,7 @@ uiModules.get('kibana')
       $scope.size = parseInt(config.get('discover:sampleSize'));
 
       $scope.hasNextPage = function () {
-        return $scope.increaseSample ? $scope.pager.totalItems < $scope.totalHitCount : $scope.pager.hasNextPage;
+        return $scope.increaseSample ? ($scope.pager.endItem !== $scope.totalHitCount) : $scope.pager.hasNextPage;
       };
       // kibi: end
 

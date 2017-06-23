@@ -117,7 +117,8 @@ uiModules.get('kibana')
       });
 
       // Kibi: filters and query flags set on appState changes.
-      let filtersOrQueryChanged = false;
+      // Attached to the scope for testing purposes
+      $scope.filtersOrQueryChanged = false;
 
       // Kibi: catch query changes
       const removeGetAppStateHandler = $scope.$watch(getAppState, (appState) => {
@@ -126,7 +127,7 @@ uiModules.get('kibana')
             const checkQuery = _.indexOf(diff, 'query');
             const checkFilters = _.indexOf(diff, 'filters');
             if (checkQuery !== -1 || checkFilters !== -1) {
-              filtersOrQueryChanged = true;
+              $scope.filtersOrQueryChanged = true;
             }
           });
         }
@@ -157,6 +158,7 @@ uiModules.get('kibana')
         $scope.searchSource.onResults().then(function onResults(resp) {
           // Reset infinite scroll limit
           $scope.limit = 50;
+          console.log('CALLED ON RESULTS');
 
           // Abort if something changed
           if ($scope.searchSource !== $scope.searchSource) return;
@@ -164,7 +166,7 @@ uiModules.get('kibana')
           $scope.hits = resp.hits.hits;
           // kibi: start the page
           let startingPage = 1;
-          if ($scope.increaseSample && $scope.pager && ($scope.totalHitCount === resp.hits.total) && !filtersOrQueryChanged) {
+          if ($scope.increaseSample && $scope.pager && ($scope.totalHitCount === resp.hits.total) && !$scope.filtersOrQueryChanged) {
             startingPage = $scope.pager.currentPage;
           }
 
@@ -176,7 +178,7 @@ uiModules.get('kibana')
           calculateItemsOnPage();
 
           // Kibi: reset the flag
-          filtersOrQueryChanged = false;
+          $scope.filtersOrQueryChanged = false;
 
           return $scope.searchSource.onResults().then(onResults);
         }).catch(notify.fatal);

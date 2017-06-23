@@ -396,4 +396,142 @@ describe('Kibi doc table extra features', function () {
     const content = $elem.find('#mytabletest').text().trim().replace(/\s+/g, ' ');
     expect(content).to.be('Property Value aaa: AAA bbb: BBB');
   });
+
+  describe('pager resets', function () {
+    it('should NOT reset the pager on query/filter change', function () {
+      const _createHits = number => {
+        const hits = [];
+
+        for (let i = 0; i < number; i++) {
+          const hit = {
+            _index: 'aaa',
+            _type: 'AAA',
+            _id: i + 1,
+            _source: {
+              aaa: `myvalue ${i + 1}`
+            }
+          };
+          hits.push(hit);
+        }
+        return hits;
+      };
+      const columnContent = (lb, up) => _.range(lb, up + 1).map(i => `myvalue ${i}`, '').join('');
+      const pageRightSelector = 'button:has(> .fa-chevron-right)';
+
+      init({
+        columns: [ 'aaa' ],
+        increaseSample: true
+      });
+
+      searchSource.crankResults({
+        hits: {
+          total: 5000,
+          hits: _createHits(50)
+        }
+      });
+      $scope.$digest();
+
+      expect(getTableColumn()).to.be(columnContent(1, 50));
+
+      // get more results
+      searchSource.crankResults({
+        hits: {
+          total: 5000,
+          hits: _createHits(100)
+        }
+      });
+
+      // go to the next page
+      $elem.find(pageRightSelector).click();
+      $scope.$digest();
+
+      expect(getTableColumn()).to.be(columnContent(51, 100));
+      expect($scope.pager.currentPage).to.be(2);
+
+      $scope.filtersOrQueryChanged = false;
+
+      // Trigger the pager update
+      searchSource.crankResults({
+        hits: {
+          total: 5000,
+          hits: _createHits(150)
+        }
+      });
+      $parentScope.$digest();
+
+      expect(getTableColumn()).to.be(columnContent(51, 100));
+      expect($scope.pager.currentPage).to.be(2);
+
+
+
+    });
+
+    it('should reset the pager on query/filter change', function () {
+      const _createHits = number => {
+        const hits = [];
+
+        for (let i = 0; i < number; i++) {
+          const hit = {
+            _index: 'aaa',
+            _type: 'AAA',
+            _id: i + 1,
+            _source: {
+              aaa: `myvalue ${i + 1}`
+            }
+          };
+          hits.push(hit);
+        }
+        return hits;
+      };
+      const columnContent = (lb, up) => _.range(lb, up + 1).map(i => `myvalue ${i}`, '').join('');
+      const pageRightSelector = 'button:has(> .fa-chevron-right)';
+
+      init({
+        columns: [ 'aaa' ],
+        increaseSample: true
+      });
+
+      searchSource.crankResults({
+        hits: {
+          total: 5000,
+          hits: _createHits(50)
+        }
+      });
+      $scope.$digest();
+
+      expect(getTableColumn()).to.be(columnContent(1, 50));
+
+      // get more results
+      searchSource.crankResults({
+        hits: {
+          total: 5000,
+          hits: _createHits(100)
+        }
+      });
+
+      // go to the next page
+      $elem.find(pageRightSelector).click();
+      $scope.$digest();
+
+      expect(getTableColumn()).to.be(columnContent(51, 100));
+      expect($scope.pager.currentPage).to.be(2);
+
+      $scope.filtersOrQueryChanged = true;
+
+      // Trigger the pager update
+      searchSource.crankResults({
+        hits: {
+          total: 5000,
+          hits: _createHits(150)
+        }
+      });
+      $parentScope.$digest();
+
+      expect(getTableColumn()).to.be(columnContent(1, 50));
+      expect($scope.pager.currentPage).to.be(1);
+
+
+
+    });
+  });
 });

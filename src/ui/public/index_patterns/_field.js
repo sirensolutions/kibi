@@ -1,3 +1,5 @@
+import { filter } from 'lodash';
+
 define(function (require) {
   return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, createNotifier) {
     let notify = createNotifier({ location: 'IndexPattern Field' });
@@ -67,8 +69,18 @@ define(function (require) {
       obj.comp('displayName', shortDotsFilter(spec.name));
       obj.comp('$$spec', spec);
 
-      // kibi: add path sequence
+      // kibi: add path sequence and multifields properties
       obj.comp('path', indexPattern.paths && indexPattern.paths[spec.name] || []);
+
+      const multifields = filter(indexPattern.fields, (f) => {
+        const nameMatched = f.name.indexOf(spec.name + '.') === 0;
+        // if name starts with same prefix + dot
+        // do another check to make sure that the field is a subfield
+        // and NOT just another field with a "dot" in it
+        return nameMatched && indexPattern.kibiPathsFetched && !Boolean(indexPattern.paths[f.name]);
+      });
+      obj.comp('multifields', multifields);
+      // kibi: end
 
       return obj.create();
     }

@@ -134,7 +134,6 @@ define(function (require) {
             // kibi: setting additional flags to prevent double execution of _indexFields and _fetchFieldsPath
             return self.refreshFields().then(() => {
               self.kibiFieldsIndexed = true;
-              self.kibiPathsFetched = true;
             });
           } else {
             return initFields().then(() => {
@@ -332,6 +331,7 @@ define(function (require) {
         return mapper.getPathsSequenceForIndexPattern(self)
         .then(paths => {
           self.paths = paths;
+          self.kibiPathsFetched = true;
         });
       };
       // kibi: end

@@ -1,4 +1,8 @@
+const noDigestPromises = require('testUtils/noDigestPromises');
+
 describe('index pattern', function () {
+  noDigestPromises.activateForSuite();
+
   const _ = require('lodash');
   const sinon = require('auto-release-sinon');
   const ngMock = require('ngMock');
@@ -152,7 +156,6 @@ describe('index pattern', function () {
 
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
-    require('testUtils/noDigestPromises').activateForSuite();
     const indexPatternId = 'test-pattern';
     let indexPattern;
     let fieldLength;
@@ -310,7 +313,6 @@ describe('index pattern', function () {
   });
 
   describe('#toDetailedIndexList', function () {
-    require('testUtils/noDigestPromises').activateForSuite();
     context('when index pattern is an interval', function () {
       let interval;
       beforeEach(function () {
@@ -389,8 +391,6 @@ describe('index pattern', function () {
 
   describe('#toIndexList', function () {
     context('when index pattern is an interval', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
-
       let interval;
       beforeEach(function () {
         interval = 'result:getInterval';
@@ -420,7 +420,6 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -442,7 +441,6 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard that is configured not to expand', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -461,13 +459,8 @@ describe('index pattern', function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
       });
 
-      it('is fulfilled by id', function () {
-        let indexList;
-        indexPattern.toIndexList().then(function (val) {
-          indexList = val;
-        });
-        $rootScope.$apply();
-
+      it('is fulfilled by id', async function () {
+        const indexList = await indexPattern.toIndexList();
         expect(indexList).to.equal(indexPattern.id);
       });
     });

@@ -88,6 +88,11 @@
           ng-blur="finder.hitBlur($event)"
           ng-click="finder.preventClick($event)">
           <span aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></span>
+          <img class="kuiStatusText__icon kuiIcon"
+               ng-if="!hit.icon && hit.type.image"
+               aria-hidden="true"
+               ng-src="{{ hit.type.image }}"
+          />
           <!-- kibi: style the title to differentiate it from the description -->
           <span ng-class="kibiTitle">
             {{hit.title}}

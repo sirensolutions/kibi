@@ -35,6 +35,27 @@ export function getUnsavedChangesWarningMessage(changedFilters) {
  * @returns {string} A title to display to the user based on the above parameters.
  */
 export function getDashboardTitle(title, viewMode, isDirty) {
+  // Kibi: shorten the dashboard url depending on the window size and the other UI elements width.
+  const globalNavWidth = document.querySelectorAll(".global-nav")[0].clientWidth;
+  const dashboardsNavWidth = document.querySelectorAll(".dashboards-nav")[0].clientWidth;
+  const kuiLocalMenuWidth = document.querySelectorAll(".kuiLocalMenu")[0].clientWidth;
+  console.log(document.querySelectorAll(".kuiLocalBreadcrumb"));
+  const kuiLocalBreadcrumbLinkWidth = document.querySelectorAll(".kuiLocalBreadcrumb")[0].clientWidth;
+  // shift is composed from the sum of paddings and a reserved space for the documents count
+  const shift = 30 + 115;
+
+  const titleSpace = $(window).width() - globalNavWidth - dashboardsNavWidth - kuiLocalMenuWidth
+    - kuiLocalBreadcrumbLinkWidth - shift;
+
+  const maxLength = Math.floor(titleSpace / 9);
+  if (title.length > maxLength) {
+    if (maxLength -3 < 0) {
+      title = '...';
+    }  else {
+      title = title.substring(0, maxLength - 3) + '...';
+    }
+  }
+
   const isEditMode = viewMode === DashboardViewMode.EDIT;
   const unsavedSuffix = isEditMode && isDirty
     ? ' (unsaved)'

@@ -158,7 +158,6 @@ uiModules.get('kibana')
         $scope.searchSource.onResults().then(function onResults(resp) {
           // Reset infinite scroll limit
           $scope.limit = 50;
-          console.log('CALLED ON RESULTS');
 
           // Abort if something changed
           if ($scope.searchSource !== $scope.searchSource) return;

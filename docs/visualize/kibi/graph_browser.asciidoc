@@ -1,7 +1,7 @@
 [[graph_browser]]
-== Kibi Graph Browser [Enterprise Edition only]
+== Kibi Graph Browser 
 
-The Kibi Graph Browser http://siren.solutions/kibi-enterprise-edition-is-here-sneak-peak-and-webinar-invitation-3/[introduced in Kibi Enterprise Edition] displays the currently selected Elasticsearch documents as a node of a graph.
+The Kibi Graph Browser displays the currently selected Elasticsearch documents as a node of a graph.
 
 image::images/graph_browser/graph_browser_example.png["Graph Browser Visualization",align="center"]
 

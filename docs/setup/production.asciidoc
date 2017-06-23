@@ -55,9 +55,10 @@ name of your cluster.
 cluster.name: "my_cluster"
 --------
 . Make sure Kibi is configured to point to your local client node. In `kibi.yml`, the `elasticsearch.url` should be set to
-`localhost:9200`.
+`localhost:{es-default-port}`.
 +
 --------
 # The Elasticsearch instance to use for all your queries.
-elasticsearch.url: "http://localhost:9200"
+elasticsearch.url: "http://localhost:9220"
+
 --------

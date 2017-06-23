@@ -1,5 +1,5 @@
 [[kibi_box_plot]]
-== Kibi Box Plot [Enterprise Edition only]
+== Kibi Box Plot
 
 This visualization displays a box plot chart from the data in the current set of Elasticsearch documents.
 

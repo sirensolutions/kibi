@@ -13,7 +13,7 @@ result is matched by a query on an external datasource. This is described in
 - it is possible to define click handlers on the cells in a column, e.g.
 to open the URL displayed in a cell. This is described in <<click-handlers>>.
 
-image::images/enhanced_search_results/config.png["Configuration view of the Enhanced search results table",align="center"]
+image::images/enhanced_search_results/config_5.png["Configuration view of the Enhanced search results table",align="center"]
 
 [float]
 [[relational-column]]

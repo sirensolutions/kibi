@@ -44,8 +44,8 @@ curl -X DELETE http://localhost:9220/company-minimal
 [float]
 === Mapping Definition
 
-Mappings allow to configure how documents are stored in the index. For example,
-they allow to define how fields are matched by the search engine and set their
+Mappings allow the user to configure how documents are stored in the index. For example,
+they allow you to define how fields are matched by the search engine and set their
 type (string, dates, numbers, locations etc.).
 
 NOTE: for detailed documentation about indices and mappings we recommend
@@ -144,7 +144,7 @@ by the query and populate the `company-minimal` index.
 
 NOTE: Support for SQL databases is provided by the
 https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html[Logstash jdbc input plugin];
-User must download logstash to `demo/example` directory and install the required plugin
+You must {logstash-ref}current/installing-logstash.html[download logstash] to `demo/example` directory and install the required plugin
 
 Open a text editor and paste the following:
 
@@ -171,9 +171,7 @@ filter {
 
 output {
   elasticsearch {
-    host => "localhost"
-    protocol => "http"
-    port => 9220
+    hosts => "localhost:9220"
     manage_template => false
     action => "index"
     index => "company-minimal"
@@ -214,17 +212,17 @@ documentation.
 [float]
 === Browsing the Index in Kibi
 
-Open {start-url} in your browser, click on the _Settings_ tab then on _Indices_ .
+Open {start-url} in your browser, click on the **Management** tab then on **Index Patterns**.
 
 Deselect _Index contains time-based events_, then write `company-minimal` in
 the _Index name or pattern_ field:
 
-image::images/logstash/company-minimal-index.png["Adding the company-minimal index",align="center"]
+image::images/logstash/company-minimal-index_5.png["Adding the company-minimal index",align="center"]
 
 Click on _Create_ to create the the index reference, then click on the
 _Discover_ tab and select _company-minimal_ in the dark grey dropdown:
 
-image::images/logstash/company-minimal-discover-dd.png["Discovering the company-minimal index",align="center"]
+image::images/logstash/company-minimal-discover-dd_5.png["Discovering the company-minimal index",align="center"]
 
 Click on the right arrow at the beginning of each row to expand it and see all
 the loaded fields:

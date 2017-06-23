@@ -1,13 +1,13 @@
 [[kibi_multi_chart]]
-== Kibi Multi Chart [Enterprise Edition only]
+== Kibi Multi Chart
 
 This visualization displays a multiple types of chart according to the current selection of multiple configurations.
 
 [float]
 === Multi Chart
-image::images/multi_chart/multi_chart_on_dashboard.png["multi chart",align="center"]
+image::images/multi_chart/multi_chart_on_dashboard_5.png["multi chart",align="center"]
 
-Multi Chart is not a type of chart by itself, it can contains a set of other charts (such as a Pie chart) and allow to switch
+Multi Chart is not a type of chart by itself, it can contains a set of other charts (such as a Pie chart) and allows you to switch
 to other type of chart with the same aggregations.
 
 [float]
@@ -16,15 +16,14 @@ image::images/multi_chart/multi_configurations.png["multi configurations",align=
 
 [float]
 === Visualize settings
-image::images/multi_chart/multi_chart_selection1.png["Selection 1",align="center"]
-image::images/multi_chart/multi_chart_selection2.png["Selection 2",align="center"]
+image::images/multi_chart/multi_chart_configuration_5.png["Selection 1",align="center"]
 
 [float]
 === New configuration
-After change the aggregation settings and set the desired type of chart you can press the "Add this configuration" button to save
-the configuration as a separated one.
+After changing the aggregation settings and setting the desired type of chart, you can press the "Add this configuration" button to save
+the configuration as a separate one.
 
-image::images/multi_chart/new_configuration.png["new configuration",align="center"]
+image::images/multi_chart/new_configuration_5.png["new configuration",align="center"]
 
 Multi Chart has the following options
 

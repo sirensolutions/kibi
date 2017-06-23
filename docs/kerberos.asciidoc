@@ -1,9 +1,9 @@
 [[kerberos-authentication]]
 
-== Kerberos/SPNEGO authentication support [Enterprise Edition only]
+== Kerberos/SPNEGO authentication support
 
 This section offers an overview of how to enable Kerberos/SPNEGO authentication
-in Kibi EE.
+in Kibi.
 
 Before enabling Kerberos support you should setup Kibi and Search Guard as
 described in the <<searchguard_integration>> chapter.

@@ -17,8 +17,9 @@ To configure the Elasticsearch indices you want to access with Kibi:
 +
 image:images/Start-Page.png[Kibi start page]
 +
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default,
-Kibi guesses that you're working with data being fed into Elasticsearch by Logstash. If that's the case,
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices.
+You may have to access the index patterns management in the <<settings-create-pattern,Management tab>>.
+By default, Kibi guesses that you're working with data being fed into Elasticsearch by Logstash. If that's the case,
 you can use the default `logstash-\*` as your index pattern. The asterisk (`*`) matches zero or more
 characters in an index's name. If your Elasticsearch indices follow some other naming convention, enter
 an appropriate pattern. The "pattern" can also simply be the name of a single index.

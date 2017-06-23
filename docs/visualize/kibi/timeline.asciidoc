@@ -23,7 +23,7 @@ To configure the visualization, add a new *Group* and select:
 - *Event end date* - (optional) date from this field will be used to position end of the event.
 - *Events number limit* - (optional) limit number of events in this group.
 
-image::images/timeline/timeline-config.png["Timeline configuration",align="center"]
+image::images/timeline/timeline-config_5.png["Timeline configuration",align="center"]
 
 [float]
 === Advanced option

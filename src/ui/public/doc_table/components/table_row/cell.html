@@ -10,17 +10,21 @@ if (timefield) {
 %>
 <td
   <%= attributes %>
-  data-test-subj="docTableField"
-  <%
-     // kibi: make the cell clickable
-     if (isClickable) {
-  %>
-    ng-class="{ 'cell-click': clickHandlers['<%- column %>'], selectedEntityCell: <%= hasSelectedEntity %>, disabled: <%= isSelectedEntityDisabled %> }" ng-click="clickHandlers['<%- column %>']($event)"
-  <% } %>
+  ng-class="{ selectedEntityCell: <%= hasSelectedEntity %>, disabled: <%= isSelectedEntityDisabled %> }"
 >
-  <%= formatted %>
+  <div
+    data-test-subj="docTableField"
+    <%
+      // kibi: make the cell clickable
+      if (isClickable) {
+    %>
+      ng-class="{ 'cell-click': clickHandlers['<%- column %>'] }" ng-click="clickHandlers['<%- column %>']($event)"
+    <% } %>
+  >
+    <%= formatted %>
+  </div>
   <!--kibi: added filters-visible class in order to display the filter icons over the selected cell color-->
-  <span class="table-cell-filter" ng-class="{ 'filters-visible': <%= hasSelectedEntity %> }">
+  <span class="table-cell-filter kibi-table-cell-filter" ng-class="{ 'filters-visible': <%= hasSelectedEntity %> }">
     <% if (filterable) { %>
       <span
         ng-click="inlineFilter($event, '+')"

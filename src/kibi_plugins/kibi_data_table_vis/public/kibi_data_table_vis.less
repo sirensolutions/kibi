@@ -16,17 +16,27 @@ doc-table {
       background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.3) 10px, rgba(255, 255, 255, 0.3) 20px);
     }
 
-    .truncate-by-height {
+    div {
       color: #fff !important;
 
-      &:before {
-        content: " ";
-        width: 100%;
-        height: 15px;
-        position: absolute;
-        left: 0;
+      .truncate-by-height {
+        color: #fff !important;
+
+        &:before {
+          content: " ";
+          width: 100%;
+          height: 15px;
+          position: absolute;
+          left: 0;
+        }
       }
     }
+  }
+
+  td .kibi-table-cell-filter {
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
   }
 
   .cell-click {

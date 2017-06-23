@@ -1,5 +1,6 @@
 import { DashboardViewMode } from './dashboard_view_mode';
 import _ from 'lodash';
+import $ from 'jquery';
 
 /**
  * @param list {Array.<string>}
@@ -39,7 +40,6 @@ export function getDashboardTitle(title, viewMode, isDirty) {
   const globalNavWidth = document.querySelectorAll(".global-nav")[0].clientWidth;
   const dashboardsNavWidth = document.querySelectorAll(".dashboards-nav")[0].clientWidth;
   const kuiLocalMenuWidth = document.querySelectorAll(".kuiLocalMenu")[0].clientWidth;
-  console.log(document.querySelectorAll(".kuiLocalBreadcrumb"));
   const kuiLocalBreadcrumbLinkWidth = document.querySelectorAll(".kuiLocalBreadcrumb")[0].clientWidth;
   // shift is composed from the sum of paddings and a reserved space for the documents count
   const shift = 30 + 115;
@@ -49,7 +49,7 @@ export function getDashboardTitle(title, viewMode, isDirty) {
 
   const maxLength = Math.floor(titleSpace / 9);
   if (title.length > maxLength) {
-    if (maxLength -3 < 0) {
+    if ((maxLength - 3) < 0) {
       title = '...';
     }  else {
       title = title.substring(0, maxLength - 3) + '...';

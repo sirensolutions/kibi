@@ -73,6 +73,7 @@ Kibi is currently developed as a fork of Kibana {kibana-version}. Although
 configuration objects are mostly the same, it is recommended to keep Kibi and
 Kibana in separate indices.
 
+[float]
 === What's new in Kibi v{kibi-version}
 
 To see all the changes, please check the <<releasenotes,full release notes>>.

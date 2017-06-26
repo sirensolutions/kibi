@@ -4,7 +4,7 @@
 :docinfo: shared
 
 :java-version: 1.8
-:vanguard-version: 5.4.0
+:vanguard-version: 5.4.1
 :vanguard-website: https://siren.io/vanguard
 :version: 5.4.0
 :kibana-version: 5.4.0
@@ -14,10 +14,12 @@
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.4/
 :logstash-ref: https://www.elastic.co/guide/en/logstash/
 :es-ref: {elastic-ref}
-:elasticsearch-version: 5.4.0
+:elasticsearch-version: 5.4.1
 :es-default-port: 9220
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
 :searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
+:searchguard-dlsfls-ref: https://github.com/floragunncom/search-guard-module-dlsfls/wiki
+:searchguard-ldap-ref: https://github.com/floragunncom/search-guard-authbackend-ldap/wiki
 :searchguard-kerberos-ref: https://github.com/floragunncom/search-guard-auth-http-kerberos/wiki
 :searchguard-jwt-ref: https://github.com/floragunncom/search-guard-authbackend-jwt
 :searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
@@ -77,8 +79,6 @@ include::searchguard_integration.asciidoc[]
 include::kerberos.asciidoc[]
 
 include::jwt.asciidoc[]
-
-include::shield_integration.asciidoc[]
 
 include::external_datasources.asciidoc[]
 

@@ -7,7 +7,8 @@ the object can be called only if both Kibi and the container page are in the sam
 [float]
 == Methods
 
-==== generateShortUrl(shareAsEmbed, displayNavBar)
+[float]
+=== generateShortUrl(shareAsEmbed, displayNavBar)
 
 Generates a shortened URL containing the current Kibi state and returns
 a promise fulfilled with the URL.
@@ -39,7 +40,8 @@ document.getElementById('kibiframe')
 If possible, it is recommended to purge old documents of type `url` from the `.kibi`
 index periodically; old documents can be identified by looking at the `createDate` attribute.
 
-==== setJWTToken(token)
+[float]
+=== setJWTToken(token)
 
 Sets or updates the JWT token for the current session if
 <<jwt-authentication,JWT authentication support>> is enabled; returns a Promise

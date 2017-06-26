@@ -10,6 +10,10 @@ export default async function (kbnServer, server, config) {
   const { plugins } = kbnServer;
 
   for (const plugin of plugins) {
+    if (plugin.pkg.name === 'gremlin_server' && kbnServer.settings.gremlin && kbnServer.settings.gremlin.enabled === false) {
+      plugins.disable(plugin);
+      continue;
+    }
     const enabledInConfig = config.get([...toPath(plugin.configPrefix), 'enabled']);
     const hasOveride = forcedOverride.hasOwnProperty(plugin.id);
     if (hasOveride) {

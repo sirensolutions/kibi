@@ -33,22 +33,11 @@ export function getUnsavedChangesWarningMessage(changedFilters) {
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
  * @param isDirty {boolean} if the dashboard is in a dirty state. If in dirty state, adds (unsaved) to the
  * end of the title.
+ * @param maxLength {integer} the maximum number of characters to show for a name.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-export function getDashboardTitle(title, viewMode, isDirty) {
-  // Kibi: shorten the dashboard url depending on the window size and the other UI elements width.
-  const globalNavWidth = document.querySelectorAll(".global-nav")[0].clientWidth;
-  const dashboardsNavWidth = document.querySelectorAll(".dashboards-nav")[0].clientWidth;
-  const kuiLocalMenuWidth = document.querySelectorAll(".kuiLocalMenu")[0].clientWidth;
-  const kuiLocalBreadcrumbLinkWidth = document.querySelectorAll(".kuiLocalBreadcrumb")[0].clientWidth;
-  // shift is composed from the sum of paddings and a reserved space for the documents count
-  const shift = 30 + 115;
-
-  const titleSpace = $(window).width() - globalNavWidth - dashboardsNavWidth - kuiLocalMenuWidth
-    - kuiLocalBreadcrumbLinkWidth - shift;
-
-  const maxLength = Math.floor(titleSpace / 9);
-  if (title.length > maxLength) {
+export function getDashboardTitle(title, viewMode, isDirty, maxLength) {
+  if (maxLength && title.length > maxLength) {
     if ((maxLength - 3) < 0) {
       title = '...';
     }  else {
@@ -63,4 +52,23 @@ export function getDashboardTitle(title, viewMode, isDirty) {
 
   const displayTitle = `${title}${unsavedSuffix}`;
   return isEditMode ? 'Editing ' + displayTitle : displayTitle;
+}
+
+/**
+ * Kibi: function that calculates the max characters to display for a dashboard title depending on the window size
+ * and the other UI elements width.
+ */
+export function getDashBoardTitleMaxLength() {
+  const globalNavWidth = document.querySelectorAll(".global-nav")[0].clientWidth;
+  const dashboardsNavWidth = document.querySelectorAll(".dashboards-nav")[0].clientWidth;
+  const kuiLocalMenuWidth = document.querySelectorAll(".kuiLocalMenu")[0].clientWidth;
+  const kuiLocalBreadcrumbLinkWidth = document.querySelectorAll(".kuiLocalBreadcrumb")[0].clientWidth;
+  // shift is composed from the sum of paddings and a reserved space for the documents count
+  const shift = 30 + 115;
+
+  const titleSpace = $(window).width() - globalNavWidth - dashboardsNavWidth - kuiLocalMenuWidth
+    - kuiLocalBreadcrumbLinkWidth - shift;
+
+  const maxLength = Math.floor(titleSpace / 9);
+  return maxLength;
 }

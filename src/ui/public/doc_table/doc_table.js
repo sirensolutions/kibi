@@ -65,7 +65,7 @@ uiModules.get('kibana')
       $scope.size = parseInt(config.get('discover:sampleSize'));
 
       $scope.hasNextPage = function () {
-        return $scope.increaseSample ? $scope.pager.totalItems < $scope.totalHitCount : $scope.pager.hasNextPage;
+        return $scope.increaseSample ? ($scope.pager.endItem !== $scope.totalHitCount) : $scope.pager.hasNextPage;
       };
       // kibi: end
 
@@ -116,7 +116,24 @@ uiModules.get('kibana')
         if ($scope.columns.length === 0) $scope.columns.push('_source');
       });
 
-      $scope.$watch('searchSource', prereq(function () {
+      // Kibi: filters and query flags set on appState changes.
+      // Attached to the scope for testing purposes
+      $scope.filtersOrQueryChanged = false;
+
+      // Kibi: catch query changes
+      const removeGetAppStateHandler = $scope.$watch(getAppState, (appState) => {
+        if (appState) {
+          appState.on('save_with_changes', function (diff) {
+            const checkQuery = _.indexOf(diff, 'query');
+            const checkFilters = _.indexOf(diff, 'filters');
+            if (checkQuery !== -1 || checkFilters !== -1) {
+              $scope.filtersOrQueryChanged = true;
+            }
+          });
+        }
+      });
+
+      const refreshTable = prereq(function () {
         if (!$scope.searchSource) return;
 
         $scope.indexPattern = $scope.searchSource.get('index');
@@ -127,12 +144,13 @@ uiModules.get('kibana')
         // Set the watcher after initialization
         $scope.$watchCollection('sorting', function (newSort, oldSort) {
           // Don't react if sort values didn't really change
-          if (newSort === oldSort) return;
+          if (!$scope.searchSource || newSort === oldSort) return;
           $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
           $scope.searchSource.fetchQueued();
         });
 
         $scope.$on('$destroy', function () {
+          removeGetAppStateHandler();
           if ($scope.searchSource) $scope.searchSource.destroy();
         });
 
@@ -145,18 +163,21 @@ uiModules.get('kibana')
           if ($scope.searchSource !== $scope.searchSource) return;
 
           $scope.hits = resp.hits.hits;
+          // kibi: start the page
+          let startingPage = 1;
+          if ($scope.increaseSample && $scope.pager && ($scope.totalHitCount === resp.hits.total) && !$scope.filtersOrQueryChanged) {
+            startingPage = $scope.pager.currentPage;
+          }
+
           // We limit the number of returned results, but we want to show the actual number of hits, not
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;
-          // kibi: start the page
-          // if page size is changed and hits length same as pager.totalItems startingPage should be 1
-          let startingPage = 1;
-          if ($scope.increaseSample && $scope.pager && ($scope.pager.totalItems !== $scope.hits.length)) {
-            startingPage = $scope.pager.pageCount;
-          }
 
           $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize || 50, startingPage);
           calculateItemsOnPage();
+
+          // Kibi: reset the flag
+          $scope.filtersOrQueryChanged = false;
 
           return $scope.searchSource.onResults().then(onResults);
         }).catch(notify.fatal);
@@ -178,7 +199,8 @@ uiModules.get('kibana')
         })
         // kibi: end
         .catch(notify.fatal);
-      }));
+      });
+      $scope.$watch('searchSource', refreshTable);
 
       $scope.pageOfItems = [];
       $scope.onPageNext = () => {

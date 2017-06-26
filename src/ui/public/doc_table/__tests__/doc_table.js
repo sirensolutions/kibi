@@ -5,6 +5,7 @@ import ngMock from 'ng_mock';
 import 'ui/private';
 import 'ui/doc_table';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import MockState from 'fixtures/mock_state';
 
 let $parentScope;
 let $scope;
@@ -37,7 +38,14 @@ const destroy = function () {
 describe('docTable', function () {
   let $elem;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(
+    ngMock.module('kibana', function ($provide) {
+      const appState = new MockState({ filters: [] });
+      $provide.service('getAppState', function () {
+        return function () { return appState; };
+      });
+    })
+  );
   beforeEach(function () {
     $elem = angular.element('<doc-table search-source="searchSource" columns="columns" sorting="sorting"></doc-table>');
     ngMock.inject(function (Private) {

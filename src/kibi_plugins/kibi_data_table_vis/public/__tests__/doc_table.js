@@ -461,9 +461,6 @@ describe('Kibi doc table extra features', function () {
 
       expect(getTableColumn()).to.be(columnContent(51, 100));
       expect($scope.pager.currentPage).to.be(2);
-
-
-
     });
 
     it('should reset the pager on query/filter change', function () {
@@ -529,9 +526,6 @@ describe('Kibi doc table extra features', function () {
 
       expect(getTableColumn()).to.be(columnContent(1, 50));
       expect($scope.pager.currentPage).to.be(1);
-
-
-
     });
   });
 });

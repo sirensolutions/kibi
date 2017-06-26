@@ -70,6 +70,9 @@ export default function (program) {
         },
         migrations: {
           enabled: false
+        },
+        gremlin: {
+          enabled: false
         }
       }
     );

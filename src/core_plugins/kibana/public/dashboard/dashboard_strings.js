@@ -37,12 +37,8 @@ export function getUnsavedChangesWarningMessage(changedFilters) {
  * @returns {string} A title to display to the user based on the above parameters.
  */
 export function getDashboardTitle(title, viewMode, isDirty, maxLength) {
-  if (maxLength && title.length > maxLength) {
-    if ((maxLength - 3) < 0) {
-      title = '...';
-    }  else {
-      title = title.substring(0, maxLength - 3) + '...';
-    }
+  if (maxLength !== undefined && title.length > maxLength) {
+    title = title.substring(0, maxLength) + '...';
   }
 
   const isEditMode = viewMode === DashboardViewMode.EDIT;
@@ -57,18 +53,38 @@ export function getDashboardTitle(title, viewMode, isDirty, maxLength) {
 /**
  * Kibi: function that calculates the max characters to display for a dashboard title depending on the window size
  * and the other UI elements width.
+ * Returns an integer of 0 or more.
  */
 export function getDashBoardTitleMaxLength() {
-  const globalNavWidth = document.querySelectorAll(".global-nav")[0].clientWidth;
-  const dashboardsNavWidth = document.querySelectorAll(".dashboards-nav")[0].clientWidth;
-  const kuiLocalMenuWidth = document.querySelectorAll(".kuiLocalMenu")[0].clientWidth;
-  const kuiLocalBreadcrumbLinkWidth = document.querySelectorAll(".kuiLocalBreadcrumb")[0].clientWidth;
+  let globalNavWidth = 0;
+  let dashboardsNavWidth = 0;
+  let kuiLocalMenuWidth = 0;
+  let kuiLocalBreadcrumbLinkWidth = 0;
+  const globalNavElmt = document.getElementById('kibi-global-nav');
+  if (globalNavElmt) {
+    globalNavWidth = globalNavElmt.clientWidth;
+  }
+  const dashboardsNavElmt = document.getElementById('kibi-dashboards-nav');
+  if (dashboardsNavElmt) {
+    dashboardsNavWidth = dashboardsNavElmt.clientWidth;
+  }
+  const kuiLocalMenuElmt = document.getElementById('kibi-kuiLocalMenu');
+  if (kuiLocalMenuElmt) {
+    kuiLocalMenuWidth = kuiLocalMenuElmt.clientWidth;
+  }
+  const kuiLocalBreadcrumbLinElmt = document.getElementById('kibi-kuiLocalBreadcrumb');
+  if (kuiLocalBreadcrumbLinElmt) {
+    kuiLocalBreadcrumbLinkWidth = kuiLocalBreadcrumbLinElmt.offsetWidth;
+  }
   // shift is composed from the sum of paddings and a reserved space for the documents count
   const shift = 30 + 115;
 
   const titleSpace = $(window).width() - globalNavWidth - dashboardsNavWidth - kuiLocalMenuWidth
     - kuiLocalBreadcrumbLinkWidth - shift;
 
-  const maxLength = Math.floor(titleSpace / 9);
-  return maxLength;
+  if (titleSpace <= 0) {
+    return 0;
+  } else {
+    return Math.floor(titleSpace / 9);
+  }
 }

@@ -204,15 +204,18 @@ uiModules
           filterManager.add(field, value, operator, index);
         };
 
-        // kibi: toggle borders around panels
-        $scope.border = !$scope.hideBorders;
-        $scope.$watch('hideBorders', hideBorders => {
-          if (hideBorders !== undefined) {
-            $scope.border = !$scope.hideBorders;
-          }
-        });
-        // kibi: end
       }
+
+      // kibi: toggle borders around panels
+      // Don't do this inside initialization to consistently show/hide borders
+      // when there are errors during the panel initialization
+      $scope.border = !$scope.hideBorders;
+      $scope.$watch('hideBorders', hideBorders => {
+        if (hideBorders !== undefined) {
+          $scope.border = !$scope.hideBorders;
+        }
+      });
+      // kibi: end
 
       $scope.loadedPanel = loadSavedObject(getObjectLoadersForDashboard(), $scope.panel)
         .then(initializePanel)

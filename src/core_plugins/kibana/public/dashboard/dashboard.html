@@ -12,28 +12,30 @@
         data-transclude-slot="topLeftCorner"
       >
         <div class="kuiLocalBreadcrumbs" data-test-subj="breadcrumbs">
-          <div class="kuiLocalBreadcrumb">
+          <!-- <div class="kuiLocalBreadcrumb"> -->
             <!-- kibi: first breadcrumb points to the dashboard listing -->
-            <a class="kuiLocalBreadcrumb__link" href="{{listingPageUrl()}}">Dashboard</a>
-          </div>
+            <!-- <a class="kuiLocalBreadcrumb__link" href="{{listingPageUrl()}}">Dashboard</a> -->
+          <!-- </div> -->
           <div class="kuiLocalBreadcrumb">
             <!-- siren: adds group icon, bigger title and stats -->
             <i
               ng-show="dash.id"
               ng-if="dash.group.iconCss"
               class="dashboard-icon-image {{dash.group.iconCss}}"
+              tooltip="{{dash.group.title}}"
             ></i>
             <img
               ng-show="dash.id"
               ng-if="dash.group.iconUrl"
               ng-src="dashboard-icon-image {{dash.group.iconUrl}}"
+              tooltip="{{dash.group.title}}"
             />
             {{ getDashTitle() }}
             <span
               ng-show="dash.id && dash.group.selected.count !== undefined"
               class="dashboard-stats"
             >
-              ({{dash.group.selected.formattedCount}})
+              ({{dash.formattedCount}})
             </span>
           </div>
         </div>

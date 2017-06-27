@@ -1,0 +1,51 @@
+.kibi-context-menu {
+  max-width: 200px;
+  display: none;
+  position: fixed;
+  z-index: 999;
+
+  &.open {
+    display: block;
+  }
+  .dropdown-menu {
+    list-style: none;
+    margin-left: 0;
+    outline: none;
+    width: 100%;
+    max-height: none;
+    height: auto;
+    z-index: 50;
+    border: 1px solid #ccc;
+    background: #fff;
+    // margin-top: 2px;
+    margin: 0;
+    max-width: 200px;
+    min-width: 160px;
+    padding: 0;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+
+    li {
+      cursor: pointer;
+      margin: 0;
+      hr {
+        border: none;
+        height: 1px;
+        background: rgba(0, 0, 0, 0.10);
+        // margin: 6px 1px 5px;
+        margin: 0;
+        padding: 0;
+      }
+
+      a {
+        display: block;
+        padding: 5px;
+        color: #555;
+        text-decoration: none;
+
+        &:hover {
+          background: #ddd;
+        }
+      }
+    }
+  }
+}

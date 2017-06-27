@@ -1,0 +1,52 @@
+<div
+  class="dashboard-top-toolbar"
+  ng-click="onClick({ $event: $event, force: true })"
+  ng-class="{ isOpen: isOpen }"
+>
+  <a
+    class="action-button new-group"
+    ng-class="{collapsed: !isOpen}"
+    ng-if="!isGroupEditorOpen"
+    ng-click="onNewGroupClick({ $event: $event }); $event.stopPropagation();"
+    data-test-subj="newGroup"
+    aria-label="Create new group"
+    tooltip="Create new group"
+    tooltip-append-to-body="true"
+  >
+    <span class="fa-stack">
+      <span class="fa fa-folder fa-stack-2x"></span>
+      <span class="fa fa-plus fa-stack-1x text-danger"></span>
+    </span>
+  </a>
+
+  <a
+   class="action-button new-dashboard"
+   ng-class="{collapsed: !isOpen}"
+   ng-click="createDashboard(); $event.stopPropagation();"
+   data-test-subj="newDashboardLink"
+   aria-label="Create new dashboard"
+   tooltip="Create new dashboard"
+   tooltip-append-to-body="true"
+   >
+   <span class="fa-stack">
+     <span class="fa fa-bar-chart fa-stack-2x"></span>
+     <span class="fa fa-plus fa-stack-1x text-danger"></span>
+   </span>
+  </a>
+
+  <a
+    class="action-button reset-filters"
+    ng-class="{collapsed: !isOpen}"
+    ng-click="onClearFilter(); $event.stopPropagation();"
+    data-test-subj="resetAll"
+    aria-label="Reset the time, filters, and queries from all dashboards to their default saved state"
+    tooltip="Reset the time, filters, and queries from all dashboards to their default saved state"
+    tooltip-append-to-body="true"
+  >
+    <span class="fa-stack">
+      <span class="fa fa-filter fa-stack-2x"></span>
+      <span class="fa fa-times fa-stack-1x text-danger"></span>
+    </span>
+  </a>
+
+</div>

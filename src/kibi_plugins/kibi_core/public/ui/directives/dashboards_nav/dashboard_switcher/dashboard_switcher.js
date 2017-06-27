@@ -1,6 +1,4 @@
-import '../dashboard_nav_link/dashboard_nav_link';
 import '../dashboard_nav_edit_link/dashboard_nav_edit_link';
-import '../dashboards_nav_control/dashboards_nav_control';
 import './dashboard_switcher.less';
 import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
 import QueryFilterProvider from 'ui/filter_bar/query_filter';
@@ -25,25 +23,58 @@ uiModules
       filter: '=',
     },
     template,
-    controller($scope) {
+    controller($scope, $element) {
+      $scope.$on('kibi-dashboard-nav-saving', (event, value) => {
+        $scope.isSaving = value;
+        if (event && event.stopPropagation) {
+          event.stopPropagation();
+        }
+      });
+
+      $scope.persistCollapsedGroupState = () => {
+        const collapsedGroups = [];
+        $scope.groups.forEach(group => {
+          if (!group.virtual && group.collapsed) {
+            collapsedGroups.push(group.id);
+          }
+        });
+        dashboardsNavState.setCollapsedGroups(collapsedGroups);
+      };
+
+      $scope.restoreCollapsedGroupState = () => {
+        const collapsedGroups = dashboardsNavState.collapsedGroups();
+        $scope.groups.forEach(group => {
+          if (_.indexOf(collapsedGroups, group.id) >= 0) {
+            group.collapsed = true;
+          }
+        });
+      };
+
+      $scope.$watch(kibiState._getCurrentDashboardId, id => {
+        if (id) {
+          dashboardGroups.getGroup(id).collapsed = false;
+          $scope.persistCollapsedGroupState();
+        }
+      });
+
       $scope.groups = dashboardGroups.getGroups();
       $scope.$watchCollection(() => dashboardGroups.getGroups(), function (groups) {
         if (groups) {
+          $scope.persistCollapsedGroupState();
           dashboardGroups.setActiveGroupFromUrl();
           $scope.groups = dashboardGroups.getGroups();
+          $scope.restoreCollapsedGroupState();
+          $scope.$emit('kibi:dashboardGroups:updated');
         }
       });
 
       $scope.$watch(() => kibiState._getCurrentDashboardId(), currentDashboardId => {
         if (currentDashboardId) {
+          $scope.persistCollapsedGroupState();
           dashboardGroups.setActiveGroupFromUrl();
           $scope.groups = dashboardGroups.getGroups();
+          $scope.restoreCollapsedGroupState();
         }
-      });
-
-      $scope.isOnEditMode = dashboardsNavState.isOnEditMode();
-      $scope.$watch(dashboardsNavState.isOnEditMode, isOnEditMode => {
-        $scope.isOnEditMode = isOnEditMode;
       });
 
       $scope.isGroupEditorOpen = dashboardsNavState.isGroupEditorOpen();
@@ -70,7 +101,7 @@ uiModules
         .then(() => kibiNavBarHelper.updateAllCounts([ dashId ], 'kibi:dashboard:changed event'));
       });
 
-      $rootScope.$on('kibi:dashboardgroup:changed', function () {
+      $scope.$on('kibi:dashboardgroup:changed', function () {
         computeDashboardsGroups('Dashboard group changed');
       });
 

@@ -1,17 +1,10 @@
 @import (reference) "~ui/styles/mixins";
 @import (reference) "~ui/styles/variables";
 @import (reference) "./variables";
+@import (reference) "~ui/kibi/styles/kibi";
 
 @logo-height: 70px;
-
-.toaster-container .toaster {
-  &.dashboards-nav-open {
-    margin-left: @dashboards-nav-open-width;
-  }
-  &.dashboards-nav-closed {
-    margin-left: @dashboards-nav-closed-width;
-  }
-}
+@scrollbar-bg: @siren-dashboard-active-background;
 
 .dashboards-nav {
   position: fixed !important;
@@ -20,8 +13,21 @@
   top: 0;
   bottom: 0;
   z-index: 0;
-  background-color: @nav_color_bg;
+  background-color: @siren-dashboard-inactive-background;
   overflow: hidden;
+  min-width: 136px;
+
+  .dashboards-slider-handle {
+    width: 4px;
+    height: 100%;
+    top: 0;
+    position: absolute;
+    left: calc(@dashboards-nav-open-width - 4);
+    cursor: col-resize;
+    &:hover {
+      background-color: @kibanaGray2;
+    }
+  }
 
   .menu {
     height: @logo-height;
@@ -108,8 +114,10 @@
    */
   .links {
     height: 100%;
+    width: 100%;
     overflow-x: hidden; /* 3 */
     overflow-y: auto; /* 3 */
+    min-width: 136px;
 
     &::-webkit-scrollbar { /* 4 */
       width: 16px;
@@ -117,7 +125,7 @@
     }
 
     &::-webkit-scrollbar-thumb { /* 4 */
-      background-color: #2f99c1;
+      background-color: @scrollbar-bg;
       border: 6px solid transparent;
       background-clip: content-box;
     }

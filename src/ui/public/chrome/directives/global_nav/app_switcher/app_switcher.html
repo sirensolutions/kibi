@@ -1,5 +1,5 @@
 <global-nav-link
-  ng-repeat="link in switcher.links"
+  ng-repeat="link in switcher.links | filter: {id: '!kibana:dashboard'}"
   ng-if="!link.hidden"
   is-active="link.active"
   is-disabled="link.disabled"

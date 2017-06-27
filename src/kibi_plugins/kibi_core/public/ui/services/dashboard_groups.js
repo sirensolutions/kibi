@@ -173,10 +173,15 @@ uiModules
       return Promise.all(saveActions);
     }
 
-    newGroup() {
+    newGroup(title = 'New group', iconCss = 'fa fa-folder-o') {
       return savedDashboardGroups.get().then(group => {
-        group.title = 'New group';
-        group.iconCss = 'fa fa-folder-o';
+        let priority = 0;
+        this.getGroups().forEach((group) => {
+          priority = priority < group.priority ? group.priority : priority;
+        });
+        group.priority = priority + 10;
+        group.title = title;
+        group.iconCss = iconCss;
         return group.save();
       });
     }

@@ -15,6 +15,7 @@ uiModules
     },
     link($scope, $el, attr, draggableController) {
       $scope.isDashboard = attr.dashboardDraggableItem !== 'group';
+      $scope.isVirtualGroup = $scope.group.virtual;
       draggableController.linkDraggableItem($el.get(0), $scope);
     }
   };

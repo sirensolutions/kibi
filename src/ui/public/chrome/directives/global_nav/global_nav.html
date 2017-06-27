@@ -5,14 +5,14 @@
 >
 
   <!-- Logo -->
-  <div class="global-nav__logo">
-    <!-- siren: 
+  <div class="global-nav__logo" tooltip="Home">
+    <!-- siren:
       changed class from kibana to kibi
-      kibi-reload to on-click open a new clean (no cache) tab with Kibi. 
+      kibi-reload to on-click open a new clean (no cache) tab with Kibi.
     -->
     <li
       ng-if="!logoBrand && !smallLogoBrand"
-      kibi-reload
+      ng-click="gotoDashboard()"
       aria-label="{{ appTitle }} Logo"
       class="logo kibi"
     ></li>
@@ -20,7 +20,7 @@
     <!-- siren: kibi-reload to on-click open a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="logoBrand"
-      kibi-reload
+      ng-click="gotoDashboard()"
       ng-style="{ 'background': logoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo hidden-sm"
@@ -29,7 +29,7 @@
     <!-- siren: kibi-reload to on-click open a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="smallLogoBrand"
-      kibi-reload
+      ng-click="gotoDashboard()"
       ng-style="{ 'background': smallLogoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo-small visible-sm hidden-xs"

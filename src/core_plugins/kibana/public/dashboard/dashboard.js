@@ -24,6 +24,10 @@ import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_cli
 import DashboardStateProvider from './dashboard_state';
 import notify from 'ui/notify';
 
+// kibi: imports
+import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
+// kibi: end
+
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
   'ngRoute',
@@ -83,10 +87,13 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         delete dash.group;
         if (dash.id) {
           dash.group = dashboardGroups.getGroup(dash.id);
-          if (dash.group && dash.group.selected) {
-            dash.group.selected.formattedCount = dash.group.selected.count;
-            if (_.isNumber(dash.group.selected.count)) {
-              dash.group.selected.formattedCount = numeral.set(dash.group.selected.count).format('0,0');
+          if (dash.group) {
+            const count = _(dash.group.dashboards).filter(d => d.id === dash.id).map('count').value();
+            if (count && count.length) {
+              dash.formattedCount = count[0];
+              if (_.isNumber(count[0])) {
+                dash.formattedCount = numeral.set(count[0]).format('0,0');
+              }
             }
           }
         }
@@ -374,6 +381,15 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };
+
+      // kibi: Merge the parameters saved on kibi_appstate_param
+      const passedState = JSON.parse(hashedItemStoreSingleton.getItem('kibi_appstate_param'));
+      if (passedState && passedState.dashboardOptions) {
+        _.assign($scope.opts.dashboard, _.cloneDeep(passedState.dashboardOptions));
+        delete passedState.dashboardOptions;
+        hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
+      }
+      // kibi: end
 
       $scope.$emit('application.load');
 

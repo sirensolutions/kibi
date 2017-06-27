@@ -1,35 +1,18 @@
 <nav
   class="dashboards-nav"
+  ng-click="toggleDashboardsNav($event)"
   ng-class="{'is-dashboards-nav-open': isDashboardsNavOpen, 'is-dashboards-nav-group-editor-open': isDashboardsNavGroupEditorOpen, 'is-global-nav-open': isGlobalNavOpen}">
 
-  <div class="menu" ng-click="toggleDashboardsNav($event)">
-    <form role="form">
-      <input
-          name="dashboards-filter"
-          ng-show="!isDashboardsNavOnEditMode"
-          ng-class="{collapsed: !isDashboardsNavOpen}"
-          aria-label="Filter"
-          ng-model="dashboardFilter"
-          class="form-control span12 dashboards-filter"
-          type="text"
-          placeholder="Filter"
-        />
-    </form>
-
-    <!-- Create dashboard button -->
-    <a
-     class="kuiButton kuiButton--primary new-dashboard"
-     ng-class="{collapsed: !isDashboardsNavOpen}"
-     ng-show="!isDashboardsNavOnEditMode"
-     ng-click="createDashboard()"
-     data-test-subj="newDashboardLink"
-     aria-label="Create new dashboard"
-     tooltip="Create new dashboard"
-     tooltip-append-to-body="true"
-     >
-     <span class="kuiButton__icon kuiIcon fa-plus"></span>
-    </a>
-  </div>
+  <!-- top toolbar -->
+  <dashboard-top-toolbar
+  on-click="toggleDashboardsNav($event, true)"
+  is-open="isDashboardsNavOpen"
+  kbn-icon="{{ dashboardsNavToggleButton.icon }}"
+  on-new-group-click="newDashboardGroup($event)"
+  is-group-editor-open="isDashboardsNavGroupEditorOpen"
+  on-clear-filter="onClearFilter()"
+  create-dashboard="createDashboard()"
+  ></dashboard-top-toolbar>
 
   <div class="links" ng-click="toggleDashboardsNav($event)">
     <!-- dashboards sidebar -->
@@ -37,23 +20,22 @@
       filter="dashboardFilter"
     ></dashboard-switcher>
 
-    <!-- actions and open/close sidebar -->
-    <dashboards-nav-control
-        on-click="toggleDashboardsNav($event, true)"
-        kbn-icon="{{ dashboardsNavToggleButton.icon }}"
-        is-open="isDashboardsNavOpen"
-        on-edit-click="toggleDashboardsNavEditMode($event)"
-        is-on-edit-mode="isDashboardsNavOnEditMode"
-        on-new-group-click="newDashboardGroup($event)"
-        is-group-editor-open="isDashboardsNavGroupEditorOpen"
-    ></dashboards-nav-control>
+    <!-- bottom toolbar -->
+    <dashboard-bottom-toolbar
+    on-click="toggleDashboardsNav($event, true)"
+    is-open="isDashboardsNavOpen"
+    kbn-icon="{{ dashboardsNavToggleButton.icon }}"
+    dashboard-filter="dashboardFilter"
+    ></dashboard-bottom-toolbar>
   </div>
+
 
   <!-- group editor panel -->
   <div ng-show="isDashboardsNavGroupEditorOpen" class="group-editor">
     <dashboard-nav-group-editor
-      edit-mode="isDashboardsNavOnEditMode">
     </dashboard-nav-group-editor>
   </div>
 
+  <div class="dashboards-slider-handle">
+  </div>
 </nav>

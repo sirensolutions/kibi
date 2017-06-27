@@ -1,0 +1,43 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "../variables";
+
+.dashboard-top-toolbar {
+  padding: 5px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #ccc;
+  height: 38px;
+
+  .action-button {
+    color: #eee;
+    top: 3px;
+    font-size: 10px;
+    padding: 4px;
+    &:hover {
+      color: @kibanaGray4;
+    }
+  }
+
+  .new-group {
+    left: 5px;
+    &.collapsed {
+      left: 5px;
+    }
+  }
+
+  .new-dashboard {
+    left: 35px;
+    &.collapsed {
+      left: 35px;
+    }
+  }
+
+  .reset-filters {
+    float: right;
+    margin-right: 5px;
+    margin-top: -2px;
+    &.collapsed {
+    }
+  }
+
+
+}

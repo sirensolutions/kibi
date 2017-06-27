@@ -29,14 +29,12 @@ uiModules
       });
       const drake = dragula({
         accepts(el, target, source, sibling) {
-          const element = $(el).parent().get(0);
-          const elementScope = $scopes.get(element);
-          const targetScope = $scopes.get(target);
-          if (elementScope.isDashboard && targetScope.isDashboard
-            && elementScope.dashboardDraggableItemCtrl.getGroup().id === targetScope.dashboardDraggableItemCtrl.getGroup().id) {
-            return true;
+          const sourceScope = $scopes.get(source);
+          if (!sourceScope.isDashboard && !sourceScope.isVirtualGroup) {
+            const targetScope = $scopes.get(target);
+            return !targetScope.isDashboard;
           }
-          return !$scopes.get(target).isDashboard;
+          return true;
         },
         moves(el, source, handle) {
           const itemScope = $scopes.get(source);
@@ -71,19 +69,31 @@ uiModules
         const sourceItem = sourceItemScope.dashboardDraggableItemCtrl.getItem();
         const sourceGroup = sourceItemScope.dashboardDraggableItemCtrl.getGroup();
         if (!sourceItemScope.isDashboard || sourceGroup.virtual) {
-          $rootScope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
+          $scope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
           return;
         }
         // Removes a dashboard from one group
         $scope.isSaving = true;
         savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
+          const dashId = savedSourceGroup.dashboards[sourceItem].id;
           savedSourceGroup.dashboards.splice(sourceItem, 1);
-          return savedSourceGroup.save();
+          let priority = 0;
+          dashboardGroups.getGroups().forEach(group => {
+            priority = priority < group.priority ? group.priority : priority;
+          });
+          return savedSourceGroup.save()
+          .then(() => {
+            return savedDashboards.get(dashId)
+            .then(savedDashboard => {
+              savedDashboard.priority = priority + 10;
+              return savedDashboard.save();
+            });
+          });
         })
         .then(cache.invalidate)
         .then(() => {
           $scope.isSaving = false;
-          $rootScope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
+          $scope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
         })
         .catch((reason) => {
           $scope.isSaving = false;
@@ -120,9 +130,15 @@ uiModules
           else if (sourceGroup.id === targetGroup.id && !sourceGroup.virtual && !targetGroup.virtual) {
             // Changes the dashboard order inside a group
             return savedDashboardGroups.get(sourceGroup.id).then(savedGroup => {
-              const swap = _.clone(savedGroup.dashboards[sourceItem]);
-              savedGroup.dashboards.splice(sourceItem, 1);
-              savedGroup.dashboards.splice(targetItem, 0, swap);
+              const dashboard = _.clone(savedGroup.dashboards[sourceItem]);
+              if (!sibling) {
+                savedGroup.dashboards.splice(sourceItem, 1);
+                savedGroup.dashboards.splice(targetItem, 0, dashboard);
+              } else {
+                savedGroup.dashboards.splice(sourceItem, 1);
+                const sibingItem = $scopes.get($(sibling).parent().get(0)).dashboardDraggableItemCtrl.getItem();
+                savedGroup.dashboards.splice(sibingItem, 0, dashboard);
+              }
               return savedGroup.save();
             });
           }
@@ -135,9 +151,10 @@ uiModules
                 savedSourceGroup.dashboards.splice(sourceItem, 1);
                 actions.push(savedSourceGroup.save());
                 if (!sibling) {
-                  savedTargetGroup.dashboards.push(dashboard);
+                  savedTargetGroup.dashboards.splice(targetItem + 1, 0, dashboard);
                 } else {
-                  savedTargetGroup.dashboards.splice(targetItem, 0, dashboard);
+                  const sibingItem = $scopes.get($(sibling).parent().get(0)).dashboardDraggableItemCtrl.getItem();
+                  savedTargetGroup.dashboards.splice(sibingItem, 0, dashboard);
                 }
                 actions.push(savedTargetGroup.save());
                 return Promise.all(actions);
@@ -154,10 +171,16 @@ uiModules
           else if (!sourceItemScope.isDashboard && sourceGroup.virtual && !targetGroup.virtual) {
             // Moves a virtual group into a group
             return savedDashboardGroups.get(targetGroup.id).then(savedGroup => {
-              savedGroup.dashboards.push({
+              const dashboard = {
                 id: sourceGroup.id,
                 title: sourceGroup.title
-              });
+              };
+              if (!sibling) {
+                savedGroup.dashboards.splice(targetItem + 1, 0, dashboard);
+              } else {
+                const sibingItem = $scopes.get($(sibling).parent().get(0)).dashboardDraggableItemCtrl.getItem();
+                savedGroup.dashboards.splice(sibingItem, 0, dashboard);
+              }
               return savedGroup.save();
             });
           }
@@ -172,7 +195,7 @@ uiModules
         .then(cache.invalidate)
         .then(() => {
           $scope.isSaving = false;
-          $rootScope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
+          $scope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
         })
         .catch((reason) => {
           $scope.isSaving = false;

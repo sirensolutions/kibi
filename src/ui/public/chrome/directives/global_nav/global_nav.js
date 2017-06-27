@@ -8,7 +8,7 @@ import uiModules from 'ui/modules';
 
 const module = uiModules.get('kibana');
 
-module.directive('globalNav', globalNavState => {
+module.directive('globalNav', (globalNavState, $window) => {
   return {
     restrict: 'E',
     replace: true,
@@ -36,6 +36,16 @@ module.directive('globalNav', globalNavState => {
       }
 
       updateGlobalNav();
+
+      //TODO: SLS: Put a right click menu to open a new kibi session
+      scope.gotoDashboard = () => {
+        const dashboardLink = scope.chrome.getNavLinks().filter(link => link.id === 'kibana:dashboard')[0];
+        if (dashboardLink.linkToLastSubUrl) {
+          $window.location.href = dashboardLink.lastSubUrl;
+        } else {
+          $window.location.href = dashboardLink.url;
+        }
+      };
 
       scope.$root.$on('globalNavState:change', () => {
         updateGlobalNav();

@@ -13,7 +13,6 @@ describe('Regex', function () {
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
   }));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {

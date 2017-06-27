@@ -16,7 +16,6 @@ describe('buildHierarchicalData', function () {
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
   }));
   beforeEach(ngMock.inject(function (Private, $injector) {
     // stub the error method before requiring vis causes Notifier#error to be bound

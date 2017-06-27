@@ -9,7 +9,6 @@ describe('Kibi Controllers', function () {
   function init({ snippet, snippetError, params = {} } = {}) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
     });
 
     ngMock.module('apps/management');

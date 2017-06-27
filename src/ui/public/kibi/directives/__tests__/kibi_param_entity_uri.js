@@ -16,7 +16,6 @@ let $rootScope;
 const init = function () {
   ngMock.module('kibana', function ($compileProvider, $provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
     $provide.constant('kibiDatasourcesSchema', {});
 
     $compileProvider.directive('kibiSelect', function () {

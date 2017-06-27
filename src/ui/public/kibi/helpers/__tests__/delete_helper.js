@@ -63,7 +63,6 @@ describe('Kibi Components', function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', '');
-        $provide.constant('kibiDefaultDashboardTitle', '');
       });
 
       ngMock.module('kibi_core/saved_objects/dashboard_groups', function ($provide) {

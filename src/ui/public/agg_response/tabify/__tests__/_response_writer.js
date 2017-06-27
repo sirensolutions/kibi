@@ -19,7 +19,6 @@ describe('ResponseWriter class', function () {
   function defineSetup(stubGetColumns) {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
     }));
     beforeEach(ngMock.inject(function ($injector) {
       Private = $injector.get('Private');

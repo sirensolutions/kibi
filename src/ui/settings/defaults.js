@@ -369,10 +369,9 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       value: true,
       description: 'Enable counts on all relational buttons.'
     },
-    'kibi:default_dashboard_title' : {
+    'kibi:defaultDashboardTitle' : {
       value: '',
-      description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.' +
-                    '  If kibi:default_dashboard_title already set from kibi.yml, default value is read from kibi.yml'
+      description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.'
     }
     // kibi: end
   };

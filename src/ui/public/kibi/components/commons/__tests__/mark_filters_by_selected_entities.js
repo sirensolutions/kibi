@@ -31,7 +31,6 @@ describe('Kibi Components', function () {
       beforeEach(function () {
         ngMock.module('kibana', function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
-          $provide.constant('kibiDefaultDashboardTitle', '');
         });
 
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {

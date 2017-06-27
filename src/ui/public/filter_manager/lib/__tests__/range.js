@@ -9,7 +9,6 @@ describe('Filter Manager', function () {
   describe('Range filter builder', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
     }));
     beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

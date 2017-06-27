@@ -66,7 +66,6 @@ describe('Kibi data table controller', function () {
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
   }));
 
   afterEach(function () {

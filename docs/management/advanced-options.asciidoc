@@ -98,6 +98,7 @@ Markdown.
 `kibi:session_cookie_expire`:: Set duration of cookie session (in seconds).
 `kibi:enableAllDashboardsCounts`:: Enable counts on all dashboards.
 `kibi:enableAllRelBtnCounts`:: Enable counts on all relational buttons.
+`kibi:defaultDashboardTitle`:: The dashboard that is displayed when clicking on the Dashboard tab for the first time.
 `kibi:graphUseWebGl`  :: Set to false to disable WebGL rendering
 `kibi:graphUseFiltersFromDashboards`  :: Set to true to use filters from dashboards on expansion.
 `kibi:graphExpansionLimit`  :: Limit the number of elements to retrieve during the graph expansion.

@@ -32,7 +32,6 @@ describe('Kibi Directives', function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kbnIndex', '.kibi');
         $provide.constant('kbnDefaultAppId', '');
-        $provide.constant('kibiDefaultDashboardTitle', '');
         if (savedDatasources) {
           $provide.service('savedDatasources', (Promise, Private) => {
             return mockSavedObjects(Promise, Private)('savedDatasources', savedDatasources);

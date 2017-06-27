@@ -33,7 +33,6 @@ _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
     beforeEach(ngMock.module('kibana', function ($provide) {
       // kibi: for running kibi tests
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
     }));
     beforeEach(ngMock.inject(function (Private, $injector) {
       vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);

@@ -483,6 +483,8 @@ monitoring:
 sentinl:
   cluster:
     - KIBI_CLUSTER
+    - "indices:data/write/bulk*"
+    - "indices:admin/template/*"
   indices:
     '*':
       '*':
@@ -490,14 +492,10 @@ sentinl:
     'watcher_alarms*':
       '*':
         - KIBI_READWRITE
-        - indices:admin/template/get
-        - indices:admin/template/put
         - CREATE_INDEX
     '/(watcher|watcher_alarms)/':
       '*':
         - KIBI_READWRITE
-        - indices:admin/template/get
-        - indices:admin/template/put
         - CREATE_INDEX
 
 # Permissions for the Kibi server process.

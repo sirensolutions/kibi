@@ -263,7 +263,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
 
       $scope.$watch('vis.aggs', function () {
         // no timefield, no vis, nothing to update
-        if (!$scope.opts.timefield) return;
+        if (!$scope.opts.timefield || !$scope.vis) return;
 
         const buckets = $scope.vis.aggs.bySchemaGroup.buckets;
 
@@ -530,9 +530,10 @@ function discoverController($scope, config, courier, $route, $window, createNoti
   let loadingVis;
   function setupVisualization() {
     // If we're not setting anything up we need to return an empty promise
-    if (!$scope.opts.timefield) return Promise.resolve();
-    if (loadingVis) return loadingVis;
+    // kibi: added condition to check if there are any fields
+    if (!$scope.opts.timefield  || $scope.indexPattern.fields.length === 0) return Promise.resolve();
 
+    if (loadingVis) return loadingVis;
     const visStateAggs = [
       {
         type: 'count',
@@ -556,6 +557,8 @@ function discoverController($scope, config, courier, $route, $window, createNoti
       $scope.vis.setState(visState);
       return Promise.resolve($scope.vis);
     }
+
+
 
     $scope.vis = new Vis($scope.indexPattern, {
       title: savedSearch.title,

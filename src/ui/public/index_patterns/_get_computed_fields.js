@@ -6,7 +6,14 @@ export default function () {
   const scriptFields = {};
   let docvalueFields = [];
 
-  docvalueFields = _.map(_.reject(self.fields.byType.date, 'scripted'), 'name');
+
+  // kibi: added extra if self.fields.byType exists before using it
+  let notScriptedFields = [];
+  if (self.fields.byType) {
+    notScriptedFields = _.reject(self.fields.byType.date, 'scripted');
+  }
+  // kibi: end
+  docvalueFields = _.map(notScriptedFields, 'name');
 
   _.each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {

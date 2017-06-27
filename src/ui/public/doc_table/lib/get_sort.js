@@ -12,7 +12,8 @@ function getSort(sort, indexPattern) {
   let direction;
 
   function isSortable(field) {
-    return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);
+    // kibi: check if indexPattern.fields.byName exists before using it
+    return (indexPattern.fields.byName && indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);
   }
 
   if (_.isArray(sort) && sort.length === 2 && isSortable(sort[0])) {

@@ -113,8 +113,12 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
             const error = JSON.stringify(hit.error, null, ' ');
             if (error.match(/ElasticsearchSecurityException/)) {
               results[i].button.warning = 'Access to an index referred by this button is forbidden.';
+              notify.error(error);
             }
-            notify.error(error);
+            if (error.match(/index_not_found_exception/)) {
+              // do not notify about missing index error
+              results[i].button.warning = 'Index referred by this button does not exist.';
+            }
             if ($scope.multiSearchData) {
               $scope.multiSearchData.add(stats);
             }

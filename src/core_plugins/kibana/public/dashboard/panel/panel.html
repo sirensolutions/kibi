@@ -46,15 +46,17 @@
     <div class="clearfix"></div>
   </div>
 
-  <div ng-if="savedObj.vis.error || error" class="load-error">
+  <div ng-if="savedObj.vis.error || error || savedObj.searchSource.error" class="load-error">
     <i aria-hidden="true" class="fa fa-exclamation-triangle"></i>
     <span ng-if="error" ng-bind="error"></span>
-    <!--kibi: added error reporting by a visualization-->
+    <!--kibi: added error reporting by a visualization or searchSource -->
     <span ng-if="savedObj.vis.error" ng-bind="savedObj.vis.error"></span>
+    <span ng-if="savedObj.searchSource.error" ng-bind="savedObj.searchSource.error"></span>
   </div>
 
+  <!-- kibi: added extra conditions to ng-if to not display if there is an error set on visualisation or searchSource object -->
   <visualize
-    ng-if="!error"
+    ng-if="!(savedObj.vis.error || error || savedObj.searchSource.error)"
     ng-switch-when="visualization"
     vis="savedObj.vis"
     search-source="savedObj.searchSource"
@@ -67,8 +69,9 @@
     class="panel-content">
   </visualize>
 
+  <!-- kibi: added extra conditions to ng-if to not display if there is an error set on visualisation or searchSource object -->
   <doc-table
-    ng-if="!error"
+    ng-if="!(savedObj.vis.error || error || savedObj.searchSource.error)"
     ng-switch-when="search"
     search-source="savedObj.searchSource"
     sorting="panel.sort"

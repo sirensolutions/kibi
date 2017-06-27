@@ -48,6 +48,8 @@ uiModules
             metadata[i].count = 'Forbidden';
           } else if (!_.contains(Object.keys(hit), 'error')) {
             metadata[i].count = hit.hits.total;
+          } else if (_.contains(Object.keys(hit), 'error') && hit.error.reason) {
+            metadata[i].count = 'Error: ' + hit.error.reason;
           } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
             metadata[i].count = 'Forbidden';
           } else {

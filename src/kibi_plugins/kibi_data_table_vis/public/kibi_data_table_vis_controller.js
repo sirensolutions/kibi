@@ -174,6 +174,11 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
     if (!_hasRelationalColumn()) {
       return;
     }
+    const indexPattern = $scope.searchSource.get('index');
+    // index does not exists so it is imposible to grab the field to configure the column
+    if (!indexPattern) {
+      return;
+    }
     const { queryFieldName: name, queryDefinitions, joinElasticsearchField } = $scope.vis.params;
     const virtualField = {
       count: 0,
@@ -181,7 +186,6 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
       name,
       type: 'string'
     };
-    const indexPattern = $scope.searchSource.get('index');
     const virtualIndexPattern = new VirtualIndexPattern(indexPattern, virtualField);
     $scope.searchSource.index(virtualIndexPattern);
 

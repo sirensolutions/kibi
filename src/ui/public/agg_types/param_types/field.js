@@ -73,10 +73,18 @@ export default function FieldAggParamFactory(Private, $filter) {
    * @return {field}
    */
   FieldAggParam.prototype.deserialize = function (fieldName, aggConfig) {
-    const field = aggConfig.getIndexPattern().fields.byName[fieldName];
+    let field;
+
+    // kibi: check if byName method exists before using it
+    if (aggConfig.getIndexPattern().fields.byName) {
+      field = aggConfig.getIndexPattern().fields.byName[fieldName];
+    }
+    // kibi: end
 
     if (!field) {
-      throw new SavedObjectNotFound('index-pattern-field', fieldName);
+      throw new SavedObjectNotFound(
+        'index-pattern-field', 'Could not found field: ' + fieldName + ' in ' + aggConfig.getIndexPattern().id + ' index pattern'
+      );
     }
 
     const validField = this.getFieldOptions(aggConfig).byName[fieldName];

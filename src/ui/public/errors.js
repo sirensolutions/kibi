@@ -172,7 +172,7 @@ export class SavedObjectNotFound extends KbnError {
   constructor(type, id) {
     const idMsg = id ? ` (id: ${id})` : '';
     super(
-      `Could not locate that ${type}${idMsg}`,
+      `Could not locate object of type: ${type}. ${idMsg}`,
       SavedObjectNotFound);
 
     this.savedObjectType = type;

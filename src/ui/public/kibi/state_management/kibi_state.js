@@ -245,6 +245,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
   /**
    * Reset the filters, queries, and time for each dashboard to their saved state.
+   * Added dashId to allow reset only one dashboard.
    */
   KibiState.prototype.resetFiltersQueriesTimes = function (dashId) {
     if (!dashId) {

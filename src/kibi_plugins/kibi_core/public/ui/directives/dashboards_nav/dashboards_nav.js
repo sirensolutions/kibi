@@ -210,6 +210,14 @@ uiModules
           if (groupId) {
             notify.info('New dashboard group was successfuly created');
             $rootScope.$broadcast('kibi:dashboardgroup:changed', groupId);
+            $timeout(() => {
+              const groupElement = $element.find('#kibi-dashboard-group-' + groupId);
+              if (groupElement.length > 0) {
+                const offset = groupElement[0].offsetTop + groupElement[0].scrollHeight;
+                dashboardsNavState.setScrollbarPos(offset);
+                $scope.links[0].scrollTop = dashboardsNavState.scrollbarPos();
+              }
+            }, 1000);
           }
         })
         .catch (reason => {

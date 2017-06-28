@@ -1,4 +1,4 @@
-<div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group">
+<div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group" id="kibi-dashboard-group-{{group.id}}">
   <div ng-class="{'dashboard-group': !group.virtual, 'dashboard': group.virtual, active: group.id === dashboardLoaded, highlight: group.collapsed && doesGroupHasAnyHiglightedDashboard(group.dashboards)}">
     <div class="icon" ng-if="!group.virtual">
       <i
@@ -30,39 +30,41 @@
         kibi-context-menu kibi-context-menu-list="contextMenuVirtualGroup"
         kibi-context-menu-click-menu="clickMenuVirtualGroup(item)"
       >
-        <div class="title" ng-class="{collapsed: !isSidebarOpen, 'dashboard-nav-title-virtual-group': group.virtual}">
-          {{group.title}}
+        <div dashboard-nav-edit-tooltip group="group" ng-class="{'dashboard-nav-item': group.virtual}">
+          <div class="title" ng-class="{collapsed: !isSidebarOpen, 'dashboard-nav-title-virtual-group': group.virtual}">
+            {{group.title}}
+          </div>
+          <div ng-if="!group.virtual" class="action">
+            <i ng-if="group.collapsed" class="fa fa-plus"></i>
+            <i ng-if="!group.collapsed" class="fa fa-minus"></i>
+          </div>
+          <div class="indicators" ng-if="group.virtual">
+            <!--dashboard count-->
+            <span ng-if="group.selected.count !== undefined && group.selected.savedSearchId" ng-bind="humanNotation(group.selected.count)"></span>
+            <span ng-if="group.selected.count === undefined && group.selected.savedSearchId">
+              <div class="spinner">
+                <div class="cube1"></div>
+                <div class="cube2"></div>
+              </div>
+            </span>
+            </span>
+            <!--filters indicator-->
+            <span ng-if="group.selected.filterIconMessage" aria-hidden="true">
+              <i class="fa fa-filter"/>
+            </span>
+            <!--join pruning indicator-->
+            <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="Count may be lower than the actual value because a join operation was pruned"> *
+            </span>
+          </div>
+          <div
+            class="action dashboards-nav-edit-link-dragbar"
+            dashboard-draggable-handle
+          >
+          </div>
         </div>
-        <div ng-if="!group.virtual" class="action">
-          <i ng-if="group.collapsed" class="fa fa-plus"></i>
-          <i ng-if="!group.collapsed" class="fa fa-minus"></i>
-        </div>
-        <div class="indicators" ng-if="group.virtual">
-          <!--dashboard count-->
-          <span ng-if="group.selected.count !== undefined && group.selected.savedSearchId" ng-bind="humanNotation(group.selected.count)"></span>
-          <span ng-if="group.selected.count === undefined && group.selected.savedSearchId">
-            <div class="spinner">
-              <div class="cube1"></div>
-              <div class="cube2"></div>
-            </div>
-          </span>
-          </span>
-          <!--filters indicator-->
-          <span ng-if="group.selected.filterIconMessage" aria-hidden="true">
-             <i class="fa fa-filter"/>
-          </span>
-          <!--join pruning indicator-->
-          <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
-                data-placement="bottom"
-                title="Count may be lower than the actual value because a join operation was pruned"> *
-          </span>
-        </div>
-        <div
-          class="action dashboards-nav-edit-link-dragbar"
-          dashboard-draggable-handle
-        >
-        </div>
-    </div>
+      </div>
     </div>
   </div>
   <div ng-if="!group.virtual && !group.collapsed">
@@ -76,29 +78,31 @@
           kibi-context-menu kibi-context-menu-list="contextMenuDashboard"
           kibi-context-menu-click-menu="clickMenuDashboard(item, dashboard)"
         >
-          <div class="dashboards-nav-edit-link-dragbar" ng-class="{collapsed: !isSidebarOpen}" dashboard-draggable-handle>
-          </div>
-          <div class="dashboard-nav-title" ng-class="{collapsed: !isSidebarOpen}" dashboard="dashboard"> <!-- dashboard-nav-edit-tooltip -->
-            {{dashboard.title}}
-          </div>
-          <div class="indicators">
-            <!--dashboard count-->
-            <span ng-if="dashboard.count !== undefined && dashboard.savedSearchId" ng-bind="humanNotation(dashboard.count)"></span>
-            <span ng-if="dashboard.count === undefined && dashboard.savedSearchId">
-              <div class="spinner">
-                <div class="cube1"></div>
-                <div class="cube2"></div>
-              </div>
-            </span>
-            <!--filters indicator-->
-            <span ng-if="dashboard.filterIconMessage" aria-hidden="true">
-               <i class="fa fa-filter"/>
-            </span>
-            <!--join pruning indicator-->
-            <span ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
-                  data-placement="bottom"
-                  title="Count may be lower than the actual value because a join operation was pruned"> *
-            </span>
+          <div dashboard-nav-edit-tooltip dashboard="dashboard" class="dashboard-nav-item">
+            <div class="dashboards-nav-edit-link-dragbar" ng-class="{collapsed: !isSidebarOpen}" dashboard-draggable-handle>
+            </div>
+            <div class="dashboard-nav-title" ng-class="{collapsed: !isSidebarOpen}">
+              {{dashboard.title}}
+            </div>
+            <div class="indicators">
+              <!--dashboard count-->
+              <span ng-if="dashboard.count !== undefined && dashboard.savedSearchId" ng-bind="humanNotation(dashboard.count)"></span>
+              <span ng-if="dashboard.count === undefined && dashboard.savedSearchId">
+                <div class="spinner">
+                  <div class="cube1"></div>
+                  <div class="cube2"></div>
+                </div>
+              </span>
+              <!--filters indicator-->
+              <span ng-if="dashboard.filterIconMessage" aria-hidden="true">
+                 <i class="fa fa-filter"/>
+              </span>
+              <!--join pruning indicator-->
+              <span ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="Count may be lower than the actual value because a join operation was pruned"> *
+              </span>
+            </div>
           </div>
         </div>
       </div>

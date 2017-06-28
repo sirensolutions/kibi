@@ -1,6 +1,6 @@
 import 'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
-import jQuery from 'jquery';
+import $ from 'jquery';
 import _ from 'lodash';
 import dashboardNavEditLinkTemplate from './dashboard_nav_edit_link.html';
 import './dashboard_nav_edit_link.less';
@@ -287,133 +287,65 @@ uiModules
         return false;
       };
 
-      const anchor = jQuery($element).find('.dashboards-nav-edit-link-group');
-
-      $scope.showFilterIconMessage = function () {
-        $scope.tooltipContent = $scope.tooltipContent + $scope.group.selected.filterIconMessage;
-        $scope.refreshTooltipContent();
-      };
-
-      $scope.removeFilterIconMessage = function () {
-        $scope.setDefaultTooltipContent();
-        $scope.refreshTooltipContent();
-      };
-
-      $scope.refreshTooltipContent = function () {
-        anchor.qtip('option', 'content.text', $scope.tooltipContent);
-      };
-
-      // $scope.initQtip = function () {
-      //   anchor.qtip({
-      //     content: {
-      //       title: 'Dashboard',
-      //       text: function () {
-      //         return $scope.tooltipContent;
-      //       }
-      //     },
-      //     position: {
-      //       my: 'left top',
-      //       at: 'right center'
-      //     },
-      //     show: {
-      //       event: 'mouseenter',
-      //       solo: true
-      //     },
-      //     hide: {
-      //       event: 'mouseleave'
-      //     },
-      //     style: {
-      //       classes: 'qtip-light qtip-rounded qtip-shadow'
-      //     }
-      //   });
-      // };
-
       $scope.humanNotation = number => {
         if (_.isNumber(number)) {
           return numeral.set(number).format('0.[00]a');
         }
       };
 
-      $scope.setDefaultTooltipContent = function () {
-        $scope.tooltipContent = $scope.group.title;
-        if ($scope.group.dashboards.length > 1) {
-          $scope.tooltipContent += ` (${$scope.group.selected.title})`;
-        }
-        if ($scope.group.selected && $scope.group.selected.count !== undefined) {
-          try {
-            $scope.countHumanNotation = numeral.set($scope.group.selected.count).format('0.[00]a');
-          } catch (err) {
-            // count may not be a number, e.g., it can be Forbidden
-            $scope.countHumanNotation = $scope.group.selected.count;
-          }
-          $scope.tooltipContent += ` (${$scope.group.selected.count})`;
-        }
-      };
-
-      $scope.$watchGroup([ 'group.selected.title', 'group.selected.count' ], () => {
-        delete $scope.countHumanNotation;
-        $scope.setDefaultTooltipContent();
-        // $scope.refreshTooltipContent();
-        // $scope.initQtip();
-      });
-
-      // end port
-
-      const groupAnchor = jQuery($element).find('.title');
-
       $scope.isSidebarOpen = dashboardsNavState.isOpen();
       $scope.$watch(dashboardsNavState.isOpen, isOpen => {
         $scope.isSidebarOpen = isOpen;
       });
-
-      // $scope.initQtip = function () {
-      //   groupAnchor.qtip({
-      //     content: {
-      //       title: 'Group',
-      //       text: function () {
-      //         return $scope.group.title;
-      //       }
-      //     },
-      //     position: {
-      //       my: 'left top',
-      //       at: 'right center'
-      //     },
-      //     show: {
-      //       event: 'mouseenter',
-      //       solo: true
-      //     },
-      //     hide: {
-      //       event: 'mouseleave'
-      //     },
-      //     style: {
-      //       classes: 'qtip-light qtip-rounded qtip-shadow'
-      //     }
-      //   });
-      // };
-      //
-      // $scope.$watchGroup([ 'group.title', 'group.dashboards' ], () => {
-      //   $scope.initQtip();
-      // });
     }
   };
 })
 .directive('dashboardNavEditTooltip', function () {
   return {
     scope: {
-      dashboard: '='
+      dashboard: '=?',
+      group: '=?'
     },
-    link: function ($scope, element, attrs)
-     {
-      element .qtip({
+    link: function ($scope, element, attrs) {
+      const numeral = require('numeral')();
+      $scope.humanNotation = number => {
+        if (_.isNumber(number)) {
+          return numeral.set(number).format('0.[00]a');
+        }
+      };
+      const dashboardNavToolTipsContainer = 'kibi-dashboard-nav-tooltips';
+      let container = $('body').find('#' + dashboardNavToolTipsContainer);
+      if (container.length === 0) {
+        $('body').append('<div id="' + dashboardNavToolTipsContainer + '"></div>');
+        container = $('body').find('#' + dashboardNavToolTipsContainer);
+      }
+      element.qtip({
         content: {
-          title: 'Dashboard',
           text: function () {
-            return $scope.dashboard.title;
+            let title;
+            let filterMessage = null;
+            if ($scope.dashboard) {
+              title = $scope.dashboard.title;
+              filterMessage = $scope.dashboard.filterIconMessage;
+              if ($scope.dashboard.count !== undefined) {
+                title += ' (' + $scope.dashboard.count + ')';
+              }
+            } else {
+              title = $scope.group.title;
+              if ($scope.group.selected) {
+                filterMessage = $scope.group.selected.filterIconMessage;
+              }
+              if ($scope.group.virtual && $scope.group.selected.count !== undefined) {
+                title += ' (' + $scope.group.selected.count  + ')';
+              }
+            }
+            return title + (filterMessage ? filterMessage : '');
           }
         },
         position: {
-          my: 'left top',
-          at: 'right center'
+          my: 'left center',
+          at: 'right center',
+          container: container
         },
         show: {
           event: 'mouseenter',

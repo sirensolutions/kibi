@@ -58,7 +58,7 @@ module.directive('globalNav', (globalNavState, $window,
       // kibi: context menu over icon allows to open a clean Kibi session
       scope.kibiContextMenuOptions = [{
         id: 'new-session',
-        name: 'Open a new Kibi session'
+        name: 'Open a new session'
       }];
       scope.kibiNewCleanSession = () => {
         const forcedReload = false;

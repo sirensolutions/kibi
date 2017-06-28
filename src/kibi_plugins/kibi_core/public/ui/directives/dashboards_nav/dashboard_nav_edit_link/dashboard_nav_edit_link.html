@@ -39,8 +39,14 @@
         </div>
         <div class="indicators" ng-if="group.virtual">
           <!--dashboard count-->
-          <span ng-if="group.selected.count !== undefined" ng-bind="humanNotation(group.selected.count)"></span>
-          <span ng-if="group.selected.count === undefined" class="spinner"></span>
+          <span ng-if="group.selected.count !== undefined && group.selected.savedSearchId" ng-bind="humanNotation(group.selected.count)"></span>
+          <span ng-if="group.selected.count === undefined && group.selected.savedSearchId">
+            <div class="spinner">
+              <div class="cube1"></div>
+              <div class="cube2"></div>
+            </div>
+          </span>
+          </span>
           <!--filters indicator-->
           <span ng-if="group.selected.filterIconMessage" aria-hidden="true">
              <i class="fa fa-filter"/>
@@ -78,7 +84,12 @@
           <div class="indicators">
             <!--dashboard count-->
             <span ng-if="dashboard.count !== undefined && dashboard.savedSearchId" ng-bind="humanNotation(dashboard.count)"></span>
-            <span ng-if="dashboard.count === undefined && dashboard.savedSearchId" class="spinner"></span>
+            <span ng-if="dashboard.count === undefined && dashboard.savedSearchId">
+              <div class="spinner">
+                <div class="cube1"></div>
+                <div class="cube2"></div>
+              </div>
+            </span>
             <!--filters indicator-->
             <span ng-if="dashboard.filterIconMessage" aria-hidden="true">
                <i class="fa fa-filter"/>

@@ -7,10 +7,12 @@ import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import _ from 'lodash';
 import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
+import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 uiModules
 .get('kibana')
-.directive('dashboardSwitcher', function (dashboardGroups, dashboardsNavState, createNotifier, kibiState, Private, $rootScope) {
+.directive('dashboardSwitcher', function (dashboardGroups, dashboardsNavState, createNotifier, kibiState,
+  Private, $rootScope, globalNavState, kbnUrl, $timeout) {
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
   const queryFilter = Private(QueryFilterProvider);
   const notify = createNotifier({
@@ -52,8 +54,16 @@ uiModules
 
       $scope.$watch(kibiState._getCurrentDashboardId, id => {
         if (id) {
-          dashboardGroups.getGroup(id).collapsed = false;
+          dashboardGroups.getGroups().forEach(group => {
+            group.dashboards.forEach(dash => dash.$$highlight = false);
+          });
+          const group = dashboardGroups.getGroup(id);
+          group.collapsed = false;
           $scope.persistCollapsedGroupState();
+          const dashboardIds = _(group.dashboards).filter(d => !d.count).map('id').value();
+          if (dashboardIds.length > 0) {
+            dashboardGroups.updateMetadataOfDashboardIds(dashboardIds);
+          }
         }
       });
 
@@ -68,24 +78,37 @@ uiModules
         }
       });
 
-      $scope.$watch(() => kibiState._getCurrentDashboardId(), currentDashboardId => {
-        if (currentDashboardId) {
-          $scope.persistCollapsedGroupState();
-          dashboardGroups.setActiveGroupFromUrl();
-          $scope.groups = dashboardGroups.getGroups();
-          $scope.restoreCollapsedGroupState();
-        }
-      });
-
       $scope.isGroupEditorOpen = dashboardsNavState.isGroupEditorOpen();
       $scope.$watch(dashboardsNavState.isGroupEditorOpen, isGroupEditorOpen => {
         $scope.isGroupEditorOpen = isGroupEditorOpen;
       });
 
-      const computeDashboardsGroups = function (reason) {
-        return dashboardGroups.computeGroups(reason)
-        .then((groups) => {
-          dashboardGroups.copy(groups, $scope.groups);
+      const computeDashboardsGroups = (reason, action = '', forceUpdate = false) => {
+        if (!forceUpdate) {
+          $scope.persistCollapsedGroupState();
+        }
+        const groupsPromise = dashboardGroups.computeGroups(reason);
+        const metadataPromise = groupsPromise.then(groups => {
+          $scope.groups = _.cloneDeep(groups);
+          if (!forceUpdate) {
+            $scope.restoreCollapsedGroupState();
+          }
+          const dashboardIds = _($scope.groups)
+          .filter(g => (forceUpdate || !g.collapsed) || g.virtual)
+          .map('dashboards')
+          .flatten()
+          .map('id')
+          .value();
+          return dashboardGroups.updateMetadataOfDashboardIds(dashboardIds);
+        });
+
+        return Promise.all([ groupsPromise, metadataPromise ])
+        .then(() => {
+          $timeout(() => {
+            if (action === 'selectDashboard') {
+              kbnUrl.change(DashboardConstants.LANDING_PAGE_PATH);
+            }
+          }, 1000);
         })
         .catch((err) => {
           // ignore all missing dashboard errors as user might not have permissions to see them
@@ -96,13 +119,26 @@ uiModules
       };
 
       // rerender tabs if any dashboard got saved
-      const removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
+      const removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', (event, dashId) => {
         computeDashboardsGroups('Dashboard changed')
         .then(() => kibiNavBarHelper.updateAllCounts([ dashId ], 'kibi:dashboard:changed event'));
       });
 
-      $scope.$on('kibi:dashboardgroup:changed', function () {
+      $scope.$on('kibi:dashboardgroup:changed', () => {
         computeDashboardsGroups('Dashboard group changed');
+      });
+
+      $scope.$on('kibi:dashboardgroup:deletedashboard', () => {
+        computeDashboardsGroups('Dashboard group changed', 'selectDashboard');
+      });
+
+      // this controller will receive x event calls one per dashboard, so, we need to debounce the calls.
+      $scope.refreshCount = _.debounce(() => {
+        computeDashboardsGroups('Refresh counts', 'refresh', true);
+      }, 5000, { leading: true, trailing: false });
+
+      $scope.$on('kibi:dashboardgroup:reloadcounts', () => {
+        $scope.refreshCount();
       });
 
       $scope.$listen(queryFilter, 'update', function () {

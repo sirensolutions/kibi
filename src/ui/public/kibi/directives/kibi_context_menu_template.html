@@ -1,4 +1,4 @@
-<div ng-show="menuList && menuList.length > 0" class="kibi-context-menu">
+<div id="{{randomId}}" ng-show="menuList && menuList.length > 0" class="kibi-context-menu">
   <ul class="dropdown-menu" role="menu">
     <li ng-click="clickItem(item, $event)" ng-repeat="item in menuList">
       <hr ng-if="item.type === 'hr'"  />

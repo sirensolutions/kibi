@@ -93,7 +93,12 @@ uiModules
         const groupsPromise = this.computeGroups('init');
         const metadataPromise = appStateReady.then(() => {
           return groupsPromise.then(groups => {
-            const dashboardIds = _.map(groups, 'selected.id');
+            const dashboardIds = _(groups)
+            .filter(g => !g.collapsed || g.virtual)
+            .map('dashboards')
+            .flatten()
+            .map('id')
+            .value();
             return this.updateMetadataOfDashboardIds(dashboardIds);
           });
         });

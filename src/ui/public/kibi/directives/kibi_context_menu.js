@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import uiModules from 'ui/modules';
 import kibiContextMenuTemplate from 'ui/kibi/directives/kibi_context_menu_template.html';
 import 'ui/kibi/directives/kibi_context_menu.less';
@@ -30,9 +31,19 @@ uiModules
       defaults(scope.options, 'isMultiple', false);
 
       scope.menu = scope.menuList;
+      const getRandomInt = function (min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      };
+      scope.randomId = 'kibi-context-menu-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
       scope.dropmenu = $compile(template)(scope);
       const dropmenu = scope.dropmenu;
-      element.append(dropmenu);
+      const contextMenuContainerId = 'kibi-context-menu-container';
+      let container = $('body').find('#' + contextMenuContainerId);
+      if (container.length === 0) {
+        $('body').append('<div id="' + contextMenuContainerId + '" style="visibility: hidden"></div>');
+        container = $('body').find('#' + contextMenuContainerId);
+      }
+      container.append(dropmenu);
 
       element.bind('contextmenu', function (event) {
         event.preventDefault();
@@ -130,7 +141,7 @@ uiModules
           const left = scrollLeft + options.left - curOffset.left + curLeft;
           let top = scrollTop + options.top - curOffset.top + curTop;
 
-          if (top + curElem.lastElementChild.offsetHeight - scrollTop > windowHeight) {
+          if (top + curElem.lastElementChild.offsetHeight > windowHeight) {
             top = top - curElem.lastElementChild.offsetHeight;
           }
 

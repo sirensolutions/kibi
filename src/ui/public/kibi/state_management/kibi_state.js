@@ -246,17 +246,23 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   /**
    * Reset the filters, queries, and time for each dashboard to their saved state.
    */
-  KibiState.prototype.resetFiltersQueriesTimes = function () {
-    if (globalState.filters && globalState.filters.length) {
-      // remove pinned filters
-      globalState.filters = [];
-      globalState.save();
+  KibiState.prototype.resetFiltersQueriesTimes = function (dashId) {
+    if (!dashId) {
+      if (globalState.filters && globalState.filters.length) {
+        // remove pinned filters
+        globalState.filters = [];
+        globalState.save();
+      }
     }
     return savedDashboards.find().then((resp) => {
       if (resp.hits) {
         const dashboardIdsToUpdate = [];
         const appState = getAppState();
         const timeDefaults = config.get('timepicker:timeDefaults');
+
+        if (dashId) {
+          resp.hits = _(resp.hits).filter(d => d.id === dashId).value();
+        }
 
         _.each(resp.hits, (dashboard) => {
           const meta = JSON.parse(dashboard.kibanaSavedObjectMeta.searchSourceJSON);
@@ -350,9 +356,12 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
             }
           });
         });
-        this.disableAllRelations();
-        // but enable the relational panel in case it was disabled by a filter
-        this.toggleRelationalPanel(true);
+
+        if (!dashId) {
+          this.disableAllRelations();
+          // but enable the relational panel in case it was disabled by a filter
+          this.toggleRelationalPanel(true);
+        }
 
         if (dashboardIdsToUpdate.length) {
           this.emit('reset', dashboardIdsToUpdate);

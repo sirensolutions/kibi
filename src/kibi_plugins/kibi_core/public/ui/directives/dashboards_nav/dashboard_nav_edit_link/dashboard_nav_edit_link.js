@@ -115,6 +115,12 @@ uiModules
           return;
         }
         $scope.group.collapsed = !$scope.group.collapsed;
+        if (!$scope.group.collapsed) {
+          const dashboardIds = _($scope.group.dashboards).filter(d => !d.count).map('id').value();
+          if (dashboardIds.length > 0) {
+            dashboardGroups.updateMetadataOfDashboardIds(dashboardIds);
+          }
+        }
       };
 
       $scope.dashboardLoaded = kibiState._getCurrentDashboardId();
@@ -190,6 +196,9 @@ uiModules
       $scope.removeDashboardFromGroup = (id) => {
         return new Promise((resolve, reject) => {
           const groups = dashboardGroups.getGroups().filter(group => {
+            if (group.virtual) {
+              return resolve();
+            }
             const idx = _.findIndex(group.dashboards, dashboard => {
               return dashboard.id === id;
             });
@@ -219,11 +228,11 @@ uiModules
           .then(cache.invalidate)
           .then(() => {
             if ($scope.dashboardLoaded === id) {
-              kbnUrl.change(DashboardConstants.LANDING_PAGE_PATH);
+              $scope.$emit('kibi-dashboard-nav-saving', false);
+              notify.info('Dashboard ' + title + ' was successfuly deleted');
+              dashboardsNavState.setScrollbarPos(0);
+              $scope.$emit('kibi:dashboardgroup:deletedashboard');
             }
-            $scope.$emit('kibi-dashboard-nav-saving', false);
-            notify.info('Dashboard ' + title + ' was successfuly deleted');
-            $scope.$emit('kibi:dashboardgroup:changed', id);
           })
           .catch(reason => {
             $scope.$emit('kibi-dashboard-nav-saving', false);
@@ -251,6 +260,18 @@ uiModules
           });
         });
       };
+
+      // This will ensure call the notification event one time per digest.
+      $scope.notifyReloadCounts = _.once(() => {
+        $scope.$emit('kibi:dashboardgroup:reloadcounts');
+      });
+
+      $scope.$watch('filter', (value) => {
+        if (value && value.length > 0) {
+          $scope.group.collapsed = false;
+          $scope.notifyReloadCounts();
+        }
+      });
 
       $scope.dashboardIsHighlighted = (dashboard) => {
         return dashboard.$$highlight;

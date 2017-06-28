@@ -17,20 +17,6 @@ import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dash
 import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
 import uiModules from 'ui/modules';
 
-//TODO:
-// Issues:
-// After create a group that goes on the bottom of the screen the contextmenu os not displayed correctly.
-// If I move a dashboard from a group to another update the icon alone side the name (dashboard app)
-// Expand all group while filtering
-// $$highlight on dashboards is not been updated correctly.
-// Reset scrollbar on first dashboard autoselection (post-delete)
-
-// Features missing:
-// Local reset button
-// Right click on logo = new session (and general code cleanup)
-// Tooltips
-// Counts not updated correctly
-
 uiModules
 .get('kibana')
 .directive('dashboardsNav', ($rootScope, dashboardsNavState, globalNavState, createNotifier, dashboardGroups, kbnUrl,
@@ -157,7 +143,7 @@ uiModules
             hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
             $scope.$broadcast('kibi-dashboard-nav-saving', false);
             notify.info('Dashboard was successfuly created');
-            $rootScope.$broadcast('kibi:dashboardgroup:changed', '');
+            $rootScope.$broadcast('kibi:dashboardgroup:changed');
             globalNavState.setOpen(false);
             dashboardGroups.selectDashboard(dash.id);
           })
@@ -169,12 +155,18 @@ uiModules
       };
 
       $scope.restoreCollapsedGroupState = () => {
-        const collapsedGroups = dashboardsNavState.collapsedGroups();
-        dashboardGroups.getGroups().forEach(group => {
-          if (_.indexOf(collapsedGroups, group.id) >= 0) {
+        if (!dashboardsNavState.areCollapsedGroupsSet()) {
+          dashboardGroups.getGroups().forEach(group => {
             group.collapsed = true;
-          }
-        });
+          });
+        } else {
+          const collapsedGroups = dashboardsNavState.collapsedGroups();
+          dashboardGroups.getGroups().forEach(group => {
+            if (_.indexOf(collapsedGroups, group.id) >= 0) {
+              group.collapsed = true;
+            }
+          });
+        }
       };
 
       $scope.persistCollapsedGroupState = () => {
@@ -227,30 +219,40 @@ uiModules
       };
 
       $scope.onClearFilter = () => {
-        kibiState.resetFiltersQueriesTimes();
+        kibiState.resetFiltersQueriesTimes()
+        .then(() => {
+          const dashboardIds = _(dashboardGroups.getGroups())
+            .filter(g => !g.collapsed || g.virtual)
+            .map('dashboards')
+            .flatten()
+            .map('id')
+            .value();
+          return dashboardGroups.updateMetadataOfDashboardIds(dashboardIds);
+        });
       };
 
       $scope.dragging = false;
 
       $scope.startSlide = event => {
-      	$document.on('mousemove', $scope.moveSlide);
-        $document.on('mouseup', $scope.stopSlide);
+      	$document.on('mousemove touchmove', $scope.moveSlide);
+        $document.on('mouseup touchend', $scope.stopSlide);
         $scope.dragging = true;
         event.preventDefault();
       };
-      $scope.slider.on('mousedown', $scope.startSlide);
+      $scope.slider.on('mousedown touchstart', $scope.startSlide);
 
       $scope.moveSlide = event => {
         if ($scope.dragging) {
-          let count = event.pageX - $scope.bar[0].offsetLeft;
+          const ev = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[0] : event.originalEvent;
+          let count = ev.pageX - $scope.bar[0].offsetLeft;
           count = count < 136 ? 140 : count;
           $scope.resizeParts(count);
         }
       };
 
       $scope.stopSlide = event => {
-      	$document.off('mousemove', $scope.moveSlide);
-        $document.off('mouseup', $scope.stopSlide);
+      	$document.off('mousemove touchmove', $scope.moveSlide);
+        $document.off('mouseup touchend', $scope.stopSlide);
         $rootScope.$broadcast('globalNav:update');
         $scope.dragging = false;
         dashboardsNavState.setNavWidth($scope.bar.width() - 4);

@@ -8,28 +8,34 @@
   <div class="global-nav__logo" tooltip="Home">
     <!-- siren:
       changed class from kibana to kibi
-      kibi-reload to on-click open a new clean (no cache) tab with Kibi.
+      right-click open a new clean (no cache) tab with Kibi.
     -->
     <li
       ng-if="!logoBrand && !smallLogoBrand"
       ng-click="gotoDashboard()"
+      kibi-context-menu kibi-context-menu-list="kibiContextMenuOptions"
+      kibi-context-menu-click-menu="kibiNewCleanSession()"
       aria-label="{{ appTitle }} Logo"
       class="logo kibi"
     ></li>
 
-    <!-- siren: kibi-reload to on-click open a new clean (no cache) tab with Kibi. -->
+    <!-- siren: right-click open a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="logoBrand"
       ng-click="gotoDashboard()"
+      kibi-context-menu kibi-context-menu-list="kibiContextMenuOptions"
+      kibi-context-menu-click-menu="kibiNewCleanSession()"
       ng-style="{ 'background': logoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo hidden-sm"
     ></li>
 
-    <!-- siren: kibi-reload to on-click open a new clean (no cache) tab with Kibi. -->
+    <!-- siren: right-click open a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="smallLogoBrand"
       ng-click="gotoDashboard()"
+      kibi-context-menu kibi-context-menu-list="kibiContextMenuOptions"
+      kibi-context-menu-click-menu="kibiNewCleanSession()"
       ng-style="{ 'background': smallLogoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo-small visible-sm hidden-xs"

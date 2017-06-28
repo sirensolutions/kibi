@@ -11,6 +11,34 @@
 @group-highlight-bg: @gray7;
 @dashboard-highlight-bg: @gray7;
 
+@translateXValue: 5px;
+
+@-webkit-keyframes sk-cubemove {
+  25% { -webkit-transform: translateX(@translateXValue) rotate(-90deg) scale(0.5) }
+  50% { -webkit-transform: translateX(@translateXValue) translateY(@translateXValue) rotate(-180deg) }
+  75% { -webkit-transform: translateX(0px) translateY(@translateXValue) rotate(-270deg) scale(0.5) }
+  100% { -webkit-transform: rotate(-360deg) }
+}
+
+@keyframes sk-cubemove {
+  25% {
+    transform: translateX(@translateXValue) rotate(-90deg) scale(0.5);
+    -webkit-transform: translateX(@translateXValue) rotate(-90deg) scale(0.5);
+  } 50% {
+    transform: translateX(@translateXValue) translateY(@translateXValue) rotate(-179deg);
+    -webkit-transform: translateX(@translateXValue) translateY(@translateXValue) rotate(-179deg);
+  } 50.1% {
+    transform: translateX(@translateXValue) translateY(@translateXValue) rotate(-180deg);
+    -webkit-transform: translateX(@translateXValue) translateY(@translateXValue) rotate(-180deg);
+  } 75% {
+    transform: translateX(0px) translateY(@translateXValue) rotate(-270deg) scale(0.5);
+    -webkit-transform: translateX(0px) translateY(@translateXValue) rotate(-270deg) scale(0.5);
+  } 100% {
+    transform: rotate(-360deg);
+    -webkit-transform: rotate(-360deg);
+  }
+}
+
 .dashboards-nav-edit-link-group {
   clear: both;
   display: block;
@@ -20,7 +48,7 @@
     margin-top: -5px;
     padding-top: 2px;
     &:hover {
-      background-color: @siren-dashboard-active-background;
+      background-color: @siren-dashboard-selection-bg;
     }
     &.highlight {
       background-color: @group-highlight-bg;
@@ -31,7 +59,7 @@
     background-color: @siren-dashboard-inactive-background;
     &:hover,
     &.active {
-      background-color: @siren-dashboard-active-background;
+      background-color: @siren-dashboard-selection-bg;
     }
   }
 
@@ -106,6 +134,26 @@
   .dashboard .edit-content {
     margin-left: 5px;
   }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    position: relative;
+  }
+  .cube1, .cube2 {
+    background-color: #ccc;
+    width: 5px;
+    height: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-animation: sk-cubemove 1.8s infinite ease-in-out;
+    animation: sk-cubemove 1.8s infinite ease-in-out;
+  }
+  .cube2 {
+    -webkit-animation-delay: -0.9s;
+    animation-delay: -0.9s;
+  }
 }
 
 .dashboards-nav-edit-link-dashboard {
@@ -119,7 +167,7 @@
 
   &:hover,
   &.active {
-    background-color: @siren-dashboard-active-background;
+    background-color: @siren-dashboard-selection-bg;
   }
 
   .indicators {
@@ -158,5 +206,25 @@
     .indicators {
       display: none;
     }
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    position: relative;
+  }
+  .cube1, .cube2 {
+    background-color: #ccc;
+    width: 5px;
+    height: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-animation: sk-cubemove 1.8s infinite ease-in-out;
+    animation: sk-cubemove 1.8s infinite ease-in-out;
+  }
+  .cube2 {
+    -webkit-animation-delay: -0.9s;
+    animation-delay: -0.9s;
   }
 }

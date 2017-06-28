@@ -51,6 +51,11 @@ uiModules
       return scrollbarPos;
     },
 
+    areCollapsedGroupsSet: () => {
+      const collapsedGroups = sessionStorage.get('kibi.collapsedGroups');
+      return collapsedGroups !== null;
+    },
+
     collapsedGroups: () => {
       const collapsedGroups = sessionStorage.get('kibi.collapsedGroups');
       return collapsedGroups === null ? {} : collapsedGroups;

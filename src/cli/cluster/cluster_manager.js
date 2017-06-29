@@ -95,7 +95,7 @@ module.exports = class ClusterManager {
 
     this.watcher = chokidar.watch(uniq(watchPaths), {
       cwd: fromRoot('.'),
-      ignored: /[\\\/](\..*|node_modules|bower_components|public|__tests__|coverage)[\\\/]/
+      ignored: /[\\\/](\..*|node_modules|bower_components|public|__tests__|coverage|plugins[\\\/]sentinl[\\\/]phantomjs)[\\\/]/
     });
 
     this.watcher.on('add', this.onWatcherAdd);

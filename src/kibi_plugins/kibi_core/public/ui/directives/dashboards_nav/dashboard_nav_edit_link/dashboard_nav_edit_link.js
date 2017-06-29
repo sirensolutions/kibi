@@ -300,15 +300,7 @@ uiModules
         $scope.isSidebarOpen = isOpen;
       });
 
-      $scope.selectors = new Map();
-
       $scope.refreshTooltipContent = function (event, reference, isDashboard) {
-        let isNewSelector = false;
-        if (!$scope.selectors.has(reference)) {
-          isNewSelector = true;
-          $scope.selectors.set(reference, event.currentTarget);
-        }
-        const selector = $($scope.selectors.get(reference));
         let title;
         let filterMessage = null;
         if (isDashboard) {
@@ -329,7 +321,7 @@ uiModules
           }
         }
         $scope.tooltipContent = title + (filterMessage ? filterMessage : '');
-
+        const selector = $(event.currentTarget);
         selector.qtip({
           content: {
             prerender: true,
@@ -339,8 +331,7 @@ uiModules
           },
           position: {
             my: 'left center',
-            at: 'right center',
-            // container: container
+            at: 'right center'
           },
           show: '',
           hide: {

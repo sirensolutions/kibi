@@ -34,15 +34,16 @@ uiModules
       const getRandomInt = function (min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       };
-      scope.randomId = 'kibi-context-menu-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
       scope.dropmenu = $compile(template)(scope);
       const dropmenu = scope.dropmenu;
-      const contextMenuContainerId = 'kibi-context-menu-container';
-      let container = $('body').find('#' + contextMenuContainerId);
-      if (container.length === 0) {
-        $('body').append('<div id="' + contextMenuContainerId + '" style="visibility: hidden"></div>');
-        container = $('body').find('#' + contextMenuContainerId);
+      const globalContextMenuContainerId = 'kibi-context-menu-container';
+      const container = $('<div id="kibi-context-menu-' + getRandomInt(0, Number.MAX_SAFE_INTEGER) + '"/>');
+      let globalContextMenuContainer = $('body').find('#' + globalContextMenuContainerId);
+      if (globalContextMenuContainer.length === 0) {
+        $('body').append('<div id="' + globalContextMenuContainerId + '" style="visibility: hidden"></div>');
+        globalContextMenuContainer = $('body').find('#' + globalContextMenuContainerId);
       }
+      globalContextMenuContainer.append(container);
       container.append(dropmenu);
 
       element.bind('contextmenu', function (event) {
@@ -111,6 +112,10 @@ uiModules
           });
         }
       };
+
+      scope.$on('$destroy', function () {
+        container.remove();
+      });
 
       function hideMenu() {
         dropmenu.css({

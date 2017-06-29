@@ -228,11 +228,13 @@ uiModules
           .then(cache.invalidate)
           .then(() => {
             if ($scope.dashboardLoaded === id) {
-              $scope.$emit('kibi-dashboard-nav-saving', false);
-              notify.info('Dashboard ' + title + ' was successfuly deleted');
               dashboardsNavState.setScrollbarPos(0);
               $scope.$emit('kibi:dashboardgroup:deletedashboard');
+            } else {
+              $scope.$emit('kibi:dashboardgroup:changed');
             }
+            $scope.$emit('kibi-dashboard-nav-saving', false);
+            notify.info('Dashboard ' + title + ' was successfuly deleted');
           })
           .catch(reason => {
             $scope.$emit('kibi-dashboard-nav-saving', false);
@@ -322,6 +324,7 @@ uiModules
       element.qtip({
         content: {
           text: function () {
+            console.log('hit');
             let title;
             let filterMessage = null;
             if ($scope.dashboard) {

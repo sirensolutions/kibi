@@ -28,6 +28,11 @@ uiModules
     controller($scope, $element) {
       $scope.$on('kibi-dashboard-nav-saving', (event, value) => {
         $scope.isSaving = value;
+        if ($scope.isSaving) {
+          $timeout(() => {
+            $scope.isSaving = false;
+          }, 5000);
+        }
         if (event && event.stopPropagation) {
           event.stopPropagation();
         }

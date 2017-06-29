@@ -58,9 +58,13 @@ export default function licenses(grunt) {
     if (Object.keys(invalidPackages).length) {
       const execSync = require('child_process').execSync;
       const names = Object.keys(invalidPackages);
-
+      let tree;
       // Uses npm ls to create tree for package locations
-      const tree = execSync(`npm ls ${names.join(' ')}`);
+      try {
+        tree = execSync(`npm ls ${names.join(' ')}`);
+      } catch(e) {
+        grunt.fail.fatal(e);
+      }
 
       grunt.log.debug(JSON.stringify(invalidPackages, null, 2));
       grunt.fail.warn(

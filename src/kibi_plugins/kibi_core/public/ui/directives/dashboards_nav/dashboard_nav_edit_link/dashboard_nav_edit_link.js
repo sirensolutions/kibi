@@ -299,68 +299,58 @@ uiModules
       $scope.$watch(dashboardsNavState.isOpen, isOpen => {
         $scope.isSidebarOpen = isOpen;
       });
-    }
-  };
-})
-.directive('dashboardNavEditTooltip', function () {
-  return {
-    scope: {
-      dashboard: '=?',
-      group: '=?'
-    },
-    link: function ($scope, element, attrs) {
-      const numeral = require('numeral')();
-      $scope.humanNotation = number => {
-        if (_.isNumber(number)) {
-          return numeral.set(number).format('0.[00]a');
+
+      $scope.selectors = new Map();
+
+      $scope.refreshTooltipContent = function (event, reference, isDashboard) {
+        let isNewSelector = false;
+        if (!$scope.selectors.has(reference)) {
+          isNewSelector = true;
+          $scope.selectors.set(reference, event.currentTarget);
         }
-      };
-      const dashboardNavToolTipsContainer = 'kibi-dashboard-nav-tooltips';
-      let container = $('body').find('#' + dashboardNavToolTipsContainer);
-      if (container.length === 0) {
-        $('body').append('<div id="' + dashboardNavToolTipsContainer + '"></div>');
-        container = $('body').find('#' + dashboardNavToolTipsContainer);
-      }
-      element.qtip({
-        content: {
-          text: function () {
-            console.log('hit');
-            let title;
-            let filterMessage = null;
-            if ($scope.dashboard) {
-              title = $scope.dashboard.title;
-              filterMessage = $scope.dashboard.filterIconMessage;
-              if ($scope.dashboard.count !== undefined) {
-                title += ' (' + $scope.dashboard.count + ')';
-              }
-            } else {
-              title = $scope.group.title;
-              if ($scope.group.selected) {
-                filterMessage = $scope.group.selected.filterIconMessage;
-              }
-              if ($scope.group.virtual && $scope.group.selected.count !== undefined) {
-                title += ' (' + $scope.group.selected.count  + ')';
-              }
-            }
-            return title + (filterMessage ? filterMessage : '');
+        const selector = $($scope.selectors.get(reference));
+        let title;
+        let filterMessage = null;
+        if (isDashboard) {
+          const dashboard = $scope.group.dashboards[+reference];
+          title = dashboard.title;
+          filterMessage = dashboard.filterIconMessage;
+          if (dashboard.count !== undefined) {
+            title += ' (' + dashboard.count + ')';
           }
-        },
-        position: {
-          my: 'left center',
-          at: 'right center',
-          container: container
-        },
-        show: {
-          event: 'mouseenter',
-          solo: true
-        },
-        hide: {
-          event: 'mouseleave'
-        },
-        style: {
-          classes: 'qtip-light qtip-rounded qtip-shadow'
+        } else {
+          const group = $scope.group;
+          title = group.title;
+          if (group.selected) {
+            filterMessage = group.selected.filterIconMessage;
+          }
+          if (group.virtual && group.selected.count !== undefined) {
+            title += ' (' + group.selected.count  + ')';
+          }
         }
-      });
+        $scope.tooltipContent = title + (filterMessage ? filterMessage : '');
+
+        selector.qtip({
+          content: {
+            prerender: true,
+            text: function () {
+              return $scope.tooltipContent;
+            }
+          },
+          position: {
+            my: 'left center',
+            at: 'right center',
+            // container: container
+          },
+          show: '',
+          hide: {
+            event: 'mouseleave'
+          },
+          style: {
+            classes: 'qtip-light qtip-rounded qtip-shadow'
+          }
+        }).qtip('show');
+      };
     }
   };
 });

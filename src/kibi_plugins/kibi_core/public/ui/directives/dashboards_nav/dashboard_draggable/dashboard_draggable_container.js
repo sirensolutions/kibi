@@ -144,6 +144,7 @@ uiModules
           }
           else if (sourceItemScope.isDashboard && !targetGroup.virtual) {
             // Moves a dashboard from one group to another
+            targetGroup.collapsed = false;
             return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
               return savedDashboardGroups.get(targetGroup.id).then(savedTargetGroup => {
                 const actions = [];
@@ -170,6 +171,7 @@ uiModules
           }
           else if (!sourceItemScope.isDashboard && sourceGroup.virtual && !targetGroup.virtual) {
             // Moves a virtual group into a group
+            targetGroup.collapsed = false;
             return savedDashboardGroups.get(targetGroup.id).then(savedGroup => {
               const dashboard = {
                 id: sourceGroup.id,

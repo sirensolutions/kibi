@@ -30,7 +30,7 @@
         kibi-context-menu kibi-context-menu-list="contextMenuVirtualGroup"
         kibi-context-menu-click-menu="clickMenuVirtualGroup(item)"
       >
-        <div dashboard-nav-edit-tooltip group="group" ng-class="{'dashboard-nav-item': group.virtual}">
+        <div ng-mouseenter="refreshTooltipContent($event, group)">
           <div class="title" ng-class="{collapsed: !isSidebarOpen, 'dashboard-nav-title-virtual-group': group.virtual}">
             {{group.title}}
           </div>
@@ -78,7 +78,7 @@
           kibi-context-menu kibi-context-menu-list="contextMenuDashboard"
           kibi-context-menu-click-menu="clickMenuDashboard(item, dashboard)"
         >
-          <div dashboard-nav-edit-tooltip dashboard="dashboard" class="dashboard-nav-item">
+          <div ng-mouseenter="refreshTooltipContent($event, $index, true)">
             <div class="dashboards-nav-edit-link-dragbar" ng-class="{collapsed: !isSidebarOpen}" dashboard-draggable-handle>
             </div>
             <div class="dashboard-nav-title" ng-class="{collapsed: !isSidebarOpen}">

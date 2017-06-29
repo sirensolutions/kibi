@@ -13,7 +13,8 @@ define(function (require) {
       restrict: 'E',
       scope: {
         from: '=',
-        to: '='
+        to: '=',
+        mode: '='
       },
       link: function ($scope, $elem) {
         // kibi: support time precision modification everywhere when parseWithPrecision method is used
@@ -68,7 +69,9 @@ define(function (require) {
               } else {
                 let tryParse = dateMath.parseWithPrecision($scope[time], time === 'to' ? true : false, $scope.kibiTimePrecision);
 
-                display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
+                // kibi: disable shortening when time is absolute
+                const formattedDate = moment($scope[time]).format(dateFormat);
+                display[time] = (moment.isMoment(tryParse)  && $scope.mode !== 'absolute') ? '~ ' + tryParse.fromNow() : formattedDate;
               }
             }
           });

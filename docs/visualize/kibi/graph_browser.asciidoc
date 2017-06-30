@@ -10,19 +10,19 @@ Please contact Siren at info@siren.io for further informations.
 
 [float]
 === Configuration
-To configure the visualization select a compatible datasource (tipically the provided _Kibi Gremlin Server_ datasource)
+To configure the visualization select a compatible datasource (typically the provided _Kibi Gremlin Server_ datasource)
 
 image::images/graph_browser/config_source.png["Source configuration", title="Source configuration", align="center"]
 
 [float]
 ==== Tooltip
-By ticking the image:images/graph_browser/tooltip_checkbox.png["Tooltip checkbox"] checkbox you can enable node tooltips.
+By ticking the image:images/graph_browser/tooltip_checkbox.png["Tooltip checkbox"] checkbox, you can enable node tooltips.
 
 image::images/graph_browser/tooltip.png["Tooltip", title="Tooltip", align="center"]
 
 [float]
 ==== Relations
-By default the Graph Browser uses all the configured relations. In case you need to use only a subset of, you can define it here.
+By default the Graph Browser uses all the configured relations. In case you need to use only a subset of the relations, you can define it here.
 
 image::images/graph_browser/relations.png["Relations", title="Relations", align="center"]
 
@@ -35,23 +35,23 @@ The Graph Browser supports three types of scripts:
  Provided _contextual_ scripts:
  
  ** *Expand by relation* - It opens a popup which allows you to choose one or more of the available relations and it expands the selected elements using only the selected ones. This does not override the graph browser configuration, you will see only the configured relations (if available for the selected nodes)
- ** *Expand by top comention* - To be used with `company` nodes (from our demo). This script expands the selected nodes using an elasticsearch aggregation to get the top comentioned `company` nodes
- ** *Replace investment with edge* - This script replaces the investment nodes with a direct link between the company nodes and the investor nodes
+ ** *Expand by top comention* - To be used with `company` nodes from our demo. This script expands the selected nodes using an elasticsearch aggregation to get the top comentioned `company` nodes
+ ** *Replace investment with edge* - To be used with our demo. This script replaces the investment nodes with a direct link between the company nodes and the investor nodes
  ** *Select - All* - Select all the elements. Same as `CTRL + A`
  ** *Select - By edge count* - It select nodes based on their link count. You can specify the count through the popup that appears
  ** *Select - By type* - It select nodes based on their type. You can specify the type through the popup that appears
- ** *Select - Extend* - Extends the current selection to the sibiling elements
+ ** *Select - Extend* - Extends the current selection to the sibling elements
  ** *Selecte - Invert* - Inverts the current selection
  ** *Shortest Path* - Calculates the shortest path between two selected nodes by fetching the connected elements.
- ** *Show nodes count by type* - Shows a popup with informations about how many nodes per type are currently displayed
+ ** *Show nodes count by type* - Shows a popup with information about how many nodes per type are currently displayed
  
  * *On Update* - These scripts are executed every time you add new elements to the graph. + 
  Provided _on update_ scripts:
  
  ** *Add time fields* - Adds the time field used by the _timebar mode_
- ** *Add geo-locations for map visualization* - Adds the geografic field used by the _map mode_
+ ** *Add geo-locations for map visualization* - Adds the geographic field used by the _map mode_
  ** *Replace investment with edge* - Same as the _contextual_ script `Replace investment with edge`, but executed automatically after every expansion.
- ** *Signal dead companies* - Changes to black all the _company_ nodes that have a not empty `deadpooled_date field`
+ ** *Signal dead companies* - Changes to black all the _company_ nodes that have a `deadpooled_date`
 
 To create a new _script_ go to `Management` -> `Scripts`
 
@@ -96,11 +96,11 @@ You have several operations available:
 
 image::images/graph_browser/toolbar.png["Toolbar", title="Toolbar", align="center"]
 
- . *Undo* - By default the graph browser saves the last 5 states. With this function you can go back one step at a time, until there no more available. You can configure the steps number in _kibi advanced settings_.
- . *Redo* - With the redo you can restore an undoed state. Be carefull: if you undo an do any operation, the redo state will be lost.
- . *Filter* - This will add a filter to the current dashboard synched with the graph selection. This lets you:
- * Do your investigation on the graph, select the vertices you're interested into, activate the filter, pin it and go back to the related dashboard to get more detailed informations about those vertices.
- * If you have other visualizations in the same dashboard it lets you have more informations on the selected nodes. For example, if you have the current dashboard associated to a companies saved search, you can do your investigation in the graph, activate the filter, select some vertices and get the visualizations to show informations on the selected vertices.
+ . *Undo* - By default the graph browser saves the last 5 states. With this function you can go back one step at a time, until there are no more available. You can configure the steps number in _kibi advanced settings_.
+ . *Redo* - With the redo you can restore an undoed state. Be careful: if you undo and perform any operation, the redo state will be lost.
+ . *Filter* - This will add a filter to the current dashboard synced with the graph selection. This lets you:
+ * Do your investigation on the graph, select the vertices you're interested into, activate the filter, pin it and go back to the related dashboard to get more detailed information about those vertices.
+ * If you have other visualizations in the same dashboard it lets you have more information on the selected nodes. For example, if you have the current dashboard associated to a companies saved search, you can do your investigation in the graph, activate the filter, select some vertices and get the visualizations to show information on the selected vertices.
  . *Crop* - This will delete every element that is not selected
  . *Remove* - This will remove all the selected elements. Right next to the _Remove_ button there is a dropdown that shows the *Remove All* button. This will clean the whole graph, regardless of selected elements or not. +
 
@@ -113,15 +113,15 @@ image::images/graph_browser/remove_all.png["Remove All", title="Remove All", ali
 image::images/graph_browser/expand_filters.png["Expand with filters", title="Expand with filters", align="center"]
 
 [start=7]
- . *Highlight mode* - This toggle enables and disables the _Highlight mode_. The _Highlight mode_ moves to the background everything that is not selectend and/or connected to a selected node/link.
+ . *Highlight mode* - This toggle enables and disables the _Highlight mode_. The _Highlight mode_ moves to the background everything that is not selected and/or connected to a selected node/link.
  
 image::images/graph_browser/highlight_on.png["Highlightning On", title="Highlightning On", align="center"]
 
 image::images/graph_browser/highlight_off.png["Highlightning Off", title="Highlightning Off", align="center"]
 
 [start=8]
- . *Layouts* - This button lets you relayout the current graph. There are 2 available layouts:
- * *Standard* - This one is the standard layout used by the graph. Pressing int will force the graph to relayout. Note: selected nodes will preserve their relative position.
+ . *Layouts* - This button lets you change the current graph's layout. There are 2 available layouts:
+ * *Standard* - This one is the standard layout used by the graph. Pressing it will force the graph to relayout. Note: selected nodes will preserve their relative position.
  * *Hierarchy* - This layout lays out nodes top down according to their connections. Note: It needs at least one selected node to work; selected nodes will be moved at the top of the hierarchy.
 
 image::images/graph_browser/standard_layout.gif["Standard Layout", title="Standard Layout", align="center"]
@@ -132,7 +132,7 @@ image::images/graph_browser/hierarchy_layout.gif["Hierarchy Layout", title="Hier
  . *Add* - The _Add_ button opens a popup with the following options: 
  * *Add selected document* - This will add the currently selected document. You can see your selected document in the upper right purple selection box.image:images/graph_browser/selected_document.png["Standard Layout"]
  * *Add from saved graph* - This will open a popup showing the available saved graphs. By using this feature you will add a set of nodes and links, but you won't preserve the layout you had when you saved the graph.
- * *Add from another dashboard* - This will adds nodes using the filtered (optionally) dashboard you select.
+ * *Add from another dashboard* - This will add nodes using the filtered (optionally) dashboard you select.
  
 image::images/graph_browser/add_from_saved_graph.png["Add from saved graph", title="Add from saved graph", align="center"]
 
@@ -163,10 +163,10 @@ The Graph Browser supports some shortcuts:
 
  * `CTRL + A`: select every element in the graph
  * `DEL`: delete the selected elements (same as the remove button)
- * `CTRL + CLICK`: allows to add elments to the current selecion
+ * `CTRL + CLICK`: allows you to add elements to the current selection
  * `DOUBLE CLICK`: expands the selected nodes (same as the expand button)
- * `ARROWS`: move the selected elements into the input direction
- * Mouse Weel: changes the zoom level of the graph
+ * `ARROWS`: move the selected elements in the input direction
+ * Mouse Wheel: changes the zoom level of the graph
 
 ==== Sidebar
 

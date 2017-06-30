@@ -20,6 +20,11 @@ describe('kibi_core/migrations/functional', function () {
   const timeout = 60000;
   this.timeout(timeout);
 
+  const stub = sinon.stub();
+  const fakeConfig = {
+    get: stub
+  };
+
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
   const cluster = new Cluster({
     url: clusterUrl,
@@ -43,7 +48,7 @@ describe('kibi_core/migrations/functional', function () {
       describe(`should update the relations - ${indexName}`, function () {
         beforeEach(() => {
           configuration = {
-            index: indexName,
+            config: fakeConfig,
             client: cluster.getClient(),
             logger: {
               warning: sinon.spy(),
@@ -51,6 +56,7 @@ describe('kibi_core/migrations/functional', function () {
             }
           };
           warningSpy = configuration.logger.warning;
+          fakeConfig.get.withArgs('kibana.index').returns(indexName);
         });
 
         it('should count all upgradeable objects', wrapAsync(async () => {
@@ -173,7 +179,7 @@ describe('kibi_core/migrations/functional', function () {
     describe('should not update the relations', function () {
       beforeEach(() => {
         configuration = {
-          index: '.kibi2',
+          config: fakeConfig,
           client: cluster.getClient(),
           logger: {
             warning: sinon.spy(),
@@ -181,6 +187,7 @@ describe('kibi_core/migrations/functional', function () {
           }
         };
         warningSpy = configuration.logger.warning;
+        fakeConfig.get.withArgs('kibana.index').returns('.kibi2');
       });
 
       it('should count all upgradeable objects', wrapAsync(async () => {
@@ -193,7 +200,7 @@ describe('kibi_core/migrations/functional', function () {
     describe('should skip the migration if kibi:relations is empty', function () {
       beforeEach(() => {
         configuration = {
-          index: '.kibi4',
+          config: fakeConfig,
           client: cluster.getClient(),
           logger: {
             warning: sinon.spy(),
@@ -201,6 +208,7 @@ describe('kibi_core/migrations/functional', function () {
           }
         };
         warningSpy = configuration.logger.warning;
+        fakeConfig.get.withArgs('kibana.index').returns('.kibi4');
       });
 
       it('should not find any object to upgrade', wrapAsync(async () => {

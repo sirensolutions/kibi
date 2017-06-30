@@ -19,7 +19,7 @@ export default class Migration7 extends Migration {
 
     this._logger = configuration.logger;
     this._client = configuration.client;
-    this._index = configuration.index;
+    this._index = configuration.config.get('kibana.index');
   }
 
   static get description() {

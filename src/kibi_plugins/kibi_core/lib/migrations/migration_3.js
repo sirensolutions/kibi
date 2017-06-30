@@ -24,7 +24,7 @@ export default class Migration3 extends Migration {
 
     this._client = configuration.client;
     this._logger = configuration.logger;
-    this._index = configuration.index;
+    this._index = configuration.config.get('kibana.index');
     this._type = 'visualization';
   }
 

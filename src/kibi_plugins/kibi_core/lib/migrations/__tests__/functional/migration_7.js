@@ -1,4 +1,5 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
 import requirefrom from 'requirefrom';
 import Migration from '../../migration_7';
 import Scenario1 from './scenarios/migration_7/scenario1';
@@ -19,6 +20,12 @@ describe('kibi_core/migrations/functional', function () {
   const timeout = 60000;
   this.timeout(timeout);
 
+  const stub = sinon.stub();
+  const fakeConfig = {
+    get: stub
+  };
+  fakeConfig.get.withArgs('kibana.index').returns('.kibi');
+
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
   const cluster = new Cluster({
     url: clusterUrl,
@@ -26,7 +33,7 @@ describe('kibi_core/migrations/functional', function () {
     requestTimeout: timeout
   });
   const configuration = {
-    index: '.kibi',
+    config: fakeConfig,
     client: cluster.getClient(),
     logger: {
       error: (message) => {},

@@ -88,8 +88,8 @@ Another tool we use for enforcing consistent coding style is Editorconfig, which
 
 #### Default kibi plugins
 
-To include a plugin in the build edit archives variable in  
-```tasks/kibi_public_plugins.js```   
+To include a plugin in the build edit archives variable in
+```tasks/kibi_public_plugins.js```
 
 Another tool we use for enforcing consistent coding style is Editorconfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [Editorconfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
 

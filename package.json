@@ -202,7 +202,7 @@
     "karma-ie-launcher": "0.2.0",
     "karma-mocha": "1.1.1",
     "karma-safari-launcher": "0.1.1",
-    "libesvm": "3.2.0",
+    "libesvm": "3.8.3",
     "license-checker": "3.1.0",
     "load-grunt-config": "0.7.2",
     "makelogs": "2.0.0",

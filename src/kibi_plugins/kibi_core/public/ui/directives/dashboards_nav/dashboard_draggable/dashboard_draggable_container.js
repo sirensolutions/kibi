@@ -22,6 +22,11 @@ uiModules
         $scope.drake.containers.push(element);
         $scopes.set(element, $itemScope);
       };
+      this.linkContainer = (el, $itemScope) => {
+        const element = $(el).get(0);
+        $scope.drake.containers.push(element);
+        $scopes.set(element, $itemScope);
+      };
     },
     link($scope, $el, attr) {
       const notify = createNotifier({
@@ -31,8 +36,17 @@ uiModules
         accepts(el, target, source, sibling) {
           const sourceScope = $scopes.get(source);
           if (!sourceScope.isDashboard && !sourceScope.isVirtualGroup) {
+            // the source is a group
             const targetScope = $scopes.get(target);
-            return !targetScope.isDashboard;
+            return !targetScope.isDashboard && !targetScope.isVirtualGroup && !targetScope.isDummy;
+          }
+          if (sourceScope.isDashboard) {
+            const targetScope = $scopes.get(target);
+            return targetScope.isDashboard || targetScope.isDummy;
+          }
+          if (sourceScope.isVirtualGroup) {
+            const targetScope = $scopes.get(target);
+            return targetScope.isDashboard || (targetScope.isDummy && !targetScope.isVirtualGroup);
           }
           return true;
         },
@@ -44,12 +58,12 @@ uiModules
           return true;
         },
         mirrorContainer: $el.parent().get(0),
-        removeOnSpill: true
+        removeOnSpill: false
       });
 
       drake.on('drag', markDragging(true));
       drake.on('dragend', markDragging(false));
-      drake.on('remove', remove);
+      drake.on('over', over);
       drake.on('drop', drop);
       $scope.$on('$destroy', drake.destroy);
       $scope.drake = drake;
@@ -63,42 +77,23 @@ uiModules
         };
       }
 
-      function remove(el, container, source) {
-        const sourceItemScope = $scopes.get(source);
-        if (!sourceItemScope) return;
-        const sourceItem = sourceItemScope.dashboardDraggableItemCtrl.getItem();
-        const sourceGroup = sourceItemScope.dashboardDraggableItemCtrl.getGroup();
-        if (!sourceItemScope.isDashboard || sourceGroup.virtual) {
-          $scope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
+      let prevController = null;
+
+      function over(el, container, source) {
+        const scope = $scopes.get($(container).get(0));
+        const sourceScope = $scopes.get($(source).get(0));
+        if (!scope) {
           return;
         }
-        // Removes a dashboard from one group
-        $scope.isSaving = true;
-        savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
-          const dashId = savedSourceGroup.dashboards[sourceItem].id;
-          savedSourceGroup.dashboards.splice(sourceItem, 1);
-          let priority = 0;
-          dashboardGroups.getGroups().forEach(group => {
-            priority = priority < group.priority ? group.priority : priority;
-          });
-          return savedSourceGroup.save()
-          .then(() => {
-            return savedDashboards.get(dashId)
-            .then(savedDashboard => {
-              savedDashboard.priority = priority + 10;
-              return savedDashboard.save();
-            });
-          });
-        })
-        .then(cache.invalidate)
-        .then(() => {
-          $scope.isSaving = false;
-          $scope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
-        })
-        .catch((reason) => {
-          $scope.isSaving = false;
-          notify.error(reason);
-        });
+        if (sourceScope.isDashboard || sourceScope.isVirtualGroup) {
+          const controller = scope.dashboardDraggableItemCtrl;
+          if (prevController && prevController.getGroup().id !== controller.getGroup().id) {
+            prevController.getState().hovered = false;
+          }
+          controller.getState().hovered = true;
+          prevController = controller;
+          scope.$apply();
+        }
       }
 
       function drop(el, target, source, sibling) {
@@ -114,7 +109,7 @@ uiModules
 
         $scope.isSaving = true;
         dashboardGroups.renumberGroups().then(() => {
-          if (sourceItemScope.isDashboard && sourceGroup.id !== targetGroup.id && !sourceGroup.virtual && targetGroup.virtual) {
+          if (sourceItemScope.isDashboard && !sourceGroup.virtual && targetItem === -2) {
             // Removes a dashboard from one group and put in the correct order
             return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
               const sourceItemId = savedSourceGroup.dashboards[sourceItem].id;
@@ -142,7 +137,7 @@ uiModules
               return savedGroup.save();
             });
           }
-          else if (sourceItemScope.isDashboard && !targetGroup.virtual) {
+          else if (sourceItemScope.isDashboard && !targetGroup.virtual && targetItem !== -2) {
             // Moves a dashboard from one group to another
             targetGroup.collapsed = false;
             return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
@@ -162,14 +157,14 @@ uiModules
               });
             });
           }
-          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && targetGroup.virtual) {
+          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && targetItem === -2) {
             // Changes the virtual group order
             return savedDashboards.get(sourceGroup.id).then(savedDashboard => {
               savedDashboard.priority = targetGroup.priority - (sibling ? 5 : -5);
               return savedDashboard.save();
             });
           }
-          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && !targetGroup.virtual) {
+          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && !targetGroup.virtual && targetItem !== -2) {
             // Moves a virtual group into a group
             targetGroup.collapsed = false;
             return savedDashboardGroups.get(targetGroup.id).then(savedGroup => {
@@ -189,7 +184,7 @@ uiModules
           else if (!sourceItemScope.isDashboard && !sourceGroup.virtual) {
             // Changes the group order
             return savedDashboardGroups.get(sourceGroup.id).then(savedGroup => {
-              savedGroup.priority = targetGroup.priority - (sibling ? 5 : -5);
+              savedGroup.priority = targetGroup.priority + (sibling ? 5 : -5);
               return savedGroup.save();
             });
           }

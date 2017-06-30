@@ -8,6 +8,7 @@ import './dashboard_nav_group_editor';
 import './dashboard_draggable/dashboard_draggable_container';
 import './dashboard_draggable/dashboard_draggable_item';
 import './dashboard_draggable/dashboard_draggable_handle';
+import './dashboard_draggable/dashboard_dummy_container';
 import './new_dashboard_confirm/new_dashboard_confirm_promise';
 import dashboardsNavTemplate from './dashboards_nav.html';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';

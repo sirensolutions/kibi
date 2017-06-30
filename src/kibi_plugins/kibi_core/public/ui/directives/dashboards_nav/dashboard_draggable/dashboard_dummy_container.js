@@ -3,21 +3,22 @@ import uiModules from 'ui/modules';
 
 uiModules
 .get('kibana')
-.directive('dashboardDraggableItem', function () {
+.directive('dashboardDummyContainer', function () {
   return {
     restrict: 'A',
     require: '^dashboardDraggableContainer',
     scope: true,
     controllerAs: 'dashboardDraggableItemCtrl',
     controller($scope, $attrs, $parse) {
-      this.getItem = () => $parse($attrs.dashboardDraggableItem)($scope);
+      this.getItem = () => $parse($attrs.dashboardDummyContainer)($scope);
       this.getGroup = () => $scope.group;
       this.getState = () => $parse($attrs.state)($scope);
     },
     link($scope, $el, attr, draggableController) {
+      $scope.isDummy = true;
       $scope.isDashboard = attr.dashboardDraggableItem !== 'group';
       $scope.isVirtualGroup = $scope.group.virtual;
-      draggableController.linkDraggableItem($el.get(0), $scope);
+      draggableController.linkContainer($el.get(0), $scope);
     }
   };
 });

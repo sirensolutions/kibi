@@ -54,6 +54,8 @@ uiModules
         name: 'Delete'
       }];
 
+      $scope.state = {};
+
       $scope.menuActionTriggered = false;
 
       if (!$scope.group.virtual) {

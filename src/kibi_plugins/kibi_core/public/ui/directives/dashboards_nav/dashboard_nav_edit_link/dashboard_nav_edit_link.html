@@ -1,4 +1,4 @@
-<div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group" id="kibi-dashboard-group-{{group.id}}">
+<div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group" state="state" id="kibi-dashboard-group-{{group.id}}">
   <div ng-class="{'dashboard-group': !group.virtual, 'dashboard': group.virtual, active: group.id === dashboardLoaded, highlight: group.collapsed && doesGroupHasAnyHiglightedDashboard(group.dashboards)}">
     <div class="icon" ng-if="!group.virtual">
       <i
@@ -72,7 +72,7 @@
       <div class="dashboards-nav-edit-link-dashboard"
         ng-class="{active: dashboard.id === dashboardLoaded, highlight: dashboardIsHighlighted(dashboard)}"
         ng-click="selectDashboard($index)"
-        dashboard-draggable-item="$index"
+        dashboard-draggable-item="$index" state="state"
       >
         <div
           kibi-context-menu kibi-context-menu-list="contextMenuDashboard"
@@ -108,4 +108,10 @@
       </div>
     </div>
   </div>
+  <div ng-if="group.dashboards.length === 0 && !group.virtual" class="dashboards-nav-dummy-container drag-dashboard"
+       ng-class="{hovered: state.hovered}" dashboard-dummy-container="-1" state="state">
+  </div>
+</div>
+<div class="dashboards-nav-dummy-container drag-after"
+     ng-class="{hovered: state.hovered}" dashboard-dummy-container="-2" state="state">
 </div>

@@ -1,70 +1,182 @@
 [[graph_browser]]
 == Kibi Graph Browser 
 
-The Kibi Graph Browser displays the currently selected Elasticsearch documents as a node of a graph.
+The Kibi Graph Browser displays Elasticsearch documents as nodes and Kibi relations as links of a graph.
 
-image::images/graph_browser/graph_browser_example.png["Graph Browser Visualization",align="center"]
+image::images/graph_browser/graph_browser_example.png["Graph Browser Example", title="Graph Browser Example", align="center"]
 
-NOTE: Kibi Graph Browser is available only in Kibi Enterprise Edition.
+NOTE: Kibi Graph Browser is not available in the publically downloadable version. +
+Please contact Siren at info@siren.io for further informations.
 
 [float]
 === Configuration
-To configure the visualization, add a new *Script* and select:
+To configure the visualization select a compatible datasource (typically the provided _Kibi Gremlin Server_ datasource)
 
- * *Query* - the query that will fetch the first node.
- * *Datasource* - the Kibi Tinkerpop3 datasource to be used.
-
-image::images/graph_browser/graph_browser_config_script.png["Graph Browser Script configuration",align="center"]
-
-By default every node is assigned with an icon and a label. It is possible to customize the style of both of them.
+image::images/graph_browser/config_source.png["Source configuration", title="Source configuration", align="center"]
 
 [float]
-==== Custom Icon
+==== Tooltip
+By ticking the image:images/graph_browser/tooltip_checkbox.png["Tooltip checkbox"] checkbox, you can enable node tooltips.
 
-To configure an icon, add a new *Icon* and select:
+image::images/graph_browser/tooltip.png["Tooltip", title="Tooltip", align="center"]
+
+[float]
+==== Relations
+By default the Graph Browser uses all the configured relations. In case you need to use only a subset of the relations, you can define it here.
+
+image::images/graph_browser/relations.png["Relations", title="Relations", align="center"]
+
+[float]
+==== Scripts
+The Graph Browser supports three types of scripts:
+
+ * *Expansion* - These scripts are used to customize the expansion policy. The provided one (`Default Expansion Policy`) will retrieve the first level connected elements to the expanded nodes
+ * *Contextual* - These scripts show up in the contextual menu (shown with a `RIGHT CLICK`) and allow you to perform operations on the graph. + 
+ Provided _contextual_ scripts:
+ 
+ ** *Expand by relation* - It opens a popup which allows you to choose one or more of the available relations and it expands the selected elements using only the selected ones. This does not override the graph browser configuration, you will see only the configured relations (if available for the selected nodes)
+ ** *Expand by top comention* - To be used with `company` nodes from our demo. This script expands the selected nodes using an elasticsearch aggregation to get the top comentioned `company` nodes
+ ** *Replace investment with edge* - To be used with our demo. This script replaces the investment nodes with a direct link between the company nodes and the investor nodes
+ ** *Select - All* - Select all the elements. Same as `CTRL + A`
+ ** *Select - By edge count* - It select nodes based on their link count. You can specify the count through the popup that appears
+ ** *Select - By type* - It select nodes based on their type. You can specify the type through the popup that appears
+ ** *Select - Extend* - Extends the current selection to the sibling elements
+ ** *Selecte - Invert* - Inverts the current selection
+ ** *Shortest Path* - Calculates the shortest path between two selected nodes by fetching the connected elements.
+ ** *Show nodes count by type* - Shows a popup with information about how many nodes per type are currently displayed
+ 
+ * *On Update* - These scripts are executed every time you add new elements to the graph. + 
+ Provided _on update_ scripts:
+ 
+ ** *Add time fields* - Adds the time field used by the _timebar mode_
+ ** *Add geo-locations for map visualization* - Adds the geographic field used by the _map mode_
+ ** *Replace investment with edge* - Same as the _contextual_ script `Replace investment with edge`, but executed automatically after every expansion.
+ ** *Signal dead companies* - Changes to black all the _company_ nodes that have a `deadpooled_date`
+
+To create a new _script_ go to `Management` -> `Scripts`
+
+image::images/graph_browser/scripts_management.png["Scripts Management", title="Scripts Management", align="center"]
+
+Here you can configure new _scripts_ or modify the saved ones.
+
+[float]
+==== Vertices UI Configuration
+
+To configure a vertex, press the image:images/graph_browser/add_vertex.png[Add Vertex]:
 
  * *Index Pattern* - the index pattern containing the type of documents you want to configure
+ * *Index Pattern Type* - the index pattern type of the documents you want to configure
+ 
  * *Icon Type* - the type of icon you want to use
  ** *Font awesome* - the icon will be selected using the vector icons from https://fortawesome.github.io/Font-Awesome/[Font Awesome]
- ** *Parameterized Relative Path* - the icon will be selected from the configured relative path. The relative path points to `<kibi_root>/installedPlugins/kibi_graph_browser_vis/public/icons/`. You can create subfolders to better organize your custom icons. If the icon filename is stored inside your document, you can use a parameterized relative path. Eg: `/set1/@[_doc][iconType]@.png` will be evaluated using the iconType field of the document.
+ ** *Parameterized Relative Path* - the icon will be selected from the configured relative path. The relative path points to `<kibi_root>/installedPlugins/kibi_graph_browser_vis/public/icons/`. You can create subfolders to better organize your custom icons. + 
+ Examples:
+ *** If the icon filename is stored inside your document, you can use a parameterized relative path. This label: `/set1/@[_doc][iconType]@.png` will be evaluated using the `iconType` field of the document.
 
-image::images/graph_browser/graph_browser_config_icon.png["Node Icon configuration",align="center"]
-
-
-[float]
-==== Custom Label
-
-To configure a label, add a new *Label* and select:
-
- * *Index Pattern* - the index pattern containing the documents you want to configure
- * *Document type* - the type of documents you want to configure
+ 
  * *Label type* - the type of label you want to use
  ** *Document Field* - the label will be a document field. You can select one of the available fields from the dropdown
- ** *Parameterized Field* - the label will be the evaluation of this parameterized field. e.g.: `Company: @doc[_source][companyName]@`
+ ** *Parameterized Field* - the label will be the evaluation of this parameterized field. + 
+ Examples:
+ *** Simple label, with the same output as for the document field one: `Company: @doc[_source][companyName]@`
+ *** You can compose the label using multiple fields: `@[_doc][company_name]@ from @[_doc][country]@`.
+ *** To have a multi-line label just add a new line character (`\n`): `@[_doc][companyName]@ \n @[_doc][country]@`
+ 
+image::images/graph_browser/vertex_config.png["Vertex Configuration", title="Vertex Configuration", align="center"]
 
 
-image::images/graph_browser/graph_browser_config_label.png["Node Label configuration",align="center"]
-
+'''
 [float]
 === Navigating the Graph
 
-Once your Kibi Graph Browser visualization is ready, you can start exploring the graph. You have several operations available:
+Once your Kibi Graph Browser visualization is ready, you can start your investigations. 
 
- * *Select Nodes* - you can select nodes by clicking and dragging a selection rectangle or by ctrl+click on elements to add them to the selection
- * *Add Filter* - a new filter will be added to Kibi representing the currently selected nodes
- * *Expand* - fetches new nodes and relations of the selected nodes
- * *Crop* - crops only the selected nodes, by removing all the other nodes
- * *Remove* - removes only the selected nodes, leaving all the others
+==== Toolbar
+You have several operations available:
 
-Note: A filter added through the graph is pinned by default.
+image::images/graph_browser/toolbar.png["Toolbar", title="Toolbar", align="center"]
 
-image::images/graph_browser/graph_filter_pin.gif["Graph Filter Pin",align="center"]
+ . *Undo* - By default the graph browser saves the last 5 states. With this function you can go back one step at a time, until there are no more available. You can configure the steps number in _kibi advanced settings_.
+ . *Redo* - With the redo you can restore an undoed state. Be careful: if you undo and perform any operation, the redo state will be lost.
+ . *Filter* - This will add a filter to the current dashboard synced with the graph selection. This lets you:
+ * Do your investigation on the graph, select the vertices you're interested into, activate the filter, pin it and go back to the related dashboard to get more detailed information about those vertices.
+ * If you have other visualizations in the same dashboard it lets you have more information on the selected nodes. For example, if you have the current dashboard associated to a companies saved search, you can do your investigation in the graph, activate the filter, select some vertices and get the visualizations to show information on the selected vertices.
+ . *Crop* - This will delete every element that is not selected
+ . *Remove* - This will remove all the selected elements. Right next to the _Remove_ button there is a dropdown that shows the *Remove All* button. This will clean the whole graph, regardless of selected elements or not. +
 
-You can choose two different layouts for your graph:
+image::images/graph_browser/remove_all.png["Remove All", title="Remove All", align="center"]
 
- * *Standard* - This is the standard visualization. The Kibi Graph Browser will choose automatically the position of elements
- * *Hierarchy* - The graph will be displayed using a hierarchical structure, starting from the selected nodes
+[start=6]
+ . *Expand* - This will expand the currently selected nodes. Right next to the _expand_ button there is a dropdown that shows advanced options for the expansion. The advanced options let you configure if you want to use the dashboard filters with the graph expansions. +
+ Eg: You have a filter on the _Companies_ dashboard that filters out every non-US company. By using that filter within the graph browser you will expand only companies from within the US.
+ 
+image::images/graph_browser/expand_filters.png["Expand with filters", title="Expand with filters", align="center"]
 
-image::images/graph_browser/graph_layouts.gif["Graph Layouts Example",align="center"]
+[start=7]
+ . *Highlight mode* - This toggle enables and disables the _Highlight mode_. The _Highlight mode_ moves to the background everything that is not selected and/or connected to a selected node/link.
+ 
+image::images/graph_browser/highlight_on.png["Highlightning On", title="Highlightning On", align="center"]
 
-At any time you can reset your Kibi Graph Browser to the initial state by pressing the reload button.
+image::images/graph_browser/highlight_off.png["Highlightning Off", title="Highlightning Off", align="center"]
+
+[start=8]
+ . *Layouts* - This button lets you change the current graph's layout. There are 2 available layouts:
+ * *Standard* - This one is the standard layout used by the graph. Pressing it will force the graph to relayout. Note: selected nodes will preserve their relative position.
+ * *Hierarchy* - This layout lays out nodes top down according to their connections. Note: It needs at least one selected node to work; selected nodes will be moved at the top of the hierarchy.
+
+image::images/graph_browser/standard_layout.gif["Standard Layout", title="Standard Layout", align="center"]
+
+image::images/graph_browser/hierarchy_layout.gif["Hierarchy Layout", title="Hierarchy Layout", align="center"]
+
+[start=9]
+ . *Add* - The _Add_ button opens a popup with the following options: 
+ * *Add selected document* - This will add the currently selected document. You can see your selected document in the upper right purple selection box.image:images/graph_browser/selected_document.png["Standard Layout"]
+ * *Add from saved graph* - This will open a popup showing the available saved graphs. By using this feature you will add a set of nodes and links, but you won't preserve the layout you had when you saved the graph.
+ * *Add from another dashboard* - This will add nodes using the filtered (optionally) dashboard you select.
+ 
+image::images/graph_browser/add_from_saved_graph.png["Add from saved graph", title="Add from saved graph", align="center"]
+
+[start=10]
+ . *Map Mode* - This toggle enables or disables the _Map mode_. The _Map mode_ will move the nodes geographically on an interactive map. You will need to set up a script to configure the geographic properties of the nodes (See <<Scripts>>).
+ 
+image::images/graph_browser/map_mode.png["Map mode", title="Map mode", align="center"]
+
+[start=11]
+ . *Timebar Mode* - This toggle enables or disables the _Timebar mode_. The _Timebar mode_ will display a timebar at the bottom of the Graph Browser that allows time based filtering of nodes. Once you enable this mode you will be able to add/remove node types to the timebar through the new menu: image:images/graph_browser/timebar_filter.png["Timebar Filter"] +
+ You will need to set up a script to configure the time property of the nodes (See <<Scripts>>).
+ 
+image::images/graph_browser/timebar_mode.png["Timebar mode", title="Timebar mode", align="center"]
+
+[start=12]
+ . *Save Graph* - This buttons opens a popup that lets you save the current graph.
+ 
+image::images/graph_browser/save_graph.png["Save Graph", title="Save Graph", align="center"]
+
+[start=13]
+ . *Open Graph* - This button opens a popup that lets you open a saved graph. Note: unlike the _add from saved graph_ this feature preserves the saved graph layout.
+ 
+image::images/graph_browser/open_graph.png["Open Graph", title="Open Graph", align="center"]
+ 
+==== Shortcuts
+
+The Graph Browser supports some shortcuts:
+
+ * `CTRL + A`: select every element in the graph
+ * `DEL`: delete the selected elements (same as the remove button)
+ * `CTRL + CLICK`: allows you to add elements to the current selection
+ * `DOUBLE CLICK`: expands the selected nodes (same as the expand button)
+ * `ARROWS`: move the selected elements in the input direction
+ * Mouse Wheel: changes the zoom level of the graph
+
+==== Sidebar
+
+image::images/graph_browser/sidebar.png["Sidebar", title="Sidebar", align="center"]
+
+The sidebar allows you to:
+
+ . Move the graph view in the clicked direction
+ . Switch between:
+ * *Arrow* - allows you to select elements
+ * *Hand* - allows you to move the graph regardless of selected elements
+ . Allows you to change the zoom level
+

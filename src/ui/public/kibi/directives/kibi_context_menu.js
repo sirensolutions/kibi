@@ -126,28 +126,28 @@ uiModules
       };
 
       function offset(elem, options) {
-        const curElem = elem[0];
+        const currentElem = elem[0];
         if (options) {
-          const curCssTop = curElem.style.top || getComputedStyle(curElem).top;
-          const curCssLeft = curElem.style.left || getComputedStyle(curElem).left;
-          const curOffset = offset(elem);
-          const scrollLeft = window.pageXOffset || curElem.scrollLeft;
-          const scrollTop = window.pageYOffset || curElem.scrollTop;
+          const currentCssTop = currentElem.style.top || getComputedStyle(currentElem).top;
+          const currentCssLeft = currentElem.style.left || getComputedStyle(currentElem).left;
+          const currentOffset = offset(elem);
+          const scrollLeft = window.pageXOffset || currentElem.scrollLeft;
+          const scrollTop = window.pageYOffset || currentElem.scrollTop;
           const windowHeight = $window.innerHeight;
-          let curTop;
-          let curLeft;
-          if ((curCssTop + curCssLeft).indexOf('auto') > -1) {
-            curTop = curElem.offsetTop;
-            curLeft = curElem.offsetLeft;
+          let currentTop;
+          let currentLeft;
+          if ((currentCssTop + currentCssLeft).indexOf('auto') > -1) {
+            currentTop = currentElem.offsetTop;
+            currentLeft = currentElem.offsetLeft;
           } else {
-            curTop = parseFloat(curCssTop) || 0;
-            curLeft = parseFloat(curCssLeft) || 0;
+            currentTop = parseFloat(currentCssTop) || 0;
+            currentLeft = parseFloat(currentCssLeft) || 0;
           }
-          const left = scrollLeft + options.left - curOffset.left + curLeft;
-          let top = scrollTop + options.top - curOffset.top + curTop;
+          const left = scrollLeft + options.left - currentOffset.left + currentLeft;
+          let top = scrollTop + options.top - currentOffset.top + currentTop;
 
-          if (top + curElem.lastElementChild.offsetHeight > windowHeight) {
-            top = top - curElem.lastElementChild.offsetHeight;
+          if (top + currentElem.lastElementChild.offsetHeight > windowHeight) {
+            top = top - currentElem.lastElementChild.offsetHeight;
           }
 
           elem.css({
@@ -156,7 +156,7 @@ uiModules
           });
           return;
         }
-        const rect = curElem.getBoundingClientRect();
+        const rect = currentElem.getBoundingClientRect();
         return {
           top: rect.top + document.body.scrollTop,
           left: rect.left + document.body.scrollLeft

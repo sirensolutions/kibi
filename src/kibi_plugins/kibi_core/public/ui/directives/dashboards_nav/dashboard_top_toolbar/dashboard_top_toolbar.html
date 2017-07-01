@@ -1,11 +1,11 @@
 <div
-  class="dashboard-top-toolbar"
+  class="kibi-dashboard-top-toolbar"
   ng-click="onClick({ $event: $event, force: true })"
   ng-class="{ isOpen: isOpen }"
 >
   <a
     class="action-button new-group"
-    ng-class="{collapsed: !isOpen}"
+    ng-class="{ collapsed: !isOpen }"
     ng-if="!isGroupEditorOpen"
     ng-click="onNewGroupClick({ $event: $event }); $event.stopPropagation();"
     data-test-subj="newGroup"
@@ -21,7 +21,7 @@
 
   <a
    class="action-button new-dashboard"
-   ng-class="{collapsed: !isOpen}"
+   ng-class="{ collapsed: !isOpen }"
    ng-click="createDashboard(); $event.stopPropagation();"
    data-test-subj="newDashboardLink"
    aria-label="Create new dashboard"
@@ -36,7 +36,7 @@
 
   <a
     class="action-button reset-filters"
-    ng-class="{collapsed: !isOpen}"
+    ng-class="{ collapsed: !isOpen }"
     ng-click="onClearFilter(); $event.stopPropagation();"
     data-test-subj="resetAll"
     aria-label="Reset the time, filters, and queries from all dashboards to their default saved state"

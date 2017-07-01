@@ -1,16 +1,16 @@
 <div
-  class="dashboard-bottom-toolbar"
+  class="kibi-dashboard-bottom-toolbar"
   ng-click="onClick({ $event: $event, force: true })"
   ng-class="{ isOpen: isOpen }"
 >
   <a
     class="anchor"
-    ng-class="{'anchor-closed': !isOpen}"
+    ng-class="{ 'anchor-closed': !isOpen }"
   >
     <div class="icon">
       <i
          ng-if="iconCss"
-         class="icon-image {{iconCss}}"
+         class="icon-image {{ iconCss }}"
       ></i>
 
       <img
@@ -24,7 +24,7 @@
   <input
       name="dashboards-filter"
       ng-click="$event.stopPropagation()"
-      ng-class="{collapsed: !isDashboardsNavOpen}"
+      ng-class="{ collapsed: !isDashboardsNavOpen }"
       aria-label="Filter"
       ng-model="dashboardFilter"
       class="dashboards-filter"

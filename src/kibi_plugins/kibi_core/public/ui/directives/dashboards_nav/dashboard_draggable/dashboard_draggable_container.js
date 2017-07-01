@@ -131,8 +131,8 @@ uiModules
                 savedGroup.dashboards.splice(targetItem, 0, dashboard);
               } else {
                 savedGroup.dashboards.splice(sourceItem, 1);
-                const sibingItem = $scopes.get($(sibling).parent().get(0)).dashboardDraggableItemCtrl.getItem();
-                savedGroup.dashboards.splice(sibingItem, 0, dashboard);
+                const siblingItem = $scopes.get($(sibling).parent().get(0)).dashboardDraggableItemCtrl.getItem();
+                savedGroup.dashboards.splice(siblingItem, 0, dashboard);
               }
               return savedGroup.save();
             });
@@ -149,8 +149,8 @@ uiModules
                 if (!sibling) {
                   savedTargetGroup.dashboards.splice(targetItem + 1, 0, dashboard);
                 } else {
-                  const sibingItem = $scopes.get($(sibling).parent().get(0)).dashboardDraggableItemCtrl.getItem();
-                  savedTargetGroup.dashboards.splice(sibingItem, 0, dashboard);
+                  const siblingItem = $scopes.get($(sibling).parent().get(0)).dashboardDraggableItemCtrl.getItem();
+                  savedTargetGroup.dashboards.splice(siblingItem, 0, dashboard);
                 }
                 actions.push(savedTargetGroup.save());
                 return Promise.all(actions);
@@ -175,8 +175,8 @@ uiModules
               if (!sibling) {
                 savedGroup.dashboards.splice(targetItem + 1, 0, dashboard);
               } else {
-                const sibingItem = $scopes.get($(sibling).parent().get(0)).dashboardDraggableItemCtrl.getItem();
-                savedGroup.dashboards.splice(sibingItem, 0, dashboard);
+                const siblingItem = $scopes.get($(sibling).parent().get(0)).dashboardDraggableItemCtrl.getItem();
+                savedGroup.dashboards.splice(siblingItem, 0, dashboard);
               }
               return savedGroup.save();
             });

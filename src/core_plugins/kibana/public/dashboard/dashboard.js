@@ -90,9 +90,10 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
           if (dash.group) {
             const count = _(dash.group.dashboards).filter(d => d.id === dash.id).map('count').value();
             if (count && count.length) {
-              dash.formattedCount = count[0];
               if (_.isNumber(count[0])) {
                 dash.formattedCount = numeral.set(count[0]).format('0,0');
+              } else {
+                dash.formattedCount = count[0];
               }
             }
           }

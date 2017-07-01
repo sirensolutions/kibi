@@ -281,7 +281,7 @@ uiModules
         return dashboard.$$highlight;
       };
 
-      $scope.doesGroupHasAnyHiglightedDashboard = function (dashboards) {
+      $scope.doesGroupHaveAnyHighlightedDashboard = function (dashboards) {
         // here iterate over dashboards check if highlighted dashboard exists
         for (let i = 0; i < dashboards.length; i++) {
           if (dashboards[i].$$highlight === true) {
@@ -335,7 +335,10 @@ uiModules
             my: 'left center',
             at: 'right center'
           },
-          show: '',
+          show: {
+            event: '',
+            solo: true
+          },
           hide: {
             event: 'mouseleave'
           },

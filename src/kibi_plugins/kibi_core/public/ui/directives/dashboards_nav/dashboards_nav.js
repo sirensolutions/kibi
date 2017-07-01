@@ -203,7 +203,7 @@ uiModules
       $scope.newDashboardGroup = event => {
         event.preventDefault();
         $scope.$broadcast('kibi-dashboard-nav-saving', true);
-        const baseName = 'New group';
+        const baseName = 'New Group';
         const lastCopy = $scope.getLastNewDashboardGroupName(baseName);
         const title = lastCopy < 0 ? baseName : baseName + ' #' + (lastCopy + 1);
         dashboardGroups.newGroup(title).then((groupId) => {
@@ -314,11 +314,8 @@ uiModules
 
       $scope.resize = () => {
         const $container = angular.element($element.find('.links')[0]);
-        const $navControls = angular.element($element.find('.dashboards-nav-control')[0]);
-        if ($navControls) {
-          const h = $element.height() - $navControls.height() - 70;
-          $container.height(Math.max(20, h));
-        }
+        const h = $element.height() - 70;
+        $container.height(Math.max(20, h));
       };
 
       // Re-render if the window is resized

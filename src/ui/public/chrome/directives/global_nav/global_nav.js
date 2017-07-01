@@ -45,7 +45,7 @@ module.directive('globalNav', (globalNavState, $window,
 
       updateGlobalNav();
 
-      // kibi: click on the log go to the dashboard
+      // kibi: click on the logo to go to the dashboard
       scope.gotoDashboard = () => {
         const dashboardLink = scope.chrome.getNavLinks().filter(link => link.id === 'kibana:dashboard')[0];
         if (dashboardLink.linkToLastSubUrl) {

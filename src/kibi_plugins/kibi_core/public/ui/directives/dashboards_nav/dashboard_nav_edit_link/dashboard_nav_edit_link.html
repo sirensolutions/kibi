@@ -1,15 +1,15 @@
-<div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group" state="state" id="kibi-dashboard-group-{{group.id}}">
-  <div ng-class="{'dashboard-group': !group.virtual, 'dashboard': group.virtual, active: group.id === dashboardLoaded, highlight: group.collapsed && doesGroupHasAnyHiglightedDashboard(group.dashboards)}">
+<div class="kibi-dashboards-nav-edit-link-group" dashboard-draggable-item="group" state="state" id="kibi-dashboard-group-{{ group.id }}">
+  <div ng-class="{ 'dashboard-group': !group.virtual, 'dashboard': group.virtual, active: group.id === dashboardLoaded, highlight: group.collapsed && doesGroupHaveAnyHighlightedDashboard(group.dashboards) }">
     <div class="icon" ng-if="!group.virtual">
       <i
          ng-if="group.iconCss"
-         class="icon-image {{group.iconCss}}"
+         class="icon-image {{ group.iconCss }}"
       ></i>
 
       <img
          ng-if="group.iconUrl"
          class="icon-image"
-         ng-src="{{group.iconUrl}}"
+         ng-src="{{ group.iconUrl }}"
       />
 
       <span
@@ -31,8 +31,8 @@
         kibi-context-menu-click-menu="clickMenuVirtualGroup(item)"
       >
         <div ng-mouseenter="refreshTooltipContent($event, group)">
-          <div class="title" ng-class="{collapsed: !isSidebarOpen, 'dashboard-nav-title-virtual-group': group.virtual}">
-            {{group.title}}
+          <div class="title" ng-class="{ collapsed: !isSidebarOpen, 'dashboard-nav-title-virtual-group': group.virtual }">
+            {{ group.title }}
           </div>
           <div ng-if="!group.virtual" class="action">
             <i ng-if="group.collapsed" class="fa fa-plus"></i>
@@ -70,7 +70,7 @@
   <div ng-if="!group.virtual && !group.collapsed">
     <div ng-repeat="dashboard in group.dashboards | filter: { title: filter }">
       <div class="dashboards-nav-edit-link-dashboard"
-        ng-class="{active: dashboard.id === dashboardLoaded, highlight: dashboardIsHighlighted(dashboard)}"
+        ng-class="{ active: dashboard.id === dashboardLoaded, highlight: dashboardIsHighlighted(dashboard) }"
         ng-click="selectDashboard($index)"
         dashboard-draggable-item="$index" state="state"
       >
@@ -79,10 +79,10 @@
           kibi-context-menu-click-menu="clickMenuDashboard(item, dashboard)"
         >
           <div ng-mouseenter="refreshTooltipContent($event, $index, true)">
-            <div class="dashboards-nav-edit-link-dragbar" ng-class="{collapsed: !isSidebarOpen}" dashboard-draggable-handle>
+            <div class="dashboards-nav-edit-link-dragbar" ng-class="{ collapsed: !isSidebarOpen }" dashboard-draggable-handle>
             </div>
-            <div class="dashboard-nav-title" ng-class="{collapsed: !isSidebarOpen}">
-              {{dashboard.title}}
+            <div class="dashboard-nav-title" ng-class="{ collapsed: !isSidebarOpen }">
+              {{ dashboard.title }}
             </div>
             <div class="indicators">
               <!--dashboard count-->
@@ -108,10 +108,10 @@
       </div>
     </div>
   </div>
-  <div ng-if="group.dashboards.length === 0 && !group.virtual" class="dashboards-nav-dummy-container drag-dashboard"
-       ng-class="{hovered: state.hovered}" dashboard-dummy-container="-1" state="state">
+  <div ng-if="group.dashboards.length === 0 && !group.virtual" class="kibi-dashboards-nav-dummy-container drag-dashboard"
+       ng-class="{ hovered: state.hovered }" dashboard-dummy-container="-1" state="state">
   </div>
 </div>
-<div class="dashboards-nav-dummy-container drag-after"
-     ng-class="{hovered: state.hovered}" dashboard-dummy-container="-2" state="state">
+<div class="kibi-dashboards-nav-dummy-container drag-after"
+     ng-class="{ hovered: state.hovered }" dashboard-dummy-container="-2" state="state">
 </div>

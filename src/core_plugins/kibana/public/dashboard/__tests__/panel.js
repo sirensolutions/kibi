@@ -64,7 +64,7 @@ describe('dashboard panel', function () {
   it('should not visualize the visualization if it does not exist', function () {
     init({ found: false });
     return $scope.loadedPanel.then(() => {
-      expect($scope.error).to.be('Could not locate that visualization (id: foo1)');
+      expect($scope.error).to.be('Could not locate object of type: visualization. (id: foo1)');
       parentScope.$digest();
       const content = $el.find('.panel-content');
       expect(content).to.have.length(0);

@@ -18,9 +18,8 @@ describe('kibi_core/migrations/functional', function () {
   const timeout = 60000;
   this.timeout(timeout);
 
-  const stub = sinon.stub();
   const fakeConfig = {
-    get: stub
+    get: sinon.stub()
   };
   fakeConfig.get.withArgs('kibana.index').returns('.kibi');
 

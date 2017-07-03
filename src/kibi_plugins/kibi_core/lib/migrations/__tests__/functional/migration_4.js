@@ -20,9 +20,8 @@ describe('kibi_core/migrations/functional', function () {
   const timeout = 60000;
   this.timeout(timeout);
 
-  const stub = sinon.stub();
   const fakeConfig = {
-    get: stub
+    get: sinon.stub()
   };
 
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);

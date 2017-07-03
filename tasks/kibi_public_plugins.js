@@ -20,7 +20,7 @@ module.exports = function (grunt) {
       dest: '/tmp/kibi_timeline_vis.zip'
     },
     {
-      url: 'https://github.com/stormpython/heatmap/archive/1.0.0.zip',
+      url: 'https://github.com/sirensolutions/heatmap/releases/download/1.0.1/heatmap.zip',
       dest: '/tmp/heatmap_vis.zip'
     }
   ];

@@ -1,15 +1,788 @@
-[[breaking-changes-5.4.0]]
-== Breaking changes in Kibi 5.4.0
-
-This section list the changes in Kibi/Kibana that you need to be aware of
-when migrating to Kibi 5.4.0
+[[migration]]
+== Migrating from Kibi 4.x
 
 [float]
-=== URL changes for DEB/RPM packages
-*Details:* The previous `packages.elastic.co` URL has been altered to `artifacts.elastic.co`.
+=== Upgrading Elasticsearch
 
-*Impact:* Ensure you update your repository files before running the upgrade process, or your operating system may not see the new
-packages.
+Kibi is compatible with Elasticsearch {elasticsearch-version}; this section
+provides a summary of the upgrade procedure described at
+{elastic-ref}/setup-upgrade.html[Upgrading Elasticsearch] with Kibi and Search
+Guard specific notes.
+
+It is also recommended to read the
+{elastic-ref}/breaking-changes-5.0.html[Breaking Changes in 5.0] section of the
+Elasticearch documentation.
+
+[float]
+==== Pre-requisites
+
+It is recommended to have a backup of the indices in the cluster.
+
+[float]
+===== Search Guard configuration backup
+
+If your cluster is secured by Search Guard, you will need to retrieve
+the current cluster configuration through the `sgadmin` tool;
+after the upgrade, you'll need to change these files with new
+permission identifiers and reload it to the cluster.
+
+`sgadmin.sh` is available in the _plugins/search-guard-2/tools_ directory on
+each Elasticsearch instance in which Search Guard has been installed; a
+standalone version (`sgadmin-standalone.zip`) can be downloaded from
+{searchguard-sgadmin-ref}[this page].
+
+The current configuration can be retrieved by creating a backup directory
+and running the tool as follows:
+
+[source,bash]
+----
+mkdir configbak
+bash /path/to/sgadmin.sh -r -ks CN\=sgadmin-keystore.jks -cd configbak -kspass password -ts truststore.jks -tspass password -icl -nhnv -h elasticsearch.local -p 9300
+----
+
+Arguments:
+
+- `r`: retrieve configuration.
+- `cd`: the directory in which the current configuration will be saved.
+- `ks`: the path to the administrative keystore
+- `kspass`: the password of the administrative keystore.
+- `ts`: the path to the truststore.
+- `tspass`: the password of the truststore.
+- `icl`: ignore cluster name.
+- `nhvv`: do not verify cluster hostname.
+- `h`: Elasticsearch hostname.
+- `p`: Elasticsearch transport port.
+
+If execution is successful, you will find the five Search Guard configuration
+files in the `configbak` directory suffixed by the current date.
+
+Before proceeding, **ensure that the files are not empty** and remove the date
+suffix; you should end up with the following files which will be required later.
+
+- `sg_action_groups.yml`
+- `sg_config.yml`
+- `sg_internal_users.yml`
+- `sg_roles_mapping.yml`
+- `sg_roles.yml`
+
+[float]
+==== Upgrade preparation
+
+To upgrade from Elasticsearch 2.4.x, you will need to perform a full cluster
+restart.
+
+Before proceeding, disable shard allocation to avoid unnecessary traffic during
+the shutdown of each node; this can be done by sending the following request
+with curl:
+
+[source,bash]
+----
+curl -XPUT http://elasticsearch.local:9200/_cluster/settings -d '{
+  "persistent": {
+    "cluster.routing.allocation.enable": "none"
+  }
+}'
+----
+
+If your cluster is secured by Search Guard, remember to include your
+credentials in each request, e.g.:
+
+[source,bash]
+----
+curl -uadmin:password --cacert ca.pem -XPUT https://elasticsearch.local:9200/_cluster/settings -d '{
+  "persistent": {
+    "cluster.routing.allocation.enable": "none"
+  }
+}'
+----
+
+For a faster recovery, you can optionally stop any indexing activity and issue
+a {elastic-ref}indices-synced-flush.html[synced flush] request as follows:
+
+[source,bash]
+----
+curl -XPOST http://elasticsearch.local:9200/_flush/synced
+----
+
+[float]
+===== Node upgrade
+
+Once the previous steps have been carried out, you will need to stop all the
+nodes in the cluster and upgrade Elasticsearch and plugins on each node as
+explained in the following sections.
+
+**Do not restart nodes until the software has been upgraded on the whole
+cluster.**
+
+[float]
+====== Elasticsearch upgrade
+
+If using Elastic packages, you can upgrade Elasticsearch by installing the
+compatible `rpm` or `deb` package through `yum` or `apt`; the packages should
+preserve the existing configuration files and data directories.
+
+If Elasticsearch was installed from a zip or tar distribution, you will need
+to:
+
+- download a compatible version in zip or tar format from
+  https://www.elastic.co/downloads/elasticsearch .
+- extract the package to a new location; make sure to not overwrite the
+  existing installation when extracting the archive.
+- copy the `config` directory from the previous installation to the new one
+- check the value of `path.data` in `config/elasticsearch.yml`; if not set, you
+  will need to copy the `data` directory from the old installation to the new
+  one, otherwise Elasticsearch will keep using the data directory specified in
+  `path.data`.
+
+*Configuration changes*
+
+Any index level setting (settings starting with `index`) declared in
+`elasticsearch.yml` must be removed from the file; these settings have now to
+be declared in {elastic-ref}indices-templates.html[Index templates].
+
+*Startup scripts*
+
+If you were starting Elasticsearch using custom systemd/init.d/supervisor
+scripts, make sure to check the
+{elastic-ref}breaking_50_packaging.html[packaging breaking changes] section of
+the Elasticsearch documentation as several environment variables have now to be
+set in the `jvm.options` file.
+
+It is also recommended to verify your custom scripts and system properties
+against the updated {elastic-ref}system-config.html[Important System
+Configuration] documentation.
+
+[float]
+====== Plugins upgrade
+
+If you installed Elasticsearch from system packages, you will need to remove
+the old versions of your plugins `/usr/share/elasticsearch/plugins`; old
+plugins can be removed by using the `elasticsearch-plugin` command, e.g.:
+
+[source,bash]
+----
+/usr/share/elasticsearch/bin/elasticsearch-plugin remove siren-join
+----
+
+If installed, the following plugins must be removed:
+
+- `siren-join`
+- `license-siren`
+- `kopf`
+- `search-guard-2`
+- `search-guard-ssl`
+
+[float]
+====== Siren Vanguard
+
+The Siren Vanguard plugin for Elasticsearch replaces the Siren Join and Siren
+License plugins; to install the plugin, you need to download the zip package of
+the plugin from {download-ref}[our customer portal] and install it through
+`elasticsearch-plugin`, e.g.:
+
+[source,bash]
+----
+./usr/share/elasticsearch/bin/elasticsearch-plugin install file:///path/to/vanguard-plugin.zip
+----
+
+[float]
+====== Search Guard 5
+
+The Search Guard 5 plugin replaces the previous Search Guard 2 and Search Guard
+SSL plugins; to find out the version of Search Guard 5 compatible with your
+Elasticsearch installation, please check the {searchguard-matrix-ref}[Search
+Guard version matrix].
+
+The plugin can be installed from Maven Central using `elasticsearch-plugin`:
+
+[source,bash]
+----
+./usr/share/elasticsearch/bin/elasticsearch-plugin install -b com.floragunn:search-guard-5:<version>
+----
+
+In addition, the compatible version of any commercial Search Guard add-on will
+have to be downloaded and copied to the `plugins/search-guard-5` directory; the
+following list provides links to the download page of all the add-ons commonly
+used in Kibi instances:
+
+- {searchguard-management-api-ref}[REST Management API] 
+- {searchguard-dlsfls-ref}[Document/Field Level security module]
+- {searchguard-ldap-ref}[LDAP Authentication module]
+- {searchguard-kerberos-ref}[Kerberos Authentication module]
+- {searchguard-jwt-ref}[JWT Authentication module]
+
+[float]
+===== Cluster restart without Search Guard
+
+If your cluster is protected by Search Guard, skip to the next section for
+specific instructions.
+
+Once Elasticsearch and plugins are up to date on all nodes, you can begin
+restarting nodes; it is recommended to restart master eligible nodes first and
+wait for the cluster to elect a master before proceeding with other nodes.
+
+NOTE: master eligibile nodes are nodes having `node.master` set to `true` or
+not set in `elasticsearch.yml`.
+
+Wait for cluster to reach the Yellow status; if not using Search Guard, you can
+check the status of the cluster by issuing a requests with curl to
+{elastic-ref}cat-health.html[_cat/health], e.g.:
+
+[source,bash]
+----
+$ curl http://elasticsearch.local:9200/_cat/health?v
+epoch      timestamp cluster status node.total node.data shards ...
+1498542620 06:50:20  541     yellow          5         3    106 ...
+----
+
+Once the cluster is in the Yellow status, you can re-enable shard allocation:
+
+[source,bash]
+----
+$ curl -XPUT http://elasticsearch.local:9200/_cluster/settings -d '
+{
+  "persistent": {
+    "cluster.routing.allocation.enable": "all"
+  }
+}
+'
+----
+
+Then you can issue additional requests to `_cat/health` to monitor the cluster
+until it reaches the Green status; you can also check the recovery status of
+each shard by issuing requests to `_cat/recovery`, e.g.:
+
+[source,bash]
+----
+$ curl http://elasticsearch.local:9200/_cat/recovery
+----
+
+[float]
+===== Cluster restart with Search Guard
+
+Once Elasticsearch and plugins are up to date on all nodes, you can begin
+restarting nodes; it is recommended to restart master eligible nodes first and
+wait for the cluster to elect a master before proceeding with other nodes.
+
+NOTE: master eligibile nodes are nodes having `node.master` set to `true` or
+not set in `elasticsearch.yml`.
+
+You won't be able to issue HTTP requests until the Search Guard configuration
+has been upgraded, so you will need to use `sgadmin` to re-enable shard
+allocation after the cluster reaches the Yellow status.
+
+`sgadmin.sh` is available in the _plugins/search-guard-5/tools_ directory on
+each Elasticsearch instance in which Search Guard has been installed; a
+standalone version (`sgadmin-standalone.zip`) can be downloaded from
+{searchguard-sgadmin-ref}[this page].
+
+To re-enable shard allocation with `sgadmin` execute it as follows:
+
+[source,bash]
+----
+$ bash /path/to/sgadmin.sh -esa -ks CN=sgadmin-keystore.jks -kspass password -ts config/truststore.jks -tspass password -icl -nhnv -h elasticsearch.local -p 9300
+Search Guard Admin v5
+Will connect to elasticsearch.local:9330 ... done
+Persistent and transient shard allocation enabled
+----
+
+Arguments:
+
+- `esa`: enable shard allocation
+- `ks`: the path to the administrative keystore
+- `kspass`: the password of the administrative keystore.
+- `ts`: the path to the truststore.
+- `tspass`: the password of the truststore.
+- `icl`: ignore cluster name.
+- `nhvv`: do not verify cluster hostname.
+- `h`: Elasticsearch hostname.
+- `p`: Elasticsearch transport port.
+
+Then you need to reload the Search Guard configuration retrieved before
+upgrading the cluster by running sgadmin as follows:
+
+[source,bash]
+----
+$ bash /path/to/sgadmin.sh -ks CN\=sgadmin-keystore.jks -cd configbak -kspass password -ts truststore.jks -tspass password -icl -nhnv -h elasticsearch.local -p 9300
+Search Guard Admin v5
+Will connect to elasticsearch.local:9330 ... done
+Contacting elasticsearch cluster 'elasticsearch' and wait for YELLOW clusterstate ...
+Clustername: escluster
+Clusterstate: YELLOW
+Number of nodes: 1
+Number of data nodes: 1
+searchguard index already exists, so we do not need to create one.
+Populate config from /home/admin/es/configbak
+Will update 'config' with ../elasticsearch.old/configbak/sg_config.yml
+   SUCC: Configuration for 'config' created or updated
+Will update 'roles' with ../elasticsearch.old/configbak/sg_roles.yml
+   SUCC: Configuration for 'roles' created or updated
+Will update 'rolesmapping' with ../elasticsearch.old/configbak/sg_roles_mapping.yml
+   SUCC: Configuration for 'rolesmapping' created or updated
+Will update 'internalusers' with ../elasticsearch.old/configbak/sg_internal_users.yml
+   SUCC: Configuration for 'internalusers' created or updated
+Will update 'actiongroups' with ../elasticsearch.old/configbak/sg_action_groups.yml
+   SUCC: Configuration for 'actiongroups' created or updated
+Done with success
+----
+
+Arguments:
+
+- `cd`: the directory containing old Search Guard configuration backup.
+- `ks`: the path to the administrative keystore
+- `kspass`: the password of the administrative keystore.
+- `ts`: the path to the truststore.
+- `tspass`: the password of the truststore.
+- `icl`: ignore cluster name.
+- `nhvv`: do not verify cluster hostname.
+- `h`: Elasticsearch hostname.
+- `p`: Elasticsearch transport port.
+
+You should now be able issue authenticated requests to `_cat/health` to monitor
+the cluster until it reaches the Green status; you can also check the recovery
+status of each shard by issuing requests to `_cat/recovery`, e.g.:
+
+[source,bash]
+----
+$ curl -uadmin:password --cacert ca.pem https://elasticsearch.local:9200/_cat/health
+$ curl -uadmin:password --cacert ca.pem https://elasticsearch.local:9200/_cat/recovery
+----
+
+Once the cluster has recovered, you will need to modify the Search Guard
+configuration to adjust Kibi specific permissions as described in the next
+section.
+
+[float]
+=== Search Guard configuration changes
+
+This section describes all the changes required to the Search Guard
+configuration files; once the files have been modified, the configuration can
+be loaded to the cluster using `sgadmin`.
+
+[float]
+==== sg_action_groups.yml
+
+Add the following action groups:
+
+[source,yaml]
+----
+UNLIMITED:
+  - "*"
+
+INDICES_ALL:
+  - "indices:*"
+----
+
+Set the `ALL` action group as follows:
+
+[source,yaml]
+----
+ALL:
+  - INDICES_ALL
+----
+
+Modify the `CREATE_INDEX` action group as follows:
+
+[source,yaml]
+----
+CREATE_INDEX:
+  - "indices:admin/create"
+  - "indices:admin/mapping/put"
+----
+
+Add the `INDICES_MONITOR` action group:
+
+[source,yaml]
+----
+MONITOR:
+  - INDICES_MONITOR
+
+INDICES_MONITOR:
+  - "indices:monitor/*"
+----
+
+Update the `DATA_ACCESS`, `READ`, `WRITE`, `DELETE`, `CRUD` and `SEARCH` groups
+as follows:
+
+[source,yaml]
+----
+DATA_ACCESS:
+  - "indices:data/*"
+  - CRUD
+
+WRITE:
+  - "indices:data/write*"
+  - "indices:admin/mapping/put"
+
+READ:
+  - "indices:data/read*"
+  - "indices:admin/mappings/fields/get*"
+
+DELETE:
+  - "indices:data/write/delete*"
+
+CRUD:
+  - READ
+  - WRITE
+
+SEARCH:
+  - "indices:data/read/search*"
+  - "indices:data/read/msearch*"
+  - "indices:siren/plan*"
+  - "indices:siren/mplan*"
+  - SUGGEST
+----
+
+Update the `INDEX` group as follows:
+
+[source,yaml]
+----
+INDEX:
+  - "indices:data/write/index*"
+  - "indices:data/write/update*"
+  - "indices:admin/mapping/put"
+  - "indices:data/write/bulk*"
+
+----
+
+Add the `CLUSTER_COMPOSITE_OPS_RO` and `CLUSTER_COMPOSITE_OPS` roles:
+
+[source,yaml]
+----
+CLUSTER_COMPOSITE_OPS_RO:
+  - "indices:data/read/mget"
+  - "indices:data/read/msearch"
+  - "indices:siren/mplan"
+  - "indices:data/read/mtv"
+  - "indices:admin/aliases/exists*"
+  - "indices:admin/aliases/get*"
+
+CLUSTER_COMPOSITE_OPS:
+  - "indices:data/write/bulk*"
+  - "indices:admin/aliases*"
+  - CLUSTER_COMPOSITE_OPS_RO
+----
+
+Remove the `KIBI_MSEARCH` role.
+
+Add the `KIBI_COMPOSITE` role:
+
+[source,yaml]
+----
+KIBI_COMPOSITE:
+  - "indices:siren/mplan*"
+----
+
+Replace `KIBI_CLUSTER`, `KIBI_READONLY` and `KIBI_READWRITE` with the following
+definitions:
+
+[source,yaml]
+----
+KIBI_CLUSTER:
+  - "indices:data/read/scroll"
+  - "cluster:internal/data/transfer/*"
+  - "indices:data/read/msearch*"
+  - "indices:siren/mplan*"
+  - "cluster:admin/plugin/siren/license/get"
+  - CLUSTER_COMPOSITE_OPS_RO
+
+KIBI_READONLY:
+  - "indices:data/read/field_stats*"
+  - "indices:data/read/field_caps*"
+  - "indices:data/read/get*"
+  - "indices:data/read/mget*"
+  - "indices:data/read/search*"
+  - "indices:siren/mplan"
+  - "indices:siren/plan"
+  - "indices:siren/task/search"
+  - "indices:admin/mappings/get*"
+  - "indices:admin/mappings/fields/get*"
+  - "indices:admin/validate/query*"
+  - "indices:admin/get*"
+  - "indices:admin/version/get*"
+  - KIBI_COMPOSITE
+
+KIBI_READWRITE:
+  - "indices:admin/exists*"
+  - "indices:admin/mapping/put*"
+  - "indices:admin/refresh*"
+  - "indices:data/write/delete*"
+  - "indices:data/write/index*"
+  - "indices:data/write/update*"
+  - "indices:data/write/bulk*"
+  - KIBI_READONLY
+----
+
+If you defined additional action groups, you will need to verify that the
+permissions work as expected in Search Guard 5.
+
+[float]
+==== sg_roles.yml
+
+[float]
+===== kibiserver
+
+Replace the `kibiserver` role with the following; **make sure to set the
+correct names for the main kibi (`.kibi` by default) and access control
+(`.kibiaccess` by default) indices if using a custom configuration**.
+
+[source,yaml]
+----
+# Permissions for the Kibi server process.
+kibiserver:
+  cluster:
+      - cluster:monitor/nodes/info
+      - cluster:monitor/health
+      - cluster:monitor/main
+      - cluster:monitor/state
+      - cluster:monitor/nodes/stats
+      - KIBI_CLUSTER
+      - CLUSTER_COMPOSITE_OPS
+  indices:
+    '*':
+      '*':
+        - indices:admin/get
+    '?kibi':
+      '*':
+        - ALL
+    '?kibiaccess':
+      '*':
+        - ALL
+----
+
+[float]
+===== sentinl
+
+Replace the `sentinl` role with the following; **make sure to set the correct
+names for watcher and watcher_alarms indices if using a custom configuration**.
+
+[source,yaml]
+----
+# Permissions for a Sentinl user.
+sentinl:
+  cluster:
+    - "indices:data/write/bulk*"
+    - "indices:admin/template/*"
+    - KIBI_CLUSTER
+  indices:
+    '*':
+      '*':
+        - KIBI_READONLY
+    'watcher_alarms*':
+      '*':
+        - KIBI_READWRITE
+        - CREATE_INDEX
+    '/(watcher|watcher_alarms)/':
+      '*':
+        - KIBI_READWRITE
+        - CREATE_INDEX
+----
+
+[float]
+===== Kibi user roles
+
+In each Kibi user role:
+ 
+- replace `KIBI_MSEARCH` with `KIBI_COMPOSITE`.
+- add the following permission on the Kibi index (`.kibi` by default):
+
+[source,yaml]
+----
+    ?kibi:
+      null:
+        - "indices:data/read/search"
+        - "indices:data/read/coordinate-search"
+----
+
+To grant a user the permission to use monitoring plugins and retrieve
+diagnostics information from the UI, you will need to add the `CLUSTER_MONITOR`
+and `INDICES_MONITOR` permissions to its role, e.g.:
+
+[source,yaml]
+----
+# Permissions for a Kibi administrator (read-write access to the .kibi index).
+kibiadmin:
+  cluster:
+    - KIBI_CLUSTER
+    - cluster:admin/plugin/siren/license/put
+    - CLUSTER_MONITOR
+  indices:
+    '*':
+      '*':
+        - KIBI_READONLY
+        - INDICES_MONITOR
+    '?kibi':
+      '*':
+        - KIBI_READWRITE
+    'watcher':
+      '*':
+        - KIBI_READWRITE
+----
+
+[float]
+===== marvel / X-Pack monitoring
+
+If you were using Marvel and are migrating to X-Pack monitoring, the following
+role can be used in place of the previous sample `marvel` role:
+
+[source,yaml]
+----
+# Permissions for an X-Pack monitoring agent.
+monitoring:
+  cluster:
+    - CLUSTER_MONITOR
+    - 'indices:admin/aliases'
+    - 'indices:admin/template/get'
+    - 'indices:admin/template/put'
+    - 'cluster:admin/ingest/pipeline/get'
+    - 'cluster:admin/ingest/pipeline/put'
+    - 'indices:data/write/bulk'
+  indices:
+    '?marvel*':
+      '*':
+        - ALL
+    '?monitoring*':
+      '*':
+        - ALL
+----
+
+[float]
+=== Kibi
+
+Before upgrading Kibi, make sure to perform the following steps:
+ 
+- backup the `.kibi` index.
+- backup the Kibi configuration file (`config/kibi.yml`)
+
+Then perform the following steps:
+
+- extract the new Kibi version to a new directory.
+- copy the previous configuration file to the `config` directory of the new
+  installation.
+- copy the files from the `data` directory in your old installation of the new
+  installation.
+- copy the files from the `pki` directory in your old installation of the new
+  installation.
+- update the configuration as described in the next sections.
+- reinstall third party plugins after checking the notes in the next sections.
+- execute `bin/kibi upgrade`.
+- start the new installation.
+
+[float]
+==== Configuration changes
+
+[float]
+===== Server SSL support
+
+If SSL support was enabled in the previous Kibi installation, you will need to
+update `kibi.yml` as follows:
+
+- add `server.ssl.enabled: true` 
+- replace `server.ssl.cert` with `server.ssl.certificate`
+
+[float]
+===== Search Guard client CA
+
+If your cluster is protected by Search Guard, you will need to rename
+`elasticsearch.ssl.ca` to `elasticsearch.ssl.certificateAuthorities`.
+
+[float]
+===== Sense
+
+`sense` settings must now be declared in the `console` section, e.g.:
+
+[source,yaml]
+----
+console.proxyConfig:
+  - match:
+      protocol: "https"
+
+    ssl:
+      ca: "pki/searchguard/ca.pem"
+----
+
+[float]
+==== Third party plugins
+
+The following plugins have been discontinued:
+
+- `kibi_wordcloud`: Kibi now supports the Tag Cloud visualization introduced in
+  Kibana 5. Existing Kibi Word Cloud visualizations will be migrated to Tag
+  Cloud visualizations by the upgrade procedure.
+- `heatmap`: the heatmap plugin for Kibana 4.x has been integrated into Kibana
+  5 and thus is available in Kibi.  Existing Heatmap visualizations will be
+  upgraded by a Kibi migration; the color palette will be set to `Greens` as
+  most of the palettes in the original plugin were not ported to Kibana 5.
+
+[float]
+==== Handling of text fields in upgraded indices
+
+Fields which were declared in mappings with `type` set to `string` and `index`
+to `analyzed` (which was the default before Elasticsearch 5.0) will be handled
+as fields of type {elastic-ref}/fielddata.html[text].
+
+In order to be usable for aggregation and sorting operations, fields of type
+`text` need a in-memory structure called `fielddata`, which is disabled by
+default to reduce memory usage.
+
+If you have visualizations using `text` fields in aggregations (for example tag
+clouds), you will need to enable `fielddata` in their mapping; for example, the
+following command sets `fielddata` to `true` on the `snippet` field of an
+`article` type in an index called `article`:
+
+[source,bash]
+----
+curl -XPUT http://elasticsearch:9200/article/_mapping/article - d'
+{
+  "properties": {
+    "snippet": { 
+      "type": "text",
+      "fielddata": true
+    }
+  }
+}
+'
+----
+
+If the existing mapping defines custom parameters (e.g. `analyzer`) you will
+get a conflicting mapping error; in that case, you need to include the custom
+parameters in the updated mapping definition, e.g.:
+
+[source,bash]
+----
+curl -XPUT http://elasticsearch.local:9200/article/_mapping/article - d'
+{
+  "properties": {
+    "snippet": { 
+      "type": "text",
+      "analyzer": "english",
+      "fielddata": true
+    }
+  }
+}
+'
+----
+
+After enabling fielddata on an existing text field, you'll have to refresh all
+the index patterns containing the field by going to Management/Index Patterns
+in Kibi, opening each pattern and clicking on the refresh button; once the
+index pattern is refreshed, the field should appear as aggregatable.
+
+image::images/refresh.png["Refreshing an index pattern",align="center"]
+
+[float]
+===== Additional documentation
+
+For more information please refer to the following links:
+
+- {elastic-ref}/fielddata.html[text datatype documentation]
+- {elastic-ref}/fielddata.html[fielddata documentation]
+
+[[breaking-changes-5.4.0]]
+== Breaking changes in Kibi and Kibana 5.4.0
+
+This section list the changes in Kibi and Kibana that you need to be aware of
+when migrating to Kibi 5.4.0.
 
 [float]
 === Kibana binds to localhost by default
@@ -39,24 +812,6 @@ It should now be defined as follows (with a space between ### and the title):
  ### Packetbeat:
      [Dashboard](/#/dashboard/Packetbeat-Dashboard)
      [Web transactions](/#/dashboard/HTTP)
-
-[float]
-=== Linux package install directories
-
-{pull}7308[Pull Request 7308]
-
-*Details:* To align with the Elasticsearch packages, Kibana now installs binaries under `/usr/share/kibana` and configuration files under `/etc/kibana`. Previously they were both located under `/opt/kibana`.
-
-*Impact:* Apart from learning the new location of Kibana binaries and configuration files, you may have to update your automation scripts as needed.
-
-[float]
-=== The plugin installer now has its own executable
-
-{pull}6402[Pull Request 6402]
-
-*Details:* The new installer can be found at `/bin/kibana-plugin`. When installing/removing Kibana plugins, you will now call `kibana-plugin` instead of the main kibana script.
-
-*Impact:* You may have to update your automation scripts.
 
 [float]
 === Only whitelisted client headers are sent to Elasticsearch
@@ -111,15 +866,6 @@ It should now be defined as follows (with a space between ### and the title):
 *Details:* Elasticsearch has removed the ability to specify a size of 0 for terms aggregations, so Kibana's minimum value has been adjusted to follow suit.
 
 *Impact:* Any saved visualization that relies on size=0 will need to be updated.
-
-[float]
-=== Dashboards created before 5.0
-
-*Details:* Loading a 4.x dashboard in Kibana 5.0 results in an internal change
-to the dashboard's metadata, which you can persist by saving the dashboard.
-
-*Impact:* This change will not affect the functionality of the dashboard itself,
-but you must save the dashboard before using certain features such as X-Pack reporting.
 
 [float]
 === Saved objects with previously deprecated Elasticsearch features

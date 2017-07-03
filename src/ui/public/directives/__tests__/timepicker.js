@@ -24,7 +24,6 @@ const init = function () {
   ngMock.module('kibana', function ($provide) {
     // kibi: added as required after timepicker directive modification
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
   });
   // Stub out the clock so 'now' doesn't move
   sinon.useFakeTimers(moment(anchor).valueOf());

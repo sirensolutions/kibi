@@ -20,7 +20,6 @@ describe('AggConfigs', function () {
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
   }));
   beforeEach(ngMock.inject(function (Private) {
     // replace the AggConfig module with a spy

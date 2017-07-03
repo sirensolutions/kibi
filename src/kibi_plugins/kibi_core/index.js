@@ -139,7 +139,6 @@ module.exports = function (kibana) {
         // kibi_core options
         if (options) {
           vars.kibiDatasourcesSchema = options.datasources_schema;
-          vars.kibiDefaultDashboardTitle = options.default_dashboard_title;
           vars.kibiWarnings = {};
           if (options.datasource_encryption_key === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
             vars.kibiWarnings.datasource_encryption_warning = true;
@@ -178,6 +177,7 @@ module.exports = function (kibana) {
         datasources_schema: Joi.any().default(datasourcesSchema.toInjectedVar()),
         datasource_cache_size: Joi.number().default(500),
 
+        // kibi: it is left for logging deprecated message in init function
         default_dashboard_title: Joi.string().allow('').default('')
       }).default();
     },
@@ -185,6 +185,11 @@ module.exports = function (kibana) {
     init: function (server, options) {
       const config = server.config();
       const datasourceCacheSize   = config.get('kibi_core.datasource_cache_size');
+
+      if (config.default_dashboard_title !== '') {
+        server.log(['warning','kibi_core'], 'kibi_core.default_dashboard_title is deprecated ' +
+        'and was moved to advance settings and should be removed from kibi.yml');
+      }
 
       this.status.yellow('Initialising the query engine');
       queryEngine = new QueryEngine(server);

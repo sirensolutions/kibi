@@ -34,7 +34,6 @@ describe('Kibi Controllers', function () {
   function init({ hits, snippet, snippetError, query, datasourceType }) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
     });
 
     ngMock.module('kibi_datasources/services/saved_datasources', function ($provide) {

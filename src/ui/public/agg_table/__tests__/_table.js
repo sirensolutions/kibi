@@ -19,7 +19,6 @@ describe('AggTable Directive', function () {
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
   }));
   beforeEach(ngMock.inject(function ($injector, Private, config) {
     tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);

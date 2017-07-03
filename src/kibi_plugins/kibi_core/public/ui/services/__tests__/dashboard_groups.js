@@ -115,6 +115,7 @@ let appState;
 let kibiState;
 let es;
 let joinExplanation;
+let config;
 
 let setSelectedDashboardIdStub;
 let switchDashboardStub;
@@ -130,7 +131,6 @@ function init({
   ngMock.module('kibana', function ($provide) {
     $provide.constant('kibiEnterpriseEnabled', false);
     $provide.constant('kbnDefaultAppId', 'dashboard');
-    $provide.constant('kibiDefaultDashboardTitle', 'Articles');
 
     appState = new MockState({ filters: [] });
     if (getAppStateUndefined === true) {
@@ -197,15 +197,17 @@ function init({
     $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches || []));
   });
 
-  ngMock.inject(function (Private, _es_, _dashboardGroups_, _kibiState_, _joinExplanation_) {
+  ngMock.inject(function (Private, _es_, _dashboardGroups_, _kibiState_, _joinExplanation_, _config_) {
     const dashboardHelper = Private(DashboardHelperProvider);
     switchDashboardStub = sinon.stub(dashboardHelper, 'switchDashboard');
     kibiState = _kibiState_;
     dashboardGroups = _dashboardGroups_;
+    config = _config_;
     sinon.stub(chrome, 'getBasePath').returns('');
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
     setSelectedDashboardIdStub = sinon.stub(kibiState, 'setSelectedDashboardId');
+    config.set('kibi:defaultDashboardTitle','Articles');
     es = _es_;
     joinExplanation = _joinExplanation_;
   });

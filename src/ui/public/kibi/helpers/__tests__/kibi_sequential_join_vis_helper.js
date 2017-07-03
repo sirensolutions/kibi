@@ -32,7 +32,6 @@ function init({
   ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
     $provide.constant('kibiEnterpriseEnabled', enableEnterprise);
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
 
     appState = new MockState({ filters: [] });
     $provide.service('getAppState', function () {

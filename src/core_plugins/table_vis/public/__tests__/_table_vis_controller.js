@@ -19,7 +19,6 @@ describe('Table Vis Controller', function () {
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
   }));
 
   beforeEach(ngMock.inject(function ($injector) {

@@ -9,7 +9,6 @@ describe('Histogram Agg', function () {
 
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
     }));
     beforeEach(ngMock.inject(function (Private) {
       histogram = Private(AggTypesIndexProvider).byName.histogram;
@@ -30,7 +29,6 @@ describe('Histogram Agg', function () {
 
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
     }));
     beforeEach(ngMock.inject(function (Private) {
       const AggParamWriter = Private(AggParamWriterProvider);

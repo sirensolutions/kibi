@@ -13,7 +13,6 @@ describe('AggConfig Filters', function () {
 
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
     }));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);

@@ -16,7 +16,6 @@ describe('GeoJson Agg Response Converter', function () {
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
   }));
   beforeEach(ngMock.inject(function (Private) {
     const Vis = Private(VisProvider);

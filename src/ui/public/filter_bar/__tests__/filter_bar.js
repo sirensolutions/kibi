@@ -29,7 +29,6 @@ describe('Filter Bar Directive', function () {
     // load the application
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
 
       $provide.service('kibiState', function () {
         return new MockState({

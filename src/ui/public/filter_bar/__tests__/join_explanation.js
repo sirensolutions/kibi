@@ -18,7 +18,6 @@ describe('Kibi Components', function () {
     beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kbnDefaultAppId', '');
-        $provide.constant('kibiDefaultDashboardTitle', '');
       });
 
       ngMock.module('kibana/index_patterns', function ($provide) {

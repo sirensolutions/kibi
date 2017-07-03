@@ -21,7 +21,6 @@ describe('Kibi Components', function () {
         'kibana/global_state',
         function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
-          $provide.constant('kibiDefaultDashboardTitle', '');
           $provide.service('$route', function () {
             return {
               reload: _.noop

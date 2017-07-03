@@ -58,7 +58,6 @@ describe('Kibi Directives', function () {
           };
         });
         $provide.constant('kbnDefaultAppId', '');
-        $provide.constant('kibiDefaultDashboardTitle', '');
       });
 
       ngMock.module('app/dashboard', function ($provide) {

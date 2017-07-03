@@ -108,4 +108,4 @@ To send *no* client-side headers, set this value to [] (an empty list).
 `elasticsearch.tribe.customHeaders:`:: *Default: `{}`* - Header names and values to send to Elasticsearch. Any custom headers
 cannot be overwritten by client-side headers, regardless of the `elasticsearch.tribe.requestHeadersWhitelist` configuration.
 
-`kibi_core.default_dashboard_title`:: *Default: not set* - The dashboard that is displayed when clicking on the Dashboard tab for the first time.
+`kibi_core.default_dashboard_title`:: *Default: not set* - The dashboard that is displayed when clicking on the Dashboard tab for the first time. This property is deprecated starting in Elasticsearch 5.4.0, it was moved to advanced_settings (<<advanced-options,Setting Advanced Options>>)

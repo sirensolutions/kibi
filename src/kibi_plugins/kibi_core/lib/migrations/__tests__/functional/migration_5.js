@@ -26,6 +26,11 @@ describe('kibi_core/migrations/functional', function () {
   const timeout = 60000;
   this.timeout(timeout);
 
+  const fakeConfig = {
+    get: sinon.stub()
+  };
+  fakeConfig.get.withArgs('kibana.index').returns('.kibi');
+
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
   const cluster = new Cluster({
     url: clusterUrl,
@@ -45,7 +50,7 @@ describe('kibi_core/migrations/functional', function () {
       beforeEach(wrapAsync(async () => {
         await scenarioManager.reload(Scenario5);
         configuration = {
-          index: '.kibi',
+          config: fakeConfig,
           client: cluster.getClient(),
           logger: {
             warning: sinon.spy(),
@@ -107,7 +112,7 @@ describe('kibi_core/migrations/functional', function () {
         beforeEach(wrapAsync(async () => {
           await scenarioManager.reload(Scenario);
           configuration = {
-            index: '.kibi',
+            config: fakeConfig,
             client: cluster.getClient(),
             logger: {
               warning: sinon.spy(),

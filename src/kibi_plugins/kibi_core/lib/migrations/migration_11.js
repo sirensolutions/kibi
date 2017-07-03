@@ -13,7 +13,7 @@ export default class Migration11 extends Migration {
     super(configuration);
 
     this._client = configuration.client;
-    this._index = configuration.index;
+    this._index = configuration.config.get('kibana.index');
     this._logger = configuration.logger;
     this._type = 'visualization';
   }

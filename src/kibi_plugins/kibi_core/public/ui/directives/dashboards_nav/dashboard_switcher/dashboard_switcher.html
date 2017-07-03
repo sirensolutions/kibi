@@ -8,7 +8,7 @@
     ng-class="{ 'dashboard-switcher-disabled': isSaving }"
   >
     <dashboard-nav-edit-link
-      ng-repeat="group in groups | orderBy: 'priority'"
+      ng-repeat="group in groups | kibiGroupFilter: filter | orderBy: 'priority'"
       group="group"
       filter="filter"
     ></dashboard-nav-edit-link>

@@ -160,4 +160,19 @@ uiModules
       });
     }
   };
+})
+.filter('kibiGroupFilter', () => {
+  return (input, filter) => {
+    if (!filter) {
+      return input;
+    }
+    const filtered = [];
+    const exp = new RegExp(filter, 'i');
+    input.forEach(group => {
+      if (!filter || !group.virtual || (filter && group.virtual && group.title.search(exp) !== -1)) {
+        filtered.push(group);
+      }
+    });
+    return filtered;
+  };
 });

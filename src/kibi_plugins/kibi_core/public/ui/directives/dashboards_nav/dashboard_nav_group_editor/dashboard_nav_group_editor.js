@@ -43,7 +43,7 @@ uiModules
             notify.info('Dashboard Group ' + $scope.dashboardGroup.title + ' was successfuly saved');
             $scope.setup();
             dashboardsNavState.setGroupEditorOpen(false);
-            $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
+            $rootScope.$broadcast('kibi:dashboardgroup:changed', groupId);
           })
           .catch (notify.error);
         });

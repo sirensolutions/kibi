@@ -1,25 +1,21 @@
-import template from './dashboards_nav_control.html';
-import './dashboards_nav_control.less';
+import template from './dashboard_bottom_toolbar.html';
+import './dashboard_bottom_toolbar.less';
 import uiModules from 'ui/modules';
 
 uiModules
 .get('kibana')
-.directive('dashboardsNavControl', () => {
+.directive('dashboardBottomToolbar', () => {
   return {
     restrict: 'E',
     replace: true,
     scope: {
       isOpen: '=',
-      isActive: '=',
       tooltipContent: '@',
       onClick: '&',
       kbnIcon: '@',
       iconCss: '@',
       title: '@',
-      onEditClick: '&',
-      isOnEditMode: '=',
-      onNewGroupClick: '&',
-      isGroupEditorOpen: '='
+      dashboardFilter: '='
     },
     template
   };

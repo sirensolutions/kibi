@@ -1,0 +1,88 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "../variables";
+
+@nav-control-height: 38px;
+
+.kibi-dashboard-bottom-toolbar {
+  clear: both;
+  position: absolute;
+  bottom: 0;
+  height: @nav-control-height;
+  line-height: 24px;
+  text-align: center;
+  width: 100%;
+
+  &:hover {
+    .anchor {
+      color: @white;
+      text-decoration: none;
+      background-color: transparent;
+    }
+  }
+
+  .anchor {
+    float: left;
+    height: 100%;
+    color: #ebf7fa;
+    margin-left: 10px;
+    margin-top: 4px;
+    font-size: 1.7em;
+    &:focus {
+      color: @white;
+    }
+  }
+
+  .icon {
+    display: inline-block;
+    height: @nav-control-height;
+    text-align: center;
+    img {
+      margin-top: 0;
+    }
+  }
+
+  .anchor-closed {
+    margin-top: 0;
+    .icon {
+      img {
+        margin-top: 8px;
+      }
+    }
+  }
+
+  .anchor-actions {
+    margin-right: 10px;
+    margin-top: 6px;
+    display: inline-block;
+    .icon-action {
+      display: inline;
+    }
+    .title-action {
+      display: inline;
+    }
+  }
+
+  .icon-image {
+    height: 18px;
+    margin-top: 8px;
+  }
+
+  .dashboards-filter {
+    border-radius: 5px;
+    margin-top: 7px;
+    padding: 2px;
+    height: 22px;
+    font-size: 11px;
+    width: 95%;
+
+    &.collapsed {
+      width: 65%;
+    }
+  }
+
+  &.isOpen {
+    .icon-image {
+      transform: translateX(1px) scaleX(-1); /* 1 */
+    }
+  }
+}

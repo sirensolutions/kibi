@@ -1,0 +1,60 @@
+<div class="kibi-new-dashboard-confirm kuiModal" data-test-subj="confirmModal">
+  <div class="kuiModalHeader">
+    <div class="kuiModalHeader__title" data-test-subj="confirmModalTitleText">
+      Create a new dashboard
+    </div>
+    <div
+      class="kuiModalHeaderCloseButton kuiIcon fa-times"
+      data-test-subj="confirmModalCloseButton"
+      ng-click="onClose()"
+    ></div>
+  </div>
+  <form
+    role="form"
+    ng-submit="onConfirm()"
+  >
+    <input
+      class="kuiLocalDropdownInput"
+      id="dashboardTitle"
+      type="text"
+      ng-model="title"
+      placeholder="Dashboard title"
+      input-focus="select"
+    >
+
+    <div class="form-group">
+      <label>Current saved search:</label>
+      {{ savedSearchDescription() }}
+    </div>
+
+    <div class="form-group">
+      <label>Select saved search
+        <kbn-info placement="right" info="Selecting a saved search will result in
+        1) The number of current hits being displayed in the dashboard title
+        2) The dashboard being a possible target of pivoting from other dashboards"></kbn-info>
+      </label>
+      <kibi-select object-type="search" ng-model="savedSearchId"></kibi-select>
+    </div>
+
+    <div class="form-group">
+      <p>
+        Dashboards with a Saved Search will:
+      </p>
+      <ul>
+        <li>Display a count of results (e.g. the hits on that saved search)</li>
+        <li>Be easier to populate with meaningful Widgets - filtering by clicking on the widget will always work coherently</li>
+        <li>Can be Target or Origin of relational navigation functionalities (Set to Set navigation)</li>
+      </ul>
+      <p>
+        Dashboards without Saved Search will be typically used for cross index "summary pages".
+      </p>
+      <p>
+        Note: To create a Saved Search from one of your Index Patterns, use the Visualize page.
+      </p>
+    </div>
+
+    <button type="submit" ng-disabled="!title" class="btn btn-primary" data-test-subj="confirmModalConfirmButton" aria-label="Create dashboard">
+      Create
+    </button>
+  </form>
+</div>

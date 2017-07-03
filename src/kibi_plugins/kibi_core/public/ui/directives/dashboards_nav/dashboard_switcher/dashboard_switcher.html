@@ -1,19 +1,16 @@
-<div class="no-groups" ng-if="groups.length === 0">No dashboards ...</div>
+<div class="kibi-dashboard-switcher">
+  <div class="no-groups" ng-if="groups.length === 0">No dashboards ...</div>
 
-<dashboard-nav-link
-  ng-if="!isOnEditMode && !isGroupEditorOpen"
-  ng-repeat="group in groups | filter:filter | orderBy: 'priority'"
-  group="group"
-  filter="filter"
-></dashboard-nav-link>
-
-<div
-  dashboard-draggable-container="groups" ng-disabled="isSaving" ng-class="{'dashboard-switcher-disabled': isSaving}"
-  ng-if="isOnEditMode || isGroupEditorOpen"
->
-  <dashboard-nav-edit-link
-    ng-repeat="group in groups | orderBy: 'priority'"
-    group="group"
-    filter="filter"
-  ></dashboard-nav-edit-link>
+  <div
+    ng-if="groups.length !== 0"
+    dashboard-draggable-container="groups"
+    ng-disabled="isSaving"
+    ng-class="{ 'dashboard-switcher-disabled': isSaving }"
+  >
+    <dashboard-nav-edit-link
+      ng-repeat="group in groups | kibiGroupFilter: filter | orderBy: 'priority'"
+      group="group"
+      filter="filter"
+    ></dashboard-nav-edit-link>
+  </div>
 </div>

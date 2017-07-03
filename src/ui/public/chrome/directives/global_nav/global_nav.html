@@ -6,31 +6,37 @@
 >
 
   <!-- Logo -->
-  <div class="global-nav__logo">
-    <!-- siren: 
+  <div class="global-nav__logo" tooltip="Home">
+    <!-- kibi:
       changed class from kibana to kibi
-      kibi-reload to on-click open a new clean (no cache) tab with Kibi. 
+      right-click open a new clean (no cache) tab with Kibi.
     -->
     <li
       ng-if="!logoBrand && !smallLogoBrand"
-      kibi-reload
+      ng-click="gotoDashboard()"
+      kibi-context-menu kibi-context-menu-list="kibiContextMenuOptions"
+      kibi-context-menu-click-menu="kibiNewCleanSession()"
       aria-label="{{ appTitle }} Logo"
       class="logo kibi"
     ></li>
 
-    <!-- siren: kibi-reload to on-click open a new clean (no cache) tab with Kibi. -->
+    <!-- kibi: right-click open a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="logoBrand"
-      kibi-reload
+      ng-click="gotoDashboard()"
+      kibi-context-menu kibi-context-menu-list="kibiContextMenuOptions"
+      kibi-context-menu-click-menu="kibiNewCleanSession()"
       ng-style="{ 'background': logoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo hidden-sm"
     ></li>
 
-    <!-- siren: kibi-reload to on-click open a new clean (no cache) tab with Kibi. -->
+    <!-- kibi: right-click open a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="smallLogoBrand"
-      kibi-reload
+      ng-click="gotoDashboard()"
+      kibi-context-menu kibi-context-menu-list="kibiContextMenuOptions"
+      kibi-context-menu-click-menu="kibiNewCleanSession()"
       ng-style="{ 'background': smallLogoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo-small visible-sm hidden-xs"
@@ -38,7 +44,7 @@
   </div>
 
   <!-- Links -->
-  <!-- siren: allows user to click on empty areas -->
+  <!-- kibi: allows user to click on empty areas -->
   <div class="global-nav__links" ng-click="toggleGlobalNav($event)">
     <!-- Main apps -->
     <div class="global-nav__links-section">

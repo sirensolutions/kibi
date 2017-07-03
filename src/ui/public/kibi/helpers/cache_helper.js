@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 export default function CacheHelperFactory($rootScope, Promise) {
 
   // we will store values in memory
@@ -14,8 +15,9 @@ export default function CacheHelperFactory($rootScope, Promise) {
     cache[key] = value;
   };
 
+  // We need to clone the item before return the reference
   CacheHelper.prototype.get = function (key) {
-    return cache[key] ? cache[key] : null;
+    return cache[key] ? cloneDeep(cache[key]) : null;
   };
 
   CacheHelper.prototype.invalidate = function () {

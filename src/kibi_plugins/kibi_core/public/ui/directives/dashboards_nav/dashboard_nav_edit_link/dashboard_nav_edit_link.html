@@ -1,15 +1,15 @@
-<div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group">
-  <div>
-    <div class="icon">
+<div class="kibi-dashboards-nav-edit-link-group" dashboard-draggable-item="group" state="state" id="kibi-dashboard-group-{{ group.id }}">
+  <div ng-class="{ 'dashboard-group': !group.virtual, 'dashboard': group.virtual, active: group.id === dashboardLoaded, highlight: group.collapsed && doesGroupHaveAnyHighlightedDashboard(group.dashboards) }">
+    <div class="icon" ng-if="!group.virtual">
       <i
          ng-if="group.iconCss"
-         class="icon-image {{group.iconCss}}"
+         class="icon-image {{ group.iconCss }}"
       ></i>
 
       <img
          ng-if="group.iconUrl"
          class="icon-image"
-         ng-src="{{group.iconUrl}}"
+         ng-src="{{ group.iconUrl }}"
       />
 
       <span
@@ -20,40 +20,98 @@
       </span>
     </div>
 
-    <div class="edit-content">
-      <div class="title" ng-class="{collapsed: !isSidebarOpen}">
-        {{group.title}}
-      </div>
-      <a
-        ng-if="!group.virtual"
-        class="action"
-        confirm-click="deleteGroup()"
-      >
-        <i class="fa fa-times" aria-hidden="true"></i>
-      </a>
+    <div
+      class="edit-content"
+      ng-click="selectDashboard()"
+      kibi-context-menu kibi-context-menu-list="contextMenuGroup"
+      kibi-context-menu-click-menu="clickMenuGroup(item)"
+    >
       <div
-        class="action dashboards-nav-edit-link-dragbar"
-        dashboard-draggable-handle
+        kibi-context-menu kibi-context-menu-list="contextMenuVirtualGroup"
+        kibi-context-menu-click-menu="clickMenuVirtualGroup(item)"
       >
+        <div ng-mouseenter="refreshTooltipContent($event, group)">
+          <div class="title" ng-class="{ collapsed: !isSidebarOpen, 'dashboard-nav-title-virtual-group': group.virtual }">
+            {{ group.title }}
+          </div>
+          <div ng-if="!group.virtual" class="action">
+            <i ng-if="group.collapsed" class="fa fa-plus"></i>
+            <i ng-if="!group.collapsed" class="fa fa-minus"></i>
+          </div>
+          <div class="indicators" ng-if="group.virtual">
+            <!--dashboard count-->
+            <span ng-if="group.selected.count !== undefined && group.selected.savedSearchId" ng-bind="humanNotation(group.selected.count)"></span>
+            <span ng-if="group.selected.count === undefined && group.selected.savedSearchId">
+              <div class="spinner">
+                <div class="cube1"></div>
+                <div class="cube2"></div>
+              </div>
+            </span>
+            </span>
+            <!--filters indicator-->
+            <span ng-if="group.selected.filterIconMessage" aria-hidden="true">
+              <i class="fa fa-filter"/>
+            </span>
+            <!--join pruning indicator-->
+            <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="Count may be lower than the actual value because a join operation was pruned"> *
+            </span>
+          </div>
+          <div
+            class="action dashboards-nav-edit-link-dragbar"
+            dashboard-draggable-handle
+          >
+          </div>
+        </div>
       </div>
-      <a
-        ng-if="!group.virtual"
-        class="action"
-        ng-click="editGroup($event, group)"
-      >
-        <i class="fa fa-pencil" aria-hidden="true"></i>
-      </a>
     </div>
   </div>
-  <div ng-if="!group.virtual">
-    <div ng-repeat="dashboard in group.dashboards">
-      <div class="dashboards-nav-edit-link-dashboard" dashboard-draggable-item="$index">
-        <div class="dashboards-nav-edit-link-dragbar" ng-class="{collapsed: !isSidebarOpen}" dashboard-draggable-handle>
-        </div>
-        <div class="dashboard-nav-title" ng-class="{collapsed: !isSidebarOpen}" dashboard="dashboard" dashboard-nav-edit-tooltip>
-          {{dashboard.title}}
+  <div ng-if="!group.virtual && !group.collapsed">
+    <div ng-repeat="dashboard in group.dashboards | filter: { title: filter }">
+      <div class="dashboards-nav-edit-link-dashboard"
+        ng-class="{ active: dashboard.id === dashboardLoaded, highlight: dashboardIsHighlighted(dashboard) }"
+        ng-click="selectDashboard($index)"
+        dashboard-draggable-item="$index" state="state"
+      >
+        <div
+          kibi-context-menu kibi-context-menu-list="contextMenuDashboard"
+          kibi-context-menu-click-menu="clickMenuDashboard(item, dashboard)"
+        >
+          <div ng-mouseenter="refreshTooltipContent($event, $index, true)">
+            <div class="dashboards-nav-edit-link-dragbar" ng-class="{ collapsed: !isSidebarOpen }" dashboard-draggable-handle>
+            </div>
+            <div class="dashboard-nav-title" ng-class="{ collapsed: !isSidebarOpen }">
+              {{ dashboard.title }}
+            </div>
+            <div class="indicators">
+              <!--dashboard count-->
+              <span ng-if="dashboard.count !== undefined && dashboard.savedSearchId" ng-bind="humanNotation(dashboard.count)"></span>
+              <span ng-if="dashboard.count === undefined && dashboard.savedSearchId">
+                <div class="spinner">
+                  <div class="cube1"></div>
+                  <div class="cube2"></div>
+                </div>
+              </span>
+              <!--filters indicator-->
+              <span ng-if="dashboard.filterIconMessage" aria-hidden="true">
+                 <i class="fa fa-filter"/>
+              </span>
+              <!--join pruning indicator-->
+              <span ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="Count may be lower than the actual value because a join operation was pruned"> *
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
+  <div ng-if="group.dashboards.length === 0 && !group.virtual" class="kibi-dashboards-nav-dummy-container drag-dashboard"
+       ng-class="{ hovered: state.hovered }" dashboard-dummy-container="-1" state="state">
+  </div>
+</div>
+<div class="kibi-dashboards-nav-dummy-container drag-after"
+     ng-class="{ hovered: state.hovered }" dashboard-dummy-container="-2" state="state">
 </div>

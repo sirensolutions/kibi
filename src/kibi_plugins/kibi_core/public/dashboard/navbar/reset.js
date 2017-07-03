@@ -6,10 +6,10 @@ registry.register(function (kibiState) {
     key: 'reset',
     order: 1,
     run() {
-      kibiState.resetFiltersQueriesTimes();
+      kibiState.resetFiltersQueriesTimes(kibiState._getCurrentDashboardId());
     },
     tooltip() {
-      return 'Reset the time, filters, and queries from all dashboards to their default saved state';
+      return 'Reset the time, filters, and queries from this dashboard to their default saved state';
     },
     testId: 'reset'
   };

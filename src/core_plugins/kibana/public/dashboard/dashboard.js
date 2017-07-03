@@ -8,7 +8,7 @@ import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
 
 import { SavedObjectNotFound } from 'ui/errors';
-import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
+import { getDashboardTitle, getDashBoardTitleMaxLength, getUnsavedChangesWarningMessage } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
@@ -181,7 +181,8 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       $scope.getDashTitle = () => getDashboardTitle(
         dashboardState.getTitle(),
         dashboardState.getViewMode(),
-        dashboardState.getIsDirty(timefilter));
+        dashboardState.getIsDirty(timefilter),
+        getDashBoardTitleMaxLength());
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
       $scope.getShouldShowEditHelp = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();

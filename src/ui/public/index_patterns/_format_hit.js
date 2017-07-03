@@ -5,7 +5,8 @@ import _ from 'lodash';
 export default function (indexPattern, defaultFormat) {
 
   function convert(hit, val, fieldName) {
-    const field = indexPattern.fields.byName[fieldName];
+    // kibi: added extera check if the fields are there
+    const field = indexPattern.fields.length ? indexPattern.fields.byName[fieldName] : null;
     if (!field) return defaultFormat.convert(val, 'html');
     return field.format.getConverterFor('html')(val, field, hit);
   }
@@ -28,6 +29,9 @@ export default function (indexPattern, defaultFormat) {
   }
 
   formatHit.formatField = function (hit, fieldName) {
+    if (!hit) {
+      return;
+    }
     let partials = hit.$$_partialFormatted;
     if (partials && partials[fieldName] != null) {
       return partials[fieldName];

@@ -180,6 +180,12 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
       return;
     }
     const { queryFieldName: name, queryDefinitions, joinElasticsearchField } = $scope.vis.params;
+
+    // Field does not exists Can happen when index pattern is defined but index was deleted
+    if (indexPattern.fields.length === 0 || !indexPattern.fields.byName[joinElasticsearchField]) {
+      return;
+    }
+
     const virtualField = {
       count: 0,
       displayName: name,

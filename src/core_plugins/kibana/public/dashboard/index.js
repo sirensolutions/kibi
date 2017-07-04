@@ -70,7 +70,7 @@ uiRoutes
           let dashboardId = firstDashboard.id;
           if (totalDefault === 0) {
             notify.error(`The default dashboard with title "${defDashConfig}" does not exist.
-            Please correct the "kibi_core.default_dashboard_title" parameter in advanced settings`);
+            Please correct the "kibi:defaultDashboardTitle" parameter in advanced settings`);
           } else if (totalDefault > 0) {
             const dashboardIndex = _.findIndex(dashboards, function (dashboard) { return dashboard.title ===  defDashConfig; });
             dashboardId = dashboards[dashboardIndex].id;

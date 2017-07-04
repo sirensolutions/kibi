@@ -29,9 +29,11 @@ export default function (indexPattern, defaultFormat) {
   }
 
   formatHit.formatField = function (hit, fieldName) {
+    // kibi: no hit no formatting
     if (!hit) {
       return;
     }
+    // kibi: end
     let partials = hit.$$_partialFormatted;
     if (partials && partials[fieldName] != null) {
       return partials[fieldName];

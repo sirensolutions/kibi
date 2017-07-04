@@ -27,7 +27,7 @@ export default function normalizeSortRequest(config) {
     // kibi: check if indexPattern.fields.byName exists before using it
     const indexField = indexPattern.fields.byName ? indexPattern.fields.byName[sortField] : undefined;
 
-    if (indexField) { // kibi: extra check if indexFiled exists
+    if (indexField) { // kibi: extra check if indexField exists
       if (indexField.scripted && indexField.sortable) {
         let direction;
         if (_.isString(sortValue)) direction = sortValue;

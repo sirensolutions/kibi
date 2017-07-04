@@ -263,6 +263,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
 
       $scope.$watch('vis.aggs', function () {
         // no timefield, no vis, nothing to update
+        // kibi: added missing check about $scope.vis
         if (!$scope.opts.timefield || !$scope.vis) return;
 
         const buckets = $scope.vis.aggs.bySchemaGroup.buckets;

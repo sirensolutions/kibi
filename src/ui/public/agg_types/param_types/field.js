@@ -83,6 +83,7 @@ export default function FieldAggParamFactory(Private, $filter) {
 
     if (!field) {
       throw new SavedObjectNotFound(
+        // kibi: improved the error message
         'index-pattern-field', 'Could not found field: ' + fieldName + ' in ' + aggConfig.getIndexPattern().id + ' index pattern'
       );
     }

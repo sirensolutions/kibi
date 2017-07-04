@@ -46,6 +46,7 @@
     <div class="clearfix"></div>
   </div>
 
+  <!-- kibi: added extra condition to check for savedObj.vis.error and savedObj.searchSource.error -->
   <div ng-if="savedObj.vis.error || error || savedObj.searchSource.error" class="load-error">
     <i aria-hidden="true" class="fa fa-exclamation-triangle"></i>
     <span ng-if="error" ng-bind="error"></span>

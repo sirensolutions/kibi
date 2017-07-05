@@ -490,7 +490,7 @@ uiModules
 
             // ignore empty or non existing dashboard objects inside a dashboard group
             const dashboards = _.reduce(group.dashboards, (filtered, dashboard) => {
-              if (dashboard.id) {
+              if (dashboard && dashboard.id) {
                 const savedDashboard = _.find(respDashboards.hits, 'id', dashboard.id);
                 if (savedDashboard) {
                   filtered.push(_getDashboardForGroup.call(self, group.id, group.title, savedDashboard));

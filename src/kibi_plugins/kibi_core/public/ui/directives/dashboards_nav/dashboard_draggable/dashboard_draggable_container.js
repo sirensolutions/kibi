@@ -9,7 +9,11 @@ uiModules
 .directive('dashboardDraggableContainer', function ($rootScope, createNotifier,
   Private, dashboardGroups, savedDashboardGroups, savedDashboards) {
   const cache = Private(CacheProvider);
-  const $scopes = new WeakMap();
+  const $scopes = new Map();
+  // PLEASE READ: The declarated value of this constants CAN NOT be changed.
+  const DUMMY_PLACEHOLDER_BETWEEN_DASHBOARDS = -1;
+  const DUMMY_PLACEHOLDER_BETWEEN_GROUPS = -2;
+  const DUMMY_PLACEHOLDER_FIRST_GROUP = -3;
 
   return {
     restrict: 'A',
@@ -63,10 +67,22 @@ uiModules
 
       drake.on('drag', markDragging(true));
       drake.on('dragend', markDragging(false));
+      drake.on('cancel', clearHoveredState());
       drake.on('over', over);
       drake.on('drop', drop);
       $scope.$on('$destroy', drake.destroy);
       $scope.drake = drake;
+
+      function clearHoveredState() {
+        return () => {
+          $scopes.forEach(scope => {
+            if (scope && scope.dashboardDraggableItemCtrl && scope.dashboardDraggableItemCtrl.getState) {
+              delete scope.dashboardDraggableItemCtrl.getState().hovered;
+              scope.$apply();
+            }
+          });
+        };
+      }
 
       function markDragging(isDragging) {
         return el => {
@@ -87,12 +103,14 @@ uiModules
         }
         if (sourceScope.isDashboard || sourceScope.isVirtualGroup) {
           const controller = scope.dashboardDraggableItemCtrl;
-          if (prevController && prevController.getGroup().id !== controller.getGroup().id) {
-            prevController.getState().hovered = false;
+          if (controller && controller.getState) {
+            if (prevController && prevController.getGroup().id !== controller.getGroup().id) {
+              prevController.getState().hovered = false;
+            }
+            controller.getState().hovered = true;
+            prevController = controller;
+            scope.$apply();
           }
-          controller.getState().hovered = true;
-          prevController = controller;
-          scope.$apply();
         }
       }
 
@@ -109,14 +127,15 @@ uiModules
 
         $scope.isSaving = true;
         dashboardGroups.renumberGroups().then(() => {
-          if (sourceItemScope.isDashboard && !sourceGroup.virtual && targetItem < -1) {
+          if (sourceItemScope.isDashboard && !sourceGroup.virtual
+              && targetItem < DUMMY_PLACEHOLDER_BETWEEN_DASHBOARDS) {
             // Removes a dashboard from one group and put in the correct order
             return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
               const sourceItemId = savedSourceGroup.dashboards[sourceItem].id;
               savedSourceGroup.dashboards.splice(sourceItem, 1);
               return savedSourceGroup.save().then(() => {
                 return savedDashboards.get(sourceItemId).then(savedDashboard => {
-                  if (targetItem === -3) {
+                  if (targetItem === DUMMY_PLACEHOLDER_FIRST_GROUP) {
                     savedDashboard.priority = targetGroup.priority - 5;
                   } else {
                     savedDashboard.priority = targetGroup.priority - (sibling ? 5 : -5);
@@ -141,7 +160,8 @@ uiModules
               return savedGroup.save();
             });
           }
-          else if (sourceItemScope.isDashboard && !targetGroup.virtual && targetItem > -2) {
+          else if (sourceItemScope.isDashboard && !targetGroup.virtual
+                   && targetItem > DUMMY_PLACEHOLDER_BETWEEN_GROUPS) {
             // Moves a dashboard from one group to another
             targetGroup.collapsed = false;
             return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
@@ -161,10 +181,11 @@ uiModules
               });
             });
           }
-          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && targetItem < -1) {
+          else if (!sourceItemScope.isDashboard && sourceGroup.virtual
+                   && targetItem < DUMMY_PLACEHOLDER_BETWEEN_DASHBOARDS) {
             // Changes the virtual group order
             return savedDashboards.get(sourceGroup.id).then(savedDashboard => {
-              if (targetItem === -3) {
+              if (targetItem === DUMMY_PLACEHOLDER_FIRST_GROUP) {
                 savedDashboard.priority = targetGroup.priority - 5;
               } else {
                 savedDashboard.priority = targetGroup.priority - (sibling ? 5 : -5);
@@ -172,7 +193,8 @@ uiModules
               return savedDashboard.save();
             });
           }
-          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && !targetGroup.virtual && targetItem > -2) {
+          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && !targetGroup.virtual
+                   && targetItem > DUMMY_PLACEHOLDER_BETWEEN_GROUPS) {
             // Moves a virtual group into a group
             targetGroup.collapsed = false;
             return savedDashboardGroups.get(targetGroup.id).then(savedGroup => {

@@ -32,6 +32,11 @@ uiModules
       const notify = createNotifier({
         location: 'Dashboard Groups'
       });
+      const COLLAPSED_WIDTH = 140;
+      const SLIDER_WIDTH = 4;
+      const BOTTOM_BAR_HEIGHT = 70;
+      const DASHBOARDS_INDICATORS_WIDTH = 80;
+      const GROUPS_INDICATORS_WIDTH = 50;
 
       $scope.bar = $element;
       $scope.slider = $element.find('.dashboards-slider-handle');
@@ -45,10 +50,10 @@ uiModules
         $scope.dashApp.css('margin-left', count);
         $scope.groupEditor.css('margin-left', count);
         $scope.links.css('width', count);
-        $scope.slider.css('left', count - 4);
+        $scope.slider.css('left', count - SLIDER_WIDTH);
         let parts = $element.find('.title');
-        parts.css('width', (((count - 50) / count) * 100).toFixed(2) + '%');
-        const value = (((count - 80) / count) * 100).toFixed(2);
+        parts.css('width', (((count - GROUPS_INDICATORS_WIDTH) / count) * 100).toFixed(2) + '%');
+        const value = (((count - DASHBOARDS_INDICATORS_WIDTH) / count) * 100).toFixed(2);
         parts = $element.find('.dashboard-nav-title');
         parts.css('width', value + '%');
         parts = $element.find('.dashboard-nav-title-virtual-group');
@@ -74,7 +79,11 @@ uiModules
         // Notify visualizations, e.g. the dashboard, that they should re-render.
         $rootScope.$broadcast('globalNav:update');
 
-        $scope.resizeParts(dashboardsNavState.navWidth());
+        if (!dashboardsNavState.isOpen()) {
+          $scope.resizeParts(COLLAPSED_WIDTH);
+        } else {
+          $scope.resizeParts(dashboardsNavState.navWidth());
+        }
       }
 
       updateGlobalNav();
@@ -84,11 +93,11 @@ uiModules
         if (event.target === event.currentTarget || force) {
           event.preventDefault();
           if (dashboardsNavState.isOpen()) {
-            dashboardsNavState.setNavWidth($scope.bar.width() - 4);
+            dashboardsNavState.setNavWidth($scope.bar.width() - SLIDER_WIDTH);
           }
           dashboardsNavState.setOpen(!dashboardsNavState.isOpen());
           if (!dashboardsNavState.isOpen()) {
-            $scope.resizeParts(140);
+            $scope.resizeParts(COLLAPSED_WIDTH);
           } else {
             $scope.resizeParts(dashboardsNavState.navWidth());
           }
@@ -254,7 +263,7 @@ uiModules
         if ($scope.dragging) {
           const ev = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[0] : event.originalEvent;
           let count = ev.pageX - $scope.bar[0].offsetLeft;
-          count = count < 136 ? 140 : count;
+          count = count < (COLLAPSED_WIDTH - SLIDER_WIDTH) ? COLLAPSED_WIDTH : count;
           $scope.resizeParts(count);
         }
       };
@@ -264,20 +273,20 @@ uiModules
         $document.off('mouseup touchend', $scope.stopSlide);
         $rootScope.$broadcast('globalNav:update');
         $scope.dragging = false;
-        dashboardsNavState.setNavWidth($scope.bar.width() - 4);
+        dashboardsNavState.setNavWidth($scope.bar.width() - SLIDER_WIDTH);
         dashboardsNavState.setOpen(true);
       };
 
       $scope.$on('kibi:dashboardGroups:updated', function () {
         $timeout(() => {
-          const width = !dashboardsNavState.isOpen() ? 140 : dashboardsNavState.navWidth();
+          const width = !dashboardsNavState.isOpen() ? COLLAPSED_WIDTH : dashboardsNavState.navWidth();
           $scope.resizeParts(width);
           $scope.restoreCollapsedGroupState();
         }, 500);
       });
 
       $timeout(() => {
-        const width = !dashboardsNavState.isOpen() ? 140 : dashboardsNavState.navWidth();
+        const width = !dashboardsNavState.isOpen() ? COLLAPSED_WIDTH : dashboardsNavState.navWidth();
         $scope.resizeParts(width);
         $scope.links[0].scrollTop = dashboardsNavState.scrollbarPos();
       }, 200);
@@ -314,7 +323,7 @@ uiModules
 
       $scope.resize = () => {
         const $container = angular.element($element.find('.links')[0]);
-        const h = $element.height() - 70;
+        const h = $element.height() - BOTTOM_BAR_HEIGHT;
         $container.height(Math.max(20, h));
       };
 

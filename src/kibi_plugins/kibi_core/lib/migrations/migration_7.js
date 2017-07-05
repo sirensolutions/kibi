@@ -27,23 +27,15 @@ export default class Migration7 extends Migration {
   }
 
   async _getConfigurations() {
-    return await this._client.search({
+    const configurations = await this._client.search({
       index: this._index,
       type: 'config',
-      size: 1000,
-      body: {
-        sort: {
-          _script: {
-            type: 'number',
-            script: {
-              lang: 'painless',
-              // buildNum is indexed as a string
-              inline: 'Integer.parseInt(doc.buildNum.value ?: "0")'
-            },
-            order: 'desc'
-          }
-        }
-      }
+      size: 1000
+    });
+    return configurations.hits.hits.sort((confa, confb) => {
+      const buildNumA = parseInt(confa._source.buildNum) || 0;
+      const buildNumB = parseInt(confb._source.buildNum) || 0;
+      return buildNumA < buildNumB;
     });
   }
 
@@ -66,8 +58,8 @@ export default class Migration7 extends Migration {
       if (err.status === 404) {
         const configurations = await this._getConfigurations();
         let onlySnapshots = true;
-        for (const hit of configurations.hits.hits) {
-          if (!hit._id.endsWith('-SNAPSHOT')) {
+        for (const config of configurations) {
+          if (!config._id.endsWith('-SNAPSHOT')) {
             onlySnapshots = false;
             break;
           }
@@ -86,9 +78,9 @@ export default class Migration7 extends Migration {
     }
     const configurations = await this._getConfigurations();
     let configuration;
-    for (const hit of configurations.hits.hits) {
-      if (!hit._id.endsWith('-SNAPSHOT')) {
-        configuration = hit._source;
+    for (const config of configurations) {
+      if (!config._id.endsWith('-SNAPSHOT')) {
+        configuration = config._source;
         break;
       }
     }

@@ -60,7 +60,7 @@ uiModules
       index: '@',
       postAction: '&'
     },
-    template: '<button class="btn btn-xs btn-default" ng-click="upParam()" > <i class="fa fa-caret-up"></i> </button>',
+    template: '<button type="button" class="btn btn-xs btn-default" ng-click="upParam()" > <i class="fa fa-caret-up"></i> </button>',
     link: function ($scope, element, attrs) {
       $scope.upParam = function () {
         ArrayHelper.up($scope.model, $scope.index, $scope.postAction);
@@ -76,7 +76,7 @@ uiModules
       index: '@',
       postAction: '&'
     },
-    template: '<button class="btn btn-xs btn-default" ng-click="downParam()" > <i class="fa fa-caret-down"></i> </button>',
+    template: '<button type="button" class="btn btn-xs btn-default" ng-click="downParam()" > <i class="fa fa-caret-down"></i> </button>',
     link: function ($scope, element, attrs) {
       $scope.downParam = function () {
         ArrayHelper.down($scope.model, $scope.index, $scope.postAction);

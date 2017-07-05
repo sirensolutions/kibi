@@ -370,10 +370,6 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     removeAutorefreshHandler();
   });
 
-  $scope.$watch('vis.params.buttons', function () {
-    _constructButtons();
-  }, true);
-
   $scope.hoverIn = function (button) {
     dashboardGroups.setGroupHighlight(button.targetDashboardId);
   };
@@ -384,6 +380,12 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
 
   // init
   updateButtons('init');
+
+  if (edit) {
+    $scope.$watch('vis.params.buttons', function () {
+      _constructButtons();
+    }, true);
+  }
 }
 
 UiModules

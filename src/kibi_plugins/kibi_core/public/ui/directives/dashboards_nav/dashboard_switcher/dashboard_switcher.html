@@ -11,6 +11,7 @@
       ng-repeat="group in groups | kibiGroupFilter: filter | orderBy: 'priority'"
       group="group"
       filter="filter"
+      is-first="$first"
     ></dashboard-nav-edit-link>
   </div>
 </div>

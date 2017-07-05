@@ -23,7 +23,8 @@ uiModules
     transclude: true,
     scope: {
       filter: '=',
-      group: '='
+      group: '=',
+      isFirst: '='
     },
     template: dashboardNavEditLinkTemplate,
     link: function ($scope, $element) {
@@ -55,6 +56,11 @@ uiModules
       }];
 
       $scope.state = {};
+
+      // PLEASE READ: The declarated value of this constants CAN NOT be changed.
+      $scope.DUMMY_PLACEHOLDER_BETWEEN_DASHBOARDS = -1;
+      $scope.DUMMY_PLACEHOLDER_BETWEEN_GROUPS = -2;
+      $scope.DUMMY_PLACEHOLDER_FIRST_GROUP = -3;
 
       $scope.menuActionTriggered = false;
 

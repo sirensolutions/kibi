@@ -296,7 +296,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
             if (queryChanged) {
               // this will save the appstate and update the current searchsource
               // This is only needed for changes on query, since the query needs to be added to the searchsource
-              this.emit('reset_app_state_query');
+              this.emit('reset_app_state_query', appState.query);
             } else {
               appState.save();
             }

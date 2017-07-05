@@ -5,6 +5,8 @@
 
 @logo-height: 70px;
 @scrollbar-bg: @siren-dashboard-active-background;
+@sidebar-min-width: 136px;
+@slider-width: 4px;
 
 .kibi-dashboards-nav {
   position: fixed !important;
@@ -15,10 +17,10 @@
   z-index: 0;
   background-color: @siren-dashboard-inactive-background;
   overflow: hidden;
-  min-width: 136px;
+  min-width: @sidebar-min-width;
 
   .dashboards-slider-handle {
-    width: 4px;
+    width: @slider-width;
     height: 100%;
     top: 0;
     position: absolute;
@@ -117,7 +119,7 @@
     width: 100%;
     overflow-x: hidden; /* 3 */
     overflow-y: auto; /* 3 */
-    min-width: 136px;
+    min-width: @sidebar-min-width;
 
     &::-webkit-scrollbar { /* 4 */
       width: 16px;
@@ -145,23 +147,5 @@
     overflow-x: hidden; /* 3 */
     overflow-y: auto; /* 3 */
     background-color: @nav_color_bg;
-  }
-
-  .form-control.span12.dashboards-filter {
-    width: 85%;
-
-    &.collapsed {
-      width: 70%;
-    }
-  }
-
-  .kuiButton.kuiButton--primary.new-dashboard {
-    position: absolute;
-    margin-left: 230px;
-    margin-top: 1px;
-
-    &.collapsed {
-       margin-left: 80px;
-    }
   }
 }

@@ -93,10 +93,19 @@ export default function UrlFormatProvider(Private) {
 
       switch (this.param('type')) {
         case 'img':
-          // kibi: adding transparent pixel image onerror to prevent displaying and ugly image placeholder
-          const transparentPixel =
-            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGP6zwAAAgcBApocMXEAAAAASUVORK5CYII=';
-          return `<img src="${url}" alt="${label}" title="${label}" onerror="this.onerror=null;this.src='${transparentPixel}'">`;
+          // kibi: adding error images for empty image url and any other error
+          const error = rawValue === '' ? 'Empty image url' : 'Error loading image';
+          const errorImage =
+          `<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" version="1.1" height="24" width="116">
+          <g>
+          <rect x="0" y="0" width="116" height="24" stroke="#dedede" fill="#ffffff"></rect>
+          <text x="8" y="17" font-size="12" fill="#2d2d2d" font-family="Open Sans">${error}</text>
+          </g>
+          </svg>`;
+
+          const encodedErrorImage = 'data:image/svg+xml,' + encodeURIComponent(errorImage);
+
+          return `<img src="${url}" alt="${label}" title="${label}" onerror="this.onerror=null;this.src='${encodedErrorImage}'">`;
           // kibi: end
         default:
           if (hit && hit.highlight && hit.highlight[field.name]) {

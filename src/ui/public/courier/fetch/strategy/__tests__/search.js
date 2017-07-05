@@ -54,26 +54,22 @@ describe('ui/courier/fetch/strategy/search', () => {
       beforeEach(() => {
         reqsFetchParams.forEach(request => request.index = []);
       });
-      const emptyMustNotQuery = JSON.stringify({
+      const emptySearch = JSON.stringify({
         query: {
-          bool: {
-            must_not: [
-              { match_all: {} }
-            ]
-          }
+          match_none: {}
         }
       });
 
-      it('queries the kibi index (.kibi) with a must_not match_all boolean', () => {
+      it('sends a match_none query to the index pattern', () => {
         return search.reqsFetchParamsToBody(reqsFetchParams).then(value => {
           expect(_.includes(value, '"index":[".kibi"]')).to.be(true);
-          expect(_.includes(value, emptyMustNotQuery)).to.be(true);
+          expect(_.includes(value, emptySearch)).to.be(true);
         });
       });
     });
 
     describe('when passed IndexPatterns', () => {
-      it(' that are out of range, queries .kibi', () => {
+      it(' that are out of range, sends a match_none query to the index pattern', () => {
         // Check out https://github.com/elastic/kibana/issues/10905 for the reasons behind this
         // test. When an IndexPattern is out of time range, it returns an array that is then stored in a cache.  This
         // cached object was being modified in a following function, which was a subtle side affect - it looked like
@@ -97,10 +93,10 @@ describe('ui/courier/fetch/strategy/search', () => {
           }
         ];
         return search.reqsFetchParamsToBody(reqsFetchParams).then(value => {
-          const indexLineMatch = value.match(/"index":\[".kibi"\]/g);
+          const indexLineMatch = value.match(/"index":\["logstash-\*"]/g);
           expect(indexLineMatch).to.not.be(null);
           expect(indexLineMatch.length).to.be(2);
-          const queryLineMatch = value.match(/"query":\{"bool":\{"must_not":\[\{"match_all":\{\}\}\]\}\}/g);
+          const queryLineMatch = value.match(/"query":{"match_none":{}}/g);
           expect(queryLineMatch).to.not.be(null);
           expect(queryLineMatch.length).to.be(2);
         });

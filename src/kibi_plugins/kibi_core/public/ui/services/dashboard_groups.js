@@ -207,13 +207,16 @@ uiModules
             query.size = 0; // we do not need hits just a count
             // here take care about correctly expanding timebased indices
             return kibiState.timeBasedIndices(index, dashboard.id)
-            .then((indices) => ({
-              dashboardId: dashboard.id,
-              filters,
-              queries,
-              query,
-              indices
-            }))
+            .then(indices => {
+              return {
+                dashboardId: dashboard.id,
+                filters,
+                queries,
+                query,
+                indices,
+                indexPattern: index
+              };
+            })
             .catch((error) => {
               // If computing the indices failed because of an authorization error
               // set indices to an empty array and mark the dashboard as forbidden.
@@ -224,7 +227,8 @@ uiModules
                   queries,
                   query,
                   forbidden: true,
-                  indices: []
+                  indices: [],
+                  indexPattern: index
                 };
               }
               throw error;
@@ -237,6 +241,7 @@ uiModules
               filters: [],
               queries: [],
               indices: [],
+              indexPattern: null,
               error: true
             };
           });
@@ -246,7 +251,7 @@ uiModules
           metadata = _.sortBy(metadata, result => ids.indexOf(result.dashboardId));
           // here fire the query to get counts
           const countsQuery = _.map(metadata, result => {
-            return searchHelper.optimize(result.indices, result.query);
+            return searchHelper.optimize(result.indices, result.query, result.indexPattern);
           })
           .join('');
 

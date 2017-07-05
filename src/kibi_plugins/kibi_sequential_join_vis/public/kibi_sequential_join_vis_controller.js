@@ -82,7 +82,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
         return Promise.resolve(_.map(results, (result) => result.button));
       }
       const query = _.map(results, result => {
-        return searchHelper.optimize(result.indices, result.query);
+        return searchHelper.optimize(result.indices, result.query, result.button.targetIndexPatternId);
       }).join('');
       const duration = moment();
 

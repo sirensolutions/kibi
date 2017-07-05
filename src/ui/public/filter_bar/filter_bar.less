@@ -150,13 +150,6 @@ filter-bar .bar {
     margin-top: 15px;
   }
 
-  .filter-link {
-    position: relative;
-    display: inline-block;
-    border: 4px solid transparent;
-    margin-bottom: 4px;
-  }
-
   .filter-description {
     white-space: nowrap;
     overflow: hidden;
@@ -257,8 +250,20 @@ filter-bar .bar {
   }
 }
 
-  .filter-bar-condensed {
-    padding: 6px 6px 2px 6px !important;
-    font-size: 0.9em;
-    background: @filter-bar-bar-condensed-bg;
+.filter-bar-condensed {
+  padding: 6px 6px 2px 6px !important;
+  font-size: 0.9em;
+  background: @filter-bar-bar-condensed-bg;
+}
+
+/* kibi: moved the .filter-link class to correctly display the items inside filter-bar-condensed */
+.filter-bar-condensed,
+filter-bar .bar {
+  .filter-link {
+    position: relative;
+    display: inline-block;
+    border: 4px solid transparent;
+    margin-bottom: 4px;
   }
+}
+/* kibi: end */

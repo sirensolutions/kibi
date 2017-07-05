@@ -23,7 +23,8 @@ uiModules
     transclude: true,
     scope: {
       filter: '=',
-      group: '='
+      group: '=',
+      isFirst: '='
     },
     template: dashboardNavEditLinkTemplate,
     link: function ($scope, $element) {

@@ -109,14 +109,18 @@ uiModules
 
         $scope.isSaving = true;
         dashboardGroups.renumberGroups().then(() => {
-          if (sourceItemScope.isDashboard && !sourceGroup.virtual && targetItem === -2) {
+          if (sourceItemScope.isDashboard && !sourceGroup.virtual && targetItem < -1) {
             // Removes a dashboard from one group and put in the correct order
             return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
               const sourceItemId = savedSourceGroup.dashboards[sourceItem].id;
               savedSourceGroup.dashboards.splice(sourceItem, 1);
               return savedSourceGroup.save().then(() => {
                 return savedDashboards.get(sourceItemId).then(savedDashboard => {
-                  savedDashboard.priority = targetGroup.priority - (sibling ? 5 : -5);
+                  if (targetItem === -3) {
+                    savedDashboard.priority = targetGroup.priority - 5;
+                  } else {
+                    savedDashboard.priority = targetGroup.priority - (sibling ? 5 : -5);
+                  }
                   return savedDashboard.save();
                 });
               });
@@ -137,7 +141,7 @@ uiModules
               return savedGroup.save();
             });
           }
-          else if (sourceItemScope.isDashboard && !targetGroup.virtual && targetItem !== -2) {
+          else if (sourceItemScope.isDashboard && !targetGroup.virtual && targetItem > -2) {
             // Moves a dashboard from one group to another
             targetGroup.collapsed = false;
             return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
@@ -157,14 +161,18 @@ uiModules
               });
             });
           }
-          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && targetItem === -2) {
+          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && targetItem < -1) {
             // Changes the virtual group order
             return savedDashboards.get(sourceGroup.id).then(savedDashboard => {
-              savedDashboard.priority = targetGroup.priority - (sibling ? 5 : -5);
+              if (targetItem === -3) {
+                savedDashboard.priority = targetGroup.priority - 5;
+              } else {
+                savedDashboard.priority = targetGroup.priority - (sibling ? 5 : -5);
+              }
               return savedDashboard.save();
             });
           }
-          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && !targetGroup.virtual && targetItem !== -2) {
+          else if (!sourceItemScope.isDashboard && sourceGroup.virtual && !targetGroup.virtual && targetItem > -2) {
             // Moves a virtual group into a group
             targetGroup.collapsed = false;
             return savedDashboardGroups.get(targetGroup.id).then(savedGroup => {

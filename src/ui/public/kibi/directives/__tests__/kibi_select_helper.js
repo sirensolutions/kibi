@@ -36,7 +36,6 @@ describe('Kibi Directives', function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kbnIndex', '.kibi');
         $provide.constant('kbnDefaultAppId', '');
-        $provide.constant('kibiDefaultDashboardTitle', '');
         $provide.constant('elasticsearchPlugins', ['siren-join']);
         if (options.savedDatasources) {
           $provide.service('savedDatasources', (Promise, Private) => {

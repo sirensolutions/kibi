@@ -49,7 +49,6 @@ module.exports = function (kibana) {
           ret.elasticsearchPlugins = config.get('elasticsearch.plugins');
           if (config.has('kibi_core')) {
             ret.kibiDatasourcesSchema  = config.get('kibi_core.datasources_schema');
-            ret.kibiDefaultDashboardTitle = config.get('kibi_core.default_dashboard_title');
             ret.kibiWarnings = {};
             if (config.get('kibi_core.datasource_encryption_key') === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
               ret.kibiWarnings.datasource_encryption_warning = true;

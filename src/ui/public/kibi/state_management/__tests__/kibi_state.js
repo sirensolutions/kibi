@@ -61,7 +61,6 @@ describe('State Management', function () {
       $provide.constant('kbnIndex', '.kibi');
       $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 

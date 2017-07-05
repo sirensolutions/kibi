@@ -31,7 +31,6 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     beforeEach(ngMock.module('kibana', function ($provide) {
       // kibi: for running kibi tests
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function (Private) {

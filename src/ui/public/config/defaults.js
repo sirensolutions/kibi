@@ -284,6 +284,10 @@ define(function (require) {
       'kibi:enableAllRelBtnCounts' : {
         value: true,
         description: 'Enable counts on all relational buttons.'
+      },
+      'kibi:defaultDashboardTitle' : {
+        value: '',
+        description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.'
       }
       // kibi: end
     };

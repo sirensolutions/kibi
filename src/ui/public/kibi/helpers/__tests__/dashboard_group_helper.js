@@ -110,13 +110,13 @@ var dashboardGroupHelper;
 var appState;
 let kibiState;
 var $httpBackend;
+let config;
 
 function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards, savedDashboardGroups, savedSearches }) {
   return function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kibiEnterpriseEnabled', false);
       $provide.constant('kbnDefaultAppId', 'dashboard');
-      $provide.constant('kibiDefaultDashboardTitle', 'Articles');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
 
       appState = new MockState({ filters: [] });
@@ -145,8 +145,10 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
       $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches || []));
     });
 
-    ngMock.inject(function ($injector, _kibiState_, Private) {
+    ngMock.inject(function ($injector, _kibiState_, Private, _config_) {
       kibiState = _kibiState_;
+      config = _config_;
+      config.set('kibi:defaultDashboardTitle','Articles');
       dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
       sinon.stub(chrome, 'getBasePath').returns('');
       sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);

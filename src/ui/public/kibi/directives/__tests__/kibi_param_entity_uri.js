@@ -18,7 +18,6 @@ let $rootScope;
 let init = function () {
   ngMock.module('kibana', function ($compileProvider, $provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
     $provide.constant('elasticsearchPlugins', ['siren-join']);
     $provide.constant('kibiDatasourcesSchema', {});
 

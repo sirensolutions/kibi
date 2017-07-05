@@ -60,6 +60,11 @@ uiModules
         parts.css('width', value + '%');
       };
 
+      function updateSidebarSize() {
+        const width = !dashboardsNavState.isOpen() ? COLLAPSED_WIDTH : dashboardsNavState.navWidth();
+        $scope.resizeParts(width);
+      }
+
       function updateGlobalNav() {
         $scope.isGlobalNavOpen = globalNavState.isOpen();
       }
@@ -79,11 +84,7 @@ uiModules
         // Notify visualizations, e.g. the dashboard, that they should re-render.
         $rootScope.$broadcast('globalNav:update');
 
-        if (!dashboardsNavState.isOpen()) {
-          $scope.resizeParts(COLLAPSED_WIDTH);
-        } else {
-          $scope.resizeParts(dashboardsNavState.navWidth());
-        }
+        updateSidebarSize();
       }
 
       updateGlobalNav();
@@ -96,11 +97,7 @@ uiModules
             dashboardsNavState.setNavWidth($scope.bar.width() - SLIDER_WIDTH);
           }
           dashboardsNavState.setOpen(!dashboardsNavState.isOpen());
-          if (!dashboardsNavState.isOpen()) {
-            $scope.resizeParts(COLLAPSED_WIDTH);
-          } else {
-            $scope.resizeParts(dashboardsNavState.navWidth());
-          }
+          updateSidebarSize();
         }
       };
 
@@ -279,15 +276,13 @@ uiModules
 
       $scope.$on('kibi:dashboardGroups:updated', function () {
         $timeout(() => {
-          const width = !dashboardsNavState.isOpen() ? COLLAPSED_WIDTH : dashboardsNavState.navWidth();
-          $scope.resizeParts(width);
+          updateSidebarSize();
           $scope.restoreCollapsedGroupState();
         }, 500);
       });
 
       $timeout(() => {
-        const width = !dashboardsNavState.isOpen() ? COLLAPSED_WIDTH : dashboardsNavState.navWidth();
-        $scope.resizeParts(width);
+        updateSidebarSize();
         $scope.links[0].scrollTop = dashboardsNavState.scrollbarPos();
       }, 200);
       $scope.restoreCollapsedGroupState();

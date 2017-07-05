@@ -2,7 +2,6 @@ import Scenario from './scenarios/empty/scenario';
 import requirefrom from 'requirefrom';
 import ModelTestHelper from './helper';
 
-const serverConfig = requirefrom('test')('server_config');
 const wrapAsync = requirefrom('src/test_utils')('wrap_async');
 
 describe('saved_objects_api/functional', function () {

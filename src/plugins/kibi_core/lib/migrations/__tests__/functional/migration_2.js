@@ -16,13 +16,18 @@ describe('kibi_core/migrations/functional', function () {
   let timeout = 60000;
   this.timeout(timeout);
 
+  const fakeConfig = {
+    get: sinon.stub()
+  };
+  fakeConfig.get.withArgs('kibana.index').returns('.kibi');
+
   let scenarioManager = new ScenarioManager(clusterUrl, timeout);
   let client = new elasticsearch.Client({
     host: clusterUrl,
     requestTimeout: timeout
   });
   let configuration = {
-    index: '.kibi',
+    config: fakeConfig,
     client: client,
     logger: {
       warning: (message) => {}

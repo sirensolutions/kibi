@@ -21,7 +21,7 @@ export default class Migration4 extends Migration {
 
     this._logger = configuration.logger;
     this._client = configuration.client;
-    this._index = configuration.index;
+    this._index = configuration.config.get('kibana.index');
     this._type = 'config';
     this._query = {
       query: {

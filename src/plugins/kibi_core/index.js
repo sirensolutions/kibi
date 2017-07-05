@@ -33,7 +33,8 @@ module.exports = function (kibana) {
     require('./lib/migrations/migration_3'),
     require('./lib/migrations/migration_4'),
     require('./lib/migrations/migration_5'),
-    require('./lib/migrations/migration_6')
+    require('./lib/migrations/migration_6'),
+    require('./lib/migrations/migration_7')
   ];
 
   const _validateQueryDefs = function (queryDefs) {

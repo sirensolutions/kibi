@@ -93,7 +93,11 @@ export default function UrlFormatProvider(Private) {
 
       switch (this.param('type')) {
         case 'img':
-          return '<img src="' + url + '" alt="' + label + '" title="' + label + '">';
+          // kibi: adding transparent pixel image onerror to prevent displaying and ugly image placeholder
+          const transparentPixel =
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGP6zwAAAgcBApocMXEAAAAASUVORK5CYII=';
+          return `<img src="${url}" alt="${label}" title="${label}" onerror="this.onerror=null;this.src='${transparentPixel}'">`;
+          // kibi: end
         default:
           if (hit && hit.highlight && hit.highlight[field.name]) {
             label = getHighlightHtml(label, hit.highlight[field.name]);

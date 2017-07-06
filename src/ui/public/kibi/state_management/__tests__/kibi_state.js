@@ -1645,7 +1645,25 @@ describe('State Management', function () {
             id: 'dashboard1',
             title: 'dashboard1',
             kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({ filter:[] })
+              searchSourceJSON: JSON.stringify({ filter: [] })
+            }
+          },
+          {
+            id: 'savedFilterDashboard',
+            title: 'savedFilterDashboard',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({
+                filter: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'existingFilter',
+                        analyze_wildcard: true
+                      }
+                    }
+                  }
+                ]
+              })
             }
           },
           {
@@ -1727,6 +1745,40 @@ describe('State Management', function () {
       });
 
       it('should emit a reset_app_state_query event if the query got changed', function (done) {
+        const savedQuery = {
+          query_string: {
+            analyze_wildcard: true,
+            query: 'existingFilter'
+          }
+        };
+
+        appState.id = 'savedFilterDashboard';
+        appState.query = {
+          query_string: {
+            query: 'web'
+          }
+        };
+        kibiState._setDashboardProperty('Articles', kibiState._properties.query, {
+          query_string: {
+            query: 'web'
+          }
+        });
+
+        kibiState.on('reset_app_state_query', function (query) {
+          expect(query).to.eql(savedQuery);
+          done();
+        });
+        kibiState.resetFiltersQueriesTimes();
+      });
+
+      it('should emit default filter if no saved filter', function (done) {
+        const defaultQuery = {
+          query_string: {
+            analyze_wildcard: true,
+            query: '*'
+          }
+        };
+
         appState.id = 'dashboard1';
         appState.query = {
           query_string: {
@@ -1739,7 +1791,8 @@ describe('State Management', function () {
           }
         });
 
-        kibiState.on('reset_app_state_query', function () {
+        kibiState.on('reset_app_state_query', function (query) {
+          expect(query).to.eql(defaultQuery);
           done();
         });
         kibiState.resetFiltersQueriesTimes();

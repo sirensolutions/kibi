@@ -321,7 +321,11 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       };
 
       // kibi: update root source on kibiState reset
-      $scope.$listen(kibiState, 'reset_app_state_query', function () {
+      $scope.$listen(kibiState, 'reset_app_state_query', function (query) {
+        if (query) {
+          $scope.model.query = query;
+        }
+
         $scope.filterResults();
       });
       // kibi: end

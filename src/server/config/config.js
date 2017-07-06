@@ -104,7 +104,6 @@ module.exports = class Config {
     const results = Joi.validate(newVals, this.getSchema(), { context });
 
     if (results.error) {
-      console.log(results.error);
       throw results.error;
     }
 

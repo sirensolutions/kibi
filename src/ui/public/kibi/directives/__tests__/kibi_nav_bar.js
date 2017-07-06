@@ -18,7 +18,6 @@ describe('Kibi Components', function () {
       ngMock.module('kibana', ($provide) => {
         $provide.constant('elasticsearchPlugins', ['siren-join']);
         $provide.constant('kbnDefaultAppId', '');
-        $provide.constant('kibiDefaultDashboardTitle', '');
 
         $provide.service('getAppState', () => {
           return function () {

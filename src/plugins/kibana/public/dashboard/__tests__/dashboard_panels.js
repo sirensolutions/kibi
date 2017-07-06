@@ -31,7 +31,6 @@ describe('dashboard panels', function () {
       $provide.constant('kibiDatasourcesSchema', {});
       $provide.constant('elasticsearchPlugins', ['siren-join']);
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
     });
   });
 

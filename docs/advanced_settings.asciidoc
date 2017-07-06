@@ -46,6 +46,7 @@ WARNING: Modifying the following settings can significantly affect Kibana's perf
 `kibi:session_cookie_expire`:: Set duration of cookie session (in seconds).
 `kibi:enableAllDashboardsCounts`:: Enable counts on all dashboards.
 `kibi:enableAllRelBtnCounts`:: Enable counts on all relational buttons.
+`kibi:defaultDashboardTitle`:: The dashboard that is displayed when clicking on the Dashboard tab for the first time.
 ifeval::["{enterprise_enabled}" == "true"]
 `kibi:graphUseWebGl` [Enterprise Edition only] :: Set to false to disable WebGL rendering
 `kibi:graphUseFiltersFromDashboards` [Enterprise Edition only] :: Set to true to use filters from dashboards on expansion.

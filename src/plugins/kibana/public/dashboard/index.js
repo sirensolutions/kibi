@@ -38,27 +38,28 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle, courier) {
+      dash: function (timefilter, savedDashboards, courier, config) {
         // kibi:
         // - get all the dashboards
         // - if none, just create a new one
         // - if any try to load the default dashboard if set, otherwise load the first dashboard
         // - if the default dashboard is missing, load the first dashboard
         // - if the first dashboard is missing, create a new one
+        const defDashConfig = config.get('kibi:defaultDashboardTitle');
         return savedDashboards.find().then(function (resp) {
           if (resp.hits.length) {
             timefilter.enabled = true;
             // kibi: select the first dashboard if default_dashboard_title is not set
             let dashboardId = resp.hits[0].id;
             let redirectToWhenMissing = '/dashboard/new-dashboard/create/';
-            if (kibiDefaultDashboardTitle) {
-              dashboardId = kibiUtils.slugifyId(kibiDefaultDashboardTitle);
+            if (defDashConfig) {
+              dashboardId = kibiUtils.slugifyId(defDashConfig);
               redirectToWhenMissing = `/dashboard/${resp.hits[0].id}`;
             }
             return savedDashboards.get(dashboardId).catch(err => {
-              if (kibiDefaultDashboardTitle) {
-                err.message = `The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
-                  Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`;
+              if (defDashConfig) {
+                err.message = `The default dashboard with title "${defDashConfig}" does not exist.
+                  Please correct the "kibi:defaultDashboardTitle" parameter in advanced settings`;
               }
               return courier.redirectWhenMissing({
                 dashboard : redirectToWhenMissing

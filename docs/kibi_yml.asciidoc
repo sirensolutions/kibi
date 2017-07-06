@@ -48,4 +48,4 @@ error messages.
 `logging.verbose`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage
 information and all requests.
 `status.allowAnonymous`:: *Default: false* If authentication is enabled, setting this to `true` allows unauthenticated users to access the Kibana server status API and status page.
-`kibi_core.default_dashboard_title`:: *Default: not set* The dashboard that is displayed when clicking on the Dashboard tab for the first time.
+`kibi_core.default_dashboard_title`:: *Default: not set* The dashboard that is displayed when clicking on the Dashboard tab for the first time. This property is deprecated starting from Kibi 4.6.4-4, it was moved to advanced_settings (<<advanced_settings,Setting Advanced Options>>)

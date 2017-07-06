@@ -13,7 +13,6 @@ describe('AggTableGroup Directive', function () {
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
     $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function ($injector, Private) {

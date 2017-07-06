@@ -72,7 +72,6 @@ describe('No global chart settings', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     // kibi: for running kibi tests
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
     $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function (Private) {
@@ -172,7 +171,6 @@ aggArray.forEach(function (dataAgg, i) {
     beforeEach(ngMock.module('kibana', function ($provide) {
       // kibi: for running kibi tests
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function (Private) {

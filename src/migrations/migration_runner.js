@@ -48,7 +48,7 @@ export default class MigrationRunner {
       if (has(plugin, 'getMigrations')) {
         for (let Migration of plugin.getMigrations()) {
           let configuration = {
-            index: this._server.config().get('kibana.index'),
+            config: this._server.config(),
             client: this._server.plugins.elasticsearch.client,
             logger: this._logger
           };

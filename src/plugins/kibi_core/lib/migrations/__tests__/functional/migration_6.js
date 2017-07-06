@@ -8,6 +8,11 @@ const packageJson = require(fromRoot('package.json'));
 const wrapAsync = requirefrom('src/testUtils')('wrap_async');
 const indexSnapshot = requirefrom('src/testUtils')('index_snapshot');
 
+const fakeConfig = {
+  get: sinon.stub()
+};
+fakeConfig.get.withArgs('kibana.index').returns('.kibi');
+
 const ScenarioManager = requirefrom('src/testUtils')('scenario_manager');
 import Migration from '../../migration_6';
 import Scenario1 from './scenarios/migration_6/scenario1';
@@ -30,7 +35,7 @@ describe('kibi_core/migrations/functional', function () {
     requestTimeout: timeout
   });
   const configuration = {
-    index: '.kibi',
+    config: fakeConfig,
     client: client,
     logger: {
       error: (message) => {},

@@ -13,7 +13,7 @@ export default class Migration {
     if (!configuration) throw new Error('Configuration not specified.');
 
     this._client = configuration.client;
-    this._index = configuration.index;
+    this._config = configuration.config;
   }
 
   /**

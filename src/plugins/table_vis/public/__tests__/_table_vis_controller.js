@@ -16,7 +16,6 @@ describe('Controller', function () {
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
     $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function ($injector) {

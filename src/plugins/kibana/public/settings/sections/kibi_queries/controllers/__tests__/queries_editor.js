@@ -32,7 +32,6 @@ describe('Kibi Controllers', function () {
   function init({ hits, snippet, snippetError, query, datasourceType }) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardTitle', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 

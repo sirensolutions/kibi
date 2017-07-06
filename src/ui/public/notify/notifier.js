@@ -376,7 +376,8 @@ Notifier.prototype._showFatal = function (err) {
   console.error(err.stack);
 };
 
-const overrideableOptions = ['lifetime', 'icon'];
+// kibi: added "stack" to allow the stack to be set
+const overrideableOptions = ['stack', 'lifetime', 'icon'];
 
 /**
  * Alert the user of an error that occured

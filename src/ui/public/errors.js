@@ -84,6 +84,10 @@ export class ShardFailure extends KbnError {
       ShardFailure);
 
     this.resp = resp;
+    // kibi: add more information about the shards failures
+    if (resp._shards.failures) {
+      this.stack = resp._shards.failures.reduce((acc, failure) => acc + `- ${failure.reason.type}: ${failure.reason.reason}\n`, '');
+    }
   }
 }
 

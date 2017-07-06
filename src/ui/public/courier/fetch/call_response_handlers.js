@@ -22,7 +22,9 @@ export default function CourierFetchCallResponseHandlers(Private, Promise) {
       }
 
       if (resp._shards && resp._shards.failed) {
-        notify.warning(new ShardFailure(resp));
+        // kibi: set the stack message for this warning notification
+        const err = new ShardFailure(resp);
+        notify.warning(err, { stack: err.stack });
       }
 
       function progress() {

@@ -83,6 +83,7 @@ export default async (kbnServer, server, config) => {
       kibiEnterpriseEnabled: kbnServer.kibiEnterpriseEnabled, // kibi: added to manage kibi enterprise
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
+      buildTimestamp: config.get('pkg.buildTimestamp'),
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),

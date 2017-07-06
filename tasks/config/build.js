@@ -6,6 +6,8 @@ export default (grunt) => {
 
   const sha = String(exec('git rev-parse HEAD')).trim();
   const version = buildVersion(grunt.option('release'), pkgVersion);
+  const timestamp = new Date().toUTCString();
+
   let number;
 
   if (/^win/.test(platform)) {
@@ -15,7 +17,7 @@ export default (grunt) => {
     number = parseFloat(String(exec('git log --format="%h" | wc -l')).trim());
   }
 
-  return { sha, number, version };
+  return { sha, number, version, timestamp };
 };
 
 function buildVersion(isRelease, version) {

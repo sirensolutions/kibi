@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import angular from 'angular';
+import emptySearch from 'ui/kibi/empty_search';
 
 import { toJson } from 'ui/utils/aggressive_parse';
 
@@ -37,23 +38,23 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
         .then(function (indexList) {
           let body = fetchParams.body || {};
           let index = [];
-          // If we've reached this point and there are no indexes in the
-          // index list at all, it means that we shouldn't expect any indexes
-          // to contain the documents we're looking for, so we instead
-          // perform a request to the Kibi index with a search that doesn't
-          // match anything to avoid querying all indices.
-          // Type is set to null to allow the execution of the query
-          // when .kibi is otherwise unaccessible by the user (assuming that
-          // a rule that allows queries on the null type has been setup in
-          // the authentication plugin).
+          // kibi: if there are no indices, issue a match_none query
+          // against the raw index pattern.
           let type = fetchParams.type;
           if (_.isArray(indexList) && indexList.length === 0) {
-            index.push(kbnIndex);
-            type = 'null';
+            if (fetchParams.index.id) {
+              index.push(fetchParams.index.id);
+            } else {
+              index = fetchParams.index;
+            }
+            if (_.isArray(index) && index.length === 0) {
+              index = [kbnIndex];
+            }
             body = emptySearch();
           } else {
             index = indexList;
           }
+          // kibi: end
           return angular.toJson({
             index,
             type,
@@ -81,14 +82,3 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
   };
 }
 
-function emptySearch() {
-  return {
-    query: {
-      bool: {
-        must_not: [
-          { match_all: {} }
-        ]
-      }
-    }
-  };
-}

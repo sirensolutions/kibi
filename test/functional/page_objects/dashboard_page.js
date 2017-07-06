@@ -45,8 +45,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      // kibi: in kibi the breadcrumb goes to the dashboard listing page
-      await retry.try(() => getRemote().findByCssSelector(`a[href="#${DashboardConstants.LISTING_PAGE_PATH}"]`).click());
+      // kibi: create a link to avoid creating timestamps in URLs
+      await getRemote()
+      .execute(`if ($('.legacyListingLink').size() === 0) {` +
+               `$('.global-nav__links app-switcher').append($('<a class="global-nav-link__anchor legacyListingLink" ` +
+               `href="#${DashboardConstants.LISTING_PAGE_PATH}">.</a>'))}`);
+      await retry.try(() => getRemote().findByCssSelector(`a[href="#${DashboardConstants.LISTING_PAGE_PATH}"]`)
+        .click());
     }
 
     async gotoDashboardLandingPage() {

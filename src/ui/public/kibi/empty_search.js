@@ -1,14 +1,10 @@
 /**
- * Returns an empty search body.
+ * Returns the body of a search that does not match anything.
  */
 export default function emptySearch() {
   return {
     query: {
-      bool: {
-        must_not: [
-          { match_all: {} }
-        ]
-      }
+      match_none: {}
     }
   };
 }

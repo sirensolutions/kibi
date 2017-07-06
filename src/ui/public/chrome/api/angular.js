@@ -28,6 +28,7 @@ export default function (chrome, internals) {
     .value('kibiKibanaAnnouncement', internals.kibiKibanaAnnouncement) // kibi:
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)
+    .value('buildTimestamp', internals.buildTimestamp)
     .value('serverName', internals.serverName)
     .value('uiSettings', internals.uiSettings)
     .value('sessionId', Date.now())

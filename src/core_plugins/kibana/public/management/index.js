@@ -28,7 +28,8 @@ require('ui/index_patterns/route_setup/load_default')({
 
 uiModules
 .get('apps/management')
-.directive('kbnManagementApp', function (Private, $location, timefilter, buildNum, buildSha, kibiVersion, kibiKibanaAnnouncement) {
+.directive('kbnManagementApp', function (Private, $location, timefilter,
+  buildNum, buildSha, buildTimestamp, kibiVersion, kibiKibanaAnnouncement) {
   return {
     restrict: 'E',
     template: appTemplate,
@@ -53,6 +54,7 @@ uiModules
       management.getSection('kibana').info = {
         kibiVersion: kibiVersion,
         kibiKibanaAnnouncement: kibiKibanaAnnouncement,
+        buildTimestamp: buildTimestamp,
         build: buildNum,
         sha: buildSha,
         currentYear: new Date().getFullYear()

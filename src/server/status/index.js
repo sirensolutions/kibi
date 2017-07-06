@@ -28,6 +28,7 @@ export default function (kbnServer, server, config) {
             number: config.get('pkg.version').replace(matchSnapshot, ''),
             build_hash: config.get('pkg.buildSha'),
             build_number: config.get('pkg.buildNum'),
+            build_timestamp: config.get('pkg.buildTimestamp'),
             build_snapshot: matchSnapshot.test(config.get('pkg.version'))
           },
           status: kbnServer.status.toJSON(),
@@ -40,6 +41,7 @@ export default function (kbnServer, server, config) {
         version: config.get('pkg.version'),
         buildNum: config.get('pkg.buildNum'),
         buildSha: config.get('pkg.buildSha'),
+        buildTimestamp: config.get('pkg.buildTimestamp'),
         uuid: config.get('server.uuid'),
         status: kbnServer.status.toJSON(),
         metrics: kbnServer.legacyMetrics

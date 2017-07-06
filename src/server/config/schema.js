@@ -31,6 +31,7 @@ module.exports = () => Joi.object({
     kibiEnterpriseEnabled: Joi.boolean().default(Joi.ref('$kibiEnterpriseEnabled')), // kibi: added to manage kibi version
     buildNum: Joi.number().default(Joi.ref('$buildNum')),
     buildSha: Joi.string().default(Joi.ref('$buildSha')),
+    buildTimestamp: Joi.string().default(Joi.ref('$buildTimestamp')),
   }).default(),
 
   env: Joi.object({

@@ -4,9 +4,7 @@ import _ from 'lodash';
 export default function () {
   const self = this;
   const scriptFields = {};
-  let docvalueFields = [];
-
-  docvalueFields = _.map(_.reject(self.fields.byType.date, 'scripted'), 'name');
+  const docvalueFields = _.map(_.reject(self.fields.byType.date, 'scripted'), 'name');
 
   _.each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {

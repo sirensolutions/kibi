@@ -86,8 +86,10 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
       if (indexPattern.intervalName) {
         promise = self.getIndicesForIndexPattern(indexPattern)
         .then(function (existing) {
-          if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
-          indexList = existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
+          // kibi: do not throw IndexPatternMissingIndices error when existing.matches.length === 0
+          if (existing.matches.length !== 0) {
+            indexList = existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
+          }
         });
       }
 
@@ -98,14 +100,38 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
           ignoreUnavailable: _.isArray(indexList),
           allowNoIndices: false,
           includeDefaults: true
+        })
+        // kibi: wrap the response to be able to distinguish between valid one and error later
+        .then((resp) => {
+          return {
+            response: resp
+          };
         });
+        // kibi: end
       })
-      .catch(handleMissingIndexPattern)
-      .then(transformMappingIntoFields)
-      .then(fields => enhanceFieldsWithCapabilities(fields, indexList))
-      .then(function (fields) {
-        fieldCache.set(id, fields);
-        return fieldCache.get(id);
+      .catch((err) => {
+        // kibi: empty response no index === no mappings
+        // we do not want to see red errors about it
+        if (err.displayName === 'NotFound' && err.statusCode === 404) {
+          return {
+            error: err
+          };
+        } else {
+          return handleMissingIndexPattern(err);
+        }
+      })
+      .then((response) => {
+        // kibi: now if there was an error return empty list of fields
+        if (response.error) {
+          return [];
+        }
+        // if not execute the following kibana code
+        return Promise.resolve(transformMappingIntoFields(response.response))
+        .then(fields => enhanceFieldsWithCapabilities(fields, indexList))
+        .then(function (fields) {
+          fieldCache.set(id, fields);
+          return fieldCache.get(id);
+        });
       });
     };
 

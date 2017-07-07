@@ -156,6 +156,9 @@ uiModules.get('kibana')
 
         // TODO: we need to have some way to clean up result requests
         $scope.searchSource.onResults().then(function onResults(resp) {
+          // kibi: delete the error on searchSource if any
+          delete $scope.searchSource.error;
+
           // Reset infinite scroll limit
           $scope.limit = 50;
 
@@ -194,8 +197,17 @@ uiModules.get('kibana')
               expError.stack = message;
               return notify.error(expError);
             }
+            // in kibi
+            // notify if it is NOT a missing index error
+            if (_.get(error, 'resp.error.type') === 'index_not_found_exception') {
+              $scope.searchSource.error =
+              (error.resp.error.reason && error.resp.error['resource.id']) ?
+              error.resp.error.reason + ' ' + error.resp.error['resource.id'] :
+              'Index not found';
+            } else {
+              return notify.error(error);
+            }
           }
-          notify.error(error);
         })
         // kibi: end
         .catch(notify.fatal);

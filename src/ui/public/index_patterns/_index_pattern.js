@@ -308,7 +308,8 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
     }
 
     hasTimeField() {
-      return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
+      // kibi: added extra check if this.fields.byName exists before using it
+      return !!(this.timeFieldName && this.fields.byName && this.fields.byName[this.timeFieldName]);
     }
 
     isWildcard() {

@@ -21,6 +21,20 @@ describe('SearchSource#normalizeSortRequest', function () {
         unmapped_type: 'boolean'
       }
     }];
+
+    // kibi: add fields used in tests to make sure the field will exists in indexPattern.fields array
+    // and can be retrieved by byName method
+    indexPattern.fields.push({
+      name: 'someField',
+      type: 'boolean'
+    });
+
+    indexPattern.fields.push({
+      name: '_score',
+      type: 'number'
+    });
+    // kibi: end
+
   }));
 
   it('should return an array', function () {

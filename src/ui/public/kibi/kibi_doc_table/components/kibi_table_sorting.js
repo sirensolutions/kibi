@@ -22,17 +22,20 @@ define(function (require) {
           label: 'descending'
         }];
 
-        $scope.sortingColumns = [{
-          value: '_score',
-          label: 'score'
-        }];
+        function populateSortingColumns() {
+          $scope.sortingColumns = [{
+            value: '_score',
+            label: 'score'
+          }];
 
-        _.each($scope.options.columns, (column) => {
-          $scope.sortingColumns.push({
-            value: column,
-            label: column
+          _.each($scope.options.columns, (column, i) => {
+            $scope.sortingColumns.push({
+              value: column,
+              label: $scope.options.columnAliases[i]
+            });
           });
-        });
+        }
+        populateSortingColumns();
 
         $scope.selectedSortingColumn = _.find($scope.sortingColumns, (column) => {
           return column.value === $scope.options.sorting[0];
@@ -45,6 +48,12 @@ define(function (require) {
         $scope.changedSortingSelection = function () {
           $scope.options.sorting = [$scope.selectedSortingColumn.value, $scope.selectedSortingOrder.value];
         };
+
+        $scope.$watchGroup([ 'options.columns', 'options.columnAliases' ], ([ newColumns, newColumnAliases ]) => {
+          if (newColumns || newColumnAliases) {
+            populateSortingColumns();
+          }
+        });
       }
     };
 

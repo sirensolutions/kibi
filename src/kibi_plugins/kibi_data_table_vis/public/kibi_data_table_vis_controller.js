@@ -215,7 +215,7 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
     }
   });
 
-  $scope.sorting = $scope.uiState.get('sort');
+  $scope.sorting = $scope.uiState.get('sort', [ '_score', 'desc' ]);
   $scope.uiState.on('change', function () {
     $scope.sorting = $scope.uiState.get('sort');
   });

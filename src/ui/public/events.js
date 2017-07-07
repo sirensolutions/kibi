@@ -34,9 +34,17 @@ export default function EventsProvider(Private, Promise) {
     };
     this._listeners[name].push(listener);
 
+    const self = this;
+
     (function rebuildDefer() {
       listener.defer = Promise.defer();
       listener.resolved = listener.defer.promise.then(function (args) {
+        // kibi: make sure that deleted listeners are not triggered
+        if (!_.find(self._listeners[name], listener => handler === listener.handler)) {
+          return;
+        }
+        // kibi: end
+
         rebuildDefer();
 
         // we ignore the completion of handlers, just watch for unhandled errors

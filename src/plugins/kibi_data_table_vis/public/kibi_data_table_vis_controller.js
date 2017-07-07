@@ -94,6 +94,12 @@ define(function (require) {
         }
       });
 
+      $scope.$watch('vis.params.columnAliases', columnAliases => {
+        if (columnAliases) {
+          $scope.savedObj.columnAliases = columnAliases;
+        }
+      });
+
       const removeVisTemplateIdChangedHandler = $rootScope.$on('kibi:vis:templateId-changed', function (event, templateId) {
         $scope.savedObj.templateId = templateId;
         $scope.customViewerMode = 'record';

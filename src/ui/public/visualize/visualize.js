@@ -226,8 +226,11 @@ uiModules
               );
             }
             // kibi: notify only if it is NOT a missing index error
-            if (e.resp.error.type === 'index_not_found_exception') {
-              searchSource.error = e.resp.error.reason + ' ' + e.resp.error['resource.id'];
+            if (_.get(e, 'resp.error.type') === 'index_not_found_exception') {
+              searchSource.error =
+              (e.resp.error.reason && e.resp.error['resource.id']) ?
+              e.resp.error.reason + ' ' + e.resp.error['resource.id'] :
+              'Index not found';
             } else {
               return notify.error(e);
             }

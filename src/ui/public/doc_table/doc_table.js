@@ -199,8 +199,11 @@ uiModules.get('kibana')
             }
             // in kibi
             // notify if it is NOT a missing index error
-            if (error.resp.error.type === 'index_not_found_exception') {
-              $scope.searchSource.error = error.resp.error.reason + ': ' + error.resp.error['resource.id'];
+            if (_.get(error, 'resp.error.type') === 'index_not_found_exception') {
+              $scope.searchSource.error =
+              (error.resp.error.reason && error.resp.error['resource.id']) ?
+              error.resp.error.reason + ' ' + error.resp.error['resource.id'] :
+              'Index not found';
             } else {
               return notify.error(error);
             }

@@ -289,10 +289,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
 
         let promise = Promise.resolve();
 
-        // add join_set on kibiState save event
-        if (diff.indexOf(kibiState._properties.enabled_relations) !== -1) {
-          promise = addJoinSetFilter(currentDashboardId);
-        }
         // the selected entity changed
         if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
             diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1) {

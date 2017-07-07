@@ -6,6 +6,7 @@
       >Switch to {{ showCustomView ? 'standard' : 'custom' }} template</a>
     <kibi-table-sorting
       columns="vis.params.columns"
+      column-aliases="vis.params.columnAliases"
       sorting="sorting"
       ng-show="sorting && showCustomView"
     ></kibi-table-sorting>

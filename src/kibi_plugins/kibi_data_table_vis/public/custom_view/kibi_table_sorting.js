@@ -10,6 +10,7 @@ uiModules
     restrict: 'E',
     scope: {
       columns: '=',
+      columnAliases: '=',
       sorting: '='
     },
     template: template,
@@ -25,19 +26,22 @@ uiModules
         }
       ];
 
-      $scope.sortingColumns = [
-        {
-          value: '_score',
-          label: 'score'
-        }
-      ];
+      function populateSortingColumns() {
+        $scope.sortingColumns = [
+          {
+            value: '_score',
+            label: 'score'
+          }
+        ];
 
-      _.each($scope.columns, (column) => {
-        $scope.sortingColumns.push({
-          value: column,
-          label: column
+        _.each($scope.columns, (column, i) => {
+          $scope.sortingColumns.push({
+            value: column,
+            label: $scope.columnAliases[i]
+          });
         });
-      });
+      }
+      populateSortingColumns();
 
       $scope.selectedSortingColumn = _.find($scope.sortingColumns, (column) => {
         return column.value === $scope.sorting[0];
@@ -50,6 +54,12 @@ uiModules
       $scope.changedSortingSelection = function () {
         $scope.sorting = [$scope.selectedSortingColumn.value, $scope.selectedSortingOrder.value];
       };
+
+      $scope.$watchGroup([ 'columns', 'columnAliases' ], ([ newColumns, newColumnAliases ]) => {
+        if (newColumns || newColumnAliases) {
+          populateSortingColumns();
+        }
+      });
     }
   };
 

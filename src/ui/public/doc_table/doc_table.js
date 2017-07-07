@@ -62,7 +62,7 @@ uiModules.get('kibana')
       $scope.exportAsCsv = Private(ExportAsCsvProvider).exportAsCsv;
 
       // kibi: increase the number of results retrieved
-      $scope.size = parseInt(config.get('discover:sampleSize'));
+      $scope.size = $scope.pageSize || parseInt(config.get('discover:sampleSize'));
 
       $scope.hasNextPage = function () {
         return $scope.increaseSample ? ($scope.pager.endItem !== $scope.totalHitCount) : $scope.pager.hasNextPage;
@@ -133,6 +133,10 @@ uiModules.get('kibana')
         }
       });
 
+      const isPageSizeChanged = function () {
+        return $scope.pageSize && $scope.pager && $scope.pageSize !== $scope.pager.pageSize;
+      };
+
       const refreshTable = prereq(function () {
         if (!$scope.searchSource) return;
 
@@ -165,7 +169,8 @@ uiModules.get('kibana')
           $scope.hits = resp.hits.hits;
           // kibi: start the page
           let startingPage = 1;
-          if ($scope.increaseSample && $scope.pager && ($scope.totalHitCount === resp.hits.total) && !$scope.filtersOrQueryChanged) {
+          if ($scope.increaseSample && $scope.pager && ($scope.totalHitCount === resp.hits.total) && !$scope.filtersOrQueryChanged &&
+              !isPageSizeChanged()) {
             startingPage = $scope.pager.currentPage;
           }
 
@@ -173,7 +178,8 @@ uiModules.get('kibana')
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;
 
-          $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize || 50, startingPage);
+          $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize || parseInt(config.get('discover:sampleSize')),
+          startingPage);
           calculateItemsOnPage();
 
           // Kibi: reset the flag
@@ -201,6 +207,13 @@ uiModules.get('kibana')
         .catch(notify.fatal);
       });
       $scope.$watch('searchSource', refreshTable);
+      $scope.$watch('pageSize', function (pageSize) {
+        if (pageSize !== undefined) {
+          $scope.size = $scope.pageSize;
+          $scope.searchSource.size($scope.size);
+          courier.fetch();
+        }
+      });
 
       $scope.pageOfItems = [];
       $scope.onPageNext = () => {

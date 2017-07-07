@@ -7,7 +7,7 @@ import template from 'plugins/kibi_data_table_vis/kibi_data_table_vis_params.htm
 
 uiModules
 .get('kibana/kibi_data_table_vis')
-.directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, kbnUrl) {
+.directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, kbnUrl, config) {
   const notify = createNotifier({
     location: 'Enhanced search results'
   });
@@ -19,6 +19,11 @@ uiModules
       // ======
       // Events
       // ======
+
+      // if vis.params.pageSize is not been set before, set it from config
+      if (!$scope.vis.params.pageSize) {
+        $scope.vis.params.pageSize = parseInt(config.get('discover:sampleSize'));
+      };
 
       const removeColumnAddListener = $rootScope.$on('kibi:column:add', (event, columnName) => {
         columnsActions.addColumn($scope.vis.params, columnName);

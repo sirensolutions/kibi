@@ -175,26 +175,21 @@ define(function (require) {
                     e.preventDefault();
 
                     const cellValue = row.$$_flattened[column];
-                    const index = row.$$_flattened._index;
-
-                    const matchQuery = {};
-                    matchQuery[column] = {
-                      query: cellValue,
-                      type: 'phrase'
-                    };
-                    const tmpFilter = {
+                    queryFilter.addFilters({
                       meta: {
-                        index: row.$$_flattened._index,
+                        index: $scope.indexPattern.id,
                         disabled: false,
                         negate: false,
                       },
                       query: {
-                        match: matchQuery
+                        match: {
+                          [column]: {
+                            query: cellValue,
+                            type: 'phrase'
+                          }
+                        }
                       }
-                    };
-
-
-                    queryFilter.addFilters(tmpFilter);
+                    });
                   });
                 } else {
                   // Style the cell value as a link

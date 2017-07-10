@@ -124,8 +124,9 @@ uiModules
         }
         $scope.group.collapsed = !$scope.group.collapsed;
         if (!$scope.group.collapsed) {
-          const dashboardIds = _($scope.group.dashboards).filter(d => !d.count).map('id').value();
+          const dashboardIds = _($scope.group.dashboards).map('id').value();
           if (dashboardIds.length > 0) {
+            $scope.group.dashboards.forEach(dashboard => delete dashboard.count);
             dashboardGroups.updateMetadataOfDashboardIds(dashboardIds);
           }
         }

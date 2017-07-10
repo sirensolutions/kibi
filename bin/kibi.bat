@@ -46,7 +46,7 @@ set PATH=%PATH%;%DIR%\node
 
 REM kibi: end
 
-cd ..
+cd %DIR%
 
 REM do NOT add a space before && !!!
 set ROOT_DIR=%DIR%&& "%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli" %*

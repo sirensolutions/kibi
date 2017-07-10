@@ -16,7 +16,9 @@ Elasticearch documentation.
 [float]
 ==== Pre-requisites
 
-It is recommended to have a backup of the indices in the cluster.
+It is recommended to have a backup of the indices in the cluster;
+if running a production cluster, you will need to request an updated license
+for Siren Vanguard.
 
 [float]
 ===== Search Guard configuration backup
@@ -128,17 +130,25 @@ to:
   https://www.elastic.co/downloads/elasticsearch .
 - extract the package to a new location; make sure to not overwrite the
   existing installation when extracting the archive.
-- copy the `config` directory from the previous installation to the new one
+- copy all files from the `config` directory of the previous installation to the `config`
+  directory of the new installation.
 - check the value of `path.data` in `config/elasticsearch.yml`; if not set, you
   will need to copy the `data` directory from the old installation to the new
   one, otherwise Elasticsearch will keep using the data directory specified in
   `path.data`.
+- ensure that the new location has the correct filesystem permissions for your
+  environment (usually it is owned by the user running Elasticsearch).
 
 *Configuration changes*
 
 Any index level setting (settings starting with `index`) declared in
 `elasticsearch.yml` must be removed from the file; these settings have now to
 be declared in {elastic-ref}indices-templates.html[Index templates].
+
+The following settings must be removed if present:
+
+- `index.queries.cache.everything`
+- `siren.filterjoin.cache.size`
 
 *Startup scripts*
 
@@ -188,8 +198,9 @@ the plugin from {download-ref}[our customer portal] and install it through
 [float]
 ====== Search Guard 5
 
-The Search Guard 5 plugin replaces the previous Search Guard 2 and Search Guard
-SSL plugins; to find out the version of Search Guard 5 compatible with your
+If your cluster is protected by Search Guard, you will need to replace the
+Search Guard 2 and Search Guard SSL plugins with the Search Guard 5 plugin;
+to find out the version of Search Guard 5 compatible with your
 Elasticsearch installation, please check the {searchguard-matrix-ref}[Search
 Guard version matrix].
 
@@ -312,16 +323,15 @@ Clusterstate: YELLOW
 Number of nodes: 1
 Number of data nodes: 1
 searchguard index already exists, so we do not need to create one.
-Populate config from /home/admin/es/configbak
-Will update 'config' with ../elasticsearch.old/configbak/sg_config.yml
+Will update 'config' with configbak/sg_config.yml
    SUCC: Configuration for 'config' created or updated
-Will update 'roles' with ../elasticsearch.old/configbak/sg_roles.yml
+Will update 'roles' with configbak/sg_roles.yml
    SUCC: Configuration for 'roles' created or updated
-Will update 'rolesmapping' with ../elasticsearch.old/configbak/sg_roles_mapping.yml
+Will update 'rolesmapping' with configbak/sg_roles_mapping.yml
    SUCC: Configuration for 'rolesmapping' created or updated
-Will update 'internalusers' with ../elasticsearch.old/configbak/sg_internal_users.yml
+Will update 'internalusers' with configbak/sg_internal_users.yml
    SUCC: Configuration for 'internalusers' created or updated
-Will update 'actiongroups' with ../elasticsearch.old/configbak/sg_action_groups.yml
+Will update 'actiongroups' with configbak/sg_action_groups.yml
    SUCC: Configuration for 'actiongroups' created or updated
 Done with success
 ----
@@ -355,8 +365,11 @@ section.
 [float]
 === Search Guard configuration changes
 
-This section describes all the changes required to the Search Guard
-configuration files; once the files have been modified, the configuration can
+This section describes all the Kibi specific changes required to the Search
+Guard configuration files; it is advised to backup the files in the retrieved
+configuration directory before making changes.
+
+Once the files have been modified, the updated configuration can
 be loaded to the cluster using `sgadmin`.
 
 [float]
@@ -553,6 +566,20 @@ kibiserver:
 [float]
 ===== sentinl
 
+Sentinl is automatically enabled in Kibi 5; if you do not need alerting it
+is possible to disable the plugin by putting the following in `kibi.yml`:
+
+[source,yaml]
+----
+sentinl:
+  enabled:
+    false
+----
+
+If you were previously using Sentinl, replace the `sentinl` role with the
+following; **make sure to set the correct names for watcher and watcher_alarms
+indices if using a custom configuration**.
+
 Replace the `sentinl` role with the following; **make sure to set the correct
 names for watcher and watcher_alarms indices if using a custom configuration**.
 
@@ -565,9 +592,6 @@ sentinl:
     - "indices:admin/template/*"
     - KIBI_CLUSTER
   indices:
-    '*':
-      '*':
-        - KIBI_READONLY
     'watcher_alarms*':
       '*':
         - KIBI_READWRITE
@@ -578,13 +602,45 @@ sentinl:
         - CREATE_INDEX
 ----
 
+You will also need to grant read permissions to each data index that Sentinl
+should be able to access when executing watches; for example, to grant access
+to the index `readings` and all indices starting with `logs`, the role would
+become:
+
+[source,yaml]
+----
+# Permissions for a Sentinl user.
+sentinl:
+  cluster:
+    - "indices:data/write/bulk*"
+    - "indices:admin/template/*"
+    - KIBI_CLUSTER
+  indices:
+    'watcher_alarms*':
+      '*':
+        - KIBI_READWRITE
+        - CREATE_INDEX
+    '/(watcher|watcher_alarms)/':
+      '*':
+        - KIBI_READWRITE
+        - CREATE_INDEX
+    'readings':
+      '*':
+        - KIBI_READONLY
+    'logs*':
+      '*':
+        - KIBI_READONLY
+----
+
+
 [float]
 ===== Kibi user roles
 
 In each Kibi user role:
  
 - replace `KIBI_MSEARCH` with `KIBI_COMPOSITE`.
-- add the following permission on the Kibi index (`.kibi` by default):
+- remove the following permission on the Kibi index (`.kibi` by default) from
+  each user role that has it:
 
 [source,yaml]
 ----
@@ -593,6 +649,33 @@ In each Kibi user role:
         - "indices:data/read/search"
         - "indices:data/read/coordinate-search"
 ----
+
+If you are using the Kibi access control plugin and want to enable ACLs on Kibi
+saved objects (which restricts access to saved objects), ensure that Kibi users
+**do not** have access to the Kibi index (`.kibi` by default), otherwise they
+might be able to peek at saved objects by issuing custom Elasticsearch queries.
+
+Access to the `.kibi` index was usually granted by the following lines in
+previous Kibi releases; these can be removed when using ACLs as the .kibi index
+will be accessed only by the `kibiserver` role:
+
+```
+'?kibi':
+  '*':
+    - KIBI_READWRITE
+```
+
+```
+'?kibi':
+  '*':
+    - KIBI_READONLY
+```
+
+If there are users with read access to all indices (`*`), they will be able to
+see the Kibi index as well; if you need to hide it, you should replace the
+wildcard with a list of rules for each index.
+
+*Monitoring*
 
 To grant a user the permission to use monitoring plugins and retrieve
 diagnostics information from the UI, you will need to add the `CLUSTER_MONITOR`
@@ -647,6 +730,65 @@ monitoring:
 ----
 
 [float]
+==== Loading the modified configuration
+
+To load the modified configuration run sgadmin as follows:
+
+[source,bash]
+----
+$ bash /path/to/sgadmin.sh -ks CN\=sgadmin-keystore.jks -cd confignew -kspass password -ts truststore.jks -tspass password -icl -nhnv -h elasticsearch.local -p 9300
+Search Guard Admin v5
+Will connect to elasticsearch.local:9330 ... done
+Contacting elasticsearch cluster 'elasticsearch' and wait for YELLOW clusterstate ...
+Clustername: escluster
+Clusterstate: YELLOW
+Number of nodes: 1
+Number of data nodes: 1
+searchguard index already exists, so we do not need to create one.
+Will update 'config' with confignew/sg_config.yml
+   SUCC: Configuration for 'config' created or updated
+Will update 'roles' with confignew/sg_roles.yml
+   SUCC: Configuration for 'roles' created or updated
+Will update 'rolesmapping' with confignew/sg_roles_mapping.yml
+   SUCC: Configuration for 'rolesmapping' created or updated
+Will update 'internalusers' with confignew/sg_internal_users.yml
+   SUCC: Configuration for 'internalusers' created or updated
+Will update 'actiongroups' with confignew/sg_action_groups.yml
+   SUCC: Configuration for 'actiongroups' created or updated
+Done with success
+----
+
+Arguments:
+
+- `cd`: the directory containing the modified Search Guard configuration.
+- `ks`: the path to the administrative keystore
+- `kspass`: the password of the administrative keystore.
+- `ts`: the path to the truststore.
+- `tspass`: the password of the truststore.
+- `icl`: ignore cluster name.
+- `nhvv`: do not verify cluster hostname.
+- `h`: Elasticsearch hostname.
+- `p`: Elasticsearch transport port.
+
+[float]
+=== License
+
+You will need to upload your license once the cluster is up and running; to
+upload the license you can use curl as follows:
+
+[source,bash]
+----
+curl http://localhost:9220/_siren/license -XPUT -T license.sig
+----
+
+If your cluster is protected by Search Guard, remember to specify credentials:
+
+[source,bash]
+----
+curl -uadmin:password --cacert=ca.pem https://localhost:9220/_siren/license -XPUT -T license.sig
+----
+
+[float]
 === Kibi
 
 Before upgrading Kibi, make sure to perform the following steps:
@@ -679,12 +821,45 @@ update `kibi.yml` as follows:
 
 - add `server.ssl.enabled: true` 
 - replace `server.ssl.cert` with `server.ssl.certificate`
+- replace `ssl.verify` with `ssl.verificationMode`; `ssl.verificationMode` can be
+  set to `full`, to check both certificate and hostname, `certificate` to check
+  only the certificate, `none` to disable verification.
+  If not set, the verification mode defaults to `full`.
 
 [float]
 ===== Search Guard client CA
 
 If your cluster is protected by Search Guard, you will need to rename
 `elasticsearch.ssl.ca` to `elasticsearch.ssl.certificateAuthorities`.
+
+
+[float]
+===== Kibi access control ACL
+
+If you want to enable Kibi Access Control ACL, you will need to:
+
+- add `acl.enabled: true` to the `kibi_access_control` section;
+- specify the Search Guard role that will have administrative access to the ACL configuration
+  in `admin_role` (`.kibiadmin` by default);
+- specify the name of the index where access control rules will be stored (`.kibiaccess` by default).
+
+E.g.:
+
+[source,yaml]
+----
+kibi_access_control:
+  acl:
+    enabled: true
+    index: kibiaccess
+  admin_role: kibiadmin
+----
+
+Once ACLs are enabled, you will need to login with a user having the role specified in
+`admin_role` and visit Access Control -> ACL to create Kibi roles with the desired
+permissions.
+
+For more informations about Kibi Access Control ACL, please check the
+<<searchguard_integration>> chapter.
 
 [float]
 ===== Sense
@@ -700,6 +875,7 @@ console.proxyConfig:
     ssl:
       ca: "pki/searchguard/ca.pem"
 ----
+
 
 [float]
 ==== Third party plugins

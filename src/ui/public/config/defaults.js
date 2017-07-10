@@ -66,7 +66,7 @@ define(function (require) {
       },
       'discover:sampleSize': {
         value: 50, // kibi: in kibi the default is 50
-        description: 'The number of rows to show in the table',
+        description: 'The number of rows to show in the Discover page and table',
       },
       'doc_table:highlight': {
         value: true,

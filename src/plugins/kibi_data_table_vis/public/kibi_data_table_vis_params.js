@@ -5,7 +5,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_array_param');
 
   require('ui/modules').get('kibana/kibi_data_table_vis')
-  .directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, $window, kbnUrl) {
+  .directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, $window, kbnUrl, config) {
 
     const notify = createNotifier({
       location: 'Enhanced search results'
@@ -20,6 +20,11 @@ define(function (require) {
         // ======
         // Events
         // ======
+
+        // if vis.params.pageSize is not been set before, set it from config
+        if (!$scope.vis.params.pageSize) {
+          $scope.vis.params.pageSize = parseInt(config.get('discover:sampleSize'));
+        };
 
         // Emit an event when state changes
         $scope.$watch('vis.dirty', function () {

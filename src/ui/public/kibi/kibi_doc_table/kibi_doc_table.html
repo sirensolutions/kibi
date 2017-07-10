@@ -10,7 +10,7 @@
   ng-class="{ loading: searchSource.activeFetchCount > 0 }">
 
   <div ng-show="!infiniteScroll && hits.length < total" class="limit-info">
-    Showing {{hits.length}} out of {{total}}
+    Showing {{size}} out of {{total}}
     <a ng-click="increaseSize()">See more</a>
   </div>
 

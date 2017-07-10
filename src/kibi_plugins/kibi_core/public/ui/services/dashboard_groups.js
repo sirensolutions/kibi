@@ -453,11 +453,13 @@ uiModules
 
     getVisibleDashboardIds(dashboardIds) {
       // filter the given dashboardIds
-      // to use only the selected/visible dashboard from each group
+      // to use only the visible dashboard
       return _(this.getGroups())
-      .filter('selected')
-      .filter(g => !dashboardIds || _.contains(dashboardIds, g.selected.id))
-      .map('selected.id')
+      .filter(g => !g.collapsed || g.virtual)
+      .map('dashboards')
+      .flatten()
+      .filter(d => _.contains(dashboardIds, d.id))
+      .map('id')
       .value();
     }
 

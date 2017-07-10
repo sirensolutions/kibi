@@ -31,8 +31,7 @@ define(function (require) {
           clickOptions: [],
           queryDefinitions: [],
           columns: [],
-          columnAliases: [],
-          pageSize: 50
+          columnAliases: []
         },
         editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
       },

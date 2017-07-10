@@ -139,7 +139,7 @@ define(function (require) {
         // kibi: increase the number of results retrieved
         const sampleSize = config.get('discover:sampleSize');
         try {
-          $scope.size = parseInt(sampleSize);
+          $scope.size =  $scope.pageSize || parseInt(sampleSize);
         } catch (e) {
           throw new Error(`Could not parse discover:sampleSize configuration value. Expected number got [${sampleSize}]`);
         }
@@ -276,6 +276,13 @@ define(function (require) {
           .catch(notify.error);
         }));
 
+        $scope.$watch('pageSize', function (pageSize) {
+          if (pageSize !== undefined) {
+            $scope.size = $scope.pageSize;
+            $scope.searchSource.size($scope.size);
+            courier.fetch();
+          }
+        });
       }
     };
   });

@@ -122,6 +122,11 @@ module.exports = function createProxy(server, method, path, config) {
         });
       },
       onResponse: (err, response, request, reply, settings, ttl, dataPassed) => {
+        if (err) {
+          reply(err);
+          return;
+        }
+
         const chunks = [];
 
         if (response === null || response === undefined) {
@@ -129,10 +134,7 @@ module.exports = function createProxy(server, method, path, config) {
           return;
         }
 
-        response.on('error', (error) => {
-          reply(error);
-          return;
-        });
+        response.on('error', error => reply(error));
         response.on('data', (chunk) => chunks.push(chunk));
         response.on('end', () => {
           const data = Buffer.concat(chunks);

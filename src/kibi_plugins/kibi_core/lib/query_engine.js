@@ -687,12 +687,11 @@ QueryEngine.prototype.getIdsFromQueries = function (queryDefs, options) {
   return self._init().then(function () {
     return self._getQueries(queryIds, options)
     .then(function (queries) {
-      const promises = _.map(queries, function (query) {
+      return Promise.map(queries, function (query) {
         const queryDefinition = self._getQueryDefById(queryDefs, query.id);
         const queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
         return query.fetchResults(options, true, queryVariableName);
       });
-      return Promise.all(promises);
     });
   });
 };

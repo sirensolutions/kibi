@@ -27,16 +27,6 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
 
   $scope.unique = _.unique;
 
-  // advanced options button
-  $scope.edit = function (item, index) {
-    const params = {
-      service: 'indices',
-      id: index
-    };
-
-    kbnUrl.change('/management/siren/relations/{{ service }}/{{ id }}', params);
-  };
-
   $scope.relations = config.get('kibi:relations');
 
   // track if the configuration has been changed

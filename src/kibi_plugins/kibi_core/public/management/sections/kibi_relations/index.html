@@ -34,7 +34,6 @@
               <th>Right Relation</th>
               <th>Label</th>
               <!--controls-->
-              <th ng-if="kibiEnterpriseEnabled"></th>
               <th></th>
             </tr>
           </thead>
@@ -158,17 +157,6 @@
               </td>
 
               <!--controls-->
-              <td class="ng-scope alignLeft" ng-if="kibiEnterpriseEnabled">
-                <div class="actions">
-                  <button
-                     ng-click="edit(relation, $index)"
-                     class="btn btn-xs"
-                     aria-label="Edit">
-                    <span class="sr-only">Edit</span>
-                    <i aria-hidden="true" class="fa fa-pencil"></i>
-                  </button>
-                </div>
-              </td>
               <td>
                 <div class="btn-group rightCorner">
                   <kibi-array-param-remove index="{{ $index }}" model="relations.relationsIndices">
@@ -177,7 +165,7 @@
               </td>
             </tr>
             <tr ng-if="relation.errors && relation.errors.length">
-              <td colspan="{{ kibiEnterpriseEnabled ? 6 : 5 }}">
+              <td colspan="5">
                 <h4 class="hintbox-heading">
                   <i class="fa fa-danger text-danger"></i> Warning
                 </h4>

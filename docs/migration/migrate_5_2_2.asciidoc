@@ -366,9 +366,8 @@ section.
 === Search Guard configuration changes
 
 This section describes all the Kibi specific changes required to the Search
-Guard configuration files; it is advised to make a copy of the configuration
-directory retrieved before the upgrade and apply the changes there, leaving the
-backup intact.
+Guard configuration files; it is advised to backup the files in the retrieved
+configuration directory before making changes.
 
 Once the files have been modified, the updated configuration can
 be loaded to the cluster using `sgadmin`.
@@ -567,8 +566,8 @@ kibiserver:
 [float]
 ===== sentinl
 
-Sentinl is automatically enabled in Kibi 5; if you do not need alerting is
-it possible to disable the plugin by putting the following in `kibi.yml`:
+Sentinl is automatically enabled in Kibi 5; if you do not need alerting it
+is possible to disable the plugin by putting the following in `kibi.yml`:
 
 [source,yaml]
 ----
@@ -652,10 +651,9 @@ In each Kibi user role:
 ----
 
 If you are using the Kibi access control plugin and want to enable ACLs on Kibi
-saved objects (which allow to restrict access to saved objects), ensure that
-Kibi users **do not** have access to the Kibi index (`.kibi` by default),
-otherwise they might be able to peek at saved objects by issuing custom
-Elasticsearch queries.
+saved objects (which restricts access to saved objects), ensure that Kibi users
+**do not** have access to the Kibi index (`.kibi` by default), otherwise they
+might be able to peek at saved objects by issuing custom Elasticsearch queries.
 
 Access to the `.kibi` index was usually granted by the following lines in
 previous Kibi releases; these can be removed when using ACLs as the .kibi index
@@ -674,8 +672,8 @@ will be accessed only by the `kibiserver` role:
 ```
 
 If there are users with read access to all indices (`*`), they will be able to
-see the the Kibi index as well; if you need to hide it, it is recommended to
-replace the wildcard with a list of rules for each index.
+see the Kibi index as well; if you need to hide it, you should replace the
+wildcard with a list of rules for each index.
 
 *Monitoring*
 

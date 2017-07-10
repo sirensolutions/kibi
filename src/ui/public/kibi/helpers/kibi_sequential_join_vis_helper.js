@@ -81,10 +81,14 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
             const switchToDashboard = function () {
               // add join_seq Filter
               kibiState.addFilter(this.targetDashboardId, this.joinSeqFilter);
-              kibiState.save();
               // switch to target dashboard
-              if (this.targetDashboardId) {
+              if (this.targetDashboardId && this.targetDashboardId !== currentDashboardId) {
+                // do not emit an event on save when switching to a different dashboard
+                // since this would trigger unwanted listeners
+                kibiState.save(false, true);
                 kbnUrl.change('/dashboard/{{id}}', { id: this.targetDashboardId });
+              } else {
+                kibiState.save();
               }
             };
 

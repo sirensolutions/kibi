@@ -320,10 +320,8 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const kibiDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
 
   $scope.$listen(kibiState, 'save_with_changes', function (diff) {
-    if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
-        diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1 ||
-        diff.indexOf(kibiState._properties.dashboards) !== -1) {
-      updateButtons.call(this, 'Relations changes');
+    if (diff.indexOf(kibiState._properties.dashboards) !== -1) {
+      updateButtons.call(this, 'dashboards in kibistate changes');
     }
   });
 

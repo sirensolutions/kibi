@@ -58,7 +58,7 @@ uiModules
       };
 
       $scope.$watch(kibiState._getCurrentDashboardId, id => {
-        if (id && dashboardGroups.isInitialized) {
+        if (id) {
           dashboardGroups.getGroups().forEach(group => {
             group.dashboards.forEach(dash => dash.$$highlight = false);
           });
@@ -66,7 +66,7 @@ uiModules
           group.collapsed = false;
           $scope.persistCollapsedGroupState();
           const dashboardIds = _(group.dashboards).filter(d => !d.count).map('id').value();
-          if (dashboardIds.length > 0) {
+          if (dashboardIds.length > 0 && dashboardGroups.isInitialized) {
             dashboardGroups.updateMetadataOfDashboardIds(dashboardIds);
           }
         }

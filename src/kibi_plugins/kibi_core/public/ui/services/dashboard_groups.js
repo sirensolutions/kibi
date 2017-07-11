@@ -66,6 +66,7 @@ uiModules
   class DashboardGroups extends SimpleEmitter {
     constructor() {
       super();
+      this._initialized = false;
       this.init = _.once(() => {
         // NOTE: It is important to wait until appState is fully ready before doing the init
         // this prevents situations where appState was not ready yet
@@ -81,11 +82,11 @@ uiModules
             }
             if (appState) {
               // leaving this console log print to have an idea how long this takes on different systems
-              console.log('Got app state during dashboard_group service initailization after ' + (i * 10) + 'ms');
+              console.log('Got appState during dashboard_group service initailization after ' + (i * 10) + 'ms');
               return fulfill();
             }
             if (++i > MAX) {
-              return reject(new Error('Could not get an app during dashboard_group service initialization'));
+              return reject(new Error('Could not get appState during dashboard_group service initialization'));
             }
             timer = $timeout(check, 10);
           };
@@ -108,8 +109,13 @@ uiModules
         return Promise.all([ groupsPromise, metadataPromise ])
         .then(([ groups ]) => {
           this.groups = groups;
+          this._initialized = true;
         });
       });
+    }
+
+    get isInitialized() {
+      return this._initialized;
     }
 
     _shortenDashboardName(groupTitle, dashboardTitle) {

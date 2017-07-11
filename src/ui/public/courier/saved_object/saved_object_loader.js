@@ -11,6 +11,7 @@ export class SavedObjectLoader {
     this.cacheGet = get;
     this.cacheFind = find;
     this.exclude = exclude;
+    this.reservedCharactersRegex = new RegExp('[+-=&&||><!(){}[\\]^"~*?:\/]', 'g');
     // kibi: end
 
     this.type = SavedObjectClass.type;
@@ -118,10 +119,20 @@ export class SavedObjectLoader {
       return Promise.resolve(this.cache.get(cacheKey));
     }
 
+    //kibi: if searchString contains reserved characters, split it with reserved characters
+    // combine words with OR operator
+    let safeQuery = '';
+    if (searchString && searchString.match(this.reservedCharactersRegex)) {
+      const words = searchString.split(this.reservedCharactersRegex).map((item) => item.trim());
+      _.each(words, function (word) {
+        safeQuery = safeQuery + '||' + word;
+      });
+    };
+
     return this.savedObjectsAPI.search({
       index: this.kbnIndex,
       type: this.lowercaseType,
-      q: searchString,
+      q: safeQuery || searchString,
       exclude: this.exclude,
       size
     })
@@ -133,6 +144,14 @@ export class SavedObjectLoader {
       if (this.cache && this.cacheFind) {
         this.cache.set(cacheKey, result);
       }
+
+      //kibi: when escaping reserved characters in query, we do not filter with reserved chracters
+      //if searchString contains reserved characters check titles of hits
+      if (safeQuery) {
+        result.hits = _.filter(result.hits, function (hit) { return hit.title.includes(searchString); });
+        result.total = result.hits.length;
+      }
+      //kibi: end
       return result;
     });
   }

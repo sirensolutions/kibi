@@ -309,7 +309,7 @@ uiModules
         $scope.isSidebarOpen = isOpen;
       });
 
-      $scope.refreshTooltipContent = function (event, reference, isDashboard) {
+      $scope.addTooltip = function (event, reference, isDashboard, includeFilters = false) {
         let title;
         let filterMessage = null;
         if (isDashboard) {
@@ -329,7 +329,7 @@ uiModules
             title += ' (' + group.selected.count  + ')';
           }
         }
-        $scope.tooltipContent = title + (filterMessage ? filterMessage : '');
+        $scope.tooltipContent = title + ((filterMessage && includeFilters) ? filterMessage : '');
         const selector = $(event.currentTarget);
         selector.qtip({
           content: {
@@ -354,6 +354,34 @@ uiModules
           }
         }).qtip('show');
       };
+
+      function isEllipsisActive(e) {
+        return (e.offsetWidth < e.scrollWidth);
+      }
+
+      $scope.refreshTooltipContent = function (event, reference, isDashboard) {
+        const $elem = $(event.currentTarget);
+        let $titleElement;
+        if (isDashboard) {
+          $titleElement = $elem.find('.dashboard-nav-title');
+        } else {
+          $titleElement = $elem.find('.title');
+        }
+        if ($titleElement.length > 0 && isEllipsisActive($titleElement[0])) {
+          $scope.addTooltip(event, reference, isDashboard);
+        }
+      };
+
+      $scope.refreshFilterTooltip = function (event, reference, isDashboard) {
+        $scope.timeoutPromise = $timeout(() => {
+          if ($scope.timeoutPromise) {
+            $timeout.cancel($scope.timeoutPromise);
+          }
+          $scope.addTooltip(event, reference, isDashboard, true);
+        }, 1000);
+      };
+
+
     }
   };
 });

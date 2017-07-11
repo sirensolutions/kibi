@@ -368,6 +368,9 @@ uiModules
           $titleElement = $elem.find('.title');
         }
         if ($titleElement.length > 0 && isEllipsisActive($titleElement[0])) {
+          if ($scope.timeoutPromise) {
+            $timeout.cancel($scope.timeoutPromise);
+          }
           $scope.addTooltip(event, reference, isDashboard);
         }
       };
@@ -379,6 +382,12 @@ uiModules
           }
           $scope.addTooltip(event, reference, isDashboard, true);
         }, 1000);
+      };
+
+      $scope.hideFilterTooltip = function (event, reference, isDashboard) {
+        if ($scope.timeoutPromise) {
+          $timeout.cancel($scope.timeoutPromise);
+        }
       };
 
 

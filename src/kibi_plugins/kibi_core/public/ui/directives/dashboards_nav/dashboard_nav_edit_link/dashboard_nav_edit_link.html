@@ -53,7 +53,9 @@
             </span>
             <!--filters indicator-->
             <span ng-if="group.selected.filterIconMessage" aria-hidden="true">
-              <i class="fa fa-filter"/>
+              <i class="fa fa-filter"
+                 ng-mouseenter="refreshFilterTooltip($event, group)"
+                 ng-mouseleave="hideFilterTooltip()"/>
             </span>
             <!--join pruning indicator-->
             <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
@@ -98,7 +100,9 @@
               </span>
               <!--filters indicator-->
               <span ng-if="dashboard.filterIconMessage" aria-hidden="true">
-                 <i class="fa fa-filter"/>
+                 <i class="fa fa-filter"
+                   ng-mouseenter="refreshFilterTooltip($event, $index, true)"
+                   ng-mouseleave="hideFilterTooltip()"/>
               </span>
               <!--join pruning indicator-->
               <span ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"

@@ -35,7 +35,7 @@ uiModules
       const COLLAPSED_WIDTH = 140;
       const SLIDER_WIDTH = 4;
       const BOTTOM_BAR_HEIGHT = 70;
-      const DASHBOARDS_INDICATORS_WIDTH = 80;
+      const DASHBOARDS_INDICATORS_WIDTH = 88;
       const GROUPS_INDICATORS_WIDTH = 50;
 
       $scope.bar = $element;

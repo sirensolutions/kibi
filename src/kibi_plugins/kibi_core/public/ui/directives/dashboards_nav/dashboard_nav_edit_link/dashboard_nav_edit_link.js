@@ -376,15 +376,16 @@ uiModules
       };
 
       $scope.refreshFilterTooltip = function (event, reference, isDashboard) {
+        const FILTER_TOOLTIP_SLEEP_TIME = 800;
         $scope.timeoutPromise = $timeout(() => {
           if ($scope.timeoutPromise) {
             $timeout.cancel($scope.timeoutPromise);
           }
           $scope.addTooltip(event, reference, isDashboard, true);
-        }, 1000);
+        }, FILTER_TOOLTIP_SLEEP_TIME);
       };
 
-      $scope.hideFilterTooltip = function (event, reference, isDashboard) {
+      $scope.hideFilterTooltip = function () {
         if ($scope.timeoutPromise) {
           $timeout.cancel($scope.timeoutPromise);
         }

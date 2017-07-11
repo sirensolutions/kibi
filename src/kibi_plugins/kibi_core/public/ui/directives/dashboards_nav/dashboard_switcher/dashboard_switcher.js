@@ -58,7 +58,7 @@ uiModules
       };
 
       $scope.$watch(kibiState._getCurrentDashboardId, id => {
-        if (id) {
+        if (id && dashboardGroups.isInitialized) {
           dashboardGroups.getGroups().forEach(group => {
             group.dashboards.forEach(dash => dash.$$highlight = false);
           });

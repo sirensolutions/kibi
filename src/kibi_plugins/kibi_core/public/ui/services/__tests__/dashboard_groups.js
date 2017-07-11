@@ -220,7 +220,7 @@ describe('Kibi Services', function () {
 
     describe('init', function () {
 
-      it('Should fail if getAppState returns undefined', function (done) {
+      it('should fail if getAppState returns undefined', function (done) {
         init({
           getAppStateUndefined: true
         });
@@ -230,7 +230,7 @@ describe('Kibi Services', function () {
           done(new Error('Should reject as getAppState returns undefined'));
         })
         .catch((err) => {
-          expect(err.message).to.equal('Could not get an app during dashboard_group service initialization');
+          expect(err.message).to.equal('Could not get appState during dashboard_group service initialization');
           done();
         });
       });

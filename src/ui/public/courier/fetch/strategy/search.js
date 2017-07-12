@@ -40,7 +40,6 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
           let index = [];
           // kibi: if there are no indices, issue a match_none query
           // against the raw index pattern.
-          let type = fetchParams.type;
           if (_.isArray(indexList) && indexList.length === 0) {
             if (fetchParams.index.id) {
               index.push(fetchParams.index.id);
@@ -57,7 +56,7 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
           // kibi: end
           return angular.toJson({
             index,
-            type,
+            type: fetchParams.type,
             search_type: fetchParams.search_type,
             ignore_unavailable: true,
             preference: sessionId,

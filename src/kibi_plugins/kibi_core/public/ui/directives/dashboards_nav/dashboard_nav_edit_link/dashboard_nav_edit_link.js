@@ -124,6 +124,7 @@ uiModules
         }
         $scope.group.collapsed = !$scope.group.collapsed;
         if (!$scope.group.collapsed) {
+          $scope.$emit('kibi:dashboardGroup:expand');
           const dashboardIds = _($scope.group.dashboards).map('id').value();
           if (dashboardIds.length > 0) {
             $scope.group.dashboards.forEach(dashboard => delete dashboard.count);
@@ -376,7 +377,7 @@ uiModules
       };
 
       $scope.refreshFilterTooltip = function (event, reference, isDashboard) {
-        const FILTER_TOOLTIP_SLEEP_TIME = 800;
+        const FILTER_TOOLTIP_SLEEP_TIME = 400;
         $scope.timeoutPromise = $timeout(() => {
           if ($scope.timeoutPromise) {
             $timeout.cancel($scope.timeoutPromise);

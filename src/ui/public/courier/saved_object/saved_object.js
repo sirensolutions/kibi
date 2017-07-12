@@ -443,7 +443,6 @@ export default function SavedObjectFactory(
           if (isErrorNonFatal(err)) {
             return;
           }
-          notify.error(err); // kibi: added here so the errors are shown by notifier
           return Promise.reject(err);
         });
     };

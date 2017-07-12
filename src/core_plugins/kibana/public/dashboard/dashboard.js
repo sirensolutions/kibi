@@ -317,7 +317,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
               updateViewMode(DashboardViewMode.VIEW);
             }
           }
-        }).catch(notify.fatal);
+        }).catch(notify.error); // kibi: downgraded to error
       };
 
       // kibi: update root source on kibiState reset

@@ -284,7 +284,7 @@ uiModules
       $scope.$on('kibi:dashboardGroup:expand', function () {
         $timeout(() => {
           updateSidebarSize();
-        }, 1);
+        });
       });
 
       $timeout(() => {

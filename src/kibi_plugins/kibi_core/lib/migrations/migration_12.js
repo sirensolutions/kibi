@@ -31,11 +31,11 @@ export default class Migration12 extends Migration {
   }
 
   async count() {
+    let count = 0;
     if (!this._defaultDashboardTitleYml) {
-      return;
+      return count;
     }
     const objects = await this.scrollSearch(this._index, this._type);
-    let count = 0;
     _.each(objects, function (object) {
       const defaultDashboardSettings = object._source['kibi:defaultDashboardTitle'];
 

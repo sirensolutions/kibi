@@ -59,7 +59,7 @@ describe('kibi_core/migrations/functional', function () {
       it('should count all upgradeable objects', wrapAsync(async () => {
         const migration = new Migration(configuration);
         const result = await migration.count();
-        expect(result).to.be(undefined);
+        expect(result).to.be(0);
       }));
 
     });
@@ -86,7 +86,7 @@ describe('kibi_core/migrations/functional', function () {
       it('should count all upgradeable objects', wrapAsync(async () => {
         const migration = new Migration(configuration);
         const result = await migration.count();
-        expect(result).to.be(undefined);
+        expect(result).to.be(0);
       }));
 
     });

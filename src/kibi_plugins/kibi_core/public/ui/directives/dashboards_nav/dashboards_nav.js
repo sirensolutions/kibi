@@ -281,6 +281,12 @@ uiModules
         }, 500);
       });
 
+      $scope.$on('kibi:dashboardGroup:expand', function () {
+        $timeout(() => {
+          updateSidebarSize();
+        });
+      });
+
       $timeout(() => {
         updateSidebarSize();
         $scope.links[0].scrollTop = dashboardsNavState.scrollbarPos();

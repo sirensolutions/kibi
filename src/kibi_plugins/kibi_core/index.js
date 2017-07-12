@@ -16,6 +16,7 @@ import migration4 from './lib/migrations/migration_4';
 import migration5 from './lib/migrations/migration_5';
 import migration6 from './lib/migrations/migration_6';
 import migration7 from './lib/migrations/migration_7';
+import migration8 from './lib/migrations/migration_8';
 import migration9 from './lib/migrations/migration_9';
 import migration10 from './lib/migrations/migration_10';
 import migration11 from './lib/migrations/migration_11';
@@ -42,6 +43,7 @@ module.exports = function (kibana) {
     migration5,
     migration6,
     migration7,
+    migration8,
     migration9,
     migration10,
     migration11,

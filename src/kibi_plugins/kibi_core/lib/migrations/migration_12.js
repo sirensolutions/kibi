@@ -47,12 +47,12 @@ export default class Migration12 extends Migration {
   }
 
   async upgrade() {
+    let upgraded = 0;
     if (!this._defaultDashboardTitleYml) {
-      return;
+      return upgraded;
     }
 
     let body = '';
-    let upgraded = 0;
     this._logger.info(`Updating kibi_core.default_dashboard_title from config`);
     const objects = await this.scrollSearch(this._index, this._type);
     for (const obj of objects) {

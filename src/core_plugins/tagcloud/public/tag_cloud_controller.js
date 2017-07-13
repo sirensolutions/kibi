@@ -85,7 +85,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
   $scope.$watch('vis.params', (options) => tagCloud.setOptions(options));
 
-   // kibi: tag-claud resize behaviour fixed
+  // kibi: tag-claud resize behaviour fixed
   const removeWatch = $scope.$watch(getContainerSize, _.debounce(() => {
     tagCloud.resize();
   }, 500, { trailing: true }), true);

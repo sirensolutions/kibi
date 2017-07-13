@@ -140,7 +140,7 @@ class TagCloud extends EventEmitter {
       const cloudBBox = this._svgGroup[0][0].getBBox();
       this._cloudWidth = cloudBBox.width;
       this._cloudHeight = cloudBBox.height;
-    // kibi: tag-claud support for scalling
+      // kibi: tag-claud support for scalling
       this._allInViewBox = true;
     } else {
       this._emptyDOM(job);
@@ -171,6 +171,7 @@ class TagCloud extends EventEmitter {
         }
         this._svgGroup.attr('transform', 'translate(' + [ tx, ty] + ') scale(' + [scaleX, scaleY] + ')');
       }
+      // kibi: end
       this._completedJob = job;
       this.emit('renderComplete');
     }

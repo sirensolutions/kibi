@@ -5,6 +5,7 @@ import d3 from 'd3';
 import { fromNode, delay } from 'bluebird';
 
 // kibi: disable all the tests for now because are absolete with this custom version
+//       https://github.com/sirensolutions/kibi-internal/issues/3310
 
 describe('tag cloud tests', function () {
 

@@ -1,7 +1,4 @@
 /*eslint max-len: 0*/
-import requirefrom from 'requirefrom';
-
-const packageJson = requirefrom('src/utils')('package_json');
 
 /**
  * Defines the following objects:
@@ -17,7 +14,6 @@ module.exports = [
     }
   },
   {
-    buildNum: packageJson.build.number,
     'dateFormat:tz': 'UTC',
     'kibi:relations': '{\"version\":2,\"relationsDashboards\":[],\"relationsDashboardsSerialized\":{},\"relationsIndices\":[],\"relationsIndicesSerialized\":{}}'
   }

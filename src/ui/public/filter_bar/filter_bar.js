@@ -287,7 +287,7 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
           return;
         }
 
-        let promise = Promise.resolve();
+        const promise = Promise.resolve();
 
         // the selected entity changed
         if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||

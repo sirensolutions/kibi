@@ -31,6 +31,16 @@ export default class Migration5 extends Migration {
   }
 
   async count() {
+    const config = await this._client.get({
+      index: this._index,
+      type: 'config',
+      ignore: [404],
+      id: 'kibi'
+    });
+    if (!config.found) {
+      return 0;
+    }
+
     const objects = await this.scrollSearch(this._index, 'visualization');
     return objects.reduce((count, obj) => {
       if (obj._type === 'visualization') {

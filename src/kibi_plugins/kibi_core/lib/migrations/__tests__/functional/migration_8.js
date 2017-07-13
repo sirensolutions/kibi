@@ -84,16 +84,6 @@ describe('kibi_core/migrations/functional', function () {
     const upgreadedKeysNo = Object.keys(upgradedKibiRelations).length;
     const originalKeysNo = Object.keys(originalKibiRelations).length;
 
-    if(upgreadedKeysNo === originalKeysNo) {
-      console.log("==============");
-      console.log(upgreadedKeysNo, originalKeysNo);
-      console.log("==============");
-      console.log(upgradedKibiRelations);
-      console.log("==============");
-      console.log(originalKibiRelations);
-      console.log("==============");
-    }
-
     expect(upgreadedKeysNo - 1).to.equal(originalKeysNo);
 
     expect(Object.keys(upgradedKibiRelations.relationsIndices).length)
@@ -148,7 +138,6 @@ describe('kibi_core/migrations/functional', function () {
 
     beforeEach(async () => {
       await scenarioManager.reload(Scenario);
-      console.log("Scenario reloaded");
     });
 
     describe('should update the relations when kibi:relations', function () {
@@ -365,7 +354,6 @@ describe('kibi_core/migrations/functional', function () {
 
     afterEach(async () => {
       await scenarioManager.unload(Scenario);
-      console.log("Scenario uloaded");
     });
 
   });

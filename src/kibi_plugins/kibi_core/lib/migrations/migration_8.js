@@ -80,21 +80,7 @@ export default class Migration8 extends Migration {
     }
     const obj = objects[0];
     const relations = JSON.parse(obj._source['kibi:relations']);
-    console.log("................................................");
-    console.log("................................................");
-    console.log(relations);
-
     const modified = this._upgradeKibiRelations(relations);
-
-    console.log("................................................");
-    console.log(relations);
-    console.log("................................................");
-    console.log(modified);
-    console.log("................................................");
-    console.log(JSON.stringify(relations));
-    console.log("................................................");
-    console.log("................................................");
-
 
     if (!modified) {
       return 0;

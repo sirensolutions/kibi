@@ -1,5 +1,8 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
+// kibi: imports
+import angular from 'angular';
+
 import vislibComponentsSeedColorsProvider from 'ui/vis/components/color/seed_colors';
 import { EventEmitter } from 'events';
 
@@ -33,7 +36,8 @@ class TagCloud extends EventEmitter {
     this.resize();
 
     //SETTING (non-configurable)
-    this._fontFamily = 'Impact';
+    // kibi: Font changed
+    this._fontFamily = 'Arial';
     this._fontStyle = 'normal';
     this._fontWeight = 'normal';
     this._spiral = 'archimedean';//layout shape
@@ -74,25 +78,20 @@ class TagCloud extends EventEmitter {
 
 
   resize() {
-    const newWidth = this._element.offsetWidth;
-    const newHeight = this._element.offsetHeight;
+    // kibi: width and height calculation fixed
+    let newWidth = angular.element(this._element).parent().width();
+    let newHeight = angular.element(this._element).parent().height();
     if (newWidth < 1 || newHeight < 1) {
-      return;
-    }
-    if (newWidth === this._size[0] && newHeight === this._size[1]) {
-      return;
+      newWidth = 0;
+      newHeight = 0;
     }
 
     const wasInside = this._size[0] >= this._cloudWidth && this._size[1] >= this._cloudHeight;
     const willBeInside = this._cloudWidth <= newWidth && this._cloudHeight <= newHeight;
     this._size[0] = newWidth;
     this._size[1] = newHeight;
-    if (wasInside && willBeInside && this._allInViewBox) {
-      this._invalidate(true);
-    } else {
-      this._invalidate(false);
-    }
-
+    // kibi: tag-claud support for scalling
+    this._invalidate(false);
   }
 
   setData(data) {
@@ -141,10 +140,8 @@ class TagCloud extends EventEmitter {
       const cloudBBox = this._svgGroup[0][0].getBBox();
       this._cloudWidth = cloudBBox.width;
       this._cloudHeight = cloudBBox.height;
-      this._allInViewBox = cloudBBox.x >= 0 &&
-        cloudBBox.y >= 0 &&
-        cloudBBox.x + cloudBBox.width <= this._element.offsetWidth &&
-        cloudBBox.y + cloudBBox.height <= this._element.offsetHeight;
+    // kibi: tag-claud support for scalling
+      this._allInViewBox = true;
     } else {
       this._emptyDOM(job);
     }
@@ -152,6 +149,28 @@ class TagCloud extends EventEmitter {
     if (this._pendingJob) {
       this._processPendingJob();//pick up next job
     } else {
+      // kibi: tag-claud support for scalling
+      if (this._bounds) {
+        const w = this._size[0];
+        const h = this._size[1];
+        let scaleX = Math.min(
+                      w / Math.abs(this._bounds[1].x - w / 2),
+                      w / Math.abs(this._bounds[0].x - w / 2)) / 2;
+        let scaleY = Math.min(
+                      h / Math.abs(this._bounds[1].y - h / 2),
+                      h / Math.abs(this._bounds[0].y - h / 2)) / 2;
+        scaleX = (scaleX > 1 ? 1 : scaleX);
+        scaleY = (scaleY > 1 ? 1 : scaleY);
+        let tx = Math.abs(this._bounds[0].x) * scaleX;
+        let ty = Math.abs(this._bounds[0].y) * scaleY;
+        if (scaleX === 1) {
+          tx = 0;
+        }
+        if (scaleY === 1) {
+          ty = 0;
+        }
+        this._svgGroup.attr('transform', 'translate(' + [ tx, ty] + ') scale(' + [scaleX, scaleY] + ')');
+      }
       this._completedJob = job;
       this.emit('renderComplete');
     }
@@ -314,6 +333,8 @@ class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.fontWeight(this._fontWeight);
     tagCloudLayoutGenerator.fontSize(tag => mapSizeToFontSize(tag.value));
     tagCloudLayoutGenerator.random(seed);
+    // kibi: tag-claud support for scalling
+    tagCloudLayoutGenerator.overflow(true);
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
     tagCloudLayoutGenerator.text(getText);
@@ -321,7 +342,11 @@ class TagCloud extends EventEmitter {
 
     this._layoutIsUpdating = true;
     await new Promise((resolve) => {
-      tagCloudLayoutGenerator.on('end', () => {
+      tagCloudLayoutGenerator.on('end', (data, bounds) => {
+
+        // kibi: tag-claud support for scalling
+        this._bounds = bounds;
+
         this._layoutIsUpdating = false;
         resolve(true);
       });

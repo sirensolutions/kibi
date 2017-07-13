@@ -85,13 +85,17 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
   $scope.$watch('vis.params', (options) => tagCloud.setOptions(options));
 
-  $scope.$watch(getContainerSize, _.debounce(() => {
+   // kibi: tag-claud resize behaviour fixed
+  const removeWatch = $scope.$watch(getContainerSize, _.debounce(() => {
     tagCloud.resize();
-  }, 1000, { trailing: true }), true);
+  }, 500, { trailing: true }), true);
 
+  $scope.$on('$destroy', function () {
+    removeWatch();
+  });
 
   function getContainerSize() {
-    return { width: $element.width(), height: $element.height() };
+    return { width: $element.parent().width(), height: $element.parent().height() };
   }
 
   function getValue(metricsAgg, bucket) {

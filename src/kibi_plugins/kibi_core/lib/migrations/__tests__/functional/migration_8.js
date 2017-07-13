@@ -9,7 +9,6 @@ import Scenario from './scenarios/migration_8/scenario';
 import url from 'url';
 
 const serverConfig = requirefrom('test')('server_config');
-const wrapAsync = requirefrom('src/test_utils')('wrap_async');
 const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
 const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
 const { Cluster } = requirefrom('src/core_plugins/elasticsearch/lib')('cluster');
@@ -147,10 +146,10 @@ describe('kibi_core/migrations/functional', function () {
     let warningSpy;
     let configuration;
 
-    beforeEach(wrapAsync(async () => {
+    beforeEach(async () => {
       await scenarioManager.reload(Scenario);
       console.log("Scenario reloaded");
-    }));
+    });
 
     describe('should update the relations when kibi:relations', function () {
       describe('when kibi:relations is of version 1', function () {
@@ -169,13 +168,13 @@ describe('kibi_core/migrations/functional', function () {
           fakeConfig.get.withArgs('kibana.index').returns(indexName);
         });
 
-        it('should count all upgradeable objects', wrapAsync(async () => {
+        it('should count all upgradeable objects', async () => {
           const migration = new Migration(configuration);
           const result = await migration.count();
           expect(result).to.be(1);
-        }));
+        });
 
-        it('should upgrade all upgradeable objects', wrapAsync(async () => {
+        it('should upgrade all upgradeable objects', async () => {
           const before = await snapshot(indexName);
           const migration = new Migration(configuration);
 
@@ -193,7 +192,7 @@ describe('kibi_core/migrations/functional', function () {
 
           result = await migration.count();
           expect(result).to.be(0);
-        }));
+        });
       });
 
       describe('when kibi:relations is of version 1 without the field relationsDashboardsSerialized', function () {
@@ -212,13 +211,13 @@ describe('kibi_core/migrations/functional', function () {
           fakeConfig.get.withArgs('kibana.index').returns(indexName);
         });
 
-        it('should count all upgradeable objects', wrapAsync(async () => {
+        it('should count all upgradeable objects', async () => {
           const migration = new Migration(configuration);
           const result = await migration.count();
           expect(result).to.be(1);
-        }));
+        });
 
-        it('should upgrade all upgradeable objects', wrapAsync(async () => {
+        it('should upgrade all upgradeable objects', async () => {
           const before = await snapshot(indexName);
           const migration = new Migration(configuration);
 
@@ -236,7 +235,7 @@ describe('kibi_core/migrations/functional', function () {
 
           result = await migration.count();
           expect(result).to.be(0);
-        }));
+        });
       });
 
       describe('in kibi singleton config but not in other configs', function () {
@@ -254,13 +253,13 @@ describe('kibi_core/migrations/functional', function () {
           fakeConfig.get.withArgs('kibana.index').returns('.kibi5');
         });
 
-        it('should count all upgradeable objects', wrapAsync(async () => {
+        it('should count all upgradeable objects', async () => {
           const migration = new Migration(configuration);
           const result = await migration.count();
           expect(result).to.be(1);
-        }));
+        });
 
-        it('should upgrade the singleton config but not the other one', wrapAsync(async () => {
+        it('should upgrade the singleton config but not the other one', async () => {
           const indexName = '.kibi5';
 
           const before = await snapshot(indexName);
@@ -288,7 +287,7 @@ describe('kibi_core/migrations/functional', function () {
 
           result = await migration.count();
           expect(result).to.be(0);
-        }));
+        });
       });
     });
 
@@ -306,11 +305,11 @@ describe('kibi_core/migrations/functional', function () {
         fakeConfig.get.withArgs('kibana.index').returns('.kibi2');
       });
 
-      it('should count all upgradeable objects', wrapAsync(async () => {
+      it('should count all upgradeable objects', async () => {
         const migration = new Migration(configuration);
         const result = await migration.count();
         expect(result).to.be(0);
-      }));
+      });
     });
 
 
@@ -328,17 +327,17 @@ describe('kibi_core/migrations/functional', function () {
         fakeConfig.get.withArgs('kibana.index').returns('.kibi4');
       });
 
-      it('should not find any object to upgrade', wrapAsync(async () => {
+      it('should not find any object to upgrade', async () => {
         const migration = new Migration(configuration);
         const result = await migration.count();
         expect(result).to.be(0);
-      }));
+      });
 
-      it('should not upgrade', wrapAsync(async () => {
+      it('should not upgrade', async () => {
         const migration = new Migration(configuration);
         const result = await migration.upgrade();
         expect(result).to.be(0);
-      }));
+      });
     });
 
 
@@ -356,18 +355,18 @@ describe('kibi_core/migrations/functional', function () {
         fakeConfig.get.withArgs('kibana.index').returns('.kibi6');
       });
 
-      it('should count all upgradeable objects', wrapAsync(async () => {
+      it('should count all upgradeable objects', async () => {
         const migration = new Migration(configuration);
         const result = await migration.count();
         expect(result).to.be(0);
-      }));
+      });
     });
 
 
-    afterEach(wrapAsync(async () => {
+    afterEach(async () => {
       await scenarioManager.unload(Scenario);
       console.log("Scenario uloaded");
-    }));
+    });
 
   });
 

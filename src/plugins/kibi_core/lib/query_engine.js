@@ -134,11 +134,11 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
     timeout: '2000ms'
   })
   .then(function (kibiIndex) {
-    const exists = !!kibiIndex;
-    if (exists) {
+    if (!!kibiIndex) {
       self.log.info('Found kibi index: [' + self.config.get('kibana.index') + ']');
+      return true;
     }
-    return exists || Promise.reject(new Error('Kibi index: [' + self.config.get('kibana.index') + '] does not exists'));
+    return Promise.reject(new Error('Kibi index: [' + self.config.get('kibana.index') + '] does not exists'));
   });
 };
 

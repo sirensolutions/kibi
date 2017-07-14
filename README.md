@@ -1,4 +1,4 @@
-# Kibi 5.4.0
+# Kibi 5.4.0-beta-2
 
 Kibi extends Kibana 5.4.0 with data intelligence features; the core feature of
 Kibi is the capability to join and filter data from multiple Elasticsearch
@@ -51,6 +51,7 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 
 Kibi  | Elasticsearch
 ----- | -------------
+5.x.x | 5.x.x
 4.6.x | 2.4.x
 4.5.x | 2.3.x
 4.4.x | 2.2.x, 2.3.x

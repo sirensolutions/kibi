@@ -34,7 +34,6 @@ export default function (chrome, internals) {
 
       controllerAs: 'chrome',
       controller($scope, $rootScope, $location, $http, Private) {
-        const getUnhashableStates = Private(getUnhashableStatesProvider);
 
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
@@ -46,7 +45,6 @@ export default function (chrome, internals) {
         const onRouteChange = function () {
           // kibi: set URLs with hashes otherwise they might overflow
           const urlWithHashes = window.location.href;
-          const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
           internals.trackPossibleSubUrl(urlWithHashes);
           // kibi: end
         };

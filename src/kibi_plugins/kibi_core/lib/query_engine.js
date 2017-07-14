@@ -102,7 +102,6 @@ QueryEngine.prototype.loadPredefinedData = function () {
 
     const tryToLoad = function () {
       self._isKibiIndexPresent().then(function () {
-        self.log.info('Found kibi index');
         self._loadTemplatesMapping().then(function () {
           self._loadTemplates().then(function () {
             if (self.config.get('pkg.kibiEnterpriseEnabled')) {
@@ -133,7 +132,11 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
     index: this.config.get('kibana.index')
   })
   .then(function (kibiIndex) {
-    return !!kibiIndex || Promise.reject(new Error('Kibi index does not exists'));
+    if (!!kibiIndex) {
+      self.log.info('Found kibi index: [' + self.config.get('kibana.index') + ']');
+      return true;
+    }
+    return Promise.reject(new Error('Kibi index: [' + self.config.get('kibana.index') + '] does not exist'));
   });
 };
 

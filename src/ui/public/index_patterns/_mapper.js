@@ -47,7 +47,7 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
         // kibi: use our service to reduce the number of calls to the backend
         return mappings.getMapping(indexList);
       })
-      .catch(handleMissingIndexPattern)
+      .catch(err => handleMissingIndexPattern(err, indexPattern))
       .then(_getPathsForIndexPattern);
     };
     // kibi: end
@@ -117,7 +117,7 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
             error: err
           };
         } else {
-          return handleMissingIndexPattern(err);
+          return handleMissingIndexPattern(err, indexPattern);
         }
       })
       .then((response) => {
@@ -164,7 +164,7 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
           matches: matches
         };
       })
-      .catch(handleMissingIndexPattern);
+      .catch(err => handleMissingIndexPattern(err, indexPattern));
     };
 
     /**
@@ -179,10 +179,10 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
     };
   }
 
-  function handleMissingIndexPattern(err) {
+  function handleMissingIndexPattern(err, indexPattern) {
     // kibi: handle authorization errors
     if (err.status === 403) {
-      return Promise.reject(new IndexPatternAuthorizationError());
+      return Promise.reject(new IndexPatternAuthorizationError(indexPattern));
     } else if (err.status >= 400) {
       // transform specific error type
       return Promise.reject(new IndexPatternMissingIndices(err.message));

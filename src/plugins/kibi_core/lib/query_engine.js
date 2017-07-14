@@ -1,23 +1,23 @@
-var Symbols = require('./_symbols');
-var kibiUtils = require('kibiutils');
-var rp = require('request-promise');
-var Promise = require('bluebird');
-var _ = require('lodash');
-var fs = require('fs');
-var path = require('path');
-var lru = require('lru-cache');
-var url = require('url');
-var logger = require('./logger');
-var setDatasourceClazz = require('./datasources/set_datasource_clazz');
-var SparqlQuery = require('./queries/sparql_query');
-var MysqlQuery = require('./queries/mysql_query');
-var PostgresQuery = require('./queries/postgres_query');
-var SQLiteQuery = require('./queries/sqlite_query');
-var RestQuery = require('./queries/rest_query');
-var ErrorQuery = require('./queries/error_query');
-var InactivatedQuery = require('./queries/inactivated_query');
-var MissingSelectedDocumentQuery = require('./queries/missing_selected_document_query');
-var JdbcQuery;
+const  Symbols = require('./_symbols');
+const  kibiUtils = require('kibiutils');
+const  rp = require('request-promise');
+const  Promise = require('bluebird');
+const  _ = require('lodash');
+const  fs = require('fs');
+const  path = require('path');
+const  lru = require('lru-cache');
+const  url = require('url');
+const  logger = require('./logger');
+const  setDatasourceClazz = require('./datasources/set_datasource_clazz');
+const  SparqlQuery = require('./queries/sparql_query');
+const  MysqlQuery = require('./queries/mysql_query');
+const  PostgresQuery = require('./queries/postgres_query');
+const  SQLiteQuery = require('./queries/sqlite_query');
+const  RestQuery = require('./queries/rest_query');
+const  ErrorQuery = require('./queries/error_query');
+const  InactivatedQuery = require('./queries/inactivated_query');
+const  MissingSelectedDocumentQuery = require('./queries/missing_selected_document_query');
+let JdbcQuery;
 
 function QueryEngine(server) {
   this.server = server;
@@ -55,12 +55,12 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
   self.cache = null;
 
   if (enableCache) {
-    var defaultSettings = {
+    const defaultSettings = {
       max: cacheSize,
       maxAge: cacheMaxAge
     };
-    var lruCache = lru(defaultSettings);
-    var cache = {
+    const lruCache = lru(defaultSettings);
+    const cache = {
       set: function (key, value, maxAge) {
         lruCache.set(key, value, maxAge);
       },
@@ -75,8 +75,8 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
   }
 
   return new Promise((fulfill, reject) => {
-    var succesfullInitializationMsg = { message: 'QueryEngine initialized successfully.' };
-    var elasticsearchStatus = _.get(self, 'server.plugins.elasticsearch.status');
+    const succesfullInitializationMsg = { message: 'QueryEngine initialized successfully.' };
+    const elasticsearchStatus = _.get(self, 'server.plugins.elasticsearch.status');
     if (elasticsearchStatus && elasticsearchStatus.state === 'green') {
       // already green - fire the _onStatusGreen
       self._onStatusGreen().then(function () {
@@ -97,10 +97,10 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
 };
 
 QueryEngine.prototype.loadPredefinedData = function () {
-  var self = this;
+  const self = this;
   return new Promise(function (fulfill, reject) {
 
-    var tryToLoad = function () {
+    const tryToLoad = function () {
       self._isKibiIndexPresent().then(function () {
         self._loadTemplatesMapping().then(function () {
           self._loadTemplates().then(function () {
@@ -128,13 +128,13 @@ QueryEngine.prototype.loadPredefinedData = function () {
 };
 
 QueryEngine.prototype._isKibiIndexPresent = function () {
-  var self = this;
+  const self = this;
   return self.client.cat.indices({
     index: self.config.get('kibana.index'),
     timeout: '2000ms'
   })
   .then(function (kibiIndex) {
-    var exists = !!kibiIndex;
+    const exists = !!kibiIndex;
     if (exists) {
       self.log.info('Found kibi index: [' + self.config.get('kibana.index') + ']');
     }
@@ -143,7 +143,7 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
 };
 
 QueryEngine.prototype._refreshKibiIndex = function () {
-  var self = this;
+  const self = this;
   return self.client.indices.refresh({
     index: self.config.get('kibana.index'),
     force: true
@@ -152,7 +152,7 @@ QueryEngine.prototype._refreshKibiIndex = function () {
 
 QueryEngine.prototype.gremlin = function (datasourceParams, options) {
   // TODO: remove when https://github.com/sirensolutions/kibi-internal/issues/906 is fixed
-  var parsedTimeout = parseInt(datasourceParams.timeout);
+  const parsedTimeout = parseInt(datasourceParams.timeout);
   if (isNaN(parsedTimeout)) {
     return Promise.reject({
       error: 'Invalid timeout',
@@ -200,7 +200,7 @@ QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
  * @return {Promise}
  */
 QueryEngine.prototype._loadTemplatesMapping = function () {
-  var mapping = {
+  const mapping = {
     template: {
       properties: {
         version: {
@@ -224,9 +224,9 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
  * @return {Promise.<*>}
  */
 QueryEngine.prototype._loadTemplates = function () {
-  var self = this;
+  const self = this;
 
-  var templatesToLoad = [
+  const templatesToLoad = [
     'kibi-json-jade',
     'kibi-table-jade',
     'kibi-html-angular',
@@ -262,15 +262,15 @@ QueryEngine.prototype._loadTemplates = function () {
 };
 
 QueryEngine.prototype._loadDatasources = function () {
-  var self = this;
+  const self = this;
   // load default datasource examples
-  var datasourcesToLoad = [
+  const datasourcesToLoad = [
     'Kibi-Gremlin-Server'
   ];
 
   self.log.info('Loading datasources');
 
-  var promises = [];
+  const promises = [];
   _.each(datasourcesToLoad, function (datasourceId) {
     promises.push(new Promise(function (fulfill, reject) {
 
@@ -281,9 +281,9 @@ QueryEngine.prototype._loadDatasources = function () {
         }
         // check whether HTTP or HTTPS is used
         if (self.config.has('kibi_core.gremlin_server.url')) {
-          var gremlinUrl = self.config.get('kibi_core.gremlin_server.url');
-          var datasourceObj = JSON.parse(data.toString());
-          var datasourceObjParam = JSON.parse(datasourceObj.datasourceParams);
+          const gremlinUrl = self.config.get('kibi_core.gremlin_server.url');
+          const datasourceObj = JSON.parse(data.toString());
+          const datasourceObjParam = JSON.parse(datasourceObj.datasourceParams);
 
           datasourceObjParam.url = gremlinUrl + '/graph/queryBatch';
           datasourceObj.datasourceParams = JSON.stringify(datasourceObjParam);
@@ -314,9 +314,9 @@ QueryEngine.prototype._loadDatasources = function () {
 };
 
 QueryEngine.prototype._loadQueries = function () {
-  var self = this;
+  const self = this;
   // load default query examples
-  var queriesToLoad = [];
+  const queriesToLoad = [];
 
   self.log.info('Loading queries');
 
@@ -353,12 +353,12 @@ QueryEngine.prototype._loadQueries = function () {
 
 QueryEngine.prototype.setupJDBC = function () {
   if (this.config.get('kibi_core.load_jdbc') === true) {
-    var JDBC = require('jdbc');
-    var jinst = require('jdbc/lib/jinst');
+    const JDBC = require('jdbc');
+    const jinst = require('jdbc/lib/jinst');
 
     JdbcQuery  = require('./queries/jdbc_query');
-    var JdbcHelper = require('./jdbc_helper');
-    var jdbcHelper = new JdbcHelper(this.server);
+    const JdbcHelper = require('./jdbc_helper');
+    const jdbcHelper = new JdbcHelper(this.server);
 
     return jdbcHelper.prepareJdbcPaths().then(function (paths) {
       if (!jinst.isJvmCreated()) {
@@ -376,7 +376,7 @@ QueryEngine.prototype.setupJDBC = function () {
 };
 
 QueryEngine.prototype._fetchQueriesFromEs = function () {
-  var self = this;
+  const self = this;
   return self.client.search({
     index: self.config.get('kibana.index'),
     type: 'query',
@@ -385,7 +385,7 @@ QueryEngine.prototype._fetchQueriesFromEs = function () {
 };
 
 QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
-  var self = this;
+  const self = this;
   return self.client.search({
     index: self.config.get('kibana.index'),
     type: 'datasource',
@@ -401,17 +401,17 @@ QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
 };
 
 QueryEngine.prototype.reloadQueries = function () {
-  var self = this;
+  const self = this;
   return self._fetchQueriesFromEs()
   .then(function (resp) {
 
-    var queryDefinitions = [];
-    var datasourcesIds = [];
+    const queryDefinitions = [];
+    const datasourcesIds = [];
     if (resp.hits && resp.hits.hits && resp.hits.hits.length > 0) {
       self.log.info('Reloading ' + resp.hits.hits.length + ' queries into memory:');
       _.each(resp.hits.hits, function (hit) {
         self.log.info('Reloading [' + hit._id + ']');
-        var queryDefinition = {
+        const queryDefinition = {
           id:                hit._id,
           label:             hit._source.title,
           description:       hit._source.description,
@@ -479,7 +479,7 @@ QueryEngine.prototype.reloadQueries = function () {
 
         self.queries = _(queryDefinitions).filter(function (queryDef) {
           //filter out queries for which datasources does not exists
-          var datasource = _.find(datasources.hits.hits, (datasource) => datasource._id === queryDef.datasourceId);
+          const datasource = _.find(datasources.hits.hits, (datasource) => datasource._id === queryDef.datasourceId);
           if (datasource) {
             datasource._source.id = datasource._id;
             queryDef.datasource = datasource._source;
@@ -539,7 +539,7 @@ QueryEngine.prototype.clearCache =  function () {
  * Order is given by the priority value.
  */
 QueryEngine.prototype._getQueries = function (queryIds, options) {
-  var self = this;
+  const self = this;
 
   if (this.queries.length === 0) {
     return Promise.reject(
@@ -547,29 +547,29 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
     );
   }
 
-  var errors = _(this.queries).filter(function (query) {
+  const errors = _(this.queries).filter(function (query) {
     return query instanceof ErrorQuery;
   }).map(function (err) {
     return err.getErrorMessage();
   }).value();
   if (errors && errors.length !== 0) {
-    var msg = '';
+    let msg = '';
     _.each(errors, function (err) {
       msg += err + '\n';
     });
     return Promise.reject(new Error(msg));
   }
 
-  var all = !queryIds || (queryIds && queryIds.length === 1 && queryIds[0] === 'ALL');
+  const all = !queryIds || (queryIds && queryIds.length === 1 && queryIds[0] === 'ALL');
 
   // if all === false
   // check that all requested queryIds exists and if not reject
   if (!all && queryIds) {
-    for (var i = 0; i < queryIds.length; i++) {
-      var id = queryIds[i];
-      var exists = false;
+    for (let i = 0; i < queryIds.length; i++) {
+      const id = queryIds[i];
+      let exists = false;
 
-      for (var j = 0; j < self.queries.length; j++) {
+      for (let j = 0; j < self.queries.length; j++) {
         if (id === self.queries[j].id) {
           exists = true;
           break;
@@ -586,7 +586,7 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
 
   // here create an array of promises
   // filter by name
-  var withRightId = _.filter(this.queries, function (query) {
+  const withRightId = _.filter(this.queries, function (query) {
     if (all) {
       return true;
     }
@@ -601,9 +601,9 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
       new Error('Non of requested queries ' + JSON.stringify(queryIds, null, ' ') + ' found in memory')
     );
   }
-  var fromRightFolder = withRightId;
+  const fromRightFolder = withRightId;
 
-  var promises = _.map(fromRightFolder, function (query) {
+  const promises = _.map(fromRightFolder, function (query) {
     return query.checkIfItIsRelevant(options);
   });
 
@@ -628,10 +628,10 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
     if (all) {
       return filteredQueries;
     } else {
-      var  filteredSortedQueries = [];
+      const  filteredSortedQueries = [];
 
       _.each(queryIds, function (id) {
-        var found = _.find(filteredQueries, function (query) {
+        const found = _.find(filteredQueries, function (query) {
           return query.id === id;
         });
         if (found) {
@@ -656,9 +656,9 @@ QueryEngine.prototype._getQueryDefById = function (queryDefs, queryId) {
 // Returns an array with response data from all relevant queries
 // Use this method when you need just data and not query html
 QueryEngine.prototype.getQueriesData = function (queryDefs, options) {
-  var self = this;
+  const self = this;
 
-  var queryIds = _.map(queryDefs, function (queryDef) {
+  const queryIds = _.map(queryDefs, function (queryDef) {
     return queryDef.queryId;
   });
 
@@ -666,10 +666,10 @@ QueryEngine.prototype.getQueriesData = function (queryDefs, options) {
     return self._getQueries(queryIds, options)
     .then(function (queries) {
 
-      var promises = _.map(queries, function (query) {
+      const promises = _.map(queries, function (query) {
 
-        var queryDefinition = self._getQueryDefById(queryDefs, query.id);
-        var queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
+        const queryDefinition = self._getQueryDefById(queryDefs, query.id);
+        const queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
         return query.fetchResults(options, null, queryVariableName);
       });
       return Promise.all(promises);
@@ -678,9 +678,9 @@ QueryEngine.prototype.getQueriesData = function (queryDefs, options) {
 };
 
 QueryEngine.prototype.getQueriesHtml = function (queryDefs, options) {
-  var self = this;
+  const self = this;
 
-  var queryIds = _.map(queryDefs, function (queryDef) {
+  const queryIds = _.map(queryDefs, function (queryDef) {
     return queryDef.queryId;
   });
 
@@ -689,9 +689,9 @@ QueryEngine.prototype.getQueriesHtml = function (queryDefs, options) {
     return self._getQueries(queryIds, options)
     .then(function (queries) {
 
-      var promises = _.map(queries, function (query) {
+      const promises = _.map(queries, function (query) {
 
-        var queryDef = self._getQueryDefById(queryDefs, query.id);
+        const queryDef = self._getQueryDefById(queryDefs, query.id);
         return query.getHtml(queryDef, options);
 
       });
@@ -714,18 +714,18 @@ QueryEngine.prototype.getQueriesHtml = function (queryDefs, options) {
  *  ]
  */
 QueryEngine.prototype.getIdsFromQueries = function (queryDefs, options) {
-  var self = this;
+  const self = this;
 
-  var queryIds = _.map(queryDefs, function (queryDef) {
+  const queryIds = _.map(queryDefs, function (queryDef) {
     return queryDef.queryId;
   });
 
   return self._init().then(function () {
     return self._getQueries(queryIds, options)
     .then(function (queries) {
-      var promises = _.map(queries, function (query) {
-        var queryDefinition = self._getQueryDefById(queryDefs, query.id);
-        var queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
+      const promises = _.map(queries, function (query) {
+        const queryDefinition = self._getQueryDefById(queryDefs, query.id);
+        const queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
         return query.fetchResults(options, true, queryVariableName);
       });
       return Promise.all(promises);

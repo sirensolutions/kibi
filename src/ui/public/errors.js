@@ -185,8 +185,12 @@ export class SavedObjectNotFound extends KbnError {
  * @author siren
  */
 export class IndexPatternAuthorizationError extends KbnError {
-  constructor() {
-    super(`IndexPattern's configured pattern matches indices you do not have access to`);
+  constructor(indexPattern) {
+    if (indexPattern) {
+      super(`Index pattern ${indexPattern.id} matches indices you do not have access to`);
+    } else {
+      super(`An index pattern matches indices you do not have access to`);
+    }
   }
 }
 

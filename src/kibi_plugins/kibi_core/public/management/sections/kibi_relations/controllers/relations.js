@@ -15,17 +15,19 @@ uiRoutes
   reloadOnSearch: false
 });
 
-function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config, Private, kbnUrl, createNotifier, kibiEnterpriseEnabled,
-    $window, $element) {
+function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config, Private, kbnUrl, createNotifier, $window, $element) {
   const notify = createNotifier({
     location: 'Relations Editor'
   });
   const color = Private(VislibComponentsColorColorProvider);
   const relationsHelper = Private(RelationsHelperFactory);
 
-  $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
-
   $scope.unique = _.unique;
+
+  // advanced options
+  $scope.edit = function (index) {
+    kbnUrl.change('/management/siren/relations/{{ id }}', { id: index });
+  };
 
   $scope.relations = config.get('kibi:relations');
 

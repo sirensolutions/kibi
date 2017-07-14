@@ -23,14 +23,12 @@ function init({
     indexPatterns = [],
     savedSearches = [],
     savedDashboards = [ { id: currentDashboardId, title: currentDashboardId } ],
-    enableEnterprise = false,
     relations = {
       relationsIndices: [],
       relationsDashboards: []
     }
   } = {}) {
   ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
-    $provide.constant('kibiEnterpriseEnabled', enableEnterprise);
     $provide.constant('kbnDefaultAppId', '');
 
     appState = new MockState({ filters: [] });
@@ -647,6 +645,51 @@ describe('Kibi Components', function () {
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
           expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
+        });
+      });
+
+      it('should set the advanced siren-vanguard parameters', function () {
+        init({ indexPatterns, savedSearches, savedDashboards });
+
+        const relations = {
+          relationsIndices: [
+            {
+              type: 'INNER_JOIN',
+              indices: [
+                {
+                  indexPatternId: 'ia',
+                  path: 'fa'
+                },
+                {
+                  indexPatternId: 'ib',
+                  path: 'fb'
+                }
+              ],
+              label: 'rel',
+              id: 'ia//fa/ib//fb'
+            }
+          ]
+        };
+        config.set('kibi:relations', relations);
+
+        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$digest();
+
+        const button = {
+          sourceField: 'fa',
+          sourceIndexPatternId: 'ia',
+          targetField: 'fb',
+          targetIndexPatternId: 'ib'
+        };
+
+        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
+        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
+        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
+
+        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then(rel => {
+          sinon.assert.called(timeBasedIndicesStub);
+          expect(rel.join_sequence).to.have.length(1);
+          expect(rel.join_sequence[0].type).to.be('INNER_JOIN');
         });
       });
     });

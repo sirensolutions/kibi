@@ -5,10 +5,8 @@ import ngMock from 'ng_mock';
 let relationsHelper;
 let $rootScope;
 
-function init({ kibiEnterpriseEnabled = false }) {
-  ngMock.module('kibana', function ($provide) {
-    $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
-  });
+function init() {
+  ngMock.module('kibana');
   ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
     relationsHelper = Private(RelationsHelperFactory);
@@ -18,7 +16,7 @@ function init({ kibiEnterpriseEnabled = false }) {
 describe('Kibi Components', function () {
   describe('Relations Helper', function () {
     describe('relations init', function () {
-      beforeEach(() => init({}));
+      beforeEach(init);
 
       it('should init the relations on init:config event', function () {
         const relations = {
@@ -72,7 +70,7 @@ describe('Kibi Components', function () {
     });
 
     describe('validateIndicesRelationFromId', function () {
-      beforeEach(() => init({}));
+      beforeEach(init);
       beforeEach(function () {
         const relations = {
           relationsIndices: [
@@ -113,7 +111,7 @@ describe('Kibi Components', function () {
     });
 
     describe('checkIfRelationsAreValid', function () {
-      beforeEach(() => init({}));
+      beforeEach(init);
 
       it('should pass if relations are correct', function () {
         const relations = {
@@ -358,7 +356,7 @@ describe('Kibi Components', function () {
     });
 
     describe('getJoinIndicesUniqueID', function () {
-      beforeEach(() => init({}));
+      beforeEach(init);
 
       it('should compute the relation unique ID', function () {
         const indexa = 'ia';
@@ -380,7 +378,7 @@ describe('Kibi Components', function () {
     });
 
     describe('getRelationInfosFromRelationID', function () {
-      beforeEach(() => init({}));
+      beforeEach(init);
 
       it('should get the correct relation details', function () {
         const indexa = 'ia';
@@ -438,9 +436,7 @@ describe('Kibi Components', function () {
     });
 
     describe('addAdvancedJoinSettingsToRelation', function () {
-      beforeEach(() => init({
-        kibiEnterpriseEnabled: true
-      }));
+      beforeEach(init);
 
       it('should not fail if the relation is missing', function () {
         const relations = {
@@ -461,41 +457,39 @@ describe('Kibi Components', function () {
             }
           ]
         };
-        const missingRelation = [
-          {
-            indices: [ 'company' ],
-            path: 'id'
-          },
-          {
-            indices: [ 'article' ],
-            path: 'companies'
-          }
-        ];
+        const missingRelation = {
+          relation: [
+            {
+              indices: [ 'company' ],
+              path: 'id'
+            },
+            {
+              indices: [ 'article' ],
+              path: 'companies'
+            }
+          ]
+        };
 
         $rootScope.$emit('change:config.kibi:relations', relations);
         $rootScope.$digest();
 
         expect(relationsHelper.addAdvancedJoinSettingsToRelation).withArgs(missingRelation).to.be.ok();
+        expect(Object.keys(missingRelation)).to.eql([ 'relation' ]);
       });
 
-      it('should get advanced relation for the given relation', function () {
+      it('should get advanced settings for the given relation', function () {
         const relations = {
           relationsIndices: [
             {
+              type: 'INNER_JOIN',
               indices: [
                 {
                   indexPatternId: 'investor',
-                  path: 'id',
-                  termsEncoding: 'enc1',
-                  orderBy: 'asc',
-                  maxTermsPerShard: 1
+                  path: 'id'
                 },
                 {
                   indexPatternId: 'investment',
-                  path: 'investorid',
-                  termsEncoding: 'enc2',
-                  orderBy: 'desc',
-                  maxTermsPerShard: 2
+                  path: 'investorid'
                 }
               ],
               label: 'by',
@@ -503,65 +497,54 @@ describe('Kibi Components', function () {
             }
           ]
         };
-        const relation1 = [
-          {
-            indices: [ 'investment' ],
-            path: 'investorid'
-          },
-          {
-            indices: [ 'investor' ],
-            path: 'id'
-          }
-        ];
+        const relation1 = {
+          relation: [
+            {
+              indices: [ 'investment' ],
+              path: 'investorid'
+            },
+            {
+              indices: [ 'investor' ],
+              path: 'id'
+            }
+          ]
+        };
 
         $rootScope.$emit('change:config.kibi:relations', relations);
         $rootScope.$digest();
 
         relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1[0].termsEncoding).to.be('enc1');
-        expect(relation1[0].orderBy).to.be('asc');
-        expect(relation1[0].maxTermsPerShard).to.be(1);
-        expect(relation1[1].termsEncoding).to.be('enc2');
-        expect(relation1[1].orderBy).to.be('desc');
-        expect(relation1[1].maxTermsPerShard).to.be(2);
+        expect(relation1.type).to.be('INNER_JOIN');
 
-        const relation2 = [
-          {
-            indices: [ 'investor' ],
-            path: 'id'
-          },
-          {
-            indices: [ 'investment' ],
-            path: 'investorid'
-          }
-        ];
+        const relation2 = {
+          relation: [
+            {
+              indices: [ 'investor' ],
+              path: 'id'
+            },
+            {
+              indices: [ 'investment' ],
+              path: 'investorid'
+            }
+          ]
+        };
         relationsHelper.addAdvancedJoinSettingsToRelation(relation2);
-        expect(relation2[0].termsEncoding).to.be('enc2');
-        expect(relation2[0].orderBy).to.be('desc');
-        expect(relation2[0].maxTermsPerShard).to.be(2);
-        expect(relation2[1].termsEncoding).to.be('enc1');
-        expect(relation2[1].orderBy).to.be('asc');
-        expect(relation2[1].maxTermsPerShard).to.be(1);
+        expect(relation2.type).to.be('INNER_JOIN');
       });
 
       it('should get advanced relation with the specified patterns', function () {
         const relations = {
           relationsIndices: [
             {
+              type: 'INNER_JOIN',
               indices: [
                 {
                   indexPatternId: 'weather-*',
-                  path: 'forecast',
-                  termsEncoding: 'enc1',
-                  orderBy: 'asc',
-                  maxTermsPerShard: 1
+                  path: 'forecast'
                 },
                 {
                   indexPatternId: 'forecast',
-                  path: 'forecast',
-                  termsEncoding: 'enc2',
-                  orderBy: 'desc',
-                  maxTermsPerShard: 2
+                  path: 'forecast'
                 }
               ],
               label: 'label',
@@ -569,45 +552,39 @@ describe('Kibi Components', function () {
             }
           ]
         };
-        const relation1 = [
-          {
-            indices: [ 'forecast' ],
-            path: 'forecast'
-          },
-          {
-            indices: [ 'weather-2015-01', 'weather-2015-02' ],
-            path: 'forecast'
-          }
-        ];
+        const relation1 = {
+          relation: [
+            {
+              indices: [ 'forecast' ],
+              path: 'forecast'
+            },
+            {
+              indices: [ 'weather-2015-01', 'weather-2015-02' ],
+              path: 'forecast'
+            }
+          ]
+        };
 
         $rootScope.$emit('change:config.kibi:relations', relations);
         $rootScope.$digest();
 
         relationsHelper.addAdvancedJoinSettingsToRelation(relation1, 'forecast', 'weather-*');
-        expect(relation1[0].termsEncoding).to.be('enc1');
-        expect(relation1[0].orderBy).to.be('asc');
-        expect(relation1[0].maxTermsPerShard).to.be(1);
-        expect(relation1[1].termsEncoding).to.be('enc2');
-        expect(relation1[1].orderBy).to.be('desc');
-        expect(relation1[1].maxTermsPerShard).to.be(2);
+        expect(relation1.type).to.be('INNER_JOIN');
 
-        const relation2 = [
-          {
-            indices: [ 'weather-2015-01', 'weather-2015-02' ],
-            path: 'forecast'
-          },
-          {
-            indices: [ 'forecast' ],
-            path: 'forecast'
-          }
-        ];
+        const relation2 = {
+          relation: [
+            {
+              indices: [ 'weather-2015-01', 'weather-2015-02' ],
+              path: 'forecast'
+            },
+            {
+              indices: [ 'forecast' ],
+              path: 'forecast'
+            }
+          ]
+        };
         relationsHelper.addAdvancedJoinSettingsToRelation(relation2, 'weather-*', 'forecast');
-        expect(relation2[0].termsEncoding).to.be('enc2');
-        expect(relation2[0].orderBy).to.be('desc');
-        expect(relation2[0].maxTermsPerShard).to.be(2);
-        expect(relation2[1].termsEncoding).to.be('enc1');
-        expect(relation2[1].orderBy).to.be('asc');
-        expect(relation2[1].maxTermsPerShard).to.be(1);
+        expect(relation2.type).to.be('INNER_JOIN');
       });
     });
   });

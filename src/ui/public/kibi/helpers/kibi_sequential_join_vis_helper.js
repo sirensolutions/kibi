@@ -280,7 +280,7 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       ret.relation[1].types = [ button.targetIndexPatternType ];
     }
 
-    relationsHelper.addAdvancedJoinSettingsToRelation(ret.relation, button.sourceIndexPatternId, button.targetIndexPatternId);
+    relationsHelper.addAdvancedJoinSettingsToRelation(ret, button.sourceIndexPatternId, button.targetIndexPatternId);
 
     ret.relation[0].queries = [ queryBuilder(filters, queries, time) ];
     return ret;

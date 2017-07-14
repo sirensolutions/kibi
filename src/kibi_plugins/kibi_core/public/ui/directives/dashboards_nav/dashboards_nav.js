@@ -12,11 +12,11 @@ import './dashboard_draggable/dashboard_dummy_container';
 import './new_dashboard_confirm/new_dashboard_confirm_promise';
 import dashboardsNavTemplate from './dashboards_nav.html';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
-import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dashboard_view_mode';
 import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
 import uiModules from 'ui/modules';
+import uiChrome from 'ui/chrome';
 
 uiModules
 .get('kibana')
@@ -61,7 +61,10 @@ uiModules
       };
 
       function updateSidebarSize() {
-        const width = !dashboardsNavState.isOpen() ? COLLAPSED_WIDTH : dashboardsNavState.navWidth();
+        let width = !dashboardsNavState.isOpen() ? COLLAPSED_WIDTH : dashboardsNavState.navWidth();
+        if (!uiChrome.isKibiNavbarVisible()) {
+          width = 0;
+        }
         $scope.resizeParts(width);
       }
 

@@ -38,7 +38,9 @@ export default function (chrome, internals) {
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
         // kibi: added to be able to share dashboards with visible kibi-nav-bar
-        internals.setKibiNavbarVisibleDefault($location.search().kibiNavbarVisible);
+        if (!chrome.getVisible()) {
+          internals.setKibiNavbarVisibleDefault($location.search().kibiNavbarVisible);
+        }
         // kibi: end
 
         // listen for route changes, propagate to tabs

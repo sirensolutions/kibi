@@ -67,6 +67,56 @@ describe('Join query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
+  it('should set the type of join', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
+      type: 'INNER_JOIN',
+      sourceTypes: 't1',
+      sourcePath: 'id1',
+      targetIndices: [ 'i2' ],
+      targetTypes: 't2',
+      targetPath: 'id2'
+    });
+    const expected = [
+      {
+        bool: {
+          must: [
+            {
+              join: {
+                type: 'INNER_JOIN',
+                indices: [ 'i2' ],
+                types: [ 't2' ],
+                on: [ 'id1', 'id2' ],
+                request: {
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: []
+                        }
+                      },
+                      must: [
+                        {
+                          match_all: {}
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              type: {
+                value: 't1'
+              }
+            }
+          ]
+        }
+      }
+    ];
+    expect(expected).to.eql(builder.toObject());
+  });
+
   it('should create a query with a join and a query', function () {
     const builder = new JoinBuilder();
     builder.addJoin({

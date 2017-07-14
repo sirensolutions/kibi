@@ -131,12 +131,12 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
   return this.cluster.callWithInternalUser('cat.indices', {
     index: this.config.get('kibana.index')
   })
-  .then(function (kibiIndex) {
+  .then((kibiIndex) => {
     if (!!kibiIndex) {
-      self.log.info('Found kibi index: [' + self.config.get('kibana.index') + ']');
+      this.log.info('Found kibi index: [' + this.config.get('kibana.index') + ']');
       return true;
     }
-    return Promise.reject(new Error('Kibi index: [' + self.config.get('kibana.index') + '] does not exist'));
+    return Promise.reject(new Error('Kibi index: [' + this.config.get('kibana.index') + '] does not exist'));
   });
 };
 

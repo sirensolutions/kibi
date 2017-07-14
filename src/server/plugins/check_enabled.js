@@ -12,6 +12,8 @@ export default async function (kbnServer, server, config) {
   for (const plugin of plugins) {
     if (plugin.pkg.name === 'gremlin_server' && kbnServer.settings.gremlin && kbnServer.settings.gremlin.enabled === false) {
       plugins.disable(plugin);
+      // Delete gremlin config to avoid a warning message about unused configuration.
+      delete kbnServer.settings.gremlin;
       continue;
     }
     const enabledInConfig = config.get([...toPath(plugin.configPrefix), 'enabled']);

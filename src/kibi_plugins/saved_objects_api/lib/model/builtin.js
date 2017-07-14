@@ -10,7 +10,8 @@ const builtin = [
   'query',
   'template',
   'datasource',
-  'search'
+  'search',
+  'url'
 ];
 
 export default builtin;

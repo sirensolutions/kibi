@@ -12,8 +12,8 @@ export default function (server) {
     // kibi: use the saved objects API to update the URL
     try {
       await getModel().patch(urlId, {
-        'accessDate': new Date(),
-        'accessCount': urlDoc._source.accessCount + 1
+        accessDate: new Date(),
+        accessCount: urlDoc._source.accessCount + 1
       }, req);
       // kibi: end
     } catch (err) {
@@ -38,9 +38,9 @@ export default function (server) {
       const response = await getModel().create(urlId, {
         url,
         sirenSession,
-        'accessCount': 0,
-        'createDate': new Date(),
-        'accessDate': new Date()
+        accessCount: 0,
+        createDate: new Date(),
+        accessDate: new Date()
       }, req);
       return response._id;
     } catch (error) {

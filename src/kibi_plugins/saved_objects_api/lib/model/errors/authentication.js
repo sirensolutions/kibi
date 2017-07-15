@@ -13,5 +13,6 @@ export default class AuthenticationError extends BaseError {
   constructor(message, inner) {
     super(message, inner);
     this.name = 'AuthenticationError';
+    this.status = 401;
   }
 }

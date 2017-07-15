@@ -34,19 +34,19 @@ export default function (chrome, internals) {
 
       controllerAs: 'chrome',
       controller($scope, $rootScope, $location, $http, Private) {
-        const getUnhashableStates = Private(getUnhashableStatesProvider);
 
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
         // kibi: added to be able to share dashboards with visible kibi-nav-bar
-        internals.setKibiNavbarVisibleDefault($location.search().kibiNavbarVisible);
+        if (!chrome.getVisible()) {
+          internals.setKibiNavbarVisibleDefault($location.search().kibiNavbarVisible);
+        }
         // kibi: end
 
         // listen for route changes, propagate to tabs
         const onRouteChange = function () {
           // kibi: set URLs with hashes otherwise they might overflow
           const urlWithHashes = window.location.href;
-          const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
           internals.trackPossibleSubUrl(urlWithHashes);
           // kibi: end
         };

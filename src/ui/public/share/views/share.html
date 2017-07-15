@@ -11,7 +11,11 @@
 
     <!-- Help text -->
     <div ng-if="share.urls.original" class="kuiLocalDropdownHelpText">
-      You can share this URL with people to let them load the most recent saved version of this {{share.objectType}}.
+      <!-- kibi: reworded -->
+      You can share this {{share.objectType}} by creating a link to it
+      <span ng-if="share.allowEmbed"> or by embedding it into an iframe</span>;
+      if the object is deleted, the link will redirect to the default Kibi page.
+      <!-- kibi: end -->
     </div>
 
     <div ng-if="!share.urls.original" class="kuiLocalDropdownWarning">
@@ -19,37 +23,7 @@
     </div>
 
     <div ng-if="share.urls.original">
-      <!-- iframe -->
-      <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
-        <!-- Header -->
-        <div class="kuiLocalDropdownHeader">
-          <div class="kuiLocalDropdownHeader__label">
-            Embedded iframe
-          </div>
-          <div class="kuiLocalDropdownHeader__actions">
-            <a
-              class="kuiLocalDropdownHeader__action"
-              ng-click="share.copyToClipboard('#originalIframeUrl')"
-            >
-              Copy
-            </a>
-          </div>
-        </div>
-
-        <!-- Input -->
-        <input
-          id="originalIframeUrl"
-          class="kuiLocalDropdownInput"
-          type="text"
-          readonly
-          value="{{share.makeIframeTag(share.urls.original)}}"
-        />
-
-        <!-- Notes -->
-        <div class="kuiLocalDropdownFormNote">
-          Add to your HTML source. Note that all clients must be able to access Kibana.
-        </div>
-      </div>
+      <!-- kibi: show link before iframes -->
 
       <!-- Link -->
       <div class="kuiLocalDropdownSection">
@@ -77,7 +51,88 @@
           value="{{share.urls.original}}"
         />
       </div>
+
+      <!-- iframe -->
+      <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
+
+        <!-- kibi: intro -->
+        <div class="kuiLocalDropdownHeader__label">
+          iframe snippets
+        </div>
+
+        <div class="kuiLocalDropdownHelpText">
+          The following snippet can be pasted into an HTML page to embed this {{share.objectType}}
+          in an iframe; users must have access to Kibi to see the {{share.objectType}}
+          inside the iframe.
+        </div>
+        <!-- kibi: end -->
+
+        <!-- Header -->
+        <div class="kuiLocalDropdownHeader">
+          <div class="kuiLocalDropdownHeader__label">
+            <!-- kibi: modified label -->
+            iframe with no sidebars
+            <!-- kibi: end -->
+          </div>
+          <!-- kibi: end -->
+          <div class="kuiLocalDropdownHeader__actions">
+            <a
+              class="kuiLocalDropdownHeader__action"
+              ng-click="share.copyToClipboard('#originalIframeUrl')"
+            >
+              Copy
+            </a>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <input
+          id="originalIframeUrl"
+          class="kuiLocalDropdownInput"
+          type="text"
+          readonly
+          value="{{share.makeIframeTag(share.urls.original)}}"
+        />
+      </div>
+
+      <!-- kibi: sidebar snippet -->
+      <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed && share.objectType === 'dashboard'">
+
+        <div class="kuiLocalDropdownHelpText">
+          When using the snippet above, the side bar, the dashboards bar and the top bar
+          will be hidden.
+          If you want to allow users to switch dashboards inside the iframe, use
+          the following snippet:
+        </div>
+
+        <!-- Header -->
+        <div class="kuiLocalDropdownHeader">
+          <div class="kuiLocalDropdownHeader__label">
+            iframe with dashboard navigation sidebar
+          </div>
+          <div class="kuiLocalDropdownHeader__actions">
+            <a
+              class="kuiLocalDropdownHeader__action"
+              ng-click="share.copyToClipboard('#originalSidebarIframeUrl')"
+            >
+              Copy
+            </a>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <input
+          id="originalSidebarIframeUrl"
+          class="kuiLocalDropdownInput"
+          type="text"
+          readonly
+          value="{{share.makeIframeTag(share.urls.original, true)}}"
+        />
+      </div>
+      <!-- kibi: end -->
+
     </div>
+
   </div>
 
   <!-- Right panel -->
@@ -89,109 +144,13 @@
 
     <!-- Help text -->
     <div class="kuiLocalDropdownHelpText">
-      Snapshot URLs encode the current state of the {{share.objectType}} in the URL itself. Edits to the saved {{share.objectType}} won't be visible via this URL.
-    </div>
-
-    <!-- iframe -->
-    <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
-      <!-- Header -->
-      <div class="kuiLocalDropdownHeader">
-        <div class="kuiLocalDropdownHeader__label">
-          Embedded iframe
-        </div>
-        <div class="kuiLocalDropdownHeader__actions">
-          <!--
-          siren: removed because we are shortening urls by default
-          <a
-            class="kuiLocalDropdownHeader__action"
-            ng-if="!share.urlFlags.shortSnapshotIframe"
-            ng-click="share.toggleShortSnapshotIframeUrl()"
-          >
-            Short URL
-          </a>
-
-          <a
-            class="kuiLocalDropdownHeader__action"
-            ng-if="share.urlFlags.shortSnapshotIframe"
-            ng-click="share.toggleShortSnapshotIframeUrl()"
-          >
-            Long URL
-          </a>
-          -->
-          <a
-            class="kuiLocalDropdownHeader__action"
-            ng-click="share.copyToClipboard('#snapshotIframeUrl')"
-          >
-            Copy
-          </a>
-        </div>
-      </div>
-
-      <!-- Input -->
-      <input
-        id="snapshotIframeUrl"
-        class="kuiLocalDropdownInput"
-        type="text"
-        readonly
-        value="{{share.urlFlags.shortSnapshotIframe ? share.makeIframeTag(share.urls.shortSnapshot) : share.makeIframeTag(share.urls.snapshot)}}"
-      />
-
-      <!-- Notes -->
-      <!-- siren: removed because we are shortening urls by default
-      <div class="kuiLocalDropdownFormNote">
-        Add to your HTML source. Note that all clients must be able to access Kibana.
-      </div>
-      -->
-    </div>
-
-    <!-- iframe -->
-    <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
-      <!-- Header -->
-      <div class="kuiLocalDropdownHeader">
-        <div class="kuiLocalDropdownHeader__label">
-          Embedded iframe - all dashboards
-        </div>
-        <div class="kuiLocalDropdownHeader__actions">
-          <!--
-          siren: removed because we are shortening urls by default
-          <a
-            class="kuiLocalDropdownHeader__action"
-            ng-if="!share.urlFlags.shortSnapshotIframe2"
-            ng-click="share.toggleShortSnapshotIframeUrl()"
-          >
-            Short URL
-          </a>
-
-          <a
-            class="kuiLocalDropdownHeader__action"
-            ng-if="share.urlFlags.shortSnapshotIframe2"
-            ng-click="share.toggleShortSnapshotIframeUrl()"
-          >
-            Long URL
-          </a>
-          -->
-          <a
-            class="kuiLocalDropdownHeader__action"
-            ng-click="share.copyToClipboard('#snapshotIframeUrl2')"
-          >
-            Copy
-          </a>
-        </div>
-      </div>
-
-      <!-- Input -->
-      <input
-        id="snapshotIframeUrl2"
-        class="kuiLocalDropdownInput"
-        type="text"
-        readonly
-        value="{{share.urlFlags.shortSnapshotIframe2 ? share.makeIframeTag(share.urls.shortSnapshot, true) : share.makeIframeTag(share.urls.snapshot, true)}}"
-      />
-
-      <!-- Notes -->
-      <div class="kuiLocalDropdownFormNote">
-        Add to your HTML source. Note that all clients must be able to access Kibana.
-      </div>
+      <!-- kibi: reworded -->
+      You can share a snapshot of the current configuration of this {{share.objectType}} by creating a link
+      <span ng-if="share.allowEmbed"> or by embedding it into an iframe</span>.
+      Further modifications to the {{share.objectType}} won't be visible through
+      the link; if one or more fields in the underlying saved search change over time, filters saved in the state might
+      become invalid or ineffective.
+      <!-- kibi: end -->
     </div>
 
     <!-- Link -->
@@ -240,6 +199,110 @@
         readonly
         value="{{share.urlFlags.shortSnapshot ? share.urls.shortSnapshot : share.urls.snapshot}}"
       />
+    <!-- iframe -->
+
+    <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
+
+      <!-- kibi: intro -->
+      <div class="kuiLocalDropdownHeader__label">
+        iframe snippets
+      </div>
+
+      <div class="kuiLocalDropdownHelpText">
+        The following snippet can be pasted into an HTML page to embed this {{share.objectType}}
+        in an iframe; users must have access to Kibi to see the {{share.objectType}}
+        inside the iframe.
+      </div>
+      <!-- kibi: end -->
+
+      <!-- Header -->
+      <div class="kuiLocalDropdownHeader">
+        <div class="kuiLocalDropdownHeader__label">
+          <!-- kibi: reworded -->
+          iframe with no sidebars
+          <!-- kibi: end -->
+        </div>
+        <div class="kuiLocalDropdownHeader__actions">
+          <!--
+          siren: removed because we are shortening urls by default
+          <a
+            class="kuiLocalDropdownHeader__action"
+            ng-if="!share.urlFlags.shortSnapshotIframe"
+            ng-click="share.toggleShortSnapshotIframeUrl()"
+          >
+            Short URL
+          </a>
+
+          <a
+            class="kuiLocalDropdownHeader__action"
+            ng-if="share.urlFlags.shortSnapshotIframe"
+            ng-click="share.toggleShortSnapshotIframeUrl()"
+          >
+            Long URL
+          </a>
+          -->
+          <a
+            class="kuiLocalDropdownHeader__action"
+            ng-click="share.copyToClipboard('#snapshotIframeUrl')"
+          >
+            Copy
+          </a>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <input
+        id="snapshotIframeUrl"
+        class="kuiLocalDropdownInput"
+        type="text"
+        readonly
+        value="{{share.urlFlags.shortSnapshotIframe ? share.makeIframeTag(share.urls.shortSnapshot) : share.makeIframeTag(share.urls.snapshot)}}"
+      />
+
+      <!-- Notes -->
+      <!-- siren: removed because we are shortening urls by default
+      <div class="kuiLocalDropdownFormNote">
+        Add to your HTML source. Note that all clients must be able to access Kibana.
+      </div>
+      -->
+    </div>
+
+    <!-- iframe -->
+    <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed && share.objectType === 'dashboard'">
+
+      <div class="kuiLocalDropdownHelpText">
+        When using the snippet above, the side bar, the dashboards bar and the top bar
+        will be hidden.
+        If you want to allow users to switch dashboards inside the iframe, use
+        the following snippet:
+      </div>
+
+      <!-- Header -->
+      <div class="kuiLocalDropdownHeader">
+        <div class="kuiLocalDropdownHeader__label">
+          iframe with dashboard navigation sidebar
+        </div>
+        <div class="kuiLocalDropdownHeader__actions">
+          <a
+            class="kuiLocalDropdownHeader__action"
+            ng-click="share.copyToClipboard('#snapshotIframeUrl2')"
+          >
+            Copy
+          </a>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <input
+        id="snapshotIframeUrl2"
+        class="kuiLocalDropdownInput"
+        type="text"
+        readonly
+        value="{{share.urlFlags.shortSnapshotIframe2 ? share.makeIframeTag(share.urls.shortSnapshot, true) : share.makeIframeTag(share.urls.snapshot, true)}}"
+      />
+
+    </div>
+
 
       <!-- Notes -->
       <!-- siren: removed because we are shortening urls by default

@@ -118,6 +118,7 @@ module.exports = function (kibana) {
 
     uiExports: {
       hacks: [
+        'plugins/kibi_core/restore',
         'plugins/kibi_core/ui/directives/dashboards_nav/dashboards_nav',
         'plugins/kibi_core/ui/chrome/services/dashboards_nav_state',
         'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups',
@@ -137,7 +138,6 @@ module.exports = function (kibana) {
         'plugins/kibi_core/ui/spy_modes/multi_search_spy_mode'
       ],
       injectDefaultVars: function (server, options) {
-        const config = server.config();
         const vars = {};
 
         // kibi_core options

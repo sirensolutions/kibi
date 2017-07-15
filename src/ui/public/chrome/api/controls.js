@@ -8,6 +8,9 @@ module.exports = function (chrome, internals) {
    *
    *   Visible
    *     determines if the Kibana chrome should be displayed
+   *
+   *   isKibiNavbarVisible
+   *     determines if the Kibi nav bar should be displayed
    */
 
   let def = true;
@@ -32,11 +35,11 @@ module.exports = function (chrome, internals) {
 
   // kibi: added to be able to share dashboards with visible kibi-nav-bar
   let kibiNavbarVisibleDefault = true;
-  internals.setKibiNavbarVisibleDefault = (_def1) => kibiNavbarVisibleDefault = Boolean(_def1);
+  internals.setKibiNavbarVisibleDefault = value => kibiNavbarVisibleDefault = Boolean(value);
 
   chrome.isKibiNavbarVisible = () => {
     return kibiNavbarVisibleDefault;
   };
-  // kibi: added
+  // kibi: end
 
 };

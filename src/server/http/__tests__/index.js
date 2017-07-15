@@ -85,7 +85,7 @@ describe('routes', function () {
           // kibi: verify the redirect according to our implementation
           const actual = res.headers.location;
           try {
-            expect(actual).to.be(`/app/kibana#/discover?_h=${payload}`);
+            expect(actual).to.be(`/app/kibana#/kibi/restore/${payload}?`);
           } catch (error) {
             return done(error);
           }
@@ -110,7 +110,7 @@ describe('routes', function () {
             kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
               const actual = res.headers.location;
               try {
-                expect(actual).to.be(`/app/kibana#/discover?embed=true&_h=${payload}`);
+                expect(actual).to.be(`/app/kibana#/kibi/restore/${payload}?embed=true&`);
                 done();
               } catch (error) {
                 done(error);
@@ -129,7 +129,7 @@ describe('routes', function () {
             kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
               const actual = res.headers.location;
               try {
-                expect(actual).to.be(`/app/kibana#/discover?embed=true&kibiNavbarVisible=true&_h=${payload}`);
+                expect(actual).to.be(`/app/kibana#/kibi/restore/${payload}?embed=true&kibiNavbarVisible=true&`);
                 done();
               } catch (error) {
                 done(error);
@@ -159,7 +159,7 @@ describe('routes', function () {
             kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
               const actual = res.headers.location;
               try {
-                expect(actual).to.be(`/app/kibana#/dashboard?embed=true&_h=${payload}`);
+                expect(actual).to.be(`/app/kibana#/kibi/restore/${payload}?embed=true&`);
                 done();
               } catch (error) {
                 done(error);
@@ -178,7 +178,7 @@ describe('routes', function () {
             kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
               const actual = res.headers.location;
               try {
-                expect(actual).to.be(`/app/kibana#/dashboard?embed=true&kibiNavbarVisible=true&_h=${payload}`);
+                expect(actual).to.be(`/app/kibana#/kibi/restore/${payload}?embed=true&kibiNavbarVisible=true&`);
                 done();
               } catch (error) {
                 done(error);
@@ -209,7 +209,7 @@ describe('routes', function () {
             kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
               const actual = res.headers.location;
               try {
-                expect(actual).to.be(`/app/kibana#/visualize?embed=true&_h=${payload}`);
+                expect(actual).to.be(`/app/kibana#/kibi/restore/${payload}?embed=true&`);
                 done();
               } catch (error) {
                 done(error);
@@ -228,7 +228,7 @@ describe('routes', function () {
             kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
               const actual = res.headers.location;
               try {
-                expect(actual).to.be(`/app/kibana#/visualize?embed=true&kibiNavbarVisible=true&_h=${payload}`);
+                expect(actual).to.be(`/app/kibana#/kibi/restore/${payload}?embed=true&kibiNavbarVisible=true&`);
                 done();
               } catch (error) {
                 done(error);

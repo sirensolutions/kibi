@@ -1,18 +1,18 @@
 module.exports = function (grunt) {
-  var https = require('https');
-  var wreck = require('wreck');
-  var fs = require('fs');
-  var _ = require('lodash');
-  var Promise = require('bluebird');
+  const https = require('https');
+  const wreck = require('wreck');
+  const fs = require('fs');
+  const _ = require('lodash');
+  const Promise = require('bluebird');
   const DecompressZip = require('@bigfunger/decompress-zip');
 
-  var archives = [
+  const archives = [
     {
-      url: 'https://github.com/sirensolutions/kibi_radar_vis/archive/4.5.3.zip',
+      url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/4.6.4-4/kibi_radar_vis-4.6.4-4.zip',
       dest: '/tmp/kibi_radar_vis.zip'
     },
     {
-      url: 'https://github.com/sirensolutions/kibi_wordcloud_vis/raw/4.6.3-1/target/kibi_wordcloud_vis-4.6.3-1.zip',
+      url: 'https://github.com/sirensolutions/kibi_wordcloud_vis/releases/download/4.6.4-4/kibi_wordcloud_vis-4.6.4-4.zip',
       dest: '/tmp/kibi_wordcloud_vis.zip'
     },
     {
@@ -25,11 +25,11 @@ module.exports = function (grunt) {
     }
   ];
 
-  var download = function (url, dest) {
+  const download = function (url, dest) {
     grunt.log.write('Downloading ' + url + '\n');
     return new Promise(function (fulfill, reject) {
-      var file = fs.createWriteStream(dest);
-      var request = wreck.request('GET', url, {redirects: 3}, function (err, res) {
+      const file = fs.createWriteStream(dest);
+      const request = wreck.request('GET', url, {redirects: 3}, function (err, res) {
         if (err) {
           reject(err);
           return;
@@ -48,7 +48,7 @@ module.exports = function (grunt) {
     });
   };
 
-  var extractArchive = function (tempArchiveFile, pathToUnzip) {
+  const extractArchive = function (tempArchiveFile, pathToUnzip) {
     grunt.log.write('Extracting archive ' + tempArchiveFile + '\n');
     return new Promise(function (resolve, reject) {
       const unzipper = new DecompressZip(tempArchiveFile);
@@ -65,13 +65,13 @@ module.exports = function (grunt) {
 
 
   grunt.registerTask('kibi_public_plugins', '', function () {
-    var downloadPromises = [];
+    const downloadPromises = [];
     _.each(archives, function (archive) {
       downloadPromises.push(download(archive.url, archive.dest));
     });
 
     Promise.all(downloadPromises).then(function () {
-      var unzipPromises = [];
+      const unzipPromises = [];
       _.each(archives, function (archive) {
         unzipPromises.push(extractArchive(archive.dest, 'build/kibana/installedPlugins'));
       });

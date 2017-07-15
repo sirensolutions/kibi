@@ -8,11 +8,11 @@ module.exports = function (grunt) {
 
   var archives = [
     {
-      url: 'https://github.com/sirensolutions/kibi_radar_vis/archive/4.5.3.zip',
+      url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/4.6.4-4/kibi_radar_vis-4.6.4-4.zip',
       dest: '/tmp/kibi_radar_vis.zip'
     },
     {
-      url: 'https://github.com/sirensolutions/kibi_wordcloud_vis/raw/4.6.3-1/target/kibi_wordcloud_vis-4.6.3-1.zip',
+      url: 'https://github.com/sirensolutions/kibi_wordcloud_vis/releases/download/4.6.4-4/kibi_wordcloud_vis-4.6.4-4.zip',
       dest: '/tmp/kibi_wordcloud_vis.zip'
     },
     {

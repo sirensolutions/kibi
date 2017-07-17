@@ -54,6 +54,20 @@ export default class Migration12 extends Migration {
 
     let body = '';
     this._logger.info(`Updating kibi_core.default_dashboard_title from config`);
+
+    const dashboards = await this.scrollSearch(this._index, 'dashboard');
+    let defaultDashboardId = '';
+    for (const obj of dashboards) {
+      if(obj._source.title === this._defaultDashboardTitleYml) {
+        defaultDashboardId = obj._id;
+        break;
+      }
+    }
+
+    if (defaultDashboardId === '') {
+      this._logger.info(this._defaultDashboardTitleYml + ` dashboard cannot be found.`);
+    }
+
     const objects = await this.scrollSearch(this._index, this._type);
     for (const obj of objects) {
       if (!obj._source['kibi:defaultDashboardTitle']) {
@@ -65,18 +79,18 @@ export default class Migration12 extends Migration {
           }
         }) + '\n' + JSON.stringify({
           doc: {
-            'kibi:defaultDashboardTitle': this._defaultDashboardTitleYml
+            'kibi:defaultDashboardTitle': defaultDashboardId
           }
         }) + '\n';
         upgraded++;
-
-        if (upgraded > 0) {
-          await this._client.bulk({
-            refresh: true,
-            body: body
-          });
-        }
       }
+    }
+
+    if (upgraded > 0) {
+      await this._client.bulk({
+        refresh: true,
+        body: body
+      });
     }
     return upgraded;
   }

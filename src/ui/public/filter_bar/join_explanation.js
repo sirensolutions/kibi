@@ -117,6 +117,9 @@ uiModules
 
     if (f.query_string && f.query_string.query) {
       return Promise.resolve(' query: <b>' + f.query_string.query + '</b> ');
+    } else if (f.terms) {
+      const fieldName = Object.keys(f.terms)[0];
+      return Promise.resolve(` any on ${fieldName}: <b>${f.terms[fieldName].join(', ')}</b> `);
     } else if (f.match) {
       return Promise.resolve(formatMatch(f, 'match'));
     } else if (f.match_phrase) {

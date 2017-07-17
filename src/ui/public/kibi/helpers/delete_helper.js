@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisualizations, Private, $window) {
+export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisualizations, Private, $window, config) {
 
   function DeleteHelper() {
   }
@@ -54,6 +54,7 @@ export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisua
 
       case 'dashboard':
         const dashboardGroupNames = dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids);
+        const defaultDashboard = config.get('kibi:defaultDashboardTitle');
         if (dashboardGroupNames && dashboardGroupNames.length > 0) {
           const plural = dashboardGroupNames.length > 1;
           const msg =
@@ -64,6 +65,12 @@ export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisua
           $window.alert(msg);
           return Promise.resolve();
         }
+        //kibi: if default dashboard is removed, remove it also from config
+        _.each(ids, function (dashboardId) {
+          if(defaultDashboard === dashboardId) {
+            config.set('kibi:defaultDashboardTitle', '');
+          }
+        });
         return _delete().then(() => dashboardGroups.computeGroups(`deleted dashboards ${JSON.stringify(ids, null, ' ')}`));
 
       case 'query':

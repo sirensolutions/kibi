@@ -11,7 +11,7 @@ export class SavedObjectLoader {
     this.cacheGet = get;
     this.cacheFind = find;
     this.exclude = exclude;
-    this.reservedCharactersRegex = new RegExp('[+-=&|><!(){}[\\\]^"~*?:]', 'g');
+    this.reservedCharactersRegex = new RegExp('[+\\-=&|><!(){}[\\\]^"~*?:]', 'g');
     // kibi: end
 
     this.type = SavedObjectClass.type;

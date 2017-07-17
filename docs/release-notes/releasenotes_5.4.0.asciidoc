@@ -3,6 +3,293 @@
 The lists below cover changes between Kibi 4.6.4 and Kibi 5.4.0
 
 [float]
+=== Kibi Changes
+
+New:
+
+* Merged changes from Kibana 5.4.0 
+* New sidebar replace the Kibi dashboard tans
+* Updated 4 to 5 migration page
+* Added additional information for shards failures
+* Page size option for table to override discovery:size
+* Add build timestamp to info page
+* Handle image error when value formatted as url/image
+* Added migration for the heatmap visualisation
+* Added kibi_wordcloud to tagcloud migration
+* Added a gremlin_server plugin to handle the startup of Gremlin Server
+* Added kibi:graphStatesLimit to the advanced options
+* Added support Kerberos/JWT
+* Added Kibi Category to vis wizard
+* Allow middlewares to set parameters explicitly
+* Kibi config is now a singleton
+* Added server.ssl.ca option
+* Update default gremlin server datasource during startup
+* Adds timelion sheets to saved object API
+* Ported html-angular view from 4.6.4-1
+* Added backup/restore commands
+* Panels border option added
+* Added space between panels
+* Added back panels borders
+
+
+Changed:
+
+* Removed support for Windows 32 bit
+* Move up one dir before running kibi.bat on Windows
+* Removed advanced join settings
+* Use match_none for empty searches
+* Migration of default dashboard title from kibi.yml to advanced settings
+* Updated kibi license file
+* Remove CONTRIBUTING.md
+* Remove tinkerpop3 related queries and filter out tinkerpop3 data sources
+* Hooks before transferVisState, usefull for multichart
+* Check for siren-vanguard instead of siren-platform
+* Removed dashboard groups management section
+* Renamed kibana-plugin binary to kibi-plugin
+* Use where.exe in place of which on windows
+* Use jar for archiving on Windows
+* Added route for getting elasticsearch plugins
+* Removed relational panel settings
+* Removes tinkerpop3 query
+
+
+Fixed:
+
+* Bumped kibiutils to version 1.8.0
+* Heatmap layout fixed 
+* Improved application logging
+* Improved notifications
+* Improved migration procedure a rare case where after migration relations definitions were wrong
+* Improvements to tag-cloud visualisation
+* Saved object finder improvements about reserved characters
+* Improved tooltips styling and content
+* Updates counts when global time filter is changed
+* Use column aliases for the sorting menu
+* Add type attribute to up/down buttons so that they don't trigger a form submission
+* Documentation updated to version 5
+* Fix extra scrollbar in doc table on pagination button click
+* Reset query text on reset button click
+* Ignore Gremlin configuration if not set
+* Do not start the gremlin server if the config is missing
+* Disable the gremlin plugin during the upgrade
+* Ignore plugins/sentinl/phantomjs to avoid braking phantomjs install by Seninl app
+* Improvements in handling the missing data indices
+* Override the default dark theme button color
+* Filtering on the advanced table triggers the underlying click handler
+* Fixed console when using an https agent
+* Handle sorting on analysed or missing fields
+* Reset pagination on filter change
+* Fixed issue when adding a filter from a SQL based visualisation
+* Fixed missing Vanguard notification
+* Fixed export meta fields as csv
+* X-Pack monitoring instructions and notification fix
+* Timelion fixes
+* Display query title instead of id
+* Increased timeout of esArchiver test
+* Use hashed item store class to handle quota storage exception
+* Fixed legend exception
+* Replace join filters on empty index sets with match_none queries
+* Use the docTable directive from kibana in the enhanced search results visualisation
+* Make management tabs responsive to width
+* Include must_not in getHighlightRequest processing
+* Allows to honor the handleNoResults property
+* Strip /kibana folder from unzipped public plugins
+* Fixed required field highlighted
+* Added missing docker doc
+* Use field_caps instead of field_stats to get field capabilities
+* Clicking on the kibi logo fixed
+* Use requiresTimePicker visualization param
+* Time input fields is made equal
+* Updates README.md
+* Relations menu filter fixed
+* Fixed issue about Proxy class not available on all browsers
+* Selected Documents issue fixed
+* Allow vis to change their es request before serialization proc begin
+* Adds support to save uistate for multiple instance of the same vis type
+* Allows restoring the uiState after click edit visualisation on dashboard
+* Fix for cluster.createClient
+* Do not add join queries to the highlight_query query
+* Take the kacConfiguration from chrome.getInjected
+* Use config.has to check for configs existence
+* Relative time range validation fixed
+* Column alias validation added
+* add hook to access control in the uiSettings API
+* Allows histogram to be interval safe
+* Fixed tabs in management objects
+* Response check added to create_kibi_proxy
+* Alias checking added to search
+* Try every index pattern if the default index is not reachable because of an authorization error
+* Port join wrapping into bool.must
+* Fix handling of missing saved searches
+* Update styles for navbar and filterbar tooltips
+* Check for forward and backslashes in packagePaths.
+* Time sync checklist fixed
+* Fixed plugin install error
+* Removed not used events
+* Set baseURL in eeg
+* Allow to add filter via table details in the visualize page
+* Column rename fixed
+* Use data cluster
+* Do not retrieve the scope of the element
+* Filter label fixed
+* Put Kibi and Kibana version
+* Fixed wrong hint on the rel filter
+* Use urandom in Gremlin Server, documentation updates
+* Border and filter bar color fix with dark theme
+* preserve column layout in the enhanced search results visualisation
+* Ported import export improvements from 4.6.4-1
+* Fixed incorrect mouseup event handling on fontawesome-icon-picker
+* Ported ACL fix in the relational filter visualisation to 5
+* Ported changes for Kibi Enterprise to 5
+* RefreshInterval object check added
+* Use fontawesome-iconpicker 1.2.1 instead of ui-iconpicker
+* Use tag instead of commit hash in package.json to point to kibi-h2o2
+* Build module path correctly on windows
+* Updated native bindings for Darwin
+* Set temp folder based on OS
+* Pagination fixed
+* Proxy the HTTP status code and upstream ttl
+* removed the wrong pointer to kibi.dev.yml
+* Made object actions always visible
+* Do not shorten URLs in shared links UI tests
+* Corrected typeahead for the Discover/Visualize/Dashboard pages
+* Removed old version of the elasticdump dependency
+* Kibana reference renamed
+* Ignore delayed executions that are cancelled
+* Hide the tooltip on destroy
+* Do not submit the form on click of the query history
+* Check that all query_string queries are put into the must clause
+* Keep toaster next to the dashboards bar
+* Validator fixed
+* Ported - introduction of MissingDashboardError
+* Ported documentation about cross frame communication
+* Support slash in entity uri and corrected some bugs about selecting documents
+* Refactor the kibi proxy code to use new functions: onResponse and onBeforeSendRequest
+* Fixed platforms mappings to classifiers
+* Ported how sharing link is generated
+* No results found alignment in Kibi data table fixed  
+* Open a new clean (no cache) web browser tab with Kibi if the logo is clicked
+* KibiSequentialJoinVisHelper improved
+* Correctly merge params and headers from datasource and query
+* Moved URL sharing functions to a service
+* Add info box on the relations setting
+* Created method for determining if object is from Kibi
+* Decorate query in kibi state
+* Include basePath in Kibi session redirect, save Kibi state using save method
+* Add info box to the Sequential Join Viz to instruct a user about how to create a relation between 2 types under 1 index. 
+* Handle cases where the company or the investor is missing
+* Fix fullscreen mode
+* Added the join icon indicator in the indices management page
+
+Plugins
+
+* Fix agg config save after apply
+* Fix Scatterplot on Kibi 5
+* Add path to Phantomjs binary in horseman options
+* Patch es client with new Vanguard methods
+* Allow underscore in ACL role ids
+* Fixed and unified plugin versions
+* Update plugin versions to 5.4.0
+* Removed extra wrapping into Kibana folder for non-public plugins
+
+Access Control 
+
+* Ported Access Control plugin to Kibi 5
+* Ported Kerberos / JWT support to 5
+* Changed title into label
+* Removed  $cookies dependency
+* Return parameters from middleware methods
+* Fixed wrong config variable name
+* Expose scope in Authentication/ACL editors
+* Fix issue when empty path
+
+Box Plot
+
+* Box Plot ported to Kibi 5
+* Refactor box_plot visualisation
+* Update Box Plot x axis labelling
+* Show whiskers correctly in Box Plot
+
+Bubble Diagram
+
+* Bubble diagram ported to Kibi 5
+
+Enterprise Components
+
+* Port Enterprise Components to Kibi 5
+* Describe unknown xhr errors
+* Object for cross frame communication
+
+Graph Browser
+
+* Port Graph Browser to Kibi 5
+* Set the default datasource id
+* Change the filter to a bool filter
+* Load scriptSource from file if present
+* Reinit the cached scope
+* Remove scroll API usage in gremlin server
+* Support multiple undo/redo states
+* Added graph script middleware + fix script editor
+* Remove an unneeded Elasticsearch query
+* Keylines upgrade
+* Always add Basic to the auth header
+* Added wrapping Kibana folder
+* Init on getters
+* Set max height to add menu
+* Refactor persistence helper
+* Pass time from the state
+* Add remove all button
+* Reflect deletion of live filter on filter_bar in graph browser filter button
+* Fix graph browser configuration issues
+* Fixed issue where new elements are not tracked by the timebar if filtering was previously enabled
+* Show warning on missing relations on runtime and configuration
+* Port issue-1359 to 5 - Error when switching back to a graph browser dashboard
+* Port issue-1316 to 5 - Expand by relation does not retrieve count for retrieved nodes
+* Port issue-1346 to 5 - Fix for remove and crop
+* Port issue-1303 to 5 - Select on Graph Browser associated with saved search
+* Port issue-1341 to 5 - Don't overwrite existing node upon expansion
+* Port issue-1270 - No such index trying to configure graph
+* Port issue-1326 - Allow graph timebar to work with arcs
+* Remove URL length check on graph selection (port to 5)
+* Self join support
+* Fix highlightning (port to 5)
+* Add graph and script to savedObjectAPITypes
+* Prevent any changes of the gremlin server datasource
+* Better graph tooltip positioning
+
+License
+
+* License plugin ported to Kibi 5
+* Fixed plugin name
+* Fixed tests on license plugin
+
+Multichart
+
+* Ported Multichart to Kibi 5
+* Miltichart allows saving the smart default configurations
+* Moves save state inside a hook
+* Fix single call on Multichart
+* Multichart SDC, serialisation refactor and unit tests
+* Fix multiple configurations on Multichart
+* Fix property edition on visualize
+* Missing after fetch event handler
+* Focus the graph after script execution
+* Configurable relations
+
+Scatter Plot 
+
+* Scatter plot ported to Kibi 5
+
+Taxonomy Browser
+
+* Moved taxonomy browser to Kibi 5
+
+Vector Map 
+
+* Vector map ported to Kibi 5
+
+
+[float]
 === Kibana Changes
 
 [float]

@@ -8,10 +8,10 @@ The lists below cover changes between Kibi 4.6.4 and Kibi 5.4.0
 New:
 
 * Merged changes from Kibana 5.4.0 
-* New sidebar replace the Kibi dashboard tans
-* Updated 4 to 5 migration page
+* New sidebar replace the Kibi dashboard tabs
+* Updated Kibi 4 to 5 migration page
 * Added additional information for shards failures
-* Page size option for table to override discovery:size
+* Page size option for the Enhanced Eearch Results visualization to override discover:sampleSize
 * Add build timestamp to info page
 * Handle image error when value formatted as url/image
 * Added migration for the heatmap visualisation
@@ -27,10 +27,8 @@ New:
 * Adds timelion sheets to saved object API
 * Ported html-angular view from 4.6.4-1
 * Added backup/restore commands
-* Panels border option added
+* Added panels border option
 * Added space between panels
-* Added back panels borders
-
 
 Changed:
 
@@ -59,7 +57,7 @@ Fixed:
 * Heatmap layout fixed 
 * Improved application logging
 * Improved notifications
-* Improved migration procedure a rare case where after migration relations definitions were wrong
+* Improved migration procedure for a rare case where after migration relations definitions were wrong
 * Improvements to tag-cloud visualisation
 * Saved object finder improvements about reserved characters
 * Improved tooltips styling and content
@@ -72,7 +70,7 @@ Fixed:
 * Ignore Gremlin configuration if not set
 * Do not start the gremlin server if the config is missing
 * Disable the gremlin plugin during the upgrade
-* Ignore plugins/sentinl/phantomjs to avoid braking phantomjs install by Seninl app
+* Ignore plugins/sentinl/phantomjs to avoid braking phantomjs install by Sentinl app
 * Improvements in handling the missing data indices
 * Override the default dark theme button color
 * Filtering on the advanced table triggers the underlying click handler
@@ -93,7 +91,6 @@ Fixed:
 * Make management tabs responsive to width
 * Include must_not in getHighlightRequest processing
 * Allows to honor the handleNoResults property
-* Strip /kibana folder from unzipped public plugins
 * Fixed required field highlighted
 * Added missing docker doc
 * Use field_caps instead of field_stats to get field capabilities
@@ -197,7 +194,7 @@ Access Control
 * Ported Access Control plugin to Kibi 5
 * Ported Kerberos / JWT support to 5
 * Changed title into label
-* Removed  $cookies dependency
+* Removed $cookies dependency
 * Return parameters from middleware methods
 * Fixed wrong config variable name
 * Expose scope in Authentication/ACL editors
@@ -243,13 +240,13 @@ Graph Browser
 * Fix graph browser configuration issues
 * Fixed issue where new elements are not tracked by the timebar if filtering was previously enabled
 * Show warning on missing relations on runtime and configuration
-* Port issue-1359 to 5 - Error when switching back to a graph browser dashboard
-* Port issue-1316 to 5 - Expand by relation does not retrieve count for retrieved nodes
-* Port issue-1346 to 5 - Fix for remove and crop
-* Port issue-1303 to 5 - Select on Graph Browser associated with saved search
-* Port issue-1341 to 5 - Don't overwrite existing node upon expansion
-* Port issue-1270 - No such index trying to configure graph
-* Port issue-1326 - Allow graph timebar to work with arcs
+* Fixed an error when switching back to a graph browser dashboard
+* Expand by relation does not retrieve count for retrieved nodes
+* Fix for remove and crop
+* Select on Graph Browser associated with saved search
+* Don't overwrite existing node upon expansion
+* No such index trying to configure graph
+* Allow graph timebar to work with arcs
 * Remove URL length check on graph selection (port to 5)
 * Self join support
 * Fix highlightning (port to 5)
@@ -279,10 +276,6 @@ Multichart
 Scatter Plot 
 
 * Scatter plot ported to Kibi 5
-
-Taxonomy Browser
-
-* Moved taxonomy browser to Kibi 5
 
 Vector Map 
 

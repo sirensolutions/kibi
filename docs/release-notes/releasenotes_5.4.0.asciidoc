@@ -8,7 +8,9 @@ The lists below cover changes between Kibi 4.6.4 and Kibi 5.4.0
 New:
 
 * Merged changes from Kibana 5.4.0 
-* New sidebar replace the Kibi dashboard tabs
+* New sidebar menu for dashboard management and navigation (replaces previous tabs)
+* Uses the new Siren Vanguard (an Elasticsearch plugin which adds relational technology to Elasticsearch, providing the capability to do joins across multiple indices)
+* Enhanced enterprise security - added support for Kerberos/JWT
 * Updated Kibi 4 to 5 migration page
 * Added additional information for shards failures
 * Page size option for the Enhanced Eearch Results visualization to override discover:sampleSize
@@ -18,15 +20,14 @@ New:
 * Added kibi_wordcloud to tagcloud migration
 * Added a gremlin_server plugin to handle the startup of Gremlin Server
 * Added kibi:graphStatesLimit to the advanced options
-* Added support Kerberos/JWT
 * Added Kibi Category to vis wizard
 * Allow middlewares to set parameters explicitly
 * Kibi config is now a singleton
-* Added server.ssl.ca option
+* Added server.ssl.ca option to kibi.yml - allows to use a CA file to verify the SSL certificate during development
 * Update default gremlin server datasource during startup
 * Adds timelion sheets to saved object API
 * Ported html-angular view from 4.6.4-1
-* Added backup/restore commands
+* Added backup/restore commands to backup/restore content of .kibi index
 * Added panels border option
 * Added space between panels
 
@@ -263,8 +264,8 @@ License
 Multichart
 
 * Ported Multichart to Kibi 5
-* Miltichart allows saving the smart default configurations
-* Moves save state inside a hook
+* Miltichart can now save the smart default configurations
+* Improved save state handling
 * Fix single call on Multichart
 * Multichart SDC, serialisation refactor and unit tests
 * Fix multiple configurations on Multichart

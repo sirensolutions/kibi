@@ -46,13 +46,13 @@ uiRoutes
         // - if any try to load the default dashboard if set, otherwise load the first dashboard
         // - if the default dashboard is missing, load the first dashboard
         // - if the first dashboard is missing, create a new one
-        let getDefaultDashboard = Promise.resolve({ hits: [] });
+        let getDefaultDashboard = Promise.resolve({ id: '' });
         const notify = createNotifier();
 
         const defDashConfig = config.get('kibi:defaultDashboardTitle');
 
         if (defDashConfig) {
-          getDefaultDashboard = savedDashboards.find(defDashConfig, 1);
+          getDefaultDashboard = savedDashboards.get(defDashConfig);
         }
 
         return Promise.all([
@@ -61,19 +61,15 @@ uiRoutes
         ])
         .then(([
             { total: totalFirst, hits: [ firstDashboard ] },
-            { total: totalDefault, hits: dashboards }
+            defaultDashboard
           ]) => {
           if (!totalFirst) {
             return savedDashboards.get();
           }
           // select the first dashboard if default_dashboard_title is not set or does not exist
           let dashboardId = firstDashboard.id;
-          if (totalDefault === 0) {
-            notify.error(`The default dashboard with title "${defDashConfig}" does not exist.
-            Please correct the "kibi:defaultDashboardTitle" parameter in advanced settings`);
-          } else if (totalDefault > 0) {
-            const dashboardIndex = _.findIndex(dashboards, function (dashboard) { return dashboard.title ===  defDashConfig; });
-            dashboardId = dashboards[dashboardIndex].id;
+          if (defaultDashboard.id && defaultDashboard.id === defDashConfig) {
+            dashboardId = defaultDashboard.id;
           }
           kbnUrl.redirect(`/dashboard/${dashboardId}`);
           return Promise.halt();

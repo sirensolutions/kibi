@@ -25,6 +25,7 @@ function toEditableConfig({ def, name, value, isCustom }) {
   const editor = getEditorType(conf);
   conf.json = editor === 'json';
   conf.select = editor === 'select';
+  conf.kibiSelect = editor === 'kibiSelect';
   conf.bool = editor === 'boolean';
   conf.array = editor === 'array';
   conf.markdown = editor === 'markdown';

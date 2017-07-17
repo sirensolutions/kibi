@@ -7,8 +7,12 @@ import uiModules from 'ui/modules';
 import FieldWildcardProvider from 'ui/field_wildcard';
 import indexedFieldsTemplate from 'plugins/kibana/management/sections/indices/_indexed_fields.html';
 
+// kibi: imports
+import joinFields from 'plugins/kibi_core/management/sections/indices/join_fields';
+// kibi: end
+
 uiModules.get('apps/management')
-.directive('indexedFields', function (Private, $filter) {
+.directive('indexedFields', function (config, Private, $filter) {
   const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
   const noTemplate = '';
   const filter = $filter('filter');
@@ -45,8 +49,13 @@ uiModules.get('apps/management')
         const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters);
         _.find($scope.editSections, { index: 'indexedFields' }).count = fields.length; // Update the tab count
 
+        const relations = config.get('kibi:relations');
         $scope.rows = fields.map(function (field) {
-          const childScope = _.assign($scope.$new(), { field: field });
+          const childScope = _.assign($scope.$new(), {
+            field: field,
+            // kibi: add information about joined fields
+            join: joinFields(relations.relationsIndices, $scope.indexPattern.id, field.name)
+          });
           rowScopes.push(childScope);
 
           const excluded = fieldWildcardMatch(field.name);

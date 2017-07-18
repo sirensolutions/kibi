@@ -103,7 +103,7 @@ describe('kibi_core/migrations/functional', function () {
             info: sinon.spy()
           }
         };
-        fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('Companies');
+        fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('Company');
       }));
 
       afterEach(wrapAsync(async () => {
@@ -126,11 +126,16 @@ describe('kibi_core/migrations/functional', function () {
 
         for (const [id, original] of before) {
           const upgraded = after.get(id);
-          const originalDefaultDashboard = original._source['kibi:defaultDashboardTitle'];
-          const upgradedDefaultDashboard = upgraded._source['kibi:defaultDashboardTitle'];
 
-          expect(originalDefaultDashboard).to.equal(undefined);
-          expect(upgradedDefaultDashboard).to.equal('Companies');
+          if(original._type === 'config') {
+            const originalDefaultDashboard = original._source['kibi:defaultDashboardTitle'];
+            expect(originalDefaultDashboard).to.equal(undefined);
+          }
+
+          if(upgraded._type === 'config') {
+            const upgradedDefaultDashboard = upgraded._source['kibi:defaultDashboardTitle'];
+            expect(upgradedDefaultDashboard).to.equal('Test-Company');
+          }
         }
       }));
     });

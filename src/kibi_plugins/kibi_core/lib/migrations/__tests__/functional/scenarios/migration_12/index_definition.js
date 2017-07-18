@@ -14,6 +14,13 @@ module.exports = {
           index: 'not_analyzed'
         }
       }
+    },
+    dashboard: {
+      properties: {
+        title: {
+          type: 'string',
+        }
+      }
     }
   }
 };

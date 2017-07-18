@@ -9,19 +9,9 @@
   ng-class="{ loading: searchSource.activeFetchCount > 0 }"
 >
   <div ng-if="!infiniteScroll">
-    <div class="kuiBar docTableBar">
-      <!--kibi: support CSV export-->
-      <a ng-if="csv" class="small" ng-click="exportAsCsv(hits, indexPattern, columns)">
-        Export as CSV <i aria-hidden="true" class="fa fa-download"></i>
-      </a>
-      <!--kibi: end-->
+    <!--kibi: enable/disable top paginator by parameter-->
+    <div class="kuiBar docTableBar" ng-if="enableTopPaginator">
       <div class="kuiBarSection">
-        <div
-          ng-if="shouldShowLimitedResultsWarning()"
-          class="kuiToolBarText kuiSubduedText"
-        >
-        {{ limitedResultsWarning }}
-        </div>
         <!-- Pagination -->
         <tool-bar-pager-text
           start-item="pager.startItem"
@@ -57,6 +47,8 @@
         <thead
           kbn-table-header
           column-aliases="columnAliases"
+          column-min-width="columnMinWidth"
+          enable-time-field="enableTimeField"
           columns="columns"
           index-pattern="indexPattern"
           sort-order="sorting"
@@ -68,6 +60,7 @@
           <tr ng-repeat="row in pageOfItems track by row._index+row._type+row._id+row._score+row._version"
             kbn-table-row="row"
             column-aliases="columnAliases"
+            enable-time-field="enableTimeField"
             cell-click-handlers="cellClickHandlers"
             columns="columns"
             sorting="sorting"
@@ -166,4 +159,3 @@
   <h2><i class="fa fa-meh-o"></i></h2>
   <h4>No results found</h4>
 </div>
-

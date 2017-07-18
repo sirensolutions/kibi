@@ -1,9 +1,11 @@
 <tr>
   <th width="1%"></th>
-  <th ng-if="indexPattern.timeFieldName" data-test-subj="docTableHeaderField">
+  <!-- kibi: make time field column optional -->
+  <th ng-if="indexPattern.timeFieldName && enableTimeField" data-test-subj="docTableHeaderField">
     <span>Time <i ng-class="headerClass(indexPattern.timeFieldName)" ng-click="cycleSortOrder(indexPattern.timeFieldName)" tooltip="Sort by time"></i></span>
   </th>
-  <th ng-repeat="name in columns" data-test-subj="docTableHeaderField">
+  <!-- kibi: add column min width option -->
+  <th ng-repeat="name in columns" data-test-subj="docTableHeaderField" ng-style="{ 'min-width': columnMinWidth[$index] + 'px' || '0px' }">
     <!-- kibi: added columnAliases[name] to the condition -->
     <span class="table-header-name">
       {{(columnAliases[$index] || name) | shortDots}} <i ng-class="headerClass(name)" ng-click="cycleSortOrder(name)" tooltip="{{tooltip(name)}}" tooltip-append-to-body="1"></i>

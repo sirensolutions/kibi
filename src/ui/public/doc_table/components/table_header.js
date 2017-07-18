@@ -17,6 +17,10 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       onMoveColumn: '=?',
       // kibi: list of column aliases
       columnAliases: '=?',
+      // kibi: list of column min width
+      columnMinWidth: '=?',
+      // kibi: make time field column optional
+      enableTimeField: '=?'
     },
     template: headerHtml,
     controller: function ($rootScope, $scope) {

@@ -28,29 +28,26 @@
     </div>
 
     <div class="form-group">
-      <label>Select saved search
-        <kbn-info placement="right" info="Selecting a saved search will result in
-        1) The number of current hits being displayed in the dashboard title
-        2) The dashboard being a possible target of pivoting from other dashboards"></kbn-info>
-      </label>
-      <kibi-select object-type="search" ng-model="savedSearchId"></kibi-select>
-    </div>
+      <label>Select saved search <a ng-click="toggleExplanation()">Why?</a></label>
 
-    <div class="form-group">
-      <p>
-        Dashboards with a Saved Search will:
-      </p>
-      <ul>
-        <li>Display a count of results (e.g. the hits on that saved search)</li>
-        <li>Be easier to populate with meaningful Widgets - filtering by clicking on the widget will always work coherently</li>
-        <li>Can be Target or Origin of relational navigation functionalities (Set to Set navigation)</li>
-      </ul>
-      <p>
-        Dashboards without Saved Search will be typically used for cross index "summary pages".
-      </p>
-      <p>
-        Note: To create a Saved Search from one of your Index Patterns, use the Visualize page.
-      </p>
+      <div ng-show="showExplanation" class="dashboard-explanation form-group">
+        <p>
+          Add a Saved Search to a dashboard to:
+        </p>
+        <ul>
+          <li>Display a count of results (e.g. the hits on that saved search)</li>
+          <li>Populate the dashboard with meaningful Widgets - filtering by clicking on the widget will always work coherently</li>
+          <li>Enable relational navigation across Dashboards (Set to Set navigation)</li>
+        </ul>
+        <p>
+          Dashboards without a Saved Search will be typically used only for cross index "summary pages".
+        </p>
+        <p>
+          Note: To create a Saved Search from one of your Index Patterns, use the <a ng-click="jumpToDiscover()">Discovery</a> page.
+        </p>
+      </div>
+
+      <kibi-select object-type="search" ng-model="savedSearchId"></kibi-select>
     </div>
 
     <button type="submit" ng-disabled="!title" class="btn btn-primary" data-test-subj="confirmModalConfirmButton" aria-label="Create dashboard">

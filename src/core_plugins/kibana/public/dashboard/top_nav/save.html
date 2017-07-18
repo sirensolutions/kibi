@@ -37,11 +37,25 @@
   </div>
   <!-- kibi: associate a saved search with this dashboard -->
   <div class="form-group">
-    <label>Saved Search
-      <kbn-info placement="right" info="Selecting a saved search will result in
-      1) The number of current hits being displayed in the dashboard title
-      2) The dashboard being a possible target of pivoting from other dashboards"></kbn-info>
+    <label>Select Saved Search <a ng-click="toggleSavedSearchExplanation()">Why?</a>
     </label>
+
+    <div ng-show="showSavedSearchExplanation" class="dashboard-explanation form-group">
+      <p>
+        Add a Saved Search to a dashboard to:
+      </p>
+      <ul>
+        <li>Display a count of results (e.g. the hits on that saved search)</li>
+        <li>Populate the dashboard with meaningful Widgets - filtering by clicking on the widget will always work coherently</li>
+        <li>Enable relational navigation across Dashboards (Set to Set navigation)</li>
+      </ul>
+      <p>
+        Dashboards without a Saved Search will be typically used only for cross index "summary pages".
+      </p>
+      <p>
+        Note: To create a Saved Search from one of your Index Patterns, use the <a ng-click="jumpToDiscover()">Discovery</a> page.
+      </p>
+    </div>
     <kibi-select object-type="search" ng-model="opts.dashboard.savedSearchId"></kibi-select>
   </div>
   <!-- kibi: end -->

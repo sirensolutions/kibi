@@ -63,6 +63,11 @@ uiModules.get('kibana')
         columns: $scope.columns
       };
 
+      // kibi: make time field column optional
+      if (!$scope.enableTimeField) {
+        $scope.enableTimeField = true;
+      }
+
       // kibi: add exportAsCsv to the scope
       $scope.exportAsCsv = Private(ExportAsCsvProvider).exportAsCsv;
 

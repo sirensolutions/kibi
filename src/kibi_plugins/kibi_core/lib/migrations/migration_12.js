@@ -35,6 +35,22 @@ export default class Migration12 extends Migration {
     if (!this._defaultDashboardTitleYml) {
       return count;
     }
+
+    const dashboards = await this.scrollSearch(this._index, 'dashboard');
+    let dashboardExists = false;
+    for (const obj of dashboards) {
+      if(obj._source.title === this._defaultDashboardTitleYml) {
+        dashboardExists = true;
+        break;
+      }
+    }
+
+    if (!dashboardExists) {
+      this._logger.warning('[' + this._defaultDashboardTitleYml + `] is set as kibi:defaultDashboardTitle in kibi.yml` +
+      ` but dashboard cannot be found.`);
+      return count;
+    }
+
     const objects = await this.scrollSearch(this._index, this._type);
     _.each(objects, function (object) {
       const defaultDashboardSettings = object._source['kibi:defaultDashboardTitle'];
@@ -66,6 +82,7 @@ export default class Migration12 extends Migration {
 
     if (defaultDashboardId === '') {
       this._logger.info(this._defaultDashboardTitleYml + ` dashboard cannot be found.`);
+      return upgraded;
     }
 
     const objects = await this.scrollSearch(this._index, this._type);

@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
   return {
     options: {
-      branch: '5.4',
+      binary: 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.4.3.tar.gz',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         http: {

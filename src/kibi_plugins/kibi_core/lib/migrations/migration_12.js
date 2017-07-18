@@ -46,8 +46,8 @@ export default class Migration12 extends Migration {
     }
 
     if (!dashboardExists) {
-      this._logger.warning('[' + this._defaultDashboardTitleYml + `] is set as kibi:defaultDashboardTitle in kibi.yml` +
-      ` but dashboard cannot be found.`);
+      this._logger.warning('[' + this._defaultDashboardTitleYml + '] is set as kibi_core.default_dashboard_title in kibi.yml' +
+      ' but dashboard cannot be found.');
       return count;
     }
 

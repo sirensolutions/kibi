@@ -52,7 +52,18 @@ uiRoutes
         const defDashConfig = config.get('kibi:defaultDashboardTitle');
 
         if (defDashConfig) {
-          getDefaultDashboard = savedDashboards.get(defDashConfig);
+        //kibi: wrapped in another promise for displaying more meaningful warning
+          getDefaultDashboard = new Promise(function (fulfill, reject) {
+            savedDashboards.get(defDashConfig).then(function (dash) {
+              fulfill(dash);
+            }).catch(function (err) {
+              if (err.message === 'Could not locate object of type: dashboard. (id: ' + defDashConfig + ')') {
+                fulfill(null);
+              } else {
+                reject(err);
+              }
+            });
+          });
         }
 
         return Promise.all([
@@ -68,8 +79,11 @@ uiRoutes
           }
           // select the first dashboard if default_dashboard_title is not set or does not exist
           let dashboardId = firstDashboard.id;
-          if (defaultDashboard.id && defaultDashboard.id === defDashConfig) {
+          if (defaultDashboard && defaultDashboard.id && defaultDashboard.id === defDashConfig) {
             dashboardId = defaultDashboard.id;
+          } else if (!defaultDashboard) {
+            notify.error(`The default dashboard with id "${defDashConfig}" does not exist.` +
+            ` Please correct the "kibi:defaultDashboardTitle" parameter in advanced settings`);
           }
           kbnUrl.redirect(`/dashboard/${dashboardId}`);
           return Promise.halt();

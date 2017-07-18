@@ -65,12 +65,12 @@ doc-table {
   padding: 5px;
   flex: 1 1 100%;
   .custom-view {
-    display: flex;
-    flex-direction: row;
+    display: inline-block;
+    width: 100%;
     color: @st-dark-gray;
 
     .sorting {
-      padding-left: 50px;
+      float: right;
     }
   }
 }
@@ -178,6 +178,9 @@ doc-table {
 .kibi-data-table-vis-params {
   .column-aliases div.duplicate-warning {
     color: #F40E0E;
+  }
+  .column-min-width {
+    width: 80px;
   }
 
   input.invalid {

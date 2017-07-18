@@ -3,13 +3,17 @@ import { resolve } from 'path';
 import { once, merge } from 'lodash';
 import libesvm from 'libesvm';
 
-const VERSION = '5.4'; // kibi: use a working branch
+// kibi: use a working branch
+const VERSION = '5.4';
+// kibi: switch to binary when https://esvm-props.kibana.rocks/builds
+const BINARY = 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.4.3.tar.gz';
 const DIRECTORY = resolve(__dirname, '../../../../esvm/functional_test_runner_tests');
 
 const createCluster = (options = {}) => {
   return libesvm.createCluster(merge({
     directory: DIRECTORY,
-    branch: VERSION,
+    binary: BINARY
+    //branch: VERSION,
   }, options));
 };
 

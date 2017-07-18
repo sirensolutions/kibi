@@ -48,7 +48,7 @@
           kbn-table-header
           column-aliases="columnAliases"
           column-min-width="columnMinWidth"
-          enable-time-field="enableTimeField"
+          disable-time-field="disableTimeField"
           columns="columns"
           index-pattern="indexPattern"
           sort-order="sorting"
@@ -60,7 +60,7 @@
           <tr ng-repeat="row in pageOfItems track by row._index+row._type+row._id+row._score+row._version"
             kbn-table-row="row"
             column-aliases="columnAliases"
-            enable-time-field="enableTimeField"
+            disable-time-field="disableTimeField"
             cell-click-handlers="cellClickHandlers"
             columns="columns"
             sorting="sorting"

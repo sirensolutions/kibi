@@ -36,7 +36,7 @@ function KibiDataTableVisTypeProvider(Private) {
         queryDefinitions: [],
         columns: [],
         columnAliases: [],
-        enableTimeField: true
+        disableTimeField: false
       },
       editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
     },

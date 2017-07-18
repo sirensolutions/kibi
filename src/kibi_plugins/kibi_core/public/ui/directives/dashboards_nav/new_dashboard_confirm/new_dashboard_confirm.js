@@ -9,7 +9,7 @@ import uiModules from 'ui/modules';
 
 const module = uiModules.get('kibana');
 
-module.factory('newDashboardConfirm', function ($rootScope, $compile) {
+module.factory('newDashboardConfirm', function ($rootScope, $compile, $window, chrome) {
   let modalPopover;
   const confirmQueue = [];
 
@@ -33,6 +33,8 @@ module.factory('newDashboardConfirm', function ($rootScope, $compile) {
 
     confirmScope.title = title;
     confirmScope.savedSearchId = '';
+    confirmScope.showExplanation = false;
+
     confirmScope.onConfirm = () => {
       destroy();
       options.title = confirmScope.title;
@@ -50,7 +52,13 @@ module.factory('newDashboardConfirm', function ($rootScope, $compile) {
     confirmScope.savedSearchDescription = () => {
       return !confirmScope.savedSearchId ? 'NONE' : confirmScope.savedSearchId;
     };
-
+    confirmScope.toggleExplanation = () => {
+      return confirmScope.showExplanation = !confirmScope.showExplanation;
+    };
+    confirmScope.jumpToDiscover = () => {
+      destroy();
+      return $window.location.href = chrome.getNavLinkById('kibana:discover').url;
+    };
     function showModal(confirmScope) {
       const modalInstance = $compile(template)(confirmScope);
       modalPopover = new ModalOverlay(modalInstance);

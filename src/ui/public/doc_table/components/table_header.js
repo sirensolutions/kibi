@@ -20,7 +20,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       // kibi: list of column min width
       columnMinWidth: '=?',
       // kibi: make time field column optional
-      enableTimeField: '=?'
+      disableTimeField: '=?'
     },
     template: headerHtml,
     controller: function ($rootScope, $scope) {

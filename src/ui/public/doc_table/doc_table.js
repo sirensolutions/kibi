@@ -52,7 +52,7 @@ uiModules.get('kibana')
       // kibi: enable top paginator and min width for the columns, plus, make time field column optional
       enableTopPaginator: '=?',
       columnMinWidth: '=?',
-      enableTimeField: '=?'
+      disableTimeField: '=?'
       // kibi: end
     },
     link: function ($scope) {
@@ -62,11 +62,6 @@ uiModules.get('kibana')
         sorting: $scope.sorting,
         columns: $scope.columns
       };
-
-      // kibi: make time field column optional
-      if (!$scope.enableTimeField) {
-        $scope.enableTimeField = true;
-      }
 
       // kibi: add exportAsCsv to the scope
       $scope.exportAsCsv = Private(ExportAsCsvProvider).exportAsCsv;

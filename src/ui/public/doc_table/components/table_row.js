@@ -44,7 +44,7 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
       // kibi: associate an action when clicking on a cell
       cellClickHandlers: '=?',
       // kibi: make time field column optional
-      enableTimeField: '=?'
+      disableTimeField: '=?'
     },
     link: function ($scope, $el) {
       $el.after('<tr>');
@@ -135,7 +135,7 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
         ];
 
         const mapping = indexPattern.fields.byName;
-        if (indexPattern.timeFieldName && $scope.enableTimeField) { // kibi: make time field column optional
+        if (indexPattern.timeFieldName && !$scope.disableTimeField) { // kibi: make time field column optional
           newHtmls.push(cellTemplate({
             timefield: true,
             formatted: _displayField(row, indexPattern.timeFieldName),

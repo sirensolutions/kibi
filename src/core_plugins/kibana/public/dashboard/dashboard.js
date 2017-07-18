@@ -71,7 +71,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState,
       // kibi: added dashboardGroups, kibiState, config
-      dashboardGroups, kibiState, config) {
+      dashboardGroups, kibiState, config, $window, chrome) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = createNotifier({ location: 'Dashboard' });
@@ -171,6 +171,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       };
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
+      $scope.showSavedSearchExplanation = false;
       $scope.dashboardViewMode = dashboardState.getViewMode();
 
       $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
@@ -227,6 +228,8 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       };
 
       $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
+      $scope.toggleSavedSearchExplanation = () => $scope.showSavedSearchExplanation = !$scope.showSavedSearchExplanation;
+      $scope.jumpToDiscover = () => $window.location.href = chrome.getNavLinkById('kibana:discover').url;
 
       $scope.$watch('model.darkTheme', () => {
         dashboardState.setDarkTheme($scope.model.darkTheme);

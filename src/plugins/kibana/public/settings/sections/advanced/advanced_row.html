@@ -62,6 +62,8 @@
         class="form-control"
         data-test-subj="selectInput">
       </select>
+
+      <kibi-select ng-if="conf.kibiSelect" object-type="dashboard" ng-model="conf.unsavedValue"/>
     </form>
 
     <!-- Setting display formats -->
@@ -69,6 +71,7 @@
       <span ng-show="(conf.normal || conf.json || conf.select)">{{conf.value || conf.defVal}}</span>
       <span ng-show="conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
       <span ng-show="conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
+      <span ng-if="conf.kibiSelect">{{conf.value}}</span>
     </span>
 
   </td>

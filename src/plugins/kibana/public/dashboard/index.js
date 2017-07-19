@@ -53,12 +53,12 @@ define(function (require) {
             let dashboardId = resp.hits[0].id;
             let redirectToWhenMissing = '/dashboard/new-dashboard/create/';
             if (defDashConfig) {
-              dashboardId = kibiUtils.slugifyId(defDashConfig);
+              dashboardId = defDashConfig;
               redirectToWhenMissing = `/dashboard/${resp.hits[0].id}`;
             }
             return savedDashboards.get(dashboardId).catch(err => {
               if (defDashConfig) {
-                err.message = `The default dashboard with title "${defDashConfig}" does not exist.
+                err.message = `The default dashboard with id "${defDashConfig}" does not exist.
                   Please correct the "kibi:defaultDashboardTitle" parameter in advanced settings`;
               }
               return courier.redirectWhenMissing({

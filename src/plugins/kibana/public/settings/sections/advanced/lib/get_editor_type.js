@@ -1,7 +1,7 @@
 define(function (require) {
   const _ = require('lodash');
 
-  const NAMED_EDITORS = ['json', 'array', 'boolean', 'select'];
+  const NAMED_EDITORS = ['json', 'array', 'boolean', 'select', 'kibiSelect'];
   const NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
 
   /**

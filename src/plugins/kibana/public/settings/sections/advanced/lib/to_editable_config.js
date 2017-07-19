@@ -29,6 +29,7 @@ define(function (require) {
     const editor = getEditorType(conf);
     conf.json = editor === 'json';
     conf.select = editor === 'select';
+    conf.kibiSelect = editor === 'kibiSelect';
     conf.bool = editor === 'boolean';
     conf.array = editor === 'array';
     conf.normal = editor === 'normal';

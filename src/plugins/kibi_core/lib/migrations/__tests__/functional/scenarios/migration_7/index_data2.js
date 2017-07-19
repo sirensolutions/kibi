@@ -19,5 +19,16 @@ module.exports = [
   {
     buildNum: packageJson.build.number,
     'kibi:defaultDashboardTitle': 'Articles'
+  },
+  {
+    index: {
+      _index: '.kibi',
+      _type: 'dashboard',
+      _id: 'Test-Company',
+
+    }
+  },
+  {
+    title: 'Company'
   }
 ];

@@ -42,7 +42,9 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
       // kibi: column aliases
       columnAliases: '=?',
       // kibi: associate an action when clicking on a cell
-      cellClickHandlers: '=?'
+      cellClickHandlers: '=?',
+      // kibi: make time field column optional
+      disableTimeField: '=?'
     },
     link: function ($scope, $el) {
       $el.after('<tr>');
@@ -133,7 +135,7 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
         ];
 
         const mapping = indexPattern.fields.byName;
-        if (indexPattern.timeFieldName) {
+        if (indexPattern.timeFieldName && !$scope.disableTimeField) { // kibi: make time field column optional
           newHtmls.push(cellTemplate({
             timefield: true,
             formatted: _displayField(row, indexPattern.timeFieldName),

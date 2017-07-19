@@ -29,7 +29,9 @@
               ng-src="dashboard-icon-image {{dash.group.iconUrl}}"
               tooltip="{{dash.group.title}}"
             />
-            {{ getDashTitle() }}
+            <span class="dashboard-title">
+              {{ getDashTitle() }}
+            </span>
             <span
               ng-show="dash.id && dash.group.selected.count !== undefined"
               class="dashboard-stats"

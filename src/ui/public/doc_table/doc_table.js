@@ -49,6 +49,11 @@ uiModules.get('kibana')
       customView: '=?',
       customViewerMode: '=?',
       // kibi: end
+      // kibi: enable top paginator and min width for the columns, plus, make time field column optional
+      enableTopPaginator: '=?',
+      columnMinWidth: '=?',
+      disableTimeField: '=?'
+      // kibi: end
     },
     link: function ($scope) {
       const notify = createNotifier();
@@ -265,4 +270,3 @@ uiModules.get('kibana')
     }
   };
 });
-

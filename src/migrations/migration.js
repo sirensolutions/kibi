@@ -73,8 +73,10 @@ export default class Migration {
         break;
       }
       response = await this._client.scroll({
-        scroll: '1m',
-        scroll_id: response._scroll_id
+        body: {
+          scroll: '1m',
+          scroll_id: response._scroll_id
+        }
       });
     }
 

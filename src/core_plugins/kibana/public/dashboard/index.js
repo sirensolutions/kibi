@@ -49,7 +49,7 @@ uiRoutes
         let getDefaultDashboard = Promise.resolve({ id: '' });
         const notify = createNotifier();
 
-        const defDashConfig = config.get('kibi:defaultDashboardTitle');
+        const defDashConfig = config.get('kibi:defaultDashboardId');
 
         if (defDashConfig) {
         //kibi: wrapped in another promise for displaying more meaningful warning
@@ -83,7 +83,7 @@ uiRoutes
             dashboardId = defaultDashboard.id;
           } else if (!defaultDashboard) {
             notify.error(`The default dashboard with id "${defDashConfig}" does not exist.` +
-            ` Please correct the "kibi:defaultDashboardTitle" parameter in advanced settings`);
+            ` Please correct the "kibi:defaultDashboardId" parameter in advanced settings`);
           }
           kbnUrl.redirect(`/dashboard/${dashboardId}`);
           return Promise.halt();

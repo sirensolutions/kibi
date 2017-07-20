@@ -54,7 +54,7 @@ export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisua
 
       case 'dashboard':
         const dashboardGroupNames = dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids);
-        const defaultDashboard = config.get('kibi:defaultDashboardTitle');
+        const defaultDashboard = config.get('kibi:defaultDashboardId');
         if (dashboardGroupNames && dashboardGroupNames.length > 0) {
           const plural = dashboardGroupNames.length > 1;
           const msg =
@@ -68,7 +68,7 @@ export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisua
         //kibi: if default dashboard is removed, remove it also from config
         _.each(ids, function (dashboardId) {
           if(defaultDashboard === dashboardId) {
-            config.set('kibi:defaultDashboardTitle', '');
+            config.set('kibi:defaultDashboardId', '');
           }
         });
         return _delete().then(() => dashboardGroups.computeGroups(`deleted dashboards ${JSON.stringify(ids, null, ' ')}`));

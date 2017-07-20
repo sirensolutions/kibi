@@ -142,8 +142,10 @@ describe('migrations', function () {
         expect(scroll.callCount).to.be(9);
         for (let i = 0; i < scroll.callCount; i++) {
           expect(scroll.getCall(i).args[0]).to.eql({
-            scroll: '1m',
-            scroll_id: 'scroll_id'
+            body: {
+              scroll: '1m',
+              scroll_id: 'scroll_id'
+            }
           });
         }
 

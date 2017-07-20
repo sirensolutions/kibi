@@ -2,4 +2,28 @@
 
 ==== Kibi Changes
 
-* Fixed: Authentication error when using JWT with the graph browser plugin
+* Added: New page size option in Enhanced search results visualisation
+* Added: Kibi index is now displayed in the logs
+
+* Changed: Updated kibi_radar_vis to version 4.6.4-4
+* Changed: Updated kibi_wordcloud_vis to version 4.6.4-4
+* Changed: Updated libsvm to version 3.8.3
+* Changed: Updated Heatmap visualisation to version 1.0.1 with tooltip issue fixed
+* Changed: Default dashboard can now be set in advanced settings, previously it was kibi_core.default_dashboard_title option in kibi.yml
+* Changed: Add sub aggregations to Box Plot
+* Changed: Shortening of dates disabled for absolute time
+
+* Fixed: Various Multichart visualisation improvements
+* Fixed: Update relational buttons if other dashboards are updated
+* Fixed: Export meta fields to CSV
+* Fixed: Add filter click handler in Enhanced search results visualisation
+* Fixed: Sort error on analysed or missing fields
+* Fixed: Show the column alias as the column's label
+* Fixed: Build filter with the index pattern instead of the concrete index name
+* Fixed: Remove unnecessary "getCountsOnButtons" requests
+* Fixed: Authentication error when using JWT with the graph browser plugin [Enterprise Edition Only]
+* Fixed: Refactored persistence helper in Graph Browser [Enterprise Edition Only]
+* Fixed: Set max height to Graph Browser add menu [Enterprise Edition Only]
+* Fixed: graphId added to some helper function calls [Enterprise Edition Only]
+* Fixed: Fix for the contextual scripts in Graph Browser [Enterprise Edition Only]
+* Fixed: Cached scope was not reinitialized in Graph Browser [Enterprise Edition Only]

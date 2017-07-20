@@ -190,7 +190,7 @@ describe('kibi_core/migrations/functional', function () {
       });
 
       describe('kibi_core.default_dashboard_title defined but dashboard does NOT exist', function () {
-       beforeEach(async () => {
+        beforeEach(async () => {
           await scenarioManager.reload(Scenario1);
           configuration = {
             config: fakeConfig,
@@ -234,8 +234,9 @@ describe('kibi_core/migrations/functional', function () {
         });
       });
 
-      describe('kibi_core.default_dashboard_title defined, dashboard exist, but valid dashboard id already set in advanced settings', function () {
-       beforeEach(async () => {
+      describe('kibi_core.default_dashboard_title defined, dashboard exist, ' +
+               'but valid dashboard id already set in advanced settings', function () {
+        beforeEach(async () => {
           await scenarioManager.reload(Scenario3);
           configuration = {
             config: fakeConfig,

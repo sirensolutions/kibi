@@ -207,7 +207,7 @@ function init({
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
     setSelectedDashboardIdStub = sinon.stub(kibiState, 'setSelectedDashboardId');
-    config.set('kibi:defaultDashboardTitle','Articles');
+    config.set('kibi:defaultDashboardId','Articles');
     es = _es_;
     joinExplanation = _joinExplanation_;
   });

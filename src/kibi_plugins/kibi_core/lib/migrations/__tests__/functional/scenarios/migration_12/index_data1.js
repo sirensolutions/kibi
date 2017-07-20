@@ -6,7 +6,7 @@ const packageJson = requirefrom('src/utils')('package_json');
 /**
  * Defines the following objects:
  *
- * - a configuration with kibi:defaultDashboardTitle
+ * - a configuration with a valid Company dashboard
  */
 module.exports = [
   {
@@ -23,7 +23,7 @@ module.exports = [
     index: {
       _index: '.kibi',
       _type: 'dashboard',
-      _id: 'Test-Company',
+      _id: 'CompanyId',
 
     }
   },

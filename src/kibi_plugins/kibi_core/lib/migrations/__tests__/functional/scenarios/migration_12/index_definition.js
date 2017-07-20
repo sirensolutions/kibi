@@ -9,7 +9,7 @@ module.exports = {
           type: 'string',
           index: 'not_analyzed'
         },
-        'kibi:defaultDashboardTitle': {
+        'kibi:defaultDashboardId': {
           type: 'string',
           index: 'not_analyzed'
         }

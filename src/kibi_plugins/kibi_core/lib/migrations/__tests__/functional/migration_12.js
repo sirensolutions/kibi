@@ -41,7 +41,7 @@ describe('kibi_core/migrations/functional', function () {
 
     describe('should migrate if kibi_core.default_dashboard_title is defined and', function () {
 
-      describe('valid dashbord from kibi_core.default_dashboard_title exist and nothing in kibi:defaultDashboardId', function () {
+      describe('valid dashboard from kibi_core.default_dashboard_title exist and nothing in kibi:defaultDashboardId', function () {
         beforeEach(async () => {
           await scenarioManager.reload(Scenario1);
           configuration = {
@@ -90,7 +90,8 @@ describe('kibi_core/migrations/functional', function () {
         });
       });
 
-      describe('valid dashbord from kibi_core.default_dashboard_title exist and invalid dashbord in kibi:defaultDashboardId', function () {
+      describe('valid dashboard from kibi_core.default_dashboard_title exist' +
+      ' and invalid dashboard in kibi:defaultDashboardId', function () {
         beforeEach(async () => {
           await scenarioManager.reload(Scenario2);
           configuration = {
@@ -122,7 +123,6 @@ describe('kibi_core/migrations/functional', function () {
           const result = await migration.upgrade();
           expect(result).to.be(1);
           const after = await snapshot();
-
           for (const [id, original] of before) {
             const upgraded = after.get(id);
 
@@ -138,9 +138,7 @@ describe('kibi_core/migrations/functional', function () {
           }
         });
       });
-
     });
-
 
     describe('should NOT migrate if', function () {
 
@@ -247,7 +245,7 @@ describe('kibi_core/migrations/functional', function () {
             }
           };
 
-          fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('doNotExistDashboard');
+          fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('Article');
         });
 
         afterEach(async () => {

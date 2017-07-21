@@ -148,7 +148,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     ngMock.inject(function ($injector, _kibiState_, Private, _config_) {
       kibiState = _kibiState_;
       config = _config_;
-      config.set('kibi:defaultDashboardTitle','Articles');
+      config.set('kibi:defaultDashboardId','Articles');
       dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
       sinon.stub(chrome, 'getBasePath').returns('');
       sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);

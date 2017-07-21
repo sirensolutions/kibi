@@ -42,7 +42,7 @@ define(function (require) {
     DeleteHelper.prototype.deleteByType = function (type, ids, delcb) {
       switch (type) {
         case 'dashboard':
-          const defaultDashboard = config.get('kibi:defaultDashboardTitle');
+          const defaultDashboard = config.get('kibi:defaultDashboardId');
           return dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids)
           .then(function (dashboardGroupNames) {
             if (dashboardGroupNames && dashboardGroupNames.length > 0) {
@@ -58,7 +58,7 @@ define(function (require) {
               //kibi: if default dashboard is removed, remove it also from config
               _.each(ids, function (dashboardId) {
                 if (defaultDashboard === dashboardId) {
-                  config.set('kibi:defaultDashboardTitle', '');
+                  config.set('kibi:defaultDashboardId', '');
                 }
               });
               if (delcb) {

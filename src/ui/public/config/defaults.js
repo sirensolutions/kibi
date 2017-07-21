@@ -285,7 +285,7 @@ define(function (require) {
         value: true,
         description: 'Enable counts on all relational buttons.'
       },
-      'kibi:defaultDashboardTitle' : {
+      'kibi:defaultDashboardId' : {
         type: 'kibiSelect',
         value: '',
         description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.'

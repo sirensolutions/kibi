@@ -6,7 +6,7 @@ const packageJson = require(fromRoot('package.json'));
 /**
  * Defines the following objects:
  *
-* - a configuration with valid Company dashboard and invalid ArticlesId dashboard set in kibi:defaultDashboardId
+ * - a configuration with valid Company dashboard and valid Article dashboard and valid ArticlesId dashboard set in kibi:defaultDashboardId
  */
 module.exports = [
   {
@@ -30,5 +30,16 @@ module.exports = [
   },
   {
     title: 'Company'
+  },
+  {
+    index: {
+      _index: '.kibi',
+      _type: 'dashboard',
+      _id: 'ArticleId',
+
+    }
+  },
+  {
+    title: 'Article'
   }
 ];

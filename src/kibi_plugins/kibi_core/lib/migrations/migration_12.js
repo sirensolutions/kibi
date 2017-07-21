@@ -11,7 +11,7 @@ import Migration from 'kibiutils/lib/migrations/migration';
  *
  * Then:
  *
- * - put kibi:defaultDashboardTitle value to the advanced settings
+ * - put kibi:defaultDashboardId value to the advanced settings
  */
 export default class Migration12 extends Migration {
 
@@ -30,36 +30,42 @@ export default class Migration12 extends Migration {
     return 'Migrate kibi_core:default_dashboard_title property to advanced settings';
   }
 
+  async _fetchDashboards() {
+    if (!this._dashboards) {
+      this._dashboards = await this.scrollSearch(this._index, 'dashboard');
+    }
+  }
+
   async count() {
     let count = 0;
     if (!this._defaultDashboardTitleYml) {
       return count;
     }
 
-    const dashboards = await this.scrollSearch(this._index, 'dashboard');
-    let dashboardExists = false;
-    for (const obj of dashboards) {
-      if(obj._source.title === this._defaultDashboardTitleYml) {
-        dashboardExists = true;
-        break;
-      }
-    }
+    await this._fetchDashboards();
+    const dashboardWithTitleFromYmlFound = _.find(this._dashboards, d => d._source.title === this._defaultDashboardTitleYml);
 
-    if (!dashboardExists) {
+    if (!dashboardWithTitleFromYmlFound) {
       this._logger.warning('[' + this._defaultDashboardTitleYml + '] is set as kibi_core.default_dashboard_title in kibi.yml' +
       ' but dashboard cannot be found.');
       return count;
     }
 
     const objects = await this.scrollSearch(this._index, this._type);
-    _.each(objects, function (object) {
-      const defaultDashboardSettings = object._source['kibi:defaultDashboardTitle'];
-
-      if(!defaultDashboardSettings) {
+    _.each(objects, (object) => {
+      if(!this._doesDashboardExist(object._source['kibi:defaultDashboardId'])) {
         count++;
       }
     });
     return count;
+  }
+
+  _doesDashboardExist(dashboardId) {
+    if (!dashboardId) {
+      return false;
+    }
+    const found = _.find(this.dashboards, d => d.id === dashboardId);
+    return Boolean(found);
   }
 
   async upgrade() {
@@ -71,23 +77,21 @@ export default class Migration12 extends Migration {
     let body = '';
     this._logger.info(`Updating kibi_core.default_dashboard_title from config`);
 
-    const dashboards = await this.scrollSearch(this._index, 'dashboard');
-    let defaultDashboardId = '';
-    for (const obj of dashboards) {
-      if(obj._source.title === this._defaultDashboardTitleYml) {
-        defaultDashboardId = obj._id;
-        break;
-      }
-    }
+    await this._fetchDashboards();
 
-    if (defaultDashboardId === '') {
+    let defaultDashboardId;
+    const dashboardWithTitleFromYmlFound = _.find(this._dashboards, d => d._source.title === this._defaultDashboardTitleYml);
+    if (dashboardWithTitleFromYmlFound) {
+      defaultDashboardId = dashboardWithTitleFromYmlFound._id;
+    } else {
       this._logger.info(this._defaultDashboardTitleYml + ` dashboard cannot be found.`);
       return upgraded;
     }
 
     const objects = await this.scrollSearch(this._index, this._type);
     for (const obj of objects) {
-      if (!obj._source['kibi:defaultDashboardTitle']) {
+      // check if kibi:defaultDashboardId contains a valid dashboard id
+      if (!this._doesDashboardExist(obj._source['kibi:defaultDashboardId'])) {
         body += JSON.stringify({
           update: {
             _index: obj._index,
@@ -96,7 +100,7 @@ export default class Migration12 extends Migration {
           }
         }) + '\n' + JSON.stringify({
           doc: {
-            'kibi:defaultDashboardTitle': defaultDashboardId
+            'kibi:defaultDashboardId': defaultDashboardId
           }
         }) + '\n';
         upgraded++;

@@ -64,7 +64,7 @@ export default class Migration12 extends Migration {
     if (!dashboardId) {
       return false;
     }
-    const found = _.find(this.dashboards, d => d.id === dashboardId);
+    const found = _.find(this._dashboards, d => d._id === dashboardId);
     return Boolean(found);
   }
 

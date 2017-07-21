@@ -32,7 +32,7 @@ export default class Migration7 extends Migration {
 
 
   async _fetchDashboards() {
-    if (!this.dashboards) {
+    if (!this._dashboards) {
       this._dashboards = await this.scrollSearch(this._index, 'dashboard');
     }
   }
@@ -65,7 +65,7 @@ export default class Migration7 extends Migration {
     if (!dashboardId) {
       return false;
     }
-    const found = _.find(this.dashboards, d => d.id === dashboardId);
+    const found = _.find(this._dashboards, d => d._id === dashboardId);
     return Boolean(found);
   }
 

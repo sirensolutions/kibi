@@ -18,7 +18,7 @@ module.exports = [
   },
   {
     buildNum: packageJson.build.number,
-    'kibi:defaultDashboardId': 'ArticlesId'
+    'kibi:defaultDashboardId': 'ArticleId'
   },
   {
     index: {

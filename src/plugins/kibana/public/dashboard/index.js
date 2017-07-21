@@ -45,7 +45,7 @@ define(function (require) {
         // - if any try to load the default dashboard if set, otherwise load the first dashboard
         // - if the default dashboard is missing, load the first dashboard
         // - if the first dashboard is missing, create a new one
-        const defDashConfig = config.get('kibi:defaultDashboardTitle');
+        const defDashConfig = config.get('kibi:defaultDashboardId');
         return savedDashboards.find().then(function (resp) {
           if (resp.hits.length) {
             timefilter.enabled = true;
@@ -59,7 +59,7 @@ define(function (require) {
             return savedDashboards.get(dashboardId).catch(err => {
               if (defDashConfig) {
                 err.message = `The default dashboard with id "${defDashConfig}" does not exist.
-                  Please correct the "kibi:defaultDashboardTitle" parameter in advanced settings`;
+                  Please correct the "kibi:defaultDashboardId" parameter in advanced settings`;
               }
               return courier.redirectWhenMissing({
                 dashboard : redirectToWhenMissing

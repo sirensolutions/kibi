@@ -245,7 +245,7 @@ describe('kibi_core/migrations/functional', function () {
             }
           };
 
-          fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('doNotExistDashboard');
+          fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('Article');
         }));
 
         afterEach(wrapAsync(async () => {

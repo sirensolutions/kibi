@@ -25,7 +25,6 @@ module.exports = [
       _index: '.kibi',
       _type: 'dashboard',
       _id: 'CompanyId',
-
     }
   },
   {

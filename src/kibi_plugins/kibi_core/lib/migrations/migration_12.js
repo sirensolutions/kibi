@@ -53,14 +53,14 @@ export default class Migration12 extends Migration {
 
     const objects = await this.scrollSearch(this._index, this._type);
     _.each(objects, (object) => {
-      if(!this._doesDasboardExist(object._source['kibi:defaultDashboardId'])) {
+      if(!this._doesDashboardExist(object._source['kibi:defaultDashboardId'])) {
         count++;
       }
     });
     return count;
   }
 
-  _doesDasboardExist(dashboardId) {
+  _doesDashboardExist(dashboardId) {
     if (!dashboardId) {
       return false;
     }
@@ -91,7 +91,7 @@ export default class Migration12 extends Migration {
     const objects = await this.scrollSearch(this._index, this._type);
     for (const obj of objects) {
       // check if kibi:defaultDashboardId contains a valid dashboard id
-      if (!this._doesDasboardExist(obj._source['kibi:defaultDashboardId'])) {
+      if (!this._doesDashboardExist(obj._source['kibi:defaultDashboardId'])) {
         body += JSON.stringify({
           update: {
             _index: obj._index,
@@ -106,8 +106,6 @@ export default class Migration12 extends Migration {
         upgraded++;
       }
     }
-
-    console.log("upgraded: " + upgraded);
 
     if (upgraded > 0) {
       await this._client.bulk({

@@ -38,7 +38,6 @@ describe('kibi_core/migrations/functional', function () {
   describe('migration 7 kibi:defaultDashboardId - Functional test', function () {
     let configuration;
 
-
     describe('should migrate if kibi_core.default_dashboard_title is defined and', function () {
 
       describe('valid dashboard from kibi_core.default_dashboard_title exists and nothing in kibi:defaultDashboardId', function () {

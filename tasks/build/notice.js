@@ -6,6 +6,8 @@ import fs from 'fs';
 import { execSync } from 'child_process';
 
 export default function licenses(grunt) {
+  const { version } = grunt.config.get('build');
+
   grunt.registerTask('_build:notice', 'Adds a notice', function () {
     const done = this.async();
     const buildPath = path.join(grunt.config.get('buildDir'), 'kibana');
@@ -85,6 +87,11 @@ export default function licenses(grunt) {
       json: true
     }, (result, error) => {
       if (error) return grunt.fail.fatal(error);
+
+      // kibi: remove info about kibi itself
+      delete result['kibi@' + version];
+      // kibi: end
+
       const noticePath = path.join(buildPath, 'NOTICE.txt');
       const fd = fs.openSync(noticePath, 'w');
       fs.appendFileSync(fd, getBaseNotice());

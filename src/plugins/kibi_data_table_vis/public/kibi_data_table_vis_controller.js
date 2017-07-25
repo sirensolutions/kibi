@@ -5,7 +5,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_param_entity_uri');
   require('ui/kibi/kibi_doc_table/kibi_doc_table');
 
-  module.controller('KibiDataTableVisController', function ($rootScope, $scope, Private) {
+  module.controller('KibiDataTableVisController', function ($rootScope, $scope, Private, config) {
     const chrome = require('ui/chrome');
     const filterManager = Private(require('ui/filter_manager'));
     const configMode = chrome.onVisualizeTab();
@@ -68,6 +68,10 @@ define(function (require) {
 
     // update table if custom page size is changed
     const checkPageSize = function () {
+      if (!$scope.vis.params.pageSize) {
+        $scope.vis.params.pageSize = _.parseInt(config.get('discover:sampleSize'));
+      }
+
       if ($scope.vis.params.pageSize !==  $scope.savedObj.pageSize) {
         $scope.savedObj.pageSize = $scope.vis.params.pageSize;
         $rootScope.$broadcast('pageSizeChanged',$scope.vis.params.pageSize);

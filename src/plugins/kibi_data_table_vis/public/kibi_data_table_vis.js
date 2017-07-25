@@ -13,7 +13,7 @@ define(function (require) {
 
   require('ui/kibi/kibi_doc_table/components/kibi_table_sorting');
 
-  function KibiDataTableVisTypeProvider(Private) {
+  function KibiDataTableVisTypeProvider(Private, config) {
     const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
     const _ = require('lodash');
 
@@ -31,7 +31,8 @@ define(function (require) {
           clickOptions: [],
           queryDefinitions: [],
           columns: [],
-          columnAliases: []
+          columnAliases: [],
+          pageSize: config.get('discover:sampleSize')
         },
         editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
       },

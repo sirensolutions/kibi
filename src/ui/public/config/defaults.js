@@ -287,7 +287,7 @@ define(function (require) {
       },
       'kibi:defaultDashboardId' : {
         type: 'kibiSelect',
-        value: '',
+        value: null,
         description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.'
       }
       // kibi: end

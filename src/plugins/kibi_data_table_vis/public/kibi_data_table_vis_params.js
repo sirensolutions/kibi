@@ -21,11 +21,6 @@ define(function (require) {
         // Events
         // ======
 
-        // if vis.params.pageSize is not been set before, set it from config
-        if (!$scope.vis.params.pageSize) {
-          $scope.vis.params.pageSize = parseInt(config.get('discover:sampleSize'));
-        };
-
         // Emit an event when state changes
         $scope.$watch('vis.dirty', function () {
           if ($scope.vis.dirty === false) {

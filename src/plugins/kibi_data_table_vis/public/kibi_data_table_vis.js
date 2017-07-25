@@ -32,7 +32,7 @@ define(function (require) {
           queryDefinitions: [],
           columns: [],
           columnAliases: [],
-          pageSize: (config.get('discover:sampleSize') || 50)
+          pageSize: config.get('discover:sampleSize')
         },
         editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
       },

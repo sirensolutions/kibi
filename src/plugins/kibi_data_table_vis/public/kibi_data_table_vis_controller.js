@@ -69,7 +69,7 @@ define(function (require) {
     // update table if custom page size is changed
     const checkPageSize = function () {
       if (!$scope.vis.params.pageSize) {
-        $scope.vis.params.pageSize = +config.get('discover:sampleSize');
+        $scope.vis.params.pageSize = _.parseInt(config.get('discover:sampleSize'));
       }
 
       if ($scope.vis.params.pageSize !==  $scope.savedObj.pageSize) {

@@ -140,6 +140,9 @@ define(function (require) {
         const sampleSize = config.get('discover:sampleSize');
         try {
           $scope.size =  $scope.pageSize || parseInt(sampleSize);
+          if (!$scope.pageSize) {
+            $scope.pageSize = $scope.size;
+          }
         } catch (e) {
           throw new Error(`Could not parse discover:sampleSize configuration value. Expected number got [${sampleSize}]`);
         }

@@ -37,7 +37,7 @@ uiModules
         _.each($scope.columns, (column, i) => {
           $scope.sortingColumns.push({
             value: column,
-            label: $scope.columnAliases[i]
+            label: $scope.columnAliases[i] || column // alias or real name when aliases not used
           });
         });
       }

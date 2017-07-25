@@ -5,6 +5,7 @@ import management from 'ui/management';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/settings/index.html';
+import 'ui/kibi/directives/kibi_select_dashboard';
 
 uiRoutes
 .when('/management/siren/settings', {

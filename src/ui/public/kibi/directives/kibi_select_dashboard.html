@@ -1,0 +1,7 @@
+<div>
+    <select ng-class="{ 'form-control' : true, 'ng-invalid' : isInvalid() }" ng-model="selectedDashboard">
+        <optgroup ng-repeat="dashboardGroup in dashboardGroups" label="{{ dashboardGroup.title }}">
+            <option ng-repeat="dashboard in dashboardGroup.dashboards" value="{{ dashboard.id }}">{{ dashboard.title }}</option>
+        </optgroup>
+    </select>
+</div>

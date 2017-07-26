@@ -20,11 +20,6 @@ uiModules
       // Events
       // ======
 
-      // if vis.params.pageSize is not been set before, set it from config
-      if (!$scope.vis.params.pageSize) {
-        $scope.vis.params.pageSize = parseInt(config.get('discover:sampleSize'));
-      };
-
       const removeColumnAddListener = $rootScope.$on('kibi:column:add', (event, columnName) => {
         columnsActions.addColumn($scope.vis.params, columnName);
         // force the editable vis to be staged

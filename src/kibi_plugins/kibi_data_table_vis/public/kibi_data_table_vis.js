@@ -16,7 +16,7 @@ import 'plugins/kibi_data_table_vis/custom_view/kibi_table_sorting';
 
 registry.register(KibiDataTableVisTypeProvider);
 
-function KibiDataTableVisTypeProvider(Private) {
+function KibiDataTableVisTypeProvider(Private, config) {
   const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(templateVisTypeProvider);
 
@@ -36,12 +36,17 @@ function KibiDataTableVisTypeProvider(Private) {
         queryDefinitions: [],
         columns: [],
         columnAliases: [],
-        disableTimeField: false
+        disableTimeField: false,
+        pageSize: config.get('discover:sampleSize')
       },
       editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
     },
     delegateSearch: true,
     init: function (vis, savedSearch) {
+      if (!vis.params.pageSize) {
+        vis.params.pageSize = config.get('discover:sampleSize');
+      }
+
       if (savedSearch) {
         if (!vis.params.columns.length) {
           vis.params.columns = _.clone(savedSearch.columns);

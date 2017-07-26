@@ -10,7 +10,8 @@ import uiModules from 'ui/modules';
 import 'ui/kibi/components/query_engine_client/query_engine_client';
 import VirtualIndexPatternProvider from 'ui/kibi/components/commons/virtual_index_pattern';
 
-function KibiDataTableVisController(getAppState, courier, $window, createNotifier, confirmModal, kibiState, $rootScope, $scope, Private) {
+function KibiDataTableVisController(getAppState, courier, $window, createNotifier, confirmModal,
+  kibiState, $rootScope, $scope, Private, config) {
   const dashboardHelper = Private(DashboardHelperProvider);
   const VirtualIndexPattern = Private(VirtualIndexPatternProvider);
   const filterManager = Private(FilterManagerProvider);
@@ -49,6 +50,13 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
           return notify.warning(`You seem to be using an alias: [${field}]. The actual field name you probably want is: [${alias}]`);
         }
       });
+    }
+  });
+
+  // kibi: Need to watch pageSize in case the parameter is removed ( = set to null) in the editor manually
+  $scope.$watch('vis.params.pageSize', pageSize => {
+    if (!pageSize) {
+      $scope.vis.params.pageSize = config.get('discover:sampleSize');
     }
   });
 

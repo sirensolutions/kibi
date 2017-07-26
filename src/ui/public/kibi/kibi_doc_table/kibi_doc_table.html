@@ -8,13 +8,12 @@
 <div
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }">
+    <div ng-show="!infiniteScroll && hits.length < total" class="limit-info">
+      Showing {{size}} out of {{total}}
+      <a ng-click="increaseSize()">See more</a>
+    </div>
 
-  <div ng-show="!infiniteScroll && hits.length < total" class="limit-info">
-    Showing {{size}} out of {{total}}
-    <a ng-click="increaseSize()">See more</a>
-  </div>
-
-  <paginate ng-if="!infiniteScroll" list="hits" per-page="{{pageSize}}" top-controls="true">
+    <paginate ng-if="!infiniteScroll" list="hits" per-page="{{pageSize}}" top-controls="true">
 
     <div
       kibi-custom-view

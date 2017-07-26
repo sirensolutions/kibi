@@ -122,7 +122,8 @@ module.exports = function (kibana) {
         'plugins/kibi_core/ui/directives/dashboards_nav/dashboards_nav',
         'plugins/kibi_core/ui/chrome/services/dashboards_nav_state',
         'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups',
-        'plugins/kibi_core/ui/services/dashboard_groups'
+        'plugins/kibi_core/ui/services/dashboard_groups',
+        'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button'
       ],
       managementSections: [
         'plugins/kibi_core/management/sections/kibi_datasources',

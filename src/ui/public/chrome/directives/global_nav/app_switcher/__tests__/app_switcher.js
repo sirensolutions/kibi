@@ -188,7 +188,8 @@ describe('appSwitcher directive', function () {
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);
 
-      env.$el.findTestSubject('appLink').trigger(event);
+      // kibi: skip the check on dashboard nav button
+      env.$el.findTestSubject('appLink:not(.kibi-indicator-class)').trigger(event);
 
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);
@@ -209,7 +210,8 @@ describe('appSwitcher directive', function () {
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);
 
-      env.$el.findTestSubject('appLink').trigger(event);
+      // kibi: skip the check on dashboard nav button
+      env.$el.findTestSubject('appLink:not(.kibi-indicator-class)').trigger(event);
 
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);

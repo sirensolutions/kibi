@@ -1,0 +1,13 @@
+<global-nav-link
+  ng-if="!link.hidden"
+  is-active="link.active"
+  is-disabled="link.disabled"
+  tooltip-content="getTooltipContent(link)"
+  on-click="clickAction($event, link)"
+  url="link.active ? link.url : (link.lastSubUrl || link.url)"
+  label="link.title"
+  icon="link.icon"
+  class="kibi-dashboard-button {{ isDashboardNavToggled ? 'kibi-dashboard-button-dashboardnav-toggled' : '' }} {{ !isGlobalNavOpen ? 'kibi-dashboard-button-globalnav-toggled' : '' }}"
+  kibi-indicator-class="getIndicatorClass(link)"
+  kibi-indicator-icon="'fa fa-caret-left'"
+></global-nav-link>

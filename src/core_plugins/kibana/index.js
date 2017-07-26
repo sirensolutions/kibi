@@ -94,7 +94,8 @@ module.exports = function (kibana) {
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
           description: 'compose visualizations for much win',
-          icon: 'plugins/kibana/assets/dashboard.svg',
+          // kibi: dashboard icon changed
+          icon: 'plugins/kibana/assets/home.svg',
         }, {
           id: 'kibana:dev_tools',
           title: 'Dev Tools',

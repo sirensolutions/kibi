@@ -55,7 +55,8 @@ uiModules
         throw new TypeError('appSwitcher directive requires the "chrome" config-object');
       }
 
-      this.links = $scope.chrome.getNavLinks();
+      // kibi: removes dashboard link from the list
+      this.links = $scope.chrome.getNavLinks().filter(link => link.id !== 'kibana:dashboard');
 
       // links don't cause full-navigation events in certain scenarios
       // so we force them when needed

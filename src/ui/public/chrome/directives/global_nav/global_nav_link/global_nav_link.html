@@ -1,19 +1,20 @@
 <div
   class="global-nav-link {{classes}}"
+  ng-click="onClick({ $event: $event, force: true })"
   ng-class="{ active: isActive, 'is-global-nav-link-disabled': isDisabled }"
   tooltip="{{ tooltipContent }}"
   tooltip-placement="right"
   tooltip-popup-delay="0"
   tooltip-append-to-body="1"
 >
-  <!-- siren: allows user to click on empty areas -->
+  <!-- kibi: allows user to click on empty areas -->
   <a
     class="global-nav-link__anchor"
     href="{{ getHref() }}"
     ng-click="onClick({ $event: $event, force: true })"
     data-test-subj="appLink"
   >
-    <div class="global-nav-link__icon">
+    <div class="global-nav-link__icon" ng-click="onClick({ $event: $event, force: true })">
       <!-- Empty alt attribute is for accessibility -->
       <img
         ng-if="icon"
@@ -31,8 +32,17 @@
       </span>
     </div>
 
-    <div class="global-nav-link__title">
+    <div class="global-nav-link__title" ng-click="onClick({ $event: $event, force: true })">
       {{ label }}
+    </div>
+
+    <!-- kibi: adds customizing options -->
+    <div
+      ng-if="kibiIndicatorClass"
+      ng-class="kibiIndicatorClass"
+      ng-click="onClick({ $event: $event, force: true })"
+    >
+      <i ng-class="kibiIndicatorIcon"></i>
     </div>
   </a>
 </div>

@@ -1,6 +1,7 @@
 import * as columnsActions from './actions/columns';
 import _ from 'lodash';
 import 'ui/kibi/directives/kibi_select';
+import 'ui/kibi/directives/kibi_select_dashboard';
 import 'ui/kibi/directives/kibi_array_param';
 import uiModules from 'ui/modules';
 import template from 'plugins/kibi_data_table_vis/kibi_data_table_vis_params.html';

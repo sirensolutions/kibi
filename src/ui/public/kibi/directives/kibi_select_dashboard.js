@@ -1,4 +1,5 @@
 import 'ui/kibi/directives/kibi_angular_qtip2';
+import 'ui/kibi/directives/kibi_select_dashboard.less';
 import uiModules from 'ui/modules';
 import kibiUtils from 'kibiutils';
 import _ from 'lodash';
@@ -11,19 +12,22 @@ uiModules.get('kibana')
     require: 'ngModel',
     replace: true,
     scope: {
-      multiselect: '=?'
+      multiSelect: '=?',
+      dashboardArray: '=?',
+      qtipTooltip: '=?',
+      qtipOptions: '=?',
+      titleLimit: '@?',
+      disableMessage: '@?'
     },
     template: kibiSelectDashboardTemplate,
     link: function (scope, element, attrs, ngModelCtrl, kibiState) {
 
       let dashboardGroupList = [];
       // virtualGroups is used for displaying virtual groups as one group
-      const virtualGroups = [
-        {
-          title: 'Others',
-          dashboards: []
-        }
-      ];
+      const virtualGroup = {
+        title: 'Other',
+        dashboards: []
+      };
 
       const populateDashboardGroups = function () {
         const groups = dashboardGroups.getGroups();
@@ -32,7 +36,7 @@ uiModules.get('kibana')
           const groupItem = {};
           groupItem.dashboards = [];
           if (group.virtual) {
-            virtualGroups[0].dashboards.push(group.dashboards[0]);
+            virtualGroup.dashboards.push(group.dashboards[0]);
           } else {
             groupItem.title = group.title;
             groupItem.id = group.id;
@@ -42,18 +46,17 @@ uiModules.get('kibana')
         });
 
         dashboardGroupList =  _.sortBy(dashboardGroupList, 'title');
-        virtualGroups[0].dashboards = _.sortBy(virtualGroups[0].dashboards, 'title');
-        return dashboardGroupList.concat(virtualGroups);
+        virtualGroup.dashboards = _.sortBy(virtualGroup.dashboards, 'title');
+        return dashboardGroupList.concat(new Array(virtualGroup));
       };
 
       const _render = function   () {
 
-        if (attrs.groups) {
-          scope.dashboardGroups = attrs.groups;
+        if (scope.dashboardArray) {
+          scope.dashboardGroups = scope.dashboardArray;
         } else {
           scope.dashboardGroups = populateDashboardGroups();
         }
-
       };
 
 

@@ -36,13 +36,16 @@
       <td>
         <div class="dashboards-list">
           <ul>
-            <li ng-repeat="d in dashboards | orderBy: orderByTitle">
-              <input type="checkbox" ng-disabled="d.disabled" ng-model="d.selected"/>
-              <!-- kibi: tooltip and limit added -->
-              <span tooltip={{d.title}} tooltip-placement="left" tooltip-popup-delay="400" tooltip-append-to-body="1">
-                <label>{{d.title | limitTo: 30 }}{{d.title.length  > 30 ? '...' : ''}} <span ng-if="d.disabled" class="smallText"> (current)</span></label>
-              </span>
-            </li>
+            <div ng-if="dashboardGroups.length > 0">
+             <kibi-select-dashboard
+                ng-model="dashboardGroups"
+                multi-select="true"
+                dashboard-array="dashboardGroups"
+                qtip-tooltip="true"
+                qtip-options="tooltipOptions"
+                title-limit="30"
+                disable-message="(current)"/>
+            </div>
           </ul>
         </div>
       </td>

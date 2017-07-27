@@ -46,8 +46,12 @@ uiModules.get('kibana')
         });
 
         dashboardGroupList =  _.sortBy(dashboardGroupList, 'title');
-        virtualGroup.dashboards = _.sortBy(virtualGroup.dashboards, 'title');
-        return dashboardGroupList.concat(new Array(virtualGroup));
+        if(virtualGroup.dashboards.length > 0) {
+          virtualGroup.dashboards = _.sortBy(virtualGroup.dashboards, 'title');
+          return dashboardGroupList.concat(new Array(virtualGroup));
+        } else {
+          return dashboardGroupList;
+        }
       };
 
       const _render = function   () {

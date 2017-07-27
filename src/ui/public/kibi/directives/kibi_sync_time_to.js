@@ -1,4 +1,5 @@
 import 'ui/kibi/directives/kibi_sync_time_to.less';
+import 'ui/kibi/directives/kibi_select_dashboard.js';
 import _ from 'lodash';
 import kibiTemplate from 'ui/kibi/directives/kibi_sync_time_to.html';
 import kibanaTemplate from 'ui/kibi/directives/kibana_sync_time_to.html';

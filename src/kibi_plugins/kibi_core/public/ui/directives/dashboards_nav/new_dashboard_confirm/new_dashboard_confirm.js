@@ -9,7 +9,7 @@ import uiModules from 'ui/modules';
 
 const module = uiModules.get('kibana');
 
-module.factory('newDashboardConfirm', function ($rootScope, $compile, $window, chrome) {
+module.factory('newDashboardConfirm', function ($rootScope, $compile, $window, chrome, savedSearches) {
   let modalPopover;
   const confirmQueue = [];
 
@@ -50,7 +50,7 @@ module.factory('newDashboardConfirm', function ($rootScope, $compile, $window, c
       options.onClose();
     };
     confirmScope.savedSearchDescription = () => {
-      return !confirmScope.savedSearchId ? 'NONE' : confirmScope.savedSearchId;
+      return !confirmScope.savedSearchId ? 'NONE' : confirmScope.savedSearchTitle;
     };
     confirmScope.toggleExplanation = () => {
       return confirmScope.showExplanation = !confirmScope.showExplanation;
@@ -76,6 +76,15 @@ module.factory('newDashboardConfirm', function ($rootScope, $compile, $window, c
     } else {
       showModal(confirmScope);
     }
+
+    //kibi: set confirmScope.savedSearchTitle for displaying title instead of id
+    confirmScope.$watch('savedSearchId', function (newValue) {
+      if (newValue) {
+        savedSearches.get(newValue).then(function (savedSearch) {
+          confirmScope.savedSearchTitle = savedSearch.title;
+        });
+      }
+    });
 
     function destroy() {
       modalPopover.destroy();

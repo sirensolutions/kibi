@@ -72,19 +72,6 @@ export default function KibiSelectHelperFactory(config, indexPatterns, Private, 
     });
   };
 
-  KibiSelectHelper.prototype.getDashboards = function (dashboardOptions) {
-    return savedDashboards.find().then(function (data) {
-      if (data.hits) {
-        return _.map(data.hits, function (hit) {
-          return {
-            label: hit.title,
-            value: hit.id
-          };
-        });
-      }
-    });
-  };
-
   KibiSelectHelper.prototype.getDatasources = function () {
     return savedDatasources.find().then(function (data) {
       if (data.hits) {

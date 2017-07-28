@@ -52,12 +52,24 @@ uiRoutes
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     resolve: {
-      dash: function (savedDashboards, $route, courier) {
+      dash: function (savedDashboards, Notifier, $route, $location, courier, kbnUrl, AppState) {
         const id = $route.current.params.id;
         return savedDashboards.get(id)
-        .catch(courier.redirectWhenMissing({
-          'dashboard' : DashboardConstants.LANDING_PAGE_PATH
-        }));
+          .catch((error) => {
+            // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
+            // See https://github.com/elastic/kibana/issues/10951 for more context.
+            if (error instanceof SavedObjectNotFound && id === 'create') {
+              // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
+              kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
+              notify.error(
+                'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
+            } else {
+              throw error;
+            }
+          })
+          .catch(courier.redirectWhenMissing({
+            'dashboard' : DashboardConstants.LANDING_PAGE_PATH
+          }));
       }
     }
   });
@@ -138,12 +150,26 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         }
       }
 
+      const updateState = () => {
+        // Following the "best practice" of always have a '.' in your ng-models –
+        // https://github.com/angular/angular.js/wiki/Understanding-Scopes
+        $scope.model = {
+          hideBorders: dashboardState.getHideBorders(), // kibi: toggle borders around panels
+          query: dashboardState.getQuery(),
+          darkTheme: dashboardState.getDarkTheme(),
+          timeRestore: dashboardState.getTimeRestore(),
+          title: dashboardState.getTitle(),
+        };
+        $scope.panels = dashboardState.getPanels();
+      };
+
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
         dirty: !dash.id
       };
       dashboardState.stateMonitor.onChange(status => {
         this.appStatus.dirty = status.dirty || !dash.id;
+        updateState();
       });
 
       dashboardState.applyFilters(dashboardState.getQuery(), filterBar.getFilters());
@@ -154,15 +180,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);
 
-      // Following the "best practice" of always have a '.' in your ng-models –
-      // https://github.com/angular/angular.js/wiki/Understanding-Scopes
-      $scope.model = {
-        hideBorders: dashboardState.getHideBorders(), // kibi: toggle borders around panels
-        query: dashboardState.getQuery(),
-        darkTheme: dashboardState.getDarkTheme(),
-        timeRestore: dashboardState.getTimeRestore(),
-        title: dashboardState.getTitle()
-      };
+      updateState();
 
       $scope.panels = dashboardState.getPanels();
       $scope.refresh = (...args) => {

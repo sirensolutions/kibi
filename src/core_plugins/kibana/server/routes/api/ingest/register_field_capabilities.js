@@ -34,7 +34,12 @@ export function registerFieldCapabilities(server) {
             return capabilities;
           });
 
-          reply({ fields: fieldsFilteredValues });
+          const retVal = { fields: fieldsFilteredValues };
+          if (res._shards && res._shards.failed) {
+            retVal.shard_failure_response = res;
+          }
+
+          reply(retVal);
         },
         (error) => {
           reply(handleESError(error));

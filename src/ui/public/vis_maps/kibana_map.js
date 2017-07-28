@@ -105,6 +105,7 @@ class KibanaMap extends EventEmitter {
     };
 
     this._leafletMap = L.map(containerNode, leafletOptions);
+    this._leafletMap.scrollWheelZoom.disable();
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
     this._leafletMap.setMaxBounds(worldBounds);
 
@@ -293,6 +294,10 @@ class KibanaMap extends EventEmitter {
     return this._leafletMap.getZoom();
   }
 
+  getMaxZoomLevel() {
+    return this._leafletMap.getMaxZoom();
+  }
+
   getAutoPrecision() {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
   }
@@ -473,7 +478,7 @@ class KibanaMap extends EventEmitter {
       }
     });
 
-    if (bounds) {
+    if (bounds && bounds.isValid()) {
       this._leafletMap.fitBounds(bounds);
     }
   }

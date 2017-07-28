@@ -37,7 +37,7 @@
 release-state can be: released | prerelease | unreleased
 //////////
 :release-state:  released
-:version: 5.4.0
+:version: 5.4.3
 :compatible-es-versions: 5.4.x
 :es-compability-table-ref: https://github.com/sirensolutions/kibi/blob/master/README.md#compatibility-table-kibi--elasticsearch
 

@@ -43,9 +43,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       //kibi: set $scope.savedSearchTitle for displaying title instead of id
       if ($scope.savedSearchId) {
-        savedSearches.get($scope.savedSearchId).then(function (savedSearch) {
-          $scope.savedSearchTitle = savedSearch.title;
-        });
+        savedSearches.get($scope.savedSearchId).then(savedSearch => $scope.savedSearchTitle = savedSearch.title);
       }
 
       // kibi: variable to store the checkbox state

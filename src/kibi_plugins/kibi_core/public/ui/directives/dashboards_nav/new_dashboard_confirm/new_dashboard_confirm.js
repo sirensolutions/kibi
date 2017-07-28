@@ -50,7 +50,7 @@ module.factory('newDashboardConfirm', function ($rootScope, $compile, $window, c
       options.onClose();
     };
     confirmScope.savedSearchDescription = () => {
-      return !confirmScope.savedSearchId ? 'NONE' : confirmScope.savedSearchTitle;
+      return confirmScope.savedSearchId ? confirmScope.savedSearchTitle : 'NONE';
     };
     confirmScope.toggleExplanation = () => {
       return confirmScope.showExplanation = !confirmScope.showExplanation;
@@ -80,9 +80,7 @@ module.factory('newDashboardConfirm', function ($rootScope, $compile, $window, c
     //kibi: set confirmScope.savedSearchTitle for displaying title instead of id
     confirmScope.$watch('savedSearchId', function (newValue) {
       if (newValue) {
-        savedSearches.get(newValue).then(function (savedSearch) {
-          confirmScope.savedSearchTitle = savedSearch.title;
-        });
+        savedSearches.get(newValue).then(savedSearch => confirmScope.savedSearchTitle = savedSearch.title);
       }
     });
 

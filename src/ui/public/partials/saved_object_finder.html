@@ -8,7 +8,7 @@
       <div ng-if="kibi.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
         <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch"/>
         <label class="based-saved-search" ng-if="savedSearchId">
-          Show only visualization linked to the saved search "{{savedSearchTitle}}".
+          Show only visualizations linked to the saved search "{{savedSearchTitle}}".
         </label>
         <input ng-if="!savedSearchId" type="checkbox" disabled/>
         <label ng-if="!savedSearchId">

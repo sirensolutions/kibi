@@ -299,12 +299,6 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
           // This is only necessary for new dashboards, which will default to Edit mode.
           updateViewMode(DashboardViewMode.VIEW);
 
-          // We need to do a hard reset of the timepicker. appState will not reload like
-          // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
-          // reload will cause it not to sync.
-          if (dashboardState.getIsTimeSavedWithDashboard()) {
-            dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
-          }
         }
 
         confirmModal(

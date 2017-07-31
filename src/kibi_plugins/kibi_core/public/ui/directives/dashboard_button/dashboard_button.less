@@ -1,0 +1,38 @@
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/variables";
+
+@kibi-dashboard-button-height: 60px;
+
+.kibi-dashboard-button {
+  height: @kibi-dashboard-button-height;
+  .global-nav-link__anchor {
+    height: inherit;
+    display: inline;
+  }
+  .global-nav-link__icon {
+    padding-top: 8px;
+  }
+  .global-nav-link__title {
+    padding-top: 8px;
+    width: calc(@global-nav-open-width - @global-nav-closed-width - 22);
+    float: inherit;
+  }
+  .kibi-dashboard-button-indicator {
+    float:right;
+    display: inline-block;
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-top: calc(@kibi-dashboard-button-height - 22);
+  }
+  &.kibi-dashboard-button-globalnav-toggled {
+    .kibi-dashboard-button-indicator {
+      padding-top: 0;
+      line-height: 22px;
+    }
+  }
+  &.kibi-dashboard-button-dashboardnav-toggled {
+    .kibi-dashboard-button-indicator {
+      transform: translateX(1px) scaleX(-1);
+    }
+  }
+}

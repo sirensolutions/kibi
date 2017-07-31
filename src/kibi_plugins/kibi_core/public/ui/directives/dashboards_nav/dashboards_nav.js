@@ -33,6 +33,7 @@ uiModules
         location: 'Dashboard Groups'
       });
       const COLLAPSED_WIDTH = 140;
+      const HIDDED_WIDTH = 0;
       const SLIDER_WIDTH = 4;
       const BOTTOM_BAR_HEIGHT = 70;
       const DASHBOARDS_INDICATORS_WIDTH = 88;
@@ -45,6 +46,8 @@ uiModules
       $scope.groupEditor = $element.find('.group-editor');
 
       $scope.resizeParts = (count) => {
+        $scope.bar.css('visibility', 'visible');
+        $scope.links.css('visibility', 'visible');
         $scope.bar.css('width', count);
         $document.find('.toaster-container .toaster').css('margin-left', count);
         $scope.dashApp.css('margin-left', count);
@@ -58,10 +61,14 @@ uiModules
         parts.css('width', value + '%');
         parts = $element.find('.dashboard-nav-title-virtual-group');
         parts.css('width', value + '%');
+        if (count === HIDDED_WIDTH) {
+          $scope.bar.css('visibility', 'hidden');
+          $scope.links.css('visibility', 'hidden');
+        }
       };
 
       function updateSidebarSize() {
-        let width = !dashboardsNavState.isOpen() ? COLLAPSED_WIDTH : dashboardsNavState.navWidth();
+        let width = !dashboardsNavState.isOpen() ? HIDDED_WIDTH : dashboardsNavState.navWidth();
         if (!uiChrome.isKibiNavbarVisible()) {
           width = 0;
         }
@@ -75,11 +82,6 @@ uiModules
       function updateDashboardsNav() {
         const isOpen = dashboardsNavState.isOpen();
         $scope.isDashboardsNavOpen = isOpen;
-        $scope.dashboardsNavToggleButton = {
-          title: isOpen ? 'Collapse' : 'Expand',
-          tooltipContent: isOpen ? 'Collapse dashboards bar' : 'Expand dashboards bar',
-          icon: 'plugins/kibana/assets/play-circle.svg'
-        };
 
         const onGroupEditorOpen = dashboardsNavState.isGroupEditorOpen();
         $scope.isDashboardsNavGroupEditorOpen = onGroupEditorOpen;
@@ -92,17 +94,6 @@ uiModules
 
       updateGlobalNav();
       updateDashboardsNav();
-
-      $scope.toggleDashboardsNav = (event, force) => {
-        if (event.target === event.currentTarget || force) {
-          event.preventDefault();
-          if (dashboardsNavState.isOpen()) {
-            dashboardsNavState.setNavWidth($scope.bar.width() - SLIDER_WIDTH);
-          }
-          dashboardsNavState.setOpen(!dashboardsNavState.isOpen());
-          updateSidebarSize();
-        }
-      };
 
       $scope.getLastNewDashboardName = (title) => {
         const regEx = /.*\s#([0-9]*)$/;

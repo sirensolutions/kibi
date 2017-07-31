@@ -1,12 +1,10 @@
 <nav
   id="kibi-dashboards-nav"
   class="kibi-dashboards-nav"
-  ng-click="toggleDashboardsNav($event)"
   ng-class="{ 'is-dashboards-nav-open': isDashboardsNavOpen, 'is-dashboards-nav-group-editor-open': isDashboardsNavGroupEditorOpen, 'is-global-nav-open': isGlobalNavOpen }">
 
   <!-- top toolbar -->
   <dashboard-top-toolbar
-  on-click="toggleDashboardsNav($event, true)"
   is-open="isDashboardsNavOpen"
   kbn-icon="{{ dashboardsNavToggleButton.icon }}"
   on-new-group-click="newDashboardGroup($event)"
@@ -15,7 +13,7 @@
   create-dashboard="createDashboard()"
   ></dashboard-top-toolbar>
 
-  <div class="links" ng-click="toggleDashboardsNav($event)">
+  <div class="links">
     <!-- dashboards sidebar -->
     <dashboard-switcher
       filter="dashboardFilter"
@@ -23,7 +21,6 @@
 
     <!-- bottom toolbar -->
     <dashboard-bottom-toolbar
-    on-click="toggleDashboardsNav($event, true)"
     is-open="isDashboardsNavOpen"
     kbn-icon="{{ dashboardsNavToggleButton.icon }}"
     dashboard-filter="dashboardFilter"

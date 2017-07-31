@@ -3,23 +3,6 @@
   ng-click="onClick({ $event: $event, force: true })"
   ng-class="{ isOpen: isOpen }"
 >
-  <a
-    class="anchor"
-    ng-class="{ 'anchor-closed': !isOpen }"
-  >
-    <div class="icon">
-      <i
-         ng-if="iconCss"
-         class="icon-image {{ iconCss }}"
-      ></i>
-
-      <img
-         ng-if="kbnIcon"
-         class="icon-image"
-         kbn-src="{{ '/' + kbnIcon }}"
-      />
-    </div>
-  </a>
 
   <input
       name="dashboards-filter"
@@ -27,7 +10,7 @@
       ng-class="{ collapsed: !isDashboardsNavOpen }"
       aria-label="Filter by name"
       ng-model="dashboardFilter"
-      class="dashboards-filter"
+      class="form-control dashboards-filter"
       type="text"
       placeholder="Filter by name"
   />

@@ -306,7 +306,7 @@
     "grunt-mocha-istanbul": "5.0.2"
   },
   "engines": {
-    "node": "6.10.2",
+    "node": "6.11.1",
     "npm": "3.10.10"
   }
 }

@@ -11,7 +11,7 @@ import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
 const module = uiModules.get('kibana');
 
-module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
+module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config, savedSearches) {
 
   const services = Private(SavedObjectsSavedObjectRegistryProvider).byLoaderPropertiesName;
 
@@ -40,6 +40,11 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
     controllerAs: 'finder',
     controller: function ($scope, $element) {
       const self = this;
+
+      //kibi: set $scope.savedSearchTitle for displaying title instead of id
+      if ($scope.savedSearchId) {
+        savedSearches.get($scope.savedSearchId).then(savedSearch => $scope.savedSearchTitle = savedSearch.title);
+      }
 
       // kibi: variable to store the checkbox state
       $scope.kibi = {

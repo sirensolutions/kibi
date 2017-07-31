@@ -299,6 +299,8 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
           // This is only necessary for new dashboards, which will default to Edit mode.
           updateViewMode(DashboardViewMode.VIEW);
 
+           // kibi: hard reset of the timepicker is removed.
+           // if time of dashboard is changed but not saved, there is no need to remove changed time
         }
 
         confirmModal(

@@ -45,7 +45,7 @@ module.exports = function (grunt) {
     'test:browser-ci',
     'test:api',
     'test:jest',
-    'test:ui'
+    //'test:ui'
   ]);
 
   grunt.registerTask('test:dev', [

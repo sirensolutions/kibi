@@ -70,8 +70,8 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
     restrict: 'E',
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState,
-      // kibi: added dashboardGroups, kibiState, config
-      dashboardGroups, kibiState, config, $window, chrome) {
+      // kibi: added dashboardGroups, kibiState, config, $timeout
+      dashboardGroups, kibiState, config, $window, chrome, $timeout) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = createNotifier({ location: 'Dashboard' });
@@ -306,6 +306,17 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
 
       updateViewMode(dashboardState.getViewMode());
+
+      // kibi: allows to change the view mode and select the current menu option (issue #3368)
+      $scope.$on('kibi:dashboardviewmode:change', (event, newMode, topNavKey) => {
+        updateViewMode(newMode);
+        if (topNavKey) {
+          $timeout(() => {
+            $scope.kbnTopNav.setCurrent(topNavKey);
+          });
+        }
+      });
+      // kibi: end
 
       $scope.save = function () {
         return dashboardState.saveDashboard(angular.toJson, timefilter).then(function (id) {

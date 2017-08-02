@@ -301,7 +301,7 @@ uiModules
 
       $scope.humanNotation = number => {
         if (_.isNumber(number)) {
-          return numeral.set(number).format('0.[00]a');
+          return numeral.set(number).format('0.[0]a');
         }
       };
 
@@ -311,6 +311,9 @@ uiModules
       });
 
       $scope.addTooltip = function (event, reference, isDashboard, includeFilters = false) {
+        function formatCount(count) {
+          return numeral.set(count).format('0,000');
+        }
         let title;
         let filterMessage = null;
         if (isDashboard) {
@@ -318,7 +321,7 @@ uiModules
           title = dashboard.title;
           filterMessage = dashboard.filterIconMessage;
           if (dashboard.count !== undefined) {
-            title += ' (' + dashboard.count + ')';
+            title += ' (' + formatCount(dashboard.count) + ')';
           }
         } else {
           const group = $scope.group;
@@ -327,7 +330,7 @@ uiModules
             filterMessage = group.selected.filterIconMessage;
           }
           if (group.virtual && group.selected.count !== undefined) {
-            title += ' (' + group.selected.count  + ')';
+            title += ' (' + formatCount(group.selected.count)  + ')';
           }
         }
         $scope.tooltipContent = title + ((filterMessage && includeFilters) ? filterMessage : '');
@@ -359,6 +362,23 @@ uiModules
       function isEllipsisActive(e) {
         return (e.offsetWidth < e.scrollWidth);
       }
+
+      $scope.refreshTooltipIndicator = function (event, reference, isDashboard) {
+        let count = 0;
+        if (isDashboard) {
+          const dashboard = $scope.group.dashboards[+reference];
+          if (dashboard.count !== undefined) {
+            count = dashboard.count;
+          }
+        } else {
+          const group = $scope.group;
+          if (group.selected && group.selected.count !== undefined) {
+            count = group.selected.count;
+          }
+        }
+        event.stopPropagation();
+        $scope.addTooltip(event, reference, isDashboard);
+      };
 
       $scope.refreshTooltipContent = function (event, reference, isDashboard) {
         const $elem = $(event.currentTarget);

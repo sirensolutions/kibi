@@ -66,7 +66,9 @@ from the saved search.
 
 . In the visualization builder, choose the metric aggregation for the
 visualization's Y axis:
-+
+
+* *Metric Aggregations*:
+
 * {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
 * {es-ref}search-aggregations-metrics-avg-aggregation.html[average]
 * {es-ref}search-aggregations-metrics-sum-aggregation.html[sum]

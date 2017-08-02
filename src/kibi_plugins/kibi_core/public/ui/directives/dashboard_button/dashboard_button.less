@@ -7,27 +7,33 @@
   height: @kibi-dashboard-button-height;
   .global-nav-link__anchor {
     height: inherit;
-    display: inline;
+    display: inline-block;
   }
   .global-nav-link__icon {
-    padding-top: 8px;
+    padding-top: 10px;
   }
   .global-nav-link__title {
-    padding-top: 8px;
-    width: calc(@global-nav-open-width - @global-nav-closed-width - 22);
+    padding-top: 10px;
+    width: calc(@global-nav-open-width - @global-nav-closed-width - 25);
     float: inherit;
   }
   .kibi-dashboard-button-indicator {
+    padding-top: calc(@kibi-dashboard-button-height - 42);
     float:right;
-    display: inline-block;
+    display: inline;
     padding-right: 5px;
     padding-left: 5px;
-    padding-top: calc(@kibi-dashboard-button-height - 22);
+    margin-left: 10px;
   }
   &.kibi-dashboard-button-globalnav-toggled {
     .kibi-dashboard-button-indicator {
-      padding-top: 0;
       line-height: 22px;
+      margin-left: 0px;
+    }
+    .global-nav-link__icon {
+      width: 36px;
+      text-align: right;
+      margin-right: 2px;
     }
   }
   &.kibi-dashboard-button-dashboardnav-toggled {

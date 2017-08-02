@@ -5,7 +5,6 @@ import _ from 'lodash';
 import dashboardNavEditLinkTemplate from './dashboard_nav_edit_link.html';
 import './dashboard_nav_edit_link.less';
 import 'ui/kibi/directives/kibi_context_menu';
-import DashboardStateProvider from 'src/core_plugins/kibana/public/dashboard/dashboard_state';
 import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dashboard_view_mode';
 import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
 import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
@@ -13,7 +12,7 @@ import uiModules from 'ui/modules';
 
 uiModules
 .get('kibana')
-.directive('dashboardNavEditLink', ($rootScope, dashboardGroups, createNotifier,
+.directive('dashboardNavEditLink', ($rootScope, $route, dashboardGroups, createNotifier,
   dashboardsNavState, savedDashboardGroups, Private, globalNavState, kibiState, AppState,
   savedDashboards, kbnUrl, confirmModalPromise, $timeout) => {
   const numeral = require('numeral')();
@@ -189,18 +188,23 @@ uiModules
       };
 
       $scope.editDashboard = (id, item) => {
-        $scope.$emit('kibi-dashboard-nav-saving', true);
-        const state = {
-          appState: {
-            viewMode: DashboardViewMode.EDIT
-          },
-          topNav: {
-            currentKey: item.topNavKey
-          }
-        };
-        hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
-        globalNavState.setOpen(false);
-        dashboardGroups.selectDashboard(id);
+        const dash = $route.current.locals.dash;
+        if (id === dash.id) {
+          $rootScope.$broadcast('kibi:dashboardviewmode:change', DashboardViewMode.EDIT, item.topNavKey);
+        } else {
+          $scope.$emit('kibi-dashboard-nav-saving', true);
+          const state = {
+            appState: {
+              viewMode: DashboardViewMode.EDIT
+            },
+            topNav: {
+              currentKey: item.topNavKey
+            }
+          };
+          hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
+          globalNavState.setOpen(false);
+          dashboardGroups.selectDashboard(id);
+        }
       };
 
       $scope.removeDashboardFromGroup = (id) => {

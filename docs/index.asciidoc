@@ -6,8 +6,8 @@
 :java-version: 1.8
 :vanguard-version: 5.4.1
 :vanguard-website: https://siren.io/vanguard
-:version: 5.4.0
-:kibana-version: 5.4.0
+:version: 5.4.3-SNAPSHOT
+:kibana-version: 5.4.3
 :kibana-announcement: https://www.elastic.co/blog/kibana-5-4-0-released
 :kibana-ref: https://www.elastic.co/guide/en/kibana/5.4
 :kibi-version: {version}
@@ -46,7 +46,7 @@ release-state can be: released | prerelease | unreleased
 :pull:           {repo}pull/
 :commit:         {repo}commit/
 :security:       https://www.elastic.co/community/security/
-:branch: 5.4.0
+:branch: 5.4.3-SNAPSHOT
 
 include::introduction.asciidoc[]
 

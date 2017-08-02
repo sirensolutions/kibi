@@ -16,7 +16,7 @@
     "SPARQL"
   ],
   "private": false,
-  "version": "5.4.3",
+  "version": "5.4.3-SNAPSHOT",
   "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-4-0-released",
   "kibi_version": "5.4.3-SNAPSHOT",
   "kibi_enterprise_enabled": false,

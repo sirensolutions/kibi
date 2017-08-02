@@ -25,6 +25,14 @@ export default function unhashUrl(urlWithHashes, states) {
 
   if (!urlWithHashesParsed.hash) return urlWithHashes;
 
+  // kibi: pass pctEncodeSpaces as true to encodeUriQuery
+  // because it should replace blank spaces with '%20' instead of '+'
+  // if '+' is used, 'New Dashboard Title' becomes 'New+Dashboard+Title'
+  const encodeUriQueryWithFlag = function (val) {
+    return encodeUriQuery(val, true);
+  };
+  // kibi: end
+
   const appUrl = urlWithHashesParsed.hash.slice(1); // trim the #
   if (!appUrl) return urlWithHashes;
 
@@ -36,7 +44,7 @@ export default function unhashUrl(urlWithHashes, states) {
   // encodeUriQuery implements the less-aggressive encoding done naturally by
   // the browser. We use it to generate the same urls the browser would
   const appQueryStringWithoutHashes = stringifyQueryString(appQueryWithoutHashes, null, null, {
-    encodeURIComponent: encodeUriQuery
+    encodeURIComponent: encodeUriQueryWithFlag
   });
 
   return formatUrl({

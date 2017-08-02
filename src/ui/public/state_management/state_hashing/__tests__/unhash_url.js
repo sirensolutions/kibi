@@ -70,4 +70,12 @@ describe('unhashUrl', () => {
     const exp = 'https://localhost:5601/#/?foo=bar&testParam=replacement';
     expect(unhashUrl(urlWithHashes, unhashableStates)).to.be(exp);
   });
+
+  it('replaces blank spaces with "%20" instead if "+"', () => {
+    const urlWithHashes = 'https://localhost:5601/#/?new foo=bar&testParam=hash';
+    const exp = 'https://localhost:5601/#/?new%20foo=bar&testParam=replacement';
+    const notExp = 'https://localhost:5601/#/?new+foo=bar&testParam=replacement';
+    expect(unhashUrl(urlWithHashes, unhashableStates)).to.be(exp);
+    expect(unhashUrl(urlWithHashes, unhashableStates)).not.to.be(notExp);
+  });
 });

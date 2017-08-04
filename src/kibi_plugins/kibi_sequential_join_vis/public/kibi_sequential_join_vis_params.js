@@ -47,7 +47,8 @@ uiModules
       const filteredRelations = _(relations.relationsIndices)
       .each((rel) => {
         if (!rel.onSelect) {
-          rel.onSelect = function (button) {
+          rel.onSelect = function (buttonIndex) {
+            const button = $scope.vis.params.buttons[buttonIndex];
             button.indexRelationId = rel.id;
             button.sourceDashboardId = null;
             button.targetDashboardId = null;

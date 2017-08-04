@@ -4,9 +4,6 @@ import TagCloud from 'plugins/tagcloud/tag_cloud';
 import d3 from 'd3';
 import { fromNode, delay } from 'bluebird';
 
-// kibi: disable all the tests for now because are absolete with this custom version
-//       https://github.com/sirensolutions/kibi-internal/issues/3310
-
 describe('tag cloud tests', function () {
 
   const minValue = 1;
@@ -116,11 +113,11 @@ describe('tag cloud tests', function () {
 
       afterEach(teardownDOM);
 
-      xit('completeness should be ok', handleExpectedBlip(function () {
+      it('completeness should be ok', handleExpectedBlip(function () {
         expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
       }));
 
-      xit('positions should be ok', handleExpectedBlip(function () {
+      it('positions should be ok', handleExpectedBlip(function () {
         const textElements = domNode.querySelectorAll('text');
         verifyTagProperties(test.expected, textElements, tagCloud);
       }));
@@ -157,11 +154,11 @@ describe('tag cloud tests', function () {
 
       afterEach(teardownDOM);
 
-      xit('completeness should be ok', handleExpectedBlip(function () {
+      it('completeness should be ok', handleExpectedBlip(function () {
         expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
       }));
 
-      xit('positions should be ok', handleExpectedBlip(function () {
+      it('positions should be ok', handleExpectedBlip(function () {
         const textElements = domNode.querySelectorAll('text');
         verifyTagProperties(logScaleTest.expected, textElements, tagCloud);
       }));
@@ -182,10 +179,10 @@ describe('tag cloud tests', function () {
 
     afterEach(teardownDOM);
 
-    xit('completeness should be ok', handleExpectedBlip(function () {
+    it('completeness should be ok', handleExpectedBlip(function () {
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     }));
-    xit('positions should be ok', handleExpectedBlip(function () {
+    it('positions should be ok', handleExpectedBlip(function () {
       const textElements = domNode.querySelectorAll('text');
       verifyTagProperties(logScaleTest.expected, textElements, tagCloud);
     }));
@@ -205,10 +202,10 @@ describe('tag cloud tests', function () {
 
     afterEach(teardownDOM);
 
-    xit('completeness should be ok', handleExpectedBlip(function () {
+    it('completeness should be ok', handleExpectedBlip(function () {
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     }));
-    xit('positions should be ok', handleExpectedBlip(function () {
+    it('positions should be ok', handleExpectedBlip(function () {
       const textElements = domNode.querySelectorAll('text');
       verifyTagProperties(trimDataTest.expected, textElements, tagCloud);
     }));
@@ -251,10 +248,10 @@ describe('tag cloud tests', function () {
 
     afterEach(teardownDOM);
 
-    xit('completeness should be ok', handleExpectedBlip(function () {
+    it('completeness should be ok', handleExpectedBlip(function () {
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     }));
-    xit('positions should be ok', handleExpectedBlip(function () {
+    it('positions should be ok', handleExpectedBlip(function () {
       const textElements = domNode.querySelectorAll('text');
       verifyTagProperties(logScaleTest.expected, textElements, tagCloud);
     }));
@@ -284,10 +281,10 @@ describe('tag cloud tests', function () {
 
     afterEach(teardownDOM);
 
-    xit('completeness should be ok', handleExpectedBlip(function () {
+    it('completeness should be ok', handleExpectedBlip(function () {
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     }));
-    xit('positions should be ok', handleExpectedBlip(function () {
+    it('positions should be ok', handleExpectedBlip(function () {
       const textElements = domNode.querySelectorAll('text');
       verifyTagProperties(baseTest.expected, textElements, tagCloud);
     }));
@@ -310,9 +307,11 @@ describe('tag cloud tests', function () {
 
     afterEach(teardownDOM);
 
+    // kibi: Comment out this test because ours modification allows tag-cloud visualization works with an smaller container.
     xit('completeness should not be ok', function () {
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
     });
+    // kibi: Comment out this test because ours modification allows tag-cloud visualization works with an smaller container.
     xit('positions should not be ok', function () {
       const textElements = domNode.querySelectorAll('text');
       for (let i = 0; i < textElements; i++) {
@@ -345,7 +344,7 @@ describe('tag cloud tests', function () {
 
     afterEach(teardownDOM);
 
-    xit('completeness should be ok', handleExpectedBlip(function () {
+    it('completeness should be ok', handleExpectedBlip(function () {
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.COMPLETE);
     }));
 
@@ -370,6 +369,7 @@ describe('tag cloud tests', function () {
 
     afterEach(teardownDOM);
 
+    // kibi: Comment out this test because ours modification allows tag-cloud visualization works with an smaller container.
     xit('completeness should not be ok', function () {
       expect(tagCloud.getStatus()).to.equal(TagCloud.STATUS.INCOMPLETE);
     });

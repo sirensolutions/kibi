@@ -18,7 +18,7 @@ import 'ui/kibi/styles/explanation';
 import MarkFilterBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
-module.directive('filterBar', function (Private, Promise, getAppState, kibiState, config, createNotifier, joinExplanation) {
+module.directive('filterBar', function (Private, Promise, getAppState, kibiState, config, createNotifier, joinExplanation, timefilter) {
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
   const mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
   const extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
@@ -55,6 +55,9 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
       ].forEach(function (method) {
         $scope[method] = queryFilter[method];
       });
+
+      // kibi: used in listening timefilter fetch to detect first load
+      let initializing = true;
 
       $scope.state = getAppState();
 
@@ -112,14 +115,9 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
       });
 
       /**
-       * kibi: Watch the filters and if anything is added/removed then the count from the join_sequence filter alias is removed.
-       * If left alone, the count would be misleading.
+       * kibi: replace '$COUNT' to '...' in filters
        */
-      $scope.$watchCollection('state.filters', function (filters, oldFilters) {
-        if (!filters || filters.length === (oldFilters && oldFilters.length || 0)) {
-          return;
-        }
-
+      const removeCountFromFilterMetaAlias = function () {
         _.each($scope.state.filters, (filter) => {
           if (filter.join_sequence && filter.meta.alias_tmpl) {
             const base = filter.meta.alias.replace(/[0-9]+/, '');
@@ -130,6 +128,29 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
             }
           }
         });
+      };
+
+      /**
+       * kibi: If dashboard time is changed then the count from the join_sequence filter alias is removed.
+       * If left alone, the count would be misleading.
+       */
+      $scope.$listen(timefilter, 'fetch', () => {
+        if (initializing) {
+          initializing = false;
+        } else {
+          removeCountFromFilterMetaAlias();
+        }
+      });
+
+      /**
+       * kibi: Watch the filters and if anything is added/removed then the count from the join_sequence filter alias is removed.
+       * If left alone, the count would be misleading.
+       */
+      $scope.$watchCollection('state.filters', function (filters, oldFilters) {
+        if (!filters || filters.length === (oldFilters && oldFilters.length || 0)) {
+          return;
+        }
+        removeCountFromFilterMetaAlias();
       });
 
       $scope.$watch('state.$newFilters', function (filters) {

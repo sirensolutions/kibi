@@ -940,24 +940,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
         return relation;
       });
     });
-
-    /*
-     * build the join_set filter
-     */
-    return Promise.all(relations)
-    .then(relations => {
-      return {
-        meta: {
-          alias: filterAlias,
-          disabled: !this.isRelationalPanelEnabled()
-        },
-        join_set: {
-          focus: focusIndex,
-          relations: relations,
-          queries: queriesPerIndexAndPerDashboard
-        }
-      };
-    });
   };
 
   /**
@@ -982,19 +964,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     };
 
     const dashboardIds = [ dashboardId ];
-    if (this.isRelationalPanelButtonEnabled()) {
-      // collect ids of dashboards from enabled relations and in the connected component to dashboardId
-      const tmpDashboardIds = this._getDashboardsIdInConnectedComponent(dashboardId, this.getEnabledRelations());
-
-      if (tmpDashboardIds.indexOf(dashboardId) !== -1) { // focused dashboard is part of enabled relation
-        _.each(tmpDashboardIds, (d) => {
-          if (d !== dashboardId) {
-            dashboardIds.push(d);
-          }
-        });
-      }
-    }
-
     const appState = getAppState();
 
     if (!dashboardIds.length) {
@@ -1007,9 +976,8 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds);
 
     // check siren-vanguard plugin
-    if (this.isRelationalPanelButtonEnabled() && !this.isSirenJoinPluginInstalled()) {
-      const error = 'The Siren Vanguard plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
-        'or disable the relational panel in Management / Relations';
+    if (!this.isSirenJoinPluginInstalled()) {
+      const error = 'The Siren Vanguard plugin is not installed. Please install the plugin and restart Kibi';
       return Promise.reject(new Error(error));
     }
 
@@ -1180,18 +1148,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     } else {
       this[this._properties.enabled_relational_panel] = toggle;
     }
-  };
-
-  KibiState.prototype.isRelationalPanelEnabled = function () {
-    if (this[this._properties.enabled_relational_panel] === undefined) {
-      // initialize the property
-      this[this._properties.enabled_relational_panel] = true;
-    }
-    return this[this._properties.enabled_relational_panel];
-  };
-
-  KibiState.prototype.isRelationalPanelButtonEnabled = function () {
-    return !!config.get('kibi:relationalPanel');
   };
 
   KibiState.prototype.isSirenJoinPluginInstalled = function () {

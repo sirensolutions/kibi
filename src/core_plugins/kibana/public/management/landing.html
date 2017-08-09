@@ -9,8 +9,7 @@
     <div
       ng-if="section.visibleItems.length > 0"
       ng-repeat="section in sections"
-      ng-class="{ 'management-section-info-expanded': section.showInfo }"
-      class="page-row"
+      class="page-row management-section-info-expanded"
     >
       <div class="kuiPanel kuiPanel--withHeader management-panel">
         <div class="kuiPanelHeader">
@@ -18,15 +17,6 @@
             <!-- kibi: removed heading icon -->
             <div class="kuiPanelHeader__title">
               {{::section.display}}
-            </div>
-          </div>
-
-          <div class="kuiPanelHeaderSection" ng-if="section.info">
-            <div class="kuiText">
-              <span
-                class="fa fa-info-circle management-panel__heading-icon--secondary"
-                ng-click="section.showInfo = !!!section.showInfo"
-              ></span>
             </div>
           </div>
         </div>
@@ -54,13 +44,16 @@
           </div>
 
           <div class="management-section-info">
-            <!-- siren: about section improved -->
+            <!-- kibi: about section improved -->
             <div class="kbn-settings-about container">
-              <div class="col-md-6 col-md-offset-3 jumbotron">
+              <div class="col-md-8 col-md-offset-2 jumbotron">
                 <center>
                   <div class="about-kibi-logo"></div>
                   <h2>Kibi</h2>
                   <p></p>
+                  <div ng-if="section.info.licenseIsMissing" class="kbn-settings-about-license">
+                    Please <a href="https://support.siren.solutions/support/home">contact us</a> to get a trial license or to purchase a license
+                  </div>
                   <table class="table table-condensed kbn-settings-about-versions">
                     <tbody>
                       <tr>
@@ -84,20 +77,50 @@
                       </tr>
 
                       <tr>
-                        <td>Powered by</td>
+                        <td>Compatible with</td>
                         <td><a href="{{::section.info.kibiKibanaAnnouncement}}">Kibana {{kbnVersion}}</a></td>
+                      </tr>
+
+                      <tr
+                        ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
+                      >
+                        <td>License type</td>
+                        <td>{{ ::section.info.licenseType }}</td>
+                      </tr>
+
+                      <tr
+                        ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
+                      >
+                        <td>Graph Browser</td>
+                        <td>{{ section.info.licenseIsValid ? 'Enabled' : 'Not Enabled' }}</td>
+                      </tr>
+
+                      <tr
+                         ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
+                         ng-if="!section.info.licenseIsMissing && section.info.licenseExpiration"
+                      >
+                        <td>Expiration date of license</td>
+                        <td>{{ ::section.info.licenseExpiration }}</td>
+                      </tr>
+
+                      <tr
+                        ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
+                        ng-if="section.info.elasticNodes"
+                      >
+                        <td>Number of Elasticsearch nodes allowed</td>
+                        <td>{{ ::section.info.elasticNodes }}</td>
                       </tr>
                     </tbody>
                   </table>
                   <p></p>
-                  <small>© 2015-{{::section.info.currentYear}} All Rights Reserved - SIREn Solutions</small>
+                  <small>© 2015-{{::section.info.currentYear}} All Rights Reserved - Siren</small>
                   <br>
                   <br>
                   <small>Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.</small>
                 </center>
               </div>
             </div>
-            <!-- siren: end -->
+            <!-- kibi: end -->
           </div>
         </div>
       </div>

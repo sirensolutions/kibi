@@ -376,7 +376,7 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       description: 'Enable counts on all relational buttons.'
     },
     'kibi:defaultDashboardId' : {
-      type: 'kibiSelect',
+      type: 'kibiSelectDashboard',
       value: '',
       description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.'
     }

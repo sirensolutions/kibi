@@ -75,7 +75,7 @@
         class="form-control"
       ></select>
 
-      <kibi-select ng-if="conf.kibiSelect" object-type="dashboard" ng-model="conf.unsavedValue"/>
+      <kibi-select-dashboard ng-if="conf.kibiSelectDashboard" ng-model="conf.unsavedValue"/>
     </form>
 
     <!-- Setting display formats -->
@@ -84,7 +84,7 @@
       <span ng-if="conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
       <span ng-if="conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
       <span ng-if="conf.markdown" ng-bind-html="conf.value | markdown"></span>
-      <span ng-if="conf.kibiSelect">{{conf.value}}</span>
+      <span ng-if="conf.kibiSelectDashboard">{{conf.value}}</span>
     </span>
 
   </td>

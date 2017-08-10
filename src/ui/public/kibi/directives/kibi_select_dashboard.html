@@ -1,0 +1,21 @@
+<div>
+    <select ng-show="!multiSelect" ng-class="{ 'form-control' : true, 'ng-invalid' : isInvalid() }" ng-model="selectedDashboard">
+        <optgroup ng-repeat="dashboardGroup in dashboardGroups" label="{{ dashboardGroup.title }}">
+            <option ng-repeat="dashboard in dashboardGroup.dashboards" value="{{ dashboard.id }}">{{ dashboard.title }}</option>
+        </optgroup>
+    </select>
+
+    <section ng-show="multiSelect" ng-repeat="dashboardGroup in dashboardGroups">
+        <label class="dashboard-group-title">{{dashboardGroup.title}}</label>
+        <section ng-repeat="dashboard in dashboardGroup.dashboards">
+            <span ng-if="qtipTooltip" qtip qtip-classes="qtip-light qtip-rounded qtip-shadow" qtip-html="dashboard.title" qtip-my="{{qtipOptions.my}}" qtip-at="{{qtipOptions.at}}">
+                <input type="checkbox" ng-disabled="dashboard.disabled" ng-model="dashboard.selected"/>
+                {{dashboard.title | limitTo: titleLimit }}{{dashboard.title.length  > titleLimit ? '...' : ''}} <span ng-if="dashboard.disabled" class="smallText"> {{disableMessage}}</span>
+            </span>
+            <span ng-if="!qtipTooltip">
+                <input type="checkbox" ng-disabled="dashboard.disabled" ng-model="dashboard.selected"/>
+                {{dashboard.title | limitTo: titleLimit }}{{dashboard.title.length  > titleLimit ? '...' : ''}} <span ng-if="dashboard.disabled" class="smallText"> {{disableMessage}}</span>
+            </span>
+        </section>
+    </section>
+</div>

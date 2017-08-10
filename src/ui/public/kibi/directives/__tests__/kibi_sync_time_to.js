@@ -65,7 +65,8 @@ describe('Kibi Components', function () {
 
       pollUntil(
         function () {
-          return directiveScope.dashboards && directiveScope.dashboards.length === timeBasedDashboards.length;
+          return directiveScope.dashboardGroups && directiveScope.dashboardGroups.length > 0 &&
+          directiveScope.dashboardGroups[0].dashboards.length === timeBasedDashboards.length;
         }, 1000, 1,
         function (err) {
           if (err) {
@@ -94,10 +95,10 @@ describe('Kibi Components', function () {
      * @param selectedDashboards a list of dashboards to sync together
      */
     function assertDashboards(expectedTime, selectedDashboards = []) {
-      expect(directiveScope.dashboards.length).to.equal(timeBasedDashboards.length);
+      expect(directiveScope.dashboardGroups[0].dashboards.length).to.equal(timeBasedDashboards.length);
 
       const checkDashboard = function (dashboardId, syncedDashboards) {
-        const dash = _.find(directiveScope.dashboards, 'id', dashboardId);
+        const dash = _.find(directiveScope.dashboardGroups[0].dashboards, 'id', dashboardId);
 
         expect(dash.selected).to.equal(Boolean(syncedDashboards));
 
@@ -200,17 +201,17 @@ describe('Kibi Components', function () {
     function uncheckAllDashboardCheckboxes(el) {
       // select all checkboxes but the first one
       if (isChrome) {
-        el.find('table tr:nth-child(2) li:gt(0) input[type=\'checkbox\']').filter(':checked').click();
+        el.find('table tr:first-child input[type=\'checkbox\']').filter(':checked').click();
       } else {
-        el.find('table tr:nth-child(2) li:gt(0) input[type=\'checkbox\']').filter(':checked').prop('checked', true).click();
+        el.find('table tr:first-child input[type=\'checkbox\']').filter(':checked').prop('checked', true).click();
       }
     };
 
     function checkAllDashboardCheckboxes(el) {
       if (isChrome) {
-        el.find('table tr:nth-child(2) input[type=\'checkbox\']').click();
+        el.find('table tr:first-child input[type=\'checkbox\']').click();
       } else {
-        el.find('table tr:nth-child(2) input[type=\'checkbox\']').prop('checked', true).click();
+        el.find('table tr:first-child input[type=\'checkbox\']').prop('checked', true).click();
       }
     };
 
@@ -221,9 +222,9 @@ describe('Kibi Components', function () {
         throw new Error(`Unknown dashboard: ${dashboardId}`);
       }
       if (isChrome) {
-        el.find(`table tr:nth-child(2) li:nth-child(${n + 1}) input[type='checkbox']`).click();
+        el.find(`table tr:nth-child(2) section:nth-child(${n + 2}) input[type='checkbox']`).click();
       } else {
-        el.find(`table tr:nth-child(2) li:nth-child(${n + 1}) input[type='checkbox']`).prop('checked', true).click();
+        el.find(`table tr:nth-child(2) section:nth-child(${n + 2}) input[type='checkbox']`).prop('checked', true).click();
       }
     };
 
@@ -272,8 +273,8 @@ describe('Kibi Components', function () {
 
           it('should retrieve already synced dashboards', function (done) {
             pollUntilDashboardsAreResolved(done, function () {
-              _.each(directiveScope.dashboards, (dashboard, i) => {
-                if (i === 0 || dashboard.id === 'dashC') { // current or selected dashboards
+              _.each(directiveScope.dashboardGroups[0].dashboards, (dashboard, i) => {
+                if (dashboard.id === 'dashA' || dashboard.id === 'dashC') { // current or selected dashboards
                   expect(dashboard.selected).to.be(true);
                 } else {
                   expect(dashboard.selected).to.be(false);
@@ -293,13 +294,14 @@ describe('Kibi Components', function () {
             });
 
             pollUntilDashboardsAreResolved(done, function () {
-              _.each(directiveScope.dashboards, (dashboard, i) => {
-                if (i === 0 || dashboard.id === 'dashC') { // current or selected dashboards
+              _.each(directiveScope.dashboardGroups[0].dashboards, (dashboard, i) => {
+                if (dashboard.id === 'dashA' || dashboard.id === 'dashC') { // current or selected dashboards
                   expect(dashboard.selected).to.be(true);
                 } else {
                   expect(dashboard.selected).to.be(false);
                 }
               });
+              checkAllDashboardCheckboxes($el);
               uncheckAllDashboardCheckboxes($el);
               $el.find('button[type=\'submit\']').click();
             }, [ 'dashC' ]);

@@ -364,6 +364,17 @@ uiModules
       .value();
     }
 
+    getTitlesOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds) {
+      return _(this.getGroups())
+      // do not consider groups that were created programmatically
+      .reject('virtual')
+      // keep only the groups which dashboards contains some of the ids passed in argument
+      .filter(group => _.intersection(dashboardIds, _.pluck(group.dashboards, 'id')).length)
+      // return the title of the groups
+      .map('title')
+      .value();
+    }
+
     selectDashboard(dashboardId) {
       $timeout.cancel(lastSelectDashboardEventTimer);
       lastSelectDashboardEventTimer = $timeout(() => {

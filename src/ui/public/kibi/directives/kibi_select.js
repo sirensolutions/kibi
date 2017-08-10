@@ -19,7 +19,6 @@ uiModules
       delegatedData: '&?',
       // objectType - text - possible values are:
       // - query: returns external query IDs
-      // - dashboard: returns dashboard IDs
       // - search: returns saved search IDs
       // - template: returns query template IDs
       // - datasource: returns datasource IDs
@@ -257,9 +256,6 @@ uiModules
               break;
             case 'query':
               promise = selectHelper.getQueries();
-              break;
-            case 'dashboard':
-              promise = selectHelper.getDashboards(scope.options);
               break;
             case 'search':
               promise = selectHelper.getSavedSearches();

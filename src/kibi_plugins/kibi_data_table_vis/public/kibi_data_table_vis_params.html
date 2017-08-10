@@ -69,7 +69,7 @@
             <div ng-if="clickOption.type === 'select'" class="form-group">
               <label>Redirect to dashboard</label></br/>
               <span>If set, when selecting a document you will be redirected to the specified dashboard.</span></br>
-              <kibi-select object-type="dashboard" ng-model="clickOption.targetDashboardId" />
+              <kibi-select-dashboard ng-model="clickOption.targetDashboardId"/>
             </div>
 
             <div class="btn-group rightCorner">

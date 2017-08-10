@@ -282,97 +282,6 @@ describe('State Management', function () {
       });
     });
 
-    describe('Relations', function () {
-      beforeEach(() => init());
-
-      it('getEnabledRelations should return an empty array if no j', function () {
-        expect(kibiState.getEnabledRelations()).to.eql([]);
-      });
-
-      it('should emit a relation event when enabling a relation', function (done) {
-        const relation = {
-          dashboards: [ 'a', 'b' ],
-          relation: 'index-a//id/index-b//id'
-        };
-
-        kibiState.on('relation', function (dashboardIds) {
-          expect(dashboardIds).to.eql([ 'a', 'b' ]);
-          done();
-        });
-
-        kibiState.enableRelation(relation);
-      });
-
-      it('should emit a relation event when disabling a relation', function (done) {
-        const relation1 = {
-          dashboards: [ 'a', 'b' ],
-          relation: 'index-a//id/index-b/id'
-        };
-        const relation2 = {
-          dashboards: [ 'c', 'b' ],
-          relation: 'index-b//id/index-c//id'
-        };
-
-        kibiState.enableRelation(relation1);
-        kibiState.enableRelation(relation2);
-
-        kibiState.on('relation', function (dashboardIds) {
-          expect(dashboardIds).to.eql([ 'a', 'b' ]);
-          done();
-        });
-
-        kibiState.disableRelation(relation1);
-      });
-
-      it('should emit a relation event when disabling all relations', function (done) {
-        const relation1 = {
-          dashboards: [ 'a', 'b' ],
-          relation: 'index-a//id/index-b//id'
-        };
-        const relation2 = {
-          dashboards: [ 'c', 'b' ],
-          relation: 'index-b//id/index-c//id'
-        };
-
-        kibiState.enableRelation(relation1);
-        kibiState.enableRelation(relation2);
-
-        kibiState.on('relation', function (dashboardIds) {
-          expect(dashboardIds).to.have.length(3);
-          expect(dashboardIds).to.contain('a');
-          expect(dashboardIds).to.contain('b');
-          expect(dashboardIds).to.contain('c');
-          done();
-        });
-        kibiState.disableAllRelations();
-      });
-
-      it('isRelationEnabled', function () {
-        const relation1 = {
-          dashboards: [ 'a', 'b' ],
-          relation: 'index-a//id/index-b//id'
-        };
-        const relation2 = {
-          dashboards: [ 'c', 'b' ],
-          relation: 'index-b//id/index-c//id'
-        };
-
-        kibiState.enableRelation(relation1);
-
-        expect(kibiState.isRelationEnabled(relation1)).to.equal(true);
-        expect(kibiState.isRelationEnabled(relation2)).to.equal(false);
-      });
-
-      it('isRelationEnabled should return false if j not initialized', function () {
-        const relation1 = {
-          dashboards: [ 'a', 'b' ],
-          relation: 'index-a//id/index-b//id'
-        };
-
-        expect(kibiState.isRelationEnabled(relation1)).to.equal(false);
-      });
-    });
-
     describe('General Helpers', function () {
       beforeEach(() => init({
         savedDashboards: [
@@ -1308,26 +1217,6 @@ describe('State Management', function () {
           }).catch(done);
         });
 
-        it('should not store in kibistate the join_set', function (done) {
-          const filter1 = {
-            join_set: { field1: 'bbb' },
-            meta: { disabled: false }
-          };
-
-          appState.filters = [ filter1 ];
-          appState.query = {
-            query_string: {
-              query: '*',
-              analyze_wildcard: true
-            }
-          };
-          kibiState.saveAppState()
-          .then(() => {
-            expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.not.be.ok();
-            done();
-          }).catch(done);
-        });
-
         it('should not store in kibistate the default query/time', function (done) {
           const filter1 = {
             term: { field1: 'bbb' },
@@ -1469,26 +1358,6 @@ describe('State Management', function () {
 
         it('should store in kibistate an empty array for filters', function (done) {
           appState.filters = [];
-          kibiState.saveAppState()
-          .then(() => {
-            expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.have.length(0);
-            done();
-          }).catch(done);
-        });
-
-        it('should not store in kibistate the join_set', function (done) {
-          const filter1 = {
-            join_set: { field1: 'bbb' },
-            meta: { disabled: false }
-          };
-
-          appState.filters = [ filter1 ];
-          appState.query = {
-            query_string: {
-              query: '*',
-              analyze_wildcard: true
-            }
-          };
           kibiState.saveAppState()
           .then(() => {
             expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.have.length(0);
@@ -1839,36 +1708,19 @@ describe('State Management', function () {
         kibiState.resetFiltersQueriesTimes();
       });
 
-      it('should emit a reset event with the IDs of dashboards that were joined', function (done) {
-        kibiState._saveTimeForDashboardId('Articles', 'quick', 'now-15m', 'now');
-
-        kibiState.enableRelation({
-          dashboards: [ 'Articles', 'Companies' ],
-          relation: 'index-a//id/index-b//id'
-        });
-
-        kibiState.on('reset', function (ids) {
-          expect(ids).to.eql([ 'Articles', 'Companies' ]);
-          done();
-        });
-        kibiState.resetFiltersQueriesTimes();
-      });
-
       it('should not emit a reset events if no dashboard got changed', function (done) {
         const counts = {
           reset: 0,
-          reset_app_state_query: 0,
-          save_with_changes: 0
+          reset_app_state_query: 0
         };
         sinon.stub(kibiState, 'emit', function (eventName) {
           counts[eventName]++;
         });
         kibiState.resetFiltersQueriesTimes()
         .then(() => {
-          expect(Object.keys(counts).length).to.equal(3);
+          expect(Object.keys(counts).length).to.equal(2);
           expect(counts.reset).to.equal(0);
           expect(counts.reset_app_state_query).to.equal(0);
-          expect(counts.save_with_changes).to.equal(1);
           done();
         }).catch(done);
       });

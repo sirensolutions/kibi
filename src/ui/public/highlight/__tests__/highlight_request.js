@@ -51,17 +51,11 @@ describe('getHighlightRequest', () => {
             {
               join_sequence: {}
             },
-            {
-              join_set: {}
-            },
             queryStringQuery
           ],
           must_not: [
             {
               join_sequence: {}
-            },
-            {
-              join_set: {}
             },
             queryStringQuery
           ]
@@ -82,9 +76,6 @@ describe('getHighlightRequest', () => {
           must: [
             {
               join_sequence: {}
-            },
-            {
-              join_set: {}
             },
             queryStringQuery
           ]

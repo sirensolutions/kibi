@@ -136,10 +136,8 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
       kibiState.getState(dashboardId)
     ])
     .then(([ sourceIndices, targetIndices, { filters, queries, time } ]) => {
-      // join_sequence should not contain the join_set
-      const clonedFilters = _(filters).filter((filter) => !filter.join_set).cloneDeep();
-      const existingJoinSeqFilters = _.filter(clonedFilters, (filter) => filter.join_sequence);
-      const remainingFilters = _.filter(clonedFilters, (filter) => !filter.join_sequence);
+      const existingJoinSeqFilters = _.filter(filters, (filter) => filter.join_sequence);
+      const remainingFilters = _.filter(filters, (filter) => !filter.join_sequence);
 
       if (existingJoinSeqFilters.length === 0) {
         return this.buildNewJoinSeqFilter({

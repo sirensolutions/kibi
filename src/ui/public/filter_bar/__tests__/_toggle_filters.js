@@ -10,8 +10,6 @@ describe('toggle filters', function () {
   let $rootScope;
   let appState;
   let globalState;
-
-  let toggleRelationalPanelSpy;
   let isFilterOutdatedStub;
 
   beforeEach(ngMock.module(
@@ -23,10 +21,8 @@ describe('toggle filters', function () {
 
       $provide.service('kibiState', function () {
         isFilterOutdatedStub = sinon.stub();
-        toggleRelationalPanelSpy = sinon.spy();
         return new MockState({
           isFilterOutdated: isFilterOutdatedStub,
-          toggleRelationalPanel: toggleRelationalPanelSpy,
           filters: []
         });
       });
@@ -64,20 +60,6 @@ describe('toggle filters', function () {
 
   describe('toggling a filter', function () {
     describe('kibi', function () {
-      it('should toggle the relational panel if join filter is present', function () {
-        filters = [
-          {
-            join_set: {},
-            meta: { negate: false, disabled: false }
-          }
-        ];
-        appState.filters = filters;
-
-        queryFilter.toggleFilter(filters[0]);
-        expect(appState.filters[0].meta.disabled).to.be(true);
-        expect(toggleRelationalPanelSpy.calledWith()).to.be(true);
-      });
-
       it('should not toggle the filter if it is outdated', function () {
         const filter = {
           join_sequence: [],

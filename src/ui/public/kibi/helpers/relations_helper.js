@@ -267,7 +267,6 @@ export default function RelationsHelperFactory(kibiEnterpriseEnabled, config) {
       // TODO verify which advanced settings could be skipped
       // https://github.com/sirensolutions/kibi-internal/issues/868
       // e.g.
-      // for join_set we need advanced settings only for the index which is not the focused one
       // for sequencial join we also only need settings for one
 
       if (forward) {

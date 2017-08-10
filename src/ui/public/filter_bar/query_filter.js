@@ -98,20 +98,7 @@ export default function (Private, $rootScope, getAppState, globalState, config, 
     }
 
     state.filters.splice(index, 1);
-
-    // kibi: if it was a join_set one
-    if (filter.join_set) {
-      removeJoinSetFilter.call(this);
-    }
-    // kibi: end
   };
-
-  function removeJoinSetFilter() {
-    kibiState.disableAllRelations();
-    // if the panel was disabled
-    kibiState.toggleRelationalPanel(true);
-    kibiState.save();
-  }
 
   /**
   * Updates an existing filter
@@ -139,17 +126,8 @@ export default function (Private, $rootScope, getAppState, globalState, config, 
   queryFilter.removeAll = function () {
     const appState = getAppState();
 
-    // kibi: find out if there was a join_set
-    const joinSetFound = _.find(appState.filters, f => f.join_set);
-
     globalState.filters = [];
     appState.filters = [];
-
-    // remove all enabled relations for the join_set
-    if (joinSetFound) {
-      removeJoinSetFilter.call(this);
-    }
-    // kibi: end
   };
 
   /**
@@ -164,11 +142,6 @@ export default function (Private, $rootScope, getAppState, globalState, config, 
       // kibi: do not allow to enable an outdated filter
       const disabled = _.isUndefined(force) ? !filter.meta.disabled : !!force;
       filter.meta.disabled = disabled;
-    }
-    if (filter.join_set) {
-      // kibi: toggle the relational panel when touching the relational filter
-      kibiState.toggleRelationalPanel();
-      kibiState.save();
     }
     return filter;
   };

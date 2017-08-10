@@ -47,8 +47,7 @@ export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, glob
       if (!currentDashboard) {
         return;
       }
-      const dashboardsIds = kibiState.addAllConnected(currentDashboard);
-      this.updateAllCounts(dashboardsIds, 'AppState change ' + angular.toJson(diff));
+      this.updateAllCounts([currentDashboard], 'AppState change ' + angular.toJson(diff));
     };
 
     const updateCountsOnGlobalStateChange = function (diff) {
@@ -61,26 +60,18 @@ export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, glob
         // the pinned filters changed, update counts on all selected dashboards
         this.updateAllCounts(null, 'GlobalState pinned filters change');
       } else if (diff.indexOf('time') !== -1) {
-        const dashboardsIds = kibiState.addAllConnected(currentDashboard);
-        this.updateAllCounts(dashboardsIds, 'GlobalState time changed');
+        this.updateAllCounts([currentDashboard], 'GlobalState time changed');
       } else if (diff.indexOf('refreshInterval') !== -1) {
         // force the count update to refresh all tabs count
         this.updateAllCounts(null, 'GlobalState refreshInterval changed', true);
       }
     };
-
-    const updateCountsOnKibiStateRelation = function (ids) {
-      const dashboardsIds = _(ids).map((dashboardId) => kibiState.addAllConnected(dashboardId)).flatten().uniq().value();
-      this.updateAllCounts(dashboardsIds, 'KibiState enabled relations changed');
-    };
-
     const updateCountsOnKibiStateReset = function (dashboardsIds) {
       this.updateAllCounts(dashboardsIds, 'KibiState reset');
     };
 
     const updateCountsOnKibiStateTime = function (dashboardId, newTime, oldTime) {
-      const dashboardsIds = kibiState.addAllConnected(dashboardId);
-      this.updateAllCounts(dashboardsIds, `KibiState time changed on dashboard ${dashboardId}`);
+      this.updateAllCounts([dashboardId], `KibiState time changed on dashboard ${dashboardId}`);
     };
 
     const updateCountsOnKibiStateChange = function (diff) {
@@ -89,9 +80,8 @@ export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, glob
       if (!currentDashboard) {
         return;
       }
-      if (diff.indexOf(kibiState._properties.groups) !== -1 || diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1) {
-        const dashboardsIds = kibiState.addAllConnected(currentDashboard);
-        this.updateAllCounts(dashboardsIds, `KibiState change ${JSON.stringify(diff, null, ' ')}`);
+      if (diff.indexOf(kibiState._properties.groups) !== -1) {
+        this.updateAllCounts([currentDashboard], `KibiState change ${JSON.stringify(diff, null, ' ')}`);
       }
     };
 
@@ -103,7 +93,6 @@ export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, glob
     });
     $rootScope.$listen(kibiState, 'save_with_changes', (diff) => updateCountsOnKibiStateChange.call(this, diff));
     $rootScope.$listen(kibiState, 'reset', (dashboardsIds) => updateCountsOnKibiStateReset.call(this, dashboardsIds));
-    $rootScope.$listen(kibiState, 'relation', (dashboardsIds) => updateCountsOnKibiStateRelation.call(this, dashboardsIds));
     $rootScope.$listen(kibiState, 'time', updateCountsOnKibiStateTime.bind(this));
 
     // everywhere use this event !!! to be consistent

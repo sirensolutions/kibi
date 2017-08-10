@@ -149,8 +149,7 @@ uiModules
       $scope.$listen(queryFilter, 'update', function () {
         const currentDashboardId = kibiState._getCurrentDashboardId();
         if (currentDashboardId) {
-          const dashboardIds = kibiState.addAllConnected(currentDashboardId);
-          kibiNavBarHelper.updateAllCounts(dashboardIds, 'filters change');
+          kibiNavBarHelper.updateAllCounts([currentDashboardId], 'filters change');
         }
       });
 

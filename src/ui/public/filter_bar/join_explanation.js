@@ -9,49 +9,6 @@ uiModules
 .get('app/dashboard')
 .service('joinExplanation', ($timeout, Private, indexPatterns, Promise, kibiState) => {
   const fieldFormat = Private(fieldFormatProvider);
-  const explainFiltersForJoinSet = function (queriesPerDashboard, indexId) {
-    const promises = [];
-    _.each(queriesPerDashboard, function (filters, dashboardId) {
-      _.each(filters, filter => {
-        promises.push(explainFilter(filter, indexId).then(filterLabel => {
-          return { filterLabel, dashboardId };
-        }));
-      });
-    });
-
-    return Promise.all(promises)
-      .then(function (explanations) {
-        let html = '';
-
-        _(explanations)
-          .groupBy('dashboardId')
-          .each((values, dashboardId) => {
-            if (values.length) {
-              html += `From <b>${dashboardId}</b>:</br><ul>`;
-              html += _.map(values, ({ filterLabel }) => `<li>${filterLabel}</li>`).join('');
-              html += '</ul>';
-            }
-          })
-          .value();
-        return html;
-      });
-  };
-
-  const explainJoinSet = function (joinSet) {
-    const promises = _.map(joinSet.queries, explainFiltersForJoinSet);
-
-    return Promise.all(promises).then(function (explanations) {
-      let html = '<ul class="explanation join-set">';
-      let empty = true;
-      _.each(explanations, function (expl) {
-        if (expl) {
-          empty = false;
-        }
-        html += '<li>' + expl + '</li>';
-      });
-      return empty ? '' : html + '</ul>';
-    });
-  };
 
   /**
    * Format the value as a date if the field type is date
@@ -153,10 +110,6 @@ uiModules
       prop = Object.keys(f.geo_bounding_box)[0];
       return Promise.resolve(' ' + prop + ': <b>' + JSON.stringify(f.geo_bounding_box[prop].top_left, null, '') + '</b> to <b>'
         + JSON.stringify(f.geo_bounding_box[prop].bottom_right, null, '') + '</b> ');
-    } else if (f.join_set) {
-      return explainJoinSet(f.join_set).then(function (html) {
-        return 'join_set: ' + html;
-      });
     } else if (f.join_sequence) {
       return explainJoinSequence(f.join_sequence).then(function (html) {
         return 'join_sequence: ' + html;
@@ -314,8 +267,6 @@ uiModules
     _.each(filters, function (f) {
       if (f.join_sequence) {
         promises.push(explainJoinSequence(f.join_sequence));
-      } else if (f.join_set) {
-        promises.push(explainJoinSet(f.join_set));
       } else {
         promises.push(explainFilter(f));
       }

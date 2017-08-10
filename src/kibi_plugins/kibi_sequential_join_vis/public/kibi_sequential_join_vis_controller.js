@@ -114,10 +114,12 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
             if (error.match(/ElasticsearchSecurityException/)) {
               results[i].button.warning = 'Access to an index referred by this button is forbidden.';
               notify.error(error);
-            }
-            if (error.match(/index_not_found_exception/)) {
+            } else if (error.match(/index_not_found_exception/)) {
               // do not notify about missing index error
               results[i].button.warning = 'Index referred by this button does not exist.';
+            } else {
+              results[i].button.warning = `Got an unexpected error while computing this button's count.`;
+              notify.error(JSON.stringify(error, null, ' '));
             }
             if ($scope.multiSearchData) {
               $scope.multiSearchData.add(stats);
@@ -134,7 +136,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
             $scope.multiSearchData.add(stats);
           }
         });
-        return _.map(results, (result) => result.button);
+        return _.map(results, 'button');
       });
     }).catch(notify.error);
   };

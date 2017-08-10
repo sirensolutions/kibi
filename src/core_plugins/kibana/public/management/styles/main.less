@@ -55,7 +55,7 @@ kbn-management-landing {
     }
   }
 
-  // siren: about section improved
+  // kibi: about section improved
   .management-section-info {
     bottom: 10px;
     display: none;
@@ -69,15 +69,28 @@ kbn-management-landing {
     padding-right: 30px;
   }
 
-  .kbn-settings-about-versions td {
-    width: 50%;
+  .kbn-settings-about-license {
+    padding-bottom: 10px;
+    color: @kibanaRed2;
   }
 
-  .kbn-settings-about-versions td:first-child {
-    font-weight: bold;
-    text-align: right;
+  .kbn-settings-about-license-invalid {
+    color: @kibanaRed2;
   }
-  // siren: end
+
+  .kbn-settings-about-versions {
+    td {
+      width: 50%;
+    }
+    td:first-child {
+      font-weight: bold;
+      text-align: right;
+    }
+    td:nth-child(2) {
+      white-space: nowrap;
+    }
+  }
+  // kibi: end
 
   .management-section-info-expanded {
     .management-section-info {

@@ -89,10 +89,13 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
     const promise = indexFields(indexPattern);
 
     // any time index pattern in ES is updated, update index pattern object
-    docSources
-    .get(indexPattern)
-    .onUpdate()
-    .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
+    // kibi: Check docSources has that indexPattern key
+    if (docSources.has(indexPattern)) {
+      docSources
+      .get(indexPattern)
+      .onUpdate()
+      .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
+    }
 
     return promise;
   }

@@ -284,6 +284,21 @@ export default function SavedObjectFactory(
             : this[fieldName];
         }
       });
+
+      if (this.searchSource) {
+        const searchSourceJSON = _.omit(this.searchSource.toJSON(), ['sort', 'size']);
+
+        //kibi: do not serialize the inject queries
+        if (searchSourceJSON.inject) {
+          delete searchSourceJSON.inject;
+        }
+
+        body.kibanaSavedObjectMeta = {
+          searchSourceJSON: angular.toJson(searchSourceJSON)
+        };
+        // kibi: end
+      }
+
       return body;
     };
 

@@ -649,63 +649,6 @@ describe('Kibi Components', function () {
           expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
         });
       });
-
-      it('should set the advanced siren-vanguard parameters', function () {
-        init({
-          enableEnterprise: true,
-          indexPatterns: indexPatterns,
-          savedSearches: savedSearches,
-          savedDashboards: savedDashboards
-        });
-
-        kibiState.enableRelation({
-          dashboards: [ 'dashboardA', 'dashboardB' ],
-          relation: 'ia//fa/ib//fb'
-        });
-        const relations = {
-          relationsIndices: [
-            {
-              indices: [
-                {
-                  indexPatternId: 'ia',
-                  path: 'fa',
-                  termsEncoding: 'enc1'
-                },
-                {
-                  indexPatternId: 'ib',
-                  path: 'fb',
-                  termsEncoding: 'enc2'
-                }
-              ],
-              label: 'rel',
-              id: 'ia//fa/ib//fb'
-            }
-          ]
-        };
-        config.set('kibi:relations', relations);
-
-        $rootScope.$emit('change:config.kibi:relations', relations);
-        $rootScope.$digest();
-
-        const button = {
-          sourceField: 'fa',
-          sourceIndexPatternId: 'ia',
-          targetField: 'fb',
-          targetIndexPatternId: 'ib'
-        };
-
-        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
-        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
-        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
-
-        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
-          sinon.assert.called(timeBasedIndicesStub);
-          expect(rel.join_sequence).to.have.length(1);
-          expect(rel.join_sequence[0].relation).to.have.length(2);
-          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('enc1');
-          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('enc2');
-        });
-      });
     });
 
     describe('composeGroupFromExistingJoinFilters', function () {

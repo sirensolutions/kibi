@@ -28,7 +28,7 @@ function _walkHighlightClauses(query, clauses) {
   */
 function getHighlightQuery(query) {
   // kibi: do not include join queries into the highlight query
-  if (query.join_sequence || query.join_set) {
+  if (query.join_sequence) {
     return;
   }
 

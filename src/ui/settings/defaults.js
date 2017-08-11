@@ -346,10 +346,6 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       value: 1.0,
       description: 'Set the zoom level for the whole page. Good if the default size is too big for you. Does not work in Firefox.'
     },
-    'kibi:relationalPanel': {
-      value: false,
-      description: 'Display the Relational panel in the dashboard tab'
-    },
     'kibi:relations': {
       type: 'json',
       value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',

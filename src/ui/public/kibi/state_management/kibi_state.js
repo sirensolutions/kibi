@@ -165,8 +165,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     synced_dashboards: 's',
     // properties available in the diff array with the save_with_changes event
     dashboards: 'd',
-    enabled_relations: 'j',
-    enabled_relational_panel: 'e',
     groups: 'g',
     // selected entity properties
     selected_entity_disabled: 'x',
@@ -348,22 +346,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
             dashboardIdsToUpdate.push(dashboard.id);
           }
         });
-
-        // add the ID of dashboards that are joined
-        _.each(this.getEnabledRelations(), (relation) => {
-          _.each(relation.dashboards, (dashboardId) => {
-            if (dashboardIdsToUpdate.indexOf(dashboardId) === -1) {
-              dashboardIdsToUpdate.push(dashboardId);
-            }
-          });
-        });
-
-        if (!dashId) {
-          this.disableAllRelations();
-          // but enable the relational panel in case it was disabled by a filter
-          this.toggleRelationalPanel(true);
-        }
-
         if (dashboardIdsToUpdate.length) {
           this.emit('reset', dashboardIdsToUpdate);
         }
@@ -564,9 +546,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     if (!disabled) {
       filters = _.filter(filters, (f) => f.meta && !f.meta.disabled);
     }
-    // remove join_set filter since it is computed only if needed.
-    // It may be available through the appState.filters
-    _.remove(filters, (filter) => filter.join_set);
     return Promise.resolve(uniqFilters(filters, { state: true, negate: true, disabled: true }));
   };
 
@@ -733,231 +712,16 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     });
   };
 
-  /**
-   * Returns all dashboard ids which are connected to given dashboard id via relations enabled in relational panel
-   */
-  KibiState.prototype.addAllConnected = function (dashboardId) {
-    const connected = this._getDashboardsIdInConnectedComponent(dashboardId, this.getEnabledRelations());
-    return connected.length > 0 ? connected : [dashboardId];
-  };
-
-  /**
-   * Returns the set of dashboard IDs which are connected to the focused dashboard, i.e., the connected component of the graph.
-   * Relations is the array of relations between dashboards.
-   */
-  KibiState.prototype._getDashboardsIdInConnectedComponent = function (focus, relations) {
-    // check in the focus dashbaord is in a relation
-    let isInARelation = false;
-    for (let i = 0; i < relations.length; i++) {
-      const relation = relations[i];
-      if (focus === relation.dashboards[0] || focus === relation.dashboards[1]) {
-        isInARelation = true;
-        break;
-      }
-    }
-    if (!isInARelation) {
-      return [];
-    }
-
-    const labels = [];
-
-    // the set of current nodes to visit
-    const current = [ focus ];
-    // the set of nodes to visit in the next iteration
-    const toVisit = [];
-    // the set of visited nodes
-    const visited = [];
-
-    do {
-
-      // for each relation:
-      // - if some node is in the current ones, then add the adjacent
-      // node to toVisit if it was not visited already
-      for (let i = 0; i < relations.length; i++) {
-        const relation = relations[i];
-        let ind = -1;
-        let label = '';
-
-        if ((ind = current.indexOf(relation.dashboards[0])) !== -1) {
-          label = relation.dashboards[1];
-        } else if ((ind = current.indexOf(relation.dashboards[1])) !== -1) {
-          label = relation.dashboards[0];
-        }
-
-        // only visit that dashboard if
-        // - it is not part of a loop
-        // - if it was not already visited
-        // - if it will not be visited in the next iteration
-        if (label && label !== current[ind] && visited.indexOf(label) === -1 && toVisit.indexOf(label) === -1) {
-          toVisit.push(label);
-        }
-      }
-
-      // update the visisted set
-      for (let j = current.length - 1; j >= 0; j--) {
-        labels.push(current[j]);
-        visited.push(current.pop());
-      }
-      // update the current set
-      for (let k = toVisit.length - 1; k >= 0; k--) {
-        current.push(toVisit.pop());
-      }
-
-    } while (current.length !== 0);
-
-    return labels;
-  };
-
   KibiState.prototype._readFromURL = function () {
     const stash = KibiState.Super.prototype._readFromURL.call(this);
 
     if (stash) {
-      // check the enabled relations
-      if (stash[this._properties.enabled_relations] && stash[this._properties.enabled_relations].length) {
-        const enableRelations = stash[this._properties.enabled_relations];
-        for (let i = enableRelations.length - 1; i >= 0; i--) {
-          if (!relationsHelper.validateDashboardsRelation(enableRelations[i])) {
-            const [ deleted ] = enableRelations.splice(i, 1);
-            notify.warning(
-              `Removed relation between dashboards ${deleted.dashboards[0]} and ${deleted.dashboards[1]} because it was invalid`
-            );
-          }
-        }
-      }
       // check the join_sequence
       _.each(stash[this._properties.dashboards], (meta, dashboardId) => {
         this.disableFiltersIfOutdated(meta[this._properties.filters], dashboardId);
       });
     }
     return stash;
-  };
-
-  /**
-   * Build the relations for the join_set query
-   *
-   * @param focusIndex the index ID at the root of the filterjoin query
-   * @param filterAlias the alias for the filter
-   * @param metas the saved objects (search + dashboard) for each dashboard
-   * @param rest the filters, queries and times for all dashboards but the focused one
-   * @returns a join_set query
-   */
-  KibiState.prototype._getJoinSetFilter = function (focusIndex, filterAlias, metas, rest) {
-    const dashboardIdsAndIndexPattern = new Map();
-    const queriesPerIndexAndPerDashboard = {};
-
-    /*
-     * Get the filters/queries/times
-     */
-    const addObject = function (container, thatIndex, thatDashbaord, array) {
-      if (!container[thatIndex]) {
-        container[thatIndex] = {};
-      }
-      if (!container[thatIndex][thatDashbaord]) {
-        container[thatIndex][thatDashbaord] = [];
-      }
-      if (array) {
-        container[thatIndex][thatDashbaord].push(...array);
-      }
-    };
-
-    const cleanFilter = function (fFilter) {
-      // clone it first so when we remove meta the original object is not modified
-      let filter = _.cloneDeep(fFilter);
-      delete filter.$state;
-      if (filter.meta) {
-        const negate = filter.meta.negate;
-        delete filter.meta;
-        if (negate) {
-          filter = {
-            not: filter
-          };
-        }
-      }
-      return filter;
-    };
-
-    for (let i = 0, j = 1; i < rest.length; i += 3, j++) {
-      const thatIndex = metas[j].savedSearchMeta.index;
-      const thatDashboardId = metas[j].savedDash.id;
-      const thatDashboardTitle = metas[j].savedDash.title;
-
-      // ids of relevant dashboard
-      if (!dashboardIdsAndIndexPattern.has(thatIndex)) {
-        dashboardIdsAndIndexPattern.set(thatIndex, []);
-      }
-      dashboardIdsAndIndexPattern.get(thatIndex).push(thatDashboardId);
-
-      // queries
-      const queries = _.filter(rest[i + 1], q => q && !this._isDefaultQuery(q)); // filter out default queries
-      addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, queries);
-
-      // filters
-      const filters = _.map(rest[i], cleanFilter.bind(this));
-      addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, filters);
-
-      // times
-      const time = rest[i + 2];
-      addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, time && [ time ] || []);
-    }
-
-    /*
-     * get the relations
-     */
-    const relations = _.map(this.getEnabledRelations(), (r) => {
-      const relationMeta = relationsHelper.getRelationInfosFromRelationID(r.relation);
-
-      const sourceIndex = relationMeta.source.index;
-      const targetIndex = relationMeta.target.index;
-
-      const relation = [
-        {
-          pattern: sourceIndex,
-          path: relationMeta.source.path
-        },
-        {
-          pattern: targetIndex,
-          path: relationMeta.target.path
-        }
-      ];
-
-      if (relationMeta.source.type) {
-        relation[0].types = [ relationMeta.source.type ];
-      }
-      if (relationMeta.target.type) {
-        relation[1].types = [ relationMeta.target.type ];
-      }
-
-      relationsHelper.addAdvancedJoinSettingsToRelation(relation, relationMeta.source.index, relationMeta.target.index);
-
-      return Promise.all([
-        sourceIndex !== focusIndex && dashboardIdsAndIndexPattern.has(sourceIndex) &&
-          this.timeBasedIndices(sourceIndex, ...dashboardIdsAndIndexPattern.get(sourceIndex)) || [],
-        targetIndex !== focusIndex && dashboardIdsAndIndexPattern.has(targetIndex) &&
-          this.timeBasedIndices(targetIndex, ...dashboardIdsAndIndexPattern.get(targetIndex)) || []
-      ]).then(([ sourceIndices, targetIndices ]) => {
-        relation[0].indices = sourceIndices;
-        relation[1].indices = targetIndices;
-        return relation;
-      });
-    });
-
-    /*
-     * build the join_set filter
-     */
-    return Promise.all(relations)
-    .then(relations => {
-      return {
-        meta: {
-          alias: filterAlias,
-          disabled: !this.isRelationalPanelEnabled()
-        },
-        join_set: {
-          focus: focusIndex,
-          relations: relations,
-          queries: queriesPerIndexAndPerDashboard
-        }
-      };
-    });
   };
 
   /**
@@ -982,19 +746,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     };
 
     const dashboardIds = [ dashboardId ];
-    if (this.isRelationalPanelButtonEnabled()) {
-      // collect ids of dashboards from enabled relations and in the connected component to dashboardId
-      const tmpDashboardIds = this._getDashboardsIdInConnectedComponent(dashboardId, this.getEnabledRelations());
-
-      if (tmpDashboardIds.indexOf(dashboardId) !== -1) { // focused dashboard is part of enabled relation
-        _.each(tmpDashboardIds, (d) => {
-          if (d !== dashboardId) {
-            dashboardIds.push(d);
-          }
-        });
-      }
-    }
-
     const appState = getAppState();
 
     if (!dashboardIds.length) {
@@ -1007,9 +758,8 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds);
 
     // check siren-vanguard plugin
-    if (this.isRelationalPanelButtonEnabled() && !this.isSirenJoinPluginInstalled()) {
-      const error = 'The Siren Vanguard plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
-        'or disable the relational panel in Management / Relations';
+    if (!this.isSirenJoinPluginInstalled()) {
+      const error = 'The Siren Vanguard plugin is not installed. Please install the plugin and restart Kibi';
       return Promise.reject(new Error(error));
     }
 
@@ -1041,20 +791,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       return Promise.all(promises)
       .then(([ filters, queries, time, ...rest ]) => {
         const index = metas[0].savedSearchMeta ? metas[0].savedSearchMeta.index : null;
-
-        if (rest.length) { // Build the join_set filter
-          const filterAlias = _(dashboardIds).map((dashboardId, ind) => metas[ind].savedDash.title).sortBy().join(' \u2194 ');
-          return this._getJoinSetFilter(index, filterAlias, metas, rest)
-          .then(joinSetFilter => {
-            const existingJoinSetFilterIndex = _.findIndex(filters, (filter) => filter.join_set);
-            if (existingJoinSetFilterIndex !== -1) {
-              filters.splice(existingJoinSetFilterIndex, 1, joinSetFilter);
-            } else {
-              filters.push(joinSetFilter);
-            }
-            return { index, filters, queries, time };
-          });
-        }
         return { index, filters, queries, time };
       });
     });
@@ -1088,11 +824,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       const dashFilters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
       const dashQuery = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
 
-      // save filters
-      const existingJoinSetFilterIndex = _.findIndex(filters, (filter) => filter.join_set);
-      if (existingJoinSetFilterIndex !== -1) {
-        filters.splice(existingJoinSetFilterIndex, 1);
-      }
       // remove private fields like $state
       filters = JSON.parse(toJson(filters, angular.toJson));
       if (!_.size(filters) && !_.size(dashFilters)) {
@@ -1124,74 +855,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       }
       this.save();
     });
-  };
-
-  /**
-   * Manage Relations from the relational panel
-   */
-
-  KibiState.prototype.getEnabledRelations = function () {
-    return this[this._properties.enabled_relations] || [];
-  };
-
-  KibiState.prototype.enableRelation = function (relation) {
-    if (!this[this._properties.enabled_relations]) {
-      this[this._properties.enabled_relations] = [];
-    }
-    if (!this.isRelationEnabled(relation)) {
-      this[this._properties.enabled_relations].push(relation);
-      this.emit('relation', relation.dashboards);
-    }
-  };
-
-  KibiState.prototype.disableAllRelations = function () {
-    const dashboardIds = _(this.getEnabledRelations())
-    .map((relation) => relation.dashboards)
-    .flatten()
-    .uniq()
-    .value();
-    this[this._properties.enabled_relations] = [];
-    if (dashboardIds.length) {
-      this.emit('relation', dashboardIds);
-    }
-  };
-
-  KibiState.prototype.disableRelation = function (relation) {
-    if (!this[this._properties.enabled_relations]) {
-      this[this._properties.enabled_relations] = [];
-    }
-    const index = _.findIndex(this[this._properties.enabled_relations], relation);
-    if (index !== -1) {
-      this[this._properties.enabled_relations].splice(index, 1);
-      this.emit('relation', relation.dashboards);
-    }
-  };
-
-  KibiState.prototype.isRelationEnabled = function (relation) {
-    if (this[this._properties.enabled_relations] instanceof Array) {
-      return Boolean(_.find(this[this._properties.enabled_relations], relation));
-    }
-    return false;
-  };
-
-  KibiState.prototype.toggleRelationalPanel = function (toggle) {
-    if (_.isUndefined(toggle)) {
-      this[this._properties.enabled_relational_panel] = !this[this._properties.enabled_relational_panel];
-    } else {
-      this[this._properties.enabled_relational_panel] = toggle;
-    }
-  };
-
-  KibiState.prototype.isRelationalPanelEnabled = function () {
-    if (this[this._properties.enabled_relational_panel] === undefined) {
-      // initialize the property
-      this[this._properties.enabled_relational_panel] = true;
-    }
-    return this[this._properties.enabled_relational_panel];
-  };
-
-  KibiState.prototype.isRelationalPanelButtonEnabled = function () {
-    return !!config.get('kibi:relationalPanel');
   };
 
   KibiState.prototype.isSirenJoinPluginInstalled = function () {

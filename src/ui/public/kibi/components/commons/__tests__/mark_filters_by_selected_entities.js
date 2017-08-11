@@ -95,7 +95,7 @@ describe('Kibi Components', function () {
             meta: {}
           },
           {
-            join_set: {},
+            join_sequence: {},
             meta: {}
           }
         ];

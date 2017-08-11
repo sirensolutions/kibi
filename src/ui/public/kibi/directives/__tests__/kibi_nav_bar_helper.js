@@ -30,7 +30,7 @@ describe('Kibi Directives', function () {
       };
     }
 
-    function init({ dashboardsIdsInConnectedComponents = [], savedDashboards = [], groups = [] }) {
+    function init({ savedDashboards = [], groups = [] }) {
       ngMock.module('kibana', ($provide) => {
         $provide.service('$timeout', () => {
           const mockTimeout = fn => Promise.resolve(fn());
@@ -73,7 +73,6 @@ describe('Kibi Directives', function () {
         kibiState = _kibiState_;
         $rootScope = _$rootScope_;
         kibiNavBarHelper = Private(KibiNavBarHelperProvider);
-        sinon.stub(kibiState, '_getDashboardsIdInConnectedComponent').returns(dashboardsIdsInConnectedComponents);
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard1');
         timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.resolve([ 'id' ]));
 
@@ -387,20 +386,12 @@ describe('Kibi Directives', function () {
           if (diff[0] === kibiState._properties.groups) {
             expect(stub.calledWith([ 'dashboard1' ], `KibiState change ${JSON.stringify([ 'g' ], null, ' ')}`)).to.be(true);
           }
-          if (diff[0] === kibiState._properties.enabled_relational_panel) {
-            expect(stub.calledWith([ 'dashboard1' ], `KibiState change ${JSON.stringify([ 'e' ], null, ' ')}`)).to.be(true);
-          }
-          if (counter === 2) {
+          if (counter === 1) {
             done();
           }
         });
 
-        [
-          kibiState._properties.groups,
-          kibiState._properties.enabled_relational_panel
-        ].forEach(function (property) {
-          kibiState.emit('save_with_changes', [ property ]);
-        });
+        kibiState.emit('save_with_changes', [  kibiState._properties.groups ]);
       });
 
       it('should update counts of dashboards that got changed on kibiState reset', function (done) {
@@ -423,18 +414,6 @@ describe('Kibi Directives', function () {
         });
 
         kibiState.emit('time', 'dashboard2');
-      });
-
-      it('should update counts of dashboards that got changed on kibiState relation event', function (done) {
-        const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
-        kibiState.on('relation', function (diff) {
-          if (diff[0] === 'dashboard2') {
-            expect(stub.calledWith([ 'dashboard2' ], 'KibiState enabled relations changed')).to.be(true);
-            done();
-          }
-        });
-
-        kibiState.emit('relation', [ 'dashboard2' ]);
       });
 
       it('should update all counts on globalState filters changes', function (done) {
@@ -580,57 +559,6 @@ describe('Kibi Directives', function () {
         getDashboardsMetadataStub.calledWith(['dashboard1', 'dashboard2']);
       });
     });
-
-
-    describe('dashboards count with connected dashboards', function () {
-      beforeEach(() => init({
-        dashboardsIdsInConnectedComponents: [ 'dashboard1', 'dashboard2' ]
-      }));
-
-      it('should update the counts of current dashboard plus connected dashboards on courier:searchRefresh', function () {
-        const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
-        $rootScope.$broadcast('courier:searchRefresh');
-        expect(stub.calledWith(null, 'courier:searchRefresh event', true)).to.be(true);
-      });
-
-      it('should update the count of dashboard that got changed on kibiState time event and those connected', function (done) {
-        const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
-        kibiState.on('time', function (dashboardId) {
-          expect(stub.calledWith([ 'dashboard1', 'dashboard2' ], 'KibiState time changed on dashboard dashboard2')).to.be(true);
-          done();
-        });
-
-        kibiState.emit('time', 'dashboard2');
-      });
-
-      it('should update counts of current dashboard and those connected on kibiState changes', function (done) {
-        const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
-
-        let counter = 0;
-        kibiState.on('save_with_changes', function (diff) {
-          counter++;
-          if (diff[0] === 'g') {
-            const actual = stub.calledWith([ 'dashboard1', 'dashboard2' ], `KibiState change ${JSON.stringify(['g'], null, ' ')}`);
-            expect(actual).to.be(true);
-          }
-          if (diff[0] === 'e') {
-            const actual = stub.calledWith([ 'dashboard1', 'dashboard2' ], `KibiState change ${JSON.stringify(['e'], null, ' ')}`);
-            expect(actual).to.be(true);
-          }
-          if (counter === 2) {
-            done();
-          }
-        });
-
-        [
-          kibiState._properties.groups,
-          kibiState._properties.enabled_relational_panel
-        ].forEach(function (property) {
-          kibiState.emit('save_with_changes', [ property ]);
-        });
-      });
-    });
-
   });
 
 });

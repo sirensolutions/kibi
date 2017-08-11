@@ -127,7 +127,6 @@ describe('Kibi Components', function () {
 
         config = _config_;
         config.set('timepicker:timeDefaults', defaultTime);
-        config.set('kibi:relationalPanel', false);
         timefilter.time = defaultTime;
         kibiState = _kibiState_;
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('empty-dashboard');
@@ -492,58 +491,6 @@ describe('Kibi Components', function () {
       };
 
       return assertQuery('empty-dashboard', expected);
-    });
-
-    it('replace join filter if already present in appState', function () {
-      appState.filters = [
-        {
-          meta:{ disabled: false },
-          join_set: {
-            indexes: [
-              {
-                id: 'index2'
-              }
-            ]
-          }
-        }
-      ];
-
-      config.set('kibi:relationalPanel', true);
-      kibiState.enableRelation({
-        dashboards: [ 'empty-dashboard', 'query-dashboard' ],
-        relation: 'index1//f1/index2//f2'
-      });
-
-      sinon.stub(kibiState, '_getJoinSetFilter').returns(Promise.resolve({ join_set: 'new join set' }));
-      const expected = {
-        query: {
-          bool: {
-            must: [
-              {
-                join_set: 'new join set'
-              },
-              defaultQuery,
-              {
-                query_string: {
-                  query: 'funded_year:>2010',
-                  analyze_wildcard: true
-                }
-              },
-              {
-                range: {
-                  date: {
-                    gte: parseWithPrecision(defaultStartTime, false).valueOf(),
-                    lte: parseWithPrecision(defaultEndTime, true).valueOf(),
-                    format: 'epoch_millis'
-                  }
-                }
-              }
-            ],
-            must_not: []
-          }
-        }
-      };
-      return assertQuery('query-dashboard', expected);
     });
   });
 });

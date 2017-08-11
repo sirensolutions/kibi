@@ -286,17 +286,10 @@ export default function SavedObjectFactory(
       });
 
       if (this.searchSource) {
-        // kibi: - we have to filter out join_set filter as this filter
         const searchSourceJSON = _.omit(this.searchSource.toJSON(), ['sort', 'size']);
 
-        // can only be turned on/off by relational panel and should not be saved
-        if (searchSourceJSON.filter && searchSourceJSON.filter.length > 0) {
-          searchSourceJSON.filter = _.filter(searchSourceJSON.filter, function (filter) {
-            return !filter.join_set;
-          });
-        }
+        //kibi: do not serialize the inject queries
         if (searchSourceJSON.inject) {
-          // do not serialize the inject queries
           delete searchSourceJSON.inject;
         }
 

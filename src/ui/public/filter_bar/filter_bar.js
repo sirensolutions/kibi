@@ -269,32 +269,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
       // .script
       $scope.recreateFilterLabel = joinExplanation.createFilterLabel;
 
-      // kibi: Get the state for the dashboard ID and add the join_set filter to the appState if it exists
-      const addJoinSetFilter = function (dashboardId) {
-        return kibiState.getState(dashboardId).then(({ filters }) => {
-          if ($scope.state && $scope.state.filters) {
-            _.remove($scope.state.filters, (f) => f.join_set);
-          }
-          _.each(filters, (filter) => {
-            if (filter.join_set) {
-              queryFilter.addFilters(filter);
-              return false;
-            }
-          });
-        }).catch(notify.error);
-      };
-
-      // kibi: add join_set on relationPanel event
-      const addJoinSetFilterOnRelationalPanel = function (panelEnabled) {
-        const currentDashboardId = kibiState._getCurrentDashboardId();
-        if (currentDashboardId && panelEnabled) {
-          addJoinSetFilter(currentDashboardId);
-        }
-      };
-      const relationalPanelListenerOff = config.watch('kibi:relationalPanel', function (event, panelEnabled) {
-        addJoinSetFilterOnRelationalPanel(panelEnabled);
-      });
-      addJoinSetFilterOnRelationalPanel(config.get('kibi:relationalPanel'));
 
       // kibi: needed to show filterbar when kibiEntityClipboard contains an entity
       $scope.showKibiEntityClipboard = onDashboardPage() && Boolean(kibiState.getEntityURI());
@@ -316,10 +290,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
           $scope.showKibiEntityClipboard = Boolean(kibiState.getEntityURI());
           promise.then(() => updateFilters.call(this)).catch(notify.error);
         }
-      });
-
-      $scope.$on('$destroy', function () {
-        relationalPanelListenerOff();
       });
     }
   };

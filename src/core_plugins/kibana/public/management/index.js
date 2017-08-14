@@ -14,8 +14,7 @@ import 'ui/kbn_top_nav';
 
 // kibi: imports
 import _ from 'lodash';
-import moment from 'moment';
-import chrome from 'ui/chrome';
+import moment from 'moment-timezone';
 // kibi: end
 
 uiRoutes
@@ -35,7 +34,7 @@ require('ui/index_patterns/route_setup/load_default')({
 uiModules
 .get('apps/management')
 .directive('kbnManagementApp', function (Private, $location, timefilter,
-  buildNum, buildSha, buildTimestamp, kibiVersion, kibiKibanaAnnouncement, elasticsearchPlugins, $http, Promise) {
+  buildNum, buildSha, buildTimestamp, kibiVersion, kibiKibanaAnnouncement, $injector, config, Promise) {
   return {
     restrict: 'E',
     template: appTemplate,
@@ -67,47 +66,35 @@ uiModules
       };
 
       function verifyLicense() {
-        const plugins = elasticsearchPlugins.get();
-
-        if (plugins.indexOf('siren-vanguard') === -1) {
+        if (!$injector.has('kibiLicenseService')) {
           return Promise.resolve();
         }
-        return $http.get(chrome.getBasePath() + '/elasticsearch/_siren/license')
-        .then((resp) => {
-          let license;
-          if (resp.data && resp.data.license) {
-            license = resp.data.license;
-          }
-          return license;
-        });
+        const kibiLicenseService = $injector.get('kibiLicenseService');
+        return kibiLicenseService.verifyLicense();
       }
 
       verifyLicense().then(license => {
-        if (license && license.content) {
-          const isEmpty = Object.keys(license.content).length === 0;
-          let licenseType = '';
-          if (!isEmpty) {
-            const expiryMoment = moment(license.content['valid-date'], 'YYYY/MM/DD');
-            const issueMoment = moment(license.content['issue-date'], 'YYYY/MM/DD');
-            licenseType = expiryMoment.diff(issueMoment, 'days') <= 31 ? 'Trial' : 'Full';
-          }
-
+        if (license && license.installed) {
+          moment.tz.setDefault(config.get('dateFormat:tz'));
+          const dateFormat = config.get('dateFormat');
           _.assign(management.getSection('kibana').info, {
-            licenseType: license.isValid ? licenseType : license.content,
-            licenseIsValid: license.isValid
+            license: 'Installed (' + moment(license.content['valid-date'], 'YYYY/MM/DD').format(dateFormat) + ')',
+            licenseDescription: license.content.description,
+            licenseGraphBrowserEnabled: license.content['graph-browser'],
+            licenseIsValid: license.isValid,
+            licenseIsMissing: false,
+            licenseMaxNodes: license.content['max-nodes'],
+            licenseMaxUsers: license.content['max-users']
           });
-          if (!isEmpty) {
-            _.assign(management.getSection('kibana').info, {
-              licenseExpiration: license.content['valid-date'],
-              elasticNodes: license.content['max-nodes']
-            });
-          }
         } else {
           _.assign(management.getSection('kibana').info, {
-            licenseType: 'None',
+            license: 'Not installed',
+            licenseDescription: 'Limited functionality Trial Mode',
+            licenseGraphBrowserEnabled: false,
             licenseIsValid: false,
             licenseIsMissing: true,
-            elasticNodes: 1
+            licenseMaxNodes: null,
+            licenseMaxUsers: null
           });
         }
       });

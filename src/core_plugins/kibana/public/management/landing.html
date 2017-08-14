@@ -84,31 +84,36 @@
                       <tr
                         ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
                       >
-                        <td>License type</td>
-                        <td>{{ ::section.info.licenseType }}</td>
+                        <td>License</td>
+                        <td>{{ ::section.info.license }}</td>
+                      </tr>
+
+                      <tr
+                        ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
+                      >
+                        <td>Description</td>
+                        <td>{{ ::section.info.licenseDescription }}</td>
                       </tr>
 
                       <tr
                         ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
                       >
                         <td>Graph Browser</td>
-                        <td>{{ section.info.licenseIsValid ? 'Enabled' : 'Not Enabled' }}</td>
-                      </tr>
-
-                      <tr
-                         ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
-                         ng-if="!section.info.licenseIsMissing && section.info.licenseExpiration"
-                      >
-                        <td>Expiration date of license</td>
-                        <td>{{ ::section.info.licenseExpiration }}</td>
+                        <td>{{ section.info.licenseGraphBrowserEnabled ? 'Enabled' : 'Not Enabled' }}</td>
                       </tr>
 
                       <tr
                         ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
-                        ng-if="section.info.elasticNodes"
                       >
-                        <td>Number of Elasticsearch nodes allowed</td>
-                        <td>{{ ::section.info.elasticNodes }}</td>
+                        <td>License max Elasticsearch Nodes allowed</td>
+                        <td>{{ ::section.info.licenseMaxNodes }}</td>
+                      </tr>
+
+                      <tr
+                        ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
+                      >
+                        <td>License Max Users</td>
+                        <td>{{ ::section.info.licenseMaxUsers }}</td>
                       </tr>
                     </tbody>
                   </table>

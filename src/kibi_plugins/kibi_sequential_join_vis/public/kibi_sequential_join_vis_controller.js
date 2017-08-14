@@ -51,6 +51,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       ])
       .then(([ indices, joinSeqFilter ]) => {
         button.joinSeqFilter = joinSeqFilter;
+        button.disabled = false;
         if ($scope.btnCountsEnabled() || updateOnClick) {
           return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
           .then((query) => {
@@ -239,6 +240,11 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
           currentDashboardId,
           dashboardIdIndexPair
         );
+
+        // disable buttons until buttons are ready
+        _.each(buttons, function (button) {
+          button.disabled = true;
+        });
 
         // retain the buttons order
         for (let i = 0; i < buttons.length; i++) {

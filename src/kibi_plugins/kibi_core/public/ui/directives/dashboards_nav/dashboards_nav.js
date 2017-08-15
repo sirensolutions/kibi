@@ -37,6 +37,7 @@ uiModules
       const SLIDER_WIDTH = 4;
       const BOTTOM_BAR_HEIGHT = 70;
       const DASHBOARD_TITLE_MARGIN_LEFT = 10;
+      const DASHBOARD_TITLE_NO_INDICATORS_MARGIN = 8;
       const DASHBOARDS_INDICATORS_WIDTH = 60 + DASHBOARD_TITLE_MARGIN_LEFT;
       const VIRTUAL_DASHBOARDS_INDICATORS_WIDTH = DASHBOARDS_INDICATORS_WIDTH - DASHBOARD_TITLE_MARGIN_LEFT;
       const GROUPS_INDICATORS_WIDTH = 50;
@@ -65,7 +66,7 @@ uiModules
         parts = $element.find('.dashboard-nav-title-virtual-group');
         parts.css('width', value + '%');
         parts = $element.find('.dashboard-nav-title.no-indicators');
-        value = (((count - DASHBOARD_TITLE_MARGIN_LEFT) / count) * 100).toFixed(2);
+        value = (((count - DASHBOARD_TITLE_MARGIN_LEFT - DASHBOARD_TITLE_NO_INDICATORS_MARGIN) / count) * 100).toFixed(2);
         parts.css('width', value + '%');
         parts = $element.find('.dashboard-nav-title-virtual-group.no-indicators');
         parts.css('width', '100%');

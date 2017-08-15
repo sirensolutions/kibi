@@ -36,7 +36,9 @@ uiModules
       const HIDDED_WIDTH = 0;
       const SLIDER_WIDTH = 4;
       const BOTTOM_BAR_HEIGHT = 70;
-      const DASHBOARDS_INDICATORS_WIDTH = 88;
+      const DASHBOARD_TITLE_MARGIN_LEFT = 10;
+      const DASHBOARDS_INDICATORS_WIDTH = 60 + DASHBOARD_TITLE_MARGIN_LEFT;
+      const VIRTUAL_DASHBOARDS_INDICATORS_WIDTH = DASHBOARDS_INDICATORS_WIDTH - DASHBOARD_TITLE_MARGIN_LEFT;
       const GROUPS_INDICATORS_WIDTH = 50;
 
       $scope.bar = $element;
@@ -56,11 +58,17 @@ uiModules
         $scope.slider.css('left', count - SLIDER_WIDTH);
         let parts = $element.find('.title');
         parts.css('width', (((count - GROUPS_INDICATORS_WIDTH) / count) * 100).toFixed(2) + '%');
-        const value = (((count - DASHBOARDS_INDICATORS_WIDTH) / count) * 100).toFixed(2);
+        let value = (((count - DASHBOARDS_INDICATORS_WIDTH) / count) * 100).toFixed(2);
         parts = $element.find('.dashboard-nav-title');
         parts.css('width', value + '%');
+        value = (((count - VIRTUAL_DASHBOARDS_INDICATORS_WIDTH) / count) * 100).toFixed(2);
         parts = $element.find('.dashboard-nav-title-virtual-group');
         parts.css('width', value + '%');
+        parts = $element.find('.dashboard-nav-title.no-indicators');
+        value = (((count - DASHBOARD_TITLE_MARGIN_LEFT) / count) * 100).toFixed(2);
+        parts.css('width', value + '%');
+        parts = $element.find('.dashboard-nav-title-virtual-group.no-indicators');
+        parts.css('width', '100%');
         if (count === HIDDED_WIDTH) {
           $scope.bar.css('visibility', 'hidden');
           $scope.links.css('visibility', 'hidden');

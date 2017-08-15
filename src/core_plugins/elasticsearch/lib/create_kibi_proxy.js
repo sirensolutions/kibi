@@ -33,13 +33,13 @@ module.exports = function createProxy(server, method, path, config) {
   }
 
   /**
-   * Sends the proxied response to the client.
-   *
-   * @param reply - reply interface
-   * @param buffer - data buffer
-   * @param upstream - the upstream response
-   * @param ttl - The upstream ttl as returned by h2o2.
-   */
+  * Sends the proxied response to the client.
+  *
+  * @param reply - reply interface
+  * @param buffer - data buffer
+  * @param upstream - the upstream response
+  * @param ttl - The upstream ttl as returned by h2o2.
+  */
   function sendResponse(reply, buffer, upstream, ttl) {
     if (upstream.headers.location) {
       // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
@@ -75,49 +75,56 @@ module.exports = function createProxy(server, method, path, config) {
               );
             }
 
-            /* Manipulate a set of queries, at the end of which the resulting queries
-             * must be concatenated back into a Buffer. The queries in the body are
-             * separated by a newline.
-             */
-            util.getQueriesAsPromise(Buffer.concat(chunks)).map((query) => {
-              // Remove the custom queries from the body
-              dataToPass.savedQueries = inject.save(query);
-              return query;
-            }).map((query) => {
-              const credentials = getCredentials(request);
-              dataToPass.credentials = credentials;
-              return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
-            }).map((query) => sirenJoin.set(query))
-            .map((query) => sirenJoin.sequence(query))
-            .then((data) => {
-              const buffers = map(data, function (query) {
-                return new Buffer(JSON.stringify(query) + '\n');
-              });
-
-              // prevent the string to be created
-              if (serverConfig.get('logging.verbose')) {
-                server.log(
-                  ['debug', 'kibi_proxy', 'translated elasticsearch query'],
-                  '\n-------------------------\n' +
-                    Buffer.concat(buffers).toString() + '\n' +
-                    '-------------------------'
-                );
-              }
-
-              fulfill({
-                payload: Buffer.concat(buffers),
+            if (req.url ===  '/elasticsearch/_siren/license') {
+              return fulfill({
+                payload: Buffer.concat(chunks),
                 data: dataToPass
               });
-            }).catch((err) => {
-              let errStr;
-              if (typeof err === 'object' && err.stack) {
-                errStr = err.toString();
-              } else {
-                errStr = JSON.stringify(err, null, ' ');
-              }
-              server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying request: ' + errStr);
-              reject(err);
-            });
+            } else {
+              /* Manipulate a set of queries, at the end of which the resulting queries
+              * must be concatenated back into a Buffer. The queries in the body are
+              * separated by a newline.
+              */
+              util.getQueriesAsPromise(Buffer.concat(chunks)).map((query) => {
+                // Remove the custom queries from the body
+                dataToPass.savedQueries = inject.save(query);
+                return query;
+              }).map((query) => {
+                const credentials = getCredentials(request);
+                dataToPass.credentials = credentials;
+                return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
+              }).map((query) => sirenJoin.set(query))
+              .map((query) => sirenJoin.sequence(query))
+              .then((data) => {
+                const buffers = map(data, function (query) {
+                  return new Buffer(JSON.stringify(query) + '\n');
+                });
+
+                // prevent the string to be created
+                if (serverConfig.get('logging.verbose')) {
+                  server.log(
+                    ['debug', 'kibi_proxy', 'translated elasticsearch query'],
+                    '\n-------------------------\n' +
+                    Buffer.concat(buffers).toString() + '\n' +
+                    '-------------------------'
+                  );
+                }
+
+                fulfill({
+                  payload: Buffer.concat(buffers),
+                  data: dataToPass
+                });
+              }).catch((err) => {
+                let errStr;
+                if (typeof err === 'object' && err.stack) {
+                  errStr = err.toString();
+                } else {
+                  errStr = JSON.stringify(err, null, ' ');
+                }
+                server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying request: ' + errStr);
+                reject(err);
+              });
+            }
           });
         });
       },
@@ -146,13 +153,13 @@ module.exports = function createProxy(server, method, path, config) {
 
           if (data.length !== 0) {
             inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.kibi_core.getQueryEngine(), dataPassed.savedQueries,
-                dataPassed.credentials)
-              .then((r) => {
-                sendResponse(reply, new Buffer(JSON.stringify(r)), response, ttl);
-              }).catch((err) => {
-                server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying response: ' + err.stack);
-                reply(err);
-              });
+            dataPassed.credentials)
+            .then((r) => {
+              sendResponse(reply, new Buffer(JSON.stringify(r)), response, ttl);
+            }).catch((err) => {
+              server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying response: ' + err.stack);
+              reply(err);
+            });
           } else {
             reply(new Error('There is no data in response.'));
           }

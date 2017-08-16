@@ -32,7 +32,7 @@ The application that embeds Kibi is responsible for generating JWT tokens;
 https://jwt.io/[jwt.io] provides a good overview of the technology, a browser
 based debugging tool and a list of libraries for several platforms.
 
-The {searchguard-ref}/blob/master/jwt.md[Search Guard documentation] provides an
+The {searchguard-ref}jwt.html[Search Guard documentation] provides an
 overview of all the claims supported by the add-on and a list of all the
 configuration options.
 

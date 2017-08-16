@@ -4,7 +4,7 @@
 
 This section offers an overview of how to integrate Search Guard with Kibi; for
 further reference and detailed options please consult the
-{searchguard-ref}/blob/master/README.md[Search Guard documentation].
+{searchguard-ref}[Search Guard documentation].
 
 Before proceeding, make sure that:
 
@@ -92,8 +92,7 @@ wildcard certificate.
 
 ==== Issuing certificates using the TLS certificate generator
 
-Floragunn GmbH provides a TLS certificate generation service at
-https://floragunn.com/tls-certificate-generator/ which can be used to create
+Floragunn GmbH provides a {searchguard-tls-certificate-ref}[TLS certificate generation service] which can be used to create
 a bundle of certificates for evaluation purposes.
 
 To try the certificates in a single node setup, it is possible to just
@@ -243,7 +242,7 @@ files are explained in the next sections and can be used as a general
 guideline.
 
 For additional configuration options please refer to the official
-{searchguard-ref}/blob/master/README.md[Search Guard documentation].
+{searchguard-ref}#configuring-users-roles-and-permissions[Search Guard documentation].
 
 **General configuration (sg_config.yml)**
 
@@ -621,7 +620,7 @@ A permission is defined by the following syntax:
 The index name can contain the simple expansion characters _*_ and _?_ to match
 any sequence of character/any single character; for further information about
 defining permissions, please refer to the
-{searchguard-ref}/blob/master/configuration.md[Search Guard configuration
+{searchguard-ref}configuration_roles_permissions.html[Search Guard configuration
 documentation].
 
 **Users (sg_internal_users.yml)**
@@ -764,7 +763,7 @@ By default the number of replicas for the `searchguard` index will be set at
 creation time to the number of data nodes - 1.
 
 For additional information on how to set replication settings and sgadmin in
-general please refer to the {searchguard-ref}/blob/master/sgadmin.md[sgadmin
+general please refer to the {searchguard-ref}sgadmin.html[sgadmin
 documentation].
 
 If the command executes successfully it will print a summary of the actions

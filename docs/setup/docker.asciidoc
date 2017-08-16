@@ -19,16 +19,24 @@ command:
 
 ["source","sh",subs="attributes"]
 --------------------------------------------
-docker pull sirensolutions/kibi-community-demo-full:latest
-docker run -d -p 5606:5606 -p 9220:9220 sirensolutions/kibi-community-demo-full:latest
+docker pull sirensolutions/{docker-image-name}:latest
+docker run -d -p 5606:5606 -p 9220:9220 sirensolutions/{docker-image-name}:latest
 --------------------------------------------
 
 or for specific version, e.g., {version}:
 
 ["source","sh",subs="attributes"]
 --------------------------------------------
-docker pull sirensolutions/kibi-community-demo-full:{version}
-docker run -d -p 5606:5606 -p 9220:9220 sirensolutions/kibi-community-demo-full:{version}
+docker pull sirensolutions/{docker-image-name}:{version}
+docker run -d -p 5606:5606 -p 9220:9220 sirensolutions/{docker-image-name}:{version}
+--------------------------------------------
+
+For an image pre-populated with demonstration data: 
+
+["source","sh",subs="attributes"]
+--------------------------------------------
+docker pull sirensolutions/{docker-image-name}-demo-data:latest
+docker run -d -p 5606:5606 -p 9220:9220 sirensolutions/{docker-image-name}-demo-data:latest
 --------------------------------------------
 
 endif::[]

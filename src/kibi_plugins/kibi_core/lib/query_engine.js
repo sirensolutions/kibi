@@ -233,25 +233,35 @@ QueryEngine.prototype._loadTemplates = function () {
 
   return Promise.all(templatesToLoad.map((templateId) => {
     return fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
-      if (err) {
-        throw err;
-      }
-      return self.cluster.callWithInternalUser('create', {
-        timeout: '1000ms',
-        index: self.config.get('kibana.index'),
-        type: 'template',
-        id: templateId,
-        body: data.toString()
-      })
-      .then(() => {
-        self.log.info('Template [' + templateId + '] successfully loaded');
-      })
-      .catch((err) => {
-        if (err.statusCode === 409) {
-          self.log.warn('Template [' + templateId + '] already exists');
-        } else {
-          self.log.error('Could not load template [' + templateId + ']', err);
+      return fs.readFile(path.join(__dirname, 'templates', templateId + '-source' + '.html'), function (sourceError, sourceTemplate) {
+        if (err) {
+          throw err;
         }
+
+        const scriptJSON = data.toString();
+        const scriptData = JSON.parse(scriptJSON);
+
+        if (!sourceError && sourceTemplate) {
+          scriptData.templateSource = sourceTemplate.toString();
+        }
+
+        return self.cluster.callWithInternalUser('create', {
+          timeout: '1000ms',
+          index: self.config.get('kibana.index'),
+          type: 'template',
+          id: templateId,
+          body: JSON.stringify(scriptData, null, ' '),
+        })
+        .then(() => {
+          self.log.info('Template [' + templateId + '] successfully loaded');
+        })
+        .catch((err) => {
+          if (err.statusCode === 409) {
+            self.log.warn('Template [' + templateId + '] already exists');
+          } else {
+            self.log.error('Could not load template [' + templateId + ']', err);
+          }
+        });
       });
     });
   }));

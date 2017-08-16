@@ -1,11 +1,10 @@
 [[relational-browsing]]
 = Relational Browsing
 
-Kibi allows to _filter_ documents on a dashboard by showing only those that
+Kibi allows you to _filter_ documents on a dashboard by showing only those that
 have a relation with documents displayed in a different dashboard, possibly
 stored in different indices.
 
-[float]
 [[relational_filter]]
 == Relational filter
 

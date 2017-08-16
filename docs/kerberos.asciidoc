@@ -242,8 +242,8 @@ setting the following line in `config/jvm.options`:
 ----
 
 For information on where to set/modify this variable please refer to
-{elastic-ref}setup-service.html[Running as a service on Linux] or
-{elastic-ref}setup-service-win[Running as a service on Windows].
+{elastic-ref}settings.html[Running as a service on Linux] or
+{elastic-ref}windows.html#windows-service[Running as a service on Windows].
 
 [float]
 ==== Cluster restart
@@ -313,7 +313,7 @@ possible to disable the challenge attribute by setting
 `kerberos_auth_domain.http_authenticator.challenge` to `false`.
 
 For more details about configuring Search Guard authenticator please refer to
-the {searchguard-ref}/blob/master/README.md[official documentation].
+the {searchguard-ref}[official documentation].
 
 === Verification
 

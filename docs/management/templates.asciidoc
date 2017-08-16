@@ -2,7 +2,7 @@
 == Templates
 
 You can define templates to format the results of a query on an
-<<external_datasource, external datasource>> datasource and the results of an
+<<external_datasources, external datasource>> and the results of an
 Elasticsearch query in a <<enhanced_search_results, Enhanced search results
 visualization>>.
 

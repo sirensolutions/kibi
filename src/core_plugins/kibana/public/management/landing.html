@@ -89,6 +89,7 @@
                       </tr>
 
                       <tr
+                        ng-if="section.info.licenseDescription"
                         ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
                       >
                         <td>Description</td>

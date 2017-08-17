@@ -143,6 +143,12 @@ uiModules
             dash.savedSearchId = resp.savedSearchId;
             return savedDash.save();
           })
+          // if user cancel the creating dashboard do nothing
+          .then(function (id) {
+            if (!id) {
+              return Promise.reject();
+            }
+          })
           .then(cache.invalidate)
           .then(() => {
             const state = {

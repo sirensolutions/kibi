@@ -1,0 +1,21 @@
+<!-- Example html-angular template 
+     For each document a panel populated with all property values !-->
+<!DOCTYPE html>
+<div style="word-wrap: break-word;">
+    <div ng-repeat="hit in hits|limitTo:limit track by hit._index+hit._type+hit._id+hit._score"  class="snippet"  style="width: 99%; border:1px #ddd solid; margin: 4px; padding: 4px; float: left">
+        <h4 style="margin: 10px" ng-if="hit._source.title">
+            <div ng-bind-html="indexPattern.formatField(hit, 'title') | trustAsHtml"></div>
+        </h4>
+                <table>
+                    <tr>
+                        <th style="text-align: right; padding: 4px;">Property</th>
+                        <th style="padding: 4px;">Value</th>
+                    </tr>      
+                    <tr ng-repeat="(key,value) in hit._source"  ng-if="value !== null && value !== undefined && value !== ''">
+                        <td style="width: 150px; font-weight: bold; vertical-align: top; text-align: right; padding: 4px;"> {{key}}:</td>
+                        <td style="padding: 4px;">{{value}}</td>
+                    </tr>  
+                </table>
+      </div>
+</div>
+<div style="clear: both;"></div>

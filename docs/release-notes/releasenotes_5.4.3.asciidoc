@@ -1,0 +1,71 @@
+== Kibi 5.4.3 and Kibana 5.4.3
+
+The lists below cover changes between Kibi 5.4.0 and Kibi 5.4.3
+
+[float]
+=== Kibi Changes
+
+New:
+
+* New dashboard sidebar with drag and drop functionality and other UI improvements
+* Dashboard selection dropdowns now group by dashboard group or saved search
+
+Changed:
+
+* Saved searches are now shown by their titles rather than IDs
+* pageSize is optional in data table visualization, defaults to discover:sampleSize
+* Improved new dashboard modal layout and text
+* Reduced the size and space usage of many visualizations to increase available dashboard area
+* Removed the CSV export button from the data table visualization
+* Made the top paginator optional on the data table visualization
+* Now allowing the user to set a minimum column width on the data table visualization
+* The defaultDashboard setting in kibi.yml has been deprecated, set in advanced options in the management tab
+* Added generic error for an unknown error in the button count calculation query request
+
+Fixed:
+
+* Fix incorrect notification when cancelling dashboard save
+* Relational buttons are now disabled until counts are complete
+* Relational filter label tooltip fixed
+* Unnecessary call to FontAwesome CDN removed
+* Time filter change now removes the count in the relational filter
+* Exception on new index pattern creation fixed
+* Share function now returns spaces correctly
+* Visualization mode changes no longer destroys the visualization state
+* When cancelling dashboard edit mode, time is no longer restored
+* Fixed sorting by alias when alias missing on data table visualization
+* Improved the filter tooltip for terms queries
+
+Plugins
+
+Timelion
+
+* Warning on security exception when accessing restricted indices
+
+Box Plot
+
+* Log and square root Y-axis scales added
+* Fixed axis labels getting cut off
+* Aligned styles with other visualizations
+
+Graph Browser
+
+* Kibi Graph Browser is disabled if the Kibi instance is unlicensed, a placeholder is shown if so
+* Geo_fields and time fields are added to the node configuration
+* Can now expand by relation using filters
+
+License
+
+* License upload/delete buttons in management/license
+* License information now available in management/About page
+
+Multichart
+
+* Added warning when aggregation type not supported by Kibi Multi Chart
+
+Scatter Plot
+
+* Colors now persist on selection change
+* Support for .raw and scripted fields added
+* Fixed blank graph when data being rendered is unchanged after e.g. query text removal
+* Fix brush selection rendering results correctly

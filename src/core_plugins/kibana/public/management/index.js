@@ -88,8 +88,8 @@ uiModules
           });
         } else {
           _.assign(management.getSection('kibana').info, {
-            license: 'Not installed',
-            licenseDescription: 'Limited functionality Trial Mode',
+            license: 'Not Installed',
+            licenseDescription: null,
             licenseGraphBrowserEnabled: false,
             licenseIsValid: false,
             licenseIsMissing: true,

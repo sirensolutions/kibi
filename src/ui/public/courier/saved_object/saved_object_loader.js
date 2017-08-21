@@ -104,11 +104,12 @@ export class SavedObjectLoader {
    * https://github.com/elastic/kibana/issues/8044 for reference.
    *
    * @param searchString
+   * @param removeReservedChars - //kibi: flag for removing reserved characters
    * @param size - The number of documents to return
    * @param exclude - A list of fields to exclude
    * @returns {Promise}
    */
-  find(searchString, size = 100) {
+  find(searchString, removeReservedChars = true, size = 100) {
     if (!searchString) {
       searchString = null;
     }
@@ -122,10 +123,14 @@ export class SavedObjectLoader {
     //kibi: if searchString contains reserved characters, split it with reserved characters
     // combine words with OR operator
     let safeQuery = '';
-    if (searchString && searchString.match(this.reservedCharactersRegex)) {
+    if (removeReservedChars && searchString && searchString.match(this.reservedCharactersRegex)) {
       const words = searchString.split(this.reservedCharactersRegex).map((item) => item.trim());
-      _.each(words, function (word) {
-        safeQuery = safeQuery + '||' + word;
+      _.each(words, function (word, index) {
+        if (index === 0) {
+          safeQuery = word;
+          return;
+        }
+        safeQuery = safeQuery + ' || ' + word;
       });
     };
 

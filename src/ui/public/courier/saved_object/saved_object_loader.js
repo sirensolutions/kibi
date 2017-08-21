@@ -128,9 +128,9 @@ export class SavedObjectLoader {
       _.each(words, function (word, index) {
         if (index === 0) {
           safeQuery = word;
-          return;
+        } else {
+          safeQuery += ' || ' + word;
         }
-        safeQuery = safeQuery + ' || ' + word;
       });
     };
 

@@ -1,7 +1,9 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+//TODO MERGE 5.5.2 add kibi comments
+
 import MockState from 'fixtures/mock_state';
 
 describe('AggTypeMetricMedianProvider class', function () {

@@ -1,9 +1,12 @@
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+
+//TODO MERGE 5.5.2 add kibi comments
+
 describe('remove filters', function () {
   let filters;
   let queryFilter;
@@ -56,7 +59,6 @@ describe('remove filters', function () {
   }));
 
   describe('removing a filter', function () {
-
     it('should remove the filter from appState', function () {
       appState.filters = filters;
       expect(appState.filters).to.have.length(3);

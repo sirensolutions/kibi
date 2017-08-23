@@ -3,7 +3,7 @@ import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/index.less';
 import uiRoutes from 'ui/routes';
 import _ from 'lodash';
-import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { savedDashboardRegister } from 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register';
 
 import dashboardListingTemplate from './listing/dashboard_listing.html';
@@ -16,7 +16,7 @@ import 'ui/kibi/session/siren_session'; // added to make sirenSession service av
 import 'ui/filter_bar/join_explanation'; // provides explanations of queries and filters to tooltips
 // kibi: end
 
-savedObjectRegistry.register(savedDashboardRegister);
+SavedObjectRegistryProvider.register(savedDashboardRegister);
 
 uiRoutes
   .defaults(/dashboard/, {

@@ -2,7 +2,10 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import MockState from 'fixtures/mock_state';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+
+//TODO MERGE 5.5.2 add kibi comments
+
 describe('get filters', function () {
   const storeNames = {
     app: 'appState',

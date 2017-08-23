@@ -33,7 +33,7 @@ export default function (Private) {
     // kibi: end
 
     // kibi: allow to test time-based indices
-    this.hasTimeField = _.constant(Boolean(timeField));
+    this.isTimeBased = _.constant(Boolean(timeField));
 
     this.toIndexList = sinon.stub().returns(Promise.resolve(indexList || [pattern]));
     this.toDetailedIndexList = _.constant(Promise.resolve([

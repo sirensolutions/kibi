@@ -1,13 +1,13 @@
 import $ from 'jquery';
-import uiModules from 'ui/modules';
-import DocViewsProvider from 'ui/registry/doc_views';
+import { uiModules } from 'ui/modules';
+import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
 import 'ui/render_directive';
 import 'ui/doc_viewer/doc_viewer.less';
 
 uiModules.get('kibana')
 .directive('docViewer', function (config, Private) {
-  const docViews = Private(DocViewsProvider);
+  const docViews = Private(DocViewsRegistryProvider);
   return {
     restrict: 'E',
     scope: {
@@ -17,7 +17,7 @@ uiModules.get('kibana')
       columns: '=?',
       columnAliases: '=?', // kibi: column aliases
       onAddColumn: '=?',
-      onRemoveColumn: '=?'
+      onRemoveColumn: '=?',
     },
     template: function ($el) {
       const $viewer = $('<div class="doc-viewer">');
@@ -27,9 +27,19 @@ uiModules.get('kibana')
       $viewer.append($tabs);
       $viewer.append($content);
       docViews.inOrder.forEach(view => {
-        const $tab = $(`<li ng-show="docViews['${view.name}'].shouldShow(hit)" ng-class="{active: mode == '${view.name}'}">
-            <a ng-click="mode='${view.name}'">${view.title}</a>
-          </li>`);
+        const $tab = $(
+          `<li
+            ng-show="docViews['${view.name}'].shouldShow(hit)"
+            ng-class="{active: mode == '${view.name}'}"
+          >
+            <a
+              ng-click="mode='${view.name}'"
+              kbn-accessible-click
+            >
+              ${view.title}
+            </a>
+          </li>`
+        );
         $tabs.append($tab);
         // kibi: added columnAliases to $viewAttrs
         const $viewAttrs = `

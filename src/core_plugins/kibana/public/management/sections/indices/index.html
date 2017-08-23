@@ -2,6 +2,7 @@
   <div class="sidebar-list">
     <div class="sidebar-list-header">
       <h5>
+        <!-- TODO MERGE 5.5.2 add kibi comment as needed -->
         <a
           ng-if="editingId"
           href="#/management/siren/index"
@@ -16,15 +17,18 @@
     <ul class="list-unstyled">
       <li
         ng-if="!defaultIndex"
-        class="sidebar-item">
+        class="sidebar-item"
+      >
         <div class="sidebar-item-title full-title">
-            <span class="label label-warning" translate="KIBANA-WARNING"></span>
-            <p translate="KIBANA-NO_DEFAULT_INDEX_PATTERN"></p>
+          <span class="label label-warning" translate="KIBANA-WARNING"></span>
+          <p translate="KIBANA-NO_DEFAULT_INDEX_PATTERN"></p>
         </div>
       </li>
+
       <li
         ng-repeat="pattern in indexPatternList | orderBy:['-default','id'] track by pattern.id "
-        class="sidebar-item">
+        class="sidebar-item"
+      >
         <a href="{{::pattern.url}}">
           <div class="{{::pattern.class}}">
             <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>

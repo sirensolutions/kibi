@@ -9,24 +9,24 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
-import applyDiff from 'ui/utils/diff_object';
-import EventsProvider from 'ui/events';
-import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import { applyDiff } from 'ui/utils/diff_object';
+import { EventsProvider } from 'ui/events';
+import { Notifier } from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 
 import {
   createStateHash,
-  hashedItemStoreSingleton,
+  HashedItemStoreSingleton,
   isStateHash,
 } from './state_storage';
 
-export default function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
+export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
   function State(
     urlParam,
     defaults,
-    hashedItemStore = hashedItemStoreSingleton,
+    hashedItemStore = HashedItemStoreSingleton,
     notifier = new Notifier()
   ) {
     State.Super.call(this);

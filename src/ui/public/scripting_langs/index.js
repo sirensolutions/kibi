@@ -1,5 +1,5 @@
 import chrome from 'ui/chrome';
-import Notifier from 'kibie/notify/notifier';
+import { Notifier } from 'kibie/notify/notifier';
 
 const notify = new Notifier({ location: 'Scripting Lang Service' });
 
@@ -17,4 +17,3 @@ export function GetEnabledScriptingLangsProvider($http) {
     });
   };
 }
-

@@ -1,5 +1,8 @@
 import { defaultsDeep } from 'lodash';
 
+//TODO MERGE 5.5.2 check this file bcos is complete different to upstream
+//TODO MERGE 5.5.2 add kibi comment as needed
+
 import { Config } from './config';
 
 export async function readConfigFile(log, configFile, settingOverrides = {}) {

@@ -1,22 +1,28 @@
 import _ from 'lodash';
 import template from 'ui/filter_bar/filter_bar.html';
 import 'ui/directives/json_input';
-import filterAppliedAndUnwrap from 'ui/filter_bar/lib/filter_applied_and_unwrap';
-import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';
-import FilterBarLibMapFlattenAndWrapFiltersProvider from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';
-import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extract_time_filter';
-import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filter_out_time_based_filter';
-import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/change_time_filter';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import compareFilters from './lib/compare_filters';
-import uiModules from 'ui/modules';
-const module = uiModules.get('kibana');
+import '../filter_editor';
+import { filterAppliedAndUnwrap } from 'ui/filter_bar/lib/filter_applied_and_unwrap';
+import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
+import { FilterBarLibMapFlattenAndWrapFiltersProvider } from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';
+import { FilterBarLibExtractTimeFilterProvider } from 'ui/filter_bar/lib/extract_time_filter';
+import { FilterBarLibFilterOutTimeBasedFilterProvider } from 'ui/filter_bar/lib/filter_out_time_based_filter';
+import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { compareFilters } from './lib/compare_filters';
+import { uiModules } from 'ui/modules';
+
+export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable_filter';
+
 
 // kibi: imports
 import 'ui/kibi/directives/kibi_entity_clipboard';
 import 'ui/kibi/styles/explanation';
 import MarkFilterBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
+// kibi: end
+
+const module = uiModules.get('kibana');
 
 module.directive('filterBar', function (Private, Promise, getAppState, kibiState, config, createNotifier, joinExplanation, timefilter) {
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
@@ -25,7 +31,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
   const filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
   const changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const privateFilterFieldRegex = /(^\$|meta)/;
 
   // kibi: added some helpers
   const markFiltersBySelectedEntities = Private(MarkFilterBySelectedEntitiesProvider);
@@ -36,9 +41,11 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
   //: kibi: end
 
   return {
+    template,
     restrict: 'E',
-    template: template,
-    scope: {},
+    scope: {
+      indexPatterns: '='
+    },
     link: function ($scope) {
       // bind query filter actions to the scope
       [
@@ -50,8 +57,7 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
         'invertFilter',
         'invertAll',
         'removeFilter',
-        'removeAll',
-        'updateFilter'
+        'removeAll'
       ].forEach(function (method) {
         $scope[method] = queryFilter[method];
       });
@@ -61,11 +67,8 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
 
       $scope.state = getAppState();
 
-      $scope.aceLoaded = function (editor) {
-        editor.$blockScrolling = Infinity;
-        const session = editor.getSession();
-        session.setTabSize(2);
-        session.setUseSoftTabs(true);
+      $scope.showAddFilterButton = () => {
+        return _.compact($scope.indexPatterns).length > 0;
       };
 
       $scope.applyFilters = function (filters) {
@@ -78,24 +81,29 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
         }
       };
 
-      $scope.startEditingFilter = function (source) {
-        return $scope.editingFilter = {
-          source: source,
-          type: _.findKey(source, function (val, key) {
-            return !key.match(privateFilterFieldRegex);
-          }),
-          model: convertToEditableFilter(source),
-          alias: source.meta.alias
+      $scope.addFilter = () => {
+        $scope.editingFilter = {
+          meta: { isNew: true }
         };
       };
 
-      $scope.stopEditingFilter = function () {
-        $scope.editingFilter = null;
+      $scope.deleteFilter = (filter) => {
+        $scope.removeFilter(filter);
+        if (filter === $scope.editingFilter) $scope.cancelEdit();
       };
 
-      $scope.editDone = function () {
-        $scope.updateFilter($scope.editingFilter);
-        $scope.stopEditingFilter();
+      $scope.editFilter = (filter) => {
+        $scope.editingFilter = filter;
+      };
+
+      $scope.cancelEdit = () => {
+        delete $scope.editingFilter;
+      };
+
+      $scope.saveEdit = (filter, newFilter, isPinned) => {
+        if (!filter.isNew) $scope.removeFilter(filter);
+        delete $scope.editingFilter;
+        $scope.addFilters([newFilter], isPinned);
       };
 
       $scope.clearFilterBar = function () {
@@ -105,7 +113,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
 
       // update the scope filter list on filter changes
       $scope.$listen(queryFilter, 'update', function () {
-        $scope.stopEditingFilter();
         updateFilters();
       });
 
@@ -202,12 +209,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
 
         _.forEach(inversionFilters, $scope.invertFilter);
         $scope.addFilters(newFilters);
-      }
-
-      function convertToEditableFilter(filter) {
-        return _.omit(_.cloneDeep(filter), function (val, key) {
-          return key.match(privateFilterFieldRegex);
-        });
       }
 
       function updateFilters() {

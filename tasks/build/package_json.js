@@ -2,7 +2,7 @@ module.exports = function (grunt) {
   const pkg = grunt.config.get('pkg');
 
   grunt.registerTask('_build:packageJson', function () {
-    const { sha, number, version, timestamp } = grunt.config.get('build');
+    const { sha, number, version, timestamp } = grunt.config.get('build'); // kibi: adds timestamp
 
     grunt.file.write(
       'build/kibana/package.json',
@@ -16,7 +16,7 @@ module.exports = function (grunt) {
         build: {
           number,
           sha,
-          timestamp
+          timestamp // kibi: adds timestamp
         },
         repository: pkg.repository,
         engines: {

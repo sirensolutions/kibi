@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import html from 'ui/doc_table/doc_table.html';
-import getSort from 'ui/doc_table/lib/get_sort';
+import { getSort } from 'ui/doc_table/lib/get_sort';
 import 'ui/doc_table/doc_table.less';
 import 'ui/directives/truncated';
 import 'ui/directives/infinite_scroll';
 import 'ui/doc_table/components/table_header';
 import 'ui/doc_table/components/table_row';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
@@ -27,6 +27,7 @@ uiModules.get('kibana')
       searchSource: '=?',
       infiniteScroll: '=?',
       filter: '=?',
+      filters: '=?',
       onAddColumn: '=?',
       onChangeSortOrder: '=?',
       onMoveColumn: '=?',
@@ -147,18 +148,21 @@ uiModules.get('kibana')
 
         $scope.indexPattern = $scope.searchSource.get('index');
 
+        //TODO MERGE 5.5.2 add kibi comment
         $scope.searchSource.size($scope.size);
         $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
         // Set the watcher after initialization
         $scope.$watchCollection('sorting', function (newSort, oldSort) {
           // Don't react if sort values didn't really change
+          //TODO MERGE 5.5.2 add kibi comment
           if (!$scope.searchSource || newSort === oldSort) return;
           $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
           $scope.searchSource.fetchQueued();
         });
 
         $scope.$on('$destroy', function () {
+          //TODO MERGE 5.5.2 add kibi comment
           removeGetAppStateHandler();
           if ($scope.searchSource) $scope.searchSource.destroy();
         });
@@ -185,7 +189,7 @@ uiModules.get('kibana')
           // We limit the number of returned results, but we want to show the actual number of hits, not
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;
-
+          //TODO MERGE 5.5.2 add kibi comment
           $scope.pager = pagerFactory.create($scope.hits.length, $scope.pageSize || parseInt(config.get('discover:sampleSize')),
           startingPage);
           calculateItemsOnPage();

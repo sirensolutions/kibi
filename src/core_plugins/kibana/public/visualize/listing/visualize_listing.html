@@ -13,22 +13,24 @@
 </kbn-top-nav>
 
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
+  <div class="kuiViewContentItem kuiVerticalRhythm" ng-if="listingController.showLimitError">
+    <div class="kuiInfoPanel kuiInfoPanel--warning">
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          You have {{ listingController.totalItems }} visualizations, but your "listingLimit" setting prevents the table below from displaying more than {{ listingController.listingLimit }}. You can change this setting under <a kbn-href="#/management/kibana/settings" class="kuiLink">Advanced Settings</a>.
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- ControlledTable -->
   <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
     <!-- ToolBar -->
     <div class="kuiToolBar">
-      <div class="kuiToolBarSearch">
-        <div class="kuiToolBarSearchBox">
-          <div class="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
-          <input
-            class="kuiToolBarSearchBox__input"
-            type="text"
-            placeholder="Search..."
-            aria-label="Filter"
-            ng-model="listingController.filter"
-          >
-        </div>
-      </div>
+      <tool-bar-search-box
+        class="kuiToolBarSection"
+        filter="listingController.filter"
+        on-filter="listingController.onFilter"
+      ></tool-bar-search-box>
 
       <div class="kuiToolBarSection">
         <!-- Bulk delete button -->
@@ -74,12 +76,12 @@
       </div>
     </div>
 
-    <!-- NoItems -->
+    <!-- TableInfo -->
     <div
       class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
       ng-if="!listingController.items.length && listingController.filter"
     >
-      <div class="kuiNoItems">
+      <div class="kuiTableInfo">
         No visualizations matched your search.
       </div>
     </div>
@@ -128,8 +130,8 @@
             Name
             <span
               class="kuiIcon"
-              ng-show="listingController.getSortProperty().name === 'title'"
-              ng-class="listingController.isAscending() ? 'fa-caret-up' : 'fa-caret-down'"
+              ng-show="listingController.getSortedProperty().name === 'title'"
+              ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'"
             ></span>
           </th>
 
@@ -140,8 +142,8 @@
             Type
             <span
               class="kuiIcon"
-              ng-show="listingController.getSortProperty().name === 'type'"
-              ng-class="listingController.isAscending() ? 'fa-caret-up' : 'fa-caret-down'"
+              ng-show="listingController.getSortedProperty().name === 'type'"
+              ng-class="listingController.isAscending('type') ? 'fa-caret-up' : 'fa-caret-down'"
             ></span>
           </th>
         </tr>

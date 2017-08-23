@@ -1,13 +1,16 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import 'ui/private';
-import AggParamsPM from 'ui/agg_types/agg_params';
-import VisProvider from 'ui/vis';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
+import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
+import { VisProvider } from 'ui/vis';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+
+//TODO MERGE 5.5.2 add kibi comments
+
 describe('AggType Class', function () {
   let AggType;
   let AggParams;
@@ -20,8 +23,8 @@ describe('AggType Class', function () {
     $provide.constant('kbnDefaultAppId', '');
   }));
   beforeEach(ngMock.inject(function (Private) {
-    AggParams = sinon.spy(Private(AggParamsPM));
-    Private.stub(AggParamsPM, AggParams);
+    AggParams = sinon.spy(Private(AggTypesAggParamsProvider));
+    Private.stub(AggTypesAggParamsProvider, AggParams);
 
     Vis = Private(VisProvider);
     fieldFormat = Private(RegistryFieldFormatsProvider);

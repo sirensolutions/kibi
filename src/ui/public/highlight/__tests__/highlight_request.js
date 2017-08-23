@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import getHighlightRequestProvider from '../highlight_request';
+import { getHighlightRequestProvider } from '../highlight_request';
 
 describe('getHighlightRequest', () => {
   const queryStringQuery = { query_string: { query: 'foo' } };
@@ -43,6 +43,7 @@ describe('getHighlightRequest', () => {
     expect(getHighlightRequest).to.be.a(Function);
   });
 
+  //TODO MERGE 5.5.2 add kibi comment
   describe('kibi', function () {
     it('should remove join queries from the highlight_query for a query with must and must not clauses', () => {
       const queries = {

@@ -1,8 +1,10 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggTypesIndexProvider from 'ui/agg_types/index';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import AggParamWriterProvider from '../agg_param_writer';
 describe('Histogram Agg', function () {
+//TODO MERGE 5.5.2 add kibi comments
+
 
   describe('ordered', function () {
     let histogram;

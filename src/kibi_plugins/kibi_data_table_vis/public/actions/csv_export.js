@@ -11,7 +11,7 @@ export default function ExportAsCsvProvider(Private, config) {
     const nonAlphaNumRE = /[^a-zA-Z0-9]/;
     const allDoubleQuoteRE = /"/g;
 
-    if (indexPattern.hasTimeField()) {
+    if (indexPattern.isTimeBased()) {
       columns = [ indexPattern.timeFieldName, ...columns ];
     }
 

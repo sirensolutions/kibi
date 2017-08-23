@@ -684,7 +684,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     }
     return indexPatterns.get(indexPatternId)
     .then((pattern) => {
-      if (pattern.hasTimeField()) {
+      if (pattern.isTimeBased()) {
         const { min, max } = _.reduce(dashboardIds, (acc, dashboardId) => {
           const { min, max } = this.getTimeBounds(dashboardId);
           if (!acc.min || acc.min.isBefore(min)) {

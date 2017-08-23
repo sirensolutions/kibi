@@ -34,7 +34,7 @@ export default function downloadNodeBuilds(grunt) {
       });
     });
   };
-  // siren: returns the filename with architecture inserted on windows
+  // kibi: returns the filename with architecture inserted on windows
   // to prevent node.exe binary being overwritten by
   // different architecture node.exe download
   const getFilename = platform => {
@@ -44,7 +44,7 @@ export default function downloadNodeBuilds(grunt) {
     const archVersion = dirname(platform.nodeUrl).match(/win-.*$/)[0];
     return `${baseNameParts[0]}-${archVersion}.${baseNameParts[1]}`;
   };
-  //siren: end
+  // kibi: end
 
   const checkShaSum = (platform) => {
     const file = getFilename(platform); // siren: get filename by OS and arch
@@ -54,6 +54,7 @@ export default function downloadNodeBuilds(grunt) {
       hash: 'sha256',
       expected: platform.win ? shaSums[basename(dirname(platform.nodeUrl)) + '/node.exe'] : shaSums[file] //siren: use original filename on windows (without architecture) to match shaSum keys
     };
+
     if (!grunt.file.isFile(filePath)) {
       return false;
     }
@@ -83,6 +84,7 @@ export default function downloadNodeBuilds(grunt) {
       return payload;
     })
     .then(payload => writeFileAsync(filePath, payload));
+
   };
 
   const start = async (platform) => {

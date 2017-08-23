@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { ContainerTooSmall } from 'ui/errors';
-import VislibVisualizationsPointSeriesProvider from './_point_series';
-export default function ColumnChartFactory(Private) {
+import { VislibVisualizationsPointSeriesProvider } from './_point_series';
+
+export function VislibVisualizationsColumnChartProvider(Private) {
 
   const PointSeries = Private(VislibVisualizationsPointSeriesProvider);
 
@@ -9,8 +9,9 @@ export default function ColumnChartFactory(Private) {
     mode: 'normal',
     showTooltip: true,
     color: undefined,
-    fillColor: undefined
+    fillColor: undefined,
   };
+
   /**
    * Vertical Bar Chart Visualization: renders vertical and/or stacked bars
    *
@@ -158,7 +159,6 @@ export default function ColumnChartFactory(Private) {
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
       const isLogScale = this.getValueAxis().axisConfig.isLogScale();
-      const minWidth = 1;
       let barWidth;
 
       if (isTimeScale) {
@@ -186,10 +186,6 @@ export default function ColumnChartFactory(Private) {
       }
 
       function widthFunc() {
-        if (barWidth < minWidth) {
-          throw new ContainerTooSmall();
-        }
-
         if (isTimeScale) {
           return barWidth;
         }

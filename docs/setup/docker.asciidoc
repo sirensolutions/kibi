@@ -31,7 +31,7 @@ docker pull sirensolutions/{docker-image-name}:{version}
 docker run -d -p 5606:5606 -p 9220:9220 sirensolutions/{docker-image-name}:{version}
 --------------------------------------------
 
-For an image pre-populated with demonstration data: 
+For an image pre-populated with demonstration data:
 
 ["source","sh",subs="attributes"]
 --------------------------------------------

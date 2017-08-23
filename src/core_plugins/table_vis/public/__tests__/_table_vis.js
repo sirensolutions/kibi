@@ -2,9 +2,12 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-describe('Table Vis Integration', function () {
+//TODO MERGE 5.5.2 add kibi comment as needed
+
+
+describe('Integration', function () {
   let $rootScope;
   let $compile;
   let $el;

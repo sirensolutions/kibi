@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import rison from 'rison-node';
-import keymap from 'ui/utils/key_map';
-import SavedObjectsSavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
-import uiModules from 'ui/modules';
+import { keyMap } from 'ui/utils/key_map';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
+import { uiModules } from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
 
 // kibi: imports
@@ -13,13 +13,12 @@ const module = uiModules.get('kibana');
 
 module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config, savedSearches) {
 
-  const services = Private(SavedObjectsSavedObjectRegistryProvider).byLoaderPropertiesName;
+  const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
 
   return {
     restrict: 'E',
     scope: {
       type: '@',
-      title: '@?',
       // optional make-url attr, sets the userMakeUrl in our scope
       userMakeUrl: '=?makeUrl',
       // optional on-choose attr, sets the userOnChoose in our scope
@@ -149,6 +148,13 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         filterResults();
       });
 
+      $scope.pageFirstItem = 0;
+      $scope.pageLastItem = 0;
+      $scope.onPageChanged = (page) => {
+        $scope.pageFirstItem = page.firstItem;
+        $scope.pageLastItem = page.lastItem;
+      };
+
       //manages the state of the keyboard selector
       self.selector = {
         enabled: false,
@@ -157,7 +163,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       //key handler for the filter text box
       self.filterKeyDown = function ($event) {
-        switch (keymap[$event.keyCode]) {
+        switch (keyMap[$event.keyCode]) {
           case 'tab':
             if (self.hitCount === 0) return;
 
@@ -182,7 +188,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       //key handler for the list items
       self.hitKeyDown = function ($event, page, paginate) {
-        switch (keymap[$event.keyCode]) {
+        switch (keyMap[$event.keyCode]) {
           case 'tab':
             if (!self.selector.enabled) break;
 

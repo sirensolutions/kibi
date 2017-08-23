@@ -2,10 +2,12 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 describe('AggTableGroup Directive', function () {
+//TODO MERGE 5.5.2 add kibi comments
+
 
   let $rootScope;
   let $compile;
@@ -17,7 +19,7 @@ describe('AggTableGroup Directive', function () {
     $provide.constant('kbnDefaultAppId', '');
   }));
   beforeEach(ngMock.inject(function ($injector, Private) {
-    tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+    tabifyAggResponse = Private(AggResponseTabifyProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
 

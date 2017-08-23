@@ -1,17 +1,17 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import DerivativeProvider from 'ui/agg_types/metrics/derivative';
-import CumulativeSumProvider from 'ui/agg_types/metrics/cumulative_sum';
-import MovingAvgProvider from 'ui/agg_types/metrics/moving_avg';
-import SerialDiffProvider from 'ui/agg_types/metrics/serial_diff';
-import VisProvider from 'ui/vis';
+import { AggTypesMetricsDerivativeProvider } from 'ui/agg_types/metrics/derivative';
+import { AggTypesMetricsCumulativeSumProvider } from 'ui/agg_types/metrics/cumulative_sum';
+import { AggTypesMetricsMovingAvgProvider } from 'ui/agg_types/metrics/moving_avg';
+import { AggTypesMetricsSerialDiffProvider } from 'ui/agg_types/metrics/serial_diff';
+import { VisProvider } from 'ui/vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [
-  { name: 'derivative', title: 'Derivative', provider: DerivativeProvider },
-  { name: 'cumulative_sum', title: 'Cumulative Sum', provider: CumulativeSumProvider },
-  { name: 'moving_avg', title: 'Moving Avg', provider: MovingAvgProvider },
-  { name: 'serial_diff', title: 'Serial Diff', provider: SerialDiffProvider },
+  { name: 'derivative', title: 'Derivative', provider: AggTypesMetricsDerivativeProvider },
+  { name: 'cumulative_sum', title: 'Cumulative Sum', provider: AggTypesMetricsCumulativeSumProvider },
+  { name: 'moving_avg', title: 'Moving Avg', provider: AggTypesMetricsMovingAvgProvider },
+  { name: 'serial_diff', title: 'Serial Diff', provider: AggTypesMetricsSerialDiffProvider },
 ];
 
 describe('parent pipeline aggs', function () {
@@ -27,6 +27,7 @@ describe('parent pipeline aggs', function () {
         ngMock.inject(function (Private) {
           const Vis = Private(VisProvider);
           const indexPattern = Private(StubbedIndexPattern);
+          indexPattern.stubSetFieldFormat('bytes', 'bytes');
           metricAgg = Private(metric.provider);
 
           const params = settings || {
@@ -52,6 +53,12 @@ describe('parent pipeline aggs', function () {
                 type: metric.name,
                 schema: 'metric',
                 params
+              },
+              {
+                id: '3',
+                type: 'max',
+                params: { field: '@timestamp' },
+                schema: 'metric'
               }
             ],
             listeners: {}
@@ -137,6 +144,33 @@ describe('parent pipeline aggs', function () {
         expect(aggDsl.parentAggs['2-metric'][metric.name].buckets_path).to.be('2-metric-metric');
       });
 
+      it('should have correct formatter', function () {
+        init({
+          metricAgg: '3'
+        });
+        expect(metricAgg.getFormat(aggConfig).type.id).to.be('date');
+      });
+
+      it('should have correct customMetric nested formatter', function () {
+        init({
+          metricAgg: 'custom',
+          customMetric: {
+            id:'2-metric',
+            type: metric.name,
+            params: {
+              buckets_path: 'custom',
+              customMetric: {
+                id:'2-metric-metric',
+                type: 'max',
+                params: { field: 'bytes' },
+                schema: 'orderAgg'
+              }
+            },
+            schema: 'orderAgg'
+          }
+        });
+        expect(metricAgg.getFormat(aggConfig).type.id).to.be('bytes');
+      });
     });
   });
 

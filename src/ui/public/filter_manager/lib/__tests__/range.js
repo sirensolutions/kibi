@@ -1,10 +1,12 @@
-import fn from 'ui/filter_manager/lib/range';
+import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+
 let indexPattern;
 let expected;
+
 describe('Filter Manager', function () {
   describe('Range filter builder', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
@@ -16,7 +18,7 @@ describe('Filter Manager', function () {
     }));
 
     it('should be a function', function () {
-      expect(fn).to.be.a(Function);
+      expect(buildRangeFilter).to.be.a(Function);
     });
 
     it('should return a range filter when passed a standard field', function () {
@@ -26,7 +28,7 @@ describe('Filter Manager', function () {
           lte: 3
         }
       };
-      expect(fn(indexPattern.fields.byName.bytes, { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
+      expect(buildRangeFilter(indexPattern.fields.byName.bytes, { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
     });
 
     it('should return a script filter when passed a scripted field', function () {
@@ -41,7 +43,8 @@ describe('Filter Manager', function () {
           lte: 3
         }
       });
-      expect(fn(indexPattern.fields.byName['script number'], { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
+      expect(buildRangeFilter(
+        indexPattern.fields.byName['script number'], { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
     });
 
     it('should wrap painless scripts in comparator lambdas', function () {
@@ -50,16 +53,17 @@ describe('Filter Manager', function () {
               `gte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.gte) && ` +
               `lte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.lte)`;
 
-      const inlineScript = fn(indexPattern.fields.byName['script date'], { gte: 1, lte: 3 }, indexPattern).script.script.inline;
+      const inlineScript = buildRangeFilter(
+        indexPattern.fields.byName['script date'], { gte: 1, lte: 3 }, indexPattern).script.script.inline;
       expect(inlineScript).to.be(expected);
     });
 
     it('should throw an error when gte and gt, or lte and lt are both passed', function () {
       expect(function () {
-        fn(indexPattern.fields.byName['script number'], { gte: 1, gt: 3 }, indexPattern);
+        buildRangeFilter(indexPattern.fields.byName['script number'], { gte: 1, gt: 3 }, indexPattern);
       }).to.throwError();
       expect(function () {
-        fn(indexPattern.fields.byName['script number'], { lte: 1, lt: 3 }, indexPattern);
+        buildRangeFilter(indexPattern.fields.byName['script number'], { lte: 1, lt: 3 }, indexPattern);
       }).to.throwError();
     });
 
@@ -67,9 +71,10 @@ describe('Filter Manager', function () {
       _.each({ gte: '>=', gt: '>', lte: '<=', lt: '<' }, function (operator, key) {
         const params = {};
         params[key] = 5;
-        const filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
+        const filter = buildRangeFilter(indexPattern.fields.byName['script number'], params, indexPattern);
 
-        expect(filter.script.script.inline).to.be('(' + indexPattern.fields.byName['script number'].script + ')' + operator + key);
+        expect(filter.script.script.inline).to.be(
+          '(' + indexPattern.fields.byName['script number'].script + ')' + operator + key);
         expect(filter.script.script.params[key]).to.be(5);
         expect(filter.script.script.params.value).to.be(operator + 5);
 
@@ -79,7 +84,7 @@ describe('Filter Manager', function () {
     describe('when given params where one side is infinite', function () {
       let filter;
       beforeEach(function () {
-        filter = fn(indexPattern.fields.byName['script number'], { gte: 0, lt: Infinity }, indexPattern);
+        filter = buildRangeFilter(indexPattern.fields.byName['script number'], { gte: 0, lt: Infinity }, indexPattern);
       });
 
       describe('returned filter', function () {
@@ -105,7 +110,8 @@ describe('Filter Manager', function () {
     describe('when given params where both sides are infinite', function () {
       let filter;
       beforeEach(function () {
-        filter = fn(indexPattern.fields.byName['script number'], { gte: -Infinity, lt: Infinity }, indexPattern);
+        filter = buildRangeFilter(
+          indexPattern.fields.byName['script number'], { gte: -Infinity, lt: Infinity }, indexPattern);
       });
 
       describe('returned filter', function () {

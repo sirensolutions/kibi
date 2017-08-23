@@ -1,14 +1,15 @@
 import _ from 'lodash';
-import toEditableConfig from 'plugins/kibana/management/sections/settings/lib/to_editable_config';
+import { toEditableConfig } from 'plugins/kibana/management/sections/settings/lib/to_editable_config';
 import 'plugins/kibana/management/sections/settings/advanced_row';
-import management from 'ui/management';
+import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/settings/index.html';
 // kibi: import
 import 'ui/kibi/directives/kibi_select_dashboard';
 
 uiRoutes
+//TODO MERGE 5.5.2 add kibi comment
 .when('/management/siren/settings', {
   template: indexTemplate
 });
@@ -41,6 +42,7 @@ uiModules.get('apps/management')
   };
 });
 
+//TODO MERGE 5.5.2 add kibi comment
 management.getSection('kibana').register('settings', {
   display: 'Advanced Settings',
   order: 20,

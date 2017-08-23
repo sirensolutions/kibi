@@ -205,7 +205,8 @@ module.exports = function (tlConfig) {
       tlConfig.time.from,
       tlConfig.time.to,
       tlConfig.settings['timelion:target_buckets'] || 200,
-      tlConfig.time.interval
+      tlConfig.time.interval,
+      tlConfig.settings['timelion:min_interval']  || '1ms',
     );
 
     tlConfig.setTargetSeries();
@@ -218,6 +219,7 @@ module.exports = function (tlConfig) {
     sheet = parseSheet(request.sheet);
     return preProcessSheet(sheet).then(function () {
       return _.map(sheet, function (chainList, i) {
+        //TODO MERGE 5.5.2 add kibi comment as needed
         if (chainList.failed) {
           return chainList;
         }
@@ -225,6 +227,7 @@ module.exports = function (tlConfig) {
           stats.sheetTime = (new Date()).getTime();
           return seriesList;
         }).catch(function (e) {
+          //TODO MERGE 5.5.2 add kibi comment as needed
           return {
             failed: true,
             cell: i,

@@ -3,10 +3,11 @@ import 'ui/visualize';
 import 'ui/doc_table';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import 'plugins/kibana/dashboard/panel/get_object_loaders_for_dashboard';
-import FilterManagerProvider from 'ui/filter_manager';
-import uiModules from 'ui/modules';
+import { FilterManagerProvider } from 'ui/filter_manager';
+import { uiModules } from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/panel/panel.html';
 import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_object';
 import { DashboardViewMode } from '../dashboard_view_mode';
@@ -21,7 +22,7 @@ uiModules
   const filterManager = Private(FilterManagerProvider);
   const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
 
-  const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
+  const services = savedObjectManagementRegistry.all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);
     return {
       type: service.type,
@@ -33,6 +34,8 @@ uiModules
     restrict: 'E',
     template: panelTemplate,
     scope: {
+      //TODO MERGE 5.5.2 add kibi comment as needed
+
       /**
        * toggle borders around panels
        * @author kibi
@@ -53,6 +56,12 @@ uiModules
        * @type {function} - Returns a {PersistedState} child uiState for this scope.
        */
       createChildUiState: '=',
+      /**
+       * Registers an index pattern with the dashboard app used by this panel. Used by the filter bar for
+       * generating field suggestions.
+       * @type {function(IndexPattern)}
+       */
+      registerPanelIndexPattern: '=',
       /**
        * Contains information about this panel.
        * @type {PanelState}
@@ -169,7 +178,11 @@ uiModules
           $scope.savedObj.vis.setUiState($scope.uiState);
           $scope.savedObj.vis.listeners.click = $scope.getVisClickHandler();
           $scope.savedObj.vis.listeners.brush = $scope.getVisBrushHandler();
+          $scope.registerPanelIndexPattern($scope.panel.panelIndex, $scope.savedObj.vis.indexPattern);
         } else if ($scope.panel.type === savedSearches.type) {
+          if ($scope.savedObj.searchSource) {
+            $scope.registerPanelIndexPattern($scope.panel.panelIndex, $scope.savedObj.searchSource.get('index'));
+          }
           // This causes changes to a saved search to be hidden, but also allows
           // the user to locally modify and save changes to a saved search only in a dashboard.
           // See https://github.com/elastic/kibana/issues/9523 for more details.

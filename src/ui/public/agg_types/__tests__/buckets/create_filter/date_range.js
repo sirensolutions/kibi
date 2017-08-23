@@ -1,8 +1,10 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import AggTypesBucketsCreateFilterDateRangeProvider from 'ui/agg_types/buckets/create_filter/date_range';
+import { AggTypesBucketsCreateFilterDateRangeProvider } from 'ui/agg_types/buckets/create_filter/date_range';
+//TODO MERGE 5.5.2 add kibi comments
+
 
 describe('AggConfig Filters', function () {
   describe('Date range', function () {

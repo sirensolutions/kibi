@@ -99,6 +99,44 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+
+    clickRegionMap() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByPartialLinkText('Region Map')
+        .click();
+    }
+
+    getVectorMapData() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findAllByCssSelector('path.leaflet-clickable')
+        .then((chartTypes) => {
+
+
+          function getChartType(chart) {
+            let color;
+            return chart.getAttribute('fill')
+              .then((stroke) => {
+                color = stroke;
+              })
+              .then(() => {
+                return { color: color };
+              });
+          }
+
+          const getChartTypesPromises = chartTypes.map(getChartType);
+          return Promise.all(getChartTypesPromises);
+        })
+        .then((data) => {
+          data = data.filter((country) => {
+            //filter empty colors
+            return country.color !== 'rgb(200,200,200)';
+          });
+          return data;
+        });
+    }
+
     clickMarkdownWidget() {
       return remote
       .setFindTimeout(defaultFindTimeout)
@@ -109,7 +147,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     clickAddMetric() {
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('[group-name="metrics"] .vis-editor-agg-add .vis-editor-agg-wide-btn div.btn')
+      .findByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]')
       .click();
     }
 
@@ -118,6 +156,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Metric')
       .click();
+    }
+
+    clickGauge() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByPartialLinkText('Gauge')
+        .click();
     }
 
     clickPieChart() {
@@ -130,9 +175,39 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     clickTileMap() {
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Tile Map')
+      .findByPartialLinkText('Coordinate Map')
       .click();
     }
+
+    clickTagCloud() {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByPartialLinkText('Tag Cloud')
+      .click();
+    }
+
+    getTextTag() {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findAllByCssSelector('text').getVisibleText();
+    }
+
+
+    getTextSizes() {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findAllByCssSelector('text')
+      .then(function (tags) {
+        function returnTagSize(tag) {
+          return tag.getAttribute('style')
+          .then(function (style) {
+            return style.match(/font-size: ([^;]*);/)[1];
+          });
+        }
+        return Promise.all(tags.map(returnTagSize));
+      });
+    }
+
 
     clickVerticalBarChart() {
       return remote
@@ -193,17 +268,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     clickGoButton() {
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      .findByClassName('kbn-timepicker-go')
-      .click();
+      return testSubjects.click('timepickerGoButton');
     }
 
     collapseChart() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('div.visualize-show-spy > div > i')
-      .click();
+      return testSubjects.click('spyToggleButton');
     }
 
     getMetric() {
@@ -211,6 +280,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .setFindTimeout(2000)
       .findByCssSelector('div[ng-controller="KbnMetricVisController"]')
       .getVisibleText();
+    }
+
+    getGaugeValue() {
+      return remote
+        .setFindTimeout(2000)
+        .findAllByCssSelector('visualize .chart svg')
+        .getVisibleText();
     }
 
     clickMetricEditor() {
@@ -301,17 +377,32 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     getField() {
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.ng-valid-required[name="field"] option[selected="selected"]')
+      .findByCssSelector('.ng-valid-required[name="field"] .ui-select-match-text')
       .getVisibleText();
     }
 
     selectField(fieldValue, groupName = 'buckets') {
       return retry.try(function tryingForTime() {
         return remote
-        .setFindTimeout(defaultFindTimeout)
-        // the css below should be more selective
-        .findByCssSelector(`[group-name="${groupName}"] option[label="${fieldValue}"]`)
-        .click();
+          .setFindTimeout(defaultFindTimeout)
+          .findByCssSelector(`[group-name="${groupName}"] .ui-select-container`)
+          .click()
+          .then(() => {
+            return remote
+              .findByCssSelector(`[group-name="${groupName}"] input.ui-select-search`)
+              .type(fieldValue)
+              .pressKeys('\uE006');
+          });
+      });
+    }
+
+    selectFieldById(fieldValue, id) {
+      return retry.try(function tryingForTime() {
+        return remote
+          .setFindTimeout(defaultFindTimeout)
+          // the css below should be more selective
+          .findByCssSelector(`#${id} > option[label="${fieldValue}"]`)
+          .click();
       });
     }
 
@@ -360,10 +451,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     clickGo() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.btn-success')
-      .click()
+      return testSubjects.click('visualizeEditorRenderButton')
       .then(function () {
         return PageObjects.header.waitUntilLoadingHasFinished();
       });

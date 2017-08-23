@@ -4,6 +4,8 @@ import ngMock from 'ng_mock';
 import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard';
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
 
+//TODO MERGE 5.5.2 add kibi comment as needed
+
 describe('dashboard panels', function () {
   let $scope;
   let $el;

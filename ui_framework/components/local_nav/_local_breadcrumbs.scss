@@ -5,11 +5,14 @@
 .kuiLocalBreadcrumbs {
   display: flex;
   align-items: center;
-  height: 100%;
   padding-left: $localNavSideSpacing; /* 1 */
 }
 
 .kuiLocalBreadcrumb {
+  font-size: 14px;
+  margin: 0;
+  font-weight: normal;
+
   & + & {
     margin-left: 6px;
 
@@ -26,23 +29,13 @@
   }
 }
 
+/**
+ * 1. Make it a bit darker to contrast with the gray background.
+ */
 .kuiLocalBreadcrumb__link {
+  @include link;
+  color: $localBreadcrumbLinkColor; /* 1 */
   font-size: $globalFontSize;
-  color: $localBreadcrumbLinkColor;
-  text-decoration: none;
-
-  &:hover {
-    color: $localBreadcrumbLinkColor;
-    text-decoration: underline;
-  }
-
-  @include darkTheme {
-    color: $globalLinkColor--darkTheme;
-
-    &:hover {
-      color: $globalLinkColor--darkTheme;
-    }
-  }
 }
 
 .kuiLocalBreadcrumb__emphasis {

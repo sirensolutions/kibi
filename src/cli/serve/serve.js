@@ -162,6 +162,7 @@ module.exports = function (program) {
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();
+      //TODO MERGE 5.5.2 add kibi comment as needed
       if (opts.quitAfterInit) {
         process.exit(0);
       }

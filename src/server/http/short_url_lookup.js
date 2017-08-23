@@ -54,6 +54,7 @@ export default function (server) {
     .update(url)
     .update(sirenSession !== undefined ? JSON.stringify(sirenSession, null, '') : '')
     .digest('hex');
+
     return urlId;
   }
 
@@ -69,7 +70,9 @@ export default function (server) {
       try {
         const urlDoc = await getUrlDoc(urlId, req);
         if (!urlDoc) throw new Error('Requested shortened url does not exist in kibana index');
+
         updateMetadata(urlId, urlDoc, req);
+
         return {
           url: urlDoc._source.url,
           sirenSession: urlDoc._source.sirenSession

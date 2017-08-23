@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
-import registry from 'plugins/kibana/management/saved_object_registry';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
-import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
+//TODO MERGE 5.5.2 add kibi comments as needed
 import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
+import { castEsToKbnFieldTypeName } from '../../../../../../utils';
 
 uiRoutes
 .when('/management/siren/objects/:service/:id', {
@@ -20,8 +21,7 @@ uiModules.get('apps/management')
     // kibi: replaces esAdmin with savedObjectsAPI
     controller: function (queryEngineClient, $scope, $injector, $routeParams, $location, $window, $rootScope, Private, savedObjectsAPI) {
       const notify = createNotifier({ location: 'SavedObject view' });
-      const castMappingType = Private(IndexPatternsCastMappingTypeProvider);
-      const serviceObj = registry.get($routeParams.service);
+      const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
       const service = $injector.get(serviceObj.service);
 
       const deleteHelper = Private(DeleteHelperProvider); // kibi: run some checks before deleting an object
@@ -85,7 +85,7 @@ uiModules.get('apps/management')
           fields.push({
             name: name,
             type: (function () {
-              switch (castMappingType(esType)) {
+              switch (castEsToKbnFieldTypeName(esType)) {
                 case 'string': return 'text';
                 case 'number': return 'number';
                 case 'boolean': return 'boolean';
@@ -108,6 +108,7 @@ uiModules.get('apps/management')
 
       $scope.title = service.type;
 
+      //TODO MERGE 5.5.2 add kibi comments as needed
       savedObjectsAPI.get({
         index: kbnIndex,
         type: service.type,
@@ -231,6 +232,7 @@ uiModules.get('apps/management')
         })
         .then(function (resp) {
           // kibi: flush the cache on the server side
+          // TODO MERGE 5.5.2 create an issue for this
           // KIBI5: put this condition inside queryEngineClient
           if (service.type === 'query' || service.type === 'template' || service.type === 'script') {
             return queryEngineClient.clearCache();

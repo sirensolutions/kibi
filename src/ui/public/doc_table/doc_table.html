@@ -52,6 +52,10 @@
           columns="columns"
           index-pattern="indexPattern"
           sort-order="sorting"
+          filter="filter"
+          filters="filters"
+          class="discover-table-row"
+          on-add-column="onAddColumn"
           on-change-sort-order="onChangeSortOrder"
           on-move-column="onMoveColumn"
           on-remove-column="onRemoveColumn"
@@ -85,7 +89,7 @@
           ng-if="shouldShowLimitedResultsWarning()"
           class="kuiToolBarText kuiSubduedText"
         >
-        {{ limitedResultsWarning }}
+          {{ limitedResultsWarning }}
         </div>
         <!-- Pagination -->
         <tool-bar-pager-text
@@ -151,7 +155,8 @@
         </tbody>
       </table>
     </div>
-    <kbn-infinite-scroll more="addRows"></kbn-infinite-scroll>
+    <!--TODO MERGE 5.5.2 check infiniteScroll is needed -->
+    <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
   </div>
 </div>
 

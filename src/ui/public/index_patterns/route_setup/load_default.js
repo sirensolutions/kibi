@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import Notifier from 'kibie/notify/notifier';
+//TODO MERGE 5.5.2 add kibi comments
+import { Notifier } from 'kibie/notify/notifier';
 import { IndexPatternAuthorizationError, NoDefaultIndexPattern } from 'ui/errors';
-import GetIdsProvider from '../_get_ids';
+import { IndexPatternsGetIdsProvider } from '../_get_ids';
 import uiRoutes from 'ui/routes';
 
 // kibi: imports
@@ -17,10 +18,11 @@ module.exports = function (opts) {
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
   let defaultRequiredToasts = null;
 
+  //TODO MERGE 5.5.2 add kibi comment
   uiRoutes
   .addSetupWork(function loadDefaultIndexPattern(indexPatterns, Private, Promise, $route, config) {
     const rootSearchSource = Private(RootSearchSourceProvider);
-    const getIds = Private(GetIdsProvider);
+    const getIds = Private(IndexPatternsGetIdsProvider);
     const route = _.get($route, 'current.$$route');
 
     return getIds()

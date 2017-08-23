@@ -60,6 +60,7 @@ describe('plugins/elasticsearch', function () {
       };
     });
 
+    //TODO MERGE 5.5.2 add kibi comments as needed
     describe('Kibi', function () {
       describe('siren join', function () {
         it('should add siren to the search action', function () {
@@ -139,6 +140,7 @@ describe('plugins/elasticsearch', function () {
         customHeaders: { foo: 'bar' }
       };
 
+      //TODO MERGE 5.5.2 add kibi comments as needed
       mapUri(stubCluster(settings), '/elasticsearch', serverWithoutSirenPlugin)(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamHeaders).to.have.property('foo', 'bar');

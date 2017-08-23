@@ -80,6 +80,10 @@
 }
 // kibi: end
 
+filter-bar {
+  z-index: @filterBarDepth !important;
+}
+
 .filter-bar-confirm {
   padding: 8px 10px 4px;
   background: @filter-bar-confirm-bg;
@@ -135,6 +139,9 @@ filter-bar:after {
 }
 // kibi: end
 
+/* TODO MERGE 5.5.2 check this bcos filter-bar is not same as .filter-bar */
+/* TODO MERGE 5.5.2 add kibi comment as necessary */
+
 filter-bar .bar {
   padding: 5px 6px 3px 6px;
   background: @filter-bar-bar-bg;
@@ -143,7 +150,6 @@ filter-bar .bar {
 
   .ace_editor {
     height: 175px;
-    margin: 15px 0;
   }
 
   .filter-edit-alias {

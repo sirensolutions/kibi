@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import Boom from 'boom';
 import Promise from 'bluebird';
-const writeFile = Promise.promisify(require('fs').writeFile);
 const unlink = Promise.promisify(require('fs').unlinkSync); // kibi: unlink is promisified
+const writeFile = Promise.promisify(require('fs').writeFile);
 
 module.exports = Promise.method(function (kbnServer, server, config) {
   const path = config.get('pid.file');

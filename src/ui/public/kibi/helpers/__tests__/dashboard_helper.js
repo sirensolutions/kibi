@@ -24,7 +24,7 @@ const fakeSavedSearches = [
     searchSource: {
       index: function () {
         return {
-          hasTimeField: function () {
+          isTimeBased: function () {
             return true;
           }
         };
@@ -36,7 +36,7 @@ const fakeSavedSearches = [
     searchSource: {
       index: function () {
         return {
-          hasTimeField: function () {
+          isTimeBased: function () {
             return false;
           }
         };

@@ -3,14 +3,15 @@ import angular from 'angular';
 
 import 'ui/promises';
 
-import RequestQueueProvider from '../_request_queue';
-import ErrorHandlersProvider from '../_error_handlers';
-import FetchProvider from '../fetch';
-import DecorateQueryProvider from './_decorate_query';
-import FieldWildcardProvider from '../../field_wildcard';
+import { RequestQueueProvider } from '../_request_queue';
+import { ErrorHandlersProvider } from '../_error_handlers';
+import { FetchProvider } from '../fetch';
+import { DecorateQueryProvider } from './_decorate_query';
+import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequestProvider } from '../../highlight';
+import { migrateFilter } from './_migrate_filter';
 
-export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
+export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
   const requestQueue = Private(RequestQueueProvider);
   const errorHandlers = Private(ErrorHandlersProvider);
   const courierFetch = Private(FetchProvider);
@@ -189,6 +190,31 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
   };
 
   /**
+   * Fetch this source and reject the returned Promise on error
+   *
+   * Otherwise behaves like #fetch()
+   *
+   * @async
+   */
+  SourceAbstract.prototype.fetchAsRejectablePromise = function () {
+    const self = this;
+    let req = _.first(self._myStartableQueued());
+
+    if (!req) {
+      req = self._createRequest();
+    }
+
+    req.setErrorHandler((request, error) => {
+      request.defer.reject(error);
+      request.abort();
+    });
+
+    courierFetch.these([req]);
+
+    return req.getCompletePromise();
+  };
+
+  /**
    * Fetch all pending requests for this source ASAP
    * @async
    */
@@ -359,6 +385,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
                     .filter(filterNegate(false))
                     .map(translateToQuery)
                     .map(cleanFilter)
+                    .map(migrateFilter)
                   )
                 ),
                 must_not: (
@@ -366,6 +393,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
                   .filter(filterNegate(true))
                   .map(translateToQuery)
                   .map(cleanFilter)
+                  .map(migrateFilter)
                 )
               }
             };

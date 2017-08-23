@@ -4,11 +4,14 @@ import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 
 import manageUuid from './server/lib/manage_uuid';
-import ingest from './server/routes/api/ingest';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
+import { importApi } from './server/routes/api/import';
+import { exportApi } from './server/routes/api/export';
 import scripts from './server/routes/api/scripts';
+import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import * as systemApi from './server/lib/system_api';
+import mappings from './mappings.json';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
@@ -16,7 +19,6 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
-
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -44,8 +46,8 @@ module.exports = function (kibana) {
           'docViews',
           'hacks' // kibi: allow to insert our own version of some kibana components like the kibiee notifier
         ],
-
         injectVars: function (server) {
+
           const serverConfig = server.config();
 
           //DEPRECATED SETTINGS
@@ -54,14 +56,21 @@ module.exports = function (kibana) {
           const configuredUrl = server.config().get('tilemap.url');
           const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
           const tilemapConfig = serverConfig.get('tilemap');
+          const regionmapsConfig = serverConfig.get('regionmap');
+          const mapConfig = serverConfig.get('map');
+
+
+          regionmapsConfig.layers =  (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
+
           return {
             kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
+            regionmapsConfig: regionmapsConfig,
+            mapConfig: mapConfig,
             tilemapsConfig: {
               deprecated: {
                 isOverridden: isOverridden,
                 config: tilemapConfig,
-              },
-              manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
+              }
             }
           };
         },
@@ -123,7 +132,8 @@ module.exports = function (kibana) {
 
       translations: [
         resolve(__dirname, './translations/en.json')
-      ]
+      ],
+      mappings
     },
 
     preInit: async function (server) {
@@ -142,10 +152,12 @@ module.exports = function (kibana) {
       // uuid
       manageUuid(server);
       // routes
-      ingest(server);
       search(server);
       settings(server);
       scripts(server);
+      importApi(server);
+      exportApi(server);
+      registerSuggestionsApi(server);
       server.expose('systemApi', systemApi);
     }
   });

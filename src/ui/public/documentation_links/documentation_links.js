@@ -1,12 +1,9 @@
-import semver from 'semver';
-import metadata from '../metadata';
+import { metadata } from '../metadata';
 
-const major = semver.major(metadata.version);
-const minor = semver.minor(metadata.version);
-const urlVersion = `${major}.${minor}`;
+const urlVersion = metadata.branch;
 const baseUrl = 'https://www.elastic.co/';
 
-export default {
+export const documentationLinks = {
   filebeat: {
     installation: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-installation.html`,
     configuration: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-configuration.html`,
@@ -22,5 +19,12 @@ export default {
     painlessApi: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless.html#painless-api`,
     painlessSyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless-syntax.html`,
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
-  }
+  },
+  query: {
+    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`,
+    queryDsl: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl.html`,
+  },
+  date: {
+    dateMath: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/common-options.html#date-math`
+  },
 };

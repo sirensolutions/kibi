@@ -8,7 +8,7 @@ import intervalTemplate from 'ui/chrome/config/interval.html';
 import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
-export default function ($compile) {
+export function KbnTopNavControllerProvider($compile) {
   return class KbnTopNavController {
     constructor(opts = []) {
       if (opts instanceof KbnTopNavController) {

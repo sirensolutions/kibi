@@ -1,6 +1,6 @@
-import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import { Notifier } from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 
-export default function CourierFetchNotifier() {
+export function CourierNotifierProvider() {
   return new Notifier({
     location: 'Courier Fetch'
   });

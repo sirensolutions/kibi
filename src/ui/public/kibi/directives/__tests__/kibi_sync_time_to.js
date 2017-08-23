@@ -49,7 +49,7 @@ describe('Kibi Components', function () {
         searchSource: {
           index: function () {
             return {
-              hasTimeField: function () {
+              isTimeBased: function () {
                 return true;
               }
             };

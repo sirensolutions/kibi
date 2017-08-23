@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import pkg from '../utils/package_json';
+import { pkg } from '../utils';
 import Command from './command';
 import serveCommand from './serve/serve';
 
-// siren: kibi commands
+// kibi: kibi commands
 import replaceEncryptionKeyCommand from './kibi/replace_encryption_key';
 import upgradeCommand from './kibi/upgrade';
 import backupCommand from './kibi/backup';
@@ -21,6 +21,7 @@ program
 
 // attach commands
 serveCommand(program);
+//TODO MERGE 5.5.2 add kibi comment as needed
 replaceEncryptionKeyCommand(program);
 upgradeCommand(program);
 backupCommand(program);

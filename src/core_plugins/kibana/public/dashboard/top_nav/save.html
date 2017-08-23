@@ -12,14 +12,35 @@
     <!--<input id="dashboardTitle" type="text" ng-model="opts.dashboard.title" class="form-control" placeholder="Dashboard title" input-focus="select">-->
   <!--</div>-->
   <div class="kuiLocalDropdownTitle">Save {{opts.displayName}}</div>
-  <input
-    class="kuiLocalDropdownInput"
-    id="dashboardTitle"
-    type="text"
-    ng-model="model.title"
-    placeholder="Dashboard title"
-    input-focus="select"
-  >
+  <div class="kuiLocalDropdownSection">
+    <div class="kuiLocalDropdownHeader">
+      <div class="kuiLocalDropdownHeader__label">
+        Title
+      </div>
+    </div>
+    <input
+      class="kuiLocalDropdownInput"
+      id="dashboardTitle"
+      type="text"
+      ng-model="model.title"
+      placeholder="Dashboard title"
+      input-focus="select"
+    >
+  </div>
+  <div class="kuiLocalDropdownSection">
+    <div class="kuiLocalDropdownHeader">
+      <div class="kuiLocalDropdownHeader__label">
+        Description
+      </div>
+    </div>
+    <input
+      class="kuiLocalDropdownInput"
+      id="dashboardDescription"
+      type="text"
+      ng-model="model.description"
+      placeholder="Dashboard description"
+    >
+  </div>
 
   <saved-object-save-as-check-box saved-object="opts.dashboard"></saved-object-save-as-check-box>
 
@@ -60,7 +81,13 @@
   </div>
   <!-- kibi: end -->
 
-  <button type="submit" ng-disabled="!model.title" class="btn btn-primary" aria-label="Save dashboard">
+  <button
+    data-test-subj="confirmSaveDashboardButton"
+    type="submit"
+    ng-disabled="!model.title"
+    class="kuiButton kuiButton--primary"
+    aria-label="Save dashboard"
+  >
     Save
   </button>
 </form>

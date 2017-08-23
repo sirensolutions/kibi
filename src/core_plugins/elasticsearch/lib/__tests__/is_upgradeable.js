@@ -2,6 +2,7 @@ import _ from 'lodash';
 import expect from 'expect.js';
 
 import isUpgradeable from '../is_upgradeable';
+//TODO MERGE 5.5.2 add kibi comments as needed
 import pkg from '../../../../utils/package_json';
 let version = pkg.kibi_version;
 

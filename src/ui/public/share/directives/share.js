@@ -7,18 +7,17 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import { Notifier } from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 
-import urlShortenerProvider from '../lib/url_shortener';
+import { UrlShortenerProvider } from '../lib/url_shortener';
 
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import shareTemplate from 'ui/share/views/share.html';
+const app = uiModules.get('kibana');
 
-uiModules
-.get('kibana')
-.directive('share', function (Private) {
+app.directive('share', function (Private) {
   const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const urlShortener = Private(urlShortenerProvider);
+  const urlShortener = Private(UrlShortenerProvider);
 
   return {
     restrict: 'E',
@@ -77,11 +76,11 @@ uiModules
 
       this.makeUrlEmbeddable = (url, kibiNavbarVisible = false) => {
         let embedQueryParam = '?embed=true';
-        // siren: added kibiNavbarVisible parameter
+        // kibi: added kibiNavbarVisible parameter
         if (kibiNavbarVisible) {
           embedQueryParam += '&kibiNavbarVisible=true';
         }
-        // siren: end
+        // kibi: end
         const urlHasQueryString = url.indexOf('?') !== -1;
         if (urlHasQueryString) {
           return url.replace('?', `${embedQueryParam}&`);
@@ -112,7 +111,7 @@ uiModules
         this.urls = {
           original: getOriginalUrl(),
           snapshot: getSnapshotUrl(),
-          shortSnapshot: undefined      // siren: this is the one with goto
+          shortSnapshot: undefined      // kibi: this is the one with goto
         };
 
         // Whenever the URL changes, reset the Short URLs to regular URLs.
@@ -122,19 +121,21 @@ uiModules
           shortSnapshotIframe2: true
         };
 
-        // siren: generate shortened URL
+        // kibi: generate shortened URL
         // be careful as this generates new shortened URL
         // on every state change
         urlShortener.shortenUrl(this.urls.snapshot).then(shortUrl => {
           this.urls.shortSnapshot = shortUrl;
         });
-        // siren: end
+        // kibi: end
       };
 
       // When the URL changes, update the links in the UI.
       $scope.$watch(() => $location.absUrl(), () => {
         updateUrls();
       });
+
+      //TODO MERGE 5.5.2 explain why we remove the kibana code and add kibi comment
 
       this.copyToClipboard = selector => {
         const notify = new Notifier({

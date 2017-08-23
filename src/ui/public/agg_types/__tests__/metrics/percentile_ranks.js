@@ -1,11 +1,13 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggTypeMetricPercentileRanksProvider from 'ui/agg_types/metrics/percentile_ranks';
-import VisProvider from 'ui/vis';
+import { AggTypesMetricsPercentileRanksProvider } from 'ui/agg_types/metrics/percentile_ranks';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+//TODO MERGE 5.5.2 add kibi comments
+
 import MockState from 'fixtures/mock_state';
 
-describe('AggTypeMetricPercentileRanksProvider class', function () {
+describe('AggTypesMetricsPercentileRanksProvider class', function () {
 
   let Vis;
   let indexPattern;
@@ -19,7 +21,7 @@ describe('AggTypeMetricPercentileRanksProvider class', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    aggTypeMetricPercentileRanks = Private(AggTypeMetricPercentileRanksProvider);
+    aggTypeMetricPercentileRanks = Private(AggTypesMetricsPercentileRanksProvider);
   }));
 
   it('uses the custom label if it is set', function () {

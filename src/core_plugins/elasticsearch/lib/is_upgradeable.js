@@ -1,4 +1,6 @@
 import semver from 'semver';
+//TODO MERGE 5.5.2 check this bcos is complete different from upstream
+
 const preReleaseRegex = /(\d+\.\d+\.\d+)-(rc|alpha|beta)-?(\d+)/i;
 
 function computePreReleaseIndex(matches) {

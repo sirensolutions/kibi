@@ -1,8 +1,8 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import DomLocationProvider from 'ui/dom_location';
+import { DomLocationProvider } from 'ui/dom_location';
 import { constant } from 'lodash';
 import { cloneDeep } from 'lodash';
 import $ from 'jquery';

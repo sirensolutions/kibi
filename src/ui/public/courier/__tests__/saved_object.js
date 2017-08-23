@@ -1,18 +1,17 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import BluebirdPromise from 'bluebird';
 
-import SavedObjectFactory from '../saved_object/saved_object';
-import IndexPatternFactory from 'ui/index_patterns/_index_pattern';
-import DocSourceProvider from '../data_source/admin_doc_source';
-
-import { stubMapper } from 'test_utils/stub_mapper';
+import { SavedObjectProvider } from '../saved_object/saved_object';
+import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
+import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 
 // kibi: imports
 import SavedObjectSourceProvider from 'ui/courier/data_source/savedobject_source';
 import Notifier from 'ui/notify/notifier';
 // kibi: end
+import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -108,7 +107,9 @@ describe('Saved Object', function () {
     return savedObject.init();
   }
 
-  beforeEach(ngMock.module('kibana',
+  beforeEach(ngMock.module(
+    'kibana',
+    StubIndexPatternsApiClientModule,
     // Use the native window.confirm instead of our specialized version to make testing
     // this easier.
     function ($provide) {
@@ -116,19 +117,19 @@ describe('Saved Object', function () {
       $provide.decorator('confirmModalPromise', () => overrideConfirm);
     })
   );
+  //TODO MERGE 5.5.2 add kibi comments as needed
   beforeEach(ngMock.inject(function (es, esAdmin, Private, $window, savedObjectsAPI) {
-    SavedObject = Private(SavedObjectFactory);
-    IndexPattern = Private(IndexPatternFactory);
+    SavedObject = Private(SavedObjectProvider);
+    IndexPattern = Private(IndexPatternProvider);
     esAdminStub = esAdmin;
     esDataStub = es;
-    DocSource = Private(DocSourceProvider);
+    DocSource = Private(AdminDocSourceProvider);
     SavedObjectSource = Private(SavedObjectSourceProvider);
     window = $window;
 
     savedObjectsAPIStub = savedObjectsAPI;
 
     mockEsService();
-    stubMapper(Private);
   }));
 
   describe('save', function () {

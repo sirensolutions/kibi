@@ -15,7 +15,7 @@ import KibiSpyDataProvider from 'ui/kibi/spy/kibi_spy_data';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (kibiState, createNotifier, SavedVis, indexPatterns, Private, config, $timeout) {
+.directive('visualize', function ($rootScope, kibiState, createNotifier, SavedVis, indexPatterns, Private, config, $timeout) {
   const notify = createNotifier({
     location: 'Visualize'
   });
@@ -52,6 +52,7 @@ uiModules
 
       const getVisEl = getter('.visualize-chart');
       const getVisContainer = getter('.vis-container');
+      const $visContainer = getVisContainer();
       const getSpyContainer = getter('.visualize-spy-container');
 
       // Show no results message when isZeroHits is true and it requires search
@@ -256,6 +257,12 @@ uiModules
         if (oldRenderbot && newRenderbot !== oldRenderbot) {
           oldRenderbot.destroy();
         }
+      });
+
+      $visContainer.on('scroll', function () {
+        const columns = $scope.vis.params.columns;
+        const docViewTop = $el.offset().top;
+        $rootScope.$broadcast('visScrolled', docViewTop, columns);
       });
 
       $scope.$on('$destroy', function () {

@@ -1,11 +1,12 @@
 import _ from 'lodash';
+import $ from 'jquery';
 import 'ui/filters/short_dots';
 import headerHtml from 'ui/doc_table/components/table_header.html';
 import uiModules from 'ui/modules';
 const module = uiModules.get('app/discover');
 
 
-module.directive('kbnTableHeader', function (shortDotsFilter) {
+module.directive('kbnTableHeader', function (shortDotsFilter, $timeout) {
   return {
     restrict: 'A',
     scope: {
@@ -23,7 +24,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       disableTimeField: '=?'
     },
     template: headerHtml,
-    controller: function ($rootScope, $scope) {
+    controller: function ($rootScope, $scope, $element) {
       const isSortableColumn = function isSortableColumn(columnName) {
         return (
           !!$scope.indexPattern
@@ -31,6 +32,83 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
           && _.get($scope, ['indexPattern', 'fields', 'byName', columnName, 'sortable'], false)
         );
       };
+
+      const deleteIt = $element.parent();
+
+      $element[0].querySelector('#fixed-header').style.display = 'none';
+      const headerOffsets = [];
+
+      const initialHeadersClientWidth = function () {
+        headerOffsets.length = 0;
+        const headers = $element[0].querySelector('#relative-header').cells;
+        for(let i = 0; i < headers.length; i++) {
+          headerOffsets.push(headers[i].clientWidth);
+        }
+      };
+
+      const allignFixedHeaderWidth = function () {
+        for(let i = 0; i < $element[0].childNodes[0].cells.length; i++) {
+          $element[0].querySelector('#fixed-header').cells[i].width = headerOffsets[i];
+        }
+      };
+
+      $timeout(function () {
+        initialHeadersClientWidth();
+        allignFixedHeaderWidth();
+      });
+
+      $scope.$watch(
+        function () {
+          return {
+            width: $element.parent().width(),
+            height: $element.parent().height(),
+          };
+        },
+       function (newValue, oldValue) {
+         if(newValue === oldValue) {
+           return;
+         }
+
+         $timeout(function () {
+           initialHeadersClientWidth();
+           allignFixedHeaderWidth();
+         });
+       },
+       true
+    );
+
+      $scope.$watch(function () { return $element.parent().is(':visible'); },
+      function (oldValue,newValue) {
+        if(newValue === oldValue) {
+          return;
+        }
+        $timeout(function () {
+          initialHeadersClientWidth();
+          allignFixedHeaderWidth();
+        });
+      });
+
+      $scope.$on('visScrolled', function (event, docViewTop, columns) {
+
+        if(!_.isEqual(event.currentScope.columns, columns)) {
+          return;
+        }
+
+        const elemTop =  $element.offset().top;
+
+        if (elemTop > docViewTop) {
+          $element[0].querySelector('#fixed-header').style.display = 'none';
+          $element[0].querySelector('#relative-header').style.visibility = '';
+        } else {
+          $element[0].querySelector('#relative-header').style.visibility = 'hidden';
+          $element[0].querySelector('#fixed-header').style.position = 'absolute';
+          $element[0].querySelector('#fixed-header').style.display = '';
+          $element[0].querySelector('#fixed-header').style.top = '0px';
+          $element[0].querySelector('#fixed-header').style.backgroundColor = 'white';
+          $element[0].querySelector('#fixed-header').style.zIndex = '100';
+          allignFixedHeaderWidth();
+        }
+      });
 
       $scope.tooltip = function (column) {
         if (!isSortableColumn(column)) return '';

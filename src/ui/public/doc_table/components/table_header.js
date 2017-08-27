@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 import 'ui/filters/short_dots';
 import headerHtml from 'ui/doc_table/components/table_header.html';
 import uiModules from 'ui/modules';
@@ -33,70 +32,72 @@ module.directive('kbnTableHeader', function (shortDotsFilter, $timeout) {
         );
       };
 
-      const deleteIt = $element.parent();
-
+      //kibi: these are required for fixed header in kibi enhanced table
       $element[0].querySelector('#fixed-header').style.display = 'none';
       const headerOffsets = [];
 
+      //assign fixed header columns width from relative header
       const initialHeadersClientWidth = function () {
         headerOffsets.length = 0;
         const headers = $element[0].querySelector('#relative-header').cells;
         for(let i = 0; i < headers.length; i++) {
-          headerOffsets.push(headers[i].clientWidth);
+          const width = Math.round((headers[i].getBoundingClientRect().width) * 100) / 100;
+          headerOffsets.push(width);
         }
       };
 
-      const allignFixedHeaderWidth = function () {
-        for(let i = 0; i < $element[0].childNodes[0].cells.length; i++) {
-          $element[0].querySelector('#fixed-header').cells[i].width = headerOffsets[i];
+      //set fixed header position in table
+      const allignFixedHeader = function (visWidth, visLeftOffset, parentLeftOffset) {
+        if (visWidth && visLeftOffset && parentLeftOffset) {
+          $element[0].querySelector('#fixed-header').style.left = parentLeftOffset - visLeftOffset + 'px';
+          $element[0].querySelector('#fixed-header').style.width = visWidth - parentLeftOffset + visLeftOffset - 14 + 'px';
+        } else {
+          $element[0].querySelector('#fixed-header').style.width = '95%';
+          $element[0].querySelector('#fixed-header').style.left = '';
+        }
+
+        for(let i = 0; i < $element[0].querySelector('#fixed-header').cells.length; i++) {
+          $element[0].querySelector('#fixed-header').cells[i].setAttribute('style','width: ' + headerOffsets[i] +
+          'px; min-width: ' + headerOffsets[i] + 'px;');
         }
       };
 
       $timeout(function () {
         initialHeadersClientWidth();
-        allignFixedHeaderWidth();
+        allignFixedHeader();
       });
 
-      $scope.$watch(
-        function () {
-          return {
-            width: $element.parent().width(),
-            height: $element.parent().height(),
-          };
-        },
-       function (newValue, oldValue) {
-         if(newValue === oldValue) {
-           return;
-         }
+      //listen 'visResized' event from visualize.js and configure fixed header
+      $scope.$on('visResized', function (event, visLeftOffset, visWidth, columns) {
+        if(!_.isEqual(event.currentScope.columns, columns)) {
+          return;
+        }
 
-         $timeout(function () {
-           initialHeadersClientWidth();
-           allignFixedHeaderWidth();
-         });
-       },
-       true
-    );
+        const parentLeftOffset = $element.parent().offset().left;
+        initialHeadersClientWidth();
+        allignFixedHeader(visWidth, visLeftOffset, parentLeftOffset);
+      });
 
+      //when user switch to standart template configure fixed header
       $scope.$watch(function () { return $element.parent().is(':visible'); },
       function (oldValue,newValue) {
         if(newValue === oldValue) {
           return;
         }
-        $timeout(function () {
-          initialHeadersClientWidth();
-          allignFixedHeaderWidth();
-        });
+        initialHeadersClientWidth();
+        allignFixedHeader();
       });
 
-      $scope.$on('visScrolled', function (event, docViewTop, columns) {
-
+      //listen 'visScrolled' event from visualize.js and configure fixed header
+      $scope.$on('visScrolled', function (event, visTopOffset, visLeftOffset, visWidth, columns) {
         if(!_.isEqual(event.currentScope.columns, columns)) {
           return;
         }
 
         const elemTop =  $element.offset().top;
+        const parentLeftOffset = $element.parent().offset().left;
 
-        if (elemTop > docViewTop) {
+        if (elemTop > visTopOffset) {
           $element[0].querySelector('#fixed-header').style.display = 'none';
           $element[0].querySelector('#relative-header').style.visibility = '';
         } else {
@@ -106,9 +107,14 @@ module.directive('kbnTableHeader', function (shortDotsFilter, $timeout) {
           $element[0].querySelector('#fixed-header').style.top = '0px';
           $element[0].querySelector('#fixed-header').style.backgroundColor = 'white';
           $element[0].querySelector('#fixed-header').style.zIndex = '100';
-          allignFixedHeaderWidth();
+          $element[0].querySelector('#fixed-header').style.overflow = 'hidden';
+          $element[0].querySelector('#fixed-header').style.marginRight = '13px';
+
+          initialHeadersClientWidth();
+          allignFixedHeader(visWidth, visLeftOffset, parentLeftOffset);
         }
       });
+      //kibi: end
 
       $scope.tooltip = function (column) {
         if (!isSortableColumn(column)) return '';

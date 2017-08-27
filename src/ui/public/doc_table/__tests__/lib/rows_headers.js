@@ -120,7 +120,7 @@ describe('Doc Table', function () {
     });
 
     describe('adding and removing columns', function () {
-      columnTests('th', $elem);
+      columnTests('tr#relative-header th', $elem);
     });
 
     describe('cycleSortOrder function', function () {

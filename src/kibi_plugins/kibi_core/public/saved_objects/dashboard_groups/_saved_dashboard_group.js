@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('plugins/kibi_core/saved_objects/dashboard_groups')

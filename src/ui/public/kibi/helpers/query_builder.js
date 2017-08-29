@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
-import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
+import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
 
 /**
 * Create a filter that can be reversed for filters with negate set

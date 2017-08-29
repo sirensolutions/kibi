@@ -2,9 +2,9 @@ import { IndexPatternMissingIndices, IndexPatternAuthorizationError } from 'ui/e
 import _ from 'lodash';
 import moment from 'moment';
 import EnhanceFieldsWithCapabilitiesProvider from 'ui/index_patterns/_enhance_fields_with_capabilities';
-import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_transform_mapping_into_fields';
-import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
-import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
+import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/kibi/components/commons/_transform_mapping_into_fields';
+import IndexPatternsPatternToWildcardProvider from 'ui/kibi/components/commons/_pattern_to_wildcard';
+import IndexPatternsLocalCacheProvider from 'ui/kibi/components/commons/_local_cache';
 
 // kibi: imports
 import PathsProvider from 'ui/kibi/index_patterns/_get_paths_for_index_pattern';

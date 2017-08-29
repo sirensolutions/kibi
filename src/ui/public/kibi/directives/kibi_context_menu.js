@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import kibiContextMenuTemplate from 'ui/kibi/directives/kibi_context_menu_template.html';
 import 'ui/kibi/directives/kibi_context_menu.less';
 

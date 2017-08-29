@@ -1,9 +1,9 @@
 import '../dashboard_nav_edit_link/dashboard_nav_edit_link';
 import './dashboard_switcher.less';
 import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
-import QueryFilterProvider from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import template from './dashboard_switcher.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import _ from 'lodash';
 import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
@@ -14,7 +14,7 @@ uiModules
 .directive('dashboardSwitcher', function (dashboardGroups, dashboardsNavState, createNotifier, kibiState,
   Private, $rootScope, globalNavState, kbnUrl, $timeout) {
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
-  const queryFilter = Private(QueryFilterProvider);
+  const queryFilter = Private(FilterBarQueryFilterProvider);
   const notify = createNotifier({
     location: 'Dashboard Navigation Bar'
   });

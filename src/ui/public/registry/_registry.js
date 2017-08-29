@@ -86,4 +86,3 @@ export function uiRegistry(spec) {
 
   return registry;
 }
-

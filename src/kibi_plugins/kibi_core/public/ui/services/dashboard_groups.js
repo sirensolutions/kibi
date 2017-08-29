@@ -1,11 +1,11 @@
 import QueryBuilderProvider from 'ui/kibi/helpers/query_builder';
-import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
+import { DashboardHelperFactory } from 'ui/kibi/helpers/dashboard_helper';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
 import _ from 'lodash';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
-import SimpleEmitter from 'ui/utils/simple_emitter';
+import { SimpleEmitter } from 'ui/utils/simple_emitter';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 
 uiRoutes
@@ -20,7 +20,7 @@ uiModules
 .service('dashboardGroups', (createNotifier, es, $timeout, kibiState, Private, savedDashboards,
                              savedDashboardGroups, Promise, kbnIndex, joinExplanation, getAppState) => {
   const notify = createNotifier();
-  const dashboardHelper = Private(DashboardHelperProvider);
+  const dashboardHelper = Private(DashboardHelperFactory);
   const queryBuilder = Private(QueryBuilderProvider);
   const searchHelper = new SearchHelper(kbnIndex);
   const selectDelay = 750;

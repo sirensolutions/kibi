@@ -1,6 +1,6 @@
 import chrome from 'ui/chrome';
 import _ from 'lodash';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import { ShardFailure } from 'ui/errors';
 
 export default function ($http) {

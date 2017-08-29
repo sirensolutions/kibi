@@ -3,7 +3,7 @@ import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 import 'ui/kibi/directives/kibi_param_entity_uri';
 import 'ui/kibi/components/query_engine_client/query_engine_client';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import kibiUtils from 'kibiutils';
 

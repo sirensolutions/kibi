@@ -1,10 +1,10 @@
-import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
+import RelationsHelperFactory from 'ui/kibi/helpers/relations_helper';
 import QueryBuilderProvider from 'ui/kibi/helpers/query_builder';
 import _ from 'lodash';
 
 export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private) {
   const queryBuilder = Private(QueryBuilderProvider);
-  const relationsHelper = Private(RelationsHelperProvider);
+  const relationsHelper = Private(RelationsHelperFactory);
 
   function KibiSequentialJoinVisHelper() {}
 

@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import Eeg from 'kibi-eeg';
 import chrome from 'ui/chrome';
 import { endsWith } from 'lodash';

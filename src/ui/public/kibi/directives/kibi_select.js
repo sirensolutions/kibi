@@ -1,5 +1,5 @@
 import 'ui/kibi/directives/kibi_angular_qtip2';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import kibiUtils from 'kibiutils';
 import _ from 'lodash';
 import SelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';

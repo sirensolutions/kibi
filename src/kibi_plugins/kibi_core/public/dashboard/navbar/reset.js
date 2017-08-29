@@ -1,6 +1,6 @@
-import registry from 'ui/registry/navbar_extensions';
+import { NavBarExtensionsRegistryProvider } from 'ui/registry/navbar_extensions';
 
-registry.register(function (kibiState) {
+NavBarExtensionsRegistryProvider.register(function (kibiState) {
   return {
     appName: 'dashboard',
     key: 'reset',

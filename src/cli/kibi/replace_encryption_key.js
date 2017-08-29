@@ -4,7 +4,7 @@ import { merge } from 'lodash';
 import Logger from './logger';
 import readYamlConfig from '../serve/read_yaml_config';
 import { resolve } from 'path';
-import fromRoot from '../../utils/from_root';
+import { fromRoot } from '../../utils/from_root';
 
 const pathCollector = function () {
   const paths = [];
@@ -117,4 +117,3 @@ export default function (program) {
     )
     .action(processCommand);
 };
-

@@ -1,4 +1,4 @@
-import PatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
+import PatternToWildcardProvider from './_pattern_to_wildcard';
 
 export default function (Private) {
   const patternToWildcard = Private(PatternToWildcardProvider);

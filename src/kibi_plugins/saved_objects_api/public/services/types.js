@@ -1,5 +1,5 @@
 import chrome from 'ui/chrome';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 /**
  * Returns a mutable Set of types managed by the saved objects API.

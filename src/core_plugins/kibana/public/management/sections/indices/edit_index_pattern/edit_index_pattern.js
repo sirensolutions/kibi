@@ -9,7 +9,7 @@ import UrlProvider from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import template from './edit_index_pattern.html';
+import editTemplate from './edit_index_pattern.html';
 
 // kibi: import authorization error
 import { IndexPatternAuthorizationError } from 'ui/errors';

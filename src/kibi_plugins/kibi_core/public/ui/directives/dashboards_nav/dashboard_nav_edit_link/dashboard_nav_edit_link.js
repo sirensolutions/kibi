@@ -7,8 +7,8 @@ import './dashboard_nav_edit_link.less';
 import 'ui/kibi/directives/kibi_context_menu';
 import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dashboard_view_mode';
 import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
-import uiModules from 'ui/modules';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('kibana')
@@ -201,7 +201,7 @@ uiModules
               currentKey: item.topNavKey
             }
           };
-          hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
+          HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
           globalNavState.setOpen(false);
           dashboardGroups.selectDashboard(id);
         }

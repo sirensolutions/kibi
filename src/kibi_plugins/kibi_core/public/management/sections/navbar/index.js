@@ -1,4 +1,4 @@
-import registry from 'ui/registry/navbar_extensions';
+import { NavBarExtensionsRegistryProvider } from 'ui/registry/navbar_extensions';
 import angular from 'angular';
 import openTemplate from './load_object.html';
 
@@ -71,7 +71,7 @@ function _hideButton(path, ...sectionNames) {
 }
 
 // register the new button
-registry.register(function ($document, $location) {
+NavBarExtensionsRegistryProvider.register(function ($document, $location) {
   return {
     appName: 'management-subnav',
     key: 'new',

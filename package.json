@@ -63,7 +63,8 @@
     "mocha": "echo 'use `node scripts/mocha`' && false",
     "sterilize": "grunt sterilize",
     "uiFramework:start": "grunt uiFramework:start",
-    "uiFramework:build": "grunt uiFramework:build"
+    "uiFramework:build": "grunt uiFramework:build",
+    "validate": "npm ls"
   },
   "repository": {
     "type": "git",
@@ -131,7 +132,7 @@
     "good-squeeze": "2.1.0",
     "gridster": "0.5.6",
     "h2o2": "5.1.1",
-    "handlebars": "4.0.5",
+    "handlebars": "2.0.0",
     "hapi": "14.2.0",
     "imports-loader": "0.6.4",
     "inert": "4.0.2",
@@ -199,7 +200,6 @@
     "webpack": "github:elastic/webpack#fix/query-params-for-aliased-loaders",
     "wreck": "6.2.0",
     "yauzl": "2.7.0",
-
     "requirefrom": "0.2.1",
     "ng-tags-input": "3.0.0",
     "antlr4": "4.5.2",
@@ -213,19 +213,19 @@
     "lru-cache": "4.0.2",
     "request-promise": "4.1.1",
     "node-forge": "^0.6.37",
-    "kibiutils": "sirensolutions/kibiutils#1.8.0",
+    "kibiutils": "sirensolutions/kibiutils#1.9.0",
     "sqlite3": "3.1.4",
     "mysql": "2.10.2",
     "pg": "4.5.5",
     "jdbc": "0.3.1",
     "jsonpath": "0.2.5",
-    "handlebars": "2.0.0",
     "kibi-h2o2": "sirensolutions/h2o2#5.4.0-kibi-1",
     "angular-cookies": "1.4.8",
     "elasticdump": "3.1.0",
     "syswide-cas": "3.0.0",
     "fontawesome-iconpicker": "sirensolutions/fontawesome-iconpicker#1.2.1-kibi-fontawesome-compatible",
-    "d3-cloud": "sirensolutions/d3-cloud#v1.2.1-kibi-5.4.0"
+    "d3-cloud": "sirensolutions/d3-cloud#v1.2.1-kibi-5.4.0",
+    "@spalger/filesaver": "1.1.2"
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.6.1",
@@ -306,5 +306,10 @@
   "engines": {
     "node": "6.11.1",
     "npm": "3.10.10"
-  }
+  },
+  "pre-commit": [
+    "lint",
+    "validate",
+    "test"
+  ]
 }

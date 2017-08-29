@@ -14,7 +14,7 @@ import { StateProvider } from 'ui/state_management/state';
 import 'ui/persisted_state';
 
 // kibi: imports
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
 const urlParam = '_a';
@@ -38,11 +38,11 @@ export function AppStateProvider(Private, $rootScope, $location, $injector) {
 
     // kibi: Merge the parameters saved on kibi_appstate_param
     if (defaults) {
-      const passedState = JSON.parse(hashedItemStoreSingleton.getItem('kibi_appstate_param'));
+      const passedState = JSON.parse(HashedItemStoreSingleton.getItem('kibi_appstate_param'));
       if (passedState && passedState.appState) {
         _.merge(defaults, _.cloneDeep(passedState.appState));
         delete passedState.appState;
-        hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
+        HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
       }
     }
     // kibi: end

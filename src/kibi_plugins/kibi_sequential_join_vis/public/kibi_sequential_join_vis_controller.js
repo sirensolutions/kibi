@@ -2,14 +2,14 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import chrome from 'ui/chrome';
-import UiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { IndexPatternAuthorizationError } from 'ui/errors';
 
 import { onVisualizePage } from 'ui/kibi/utils/on_page';
 
-import QueryFilterProvider from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import KibiSequentialJoinVisHelperProvider from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
-import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
+import RelationsHelperFactory from 'ui/kibi/helpers/relations_helper';
 import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
@@ -28,11 +28,11 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   });
   const appState = getAppState();
 
-  const relationsHelper = Private(RelationsHelperProvider);
+  const relationsHelper = Private(RelationsHelperFactory);
   const kibiSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperProvider);
   const currentDashboardId = kibiState._getCurrentDashboardId();
   $scope.currentDashboardId = currentDashboardId;
-  const queryFilter = Private(QueryFilterProvider);
+  const queryFilter = Private(FilterBarQueryFilterProvider);
 
   $scope.btnCountsEnabled = function () {
     return config.get('kibi:enableAllRelBtnCounts');
@@ -398,6 +398,6 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   }
 }
 
-UiModules
+uiModules
 .get('kibana/kibi_sequential_join_vis', ['kibana'])
 .controller('KibiSequentialJoinVisController', controller);

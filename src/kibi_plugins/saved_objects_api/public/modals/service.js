@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import saveTemplate from './save.html';
 import saveController from './save';
 import openTemplate from './open.html';

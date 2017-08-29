@@ -13,7 +13,7 @@ import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_objec
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 // kibi: imports
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
 uiModules
@@ -109,8 +109,8 @@ uiModules
             panelId: getPersistedStateId($scope.panel),
             updated: false
           };
-          hashedItemStoreSingleton.setItem('kibi_panel_id', JSON.stringify(kibiPanelId));
-          hashedItemStoreSingleton.setItem('kibi_ui_state', $scope.savedObj.vis.getUiState().toString());
+          HashedItemStoreSingleton.setItem('kibi_panel_id', JSON.stringify(kibiPanelId));
+          HashedItemStoreSingleton.setItem('kibi_ui_state', $scope.savedObj.vis.getUiState().toString());
         }
         window.location.href = $scope.editUrl;
       };
@@ -164,13 +164,13 @@ uiModules
 
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
           // kibi: allows restore the uiState after click edit visualization on dashboard
-          const __panelid = hashedItemStoreSingleton.getItem('kibi_panel_id');
+          const __panelid = HashedItemStoreSingleton.getItem('kibi_panel_id');
           if (__panelid) {
             const { visId, panelId, updated } = JSON.parse(__panelid);
             if (visId === $scope.panel.id && panelId === getPersistedStateId($scope.panel) && updated) {
-              $scope.uiState.fromString(hashedItemStoreSingleton.getItem('kibi_ui_state'));
-              hashedItemStoreSingleton.removeItem('kibi_panel_id');
-              hashedItemStoreSingleton.removeItem('kibi_ui_state');
+              $scope.uiState.fromString(HashedItemStoreSingleton.getItem('kibi_ui_state'));
+              HashedItemStoreSingleton.removeItem('kibi_panel_id');
+              HashedItemStoreSingleton.removeItem('kibi_ui_state');
             }
           }
           // kibi: end

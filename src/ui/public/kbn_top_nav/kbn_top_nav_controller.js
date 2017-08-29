@@ -5,7 +5,7 @@ import filterTemplate from 'ui/chrome/config/filter.html';
 import intervalTemplate from 'ui/chrome/config/interval.html';
 
 // kibi: imports
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
 export function KbnTopNavControllerProvider($compile) {
@@ -92,13 +92,13 @@ export function KbnTopNavControllerProvider($compile) {
       this.$element = $element;
 
       // kibi: Makes a tab active using the currentKey saved on kibi_appstate_param
-      const passedState = JSON.parse(hashedItemStoreSingleton.getItem('kibi_appstate_param'));
+      const passedState = JSON.parse(HashedItemStoreSingleton.getItem('kibi_appstate_param'));
       if (passedState && passedState.topNav) {
         if (this.getItem(passedState.topNav.currentKey)) {
           this.setCurrent(passedState.topNav.currentKey);
         }
         delete passedState.topNav;
-        hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
+        HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
       }
       // kibi: end
 

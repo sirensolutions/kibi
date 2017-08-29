@@ -1,9 +1,9 @@
 import StrategyProvider from 'ui/courier/fetch/strategy/savedobject';
-import DocRequestProvider from 'ui/courier/fetch/request/doc_admin';
+import { AdminDocRequestProvider } from 'ui/courier/fetch/request/doc_admin';
 import _ from 'lodash';
 
 export default function SavedObjectRequestProvider(Private) {
-  const DocRequest = Private(DocRequestProvider);
+  const DocRequest = Private(AdminDocRequestProvider);
   const strategy = Private(StrategyProvider);
 
   _.class(SavedObjectRequest).inherits(DocRequest);

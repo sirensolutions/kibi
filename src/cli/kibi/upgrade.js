@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import { merge } from 'lodash';
 import readYamlConfig from '../serve/read_yaml_config';
 import { resolve } from 'path';
-import fromRoot from '../../utils/from_root';
+import { fromRoot } from '../../utils/from_root';
 import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';
 import MigrationLogger from 'kibiutils/lib/migrations/migration_logger';
 
@@ -127,4 +127,3 @@ export default function (program) {
     )
     .action(processCommand);
 };
-

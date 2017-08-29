@@ -1,6 +1,6 @@
 import 'ui/kibi/directives/kibi_menu_template.less';
 import $ from 'jquery';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('app/dashboard')

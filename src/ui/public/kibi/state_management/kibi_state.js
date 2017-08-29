@@ -2,23 +2,24 @@ import _ from 'lodash';
 import { isEqual } from 'lodash';
 import qs from 'ui/utils/query_string';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
-import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
+import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
 import { toJson } from 'ui/utils/aggressive_parse';
 import angular from 'angular';
 import { onManagementPage, onDashboardPage, onVisualizePage } from 'ui/kibi/utils/on_page';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
-import StateManagementStateProvider from 'ui/state_management/state';
-import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
+import { StateProvider } from 'ui/state_management/state';
+import RelationsHelperFactory from 'ui/kibi/helpers/relations_helper';
 import { getAppUrl, getBasePath } from 'ui/chrome';
 import { IndexPatternMissingIndices } from 'ui/errors';
+import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
 
 function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns, globalState,
     elasticsearchPlugins, $location, config, Private, createNotifier) {
-  const State = Private(StateManagementStateProvider);
+  const State = Private(StateProvider);
   const notify = createNotifier({ location: 'Kibi State' });
-  const relationsHelper = Private(RelationsHelperProvider);
-  const decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
+  const relationsHelper = Private(RelationsHelperFactory);
+  const decorateQuery = Private(DecorateQueryProvider);
 
   _.class(KibiState).inherits(State);
   function KibiState(defaults) {

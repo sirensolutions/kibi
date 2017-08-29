@@ -3,7 +3,7 @@ import rison from 'rison-node';
 
 import {
   createStateHash,
-  hashedItemStoreSingleton,
+  HashedItemStoreSingleton,
   isStateHash,
 } from 'ui/state_management/state_storage';
 
@@ -37,9 +37,9 @@ export default function hashUrl(url) {
           try {
             const json = angular.toJson(rison.decode(decodeURIComponent(stateValue)));
             const hash = createStateHash(json, hash => {
-              return hashedItemStoreSingleton.getItem(hash);
+              return HashedItemStoreSingleton.getItem(hash);
             });
-            const isItemSet = hashedItemStoreSingleton.setItem(hash, json);
+            const isItemSet = HashedItemStoreSingleton.setItem(hash, json);
 
             if (!isItemSet) {
               error = new Error('Unable to store the state from of the shared URL in the session storage,' +

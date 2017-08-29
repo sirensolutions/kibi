@@ -8,10 +8,10 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 
 // kibi: imports
-import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
+import { RefreshKibanaIndex } from 'plugins/kibana/management/sections/indices/refresh_kibana_index';
 import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
-import ObjectActionsRegistry from 'ui/registry/object_actions';
+import { ObjectActionsRegistryProvider } from 'ui/registry/object_actions';
 import ImportExportProvider from 'plugins/kibi_core/management/sections/objects/import_export_helper';
 // kibi: end
 
@@ -33,7 +33,7 @@ uiModules.get('apps/management')
   // kibi: all below dependencies added by kibi to improve import/export and delete operations
   const cache = Private(CacheProvider);
   const deleteHelper = Private(DeleteHelperProvider);
-  const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
+  const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const importExportHelper = Private(ImportExportProvider);
   // kibi: end
 
@@ -50,7 +50,7 @@ uiModules.get('apps/management')
       $scope.selectedItems = [];
 
       // kibi: object actions registry
-      $scope.objectActions = Private(ObjectActionsRegistry).toJSON();
+      $scope.objectActions = Private(ObjectActionsRegistryProvider).toJSON();
       // kibi: end
 
       this.areAllRowsChecked = function areAllRowsChecked() {

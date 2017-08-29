@@ -1,8 +1,8 @@
 import { saveAs } from '@spalger/filesaver';
 import { isObject, map } from 'lodash';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
-export default function ExportAsCsvProvider(Private, config) {
+export function ExportAsCsvProvider(Private, config) {
   const stringFormat = Private(RegistryFieldFormatsProvider).getDefaultInstance('string');
 
   function toCsv(config, rows, indexPattern, columns) {

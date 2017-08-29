@@ -6,7 +6,7 @@ import { uiModules } from 'ui/modules';
 
 // kibi: imports
 import CacheHelper from 'ui/kibi/helpers/cache_helper';
-import findByParam from 'ui/utils/find_by_param';
+import { findByParam } from 'ui/utils/find_by_param';
 // kibi: end
 
 uiModules.get('kibana')

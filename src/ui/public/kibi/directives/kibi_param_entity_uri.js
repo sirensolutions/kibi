@@ -2,7 +2,7 @@ import 'ui/kibi/directives/kibi_param_entity_uri.less';
 import 'ui/kibi/directives/kibi_select';
 import _ from 'lodash';
 import chrome from 'ui/chrome';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import IndexPathProvider from 'ui/kibi/components/commons/_index_path';
 import template from 'ui/kibi/directives/kibi_param_entity_uri.html';
 

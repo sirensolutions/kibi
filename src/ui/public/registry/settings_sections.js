@@ -1,6 +1,6 @@
-define(function (require) {
-  return require('ui/registry/_registry')({
-    name: 'settingsSections',
-    order: ['order']
-  });
+import { uiRegistry } from 'ui/registry/_registry';
+
+export const SettingsSectionsRegistryProvider = uiRegistry({
+  name: 'settingsSections',
+  order: ['order']
 });

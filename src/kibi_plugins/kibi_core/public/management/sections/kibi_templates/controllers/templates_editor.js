@@ -9,7 +9,7 @@ import 'ui/kibi/directives/kibi_param_entity_uri';
 import 'ace';
 import 'angular-sanitize';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import angular from 'angular';
 import template from 'plugins/kibi_core/management/sections/kibi_templates/index.html';

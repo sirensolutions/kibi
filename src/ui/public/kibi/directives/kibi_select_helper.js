@@ -3,7 +3,7 @@ import SparqlHelperProvider from 'ui/kibi/helpers/sparql_helper';
 import SqlHelperProvider from 'ui/kibi/helpers/sql_helper';
 import IndexPathProvider from 'ui/kibi/components/commons/_index_path';
 import DatasourceHelperProvider from 'ui/kibi/helpers/datasource_helper';
-import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
+import RelationsHelperFactory from 'ui/kibi/helpers/relations_helper';
 import kibiUtils from 'kibiutils';
 
 export default function KibiSelectHelperFactory(config, indexPatterns, Private, Promise, kibiState, es, savedSearches, savedTemplates,
@@ -16,7 +16,7 @@ export default function KibiSelectHelperFactory(config, indexPatterns, Private, 
   const sqlHelper = Private(SqlHelperProvider);
   const indexPath = Private(IndexPathProvider);
   const datasourceHelper = Private(DatasourceHelperProvider);
-  const relationsHelper = Private(RelationsHelperProvider);
+  const relationsHelper = Private(RelationsHelperFactory);
 
   KibiSelectHelper.prototype.getQueries = function () {
     return Promise.all([ savedQueries.find(), savedDatasources.find() ]).then(function (results) {

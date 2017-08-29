@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import { uiNotifier } from 'ui/notify/notifier'; // kibi: import stock notifier
+import { Notifier as uiNotifier } from 'ui/notify/notifier'; // kibi: import stock notifier
 import { Notifier } from 'kibie/notify/notifier'; // kibi: import ee notifier
 import 'ui/notify/directives';
 import { metadata } from 'ui/metadata';

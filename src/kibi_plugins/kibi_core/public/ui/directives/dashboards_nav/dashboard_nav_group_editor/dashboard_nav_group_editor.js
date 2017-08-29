@@ -3,7 +3,7 @@ import 'plugins/kibi_core/ui/directives/icon_picker';
 import dashboardNavGroupEditorTemplate from './dashboard_nav_group_editor.html';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 import './dashboard_nav_group_editor.less';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('kibana')

@@ -1,6 +1,6 @@
 import 'elasticsearch-browser/elasticsearch.angular.js';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 let client;
 

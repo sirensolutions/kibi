@@ -6,7 +6,7 @@ import { IndexPatternsGetIdsProvider } from '../_get_ids';
 import uiRoutes from 'ui/routes';
 
 // kibi: imports
-import RootSearchSourceProvider from 'ui/courier/data_source/_root_search_source';
+import { RootSearchSourceProvider } from 'ui/courier/data_source/_root_search_source';
 // kibi: end
 
 const notify = new Notifier({

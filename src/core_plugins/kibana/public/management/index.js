@@ -12,6 +12,7 @@ import 'ui/kbn_top_nav';
 // kibi: imports
 import _ from 'lodash';
 import moment from 'moment-timezone';
+import loadDefault from 'ui/index_patterns/route_setup/load_default';
 // kibi: end
 
 uiRoutes
@@ -24,8 +25,8 @@ uiRoutes
   redirectTo: '/management'
 });
 
-require('ui/index_patterns/route_setup/load_default')({
-  //TODO MERGE 5.5.2 add kibi comment
+//TODO MERGE 5.5.2 add kibi comment
+loadDefault({
   whenMissingRedirectTo: '/management/siren/index'
 });
 

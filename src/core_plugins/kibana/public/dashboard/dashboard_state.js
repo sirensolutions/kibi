@@ -8,7 +8,7 @@ import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState, getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 
 // kibi: need to call private on filter_utils
-import FilterUtilsProvider from './filter_utils';
+import { FilterUtilsProvider } from './filter_utils';
 
 let FilterUtils;
 // kibi: end

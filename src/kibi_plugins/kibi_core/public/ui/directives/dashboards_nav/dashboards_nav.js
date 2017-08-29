@@ -14,8 +14,8 @@ import dashboardsNavTemplate from './dashboards_nav.html';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dashboard_view_mode';
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
-import uiModules from 'ui/modules';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { uiModules } from 'ui/modules';
 import uiChrome from 'ui/chrome';
 
 uiModules
@@ -156,7 +156,7 @@ uiModules
                 viewMode: DashboardViewMode.EDIT
               }
             };
-            hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
+            HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
             $scope.$broadcast('kibi-dashboard-nav-saving', false);
             notify.info('Dashboard was successfuly created');
             $rootScope.$broadcast('kibi:dashboardgroup:changed');

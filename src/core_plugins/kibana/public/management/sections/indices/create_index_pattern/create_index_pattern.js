@@ -10,8 +10,10 @@ import { getDefaultPatternForInterval } from './get_default_pattern_for_interval
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { pickCreateButtonText } from './pick_create_button_text';
 
+//TODO MERGE 5.5.2 add kibi comment as needed
+
 uiRoutes
-.when('/management/kibana/index', {
+.when('/management/siren/index', {
   template,
 });
 
@@ -300,7 +302,7 @@ uiModules.get('apps/management')
         }
 
         indexPatterns.cache.clear(id);
-        kbnUrl.change(`/management/kibana/indices/${id}`);
+        kbnUrl.change(`/management/siren/indices/${id}`);
 
         // force loading while kbnUrl.change takes effect
         loadingCount = Infinity;

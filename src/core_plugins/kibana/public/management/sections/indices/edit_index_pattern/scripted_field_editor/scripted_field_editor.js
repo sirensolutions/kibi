@@ -4,13 +4,14 @@ import UrlProvider from 'ui/url';
 import uiRoutes from 'ui/routes';
 import template from './scripted_field_editor.html';
 
+//TODO MERGE 5.5.2 add kibi comment as needed
+
 uiRoutes
-.when('/management/kibana/indices/:indexPatternId/field/:fieldName*', { mode: 'edit' })
-.when('/management/kibana/indices/:indexPatternId/create-field/', { mode: 'create' })
-.defaults(/management\/kibana\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
+.when('/management/siren/indices/:indexPatternId/field/:fieldName*', { mode: 'edit' })
+.when('/management/siren/indices/:indexPatternId/create-field/', { mode: 'create' })
+.defaults(/management\/siren\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
   template,
   resolve: {
-    //TODO MERGE 5.5.2 add kibi comment as needed
     indexPattern: function ($route, courier) {
       return courier.indexPatterns.get($route.current.params.indexPatternId)
       .catch(courier.redirectWhenMissing('/management/siren/indices'));

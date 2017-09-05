@@ -9,8 +9,8 @@ import { uiModules } from 'ui/modules';
 
 // kibi: imports
 import { RefreshKibanaIndex } from 'plugins/kibana/management/sections/indices/refresh_kibana_index';
-import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import { ObjectActionsRegistryProvider } from 'ui/registry/object_actions';
 import ImportExportProvider from 'plugins/kibi_core/management/sections/objects/import_export_helper';
 // kibi: end
@@ -32,7 +32,7 @@ uiModules.get('apps/management')
 
   // kibi: all below dependencies added by kibi to improve import/export and delete operations
   const cache = Private(CacheProvider);
-  const deleteHelper = Private(DeleteHelperProvider);
+  const deleteHelper = Private(DeleteHelperFactory);
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const importExportHelper = Private(ImportExportProvider);
   // kibi: end

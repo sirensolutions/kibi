@@ -1,4 +1,4 @@
-import DatasourceHelperProvider from 'ui/kibi/helpers/datasource_helper';
+import { DatasourceHelperFactory } from 'ui/kibi/helpers/datasource_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
@@ -37,7 +37,7 @@ describe('Kibi Components', function () {
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
         $rootScope = _$rootScope_;
-        datasourceHelper = Private(DatasourceHelperProvider);
+        datasourceHelper = Private(DatasourceHelperFactory);
       });
     });
 
@@ -63,4 +63,3 @@ describe('Kibi Components', function () {
 
   });
 });
-

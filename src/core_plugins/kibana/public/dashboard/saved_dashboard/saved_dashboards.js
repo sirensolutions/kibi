@@ -4,7 +4,7 @@ import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 
 // kibi: imports
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 // kibi: end
 
 const module = uiModules.get('app/dashboard');

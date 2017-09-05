@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import IndexPatternsCastMappingTypeProvider from './_cast_mapping_type';
-export default function MapFieldFn(Private, config) {
+import { IndexPatternsCastMappingTypeProvider } from './_cast_mapping_type';
+export function MapFieldFn(Private, config) {
   const castMappingType = Private(IndexPatternsCastMappingTypeProvider);
 
   /**

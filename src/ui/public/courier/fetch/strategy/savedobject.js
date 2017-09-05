@@ -1,4 +1,4 @@
-export default function FetchStrategyForSavedObject(Promise, savedObjectsAPI) {
+export function SavedObjectStrategyProvider(Promise, savedObjectsAPI) {
   return {
     clientMethod: 'mget',
     client: savedObjectsAPI,

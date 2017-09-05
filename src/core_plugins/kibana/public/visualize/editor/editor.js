@@ -24,7 +24,7 @@ import { getDefaultQuery } from 'ui/parse_query';
 
 // kibi: imports
 import 'ui/kibi/directives/kibi_param_entity_uri';
-import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
+import { DoesVisDependsOnSelectedEntitiesProvider } from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
 import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 

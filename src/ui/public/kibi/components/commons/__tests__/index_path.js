@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import IndexPathProvider from 'ui/kibi/components/commons/_index_path';
+import { IndexPathProvider } from 'ui/kibi/components/commons/_index_path';
 
 let indexPath;
 

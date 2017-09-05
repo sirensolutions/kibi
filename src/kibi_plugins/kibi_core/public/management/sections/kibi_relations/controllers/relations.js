@@ -1,4 +1,4 @@
-import RelationsHelperFactory from 'ui/kibi/helpers/relations_helper';
+import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import { VislibComponentsColorColorProvider } from 'ui/vis/components/color/color';
 import 'ui/kibi/directives/eeg';
 import 'plugins/kibi_core/management/sections/kibi_relations/styles/relations.less';

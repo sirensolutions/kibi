@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function getPathsForIndexPattern() {
+export function getPathsForIndexPattern() {
   return function (response) {
     const mapProperties = function (properties, paths = {}, currentPath = []) {
       _.each(properties, (property, fieldName) => {

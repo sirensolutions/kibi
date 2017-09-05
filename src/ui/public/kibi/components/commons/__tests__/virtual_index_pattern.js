@@ -1,5 +1,5 @@
 import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import VirtualIndexPatternProvider from 'ui/kibi/components/commons/virtual_index_pattern';
+import { VirtualIndexPatternFactory } from 'ui/kibi/components/commons/virtual_index_pattern';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
@@ -24,7 +24,7 @@ describe('Kibi Components', function () {
       ngMock.module('kibana');
 
       ngMock.inject(function (Private) {
-        VirtualIndexPattern = Private(VirtualIndexPatternProvider);
+        VirtualIndexPattern = Private(VirtualIndexPatternFactory);
         indexPattern = Private(IndexPatternProvider);
       });
     });

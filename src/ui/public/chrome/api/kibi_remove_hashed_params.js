@@ -1,6 +1,6 @@
 const regex = /[_gak]+=h@[a-f0-9]+/g;
 
-export default function (url, _sessionStorage) {
+export function kibiRemoveHashedParams(url, _sessionStorage) {
   if (_sessionStorage.length === 0) {
     if (url.match(regex)) {
       // get the part after ?

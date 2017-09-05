@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function RelationsHelperFactory(kibiEnterpriseEnabled, config) {
+export function RelationsHelperFactory(kibiEnterpriseEnabled, config) {
   const SEPARATOR = '/';
 
   let relations;

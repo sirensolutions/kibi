@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 // kibi: imports
-import emptySearch from 'ui/kibi/empty_search';
+import { emptySearch } from 'ui/kibi/empty_search';
 // kibi: end
 
 import { toJson } from 'ui/utils/aggressive_parse';
@@ -83,4 +83,3 @@ export function SearchStrategyProvider(Private, Promise, timefilter, kbnIndex, s
     }
   };
 }
-

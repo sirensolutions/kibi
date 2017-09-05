@@ -2,13 +2,13 @@ import 'ui/kibi/directives/kibi_angular_qtip2';
 import { uiModules } from 'ui/modules';
 import kibiUtils from 'kibiutils';
 import _ from 'lodash';
-import SelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';
+import { KibiSelectHelperFactory } from 'ui/kibi/directives/kibi_select_helper';
 import kibiSelectTemplate from 'ui/kibi/directives/kibi_select.html';
 
 uiModules
 .get('kibana')
 .directive('kibiSelect', function (Private) {
-  const selectHelper = Private(SelectHelperProvider);
+  const selectHelper = Private(KibiSelectHelperFactory);
 
   return {
     require: 'ngModel',

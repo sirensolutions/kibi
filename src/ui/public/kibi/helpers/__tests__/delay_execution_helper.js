@@ -1,7 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
-import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
+import { DelayExecutionHelperFactory } from 'ui/kibi/helpers/delay_execution_helper';
 
 describe('Kibi Components', function () {
   let actualData;
@@ -16,7 +16,7 @@ describe('Kibi Components', function () {
     beforeEach(ngMock.inject(function (_Promise_, _$timeout_, Private) {
       Promise = _Promise_;
       $timeout = _$timeout_;
-      DelayExecutionHelper = Private(DelayExecutionHelperProvider);
+      DelayExecutionHelper = Private(DelayExecutionHelperFactory);
     }));
 
     afterEach(function () {

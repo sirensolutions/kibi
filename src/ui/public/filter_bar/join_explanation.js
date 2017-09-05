@@ -1,4 +1,4 @@
-/*eslint no-use-before-define: 1*/
+/*eslint no-use-before-define: 0*/
 import jQuery from 'jquery';
 import _ from 'lodash';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';

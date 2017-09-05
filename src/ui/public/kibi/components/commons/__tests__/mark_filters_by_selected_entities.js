@@ -1,4 +1,4 @@
-import MarkFiltersBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
+import { MarkFiltersBySelectedEntitiesFactory } from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
@@ -42,7 +42,7 @@ describe('Kibi Components', function () {
 
           sinon.stub(onPage, 'onDashboardPage').returns(true);
 
-          markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesProvider);
+          markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesFactory);
         });
       });
 
@@ -154,4 +154,3 @@ describe('Kibi Components', function () {
     });
   });
 });
-

@@ -1,4 +1,4 @@
-export default function PatternToWildcardFn() {
+export function PatternToWildcardFn() {
   return function (format) {
     let wildcard = '';
     let inEscape = false;

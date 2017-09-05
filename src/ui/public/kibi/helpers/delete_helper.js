@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisualizations, Private, $window, config) {
+export function DeleteHelperFactory(Promise, dashboardGroups, savedVisualizations, Private, $window, config) {
 
   function DeleteHelper() {
   }

@@ -1,5 +1,5 @@
 import noDigestPromises from 'test_utils/no_digest_promises';
-import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
+import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { intersection } from 'lodash';
@@ -79,7 +79,7 @@ describe('Kibi Components', function () {
 
       ngMock.inject(function (_$window_, dashboardGroups, Private, Promise) {
         $window = _$window_;
-        deleteHelper = Private(DeleteHelperProvider);
+        deleteHelper = Private(DeleteHelperFactory);
 
         computeGroupsStub = sinon.stub(dashboardGroups, 'computeGroups').returns(Promise.resolve('computed groups'));
 

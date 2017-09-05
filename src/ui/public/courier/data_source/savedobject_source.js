@@ -1,12 +1,12 @@
-import savedObjectStrategyProvider from 'ui/courier/fetch/strategy/savedobject';
+import { SavedObjectStrategyProvider } from 'ui/courier/fetch/strategy/savedobject';
 import { DocSourceProvider } from 'ui/courier/data_source/doc_source';
-import savedObjectRequestProvider from 'ui/courier/fetch/request/savedobject';
+import { SavedObjectRequestProvider } from 'ui/courier/fetch/request/savedobject';
 import _ from 'lodash';
 
-export default function SavedObjectSourceFactory(Private) {
+export function SavedObjectSourceFactory(Private) {
   const DocSource = Private(DocSourceProvider);
-  const SavedObjectRequest = Private(savedObjectRequestProvider);
-  const SavedObjectStrategy = Private(savedObjectStrategyProvider);
+  const SavedObjectRequest = Private(SavedObjectRequestProvider);
+  const SavedObjectStrategy = Private(SavedObjectStrategyProvider);
 
   _.class(SavedObjectSource).inherits(DocSource);
   function SavedObjectSource(initialState) {

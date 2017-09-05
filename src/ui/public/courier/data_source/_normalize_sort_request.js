@@ -1,6 +1,6 @@
 import _ from 'lodash';
 // kibi: imports
-import getAlternativeSortingField from 'ui/kibi/components/courier/data_source/get_alternative_sorting_field';
+import { getAlternativeSortingField } from 'ui/kibi/components/courier/data_source/get_alternative_sorting_field';
 // kibi: end
 
 export function NormalizeSortRequestProvider(config) {

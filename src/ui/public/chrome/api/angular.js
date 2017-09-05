@@ -3,7 +3,7 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 
 import { uiModules } from 'ui/modules';
 import { Notifier } from 'kibie/notify/notifier'; // kibi: import Kibi notifier
-import kibiRemoveHashedParams from './kibi_remove_hashed_params'; // kibi: import util to clean the url
+import { kibiRemoveHashedParams } from './kibi_remove_hashed_params'; // kibi: import util to clean the url
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 import { directivesProvider } from '../directives';

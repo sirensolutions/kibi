@@ -40,7 +40,7 @@ const cleanFilter = function (filter) {
   return _.omit(filter, ['meta']);
 };
 
-export default function QueryBuilderFactory(Private, kibiState) {
+export function QueryBuilderFactory(Private, kibiState) {
   const decorateQuery = Private(DecorateQueryProvider);
 
   /*

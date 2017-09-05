@@ -1,5 +1,5 @@
 import noDigestPromises from 'test_utils/no_digest_promises';
-import SequentialJoinVisHelperProvider from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
+import { KibiSequentialJoinVisHelperFactory } from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
 import MockState from 'fixtures/mock_state';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import sinon from 'auto-release-sinon';
@@ -59,7 +59,7 @@ function init({
     config = _config_;
     $rootScope = _$rootScope_;
     kibiState = _kibiState_;
-    sequentialJoinVisHelper = Private(SequentialJoinVisHelperProvider);
+    sequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
     saveAppStateStub = sinon.stub(kibiState, 'saveAppState').returns(Promise.resolve());

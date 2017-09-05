@@ -11,7 +11,7 @@ import {
 } from '../elasticsearch_errors';
 
 // kibi: imports
-import KibiSpyDataProvider from 'ui/kibi/spy/kibi_spy_data';
+import KibiSpyDataFactory from 'ui/kibi/spy/kibi_spy_data';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
@@ -22,7 +22,7 @@ uiModules
 
   // kibi: to hold onto stats about msearch requests from visualizations like the relational filter
   // This is then displayed in the multisearch spy mode
-  const KibiSpyData = Private(KibiSpyDataProvider);
+  const KibiSpyData = Private(KibiSpyDataFactory);
 
   return {
     restrict: 'E',

@@ -8,7 +8,7 @@ import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 
 // kibi: imports
-import SavedObjectSourceProvider from 'ui/courier/data_source/savedobject_source';
+import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source';
 import Notifier from 'ui/notify/notifier';
 // kibi: end
 import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
@@ -124,7 +124,7 @@ describe('Saved Object', function () {
     esAdminStub = esAdmin;
     esDataStub = es;
     DocSource = Private(AdminDocSourceProvider);
-    SavedObjectSource = Private(SavedObjectSourceProvider);
+    SavedObjectSource = Private(SavedObjectSourceFactory);
     window = $window;
 
     savedObjectsAPIStub = savedObjectsAPI;

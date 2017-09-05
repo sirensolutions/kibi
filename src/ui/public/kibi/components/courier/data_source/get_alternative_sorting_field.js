@@ -1,6 +1,6 @@
 import { find } from 'lodash';
 
-export default function getAlternativeSortingField(indexField) {
+export function getAlternativeSortingField(indexField) {
   if (indexField.type && (indexField.type === 'string' || indexField.type === 'text')) {
     // search for subproperty with type keyword or string but not analyzed
     const multifields = indexField.multifields;

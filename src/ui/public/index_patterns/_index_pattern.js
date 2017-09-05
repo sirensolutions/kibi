@@ -16,8 +16,8 @@ import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 
 // kibi: imports
-import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
-import AdminDocSourceProvider from 'ui/courier/data_source/savedobject_source'; // kibi: use the SavedObjectSource as DocSource
+import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
+import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source'; // kibi: use the SavedObjectSource as DocSource
 // kibi: end
 
 // kibi: added mappings service dependency
@@ -26,7 +26,7 @@ export function IndexPatternProvider(Private, createNotifier, config, kbnIndex, 
   const getIds = Private(IndexPatternsGetIdsProvider);
   const fieldsFetcher = Private(FieldsFetcherProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
-  const DocSource = Private(AdminDocSourceProvider);
+  const DocSource = Private(SavedObjectSourceFactory);
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);

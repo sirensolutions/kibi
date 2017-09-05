@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import ArrayHelper from 'ui/kibi/helpers/array_helper';
+import { ArrayHelper } from 'ui/kibi/helpers/array_helper';
 import template from 'ui/kibi/directives/kibi_array_param_add.html';
 
 uiModules

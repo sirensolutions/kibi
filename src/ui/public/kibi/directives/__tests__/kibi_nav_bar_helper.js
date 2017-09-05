@@ -1,5 +1,5 @@
 import * as onPage from 'ui/kibi/utils/on_page';
-import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
+import { KibiNavBarHelperFactory } from 'ui/kibi/directives/kibi_nav_bar_helper';
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -72,7 +72,7 @@ describe('Kibi Directives', function () {
         globalState = _globalState_;
         kibiState = _kibiState_;
         $rootScope = _$rootScope_;
-        kibiNavBarHelper = Private(KibiNavBarHelperProvider);
+        kibiNavBarHelper = Private(KibiNavBarHelperFactory);
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard1');
         timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.resolve([ 'id' ]));
 

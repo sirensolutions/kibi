@@ -1,11 +1,11 @@
 import { FetchProvider } from 'ui/courier/fetch/fetch';
 import { LooperProvider } from 'ui/courier/looper/_looper';
-import FetchStrategyForSavedObject from 'ui/courier/fetch/strategy/savedobject';
+import { SavedObjectStrategyProvider } from 'ui/courier/fetch/strategy/savedobject';
 
 export function SavedObjectLooperService(Private) {
   const fetch = Private(FetchProvider);
   const Looper = Private(LooperProvider);
-  const strategy = Private(FetchStrategyForSavedObject);
+  const strategy = Private(SavedObjectStrategyProvider);
 
   /**
    * The Looper which will manage the saved objects fetch interval

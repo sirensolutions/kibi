@@ -6,7 +6,7 @@ import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.htm
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 //TODO MERGE 5.5.2 add kibi comments as needed
-import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
+import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
 import { castEsToKbnFieldTypeName } from '../../../../../../utils';
 
 uiRoutes
@@ -24,7 +24,7 @@ uiModules.get('apps/management')
       const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
       const service = $injector.get(serviceObj.service);
 
-      const deleteHelper = Private(DeleteHelperProvider); // kibi: run some checks before deleting an object
+      const deleteHelper = Private(DeleteHelperFactory); // kibi: run some checks before deleting an object
 
       /**
        * Creates a field definition and pushes it to the memo stack. This function

@@ -1,5 +1,5 @@
 import 'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups';
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import $ from 'jquery';
 import _ from 'lodash';
 import dashboardNavEditLinkTemplate from './dashboard_nav_edit_link.html';

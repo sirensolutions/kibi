@@ -2,7 +2,7 @@ import 'plugins/kibana/discover/saved_searches/_saved_search';
 import 'ui/notify';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify'

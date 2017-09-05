@@ -1,6 +1,6 @@
 import Notifier from 'ui/notify/notifier';
 import sinon from 'auto-release-sinon';
-import KibiSelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';
+import { KibiSelectHelperFactory } from 'ui/kibi/directives/kibi_select_helper';
 import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
@@ -83,7 +83,7 @@ describe('Kibi Directives', function () {
       }
 
       ngMock.inject(function ($injector, Private) {
-        kibiSelectHelper = Private(KibiSelectHelperProvider);
+        kibiSelectHelper = Private(KibiSelectHelperFactory);
         if (stubConfig) {
           config = $injector.get('config');
         }

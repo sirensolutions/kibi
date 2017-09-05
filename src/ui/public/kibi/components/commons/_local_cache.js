@@ -1,6 +1,6 @@
 import angular from 'angular';
 
-export default function LocalCacheFactory() {
+export function LocalCacheFactory() {
   function LocalCache(opts) {
     opts = opts || {};
     const _id = opts.id || function (o) { return '' + o; };
@@ -31,4 +31,3 @@ export default function LocalCacheFactory() {
 
   return LocalCache;
 }
-

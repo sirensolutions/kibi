@@ -12,8 +12,8 @@ import { FilterBarLibMapScriptProvider } from './map_script';
 import { FilterBarLibMapDefaultProvider } from './map_default';
 
 // kibi: imports
-import DBFilterProvider from 'ui/kibi/filter_bar/lib/map_db_filter';
-import SirenJoinProvider from 'ui/kibi/filter_bar/lib/map_join_filter';
+import { DBFilterProvider } from 'ui/kibi/filter_bar/lib/map_db_filter';
+import { SirenJoinProvider } from 'ui/kibi/filter_bar/lib/map_join_filter';
 // kibi: end
 
 export function FilterBarLibMapFilterProvider(Promise, Private) {

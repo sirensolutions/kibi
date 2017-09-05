@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { pkg } from '../utils';
-import { Command } from '../cli/command';
+import Command from '../cli/command';
 import listCommand from './list';
 import installCommand from './install';
 import removeCommand from './remove';

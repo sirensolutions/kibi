@@ -2,7 +2,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import dragula from 'dragula';
 import { uiModules } from 'ui/modules';
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 
 uiModules
 .get('kibana')

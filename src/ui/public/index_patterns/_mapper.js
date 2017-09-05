@@ -1,23 +1,23 @@
 import { IndexPatternMissingIndices, IndexPatternAuthorizationError } from 'ui/errors';
 import _ from 'lodash';
 import moment from 'moment';
-import EnhanceFieldsWithCapabilitiesProvider from 'ui/index_patterns/_enhance_fields_with_capabilities';
-import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/kibi/components/commons/_transform_mapping_into_fields';
-import IndexPatternsPatternToWildcardProvider from 'ui/kibi/components/commons/_pattern_to_wildcard';
-import IndexPatternsLocalCacheProvider from 'ui/kibi/components/commons/_local_cache';
+import { EnhanceFieldsWithCapabilitiesProvider } from 'ui/index_patterns/_enhance_fields_with_capabilities';
+import { TransformMappingIntoFields } from 'ui/kibi/components/commons/_transform_mapping_into_fields';
+import { PatternToWildcardFn } from 'ui/kibi/components/commons/_pattern_to_wildcard';
+import { LocalCacheFactory } from 'ui/kibi/components/commons/_local_cache';
 
 // kibi: imports
-import PathsProvider from 'ui/kibi/index_patterns/_get_paths_for_index_pattern';
+import { getPathsForIndexPattern } from 'ui/kibi/index_patterns/_get_paths_for_index_pattern';
 
 // kibi: require savedObjecsAPI service instead of esAdmin, added mappings
-export default function MapperService(Private, Promise, es, savedObjectsAPI, config, kbnIndex, mappings) {
+export function IndexPatternsMapperProvider(Private, Promise, es, savedObjectsAPI, config, kbnIndex, mappings) {
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
-  const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
-  const patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
-  const LocalCache = Private(IndexPatternsLocalCacheProvider);
+  const transformMappingIntoFields = Private(TransformMappingIntoFields);
+  const patternToWildcard = Private(PatternToWildcardFn);
+  const LocalCache = Private(LocalCacheFactory);
 
   // kibi: support dots in field name
-  const _getPathsForIndexPattern = Private(PathsProvider);
+  const _getPathsForIndexPattern = Private(getPathsForIndexPattern);
 
 
   function Mapper() {

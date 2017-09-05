@@ -1,4 +1,4 @@
-import QueryBuilderProvider from '../query_builder';
+import { QueryBuilderFactory  } from '../query_builder';
 import sinon from 'auto-release-sinon';
 import _ from 'lodash';
 import MockState from 'fixtures/mock_state';
@@ -131,7 +131,7 @@ describe('Kibi Components', function () {
         kibiState = _kibiState_;
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('empty-dashboard');
         sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
-        queryBuilder = Private(QueryBuilderProvider);
+        queryBuilder = Private(QueryBuilderFactory);
       });
     });
 

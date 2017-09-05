@@ -1,21 +1,21 @@
 import _ from 'lodash';
-import SparqlHelperProvider from 'ui/kibi/helpers/sparql_helper';
-import SqlHelperProvider from 'ui/kibi/helpers/sql_helper';
-import IndexPathProvider from 'ui/kibi/components/commons/_index_path';
-import DatasourceHelperProvider from 'ui/kibi/helpers/datasource_helper';
-import RelationsHelperFactory from 'ui/kibi/helpers/relations_helper';
+import { SparqlHelperFactory } from 'ui/kibi/helpers/sparql_helper';
+import { SQLHelperFactory } from 'ui/kibi/helpers/sql_helper';
+import { IndexPathProvider } from 'ui/kibi/components/commons/_index_path';
+import { DatasourceHelperFactory } from 'ui/kibi/helpers/datasource_helper';
+import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import kibiUtils from 'kibiutils';
 
-export default function KibiSelectHelperFactory(config, indexPatterns, Private, Promise, kibiState, es, savedSearches, savedTemplates,
+export function KibiSelectHelperFactory(config, indexPatterns, Private, Promise, kibiState, es, savedSearches, savedTemplates,
   savedDashboards, savedQueries, savedDatasources, mappings) {
 
   function KibiSelectHelper() {
   }
 
-  const sparqlHelper = Private(SparqlHelperProvider);
-  const sqlHelper = Private(SqlHelperProvider);
+  const sparqlHelper = Private(SparqlHelperFactory);
+  const sqlHelper = Private(SQLHelperFactory);
   const indexPath = Private(IndexPathProvider);
-  const datasourceHelper = Private(DatasourceHelperProvider);
+  const datasourceHelper = Private(DatasourceHelperFactory);
   const relationsHelper = Private(RelationsHelperFactory);
 
   KibiSelectHelper.prototype.getQueries = function () {
@@ -169,7 +169,7 @@ export default function KibiSelectHelperFactory(config, indexPatterns, Private, 
           value: field.name,
           scripted: field.scripted,
           options: {
-            analyzed: field.analyzed,
+            analyzed: field.type === 'text',
             scripted: field.scripted
           }
         };

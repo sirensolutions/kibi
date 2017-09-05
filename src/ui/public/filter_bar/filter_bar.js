@@ -18,7 +18,7 @@ export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable
 // kibi: imports
 import 'ui/kibi/directives/kibi_entity_clipboard';
 import 'ui/kibi/styles/explanation';
-import MarkFilterBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
+import { MarkFiltersBySelectedEntitiesFactory } from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 // kibi: end
 
@@ -33,7 +33,7 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   // kibi: added some helpers
-  const markFiltersBySelectedEntities = Private(MarkFilterBySelectedEntitiesProvider);
+  const markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesFactory);
 
   const notify = createNotifier({
     location: 'Kibi Navigation Bar'

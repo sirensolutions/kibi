@@ -8,10 +8,10 @@ import { IndexPatternAuthorizationError } from 'ui/errors';
 import { onVisualizePage } from 'ui/kibi/utils/on_page';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import KibiSequentialJoinVisHelperProvider from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
-import RelationsHelperFactory from 'ui/kibi/helpers/relations_helper';
-import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
-import SearchHelper from 'ui/kibi/helpers/search_helper';
+import { KibiSequentialJoinVisHelperFactory } from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
+import { RelationsHelperFactory }  from 'ui/kibi/helpers/relations_helper';
+import { DelayExecutionHelperFactory } from 'ui/kibi/helpers/delay_execution_helper';
+import { SearchHelper } from 'ui/kibi/helpers/search_helper';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
 
 import 'ui/kibi/directives/kibi_select';
@@ -19,7 +19,7 @@ import 'ui/kibi/directives/kibi_array_param';
 
 function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, es, createNotifier, globalState, Promise,
   kbnIndex, config, savedDashboards, timefilter) {
-  const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
+  const DelayExecutionHelper = Private(DelayExecutionHelperFactory);
   const searchHelper = new SearchHelper(kbnIndex);
   const edit = onVisualizePage();
 
@@ -29,7 +29,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const appState = getAppState();
 
   const relationsHelper = Private(RelationsHelperFactory);
-  const kibiSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperProvider);
+  const kibiSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
   const currentDashboardId = kibiState._getCurrentDashboardId();
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);

@@ -19,7 +19,7 @@ import { SavedObjectProvider } from './saved_object';
 import { RedirectWhenMissingProvider } from './_redirect_when_missing';
 
 // kibi: imports
-import KibiSavedObjectSource from 'ui/courier/data_source/savedobject_source';
+import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source';
 import { SavedObjectLooperService } from 'ui/courier/looper/savedobject';
 // kibi: end
 
@@ -50,7 +50,7 @@ uiModules.get('kibana/courier')
     self.SearchSource = SearchSource;
 
     // kibi: Saved Objects API imports
-    const SavedObjectSource = Private(KibiSavedObjectSource);
+    const SavedObjectSource = Private(SavedObjectSourceFactory);
     const savedObjectLooper = self.savedObjectLooper = Private(SavedObjectLooperService);
     self.SavedObjectSource = SavedObjectSource;
     // kibi: end

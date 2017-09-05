@@ -1,8 +1,8 @@
-import shouldEntityUriBeEnabledProvider from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
+import { ShouldEntityURIBeEnabledFactory } from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
 import _ from 'lodash';
 
-export default function DoesVisDependsOnSelectedEntitiesFactory(Promise, Private) {
-  const _shouldEntityURIBeEnabled = Private(shouldEntityUriBeEnabledProvider);
+export function DoesVisDependsOnSelectedEntitiesProvider(Promise, Private) {
+  const _shouldEntityURIBeEnabled = Private(ShouldEntityURIBeEnabledFactory);
 
   return function (vis) {
     const name = vis.type.name;

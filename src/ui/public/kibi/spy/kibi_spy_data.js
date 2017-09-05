@@ -3,7 +3,7 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { toJson } from 'ui/utils/aggressive_parse';
 
-export default function KibiSpyDataFactory(Promise, $http) {
+export function KibiSpyDataFactory(Promise, $http) {
   class KibiSpyData {
     constructor() {
       this.data = [];

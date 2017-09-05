@@ -3,7 +3,7 @@ import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
 /**
  * Adds support to virtual fields to an IndexPattern.
  */
-export default function VirtualIndexPatternFactory(Private) {
+export function VirtualIndexPatternFactory(Private) {
   const FieldList = Private(IndexPatternsFieldListProvider);
 
   return function VirtualIndexPattern(wrappedIndexPattern, virtualField) {

@@ -1,9 +1,9 @@
 import { onVisualizePage, onDashboardPage } from 'ui/kibi/utils/on_page';
 import _ from 'lodash';
-import ShouldEntityURIBeEnabledProvider from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
+import { ShouldEntityURIBeEnabledFactory } from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
 
-export default function MarkFiltersBySelectedEntitiesFactory(Promise, Private, kibiState) {
-  const _shouldEntityURIBeEnabled = Private(ShouldEntityURIBeEnabledProvider);
+export function MarkFiltersBySelectedEntitiesFactory(Promise, Private, kibiState) {
+  const _shouldEntityURIBeEnabled = Private(ShouldEntityURIBeEnabledFactory);
 
   return function (filters) {
     const promises = _.map(filters, filter => {

@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { Notifier } from 'ui/notify/notifier';
 import { ShardFailure } from 'ui/errors';
 
-export default function ($http) {
+export function EnhanceFieldsWithCapabilitiesProvider($http) {
   const notifier = new Notifier({
     location: 'Field Capabilities'
   });

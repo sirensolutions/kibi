@@ -41,8 +41,8 @@ function isErrorNonFatal(error) {
 }
 
 // kibi: imports
-import SavedObjectSourceProvider from 'ui/courier/data_source/savedobject_source';
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 // kibi: end
 
 // kibi: include savedObjectsAPI dependencies
@@ -56,7 +56,7 @@ export function SavedObjectProvider(
   const mappingSetup = Private(MappingSetupProvider);
 
   // kibi: imports
-  const SavedObjectSource = Private(SavedObjectSourceProvider); // use a custom source for objects managed by the Saved Objects API
+  const SavedObjectSource = Private(SavedObjectSourceFactory); // use a custom source for objects managed by the Saved Objects API
   const cache = Private(CacheProvider); // added to clear the cache on object save
   // kibi: end
 

@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import IndexPatternsMapFieldProvider from './_map_field';
+import { MapFieldFn } from './_map_field';
 import { ConflictTracker } from './_conflict_tracker';
 
-export default function transformMappingIntoFields(Private, kbnIndex, config) {
-  const mapField = Private(IndexPatternsMapFieldProvider);
+export function TransformMappingIntoFields(Private, kbnIndex, config) {
+  const mapField = Private(MapFieldFn);
 
   /**
    * Convert the ES response into the simple map for fields to

@@ -6,7 +6,7 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
-import VirtualIndexPatternProvider from 'ui/kibi/components/commons/virtual_index_pattern';
+import { VirtualIndexPatternFactory } from 'ui/kibi/components/commons/virtual_index_pattern';
 import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
@@ -28,7 +28,7 @@ describe('Kibi data table controller', function () {
         });
       }
 
-      VirtualIndexPattern = Private(VirtualIndexPatternProvider);
+      VirtualIndexPattern = Private(VirtualIndexPatternFactory);
       dashboardHelper = Private(DashboardHelperProvider);
       dashboardHelper.switchDashboard = sinon.stub();
 

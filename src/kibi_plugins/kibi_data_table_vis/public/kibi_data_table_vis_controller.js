@@ -8,12 +8,12 @@ import { uiModules } from 'ui/modules';
 
 // allow to query external datasources for populating a column
 import 'ui/kibi/components/query_engine_client/query_engine_client';
-import VirtualIndexPatternProvider from 'ui/kibi/components/commons/virtual_index_pattern';
+import { VirtualIndexPatternFactory } from 'ui/kibi/components/commons/virtual_index_pattern';
 
 function KibiDataTableVisController(getAppState, courier, $window, createNotifier, confirmModal,
   kibiState, $rootScope, $scope, Private, config) {
   const dashboardHelper = Private(DashboardHelperFactory);
-  const VirtualIndexPattern = Private(VirtualIndexPatternProvider);
+  const VirtualIndexPattern = Private(VirtualIndexPatternFactory);
   const filterManager = Private(FilterManagerProvider);
   const configMode = onVisualizePage();
   const notify = createNotifier({

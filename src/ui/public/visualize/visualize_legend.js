@@ -5,7 +5,7 @@ import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_ha
 import { uiModules } from 'ui/modules';
 
 // kibi: imports
-import CacheHelper from 'ui/kibi/helpers/cache_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import { findByParam } from 'ui/utils/find_by_param';
 // kibi: end
 
@@ -13,7 +13,7 @@ uiModules.get('kibana')
 .directive('visualizeLegend', function (Private, getAppState) {
   const Data = Private(VislibLibDataProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
-  const cache = Private(CacheHelper); // kibi: added by kibi
+  const cache = Private(CacheProvider); // kibi: added by kibi
 
   return {
     restrict: 'E',

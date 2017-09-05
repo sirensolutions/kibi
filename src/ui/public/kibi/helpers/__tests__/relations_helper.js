@@ -1,4 +1,4 @@
-import RelationsHelperFactory from 'ui/kibi/helpers/relations_helper';
+import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 

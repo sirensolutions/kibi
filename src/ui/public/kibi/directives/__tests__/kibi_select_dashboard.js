@@ -4,7 +4,6 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import '../kibi_select';
-import SelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';
 import MockState from 'fixtures/mock_state';
 
 let $rootScope;

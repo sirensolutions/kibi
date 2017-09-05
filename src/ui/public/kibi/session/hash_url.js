@@ -13,7 +13,7 @@ import {
  * @param {String} url - A URL.
  * @return {String} - The hashed URL.
  */
-export default function hashUrl(url) {
+export function hashUrl(url) {
   let hashed = null;
   let querystring = '';
   const matches = url.match(/(.+#.+?)\?(.*)/);

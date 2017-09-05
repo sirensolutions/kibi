@@ -4,7 +4,7 @@ import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_buck
 import { AggTypesBucketsCreateFilterFiltersProvider } from 'ui/agg_types/buckets/create_filter/filters';
 import editor from 'ui/kibi/agg_types/controls/external_query_terms_filter.html';
 
-export default function RelatedEntitiesAggDefinition(Private, createNotifier, kibiState, $rootScope, $timeout) {
+export function RelatedEntitiesAggDefinition(Private, createNotifier, kibiState, $rootScope, $timeout) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
   const notify = createNotifier({ location: 'External Query Terms Filter Aggregation' });

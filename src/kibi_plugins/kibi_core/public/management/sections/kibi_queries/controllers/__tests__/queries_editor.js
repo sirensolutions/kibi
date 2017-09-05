@@ -1,6 +1,6 @@
 import * as onPage from 'ui/kibi/utils/on_page';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import ngMock from 'ng_mock';
 import jQuery from 'jquery';
 import Promise from 'bluebird';

@@ -1,7 +1,7 @@
 import Notifier from 'ui/notify/notifier';
 import * as onPage from 'ui/kibi/utils/on_page';
 import moment from 'moment';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import _ from 'lodash';
 import Promise from 'bluebird';
 import expect from 'expect.js';

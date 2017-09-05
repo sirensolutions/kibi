@@ -11,7 +11,7 @@ import {
 } from '../elasticsearch_errors';
 
 // kibi: imports
-import KibiSpyDataFactory from 'ui/kibi/spy/kibi_spy_data';
+import { KibiSpyDataFactory } from 'ui/kibi/spy/kibi_spy_data';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])

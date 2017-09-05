@@ -1,4 +1,4 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import CsvExportProvider from 'plugins/kibi_data_table_vis/actions/csv_export';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';

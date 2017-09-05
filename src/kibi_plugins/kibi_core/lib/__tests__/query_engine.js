@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import QueryEngine from '../query_engine';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import { EventEmitter } from 'events';
 import SqliteQuery from '../queries/sqlite_query';
 

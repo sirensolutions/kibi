@@ -4,7 +4,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { intersection } from 'lodash';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 
 const fakeSavedVisualisations = [
   {

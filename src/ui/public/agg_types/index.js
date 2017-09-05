@@ -31,6 +31,10 @@ import { AggTypesMetricsBucketMinProvider } from 'ui/agg_types/metrics/bucket_mi
 import { AggTypesMetricsBucketMaxProvider } from 'ui/agg_types/metrics/bucket_max';
 import 'ui/directives/validate_agg';
 
+// kibi: imports
+import { RelatedEntitiesAggDefinition } from 'ui/kibi/agg_types/buckets/external_query_terms_filter';
+// kibi: end
+
 export function AggTypesIndexProvider(Private, $injector) {
 
   const aggs = {
@@ -71,7 +75,7 @@ export function AggTypesIndexProvider(Private, $injector) {
 
   // kibi: include the external_query_terms_filter bucket only if the kibiState service is available.
   if ($injector.has('kibiState')) {
-    aggs.buckets.push(Private(require('ui/kibi/agg_types/buckets/external_query_terms_filter')));
+    aggs.buckets.push(Private(RelatedEntitiesAggDefinition));
   } else {
     console.log(`Can't enable the external_query_terms_filter bucket; kibiState not available.`); // eslint-disable-line no-console
   }

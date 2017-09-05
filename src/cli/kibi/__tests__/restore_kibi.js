@@ -4,7 +4,7 @@ import Promise from 'bluebird';
 import { mkdtemp } from 'fs';
 import RestoreKibi from '../_restore_kibi';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 
 describe('Restore Kibi', function () {
   let config;

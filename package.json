@@ -303,7 +303,6 @@
     "tree-kill": "1.1.0",
     "webpack-dev-server": "1.14.1",
 
-    "auto-release-sinon": "1.0.3",
     "mockery": "1.4.0"
   },
   "engines": {

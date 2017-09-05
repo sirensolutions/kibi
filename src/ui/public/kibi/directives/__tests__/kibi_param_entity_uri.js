@@ -1,5 +1,5 @@
 import MockState from 'fixtures/mock_state';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';

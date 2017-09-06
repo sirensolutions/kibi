@@ -9,6 +9,7 @@ import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 describe('Restore Kibi', function () {
   let config;
   let tmpDir;
+  let fromFileToElasticsearchStub;
 
   beforeEach(async function () {
     config = {
@@ -20,10 +21,12 @@ describe('Restore Kibi', function () {
       }
     };
     tmpDir = await Promise.fromNode(cb => mkdtemp('/tmp/backup-', cb));
+    fromFileToElasticsearchStub = sinon.stub(Dump.prototype, 'fromFileToElasticsearch');
   });
 
   afterEach(function (done) {
     rimraf(tmpDir, done);
+    fromFileToElasticsearchStub.restore();
   });
 
   it('should fail if backup folder does not exist', async function () {
@@ -37,7 +40,6 @@ describe('Restore Kibi', function () {
   });
 
   it('should restore the data and mappings of the kibi index', async function () {
-    const fromFileToElasticsearchStub = sinon.stub(Dump.prototype, 'fromFileToElasticsearch');
     const restoreKibi = new RestoreKibi(config, tmpDir);
 
     await restoreKibi.restore();
@@ -53,7 +55,6 @@ describe('Restore Kibi', function () {
         index: 'acl'
       }
     };
-    const fromFileToElasticsearchStub = sinon.stub(Dump.prototype, 'fromFileToElasticsearch');
     const restoreKibi = new RestoreKibi(config, tmpDir);
 
     await restoreKibi.restore();
@@ -78,7 +79,6 @@ describe('Restore Kibi', function () {
         index: 'acl'
       }
     };
-    const fromFileToElasticsearchStub = sinon.stub(Dump.prototype, 'fromFileToElasticsearch');
     const restoreKibi = new RestoreKibi(config, tmpDir);
 
     await restoreKibi.restore();

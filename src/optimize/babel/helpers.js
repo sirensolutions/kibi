@@ -20,6 +20,8 @@ const commonPreset = {
     require.resolve('babel-plugin-transform-object-rest-spread'),
     // stage 2
     require.resolve('babel-plugin-transform-class-properties'),
+    // kibi: adds relative import paths
+    require.resolve('babel-plugin-relative-import'), 
   ],
 }
 

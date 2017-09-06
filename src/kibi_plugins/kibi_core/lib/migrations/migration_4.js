@@ -1,4 +1,3 @@
-import requirefrom from 'requirefrom';
 import Migration from 'kibiutils/lib/migrations/migration';
 import { pkg } from '../../../../utils/package_json';
 

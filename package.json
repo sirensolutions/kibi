@@ -225,7 +225,8 @@
     "syswide-cas": "3.0.0",
     "fontawesome-iconpicker": "sirensolutions/fontawesome-iconpicker#1.2.1-kibi-fontawesome-compatible",
     "d3-cloud": "sirensolutions/d3-cloud#v1.2.1-kibi-5.4.0",
-    "@spalger/filesaver": "1.1.2"
+    "@spalger/filesaver": "1.1.2",
+    "babel-plugin-relative-import": "1.0.3"
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.6.1",

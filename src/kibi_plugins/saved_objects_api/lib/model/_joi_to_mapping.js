@@ -8,7 +8,7 @@ import { each } from 'lodash';
 function getElasticsearchMappingType(joi) {
   switch (joi.type) {
     case 'string':
-      return { type: 'string' };
+      return { type: 'text' };
     case 'boolean':
       return { type: 'boolean' };
     case 'object':
@@ -21,7 +21,7 @@ function getElasticsearchMappingType(joi) {
         });
         return body;
       } else {
-        return { type: 'string' };
+        return { type: 'text' };
       }
       break;
     case 'date':

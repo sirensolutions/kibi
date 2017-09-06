@@ -135,12 +135,13 @@ export default class Model {
     }
     const parameters = {
       index: this._config.get('kibana.index'),
-      type: this._type
+      type: this._type,
+      ignore: [404]
     };
     this._setCredentials(parameters, request);
     const mappings = await this._cluster.callWithRequest({}, 'indices.getMapping', parameters);
 
-    return Object.keys(mappings).length !== 0;
+    return Object.keys(mappings).length !== 0 && !mappings.error;
   }
 
   /**

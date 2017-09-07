@@ -54,35 +54,6 @@ describe('ui settings', function () {
       expect(result).to.be.a(Promise);
     });
 
-    describe('kibi', function () {
-      it('should create the config singleton if it does not exist yet', async function () {
-        const { server, uiSettings, configGet, req } = instantiate({
-          async callWithRequest(req, method, params) {
-            switch (method) {
-              case 'update':
-                // config object does not exist yet
-                throw { status: 404 };
-              case 'create':
-                expect(params.index).to.eql(configGet('kibana.index'));
-                expect(params.type).to.eql('config');
-                expect(params.id).to.eql('kibi');
-                expect(params.body).to.eql({ one: 'value' });
-                break;
-              default:
-                throw new Error(`callWithRequest() is using unexpected method "${method}"`);
-            }
-          }
-        });
-
-        await uiSettings.setMany(req, { one: 'value' });
-
-        const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-        sinon.assert.calledTwice(callWithRequest);
-        sinon.assert.calledWith(callWithRequest.getCall(0), sinon.match.any, 'update');
-        sinon.assert.calledWith(callWithRequest.getCall(1), sinon.match.any, 'create');
-      });
-    });
-
     it('updates a single value in one operation', function () {
       const { server, uiSettings, configGet, req } = instantiate();
       uiSettings.setMany(req, { one: 'value' });
@@ -204,9 +175,9 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getUserProvided(req);
-      expect(result).to.eql({
+      expect(isEqual(result, {
         user: { userValue: 'customized' }
-      });
+      })).to.equal(true);
     });
 
     it('ignores null user configuration (because default values)', async function () {
@@ -216,9 +187,9 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getUserProvided(req);
-      expect(result).to.eql({
+      expect(isEqual(result, {
         user: { userValue: 'customized' }, something: { userValue: 'else' }
-      });
+      })).to.equal(true);
     });
 
     it('returns an empty object when status is not green', async function () {
@@ -271,7 +242,7 @@ describe('ui settings', function () {
         throw new Error('expect getUserProvided() to throw');
       } catch (err) {
         // kibi: the error is wrapped by the savedObjetsAPI plugin
-        expect(err.inner).to.be.a(esErrors[401]);
+        expect(err).to.be.a(esErrors[401]);
       }
     });
 
@@ -458,8 +429,7 @@ function expectElasticsearchUpdateQuery(server, req, configGet, doc) {
     index: configGet('kibana.index'),
     id: 'kibi',
     type: 'config',
-    body: { doc },
-    refresh: true
+    body: { doc }
   });
 }
 
@@ -497,7 +467,7 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
       //expect(withReq).to.be(req);
       switch (method) {
         case 'get':
-          return Promise.resolve({ _source: getResult, found: true });
+          return Promise.resolve({ _source: getResult });
         case 'update':
           return Promise.resolve();
         default:

@@ -9,7 +9,7 @@ import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
 import filterHeaders from './lib/filter_headers';
 
-import createKibanaProxy from './lib/create_kibana_proxy';
+import createKibanaProxy, { createPath } from './lib/create_kibana_proxy';
 import createKibiProxy from './lib/create_kibi_proxy';
 
 // kibi: kibi imports
@@ -162,7 +162,7 @@ module.exports = function (kibana) {
 
       function noDirectIndex({ path }, reply) {
         const requestPath = trimRight(trim(path), '/');
-        const matchPath = createKibanaProxy('/elasticsearch', kibanaIndex);
+        const matchPath = createPath('/elasticsearch', kibanaIndex);
 
         if (requestPath === matchPath) {
           return reply(methodNotAllowed('You cannot modify the primary kibana index through this interface.'));

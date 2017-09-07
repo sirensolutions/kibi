@@ -12,7 +12,6 @@ import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
-import { stubMapper } from 'test_utils/stub_mapper';
 
 import { FieldsFetcherProvider } from '../fields_fetcher_provider';
 import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_client';
@@ -23,7 +22,6 @@ describe('index pattern', function () {
   NoDigestPromises.activateForSuite();
 
   let IndexPattern;
-  let mapper;
   let fieldsFetcher;
   let mappingSetup;
   let mockLogstashFields;
@@ -58,7 +56,6 @@ describe('index pattern', function () {
     DocSource = Private(AdminDocSourceProvider);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
-    mapper = stubMapper(Private, mockLogstashFields);
 
     // stub mappingSetup
     mappingSetup = Private(UtilsMappingSetupProvider);
@@ -66,27 +63,27 @@ describe('index pattern', function () {
       return Promise.resolve(true);
     });
 
-    // kibi: needed to support dotted field names
-    sinon.stub(mapper, 'getPathsSequenceForIndexPattern', function () {
-      const paths = _(mockLogstashFields)
-      .filter({ scripted: false })
-      .pluck('name')
-      .map(fieldName => [ fieldName, fieldName.split('.') ])
-      .zipObject()
-      .value();
-      return Promise.resolve(paths);
-    });
-    // kibi: end
-
-    //TODO MERGE 5.5.2 add kibi comment
-    // stub calculateIndices
-    calculateIndices = sinon.spy(function () {
-      return Promise.resolve([
-        { index: 'foo', max: Infinity, min: -Infinity },
-        { index: 'bar', max: Infinity, min: -Infinity }
-      ]);
-    });
-    Private.stub(require('ui/index_patterns/_calculate_indices'), calculateIndices);
+    //TODO MERGE 5.5.2 this need to be rewritten
+    // // kibi: needed to support dotted field names
+    // sinon.stub(mapper, 'getPathsSequenceForIndexPattern', function () {
+    //   const paths = _(mockLogstashFields)
+    //   .filter({ scripted: false })
+    //   .pluck('name')
+    //   .map(fieldName => [ fieldName, fieldName.split('.') ])
+    //   .zipObject()
+    //   .value();
+    //   return Promise.resolve(paths);
+    // });
+    // // kibi: end
+    //
+    // // stub calculateIndices
+    // calculateIndices = sinon.spy(function () {
+    //   return Promise.resolve([
+    //     { index: 'foo', max: Infinity, min: -Infinity },
+    //     { index: 'bar', max: Infinity, min: -Infinity }
+    //   ]);
+    // });
+    // Private.stub(require('ui/index_patterns/_calculate_indices'), calculateIndices);
 
     // spy on intervals
     intervals = Private(IndexPatternsIntervalsProvider);

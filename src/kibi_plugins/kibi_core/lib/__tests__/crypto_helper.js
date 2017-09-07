@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import forge from 'node-forge';
 import datasourcesSchema from '../datasources_schema';
 import cryptoHelper from '../crypto_helper';
@@ -17,6 +17,12 @@ describe('Crypto Helper', function () {
       }
     }
   };
+
+  afterEach(() => {
+    if (datasourcesSchema.getSchema.restore) {
+      datasourcesSchema.getSchema.restore();
+    }
+  });
 
   describe('fake schema', function () {
     beforeEach(function () {

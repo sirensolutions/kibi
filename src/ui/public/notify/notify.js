@@ -4,6 +4,7 @@ import { Notifier } from 'kibie/notify/notifier'; // kibi: import ee notifier
 import 'ui/notify/directives';
 import { metadata } from 'ui/metadata';
 
+//TODO MERGE 5.5.2 fix problem with notifier
 const module = uiModules.get('kibana/notify');
 export const notify = new Notifier();
 export { Notifier } from 'ui/notify/notifier';

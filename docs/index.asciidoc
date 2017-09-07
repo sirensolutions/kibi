@@ -4,17 +4,17 @@
 :docinfo: shared
 
 :java-version: 1.8
-:vanguard-version: 5.4.3
+:vanguard-version: 5.5.2-SNAPSHOT
 :vanguard-website: https://docs.support.siren.io/5.4.3/vanguard/
-:version: 5.4.3
+:version: 5.4.4-SNAPSHOT
 :kibana-version: 5.4.3
 :kibana-announcement: https://www.elastic.co/blog/kibana-5-4-3-released
-:kibana-ref: https://www.elastic.co/guide/en/kibana/5.4
+:kibana-ref: https://www.elastic.co/guide/en/kibana/5.5
 :kibi-version: {version}
-:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.4/
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.5/
 :logstash-ref: https://www.elastic.co/guide/en/logstash/
 :es-ref: {elastic-ref}
-:elasticsearch-version: 5.4.3
+:elasticsearch-version: 5.5.2
 :es-default-port: 9220
 :searchguard-ref: http://floragunncom.github.io/search-guard-docs/
 :searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki

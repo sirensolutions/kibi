@@ -376,7 +376,6 @@ uiModules
     }
 
     selectDashboard(dashboardId) {
-      const self = this;
       $timeout.cancel(lastSelectDashboardEventTimer);
       lastSelectDashboardEventTimer = $timeout(() => {
         // save which one was selected for:
@@ -385,7 +384,7 @@ uiModules
         _.each(this.getGroups(), group => {
           group.active = false;
         });
-        self.updateMetadataOfDashboardIds(dashboardId, true);
+        this.updateMetadataOfDashboardIds(dashboardId, true);
         const activeGroup = _.findWhere(this.getGroups(), { dashboards: [ { id: dashboardId } ] });
         activeGroup.active = true;
         activeGroup.selected = _.find(activeGroup.dashboards, 'id', dashboardId);

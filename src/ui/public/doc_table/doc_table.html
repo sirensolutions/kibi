@@ -77,7 +77,7 @@
     <!-- ToolBarFooter -->
     <div class="kuiBar docTableBar">
       <!--kibi: support CSV export-->
-      <a ng-if="csv" class="small" ng-click="exportAsCsv(hits, indexPattern, columns)">
+      <a ng-if="csv" data-ui-acl="ui:kibi@csvexport" class="small" ng-click="exportAsCsv(hits, indexPattern, columns)">
         Export as CSV <i aria-hidden="true" class="fa fa-download"></i>
       </a>
       <div class="kuiBarSection">

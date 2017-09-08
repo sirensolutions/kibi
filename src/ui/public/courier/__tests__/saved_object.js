@@ -9,7 +9,7 @@ import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 
 // kibi: imports
 import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source';
-import Notifier from 'ui/notify/notifier';
+import  { Notifier } from 'ui/notify/notifier';
 // kibi: end
 import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
 

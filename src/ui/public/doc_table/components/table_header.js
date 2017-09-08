@@ -47,24 +47,24 @@ module.directive('kbnTableHeader', function (shortDotsFilter, $timeout) {
       };
 
       //set fixed header position in table
-      const allignFixedHeader = function (visWidth, visLeftOffset, parentLeftOffset) {
+      const alignFixedHeader = function (visWidth, visLeftOffset, parentLeftOffset) {
+        const fixedHeader = $element[0].querySelector('#fixed-header');
         if (visWidth && visLeftOffset && parentLeftOffset) {
-          $element[0].querySelector('#fixed-header').style.left = parentLeftOffset - visLeftOffset + 'px';
-          $element[0].querySelector('#fixed-header').style.width = visWidth - parentLeftOffset + visLeftOffset - 14 + 'px';
+          fixedHeader.style.left = parentLeftOffset - visLeftOffset + 'px';
+          fixedHeader.style.width = visWidth - parentLeftOffset + visLeftOffset - 14 + 'px';
         } else {
-          $element[0].querySelector('#fixed-header').style.width = '95%';
-          $element[0].querySelector('#fixed-header').style.left = '';
+          fixedHeader.style.width = '95%';
+          fixedHeader.style.left = '';
         }
 
-        for(let i = 0; i < $element[0].querySelector('#fixed-header').cells.length; i++) {
-          $element[0].querySelector('#fixed-header').cells[i].setAttribute('style','width: ' + headerOffsets[i] +
-          'px; min-width: ' + headerOffsets[i] + 'px;');
+        for(let i = 0; i < fixedHeader.cells.length; i++) {
+          fixedHeader.cells[i].setAttribute('style','width: ' + headerOffsets[i] + 'px; min-width: ' + headerOffsets[i] + 'px;');
         }
       };
 
       $timeout(function () {
         initialHeadersClientWidth();
-        allignFixedHeader();
+        alignFixedHeader();
       });
 
       //listen 'visResized' event from visualize.js and configure fixed header
@@ -75,7 +75,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter, $timeout) {
 
         const parentLeftOffset = $element.parent().offset().left;
         initialHeadersClientWidth();
-        allignFixedHeader(visWidth, visLeftOffset, parentLeftOffset);
+        alignFixedHeader(visWidth, visLeftOffset, parentLeftOffset);
       });
 
       //when user switch to standart template configure fixed header
@@ -85,7 +85,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter, $timeout) {
           return;
         }
         initialHeadersClientWidth();
-        allignFixedHeader();
+        alignFixedHeader();
       });
 
       //listen 'visScrolled' event from visualize.js and configure fixed header
@@ -96,22 +96,24 @@ module.directive('kbnTableHeader', function (shortDotsFilter, $timeout) {
 
         const elemTop =  $element.offset().top;
         const parentLeftOffset = $element.parent().offset().left;
+        const fixedHeader = $element[0].querySelector('#fixed-header');
+        const relativeHeader = $element[0].querySelector('#relative-header');
 
         if (elemTop > visTopOffset) {
-          $element[0].querySelector('#fixed-header').style.display = 'none';
-          $element[0].querySelector('#relative-header').style.visibility = '';
+          fixedHeader.style.display = 'none';
+          relativeHeader.style.visibility = '';
         } else {
-          $element[0].querySelector('#relative-header').style.visibility = 'hidden';
-          $element[0].querySelector('#fixed-header').style.position = 'absolute';
-          $element[0].querySelector('#fixed-header').style.display = '';
-          $element[0].querySelector('#fixed-header').style.top = '0px';
-          $element[0].querySelector('#fixed-header').style.backgroundColor = 'white';
-          $element[0].querySelector('#fixed-header').style.zIndex = '100';
-          $element[0].querySelector('#fixed-header').style.overflow = 'hidden';
-          $element[0].querySelector('#fixed-header').style.marginRight = '13px';
+          relativeHeader.style.visibility = 'hidden';
+          fixedHeader.style.position = 'absolute';
+          fixedHeader.style.display = '';
+          fixedHeader.style.top = '0px';
+          fixedHeader.style.backgroundColor = 'white';
+          fixedHeader.style.zIndex = '100';
+          fixedHeader.style.overflow = 'hidden';
+          fixedHeader.style.marginRight = '13px';
 
           initialHeadersClientWidth();
-          allignFixedHeader(visWidth, visLeftOffset, parentLeftOffset);
+          alignFixedHeader(visWidth, visLeftOffset, parentLeftOffset);
         }
       });
       //kibi: end

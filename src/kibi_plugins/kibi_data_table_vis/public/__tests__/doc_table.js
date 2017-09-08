@@ -67,8 +67,10 @@ describe('Kibi doc table extra features', function () {
    * getTableHeaders returns the column names
    */
   function getTableHeaders() {
-    return [_.trim($elem.find('tr#relative-header .table-header-name').text()),
-      _.trim($elem.find('tr#fixed-header .table-header-name').text())];
+    return [
+      _.trim($elem.find('tr#relative-header .table-header-name').text()),
+      _.trim($elem.find('tr#fixed-header .table-header-name').text())
+    ];
   };
 
   /**

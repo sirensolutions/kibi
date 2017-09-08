@@ -8,7 +8,13 @@
   <th ng-repeat="name in columns" data-test-subj="docTableHeaderField" ng-style="{ 'min-width': columnMinWidth[$index] + 'px' || '0px' }">
     <!-- kibi: added columnAliases[name] to the condition -->
     <span class="table-header-name">
-      {{(columnAliases[$index] || name) | shortDots}} <i ng-class="headerClass(name)" ng-click="cycleSortOrder(name)" tooltip="{{tooltip(name)}}" tooltip-append-to-body="1"></i>
+      {{(columnAliases[$index] || name) | shortDots}} 
+      <i
+        ng-class="headerClass(name)" 
+        ng-click="cycleSortOrder(name)" 
+        tooltip="{{tooltip(name)}}" 
+        tooltip-append-to-body="1"
+      ></i>
     </span>
     <span class="table-header-move">
       <i
@@ -45,7 +51,13 @@
   <th ng-repeat="name in columns" data-test-subj="docTableHeaderField" ng-style="{ 'min-width': columnMinWidth[$index] + 'px' || '0px' }">
     <!-- kibi: added columnAliases[name] to the condition -->
     <span class="table-header-name">
-      {{(columnAliases[$index] || name) | shortDots}} <i ng-class="headerClass(name)" ng-click="cycleSortOrder(name)" tooltip="{{tooltip(name)}}" tooltip-append-to-body="1"></i>
+      {{(columnAliases[$index] || name) | shortDots}} 
+      <i 
+        ng-class="headerClass(name)" 
+        ng-click="cycleSortOrder(name)" 
+        tooltip="{{tooltip(name)}}" 
+        tooltip-append-to-body="1"
+      ></i>
     </span>
     <span class="table-header-move">
       <i

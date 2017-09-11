@@ -62,7 +62,7 @@ export default async (kbnServer, server, config) => {
       if (server.plugins.kibi_access_control && id !== 'kibana') {
         const result = await server.plugins.kibi_access_control.isAllowed(user, ['view'], 'app:' + id);
         if (result === false) {
-          return reply(`Sorry you do not have access to <b>${id}</b> application`);
+          return reply(`Access to ${id} denied by ACL.`);
         }
       }
 

@@ -76,7 +76,10 @@
     </div>
     <!-- ToolBarFooter -->
     <div class="kuiBar docTableBar">
-      <!--kibi: support CSV export-->
+      <!-- kibi: support CSV export
+           leave the container so even if scv button is hidden
+           either via ng-if or data_ui_acl class
+           the pager is still properly aligned -->
       <div class="csv-button">
         <a ng-if="csv" data-ui-acl="ui:kibi@csvexport" class="small" ng-click="exportAsCsv(hits, indexPattern, columns)">
           Export as CSV <i aria-hidden="true" class="fa fa-download"></i>

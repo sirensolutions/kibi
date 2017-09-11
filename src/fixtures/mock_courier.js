@@ -1,8 +1,8 @@
 import sinon from 'sinon';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 export default function (Private, Promise) {
-  const indexPatterns = Private(FixturesStubbedLogstashIndexPatternProvider);
+  const indexPatterns = Private(stubbedLogstashIndexPatternService);
   const getIndexPatternStub = sinon.stub()
     .returns(Promise.resolve(indexPatterns));
 

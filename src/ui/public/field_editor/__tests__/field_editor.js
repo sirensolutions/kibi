@@ -3,7 +3,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 
 describe('FieldEditor directive', function () {
@@ -27,7 +27,7 @@ describe('FieldEditor directive', function () {
     $rootScope = $injector.get('$rootScope');
     Field = Private(IndexPatternsFieldProvider);
 
-    $rootScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    $rootScope.indexPattern = Private(stubbedLogstashIndexPatternService);
     $rootScope.indexPattern.stubSetFieldFormat('time', 'string', { foo: 1, bar: 2 });
     $rootScope.field = $rootScope.indexPattern.fields.byName.time;
 

@@ -2,8 +2,8 @@ import $ from 'jquery';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
+import { StubbedSearchSourceProvider } from 'fixtures/stubbed_search_source';
 describe('visualize directive', function () {
   let $rootScope;
   let $compile;
@@ -20,8 +20,8 @@ describe('visualize directive', function () {
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    searchSource = Private(FixturesStubbedSearchSourceProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
+    searchSource = Private(StubbedSearchSourceProvider);
   }));
 
   // basically a parameterized beforeEach

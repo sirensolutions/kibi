@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { PointSeriesGetAspectsProvider } from 'ui/agg_response/point_series/_get_aspects';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 //TODO MERGE 5.5.2 add kibi comments
 
 
@@ -22,7 +22,7 @@ describe('getAspects', function () {
     Vis = Private(VisProvider);
     AggConfig = Private(VisAggConfigProvider);
     getAspects = Private(PointSeriesGetAspectsProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
   }));
 
   let vis;

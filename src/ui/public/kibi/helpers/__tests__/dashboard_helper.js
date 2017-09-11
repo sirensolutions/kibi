@@ -2,7 +2,7 @@ import noDigestPromises from 'test_utils/no_digest_promises';
 import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 
 const fakeSavedDashboards = [
   {

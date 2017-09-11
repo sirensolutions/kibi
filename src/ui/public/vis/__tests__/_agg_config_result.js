@@ -2,7 +2,7 @@ import AggConfigResult from 'ui/vis/agg_config_result';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 describe('AggConfigResult', function () {
   let indexPattern;
   let Vis;
@@ -12,7 +12,7 @@ describe('AggConfigResult', function () {
   }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
   }));
 
   describe('initialization', function () {

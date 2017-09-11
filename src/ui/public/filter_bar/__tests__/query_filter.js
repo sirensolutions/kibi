@@ -9,7 +9,7 @@ import './_pin_filters';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { EventsProvider } from 'ui/events';
 // kibi: imports
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 // kibi: end
 let queryFilter;
 let EventEmitter;

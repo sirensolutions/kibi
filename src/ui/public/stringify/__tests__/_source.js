@@ -3,7 +3,7 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesHitsProvider from 'fixtures/hits';
 describe('_source formatting', function () {
 
@@ -21,7 +21,7 @@ describe('_source formatting', function () {
     let convertHtml;
 
     beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      indexPattern = Private(stubbedLogstashIndexPatternService);
       hits = Private(FixturesHitsProvider);
       format = fieldFormats.getInstance('_source');
       convertHtml = format.getConverterFor('html');

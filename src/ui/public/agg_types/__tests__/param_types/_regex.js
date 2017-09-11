@@ -3,7 +3,7 @@ import ngMock from 'ng_mock';
 import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
 import { AggTypesParamTypesRegexProvider } from 'ui/agg_types/param_types/regex';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 //TODO MERGE 5.5.2 add kibi comments
 
@@ -22,7 +22,7 @@ describe('Regex', function () {
     BaseAggParam = Private(AggTypesParamTypesBaseProvider);
     RegexAggParam = Private(AggTypesParamTypesRegexProvider);
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
   }));
 
   describe('constructor', function () {

@@ -4,7 +4,7 @@ import expect from 'expect.js';
 //TODO MERGE 5.5.2 add kibi comment as needed
 
 // kibi: we need to call Private on this
-import DashboardStateProvider from '../dashboard_state';
+import { DashboardStateProvider } from '../dashboard_state';
 
 describe('DashboardState', function () {
   let AppState;

@@ -2,7 +2,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import searchResp from 'fixtures/search_response';
 
 import { FetchProvider } from '../fetch';
@@ -24,7 +24,7 @@ describe('Fetch service', function () {
     es = $injector.get('es');
     Promise = $injector.get('Promise');
     fetch = Private(FetchProvider);
-    indexPattern = Private(IndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     DocSource = Private(DocSourceProvider);
     SearchSource = Private(SearchSourceProvider);
   }));

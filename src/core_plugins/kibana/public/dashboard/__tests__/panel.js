@@ -11,6 +11,7 @@ describe('dashboard panel', function () {
   let $scope;
   let $el;
   let parentScope;
+  let mgetStub;
 
   noDigestPromise.activateForSuite();
 
@@ -20,7 +21,7 @@ describe('dashboard panel', function () {
     });
     ngMock.inject(($rootScope, $compile, esAdmin, savedObjectsAPI, kibiState) => {
       // kibi: use the savedObjectsAPI instead of esAdmin, inject getEntityURI() for check in panel.js
-      sinon.stub(savedObjectsAPI, 'mget').returns(Promise.resolve({ docs: [ mockDocResponse ] }));
+      mgetStub = sinon.stub(savedObjectsAPI, 'mget').returns(Promise.resolve({ docs: [ mockDocResponse ] }));
       sinon.stub(kibiState, 'getEntityURI').returns({ index: 'a', type: 'b', id: 'c' });
       sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
         '.kibana': {
@@ -63,6 +64,7 @@ describe('dashboard panel', function () {
   afterEach(() => {
     $scope.$destroy();
     $el.remove();
+    mgetStub.restore();
   });
 
   it('should not visualize the visualization if it does not exist', function () {

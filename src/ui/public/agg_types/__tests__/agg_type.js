@@ -7,7 +7,7 @@ import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
 import { VisProvider } from 'ui/vis';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 //TODO MERGE 5.5.2 add kibi comments
 
@@ -29,7 +29,7 @@ describe('AggType Class', function () {
     Vis = Private(VisProvider);
     fieldFormat = Private(RegistryFieldFormatsProvider);
     AggType = Private(AggTypesAggTypeProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
   }));
 
   describe('constructor', function () {

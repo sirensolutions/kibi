@@ -4,7 +4,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 //TODO MERGE 5.5.2 add kibi comments
 
 
@@ -19,7 +19,7 @@ describe('tabifyAggResponse Integration', function () {
   beforeEach(ngMock.inject(function (Private) {
     tabifyAggResponse = Private(AggResponseTabifyProvider);
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
   }));
 
   function normalizeIds(vis) {

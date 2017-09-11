@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
 //TODO MERGE 5.5.2 add kibi comment as needed
 
@@ -35,7 +35,7 @@ describe('Controller', function () {
 
   function OneRangeVis(params) {
     return new Vis(
-      Private(FixturesStubbedLogstashIndexPatternProvider),
+      Private(stubbedLogstashIndexPatternService),
       {
         type: 'table',
         params: params || {},
@@ -59,7 +59,7 @@ describe('Controller', function () {
 
   function getExternalQueryVis(params) {
     return new Vis(
-      Private(FixturesStubbedLogstashIndexPatternProvider),
+      Private(stubbedLogstashIndexPatternService),
       {
         type: 'table',
         params: params || {},
@@ -236,8 +236,7 @@ describe('Controller', function () {
       };
 
       const stubbedTabify = sinon.stub().returns(tabifyResponse);
-      //TODO MERGE 5.5.2 check why tabifyPm is not defined
-      //Private.stub(tabifyPm, stubbedTabify);
+      Private.stub(AggResponseTabifyProvider, stubbedTabify);
 
       initController(getExternalQueryVis());
       attachEsResponseToScope(fixtures.oneExternalQueryFilterBucket);

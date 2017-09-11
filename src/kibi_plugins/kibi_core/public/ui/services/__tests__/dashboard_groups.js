@@ -1,11 +1,11 @@
-import Notifier from 'ui/notify/notifier';
-import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
+import { Notifier } from 'ui/notify/notifier';
+import { DashboardHelperFactory } from 'ui/kibi/helpers/dashboard_helper';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import Promise from 'bluebird';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import MockState from 'fixtures/mock_state';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { MockState } from 'fixtures/mock_state';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import chrome from 'ui/chrome';
 import _ from 'lodash';
@@ -119,6 +119,7 @@ let config;
 
 let setSelectedDashboardIdStub;
 let switchDashboardStub;
+let chromeGetBasePathStub;
 
 function init({
   currentDashboardId = 'Articles',
@@ -198,12 +199,12 @@ function init({
   });
 
   ngMock.inject(function (Private, _es_, _dashboardGroups_, _kibiState_, _joinExplanation_, _config_) {
-    const dashboardHelper = Private(DashboardHelperProvider);
+    const dashboardHelper = Private(DashboardHelperFactory);
     switchDashboardStub = sinon.stub(dashboardHelper, 'switchDashboard');
     kibiState = _kibiState_;
     dashboardGroups = _dashboardGroups_;
     config = _config_;
-    sinon.stub(chrome, 'getBasePath').returns('');
+    chromeGetBasePathStub = sinon.stub(chrome, 'getBasePath').returns('');
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
     setSelectedDashboardIdStub = sinon.stub(kibiState, 'setSelectedDashboardId');
@@ -234,6 +235,10 @@ describe('Kibi Services', function () {
           done();
         });
       });
+    });
+
+    afterEach(() => {
+      chromeGetBasePathStub.restore();
     });
 
     describe('copy', function () {

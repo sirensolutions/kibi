@@ -22,6 +22,10 @@ describe('kibi/session/hashUrl', () => {
     hashedItemStoreSpy = sinon.spy(HashedItemStoreSingleton, 'setItem');
   });
 
+  afterEach(() => {
+    hashedItemStoreSpy.restore();
+  });
+
   it('should hash unhashed states', () => {
     const base = '/app/kibana#/dashboard/dash';
     const querystring = `_g=${encodedStates[0]}&_a=${encodedStates[1]}&_k=${encodedStates[2]}`;

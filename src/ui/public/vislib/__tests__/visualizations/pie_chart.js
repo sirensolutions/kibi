@@ -7,7 +7,7 @@ import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import { VisProvider } from 'ui/vis';
 import 'ui/persisted_state';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
 const rowAgg = [
@@ -82,7 +82,7 @@ describe('No global chart settings', function () {
     chart2 = Private(FixturesVislibVisFixtureProvider)(visLibParams2);
     Vis = Private(VisProvider);
     persistedState = new ($injector.get('PersistedState'))();
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     buildHierarchicalData = Private(BuildHierarchicalDataProvider);
 
     let id1 = 1;
@@ -179,7 +179,7 @@ aggArray.forEach(function (dataAgg, i) {
       vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
       Vis = Private(VisProvider);
       persistedState = new ($injector.get('PersistedState'))();
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      indexPattern = Private(stubbedLogstashIndexPatternService);
       buildHierarchicalData = Private(BuildHierarchicalDataProvider);
 
       let id = 1;

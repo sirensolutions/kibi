@@ -7,7 +7,7 @@ import 'plugins/kibana/visualize/editor/agg_params';
 import { VisProvider } from 'ui/vis';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { VisSchemasProvider } from 'ui/vis/schemas';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 
 describe('Vis-Editor-Agg-Params plugin directive', function () {
@@ -34,7 +34,7 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
     compile = $compile;
 
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     Schemas = Private(VisSchemasProvider);
     AggConfig = Private(VisAggConfigProvider);
   }));

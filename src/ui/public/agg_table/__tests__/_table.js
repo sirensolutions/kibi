@@ -6,7 +6,7 @@ import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from 'ui/vis';
 describe('AggTable Directive', function () {
 //TODO MERGE 5.5.2 add kibi comments
@@ -24,7 +24,7 @@ describe('AggTable Directive', function () {
   }));
   beforeEach(ngMock.inject(function ($injector, Private, config) {
     tabifyAggResponse = Private(AggResponseTabifyProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     Vis = Private(VisProvider);
     settings = config;
 

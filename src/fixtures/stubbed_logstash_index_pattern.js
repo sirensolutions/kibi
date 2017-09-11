@@ -1,9 +1,9 @@
-import TestUtilsStubIndexPatternProvider from 'test_utils/stub_index_pattern';
+import { StubIndexPatternProvider } from 'test_utils/stub_index_pattern';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import { getKbnFieldType } from '../utils';
 
-export default function stubbedLogstashIndexPatternService(Private) {
-  const StubIndexPattern = Private(TestUtilsStubIndexPatternProvider);
+export function stubbedLogstashIndexPatternService(Private) {
+  const StubIndexPattern = Private(StubIndexPatternProvider);
   const mockLogstashFields = Private(FixturesLogstashFieldsProvider);
 
   const fields = mockLogstashFields.map(function (field) {

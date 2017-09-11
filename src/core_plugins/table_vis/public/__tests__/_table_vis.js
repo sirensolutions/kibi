@@ -3,7 +3,7 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 //TODO MERGE 5.5.2 add kibi comment as needed
 
 
@@ -24,7 +24,7 @@ describe('Integration', function () {
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
   }));
 
   // basically a parameterized beforeEach

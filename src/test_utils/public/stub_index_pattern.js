@@ -8,7 +8,7 @@ import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
 import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
 
-export default function (Private) {
+export function StubIndexPatternProvider(Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
@@ -31,6 +31,10 @@ export default function (Private) {
       min: 0,
       max: 1
     }))));
+
+    // kibi: allow to test time-based indices
+    this.isTimeBased = _.constant(Boolean(timeField));
+
     this.getComputedFields = getComputedFields.bind(this);
     this.flattenHit = flattenHit(this);
     this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));

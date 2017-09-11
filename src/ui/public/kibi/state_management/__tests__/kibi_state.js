@@ -1,4 +1,4 @@
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import * as onPage from 'ui/kibi/utils/on_page';
 import moment from 'moment';
 import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
@@ -6,8 +6,8 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import MockState from 'fixtures/mock_state';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { MockState } from 'fixtures/mock_state';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
@@ -116,6 +116,9 @@ describe('State Management', function () {
     // https://github.com/elastic/kibana/pull/8822 ensure that the notifier is emptied by each test
     afterEach(() => {
       Notifier.prototype._notifs.length = 0;
+      onDashboardPageSpy.restore();
+      onVisualizePageSpy.restore();
+      onManagementPageSpy.restore();
     });
 
     describe('_isDefaultQuery', function () {

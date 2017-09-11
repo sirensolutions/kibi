@@ -5,7 +5,7 @@ import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import Promise from 'bluebird';
 

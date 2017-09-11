@@ -2,7 +2,7 @@ import noDigestPromises from 'test_utils/no_digest_promises';
 import { DoesVisDependsOnSelectedEntitiesProvider } from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 
 let doesVisDependsOnSelectedEntities;
 const fakeSavedQueries = [

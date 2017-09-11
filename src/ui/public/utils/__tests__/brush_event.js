@@ -2,7 +2,7 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import moment from 'moment';
 import ngMock from 'ng_mock';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 
 describe('brushEvent', function () {
@@ -35,7 +35,7 @@ describe('brushEvent', function () {
     };
 
     beforeEach(ngMock.inject(function (Private) {
-      baseEvent.data.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      baseEvent.data.indexPattern = Private(stubbedLogstashIndexPatternService);
       $state = _.cloneDeep(baseState);
       brushEvent = brushEventFn($state);
     }));

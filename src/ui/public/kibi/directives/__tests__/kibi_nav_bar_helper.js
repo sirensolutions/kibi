@@ -3,7 +3,7 @@ import { KibiNavBarHelperFactory } from 'ui/kibi/directives/kibi_nav_bar_helper'
 import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 import noDigestPromises from 'test_utils/no_digest_promises';

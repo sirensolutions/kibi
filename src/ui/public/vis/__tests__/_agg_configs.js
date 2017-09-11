@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { VisProvider } from 'ui/vis';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import { IndexedArray } from 'ui/indexed_array';
 
@@ -36,7 +36,7 @@ describe('AggConfigs', function () {
     Vis = Private(VisProvider);
     SpiedAggConfig = Private(VisAggConfigProvider);
     AggConfigs = Private(VisAggConfigsProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     Schemas = Private(VisSchemasProvider);
   }));
 

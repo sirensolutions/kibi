@@ -1,6 +1,6 @@
 import chrome from 'ui/chrome';
 import Notifier from 'ui/notify/notifier';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import noDigestPromises from 'test_utils/no_digest_promises';
 import Promise from 'bluebird';

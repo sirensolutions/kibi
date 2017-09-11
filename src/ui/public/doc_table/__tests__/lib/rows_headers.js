@@ -6,7 +6,7 @@ import ngMock from 'ng_mock';
 import getFakeRow from 'fixtures/fake_row';
 import $ from 'jquery';
 import 'plugins/kibana/discover/index';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 
 const SORTABLE_FIELDS = ['bytes', '@timestamp'];
@@ -27,7 +27,7 @@ describe('Doc Table', function () {
   beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {
     config = _config_;
     $parentScope = $rootScope;
-    $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    $parentScope.indexPattern = Private(stubbedLogstashIndexPatternService);
     mapping = $parentScope.indexPattern.fields.byName;
   }));
 
@@ -348,7 +348,7 @@ describe('Doc Table', function () {
       $root.filtering = sinon.spy();
       $root.maxLength = 50;
       $root.mapping = mapping;
-      $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      $root.indexPattern = Private(stubbedLogstashIndexPatternService);
 
       $row = $('<tr>')
       .attr({

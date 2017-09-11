@@ -2,10 +2,10 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { AggTypesMetricsPercentilesProvider } from 'ui/agg_types/metrics/percentiles';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 //TODO MERGE 5.5.2 add kibi comments
 
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 
 describe('AggTypesMetricsPercentilesProvider class', function () {
 
@@ -20,7 +20,7 @@ describe('AggTypesMetricsPercentilesProvider class', function () {
   }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     aggTypeMetricPercentiles = Private(AggTypesMetricsPercentilesProvider);
   }));
 

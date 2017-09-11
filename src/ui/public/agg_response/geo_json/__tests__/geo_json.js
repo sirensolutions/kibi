@@ -2,8 +2,8 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import FixturesAggRespGeohashGridProvider from 'fixtures/agg_resp/geohash_grid';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
+import { GeoHashGridAggResponseFixture } from 'fixtures/agg_resp/geohash_grid';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 
@@ -21,9 +21,9 @@ describe('GeoJson Agg Response Converter', function () {
   }));
   beforeEach(ngMock.inject(function (Private) {
     const Vis = Private(VisProvider);
-    const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    const indexPattern = Private(stubbedLogstashIndexPatternService);
 
-    esResponse = Private(FixturesAggRespGeohashGridProvider);
+    esResponse = Private(GeoHashGridAggResponseFixture);
     tabify = Private(AggResponseTabifyProvider);
     convert = Private(AggResponseGeoJsonProvider);
 

@@ -9,7 +9,7 @@ import {
   rangeFilter,
   existsFilter
 } from 'fixtures/filters';
-import stubbedLogstashIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { FILTER_OPERATORS } from '../filter_operators';
 import {
@@ -30,7 +30,7 @@ describe('FilterEditorUtils', function () {
   let fields;
   beforeEach(function () {
     ngMock.inject(function (Private) {
-      indexPattern = Private(stubbedLogstashIndexPattern);
+      indexPattern = Private(stubbedLogstashIndexPatternService);
       fields = stubbedLogstashFields();
     });
   });

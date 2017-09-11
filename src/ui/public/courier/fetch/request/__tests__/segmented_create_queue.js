@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import { StubbedSearchSourceProvider } from 'fixtures/stubbed_search_source';
 
 import { SegmentedRequestProvider } from '../segmented';
 

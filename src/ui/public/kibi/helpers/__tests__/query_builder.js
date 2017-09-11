@@ -5,7 +5,7 @@ import MockState from 'fixtures/mock_state';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
 const defaultStartTime = '2006-09-01T12:00:00.000Z';

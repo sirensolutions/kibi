@@ -5,7 +5,7 @@ import uiModules from 'ui/modules';
 const module = uiModules.get('app/discover');
 
 
-module.directive('kbnTableHeader', function (shortDotsFilter) {
+module.directive('kbnTableHeader', function (shortDotsFilter, $timeout) {
   return {
     restrict: 'A',
     scope: {
@@ -23,7 +23,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       disableTimeField: '=?'
     },
     template: headerHtml,
-    controller: function ($rootScope, $scope) {
+    controller: function ($rootScope, $scope, $element) {
       const isSortableColumn = function isSortableColumn(columnName) {
         return (
           !!$scope.indexPattern
@@ -31,6 +31,92 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
           && _.get($scope, ['indexPattern', 'fields', 'byName', columnName, 'sortable'], false)
         );
       };
+
+      //kibi: these are required for fixed header in kibi enhanced table
+      $element[0].querySelector('#fixed-header').style.display = 'none';
+      const headerOffsets = [];
+
+      //assign fixed header columns width from relative header
+      const initialHeadersClientWidth = function () {
+        headerOffsets.length = 0;
+        const headers = $element[0].querySelector('#relative-header').cells;
+        for(let i = 0; i < headers.length; i++) {
+          const width = Math.round((headers[i].getBoundingClientRect().width) * 100) / 100;
+          headerOffsets.push(width);
+        }
+      };
+
+      //set fixed header position in table
+      const alignFixedHeader = function (visWidth, visLeftOffset, parentLeftOffset) {
+        const fixedHeader = $element[0].querySelector('#fixed-header');
+        if (visWidth && visLeftOffset && parentLeftOffset) {
+          fixedHeader.style.left = parentLeftOffset - visLeftOffset + 'px';
+          fixedHeader.style.width = visWidth - parentLeftOffset + visLeftOffset - 14 + 'px';
+        } else {
+          fixedHeader.style.width = '95%';
+          fixedHeader.style.left = '';
+        }
+
+        for(let i = 0; i < fixedHeader.cells.length; i++) {
+          fixedHeader.cells[i].setAttribute('style','width: ' + headerOffsets[i] + 'px; min-width: ' + headerOffsets[i] + 'px;');
+        }
+      };
+
+      $timeout(function () {
+        initialHeadersClientWidth();
+        alignFixedHeader();
+      });
+
+      //listen 'visResized' event from visualize.js and configure fixed header
+      $scope.$on('visResized', function (event, visLeftOffset, visWidth, columns) {
+        if(!_.isEqual(event.currentScope.columns, columns)) {
+          return;
+        }
+
+        const parentLeftOffset = $element.parent().offset().left;
+        initialHeadersClientWidth();
+        alignFixedHeader(visWidth, visLeftOffset, parentLeftOffset);
+      });
+
+      //when user switch to standart template configure fixed header
+      $scope.$watch(function () { return $element.parent().is(':visible'); },
+      function (oldValue,newValue) {
+        if(newValue === oldValue) {
+          return;
+        }
+        initialHeadersClientWidth();
+        alignFixedHeader();
+      });
+
+      //listen 'visScrolled' event from visualize.js and configure fixed header
+      $scope.$on('visScrolled', function (event, visTopOffset, visLeftOffset, visWidth, columns) {
+        if(!_.isEqual(event.currentScope.columns, columns)) {
+          return;
+        }
+
+        const elemTop =  $element.offset().top;
+        const parentLeftOffset = $element.parent().offset().left;
+        const fixedHeader = $element[0].querySelector('#fixed-header');
+        const relativeHeader = $element[0].querySelector('#relative-header');
+
+        if (elemTop > visTopOffset) {
+          fixedHeader.style.display = 'none';
+          relativeHeader.style.visibility = '';
+        } else {
+          relativeHeader.style.visibility = 'hidden';
+          fixedHeader.style.position = 'absolute';
+          fixedHeader.style.display = '';
+          fixedHeader.style.top = '0px';
+          fixedHeader.style.backgroundColor = 'white';
+          fixedHeader.style.zIndex = '100';
+          fixedHeader.style.overflow = 'hidden';
+          fixedHeader.style.marginRight = '13px';
+
+          initialHeadersClientWidth();
+          alignFixedHeader(visWidth, visLeftOffset, parentLeftOffset);
+        }
+      });
+      //kibi: end
 
       $scope.tooltip = function (column) {
         if (!isSortableColumn(column)) return '';

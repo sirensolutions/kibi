@@ -64,10 +64,13 @@ describe('Kibi doc table extra features', function () {
   };
 
   /**
-   * getTableHeader returns the column names
+   * getTableHeaders returns the column names
    */
-  function getTableHeader() {
-    return _.trim($elem.find('.table-header-name').text());
+  function getTableHeaders() {
+    return [
+      _.trim($elem.find('tr#relative-header .table-header-name').text()),
+      _.trim($elem.find('tr#fixed-header .table-header-name').text())
+    ];
   };
 
   /**
@@ -108,7 +111,10 @@ describe('Kibi doc table extra features', function () {
         }
       });
       $scope.$digest();
-      expect(_.trim($elem.find('.table-header-name').text())).to.equal('label');
+
+      _.each(getTableHeaders(), function (header) {
+        expect(header).to.equal('label');
+      });
     });
 
     it('should replace the column name with its alias', function () {
@@ -130,7 +136,10 @@ describe('Kibi doc table extra features', function () {
         }
       });
       $scope.$digest();
-      expect(_.trim($elem.find('.table-header-name').text())).to.equal('labelAlias');
+
+      _.each(getTableHeaders(), function (header) {
+        expect(header).to.equal('labelAlias');
+      });
     });
   });
 
@@ -161,7 +170,10 @@ describe('Kibi doc table extra features', function () {
       });
       $scope.$digest();
 
-      expect(_.trim($elem.find('.table-header-name').text())).to.equal('cthulhu');
+      _.each(getTableHeaders(), function (header) {
+        expect(header).to.equal('cthulhu');
+      });
+
       expect(_.trim($elem.find('.discover-table-datafield').text())).to.equal('high priest, low priest');
     });
 
@@ -185,7 +197,10 @@ describe('Kibi doc table extra features', function () {
       });
       $scope.$digest();
 
-      expect(getTableHeader()).to.equal('cthulhu');
+      _.each(getTableHeaders(), function (header) {
+        expect(header).to.equal('cthulhu');
+      });
+
       expect(getTableColumn()).to.equal('');
     });
   });

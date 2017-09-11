@@ -15,7 +15,7 @@ import KibiSpyDataProvider from 'ui/kibi/spy/kibi_spy_data';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (kibiState, createNotifier, SavedVis, indexPatterns, Private, config, $timeout) {
+.directive('visualize', function ($rootScope, kibiState, createNotifier, SavedVis, indexPatterns, Private, config, $timeout) {
   const notify = createNotifier({
     location: 'Visualize'
   });
@@ -52,6 +52,7 @@ uiModules
 
       const getVisEl = getter('.visualize-chart');
       const getVisContainer = getter('.vis-container');
+      const $visContainer = getVisContainer();
       const getSpyContainer = getter('.visualize-spy-container');
 
       // Show no results message when isZeroHits is true and it requires search
@@ -257,6 +258,39 @@ uiModules
           oldRenderbot.destroy();
         }
       });
+
+      // kibi: these are required for fixed header in kibi enhanced table
+      // watch visualization resize and pass 'visResized' event to table_header.js
+      $scope.$watch(
+        function () {
+          return {
+            width: $el.width(),
+            height: $el.height(),
+          };
+        },
+       function (newValue, oldValue) {
+         if(newValue === oldValue) {
+           return;
+         }
+
+         const columns = $scope.vis.params.columns;
+         const visLeftOffset = $el.offset().left;
+         const visWidth = $el.width();
+
+         $rootScope.$broadcast('visResized', visLeftOffset, visWidth, columns);
+       },
+       true
+    );
+
+      // listen scroll event in visualization and pass 'visScrolled' event to table_header.js
+      $visContainer.on('scroll', function () {
+        const columns = $scope.vis.params.columns;
+        const visTopOffset = $el.offset().top;
+        const visLeftOffset = $el.offset().left;
+        const visWidth = $el.width();
+        $rootScope.$broadcast('visScrolled', visTopOffset, visLeftOffset, visWidth, columns);
+      });
+      // kibi: end
 
       $scope.$on('$destroy', function () {
         if ($scope.renderbot) {

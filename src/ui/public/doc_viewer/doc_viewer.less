@@ -16,6 +16,13 @@
 
   .doc-viewer-content {
     margin-top: @padding-base-vertical;
+    //kibi: this one needed for cell shift problem in IE11
+    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {		
+      table {
+        max-width: 600px;
+      }	
+    }
+    //kibi: end
   }
 
   .doc-viewer-buttons,

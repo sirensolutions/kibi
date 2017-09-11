@@ -384,6 +384,7 @@ uiModules
         _.each(this.getGroups(), group => {
           group.active = false;
         });
+        this.updateMetadataOfDashboardIds(dashboardId, true);
         const activeGroup = _.findWhere(this.getGroups(), { dashboards: [ { id: dashboardId } ] });
         activeGroup.active = true;
         activeGroup.selected = _.find(activeGroup.dashboards, 'id', dashboardId);

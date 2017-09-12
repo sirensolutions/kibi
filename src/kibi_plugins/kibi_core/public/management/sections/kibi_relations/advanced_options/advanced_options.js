@@ -32,6 +32,10 @@ uiModules
     $scope.relation.type = 'SEARCH_JOIN'; // default join type
   }
 
+  if (!$scope.relation.limit_per_shard) {
+    $scope.relation.limit_per_shard = 10000000; // default per shard limit
+  }
+
   // cancel button
   $scope.cancel = function () {
     kbnUrl.change('/management/siren/relations');

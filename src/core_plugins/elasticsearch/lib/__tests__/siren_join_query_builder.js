@@ -30,7 +30,7 @@ function addSourceTypes(query, types) {
  * JoinBuilder creates a siren join query
  *
  * @param orderBy orderBy join parameter
- * @param maxTermsPerShard maxTermsPerShard join parameter
+ * @param limitPerShard limit_per_shard join parameter
  * @param termsEncoding termsEncoding join parameter
  * @param sourcePath join path in the source index
  * @param targetPath join path in the target index
@@ -40,7 +40,7 @@ function addSourceTypes(query, types) {
  * @returns this JoinBuilder instance
  */
 class JoinBuilder {
-  constructor({ orderBy, maxTermsPerShard, termsEncoding, type, sourcePath, targetIndices, targetTypes, targetPath }) {
+  constructor({ orderBy, limitPerShard, termsEncoding, type, sourcePath, targetIndices, targetTypes, targetPath }) {
     const join = {
       indices: targetIndices,
       on: [ sourcePath, targetPath ],
@@ -74,11 +74,11 @@ class JoinBuilder {
     if (orderBy) {
       join.orderBy = orderBy;
     }
-    if (maxTermsPerShard && maxTermsPerShard > -1) {
-      join.maxTermsPerShard = maxTermsPerShard;
-    }
     if (termsEncoding) {
       join.termsEncoding = termsEncoding;
+    }
+    if (limitPerShard && limitPerShard > -1) {
+      join.limit_per_shard = limitPerShard;
     }
 
     this.fjQuery = [ { join } ];
@@ -88,16 +88,16 @@ class JoinBuilder {
   /**
    * addJoin adds a join query to be nested in the parent one
    */
-  addJoin({ orderBy, maxTermsPerShard, termsEncoding, type, sourceTypes, sourcePath, targetIndices, negate, targetTypes, targetPath }) {
+  addJoin({ orderBy, limitPerShard, termsEncoding, type, sourceTypes, sourcePath, targetIndices, negate, targetTypes, targetPath }) {
     const joinBuilder = new JoinBuilder({
       orderBy,
-      maxTermsPerShard,
       termsEncoding,
       type,
       sourcePath,
       targetIndices,
       targetTypes,
-      targetPath
+      targetPath,
+      limitPerShard
     });
     const query = this.join.request.query.bool;
 
@@ -205,10 +205,10 @@ export default class Builder {
   /**
    * addJoin adds a join query
    */
-  addJoin({ orderBy, maxTermsPerShard, termsEncoding, type, sourceTypes, sourcePath, targetIndices, targetTypes, targetPath }) {
+  addJoin({ orderBy, limitPerShard, termsEncoding, type, sourceTypes, sourcePath, targetIndices, targetTypes, targetPath }) {
     const joinBuilder = new JoinBuilder({
       orderBy,
-      maxTermsPerShard,
+      limitPerShard,
       termsEncoding,
       type,
       sourcePath,

@@ -263,7 +263,7 @@ export function RelationsHelperFactory(config) {
       }
 
       // set the advanced properties
-      [ 'type' ].forEach(advancedKey => {
+      [ 'type', 'limit_per_shard' ].forEach(advancedKey => {
         if (indexRelation[advancedKey]) {
           rel[advancedKey] = indexRelation[advancedKey];
         }

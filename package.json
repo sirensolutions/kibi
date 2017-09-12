@@ -19,7 +19,7 @@
   "version": "5.4.3",
   "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-4-3-released",
   "kibi_version": "5.4.4-SNAPSHOT-DISTRIBUTED",
-  "kibi_enterprise_enabled": false,
+  "kibi_enterprise_enabled": true,
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9",

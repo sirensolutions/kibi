@@ -47,6 +47,7 @@ describe('ui/modals/confirm_modal', function () {
     confirmModal(myMessage, { confirmButtonText: 'GREAT!', onConfirm: _.noop });
 
     $rootScope.$digest();
+    const deleteIt = findByDataTestSubj('confirmModalBodyText');
     const message = findByDataTestSubj('confirmModalBodyText')[0].innerText.trim();
     expect(message).to.equal(myMessage);
   });

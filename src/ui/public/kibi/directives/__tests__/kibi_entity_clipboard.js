@@ -2,7 +2,7 @@ import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import * as onPage from 'ui/kibi/utils/on_page';
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 import _ from 'lodash';
 import '../kibi_entity_clipboard';
 import noDigestPromises from 'test_utils/no_digest_promises';

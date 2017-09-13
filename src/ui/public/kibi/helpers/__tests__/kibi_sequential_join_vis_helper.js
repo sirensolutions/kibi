@@ -1,6 +1,6 @@
 import noDigestPromises from 'test_utils/no_digest_promises';
 import { KibiSequentialJoinVisHelperFactory } from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import expect from 'expect.js';

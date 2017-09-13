@@ -1,7 +1,7 @@
 import { DatasourceHelperFactory } from 'ui/kibi/helpers/datasource_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 
 const fakeSavedDatasources = [
   {

@@ -5,9 +5,10 @@ import expect from 'expect.js';
 import Promise from 'bluebird';
 import { DuplicateField } from 'ui/errors';
 import { IndexedArray } from 'ui/indexed_array';
-import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
-import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
+import { stubbedLogstashFields } from 'fixtures/logstash_fields';
+import { stubbedDocSourceResponse } from 'fixtures/stubbed_doc_source_response';
 import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
+import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
@@ -49,11 +50,11 @@ describe('index pattern', function () {
   }));
 
   beforeEach(ngMock.inject(function (Private) {
-    mockLogstashFields = Private(FixturesLogstashFieldsProvider);
+    mockLogstashFields = Private(stubbedLogstashFields);
     defaultTimeField = mockLogstashFields.find(f => f.type === 'date');
-    docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
+    docSourceResponse = Private(stubbedDocSourceResponse);
 
-    DocSource = Private(AdminDocSourceProvider);
+    DocSource = Private(SavedObjectSourceFactory);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
 
@@ -75,15 +76,6 @@ describe('index pattern', function () {
     //   return Promise.resolve(paths);
     // });
     // // kibi: end
-    //
-    // // stub calculateIndices
-    // calculateIndices = sinon.spy(function () {
-    //   return Promise.resolve([
-    //     { index: 'foo', max: Infinity, min: -Infinity },
-    //     { index: 'bar', max: Infinity, min: -Infinity }
-    //   ]);
-    // });
-    // Private.stub(require('ui/index_patterns/_calculate_indices'), calculateIndices);
 
     // spy on intervals
     intervals = Private(IndexPatternsIntervalsProvider);

@@ -1,4 +1,4 @@
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import angular from 'angular';
 import ngMock from 'ng_mock';

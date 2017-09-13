@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { AggTypesMetricsTopHitProvider } from 'ui/agg_types/metrics/top_hit';
 import { VisProvider } from 'ui/vis';
-import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Top hit metric', function () {
   let aggDsl;
@@ -14,7 +14,7 @@ describe('Top hit metric', function () {
     ngMock.module('kibana');
     ngMock.inject(function (Private) {
       const Vis = Private(VisProvider);
-      const indexPattern = Private(StubbedIndexPattern);
+      const indexPattern = Private(stubbedLogstashIndexPatternService);
       topHitMetric = Private(AggTypesMetricsTopHitProvider);
 
       const params = {};

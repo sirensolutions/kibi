@@ -4,7 +4,7 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import '../kibi_select';
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 
 let $rootScope;
 let $scope;

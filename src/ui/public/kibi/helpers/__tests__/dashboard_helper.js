@@ -1,5 +1,5 @@
 import noDigestPromises from 'test_utils/no_digest_promises';
-import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
+import { DashboardHelperFactory } from 'ui/kibi/helpers/dashboard_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
@@ -63,7 +63,7 @@ describe('Kibi Components', function () {
       });
 
       ngMock.inject(function (Private) {
-        dashboardHelper = Private(DashboardHelperProvider);
+        dashboardHelper = Private(DashboardHelperFactory);
       });
     });
 

@@ -12,30 +12,39 @@ export function StubIndexPatternProvider(Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
-  const IndexPattern = Private(IndexPatternProvider);
 
-  function StubIndexPattern(pattern, timeField, fields) {
+  // kibi: added the indexList for testing time-based indices
+  function StubIndexPattern(pattern, timeField, fields, indexList) {
     this.id = pattern;
-    this.popularizeField = sinon.stub();
+    this.popularizeField = sinon.spy();
     this.timeFieldName = timeField;
-    this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
-    this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
-    this.getSourceFiltering = sinon.stub();
+    this.getNonScriptedFields = sinon.spy();
+    this.getScriptedFields = sinon.spy();
+    this.getSourceFiltering = sinon.spy();
     this.metaFields = ['_id', '_type', '_source'];
     this.fieldFormatMap = {};
     this.routes = IndexPatternProvider.routes;
 
-    this.toIndexList = _.constant(Promise.resolve(pattern.split(',')));
-    this.toDetailedIndexList = _.constant(Promise.resolve(pattern.split(',').map(index => ({
-      index,
-      min: 0,
-      max: 1
-    }))));
+    // kibi: stub the paths array
+    this.paths = {};
+    _.each(fields, field => {
+      this.paths[field.name] = field.path;
+    });
+    // kibi: end
 
     // kibi: allow to test time-based indices
     this.isTimeBased = _.constant(Boolean(timeField));
 
-    this.getComputedFields = getComputedFields.bind(this);
+    this.toIndexList = sinon.stub().returns(Promise.resolve(indexList || [pattern]));
+    this.toDetailedIndexList = _.constant(Promise.resolve([
+      {
+        index: indexList || pattern,
+        min: 0,
+        max: 1
+      }
+    ]));
+    // kibi: end
+    this.getComputedFields = _.bind(getComputedFields, this);
     this.flattenHit = flattenHit(this);
     this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
     this.formatField = this.formatHit.formatField;

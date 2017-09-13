@@ -4,9 +4,9 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import 'ui/private';
 import 'ui/doc_table';
-import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import { StubbedSearchSourceProvider } from 'fixtures/stubbed_search_source';
 //TODO MERGE 5.5.2 add kibi comments
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 
 let $parentScope;
 let $scope;
@@ -50,7 +50,7 @@ describe('docTable', function () {
   beforeEach(function () {
     $elem = angular.element('<doc-table search-source="searchSource" columns="columns" sorting="sorting"></doc-table>');
     ngMock.inject(function (Private) {
-      searchSource = Private(FixturesStubbedSearchSourceProvider);
+      searchSource = Private(StubbedSearchSourceProvider);
     });
     init($elem, {
       searchSource: searchSource,

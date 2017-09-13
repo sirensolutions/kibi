@@ -1,4 +1,4 @@
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';

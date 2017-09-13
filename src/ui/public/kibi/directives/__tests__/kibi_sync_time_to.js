@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
 import pollUntil from './_poll_until';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 
 import '../kibi_sync_time_to';
 

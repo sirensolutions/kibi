@@ -4,11 +4,11 @@ import { getPathsForIndexPattern } from 'ui/kibi/index_patterns/_get_paths_for_i
 
 describe('kibi indexpattern', function () {
   describe('getPathsForIndexPattern', function () {
-    let getPathsForIndexPattern;
+    let mockGetPathsForIndexPattern;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      getPathsForIndexPattern = Private(getPathsForIndexPattern);
+      mockGetPathsForIndexPattern = Private(getPathsForIndexPattern);
     }));
 
     it('should return the path for every field in the index pattern', function () {
@@ -75,7 +75,7 @@ describe('kibi indexpattern', function () {
         'geo.srcdest': [ 'geo', 'srcdest' ]
       };
 
-      expect(getPathsForIndexPattern(response)).to.eql(expected);
+      expect(mockGetPathsForIndexPattern(response)).to.eql(expected);
     });
 
     it('should support dotted field names', function () {
@@ -129,7 +129,7 @@ describe('kibi indexpattern', function () {
         'geo.one.srcdest': [ 'geo.one', 'srcdest' ]
       };
 
-      expect(getPathsForIndexPattern(response)).to.eql(expected);
+      expect(mockGetPathsForIndexPattern(response)).to.eql(expected);
     });
   });
 });

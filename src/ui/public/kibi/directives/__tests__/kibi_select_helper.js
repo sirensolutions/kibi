@@ -1,7 +1,7 @@
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import { KibiSelectHelperFactory } from 'ui/kibi/directives/kibi_select_helper';
-import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -69,7 +69,7 @@ describe('Kibi Directives', function () {
       if (stubIndexPatterns) {
         ngMock.module('kibana/index_patterns', function ($provide) {
           $provide.service('indexPatterns', function (Promise, Private) {
-            const indexPattern = Private(IndexPatternProvider);
+            const indexPattern = Private(stubbedLogstashIndexPatternService);
             return {
               get: function (id) {
                 return Promise.resolve(indexPattern);
@@ -412,9 +412,7 @@ describe('Kibi Directives', function () {
           expect(_.find(fields, { label: 'ssl' })).not.to.be.ok();
           expect(_.find(fields, { label: '_id' })).not.to.be.ok();
           expect(_.find(fields, { label: 'area' })).to.be.ok();
-          expect(_.find(fields, { label: 'area' }).options.analyzed).to.be.ok();
           expect(_.find(fields, { label: 'custom_user_field' })).to.be.ok();
-          expect(_.find(fields, { label: 'custom_user_field' }).options.analyzed).not.to.be.ok();
         });
       });
 

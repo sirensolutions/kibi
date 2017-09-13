@@ -23,9 +23,10 @@ describe('ui/modals/confirm_modal_promise', function () {
   });
 
   afterEach(function () {
+    //kibi: $rootScope.$digest() moved here because confirmButton should be visible when finding it
+    $rootScope.$digest();
     const confirmButton = angular.element(document.body).find('[data-test-subj=confirmModalConfirmButton]');
     if (confirmButton) {
-      $rootScope.$digest();
       angular.element(confirmButton).click();
     }
   });

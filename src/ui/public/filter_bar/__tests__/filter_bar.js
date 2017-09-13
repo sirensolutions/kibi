@@ -6,7 +6,7 @@ import sinon from 'sinon';
 //TODO MERGE 5.5.2 add all the necessary kibi comments
 
 import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 import $ from 'jquery';
 import 'ui/filter_bar';
 import { FilterBarLibMapFilterProvider } from 'ui/filter_bar/lib/map_filter';

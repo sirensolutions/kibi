@@ -1,4 +1,4 @@
-import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { VirtualIndexPatternFactory } from 'ui/kibi/components/commons/virtual_index_pattern';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -25,7 +25,7 @@ describe('Kibi Components', function () {
 
       ngMock.inject(function (Private) {
         VirtualIndexPattern = Private(VirtualIndexPatternFactory);
-        indexPattern = Private(IndexPatternProvider);
+        indexPattern = Private(stubbedLogstashIndexPatternService);
       });
     });
 

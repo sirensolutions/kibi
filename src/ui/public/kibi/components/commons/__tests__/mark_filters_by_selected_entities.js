@@ -8,6 +8,7 @@ import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 
 let markFiltersBySelectedEntities;
 let kibiState;
+let onDashboardPageStub;
 
 const fakeSavedQueries = [
   {
@@ -33,6 +34,10 @@ describe('Kibi Components', function () {
           $provide.constant('kbnDefaultAppId', '');
         });
 
+        afterEach(function () {
+          onDashboardPageStub.restore();
+        });
+
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {
           $provide.service('savedQueries', (Promise, Private) => mockSavedObjects(Promise, Private)('savedQueries', fakeSavedQueries));
         });
@@ -40,7 +45,7 @@ describe('Kibi Components', function () {
         ngMock.inject(function (Private, _kibiState_) {
           kibiState = _kibiState_;
 
-          sinon.stub(onPage, 'onDashboardPage').returns(true);
+          onDashboardPageStub = sinon.stub(onPage, 'onDashboardPage').returns(true);
 
           markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesFactory);
         });

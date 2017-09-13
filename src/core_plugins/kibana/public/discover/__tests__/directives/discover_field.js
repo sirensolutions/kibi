@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import 'ui/private';
 import 'plugins/kibana/discover/components/field_chooser/discover_field';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 // Load the kibana app dependencies.
 
@@ -24,7 +24,7 @@ describe('discoverField', function () {
         on-show-details="showDetails"
       ></discover-field>
     `);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
 
     _.assign($rootScope, {
       field: indexPattern.fields.byName.extension,

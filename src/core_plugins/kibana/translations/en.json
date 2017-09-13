@@ -48,5 +48,7 @@
   "KIBANA-ADD_NEW" : "Create Index Pattern",
   "KIBANA-SEE" : "See",
   "KIBANA-CREATE" : "Create",
-  "KIBANA-FIELD_IS_REQUIRED": "{{fieldName}} is required"
+  "KIBANA-FIELD_IS_REQUIRED": "{{fieldName}} is required",
+  "KIBANA-SET_INDEX_NAME_FIRST": "Set index name first",
+  "KIBANA-INTERVAL_INDICES_POPULATED":  "Interval indices populated"
 }

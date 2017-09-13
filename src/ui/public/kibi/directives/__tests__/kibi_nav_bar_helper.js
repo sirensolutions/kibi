@@ -18,6 +18,8 @@ describe('Kibi Directives', function () {
     let dashboardGroups;
     let timeBasedIndicesStub;
     let getDashboardsMetadataStub;
+    let getBashPathStub;
+    let onDashboardPageStub;
 
     noDigestPromises.activateForSuite();
 
@@ -76,14 +78,19 @@ describe('Kibi Directives', function () {
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard1');
         timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.resolve([ 'id' ]));
 
-        sinon.stub(chrome, 'getBasePath').returns('');
-        sinon.stub(onPage, 'onDashboardPage').returns(true);
+        getBashPathStub = sinon.stub(chrome, 'getBasePath').returns('');
+        onDashboardPageStub = sinon.stub(onPage, 'onDashboardPage').returns(true);
 
         dashboardGroups = _dashboardGroups_;
         sinon.stub(dashboardGroups, 'getGroups').returns(groups);
         getDashboardsMetadataStub = sinon.stub(dashboardGroups, '_getDashboardsMetadata');
       });
     }
+
+    afterEach(function () {
+      getBashPathStub.restore();
+      onDashboardPageStub.restore();
+    });
 
     describe('remove dashboards properties (count, isPruned, filterIconMessage)', function () {
 

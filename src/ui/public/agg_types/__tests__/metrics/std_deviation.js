@@ -2,11 +2,11 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { AggTypesMetricsStdDeviationProvider } from 'ui/agg_types/metrics/std_deviation';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 //TODO MERGE 5.5.2 add kibi comments
 
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 
 
 describe('AggTypeMetricStandardDeviationProvider class', function () {
@@ -22,7 +22,7 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
   }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     aggTypeMetricStandardDeviation = Private(AggTypesMetricsStdDeviationProvider);
   }));
 

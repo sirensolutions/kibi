@@ -6,8 +6,8 @@ import sinon from 'sinon';
 
 import createIndexPatternTemplate from '../create_index_pattern.html';
 import { StubIndexPatternsApiClientModule } from 'ui/index_patterns/__tests__/stub_index_patterns_api_client';
-import { IndexPatternsApiClientProvider } from 'ui/index_patterns';
-import MockLogstashFieldsProvider from 'fixtures/logstash_fields';
+import { IndexPatternsApiClientProvider } from 'ui/index_patterns/index_patterns_api_client_provider';
+import { stubbedLogstashFields } from 'fixtures/logstash_fields';
 
 describe('createIndexPattern UI', () => {
   let setup;
@@ -32,7 +32,7 @@ describe('createIndexPattern UI', () => {
       const $compile = $injector.get('$compile');
       const $rootScope = $injector.get('$rootScope');
 
-      const fields = Private(MockLogstashFieldsProvider);
+      const fields = Private(stubbedLogstashFields);
       const indexPatternsApiClient = Private(IndexPatternsApiClientProvider);
       const $scope = $rootScope.$new();
       const $view = jQuery($compile(angular.element('<div>').html(createIndexPatternTemplate))($scope));

@@ -41,21 +41,21 @@ uiModules
     if (responses && metadata) {
       if (responses.length === metadata.length) {
         for (let i = 0; i < responses.length; i++) {
-          const hit = responses[i];
+          const response = responses[i];
           if (metadata[i].error) {
             metadata[i].count = 'Error';
           } else if (metadata[i].forbidden) {
             metadata[i].count = 'Forbidden';
-          } else if (!_.contains(Object.keys(hit), 'error')) {
-            metadata[i].count = hit.hits.total;
-          } else if (_.contains(Object.keys(hit), 'error') && hit.error.reason) {
-            metadata[i].count = 'Error: ' + hit.error.reason;
-          } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
+          } else if (!_.contains(Object.keys(response), 'error')) {
+            metadata[i].count = response.hits.total;
+          } else if (_.contains(Object.keys(response), 'error') && response.error.reason) {
+            metadata[i].count = 'Error: ' + response.error.reason;
+          } else if (_.contains(Object.keys(response), 'error') && _.contains(response.error, 'ElasticsearchSecurityException')) {
             metadata[i].count = 'Forbidden';
           } else {
             metadata[i].count = 'Error';
           }
-          metadata[i].isPruned = isJoinPruned(hit);
+          metadata[i].isPruned = isJoinPruned(response);
         }
       } else {
         throw new Error('Metadata size different than responses size');

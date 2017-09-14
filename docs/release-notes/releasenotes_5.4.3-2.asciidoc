@@ -1,0 +1,13 @@
+== Kibi 5.4.3-2 and Kibana 5.4.3
+
+[float]
+=== Kibi Changes
+
+Fixed: 
+
+* Fixed issue where Kibi could not start when used with Elasticsearch 5.5.2 
+
+Changed:
+
+* Update Siren Platform distributions to use Elasticsearch version 5.5.2
+* Update Vanguard to version 5.5.2-1

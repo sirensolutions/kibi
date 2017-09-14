@@ -1128,17 +1128,45 @@ image::images/access_control/acl_section_5.png["The ACL section",align="center"]
 ==== Kibi roles and rules
 
 The ACL Roles panel in the ACL section allows to define Kibi roles, which
-are collections of permissions on saved objects; the main purpose of this
-system is to hide dashboards on unauthorized indices to end users and avoid
+are collections of permissions on saved objects and ui contexts; the main purpose of this
+system is to hide applications, kibi sections or dashboards on unauthorized indices to end users and avoid
 unauthorized changes to configuration objects.
+
+There are two kinds of rules:
+
+ * rules - to set permission for saved objects
+ * ui rules - to set permission to view different UI elements,
+ applications (e.g.: **timelion**, **access_control**) and
+ sections of Kibi (e.g.: **discover**, **management**)
 
 The `everyone` role defines permissions for all the users in the system, and is
 mapped by default to any user logged in Kibi; by default it allows all users
 read only access to the Kibi configuration (**Advanced settings**), saved
-searches and index patterns.
+searches and index patterns as well as view all applications and ui elements.
 
 ._The everyone role_
 image::images/access_control/everyone.png["The everyone role",align="center"]
+
+Denying access to certain saved object like **dashboard** using the first sets
+of rules is usually transparent to the user which means that he will simply
+do not see the objects anywhere in Kibi.
+
+Denying access to an application like **timelion**
+or Kibi section like **management** will hide the navigation menu elements
+and block access on the route level and display an error.
+
+._Blocked timelion application and Kibi management section_
+image::images/access_control/blocked_timelion_and_management_uirules.png["Blocked timelion application and Kibi management section",align="center"]
+
+Below and error user will see when trying to access **/app/timelion** URL
+
+._Blocked timelion error_
+image::images/access_control/blocked_timelion_error.png["Blocked timelion error",align="center", width="800"]
+
+Below and error user will see when trying to access **/app/kibana#/management** URL
+
+._Blocked Kibi management section error_
+image::images/access_control/blocked_managemnent_error.png["Blocked Kibi management section error",align="center", width="800"]
 
 For most setups it makes sense to grant **view** permissions on visualizations
 as well, then set specific permissions on dashboards and dashboard groups for

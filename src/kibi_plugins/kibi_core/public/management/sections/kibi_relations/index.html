@@ -209,7 +209,11 @@
             </tr>
           </tbody>
         </table>
-        <kibi-array-param-add label="relation" model="relations.relationsIndices" default="{{ { indices: [ {}, {} ] } }}"></kibi-array-param-add>
+        <kibi-array-param-add
+          label="relation"
+          model="relations.relationsIndices"
+          default="{{ { type: defaults.type, limit_per_shard: defaults.limit_per_shard, indices: [ {}, {} ] } }}">
+        </kibi-array-param-add>
       </div>
     </form>
 

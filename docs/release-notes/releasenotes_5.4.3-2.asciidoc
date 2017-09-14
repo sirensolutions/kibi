@@ -11,3 +11,9 @@ Changed:
 
 * Update Siren Platform distributions to use Elasticsearch version 5.5.2
 * Update Vanguard to version 5.5.2-1
+
+Added: 
+
+* Added ability to limit number of collected tuples per shard during the join operations
+  This option can now be set globally via kibi:relationsDefaultLimitPerShard in Advanced Settings 
+  or per relation in Advanced Relation Settings menu 

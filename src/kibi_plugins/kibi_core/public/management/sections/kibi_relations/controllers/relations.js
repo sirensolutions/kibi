@@ -23,6 +23,10 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
   const relationsHelper = Private(RelationsHelperFactory);
 
   $scope.unique = _.unique;
+  $scope.defaults = {
+    limit_per_shard: config.get('kibi:relationsDefaultLimitPerShard'),
+    type: 'SEARCH_JOIN'
+  };
 
   // advanced options
   $scope.edit = function (index) {

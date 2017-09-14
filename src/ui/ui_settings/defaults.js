@@ -376,6 +376,12 @@ export function getDefaultSettings(kibiEnterpriseEnabled) {
       value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
       description: 'Relations between index patterns and dashboards'
     },
+    'kibi:relationsDefaultLimitPerShard': {
+      type: 'number',
+      value: 1000000,
+      description:
+      'Default value of limit_per_shard join parameter. Can be overriten in relations advanced options. Set to -1 to remove the limit'
+    },
     'kibi:panel_vertical_size': {
       type: 'number',
       value: 3,

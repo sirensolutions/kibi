@@ -942,15 +942,11 @@ describe('Kibi Services', function () {
         sinon.stub(es, 'msearch').returns(Promise.resolve({
           responses: [
             {
-              coordinate_search: {
-                actions: [
-                  {
-                    is_pruned: true
-                  }
-                ]
-              },
               hits: {
                 total: 42
+              },
+              planner: {
+                is_pruned: true
               }
             }
           ]

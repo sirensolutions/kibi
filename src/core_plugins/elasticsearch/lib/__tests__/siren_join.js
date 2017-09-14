@@ -1808,6 +1808,34 @@ describe('Join querying', function () {
         expect(actual).to.eql(builder.toObject());
       });
 
+      // NOTE enable after join type available
+      xit('should set the type of join', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                type: 'INNER_JOIN',
+                relation: [
+                  { pattern: 'company', path: 'id', indices: [ 'company' ], types: [ 'Company' ] },
+                  { pattern: 'investment', path: 'companyid', indices: [ 'investment' ], types: [ 'Investment' ] }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new JoinBuilder();
+        builder.addJoin({
+          type: 'INNER_JOIN',
+          sourceTypes: 'Investment',
+          sourcePath: 'companyid',
+          targetIndices: [ 'company' ],
+          targetTypes: 'Company',
+          targetPath: 'id'
+        });
+        const actual = joinSequence(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
       it('should keep the types specified for the source index', function () {
         const query = [
           {

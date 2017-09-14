@@ -35,6 +35,7 @@
               <th>Label</th>
               <!--controls-->
               <th></th>
+              <th></th>
             </tr>
           </thead>
           <!-- here we repeat tbody to be able to show row with the error properly -->
@@ -157,6 +158,18 @@
               </td>
 
               <!--controls-->
+              <td class="alignLeft">
+                <div class="actions">
+                  <button
+                     ng-click="edit($index)"
+                     class="btn btn-xs"
+                     aria-label="Edit"
+                  >
+                    <span class="sr-only">Edit</span>
+                    <i aria-hidden="true" class="fa fa-pencil"></i>
+                  </button>
+                </div>
+              </td>
               <td>
                 <div class="btn-group rightCorner">
                   <kibi-array-param-remove index="{{ $index }}" model="relations.relationsIndices">
@@ -165,7 +178,7 @@
               </td>
             </tr>
             <tr ng-if="relation.errors && relation.errors.length">
-              <td colspan="5">
+              <td colspan="6">
                 <h4 class="hintbox-heading">
                   <i class="fa fa-danger text-danger"></i> Warning
                 </h4>
@@ -196,7 +209,11 @@
             </tr>
           </tbody>
         </table>
-        <kibi-array-param-add label="relation" model="relations.relationsIndices" default="{{ { indices: [ {}, {} ] } }}"></kibi-array-param-add>
+        <kibi-array-param-add
+          label="relation"
+          model="relations.relationsIndices"
+          default="{{ { type: defaults.type, limit_per_shard: defaults.limit_per_shard, indices: [ {}, {} ] } }}">
+        </kibi-array-param-add>
       </div>
     </form>
 

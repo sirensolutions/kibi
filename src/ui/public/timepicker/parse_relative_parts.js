@@ -1,3 +1,4 @@
+//TODO MERGE 5.5.2 Review if this need an issue or could be removed
 // KIBI5: use the kibi parse with precision helper
 import dateMath from '@elastic/datemath';
 import moment from 'moment';

@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import moment from 'moment';
-import VislibComponentsZeroInjectionUniqKeysProvider from './uniq_keys';
-export default function OrderedXKeysUtilService(Private) {
+import { VislibComponentsZeroInjectionUniqKeysProvider } from './uniq_keys';
+
+export function VislibComponentsZeroInjectionOrderedXKeysProvider(Private) {
   const getUniqKeys = Private(VislibComponentsZeroInjectionUniqKeysProvider);
 
   /*
@@ -43,13 +44,13 @@ export default function OrderedXKeysUtilService(Private) {
 
       if (dateInterval) {
         next = moment(val);
-        // siren: allows histogram to be interval safe
+        // kibi: allows histogram to be interval safe
         while (next < gapEdge && vals.length < 50) {
           vals.push(next.valueOf());
           next.add(dateInterval);
         }
       } else {
-        // siren: allows histogram to be interval safe
+        // kibi: allows histogram to be interval safe
         while (next < gapEdge && vals.length < 50) {
           vals.push(next);
           next += interval;

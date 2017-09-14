@@ -9,18 +9,18 @@
  */
 
 import _ from 'lodash';
-import modules from 'ui/modules';
-import StateManagementStateProvider from 'ui/state_management/state';
+import { uiModules } from 'ui/modules';
+import { StateProvider } from 'ui/state_management/state';
 import 'ui/persisted_state';
 
 // kibi: imports
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
 const urlParam = '_a';
 
-function AppStateProvider(Private, $rootScope, $location, $injector) {
-  const State = Private(StateManagementStateProvider);
+export function AppStateProvider(Private, $rootScope, $location, $injector) {
+  const State = Private(StateProvider);
   const PersistedState = $injector.get('PersistedState');
   let persistedStates;
   let eventUnsubscribers;
@@ -38,17 +38,16 @@ function AppStateProvider(Private, $rootScope, $location, $injector) {
 
     // kibi: Merge the parameters saved on kibi_appstate_param
     if (defaults) {
-      const passedState = JSON.parse(hashedItemStoreSingleton.getItem('kibi_appstate_param'));
+      const passedState = JSON.parse(HashedItemStoreSingleton.getItem('kibi_appstate_param'));
       if (passedState && passedState.appState) {
         _.merge(defaults, _.cloneDeep(passedState.appState));
         delete passedState.appState;
-        hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
+        HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
       }
     }
     // kibi: end
 
     AppState.Super.call(this, urlParam, defaults);
-
     AppState.getAppState._set(this);
   }
 
@@ -123,12 +122,10 @@ function AppStateProvider(Private, $rootScope, $location, $injector) {
   return AppState;
 }
 
-modules.get('kibana/global_state')
+uiModules.get('kibana/global_state')
 .factory('AppState', function (Private) {
   return Private(AppStateProvider);
 })
 .service('getAppState', function (Private) {
   return Private(AppStateProvider).getAppState;
 });
-
-export default AppStateProvider;

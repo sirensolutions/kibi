@@ -1,6 +1,6 @@
 import { has, get, merge } from 'lodash';
 import readYamlConfig from '../serve/read_yaml_config';
-import fromRoot from '../../utils/from_root';
+import { fromRoot } from '../../utils/from_root';
 import BackupKibi from './_backup_kibi';
 import syswidecas from 'syswide-cas';
 

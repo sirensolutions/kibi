@@ -1,13 +1,14 @@
-import MarkFiltersBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
+import { MarkFiltersBySelectedEntitiesFactory } from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 import noDigestPromises from 'test_utils/no_digest_promises';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import * as onPage from 'ui/kibi/utils/on_page';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 
 let markFiltersBySelectedEntities;
 let kibiState;
+let onDashboardPageStub;
 
 const fakeSavedQueries = [
   {
@@ -33,6 +34,10 @@ describe('Kibi Components', function () {
           $provide.constant('kbnDefaultAppId', '');
         });
 
+        afterEach(function () {
+          onDashboardPageStub.restore();
+        });
+
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {
           $provide.service('savedQueries', (Promise, Private) => mockSavedObjects(Promise, Private)('savedQueries', fakeSavedQueries));
         });
@@ -40,9 +45,9 @@ describe('Kibi Components', function () {
         ngMock.inject(function (Private, _kibiState_) {
           kibiState = _kibiState_;
 
-          sinon.stub(onPage, 'onDashboardPage').returns(true);
+          onDashboardPageStub = sinon.stub(onPage, 'onDashboardPage').returns(true);
 
-          markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesProvider);
+          markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesFactory);
         });
       });
 
@@ -154,4 +159,3 @@ describe('Kibi Components', function () {
     });
   });
 });
-

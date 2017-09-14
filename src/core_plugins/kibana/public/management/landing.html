@@ -6,6 +6,7 @@
     </div>
 
     <!-- Management sections for the ES stack -->
+    <!-- kibi: info section expanded by default -->
     <div
       ng-if="section.visibleItems.length > 0"
       ng-repeat="section in sections"
@@ -19,6 +20,7 @@
               {{::section.display}}
             </div>
           </div>
+          <!-- kibi: removed panel header section -->
         </div>
 
         <div class="kuiPanelBody management-panel__body">

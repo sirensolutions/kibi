@@ -1,11 +1,11 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import '../kibi_select';
-import SelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';
-import MockState from 'fixtures/mock_state';
+import { KibiSelectHelperFactory } from 'ui/kibi/directives/kibi_select_helper';
+import { MockState } from 'fixtures/mock_state';
 
 let $rootScope;
 let $scope;
@@ -34,7 +34,7 @@ const init = function ({
     $rootScope = _$rootScope_.$new();
     $rootScope.model = initValue;
 
-    const selectHelper = Private(SelectHelperProvider);
+    const selectHelper = Private(KibiSelectHelperFactory);
     $rootScope.action = sinon.stub(selectHelper, 'getSavedSearches').returns(Promise.resolve(items));
 
     let select = '<kibi-select ng-model="model" object-type="search"';

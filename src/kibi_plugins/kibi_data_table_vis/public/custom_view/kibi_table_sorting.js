@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './kibi_table_sorting.html';
 
 uiModules

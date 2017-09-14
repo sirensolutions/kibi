@@ -3,7 +3,7 @@ import moment from 'moment';
 import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/time_units';
 import 'ui/kibi/styles/kibi.less'; // kibi: added some styling
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana');
 
 // kibi: imports
@@ -25,6 +25,11 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
         lookupByRange[frame.from + ' to ' + frame.to] = frame;
       });
 
+      function setText(text) {
+        $elem.text(text);
+        $elem.attr('aria-label', `Current time range is ${text}`);
+      }
+
       function stringify() {
         let text;
 
@@ -33,7 +38,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
         if ($scope.from && $scope.to && !moment.isMoment($scope.from) && !moment.isMoment($scope.to)) {
           const tryLookup = lookupByRange[$scope.from.toString() + ' to ' + $scope.to.toString()];
           if (tryLookup) {
-            $elem.text(tryLookup.display);
+            setText(tryLookup.display);
           } else {
             const fromParts = $scope.from.toString().split('-');
             if ($scope.to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
@@ -42,7 +47,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
               if (rounded[1]) {
                 text = text + ' rounded to the ' + timeUnits[rounded[1]];
               }
-              $elem.text(text);
+              setText(text);
             } else {
               cantLookup();
             }
@@ -65,6 +70,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
             if ($scope[time] === 'now') {
               display[time] = 'now';
             } else {
+              //TODO MERGE 5.5.2 add kibi comments
               const tryParse = parseWithPrecision($scope[time], time === 'to' ? true : false, $scope.kibiTimePrecision);
               display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
             }
@@ -72,7 +78,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
         });
 
         //kibi: 'to' removed new line added
-        $elem.text(display.from + '\n' + display.to);
+        setText(display.from + '\n' + display.to);
       }
 
       $scope.$watch('from', stringify);

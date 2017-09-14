@@ -7,8 +7,11 @@
  */
 
 import _ from 'lodash';
-import VisProvider from 'ui/vis';
-import uiModules from 'ui/modules';
+import { VisProvider } from 'ui/vis';
+import { uiModules } from 'ui/modules';
+
+//TODO MERGE 5.5.2 add kibi comment as needed
+
 
 uiModules
 .get('app/visualize')

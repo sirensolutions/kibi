@@ -1,5 +1,5 @@
-import FieldFormatProvider from 'ui/registry/field_formats';
-import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import noDigestPromises from 'test_utils/no_digest_promises';
 /*eslint no-use-before-define: 1*/
 import _ from 'lodash';
@@ -22,7 +22,7 @@ describe('Kibi Components', function () {
 
       ngMock.module('kibana/index_patterns', function ($provide) {
         $provide.service('indexPatterns', function (Private, Promise) {
-          const indexPattern = Private(IndexPatternProvider);
+          const indexPattern = Private(stubbedLogstashIndexPatternService);
           return {
             get: function (id) {
               return Promise.resolve(indexPattern);
@@ -32,7 +32,7 @@ describe('Kibi Components', function () {
       });
 
       ngMock.inject(function (Private, _joinExplanation_) {
-        fieldFormat = Private(FieldFormatProvider);
+        fieldFormat = Private(RegistryFieldFormatsProvider);
         joinExplanation = _joinExplanation_;
       });
 

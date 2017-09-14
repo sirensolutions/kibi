@@ -1,4 +1,4 @@
-import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
+import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
@@ -11,7 +11,7 @@ function init({ kibiEnterpriseEnabled = false }) {
   });
   ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
-    relationsHelper = Private(RelationsHelperProvider);
+    relationsHelper = Private(RelationsHelperFactory);
   });
 }
 
@@ -612,4 +612,3 @@ describe('Kibi Components', function () {
     });
   });
 });
-

@@ -1,4 +1,4 @@
-<div ng-show="section === 'tutorial'">
+<div>
   <div ng-show="page === 1">
     <div class="doc-container-content">
       <h1>Welcome to <strong>Timelion</strong>!</h1>
@@ -14,23 +14,27 @@
       </p>
       <p>
         Ready to get started? Click <strong>Next</strong>. Want to skip the
-        tutorial and view the docs? <a ng-click="section = 'functions'">
+        tutorial and view the docs? <a ng-click="setPage(0)">
         Jump to the function reference</a>.
       </p>
     </div>
     <div class="doc-container-buttons">
-      <button
-        ng-click="opts.dontShowHelp()"
-        class="btn btn-default btn-doc-prev"
-      >
-        Don't show this again
-      </button>
-      <button
-        ng-click="page = page+1"
-        class="btn btn-primary btn-doc-next"
-      >
-        Next
-      </button>
+      <div class="btn-doc-prev">
+        <button
+          ng-click="opts.dontShowHelp()"
+          class="kuiButton kuiButton--hollow"
+        >
+          Don't show this again
+        </button>
+      </div>
+      <div class="btn-doc-next">
+        <button
+          ng-click="setPage(page+1)"
+          class="kuiButton kuiButton--primary"
+        >
+          Next
+        </button>
+      </div>
     </div>
   </div>
   <div ng-show="page === 2">
@@ -52,23 +56,27 @@
         </p>
       </div>
       <div class="doc-container-buttons">
-        <button
-          ng-click="page = page-1"
-          class="btn btn-primary btn-doc-prev"
-        >
-          Previous
-        </button>
+        <div class="btn-doc-prev">
+          <button
+            ng-click="setPage(page-1)"
+            class="kuiButton kuiButton--primary"
+          >
+            Previous
+          </button>
+        </div>
         <span ng-show="es.invalidCount > 0 && !es.valid">
           Could not validate Elasticsearch settings:
           <strong>{{es.invalidReason}}.</strong> Check your Advanced Settings
           and try again. ({{es.invalidCount}})
         </span>
-        <button
-          ng-click="recheckElasticsearch()"
-          class="btn btn-success btn-doc-next"
-        >
-          Validate Config
-        </button>
+        <div class="btn-doc-next">
+          <button
+            ng-click="recheckElasticsearch()"
+            class="kuiButton kuiButton--primary"
+          >
+            Validate Config
+          </button>
+        </div>
       </div>
     </div>
     <div ng-show="es.valid">
@@ -100,6 +108,7 @@
                 Set it to <code>auto </code> to let Timelion choose an
                 appropriate interval.
               </span>
+<!-- TODO MERGE 5.5.2 add kibi comment -->
               If Timelion thinks your combination of time range and interval
               will produce too many data points, it throws an error. You can
               adjust that limit by configuring <code>timelion:max_buckets</code>
@@ -123,18 +132,22 @@
         </p>
       </div>
       <div class="doc-container-buttons">
-        <button
-          ng-click="page = page-1"
-          class="btn btn-primary btn-doc-prev"
-        >
-          Previous
-        </button>
-        <button
-          ng-click="page = page+1"
-          class="btn btn-primary btn-doc-next"
-        >
-          Next
-        </button>
+        <div class="btn-doc-prev">
+          <button
+            ng-click="setPage(page-1)"
+            class="kuiButton kuiButton--primary"
+          >
+            Previous
+          </button>
+        </div>
+        <div class="btn-doc-next">
+          <button
+            ng-click="setPage(page+1)"
+            class="kuiButton kuiButton--primary"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -195,18 +208,22 @@
       </p>
     </div>
     <div class="doc-container-buttons">
-      <button
-        ng-click="page = page-1"
-        class="btn btn-primary btn-doc-prev"
-      >
-        Previous
-      </button>
-      <button
-        ng-click="page = page+1"
-        class="btn btn-primary btn-doc-next"
-      >
-        Next
-      </button>
+      <div class="btn-doc-prev">
+        <button
+          ng-click="setPage(page-1)"
+          class="kuiButton kuiButton--primary"
+        >
+          Previous
+        </button>
+      </div>
+      <div class="btn-doc-next">
+        <button
+          ng-click="setPage(page+1)"
+          class="kuiButton kuiButton--primary"
+        >
+          Next
+        </button>
+      </div>
     </div>
   </div>
 
@@ -265,22 +282,26 @@
       <p>
         Timelion provides additional view transformation functions you can use
         to customize the appearance of your charts. For the complete list, see
-        the <a ng-click="section = 'functions'">Function reference</a>.
+        the <a ng-click="setPage(0)">Function reference</a>.
       </p>
     </div>
     <div class="doc-container-buttons">
-      <button
-        ng-click="page = page-1"
-        class="btn btn-primary btn-doc-prev"
-      >
-        Previous
-      </button>
-      <button
-        ng-click="page = page+1"
-        class="btn btn-primary btn-doc-next"
-      >
-        Next
-      </button>
+      <div class="btn-doc-prev">
+        <button
+          ng-click="setPage(page-1)"
+          class="kuiButton kuiButton--primary"
+        >
+          Previous
+        </button>
+      </div>
+      <div class="btn-doc-next">
+        <button
+          ng-click="setPage(page+1)"
+          class="kuiButton kuiButton--primary"
+        >
+          Next
+        </button>
+      </div>
     </div>
   </div>
   <div ng-show="page === 5">
@@ -317,7 +338,7 @@
         <code>derivative</code>.
       </p>
       <p>Now that you're familiar with the syntax, refer to the
-        <a ng-click="section = 'functions'">Function reference</a> to see
+        <a ng-click="setPage(0)">Function reference</a> to see
         how to use all of the available Timelion functions. You can view
         the reference at any time by clicking <strong>Docs</strong>
         in the Kibana toolbar. To get back to this tutorial, click the
@@ -325,29 +346,33 @@
       </p>
     </div>
     <div class="doc-container-buttons">
-      <button
-        ng-click="page = page-1"
-        class="btn btn-primary btn-doc-prev"
-      >
-        Previous
-      </button>
+      <div class="btn-doc-prev">
+        <button
+          ng-click="setPage(page-1)"
+          class="kuiButton kuiButton--primary"
+        >
+          Previous
+        </button>
+      </div>
 
-      <button
-        ng-click="opts.dontShowHelp()"
-        class="btn btn-default btn-doc-next"
-      >
-        Don't show this again
-      </button>
+      <div class="btn-doc-next">
+        <button
+          ng-click="opts.dontShowHelp()"
+          class="kuiButton kuiButton--hollow"
+        >
+          Don't show this again
+        </button>
+      </div>
     </div>
   </div>
 </div>
-<div ng-show="section === 'functions'">
+<div ng-show="page === 0">
   <div class="kuiLocalDropdownTitle">
     Function reference
   </div>
   <div class="kuiLocalDropdownHelpText">
     Click any function for more information. Just getting started?
-    <a ng-click="section = 'tutorial'">Check out the tutorial</a>.
+    <a ng-click="setPage(1)">Check out the tutorial</a>.
   </div>
   <div class="timelionFunctionsDropdownContent">
     <table class="table table-condensed table-bordered timelionFunctionsTable">

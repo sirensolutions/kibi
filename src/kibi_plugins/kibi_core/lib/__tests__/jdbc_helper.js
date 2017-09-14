@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import Promise from 'bluebird';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import JdbcHelper from '../jdbc_helper';
 import cryptoHelper from '../crypto_helper';
 
@@ -141,10 +141,17 @@ describe('Jdbc Helper', function () {
 
 
   describe('windows', function () {
+    let stubOSPlatform;
+    let stubOSHostname;
 
     beforeEach(function () {
-      sinon.stub(os, 'platform').returns('windows');
-      sinon.stub(os, 'hostname').returns('localhost');
+      stubOSPlatform = sinon.stub(os, 'platform').returns('windows');
+      stubOSHostname = sinon.stub(os, 'hostname').returns('localhost');
+    });
+
+    afterEach(() => {
+      stubOSPlatform.restore();
+      stubOSHostname.restore();
     });
 
     describe('getAbsolutePathToSindicetechFolder', function () {
@@ -249,10 +256,17 @@ describe('Jdbc Helper', function () {
 
 
   describe('unix', function () {
+    let stubOSPlatform;
+    let stubOSHostname;
 
     beforeEach(function () {
-      sinon.stub(os, 'platform').returns('linux');
-      sinon.stub(os, 'hostname').returns('localhost');
+      stubOSPlatform = sinon.stub(os, 'platform').returns('linux');
+      stubOSHostname = sinon.stub(os, 'hostname').returns('localhost');
+    });
+
+    afterEach(() => {
+      stubOSPlatform.restore();
+      stubOSHostname.restore();
     });
 
     describe('getAbsolutePathToSindicetechFolder', function () {
@@ -390,4 +404,3 @@ describe('Jdbc Helper', function () {
 
 
 });
-

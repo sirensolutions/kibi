@@ -1,8 +1,8 @@
-import sinon from 'auto-release-sinon';
-import CsvExportProvider from 'plugins/kibi_data_table_vis/actions/csv_export';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import { ExportAsCsvProvider } from 'plugins/kibi_data_table_vis/actions/csv_export';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import StubIndexPatternProvider from 'test_utils/stub_index_pattern';
+import { StubIndexPatternProvider } from 'test_utils/stub_index_pattern';
 
 describe('exportAsCsv', function () {
   let config;
@@ -18,7 +18,7 @@ describe('exportAsCsv', function () {
     config = _config_;
     indexPattern = new IndexPattern('plain', null, fields);
     timeBasedIndexPattern = new IndexPattern('plain', 'time', fields);
-    toCsv = Private(CsvExportProvider).toCsv;
+    toCsv = Private(ExportAsCsvProvider).toCsv;
   }));
 
   it('should output hits as a CSV', function () {

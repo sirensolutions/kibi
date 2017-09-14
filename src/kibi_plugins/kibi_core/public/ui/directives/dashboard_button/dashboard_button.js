@@ -1,11 +1,12 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import 'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button.less';
+import template from 'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button.html';
 
 uiModules
 .get('kibana')
 .directive('kibiDashboardButton', function ($rootScope, chrome, appSwitcherEnsureNavigation, globalNavState, dashboardsNavState) {
   return {
-    template: require('plugins/kibi_core/ui/directives/dashboard_button/dashboard_button.html'),
+    template,
     transclude: true,
     restrict: 'E',
     link: ($scope) => {

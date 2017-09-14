@@ -1,7 +1,6 @@
-import 'ui/state_management/app_state';
-import 'ui/state_management/global_state';
+//TODO MERGE 5.5.2 imports removed, add again if necessary and put kibi comment
 
-export default function getUnhashableStatesProvider(getAppState, globalState, $injector) {
+export function getUnhashableStatesProvider(getAppState, globalState, $injector) {
   return function getUnhashableStates() {
     // kibi: added kibiState via injector
     // so it works correctly on statusPage where kibiState is not autoloaded

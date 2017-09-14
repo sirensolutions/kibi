@@ -5,6 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   describe('discover app', function describeIndexTests() {
@@ -13,13 +14,13 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
 
       // delete .kibana index and update configDoc
-      return kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
-      })
+      return esArchiver.load('discover')
       .then(function loadkibanaIndexPattern() {
         log.debug('load kibana index with default index pattern');
-        return esArchiver.load('discover');
+        return kibanaServer.uiSettings.replace({
+          'dateFormat:tz': 'UTC',
+          'defaultIndex': 'logstash-*'
+        });
       })
       // and load a set of makelogs data
       .then(function loadIfEmptyMakelogs() {
@@ -44,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
           return retry.try(function tryingForTime() {
             return PageObjects.discover.getHitCount()
             .then(function compareData(hitCount) {
-              PageObjects.common.saveScreenshot('Discover-field-data');
+              screenshots.take('Discover-field-data');
               expect(hitCount).to.be(expectedHitCount);
             });
           });
@@ -217,7 +218,7 @@ export default function ({ getService, getPageObjects }) {
           return retry.try(function tryingForTime() {
             return PageObjects.discover.getDocTableIndex(1)
             .then(function (rowData) {
-              PageObjects.common.saveScreenshot('Discover-sort-down');
+              screenshots.take('Discover-sort-down');
               expect(rowData).to.be(ExpectedDoc);
             });
           });
@@ -232,7 +233,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.header.getToastMessage();
         })
         .then(function (toastMessage) {
-          PageObjects.common.saveScreenshot('Discover-syntax-error-toast');
+          screenshots.take('Discover-syntax-error-toast');
           expect(toastMessage).to.be(expectedError);
         })
         .then(function () {

@@ -1,4 +1,4 @@
-export default function DatasourceHelperFactory(savedDatasources) {
+export function DatasourceHelperFactory(savedDatasources) {
 
   function DatasourceHelper() {
   }

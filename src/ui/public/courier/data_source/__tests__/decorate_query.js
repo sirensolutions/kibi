@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
+import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
 
 describe('Query decorator', function () {
   let config;
@@ -15,6 +15,7 @@ describe('Query decorator', function () {
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; },
+          //TODO MERGE 5.5.2 kibi comment missing??
           isDeclared: () => false
         };
       });

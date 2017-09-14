@@ -17,7 +17,7 @@ The `zip` package is the only supported package for Windows.
 
 Kibi Docker images are available at {dockerhub-ref}.
 +
-<<docker>>
+{kibana-ref}/docker.html[Running Kibana on Docker]
 
 include::docker.asciidoc[]
 

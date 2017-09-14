@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
   describe('visualize app', function describeIndexTests() {
@@ -10,6 +11,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new');
     });
+
 
     describe('chart types', function indexPatternCreation() {
       it('should show the correct chart types', function () {
@@ -21,8 +23,11 @@ export default function ({ getService, getPageObjects }) {
           'Pie',
           'Vertical Bar',
           'Data Table',
+          'Gauge',
+          'Goal',
           'Metric',
-          'Tile Map',
+          'Coordinate Map',
+          'Region Map',
           'Timelion',
           'Visual Builder',
           'Markdown',
@@ -38,8 +43,8 @@ export default function ({ getService, getPageObjects }) {
         .then(function testChartTypes(chartTypes) {
           log.debug('returned chart types = ' + chartTypes);
           log.debug('expected chart types = ' + expectedChartTypes);
-          PageObjects.common.saveScreenshot('Visualize-chart-types');
-          expect(chartTypes.sort()).to.eql(expectedChartTypes.sort());
+          screenshots.take('Visualize-chart-types');
+          expect(chartTypes).to.eql(expectedChartTypes);
         });
       });
     });

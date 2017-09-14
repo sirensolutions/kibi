@@ -1,4 +1,4 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import Scenario from './scenarios/empty/scenario';
 import ModelTestHelper from './helper';
 

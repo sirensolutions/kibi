@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import VislibVisProvider from 'ui/vislib/vis';
+import { VislibVisProvider } from 'ui/vislib/vis';
 
 const $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')
@@ -40,8 +40,7 @@ module.exports = function VislibFixtures(Private) {
       defaultYExtents: false,
       setYExtents: false,
       yAxis: {},
-      type: 'histogram',
-      hasTimeField: true
+      type: 'histogram'
     }));
   };
 };

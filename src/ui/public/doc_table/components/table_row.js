@@ -7,10 +7,12 @@ import 'ui/doc_viewer';
 import 'ui/filters/trust_as_html';
 import 'ui/filters/short_dots';
 import './table_row.less';
-import noWhiteSpace from 'ui/utils/no_white_space';
+import { noWhiteSpace } from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
+import { disableFilter } from 'ui/filter_bar';
+
 const module = uiModules.get('app/discover');
 
 
@@ -35,6 +37,7 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
     scope: {
       columns: '=',
       filter: '=',
+      filters: '=?',
       indexPattern: '=',
       row: '=kbnTableRow',
       onAddColumn: '=?',
@@ -119,6 +122,7 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
         const hash = $httpParamSerializer({
           _a: rison.encode({
             columns: $scope.columns,
+            filters: ($scope.filters || []).map(disableFilter),
           }),
         });
         return `${path}?${hash}`;
@@ -188,7 +192,6 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
         let $cells = $el.children();
         newHtmls.forEach(function (html, i) {
           const $cell = $cells.eq(i);
-
           if ($cell.data('discover:html') === html) return;
 
           const reuse = _.find($cells.slice(i + 1), function (cell) {
@@ -196,7 +199,6 @@ module.directive('kbnTableRow', function (kibiState, $compile, $httpParamSeriali
           });
 
           const $target = reuse ? $(reuse).detach() : $(html);
-
           $target.data('discover:html', html);
           const $before = $cells.eq(i - 1);
           if ($before.size()) {

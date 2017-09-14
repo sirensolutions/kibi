@@ -1,9 +1,8 @@
-import management from 'ui/management';
-import 'plugins/kibana/management/sections/indices/_create';
-import 'plugins/kibana/management/sections/indices/_edit';
-import 'plugins/kibana/management/sections/indices/_field_editor';
+import { management } from 'ui/management';
+import './create_index_pattern';
+import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
 
 const indexPatternsResolutions = {
@@ -14,11 +13,13 @@ const indexPatternsResolutions = {
 
 // add a dependency to all of the subsection routes
 uiRoutes
+//TODO MERGE 5.5.2 add kibi comment as needed
 .defaults(/management\/siren\/indices/, {
   resolve: indexPatternsResolutions
 });
 
 uiRoutes
+//TODO MERGE 5.5.2 add kibi comment as needed
 .defaults(/management\/siren\/index/, {
   resolve: indexPatternsResolutions
 });
@@ -37,6 +38,7 @@ uiModules.get('apps/management')
       $scope.$watch('defaultIndex', function () {
         const ids = $route.current.locals.indexPatternIds;
         $scope.indexPatternList = ids.map(function (id) {
+          //TODO MERGE 5.5.2 add kibi comment as needed
           return {
             id: id,
             url: kbnUrl.eval('#/management/siren/indices/{{id}}', { id: id }),
@@ -51,6 +53,7 @@ uiModules.get('apps/management')
   };
 });
 
+//TODO MERGE 5.5.2 add kibi comment as needed
 management.getSection('kibana').register('indices', {
   display: 'Index Patterns',
   order: 0,

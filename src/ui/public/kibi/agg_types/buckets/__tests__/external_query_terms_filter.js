@@ -1,8 +1,8 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import VisProvider from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { VisProvider } from 'ui/vis';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('External query terms filter aggregation', function () {
   let agg;
@@ -15,7 +15,7 @@ describe('External query terms filter aggregation', function () {
   }));
   beforeEach(ngMock.inject(function (_kibiState_, Private) {
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     kibiState = _kibiState_;
     kibiState.isSelectedEntityDisabled = sinon.stub();
     kibiState.getEntityURI = sinon.stub();

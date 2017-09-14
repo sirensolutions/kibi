@@ -1,7 +1,7 @@
-import UiModules from 'ui/modules';
-import EventsProvider from 'ui/events';
+import { uiModules } from 'ui/modules';
+import { EventsProvider } from 'ui/events';
 
-UiModules.get('kibana')
+uiModules.get('kibana')
 .service('sirenSession', ($location, Private) => {
   const Events = Private(EventsProvider);
 

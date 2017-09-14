@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function ColumnHandler() {
+export function VislibTypesPointSeries() {
 
   const createSerieFromParams = (cfg, seri) => {
     const matchingSeriParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
@@ -130,6 +130,13 @@ export default function ColumnHandler() {
             }
           }
         ];
+      } else {
+        const categoryAxis1 = config.categoryAxes.find((categoryAxis) => {
+          return categoryAxis.id === 'CategoryAxis-1';
+        });
+        if (categoryAxis1) {
+          categoryAxis1.title.text = data.get('xAxisLabel');
+        }
       }
 
       if (!config.charts) {

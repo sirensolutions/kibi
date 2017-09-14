@@ -17,18 +17,20 @@ export default (grunt) => {
   };
 
   async function archives({ name, buildName, zipPath, tarPath }) {
-    // siren: windows (with Java installed) can use jar instead of tar/zip
+    // kibi: windows (with Java installed) can use jar instead of tar/zip
     // assume Java is installed as they're using ElasticSearch
     if (isWin) {
       await exec('jar', ['-cMf', tarPath, buildName]);
       await exec('jar', ['-cMf', zipPath, buildName]);
     } else {
-      await exec('tar', ['-chzf', tarPath, buildName]);
-      if (/windows/.test(name)) {
-        await exec('zip', ['-rq', '-ll', zipPath, buildName]);
-      } else {
-        await exec('zip', ['-rq', zipPath, buildName]);
+      const tarArguments = ['-zchf', tarPath, buildName];
+
+      // Add a flag to handle filepaths with colons (i.e. C://...) on windows
+      if (/^win/.test(process.platform)) {
+        tarArguments.push('--force-local');
       }
+
+      await exec('tar', tarArguments);
     }
   };
 

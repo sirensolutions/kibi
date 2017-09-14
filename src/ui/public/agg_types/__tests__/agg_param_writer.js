@@ -1,13 +1,13 @@
 import _ from 'lodash';
-import VisProvider from 'ui/vis';
-import AggTypesIndexProvider from 'ui/agg_types/index';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { VisProvider } from 'ui/vis';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 module.exports = function AggParamWriterHelper(Private) {
   const Vis = Private(VisProvider);
   const aggTypes = Private(AggTypesIndexProvider);
-  const visTypes = Private(RegistryVisTypesProvider);
-  const stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  const visTypes = Private(VisTypesRegistryProvider);
+  const stubbedLogstashIndexPattern = Private(stubbedLogstashIndexPatternService);
 
   /**
    * Helper object for writing aggParams. Specify an aggType and it will find a vis & schema, and

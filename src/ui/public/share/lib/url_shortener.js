@@ -1,7 +1,7 @@
 import chrome from 'ui/chrome';
 import url from 'url';
 
-export default function createUrlShortener(createNotifier, $http, sirenSession) {
+export function UrlShortenerProvider(createNotifier, $http, sirenSession) {
   const notify = createNotifier({
     location: 'Url Shortener'
   });

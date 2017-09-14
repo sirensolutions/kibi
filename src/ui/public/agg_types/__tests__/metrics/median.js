@@ -1,8 +1,10 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import MockState from 'fixtures/mock_state';
+import { VisProvider } from 'ui/vis';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
+//TODO MERGE 5.5.2 add kibi comments
+
+import { MockState } from 'fixtures/mock_state';
 
 describe('AggTypeMetricMedianProvider class', function () {
   let indexPattern;
@@ -15,7 +17,7 @@ describe('AggTypeMetricMedianProvider class', function () {
   }));
   beforeEach(ngMock.inject(function (Private) {
     const Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
 
     const vis = new Vis(indexPattern, {
       'title': 'New Visualization',

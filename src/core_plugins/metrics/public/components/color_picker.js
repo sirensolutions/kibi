@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Tooltip from './tooltip';
-import CustomColorPicker from './custom_color_picker';
+import { CustomColorPicker } from './custom_color_picker';
 const Picker = CustomColorPicker;
 
 class ColorPicker extends Component {

@@ -12,12 +12,19 @@
     <span class="panel-title" title="{{::savedObj.title}}">
       {{::savedObj.title}}
     </span>
-    <div class="btn-group">
-      <a aria-label="Expand"
-         data-test-subj="dashboardPanelExpandIcon"
-         ng-click="toggleExpand()"
+    <div class="kuiMicroButtonGroup">
+      <a
+        class="kuiMicroButton"
+        aria-label="Expand panel"
+        data-test-subj="dashboardPanelExpandIcon"
+        ng-click="toggleExpand()"
+        kbn-accessible-click
       >
-        <span class="fa" ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"></span>
+        <span
+          aria-hidden="true"
+          class="kuiIcon"
+          ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"
+        ></span>
       </a>
       <!-- kibi: allows restore the uiState after click edit visualization on dashboard -->
       <a aria-label="Edit"
@@ -26,21 +33,43 @@
          ng-href="{{::editUrl}}"
          ng-click="edit()"
       >
-        <i aria-hidden="true" class="fa fa-pencil"></i>
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-pencil"
+        ></span>
       </a>
-      <a aria-label="Move"
-         data-test-subj="dashboardPanelMoveIcon"
-         ng-show="!isViewOnlyMode() && !isExpanded"
-         class="panel-move"
+
+      <!-- data-dashboard-panel-drag-handle works in Firefox when applied here -->
+      <a
+        data-dashboard-panel-drag-handle
+        tabindex="0"
+        role="button"
+        class="kuiMicroButton panel-move"
+        aria-label="Move panel"
+        data-test-subj="dashboardPanelMoveIcon"
+        ng-show="!isViewOnlyMode() && !isExpanded"
       >
-        <i aria-hidden="true" class="fa fa-arrows"></i>
+        <!-- data-dashboard-panel-drag-handle works in Chrome when applied here -->
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-arrows"
+          data-dashboard-panel-drag-handle
+        ></span>
       </a>
-      <a aria-label="Remove"
-         data-test-subj="dashboardPanelRemoveIcon"
-         ng-show="!isViewOnlyMode() && !isExpanded"
-         ng-click="remove()"
+
+      <a
+        type="button"
+        class="kuiMicroButton"
+        aria-label="Remove panel from dashboard"
+        data-test-subj="dashboardPanelRemoveIcon"
+        ng-show="!isViewOnlyMode() && !isExpanded"
+        ng-click="remove()"
+        kbn-accessible-click
       >
-        <i aria-hidden="true" class="fa fa-times"></i>
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-times"
+        ></span>
       </a>
     </div>
     <div class="clearfix"></div>

@@ -1,14 +1,14 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import TagCloud from 'plugins/tagcloud/tag_cloud';
 import AggConfigResult from 'ui/vis/agg_config_result';
-import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 
 const module = uiModules.get('kibana/tagcloud', ['kibana']);
 module.controller('KbnTagCloudController', function ($scope, $element, Private, getAppState) {
 
   const containerNode = $element[0];
-  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const maxTagCount = 200;
   let truncated = false;
 
@@ -90,10 +90,12 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     tagCloud.resize();
   }, 500, { trailing: true }), true);
 
+  //TODO MERGE 5.5.2 add kibi comment as needed
   $scope.$on('$destroy', function () {
     removeWatch();
   });
 
+  //TODO MERGE 5.5.2 add kibi comment as needed
   function getContainerSize() {
     return { width: $element.parent().width(), height: $element.parent().height() };
   }

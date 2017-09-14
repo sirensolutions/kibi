@@ -1,9 +1,10 @@
 import _ from 'lodash';
-import AggResponseTabifyResponseWriterProvider from 'ui/agg_response/tabify/_response_writer';
-import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
-export default function tabifyAggResponseProvider(Private, createNotifier) {
-  const TabbedAggResponseWriter = Private(AggResponseTabifyResponseWriterProvider);
-  const Buckets = Private(AggResponseTabifyBucketsProvider);
+import { TabbedAggResponseWriterProvider } from 'ui/agg_response/tabify/_response_writer';
+import { AggResponseBucketsProvider } from 'ui/agg_response/tabify/_buckets';
+
+export function AggResponseTabifyProvider(Private, createNotifier) {
+  const TabbedAggResponseWriter = Private(TabbedAggResponseWriterProvider);
+  const Buckets = Private(AggResponseBucketsProvider);
   const notify = createNotifier({ location: 'agg_response/tabify' });
 
   function tabifyAggResponse(vis, esResponse, respOpts) {

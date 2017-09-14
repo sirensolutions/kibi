@@ -2,12 +2,15 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
-import tabifyPm from 'ui/agg_response/tabify/tabify';
-import VisProvider from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import StateManagementAppStateProvider from 'ui/state_management/app_state';
-describe('Table Vis Controller', function () {
+import sinon from 'sinon';
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
+import { VisProvider } from 'ui/vis';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
+import { AppStateProvider } from 'ui/state_management/app_state';
+//TODO MERGE 5.5.2 add kibi comment as needed
+
+
+describe('Controller', function () {
   let $rootScope;
   let $compile;
   let Private;
@@ -26,13 +29,13 @@ describe('Table Vis Controller', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
-    AppState = Private(StateManagementAppStateProvider);
+    AppState = Private(AppStateProvider);
     Vis = Private(VisProvider);
   }));
 
   function OneRangeVis(params) {
     return new Vis(
-      Private(FixturesStubbedLogstashIndexPatternProvider),
+      Private(stubbedLogstashIndexPatternService),
       {
         type: 'table',
         params: params || {},
@@ -56,7 +59,7 @@ describe('Table Vis Controller', function () {
 
   function getExternalQueryVis(params) {
     return new Vis(
-      Private(FixturesStubbedLogstashIndexPatternProvider),
+      Private(stubbedLogstashIndexPatternService),
       {
         type: 'table',
         params: params || {},
@@ -161,8 +164,8 @@ describe('Table Vis Controller', function () {
 
   it('passes partialRows:true to tabify based on the vis params', function () {
     // spy on the tabify private module
-    const spiedTabify = sinon.spy(Private(tabifyPm));
-    Private.stub(tabifyPm, spiedTabify);
+    const spiedTabify = sinon.spy(Private(AggResponseTabifyProvider));
+    Private.stub(AggResponseTabifyProvider, spiedTabify);
 
     const vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
@@ -174,8 +177,8 @@ describe('Table Vis Controller', function () {
 
   it('passes partialRows:false to tabify based on the vis params', function () {
     // spy on the tabify private module
-    const spiedTabify = sinon.spy(Private(tabifyPm));
-    Private.stub(tabifyPm, spiedTabify);
+    const spiedTabify = sinon.spy(Private(AggResponseTabifyProvider));
+    Private.stub(AggResponseTabifyProvider, spiedTabify);
 
     const vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
@@ -187,8 +190,8 @@ describe('Table Vis Controller', function () {
 
   it('passes partialRows:true to tabify based on the vis params', function () {
     // spy on the tabify private module
-    const spiedTabify = sinon.spy(Private(tabifyPm));
-    Private.stub(tabifyPm, spiedTabify);
+    const spiedTabify = sinon.spy(Private(AggResponseTabifyProvider));
+    Private.stub(AggResponseTabifyProvider, spiedTabify);
 
     const vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
@@ -200,8 +203,8 @@ describe('Table Vis Controller', function () {
 
   it('passes partialRows:false to tabify based on the vis params', function () {
     // spy on the tabify private module
-    const spiedTabify = sinon.spy(Private(tabifyPm));
-    Private.stub(tabifyPm, spiedTabify);
+    const spiedTabify = sinon.spy(Private(AggResponseTabifyProvider));
+    Private.stub(AggResponseTabifyProvider, spiedTabify);
 
     const vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
@@ -233,7 +236,7 @@ describe('Table Vis Controller', function () {
       };
 
       const stubbedTabify = sinon.stub().returns(tabifyResponse);
-      Private.stub(tabifyPm, stubbedTabify);
+      Private.stub(AggResponseTabifyProvider, stubbedTabify);
 
       initController(getExternalQueryVis());
       attachEsResponseToScope(fixtures.oneExternalQueryFilterBucket);

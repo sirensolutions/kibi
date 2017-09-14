@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function mapTermsProvider(Promise, courier) {
+export function SirenJoinProvider(Promise, courier) {
   return function (filter) {
     if (filter.join_sequence) {
       return Promise.resolve({ key: filter.meta.key, value: filter.meta.value });

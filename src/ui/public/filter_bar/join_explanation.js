@@ -1,14 +1,14 @@
-/*eslint no-use-before-define: 1*/
+/*eslint no-use-before-define: 0*/
 import jQuery from 'jquery';
 import _ from 'lodash';
-import fieldFormatProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import 'kibi-qtip2';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('app/dashboard')
 .service('joinExplanation', ($timeout, Private, indexPatterns, Promise, kibiState) => {
-  const fieldFormat = Private(fieldFormatProvider);
+  const fieldFormat = Private(RegistryFieldFormatsProvider);
 
   /**
    * Format the value as a date if the field type is date

@@ -1,12 +1,12 @@
 import angular from 'angular';
 import _ from 'lodash';
-import emptySearch from 'ui/kibi/empty_search';
+import { emptySearch } from 'ui/kibi/empty_search';
 import { toJson } from 'ui/utils/aggressive_parse';
 
 /**
  * An helper that modifies searches.
  */
-export default class SearchHelper {
+export class SearchHelper {
 
   constructor(kbnIndex) {
     this._defaultIndex = kbnIndex;

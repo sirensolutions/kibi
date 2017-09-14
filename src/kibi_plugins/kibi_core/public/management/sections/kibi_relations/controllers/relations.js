@@ -1,12 +1,12 @@
-import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
-import ColorProvider from 'ui/vis/components/color/color';
+import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
+import { VislibComponentsColorColorProvider } from 'ui/vis/components/color/color';
 import 'ui/kibi/directives/eeg';
 import 'plugins/kibi_core/management/sections/kibi_relations/styles/relations.less';
 import 'ui/kibi/directives/kibi_validate';
 import template from 'plugins/kibi_core/management/sections/kibi_relations/index.html';
 import _ from 'lodash';
 import $ from 'jquery';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 
 uiRoutes
@@ -20,8 +20,8 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
   const notify = createNotifier({
     location: 'Relations Editor'
   });
-  const color = Private(ColorProvider);
-  const relationsHelper = Private(RelationsHelperProvider);
+  const color = Private(VislibComponentsColorColorProvider);
+  const relationsHelper = Private(RelationsHelperFactory);
 
   $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
 

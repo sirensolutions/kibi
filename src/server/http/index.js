@@ -162,6 +162,7 @@ module.exports = async function (kbnServer, server, config) {
     handler: async function (request, reply) {
       try {
         shortUrlAssertValid(request.payload.url);
+        //TODO MERGE 5.5.2 add kibi comment as needed
         const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request.payload.sirenSession, request);
         reply(urlId);
       } catch (err) {

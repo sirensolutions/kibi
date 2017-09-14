@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import requirefrom from 'requirefrom';
-const pkg = requirefrom('src/utils')('package_json');
 import Migration from 'kibiutils/lib/migrations/migration';
 
 /**

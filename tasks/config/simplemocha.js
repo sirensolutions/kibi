@@ -13,17 +13,12 @@ module.exports = grunt => ({
       'test/**/__tests__/**/*.js',
       'src/**/__tests__/**/*.js',
       'plugins/**/lib/**/__tests__/**/*.js', // kibi: Support execution of mocha tests in plugins
+      'tasks/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
       '!src/**/public/**',
       '!**/_*.js',
       '!plugins/**/public/**', // kibi: Support execution of mocha tests in plugins
       '!plugins/**/node_modules/**' // kibi: Support execution of mocha tests in plugins
-    ]
-  },
-  api: {
-    src: [
-      'test/mocha_setup.js',
-      'test/unit/**/*.js'
     ]
   }
 });

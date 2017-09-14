@@ -1,9 +1,13 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggTypeMetricStandardDeviationProvider from 'ui/agg_types/metrics/std_deviation';
-import VisProvider from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import MockState from 'fixtures/mock_state';
+import { AggTypesMetricsStdDeviationProvider } from 'ui/agg_types/metrics/std_deviation';
+import { VisProvider } from 'ui/vis';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
+
+//TODO MERGE 5.5.2 add kibi comments
+
+import { MockState } from 'fixtures/mock_state';
+
 
 describe('AggTypeMetricStandardDeviationProvider class', function () {
 
@@ -18,8 +22,8 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
   }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    aggTypeMetricStandardDeviation = Private(AggTypeMetricStandardDeviationProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
+    aggTypeMetricStandardDeviation = Private(AggTypesMetricsStdDeviationProvider);
   }));
 
   it('uses the custom label if it is set', function () {

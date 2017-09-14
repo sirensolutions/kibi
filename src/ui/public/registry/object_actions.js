@@ -1,6 +1,6 @@
-define(function (require) {
-  return require('ui/registry/_registry')({
-    name: 'objectActions',
-    order: ['order']
-  });
+import { uiRegistry } from 'ui/registry/_registry';
+
+export const ObjectActionsRegistryProvider = uiRegistry({
+  name: 'objectActions',
+  order: ['order']
 });

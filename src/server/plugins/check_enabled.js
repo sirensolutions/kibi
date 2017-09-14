@@ -10,6 +10,8 @@ export default async function (kbnServer, server, config) {
   const { plugins } = kbnServer;
 
   for (const plugin of plugins) {
+    //TODO MERGE 5.5.2 add kibi comment as needed
+
     if (plugin.pkg.name === 'gremlin_server' && kbnServer.settings.gremlin && kbnServer.settings.gremlin.enabled === false) {
       plugins.disable(plugin);
       // Delete gremlin config to avoid a warning message about unused configuration.

@@ -2,8 +2,10 @@ import { values } from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import resp from 'fixtures/agg_resp/range';
-import VisProvider from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { VisProvider } from 'ui/vis';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
+//TODO MERGE 5.5.2 add kibi comments
+
 
 describe('Range Agg', function () {
   const buckets = values(resp.aggregations[1].buckets);
@@ -16,7 +18,7 @@ describe('Range Agg', function () {
   }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     indexPattern.stubSetFieldFormat('bytes', 'bytes', {
       pattern: '0,0.[000] b'
     });

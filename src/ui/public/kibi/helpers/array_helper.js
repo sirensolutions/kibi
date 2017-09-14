@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default class ArrayHelper {
+export class ArrayHelper {
   static add(array, object, callback) {
     array.push(object);
     if (callback) {

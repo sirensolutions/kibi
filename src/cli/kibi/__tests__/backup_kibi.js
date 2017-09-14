@@ -4,11 +4,12 @@ import Promise from 'bluebird';
 import { mkdtemp } from 'fs';
 import BackupKibi from '../_backup_kibi';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 describe('Backup Kibi', function () {
   let config;
   let tmpDir;
+  let fromElasticsearchToFileStub;
 
   beforeEach(async function () {
     config = {
@@ -20,10 +21,12 @@ describe('Backup Kibi', function () {
       }
     };
     tmpDir = await Promise.fromNode(cb => mkdtemp('/tmp/backup-', cb));
+    fromElasticsearchToFileStub = sinon.stub(Dump.prototype, 'fromElasticsearchToFile');
   });
 
   afterEach(function (done) {
     rimraf(tmpDir, done);
+    fromElasticsearchToFileStub.restore();
   });
 
   it('should fail if backup folder already exists', async function () {
@@ -37,7 +40,6 @@ describe('Backup Kibi', function () {
   });
 
   it('should save the data and mappings of the kibi index', async function () {
-    const fromElasticsearchToFileStub = sinon.stub(Dump.prototype, 'fromElasticsearchToFile');
     const backupKibi = new BackupKibi(config, `${tmpDir}/test`);
 
     await backupKibi.backup();
@@ -53,7 +55,6 @@ describe('Backup Kibi', function () {
         index: 'acl'
       }
     };
-    const fromElasticsearchToFileStub = sinon.stub(Dump.prototype, 'fromElasticsearchToFile');
     const backupKibi = new BackupKibi(config, `${tmpDir}/test`);
 
     await backupKibi.backup();
@@ -71,7 +72,6 @@ describe('Backup Kibi', function () {
         index: 'acl'
       }
     };
-    const fromElasticsearchToFileStub = sinon.stub(Dump.prototype, 'fromElasticsearchToFile');
     const backupKibi = new BackupKibi(config, `${tmpDir}/test`);
 
     await backupKibi.backup();

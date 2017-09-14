@@ -1,7 +1,9 @@
 import _ from 'lodash';
-import getAlternativeSortingField from 'ui/kibi/components/courier/data_source/get_alternative_sorting_field';
+// kibi: imports
+import { getAlternativeSortingField } from 'ui/kibi/components/courier/data_source/get_alternative_sorting_field';
+// kibi: end
 
-export default function normalizeSortRequest(config) {
+export function NormalizeSortRequestProvider(config) {
   const defaultSortOptions = config.get('sort:options');
 
   /**

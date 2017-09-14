@@ -1,10 +1,10 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
+import { seedColors } from 'ui/vis/components/color/seed_colors';
+import { EventEmitter } from 'events';
 // kibi: imports
 import angular from 'angular';
-
-import vislibComponentsSeedColorsProvider from 'ui/vis/components/color/seed_colors';
-import { EventEmitter } from 'events';
+// kibi: end
 
 const ORIENTATIONS = {
   'single': () => 0,
@@ -412,7 +412,7 @@ function getSizeInPixels(tag) {
   return `${tag.size}px`;
 }
 
-const colorScale = d3.scale.ordinal().range(vislibComponentsSeedColorsProvider());
+const colorScale = d3.scale.ordinal().range(seedColors);
 function getFill(tag) {
   return colorScale(tag.text);
 }

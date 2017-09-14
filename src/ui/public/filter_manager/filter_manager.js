@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import { buildInlineScriptForPhraseFilter } from './lib/phrase';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { getPhraseScript } from './lib/phrase';
 
 // Adds a filter to a passed state
-export default function (Private) {
+export function FilterManagerProvider(Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterManager = {};
 
@@ -50,10 +50,7 @@ export default function (Private) {
       switch (fieldName) {
         case '_exists_':
           filter = {
-            meta: {
-              negate: negate,
-              index: index
-            },
+            meta: { negate, index },
             exists: {
               field: value
             }
@@ -62,16 +59,8 @@ export default function (Private) {
         default:
           if (field.scripted) {
             filter = {
-              meta: { negate: negate, index: index, field: fieldName },
-              script: {
-                script: {
-                  inline: buildInlineScriptForPhraseFilter(field),
-                  lang: field.lang,
-                  params: {
-                    value: value
-                  }
-                }
-              }
+              meta: { negate, index, field: fieldName },
+              script: getPhraseScript(field, value)
             };
           }
           // kibi: added because clicking on a cell of the data table with a null value
@@ -92,7 +81,7 @@ export default function (Private) {
               }
             };
           } else {
-            filter = { meta: { negate: negate, index: index }, query: { match: {} } };
+            filter = { meta: { negate, index }, query: { match: {} } };
             filter.query.match[fieldName] = { query: value, type: 'phrase' };
           }
 
@@ -107,4 +96,3 @@ export default function (Private) {
 
   return filterManager;
 }
-

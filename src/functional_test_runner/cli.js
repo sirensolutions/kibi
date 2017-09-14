@@ -6,7 +6,6 @@ import { createToolingLog } from '../utils';
 import { createFunctionalTestRunner } from './functional_test_runner';
 
 const cmd = new Command('node scripts/functional_test_runner');
-
 const resolveConfigPath = v => resolve(process.cwd(), v);
 const defaultConfigPath = resolveConfigPath('test/functional/config.js');
 
@@ -19,13 +18,6 @@ cmd
   .option('--silent', 'Log nothing', false)
   .option('--debug', 'Run in debug mode', false)
   .parse(process.argv);
-
-if (!cmd.config) {
-  console.log('');
-  console.log('  --config is a required parameter');
-  console.log('');
-  process.exit(1);
-}
 
 let logLevel = 'info';
 if (cmd.silent) logLevel = 'silent';
@@ -52,9 +44,9 @@ async function run() {
     const failureCount = await functionalTestRunner.run();
     process.exitCode = failureCount ? 1 : 0;
   } catch (err) {
-    await teardown(err);
+    // await teardown(err);
   } finally {
-    await teardown();
+    // await teardown();
   }
 }
 

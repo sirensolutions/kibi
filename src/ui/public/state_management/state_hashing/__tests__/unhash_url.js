@@ -1,8 +1,8 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
-import StateProvider from 'ui/state_management/state';
+import { StateProvider } from 'ui/state_management/state';
 import { unhashUrl } from 'ui/state_management/state_hashing';
 
 describe('unhashUrl', () => {
@@ -70,6 +70,8 @@ describe('unhashUrl', () => {
     const exp = 'https://localhost:5601/#/?foo=bar&testParam=replacement';
     expect(unhashUrl(urlWithHashes, unhashableStates)).to.be(exp);
   });
+
+  //TODO MERGE 5.5.2 add kibi comment or remove this
 
   it('replaces blank spaces with "%20" instead if "+"', () => {
     const urlWithHashes = 'https://localhost:5601/#/?new foo=bar&testParam=hash&second foo=bar&third foo=bar';

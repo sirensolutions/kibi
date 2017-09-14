@@ -13,18 +13,12 @@ import expect from 'expect.js';
  * ```
  */
 export default function (wrapped) {
-  return async function (callback) {
+  return async function () {
     try {
       await wrapped();
-      if (callback) {
-        callback();
-      }
     } catch (error) {
-      if (!callback) {
-        expect().fail(error);
-      } else {
-        callback(error);
-      }
+      expect().fail(error);
     }
   };
+
 };

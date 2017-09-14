@@ -7,7 +7,7 @@ import SetDatasourceSchemaProvider from 'plugins/kibi_core/management/sections/k
 import template from 'plugins/kibi_core/management/sections/kibi_datasources/index.html';
 import kibiUtils from 'kibiutils';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiRoutes
 .when('/management/siren/datasources', {

@@ -9,14 +9,14 @@
  */
 
 import _ from 'lodash';
-import AggTypesIndexProvider from 'ui/agg_types/index';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
-import VisAggConfigsProvider from 'ui/vis/agg_configs';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { PersistedState } from 'ui/persisted_state';
 
-export default function VisFactory(createNotifier, Private) {
+export function VisProvider(createNotifier, Private) {
   const aggTypes = Private(AggTypesIndexProvider);
-  const visTypes = Private(RegistryVisTypesProvider);
+  const visTypes = Private(VisTypesRegistryProvider);
   const AggConfigs = Private(VisAggConfigsProvider);
 
   const notify = createNotifier({
@@ -95,6 +95,7 @@ export default function VisFactory(createNotifier, Private) {
 
     // kibi: visualization type versioning
     this.version = this.type.version;
+    // kibi: end
 
     this.listeners = _.assign({}, state.listeners, this.type.listeners);
     this.params = _.defaults({},

@@ -1,8 +1,9 @@
-
 import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
+import { UtilsDiffTimePickerValsProvider } from 'ui/utils/diff_time_picker_vals';
+
+//TODO MERGE 5.5.2 add kibi comments
 
 describe('Diff Time Picker Values', function () {
   let diffTimePickerValues;

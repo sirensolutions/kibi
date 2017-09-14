@@ -2,8 +2,7 @@ import Joi from 'joi';
 import _ from 'lodash';
 import override from './override';
 import createDefaultSchema from './schema';
-import { pkg, unset } from '../../utils';
-import { deepCloneWithBuffers as clone } from '../../utils';
+import { pkg, unset, deepCloneWithBuffers as clone  } from '../../utils';
 
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
@@ -87,7 +86,9 @@ module.exports = class Config {
       notProd: !prod,
       notDev: !dev,
       version: _.get(pkg, 'version'),
+      branch: _.get(pkg, 'branch'),
       buildNum: dev ? Math.pow(2, 53) - 1 : _.get(pkg, 'build.number', NaN),
+      //TODO MERGE 5.5.2 add kibi comment as needed
       kibiVersion: _.get(pkg, 'kibi_version', ''),
       buildTimestamp: _.get(pkg, 'build.timestamp', ''),
       kibiKibanaAnnouncement: _.get(pkg, 'kibi_kibana_announcement', ''),
@@ -101,7 +102,10 @@ module.exports = class Config {
       );
     }
 
-    const results = Joi.validate(newVals, this.getSchema(), { context });
+    const results = Joi.validate(newVals, this.getSchema(), {
+      context,
+      abortEarly: false
+    });
 
     if (results.error) {
       throw results.error;

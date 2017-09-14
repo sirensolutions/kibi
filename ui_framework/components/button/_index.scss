@@ -1,7 +1,13 @@
 // All buttons
 $buttonHeight: 30px;
 $buttonIconSpacing: 8px;
+$buttonIconSmallSpacing: 4px;
 $buttonFontWeight: $globalFontWeightRegular;
+
+// Size
+$buttonSmallFontSize: 12px;
+$buttonSmallPadding: 2px 8px 3px;
+$buttonSmallHeight: 22px;
 
 // Most buttons
 $buttonDefaultTextColor: #FFF;
@@ -24,6 +30,11 @@ $buttonPrimaryDisabledBackgroundColor: #B6D6E0;
 $buttonDangerBackgroundColor: #D76051;
 $buttonDangerHoverBackgroundColor: #A52E1F;
 $buttonDangerDisabledBackgroundColor: #efc0ba;
+
+// Warning
+$buttonWarningBackgroundColor: #f3bb57;
+$buttonWarningHoverBackgroundColor: #e69606;
+$buttonWarningDisabledBackgroundColor: #f4debc;
 
 // Hollow
 $buttonHollowDiabledTextColor: #dddddd;

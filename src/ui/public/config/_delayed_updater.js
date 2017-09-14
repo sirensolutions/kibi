@@ -1,4 +1,4 @@
-export default function DelayedUpdaterFactory($timeout, $http, chrome, Promise) {
+export function ConfigDelayedUpdaterProvider($timeout, $http, chrome, Promise) {
   let unsavedChanges = {};
   let unresolvedPromises = [];
   let saveTimeout = null;
@@ -12,9 +12,11 @@ export default function DelayedUpdaterFactory($timeout, $http, chrome, Promise) 
 
   function saveSoon(resolve, reject) {
     if (saveTimeout) {
+      //TODO MERGE 5.5.2 add kibi comment as needed
       $timeout.cancel(saveTimeout);
     }
 
+      //TODO MERGE 5.5.2 add kibi comment as needed
     saveTimeout = $timeout(fire, 200);
     unresolvedPromises.push({ resolve, reject });
   }
@@ -26,6 +28,7 @@ export default function DelayedUpdaterFactory($timeout, $http, chrome, Promise) 
     unresolvedPromises = [];
     unsavedChanges = {};
 
+    //TODO MERGE 5.5.2 add kibi comment as needed
     return persist(changes)
       .then(result => settle(promises, `resolve`, result))
       .catch(reason => settle(promises, `reject`, reason));

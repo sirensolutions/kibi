@@ -14,11 +14,6 @@ label > small {
   font-weight: normal;
 }
 
-button {
-  // buttons have a stupid 1990's default look which should be disabled
-  .btn();
-}
-
 .small {
   font-size: 0.9em !important;
 }
@@ -153,10 +148,6 @@ a {
       margin-left: auto;
       padding-right: 0;
       line-height: 20px;
-
-      .button-group > :last-child {
-        border-radius: 0;
-      }
     }
   }
 
@@ -164,7 +155,7 @@ a {
     z-index: 1;
   }
   > navbar { padding-bottom: 4px; }
-  > kbn-top-nav { z-index: 3; }
+  > kbn-top-nav { z-index: @localNavDepth; }
 
   > nav,
   > navbar {
@@ -189,14 +180,6 @@ a {
   }
 }
 
-.navbtn {
-  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
-}
-
-.navbtn-inverse {
-  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
-}
-
   .navbar-timepicker-time-desc > .fa-clock-o {
     padding-right: 5px;
   }
@@ -205,28 +188,14 @@ kbn-info i {
   cursor: help;
 }
 
-.kbn-timepicker .btn-default {
-  background: transparent;
-  color: @text-color;
-  border: 0px;
-  box-shadow: none;
-  text-shadow: none;
-}
-
-.kbn-timepicker .btn-info {
-  .button-variant(@btn-info-color; @btn-info-bg; @btn-info-border);
-  .text-info { color: @btn-info-color; }
-  text-shadow: none;
-}
-
 .kbn-timepicker .refresh-interval {
   padding: 0.2em 0.4em;
   border-radius: @border-radius-small;
 }
 
 .kbn-timepicker .refresh-interval-active {
-  background-color: @btn-info-bg;
-  color: @btn-info-color;
+  background-color: @brand-info;
+  color: @white;
 }
 
 //== Table
@@ -293,12 +262,12 @@ paginated-selectable-list {
         padding: 0;
         display: flex;
         flex-direction: row;
-      }
 
-      .finder-type {
-        margin-right: 8px;
-        // kibi: added black to match the new black images
-        color: #000;
+        .finder-type {
+          margin-right: 8px;
+          // kibi: added black to match the new black images
+          color: #000;
+        }
       }
 
       a {
@@ -339,11 +308,6 @@ paginated-selectable-list {
   font-size: @font-size-small;
   color: @text-muted;
   padding: @padding-base-vertical @padding-base-horizontal;
-}
-
-//== clicking disabled buttons should not cause the whole page to get selected
-button[disabled] {
-  user-select: none;
 }
 
 //== override the disabled cursor that doesn't work everywhere

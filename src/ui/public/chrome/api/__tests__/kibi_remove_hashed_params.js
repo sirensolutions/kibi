@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import kibiRemoveHashedParams from '../kibi_remove_hashed_params';
+import { kibiRemoveHashedParams } from '../kibi_remove_hashed_params';
 
 describe('kibi_remove_hashed_params', function () {
 

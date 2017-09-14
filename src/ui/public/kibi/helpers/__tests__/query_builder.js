@@ -1,11 +1,11 @@
-import QueryBuilderProvider from '../query_builder';
-import sinon from 'auto-release-sinon';
+import { QueryBuilderFactory  } from '../query_builder';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import _ from 'lodash';
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
 const defaultStartTime = '2006-09-01T12:00:00.000Z';
@@ -131,7 +131,7 @@ describe('Kibi Components', function () {
         kibiState = _kibiState_;
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('empty-dashboard');
         sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
-        queryBuilder = Private(QueryBuilderProvider);
+        queryBuilder = Private(QueryBuilderFactory);
       });
     });
 

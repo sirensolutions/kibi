@@ -1,5 +1,5 @@
-import getValType from './get_val_type';
-import getEditorType from './get_editor_type';
+import { getValType } from './get_val_type';
+import { getEditorType } from './get_editor_type';
 
 /**
  * @param {object} advanced setting definition object
@@ -7,7 +7,7 @@ import getEditorType from './get_editor_type';
  * @param {object} current value of setting
  * @returns {object} the editable config object
  */
-function toEditableConfig({ def, name, value, isCustom }) {
+export function toEditableConfig({ def, name, value, isCustom }) {
   if (!def) {
     def = {};
   }
@@ -25,6 +25,7 @@ function toEditableConfig({ def, name, value, isCustom }) {
   const editor = getEditorType(conf);
   conf.json = editor === 'json';
   conf.select = editor === 'select';
+  //TODO MERGE 5.5.2 add kibi comment
   conf.kibiSelectDashboard = editor === 'kibiSelectDashboard';
   conf.bool = editor === 'boolean';
   conf.array = editor === 'array';
@@ -40,5 +41,3 @@ function toEditableConfig({ def, name, value, isCustom }) {
 
   return conf;
 }
-
-export default toEditableConfig;

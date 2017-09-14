@@ -9,28 +9,52 @@
         <div class="col-md-2">
           <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
             <li ng-class="{active: mode === 'quick' }">
-              <a ng-click="setMode('quick')">quick</a>
+              <a
+                ng-click="setMode('quick')"
+                kbn-accessible-click
+              >
+                quick
+              </a>
             </li>
+
             <li ng-class="{active: mode === 'relative' }">
-              <a ng-click="setMode('relative')">relative</a>
+              <a
+                ng-click="setMode('relative')"
+                kbn-accessible-click
+              >
+                relative
+              </a>
             </li>
+
             <li ng-class="{active: mode === 'absolute' }">
-              <a ng-click="setMode('absolute')">absolute</a>
+              <a
+                ng-click="setMode('absolute')"
+                kbn-accessible-click
+              >
+                absolute
+              </a>
             </li>
           </ul>
         </div>
 
         <div class="col-md-10">
+          <!-- TODO MERGE 5.5.2 add kibi comment -->
           <div ng-switch on="mode" class="container-fluid kibi-float-left">
             <div ng-switch-when="quick">
 
               <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
                 <ul class="list-unstyled">
                   <li ng-repeat="option in list">
-                    <a ng-click="setQuick(option.from, option.to)" ng-bind="::option.display"></a>
+                    <a
+                      ng-click="setQuick(option.from, option.to)"
+                      ng-bind="::option.display"
+                      kbn-accessible-click
+                    ></a>
                   </li>
                 </ul>
               </div>
+
+              <!-- TODO: Add a section for custom intervals -->
             </div>
 
             <div ng-switch-when="relative">
@@ -39,8 +63,14 @@
                   <label>
                     From:
                     <span ng-show="relative.from.preview">{{relative.from.preview}}</span>
-                    <a class="label label-default" ng-click="setRelativeToNow('from')">Set To Now</a>
-                    <span ng-hide="relative.from.preview"><i>Invalid Expression</i></span>
+                    <a
+                      class="label label-default"
+                      ng-click="setRelativeToNow('from')"
+                      kbn-accessible-click
+                    >
+                      Set To Now
+                    </a>
+                    <span ng-hide="relative.from.preview"><em>Invalid Expression</em></span>
                   </label>
                   <br>
                   <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
@@ -59,8 +89,8 @@
                       ng-model="relative.from.unit"
                       ng-options="opt.value as opt.text for opt in relativeOptions"
                       ng-change="formatRelative('from')"
-                      class="form-control col-xs-2"
-                    ></select>
+                      class="form-control col-xs-2">
+                    </select>
                   </div>
                   <br>
                   <div class="small">
@@ -69,7 +99,7 @@
                         ng-model="relative.from.round"
                         ng-checked="relative.from.round"
                         ng-change="formatRelative('from')"
-                        type="checkbox"/>
+                        type="checkbox">
                       round to the {{units[relative.from.unit.substring(0,1)]}}
                     </label>
                     <div
@@ -84,11 +114,18 @@
                   <label>
                     To:
                     <span ng-show="relative.to.preview">{{relative.to.preview}}</span>
-                    <a class="label label-default" ng-click="setRelativeToNow('to')">Set To Now</a>
-                    <span ng-hide="relative.to.preview"><i>Invalid Expression</i></span>
+                    <a
+                      class="label label-default"
+                      ng-click="setRelativeToNow('to')"
+                      kbn-accessible-click
+                    >
+                      Set To Now
+                    </a>
+                    <span ng-hide="relative.to.preview"><em>Invalid Expression</em></span>
                   </label>
                   <br>
                   <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
+                    <!-- TODO MERGE 5.5.2 add kibi comment -->
                     <input
                       required
                       ng-model="relative.to.count"
@@ -127,8 +164,14 @@
               <form name="absoluteTime" ng-submit="applyAbsolute()">
                 <div class="kbn-timepicker-section">
                   <div>
-                    <label class="small">From: <span ng-show="!absolute.from"><i>Invalid Date</i></span>
-                      <a class="label label-default" ng-click="setToNow('from')">Set To Now</a>
+                    <label class="small">From: <span ng-show="!absolute.from"><em>Invalid Date</em></span>
+                      <a
+                        class="label label-default"
+                        ng-click="setToNow('from')"
+                        kbn-accessible-click
+                      >
+                        Set To Now
+                      </a>
                     </label>
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.from">
                   </div>
@@ -140,18 +183,28 @@
                 <div class="kbn-timepicker-section">
                   <div>
                     <label class="small">To:
-                      <a class="label label-default" ng-click="setToNow('to')">Set To Now</a>
+                      <a
+                        class="label label-default"
+                        ng-click="setToNow('to')"
+                        kbn-accessible-click
+                      >
+                        Set To Now
+                      </a>
                     </label>
-                    <span ng-show="!absolute.to"><i>Invalid Date</i></span>
+                    <span ng-show="!absolute.to"><em>Invalid Date</em></span>
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
                   </div>
                   <div>
                     <datepicker ng-model="pickToDate" ng-model-options="{ getterSetter: true }" min-date="absolute.from" show-weeks="false"></datepicker>
                   </div>
                 </div>
+
+                <!-- TODO MERGE 5.5.2 add kibi comment to explain why we remove kibana code here -->
               </form>
             </div>
           </div>
+
+          <!-- TODO MERGE 5.5.2 add kibi comment -->
 
           <div class="container-fluid kibi-float-left">
             <kibi-sync-time-to class="kbn-timepicker-section"></kibi-sync-time-to>
@@ -160,13 +213,19 @@
         </div>
       </div>
     </div>
+
     <!-- Refresh Intervals -->
     <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
       <div class="kuiLocalDropdownTitle">Refresh Interval</div>
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
         <ul class="list-unstyled">
           <li ng-repeat="inter in list">
-            <a class="refresh-interval" ng-class="{ 'refresh-interval-active': interval.value === inter.value }" ng-click="setRefreshInterval(inter)">
+            <a
+              class="refresh-interval"
+              ng-class="{ 'refresh-interval-active': interval.value === inter.value }"
+              ng-click="setRefreshInterval(inter)"
+              kbn-accessible-click
+            >
               {{inter.display}}
             </a>
           </li>

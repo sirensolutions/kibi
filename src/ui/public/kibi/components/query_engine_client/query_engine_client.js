@@ -1,7 +1,7 @@
 import chrome from 'ui/chrome';
 import angular from 'angular';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('kibana/query_engine_client')

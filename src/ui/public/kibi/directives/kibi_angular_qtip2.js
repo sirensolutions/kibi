@@ -1,6 +1,6 @@
 import 'kibi-qtip2';
 import $ from 'jquery';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('kibana')

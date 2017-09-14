@@ -1,11 +1,12 @@
 import _ from 'lodash';
+import { getDefaultQuery } from 'ui/parse_query';
 
 /**
  * @typedef {Object} QueryFilter
  * @property query_string {Object}
  * @property query_string.query {String}
  */
-export default function FilterUtilsProvider(kibiState) {
+export function FilterUtilsProvider(kibiState) {
   return class FilterUtils {
     /**
      *

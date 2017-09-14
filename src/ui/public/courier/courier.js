@@ -3,23 +3,25 @@ import _ from 'lodash';
 import 'ui/es';
 import 'ui/promises';
 import 'ui/index_patterns';
-import uiModules from 'ui/modules';
-import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import { uiModules } from 'ui/modules';
+import { Notifier } from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 
-import DocSourceProvider from './data_source/doc_source';
-import SearchSourceProvider from './data_source/search_source';
-import SearchStrategyProvider from './fetch/strategy/search';
-import RequestQueueProvider from './_request_queue';
-import FetchProvider from './fetch';
-import DocDataLooperProvider from './looper/doc_data';
-import DocAdminLooperProvider from './looper/doc_admin';
-import SearchLooperProvider from './looper/search';
-import RootSearchSourceProvider from './data_source/_root_search_source';
-import SavedObjectProvider from './saved_object';
-import RedirectWhenMissingProvider from './_redirect_when_missing';
+import { DocSourceProvider } from './data_source/doc_source';
+import { SearchSourceProvider } from './data_source/search_source';
+import { SearchStrategyProvider } from './fetch/strategy/search';
+import { RequestQueueProvider } from './_request_queue';
+import { FetchProvider } from './fetch';
+import { DocDataLooperProvider } from './looper/doc_data';
+import { DocAdminLooperProvider } from './looper/doc_admin';
+import { SearchLooperProvider } from './looper/search';
+import { RootSearchSourceProvider } from './data_source/_root_search_source';
+import { SavedObjectProvider } from './saved_object';
+import { RedirectWhenMissingProvider } from './_redirect_when_missing';
 
-import KibiSavedObjectSource from 'ui/courier/data_source/savedobject_source';
-import KibiSavedObject from 'ui/courier/looper/savedobject';
+// kibi: imports
+import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source';
+import { SavedObjectLooperService } from 'ui/courier/looper/savedobject';
+// kibi: end
 
 uiModules.get('kibana/courier')
 .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
@@ -48,8 +50,8 @@ uiModules.get('kibana/courier')
     self.SearchSource = SearchSource;
 
     // kibi: Saved Objects API imports
-    const SavedObjectSource = Private(KibiSavedObjectSource);
-    const savedObjectLooper = self.savedObjectLooper = Private(KibiSavedObject);
+    const SavedObjectSource = Private(SavedObjectSourceFactory);
+    const savedObjectLooper = self.savedObjectLooper = Private(SavedObjectLooperService);
     self.SavedObjectSource = SavedObjectSource;
     // kibi: end
 
@@ -83,6 +85,7 @@ uiModules.get('kibana/courier')
      * individual errors are routed to their respective requests.
      */
     self.fetch = function () {
+      //TODO MERGE 5.5.2 add kibi comment
       return fetch.fetchQueued(searchStrategy).then(function () {
         searchLooper.restart();
       });

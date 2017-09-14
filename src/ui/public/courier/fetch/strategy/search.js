@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import angular from 'angular';
-import emptySearch from 'ui/kibi/empty_search';
+// kibi: imports
+import { emptySearch } from 'ui/kibi/empty_search';
+// kibi: end
 
 import { toJson } from 'ui/utils/aggressive_parse';
 
-export default function FetchStrategyForSearch(Private, Promise, timefilter, kbnIndex, sessionId) {
+export function SearchStrategyProvider(Private, Promise, timefilter, kbnIndex, sessionId) {
 
   return {
     clientMethod: 'msearch',
@@ -17,6 +19,7 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
      */
     reqsFetchParamsToBody: function (reqsFetchParams) {
       const indexToListMapping = {};
+      const timeBounds = timefilter.getActiveBounds();
 
       return Promise.map(reqsFetchParams, function (fetchParams) {
         return Promise.resolve(fetchParams.index)
@@ -25,10 +28,10 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
             return indexList;
           }
 
-          const timeBounds = timefilter.getBounds();
-
           if (!indexToListMapping[indexList.id]) {
-            indexToListMapping[indexList.id] = indexList.toIndexList(timeBounds.min, timeBounds.max);
+            indexToListMapping[indexList.id] = timeBounds
+              ? indexList.toIndexList(timeBounds.min, timeBounds.max)
+              : indexList.toIndexList();
           }
           return indexToListMapping[indexList.id].then(indexList => {
             // Make sure the index list in the cache can't be subsequently updated.
@@ -80,4 +83,3 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
     }
   };
 }
-

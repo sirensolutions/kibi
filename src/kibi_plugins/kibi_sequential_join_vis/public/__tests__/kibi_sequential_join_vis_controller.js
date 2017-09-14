@@ -1,10 +1,10 @@
 import chrome from 'ui/chrome';
-import Notifier from 'ui/notify/notifier';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
-import sinon from 'auto-release-sinon';
+import { Notifier } from 'ui/notify/notifier';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import noDigestPromises from 'test_utils/no_digest_promises';
 import Promise from 'bluebird';
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';

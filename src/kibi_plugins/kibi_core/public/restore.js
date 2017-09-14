@@ -1,7 +1,7 @@
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
-import Notifier from 'kibie/notify/notifier';
-import hashUrl from 'ui/kibi/session/hash_url';
+import { Notifier } from 'kibie/notify/notifier';
+import { hashUrl } from 'ui/kibi/session/hash_url';
 
 uiRoutes
 .when('/kibi/restore/:sessionId', {

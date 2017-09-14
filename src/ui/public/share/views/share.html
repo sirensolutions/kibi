@@ -1,3 +1,4 @@
+<!-- TODO MERGE 5.5.2 check if a complete new file if better instead of making so many changes to the original html -->
 <div class="kuiLocalDropdownPanels">
   <!-- Left panel -->
   <div class="kuiLocalDropdownPanel kuiLocalDropdownPanel--left">
@@ -79,6 +80,7 @@
             <a
               class="kuiLocalDropdownHeader__action"
               ng-click="share.copyToClipboard('#originalIframeUrl')"
+              kbn-accessible-click
             >
               Copy
             </a>
@@ -113,7 +115,8 @@
           <div class="kuiLocalDropdownHeader__actions">
             <a
               class="kuiLocalDropdownHeader__action"
-              ng-click="share.copyToClipboard('#originalSidebarIframeUrl')"
+              ng-click="share.copyToClipboard('#originalUrl')"
+              kbn-accessible-click
             >
               Copy
             </a>
@@ -132,7 +135,6 @@
       <!-- kibi: end -->
 
     </div>
-
   </div>
 
   <!-- Right panel -->
@@ -162,20 +164,22 @@
         </div>
         <div class="kuiLocalDropdownHeader__actions">
           <!--
-          siren: removed because we are shortening urls by default
+          kibi: removed because we are shortening urls by default
           <a
             data-test-subj="sharedSnapshotShortUrlButton"
             class="kuiLocalDropdownHeader__action"
-            ng-if="!share.urlFlags.shortSnapshot"
-            ng-click="share.toggleShortSnapshotUrl()"
+            ng-if="!share.urlFlags.shortSnapshotIframe"
+            ng-click="share.toggleShortSnapshotIframeUrl()"
+            kbn-accessible-click
           >
             Short URL
           </a>
 
           <a
             class="kuiLocalDropdownHeader__action"
-            ng-if="share.urlFlags.shortSnapshot"
-            ng-click="share.toggleShortSnapshotUrl()"
+            ng-if="share.urlFlags.shortSnapshotIframe"
+            ng-click="share.toggleShortSnapshotIframeUrl()"
+            kbn-accessible-click
           >
             Long URL
           </a>
@@ -183,7 +187,8 @@
           <a
             data-test-subj="sharedSnapshotCopyButton"
             class="kuiLocalDropdownHeader__action"
-            ng-click="share.copyToClipboard('#snapshotUrl')"
+            ng-click="share.copyToClipboard('#snapshotIframeUrl')"
+            kbn-accessible-click
           >
             Copy
           </a>
@@ -227,16 +232,18 @@
           siren: removed because we are shortening urls by default
           <a
             class="kuiLocalDropdownHeader__action"
-            ng-if="!share.urlFlags.shortSnapshotIframe"
-            ng-click="share.toggleShortSnapshotIframeUrl()"
+            ng-if="!share.urlFlags.shortSnapshot"
+            ng-click="share.toggleShortSnapshotUrl()"
+            kbn-accessible-click
           >
             Short URL
           </a>
 
           <a
             class="kuiLocalDropdownHeader__action"
-            ng-if="share.urlFlags.shortSnapshotIframe"
-            ng-click="share.toggleShortSnapshotIframeUrl()"
+            ng-if="share.urlFlags.shortSnapshot"
+            ng-click="share.toggleShortSnapshotUrl()"
+            kbn-accessible-click
           >
             Long URL
           </a>
@@ -285,7 +292,8 @@
         <div class="kuiLocalDropdownHeader__actions">
           <a
             class="kuiLocalDropdownHeader__action"
-            ng-click="share.copyToClipboard('#snapshotIframeUrl2')"
+            ng-click="share.copyToClipboard('#snapshotUrl')"
+            kbn-accessible-click
           >
             Copy
           </a>

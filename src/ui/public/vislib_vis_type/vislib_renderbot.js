@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import VislibProvider from 'ui/vislib';
-import VisRenderbotProvider from 'ui/vis/renderbot';
-import VislibVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
+import { VisRenderbotProvider } from 'ui/vis/renderbot';
+import { VislibVisTypeBuildChartDataProvider } from 'ui/vislib_vis_type/build_chart_data';
+
 module.exports = function VislibRenderbotFactory(Private, $injector) {
   const AngularPromise = $injector.get('Promise');
   const vislib = Private(VislibProvider);
@@ -37,11 +38,7 @@ module.exports = function VislibRenderbotFactory(Private, $injector) {
     return _.assign(
       {},
       self.vis.type.params.defaults,
-      {
-        type: self.vis.type.name,
-        // Add attribute which determines whether an index is time based or not.
-        hasTimeField: self.vis.indexPattern && self.vis.indexPattern.hasTimeField()
-      },
+      { type: self.vis.type.name },
       self.vis.params
     );
   };

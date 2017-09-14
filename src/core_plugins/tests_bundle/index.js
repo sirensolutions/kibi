@@ -1,5 +1,5 @@
 import { union } from 'lodash';
-import defaultsProvider from '../../ui/settings/defaults';
+import { getDefaultSettings } from '../../ui/ui_settings/defaults';
 import findSourceFiles from './find_source_files';
 import { fromRoot } from '../../utils';
 
@@ -57,7 +57,7 @@ export default (kibana) => {
           });
         }
 
-        env.defaultUiSettings = defaultsProvider();
+        env.defaultUiSettings = getDefaultSettings();
 
         return new UiBundle({
           id: 'tests',
@@ -71,7 +71,7 @@ export default (kibana) => {
         ng_mock$: fromRoot('src/core_plugins/dev_mode/public/ng_mock'),
         'angular-mocks$': require.resolve('./webpackShims/angular-mocks'),
         fixtures: fromRoot('src/fixtures'),
-        test_utils: fromRoot('src/test_utils'),
+        test_utils: fromRoot('src/test_utils/public'),
       }
     }
   });

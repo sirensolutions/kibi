@@ -1,10 +1,10 @@
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import ngMock from 'ng_mock';
 import rison from 'rison-node';
-import hashUrl from '../hash_url';
+import { hashUrl } from '../hash_url';
 import {
-  hashedItemStoreSingleton,
+  HashedItemStoreSingleton,
 } from 'ui/state_management/state_storage';
 
 describe('kibi/session/hashUrl', () => {
@@ -19,7 +19,11 @@ describe('kibi/session/hashUrl', () => {
   let hashedItemStoreSpy;
 
   beforeEach(() => {
-    hashedItemStoreSpy = sinon.spy(hashedItemStoreSingleton, 'setItem');
+    hashedItemStoreSpy = sinon.spy(HashedItemStoreSingleton, 'setItem');
+  });
+
+  afterEach(() => {
+    hashedItemStoreSpy.restore();
   });
 
   it('should hash unhashed states', () => {
@@ -70,8 +74,8 @@ describe('kibi/session/hashUrl', () => {
   });
 
   it('should throw an error if a state cannot be stored in the sessionStorage', () => {
-    hashedItemStoreSingleton.setItem.restore();
-    sinon.stub(hashedItemStoreSingleton, 'setItem').throws(new Error());
+    HashedItemStoreSingleton.setItem.restore();
+    sinon.stub(HashedItemStoreSingleton, 'setItem').throws(new Error());
     const base = '/app/kibana#/dashboard/dash';
     const querystring = `_g=h@123456&_a=${encodedStates[1]}`;
     const url = `${base}?${querystring}`;

@@ -18,7 +18,9 @@ export async function getInstalledPackages(options = {}) {
   const {
     directory,
     dev = false,
-    licenseOverrides = {}
+    licenseOverrides = {},
+    // kibi: pass the kibi version
+    kibiVersion
   } = options;
 
   if (!directory) {
@@ -28,6 +30,11 @@ export async function getInstalledPackages(options = {}) {
   const licenseInfo = await callLicenseChecker({ directory, dev });
   return Object
     .keys(licenseInfo)
+    // kibi: remove info about kibi itself
+    .filter((key, value) => {
+      return key !== ('kibi@' + kibiVersion);
+    })
+    // kibi: end
     .map(key => {
       const keyParts = key.split('@');
       const name = keyParts.slice(0, -1).join('@');

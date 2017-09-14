@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import angular from 'angular';
 import $ from 'jquery';
-import metadata from 'ui/metadata';
-import formatMsg from 'kibie/notify/lib/_format_msg';
+import { metadata } from 'ui/metadata';
+import { formatMsg } from 'ui/notify/lib/_format_msg';
 import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
 import 'ui/render_directive';
 /* eslint no-console: 0 */
@@ -86,18 +86,18 @@ function restartNotifTimer(notif, cb) {
 }
 
 const typeToButtonClassMap = {
-  danger: 'btn-danger', // NOTE: `error` type is internally named as `danger`
-  warning: 'btn-warning',
-  info: 'btn-info',
-  banner: 'btn-banner'
+  danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
+  warning: 'kuiButton--warning',
+  info: 'kuiButton--primary',
+  banner: 'kuiButton--basic'
 };
 const buttonHierarchyClass = (index) => {
   if (index === 0) {
     // first action: primary className
-    return 'btn-primary';
+    return 'kuiButton--primary';
   }
   // subsequent actions: secondary/default className
-  return 'btn-default';
+  return 'kuiButton--basic';
 };
 const typeToAlertClassMap = {
   danger: `alert-danger`,
@@ -126,6 +126,7 @@ function add(notif, cb) {
     notif.customActions = notif.customActions.map((action, index) => {
       return {
         key: action.text,
+        dataTestSubj: action.dataTestSubj,
         callback: closeNotif(notif, action.callback, action.text),
         getButtonClass() {
           const buttonTypeClass = typeToButtonClassMap[notif.type];
@@ -230,7 +231,7 @@ function formatStack(err) {
 /**
  * Functionality to check that
  */
-function Notifier(opts) {
+export function Notifier(opts) {
   const self = this;
   opts = opts || {};
 
@@ -681,5 +682,3 @@ function createGroupLogger(type, opts) {
     return ret;
   };
 }
-
-export default Notifier;

@@ -1,4 +1,4 @@
-export default function EnsureSomeIndexPatternsFn(kbnUrl) {
+export function EnsureSomeIndexPatternsFn(kbnUrl) {
   return function ensureSomeIndexPatterns() {
     return function promiseHandler(patterns) {
       if (!patterns || patterns.length === 0) {

@@ -1,5 +1,5 @@
 import UrlShortenerProvider from './lib/url_shortener';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { unhashUrl, getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 uiModules

@@ -8,7 +8,7 @@ import 'ui/kibi/directives/kibi_context_menu';
 
 import globalNavTemplate from './global_nav.html';
 import './global_nav.less';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('kibana');
 
@@ -77,7 +77,7 @@ module.directive('globalNav', (globalNavState, $window,
       });
 
       scope.toggleGlobalNav = (event, force) => {
-        // siren: allows user to click on empty areas
+        // kibi: allows user to click on empty areas
         if (event.target === event.currentTarget || force) {
           event.preventDefault();
           globalNavState.setOpen(!globalNavState.isOpen());

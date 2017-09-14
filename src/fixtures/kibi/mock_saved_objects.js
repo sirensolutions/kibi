@@ -1,10 +1,10 @@
-import PatternCacheProvider from 'ui/index_patterns/_pattern_cache';
-import stubIndexPatternProvider from 'test_utils/stub_index_pattern';
+import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_cache';
+import { StubIndexPatternProvider } from 'test_utils/stub_index_pattern';
 import _ from 'lodash';
 
-export default function (Promise, Private) {
-  const StubIndexPattern = Private(stubIndexPatternProvider);
-  const patternCache = Private(PatternCacheProvider);
+export function mockSavedObjects(Promise, Private) {
+  const StubIndexPattern = Private(StubIndexPatternProvider);
+  const patternCache = Private(IndexPatternsPatternCacheProvider);
   // kibi: simulate missing indices and generic errors
   const { IndexPatternMissingIndices } = require('ui/errors');
 

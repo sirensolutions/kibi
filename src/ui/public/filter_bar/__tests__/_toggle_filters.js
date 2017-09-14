@@ -1,9 +1,12 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
-import MockState from 'fixtures/mock_state';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import sinon from 'sinon';
+import { MockState } from 'fixtures/mock_state';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+
+//TODO MERGE 5.5.2 add kibi comments
+
 describe('toggle filters', function () {
   let filters;
   let queryFilter;

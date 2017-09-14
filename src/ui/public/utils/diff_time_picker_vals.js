@@ -3,7 +3,7 @@ import angular from 'angular';
 // kibi: imports
 import { roundWithPrecision } from 'ui/kibi/utils/date_math_precision';
 
-export default function DiffTimePickerValuesFn($rootScope) {
+export function UtilsDiffTimePickerValsProvider($rootScope) {
 
   const valueOf = function (o) {
     if (o) return o.valueOf();

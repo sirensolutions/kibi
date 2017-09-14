@@ -1,4 +1,4 @@
-import formatESMsg from 'ui/notify/lib/_format_es_msg';
+import { formatESMsg } from 'ui/notify/lib/_format_es_msg';
 import expect from 'expect.js';
 describe('formatESMsg', function () {
 
@@ -18,6 +18,7 @@ describe('formatESMsg', function () {
     expect(actual).to.be(undefined);
   });
 
+  //TODO MERGE 5.5.2 add kibi comment
   it('kibi - should return the root_cause if $http is used for making a request against Elasticsearch', function () {
     const err = {
       data: {

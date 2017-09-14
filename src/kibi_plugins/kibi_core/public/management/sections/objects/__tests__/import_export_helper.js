@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import Promise from 'bluebird';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import ImportExportHelperProvider from '../import_export_helper';

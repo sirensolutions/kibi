@@ -1,10 +1,10 @@
 import noDigestPromises from 'test_utils/no_digest_promises';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
 import pollUntil from './_poll_until';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 
 import '../kibi_sync_time_to';
 
@@ -49,7 +49,7 @@ describe('Kibi Components', function () {
         searchSource: {
           index: function () {
             return {
-              hasTimeField: function () {
+              isTimeBased: function () {
                 return true;
               }
             };

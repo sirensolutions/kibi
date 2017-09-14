@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import SearchHelper from 'ui/kibi/helpers/search_helper';
+import { SearchHelper } from 'ui/kibi/helpers/search_helper';
 
 describe('Kibi Components', function () {
   describe('SearchHelper', function () {

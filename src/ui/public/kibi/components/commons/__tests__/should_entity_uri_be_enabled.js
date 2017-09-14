@@ -1,9 +1,9 @@
-import ShouldEntityUriBeEnabledProvider from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
+import { ShouldEntityURIBeEnabledFactory } from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 
 let shouldEntityUriBeEnabled;
 
@@ -74,7 +74,7 @@ describe('Kibi Components', function () {
         });
 
         ngMock.inject(function (Private) {
-          shouldEntityUriBeEnabled = Private(ShouldEntityUriBeEnabledProvider);
+          shouldEntityUriBeEnabled = Private(ShouldEntityURIBeEnabledFactory);
         });
       });
 

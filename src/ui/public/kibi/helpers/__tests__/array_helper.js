@@ -1,4 +1,4 @@
-import ArrayHelper from 'ui/kibi/helpers/array_helper';
+import { ArrayHelper } from 'ui/kibi/helpers/array_helper';
 import expect from 'expect.js';
 
 describe('Kibi Components', function () {
@@ -71,5 +71,3 @@ describe('Kibi Components', function () {
     });
   });
 });
-
-

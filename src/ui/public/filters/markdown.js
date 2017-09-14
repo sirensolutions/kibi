@@ -1,5 +1,5 @@
-import marked from 'marked';
-import uiModules from 'ui/modules';
+import marked from '../../../forked/marked';
+import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 
 marked.setOptions({

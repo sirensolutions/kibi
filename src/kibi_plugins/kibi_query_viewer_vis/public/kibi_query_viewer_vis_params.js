@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from 'plugins/kibi_query_viewer_vis/kibi_query_viewer_vis_params.html';
 
 uiModules

@@ -138,9 +138,22 @@ export default class Model {
       type: this._type
     };
     this._setCredentials(parameters, request);
-    const mappings = await this._cluster.callWithRequest({}, 'indices.getMapping', parameters);
 
-    return Object.keys(mappings).length !== 0;
+    // NOTE:
+    // There is a difference between elasticsearch 5.4.x and 5.5.x
+    // when there is no mappings
+    // 5.4.x resolve with an empty object
+    // 5.5.x rejects with a proper Error object
+    try {
+      const mappings = await this._cluster.callWithRequest({}, 'indices.getMapping', parameters);
+      return Object.keys(mappings).length !== 0;
+    } catch (error) {
+      // throw if an Error is different than NotFound
+      if (!(error.statusCode === 404 && error.displayName === 'NotFound')) {
+        throw error;
+      }
+      return false;
+    }
   }
 
   /**

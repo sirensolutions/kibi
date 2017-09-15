@@ -1134,7 +1134,7 @@ The main purpose of this system is to hide and block access to:
  * UI elements - applications, e.g.: **Timelion**, **Access control**, **Sentinl**
  * UI elements - specific functionalities e.g.: **export CSV feature**
  * UI elements - Kibi sections, e.g.: **discover**, **management**
- * Saved objects on on unauthorized indices, e.g.: **dashboards**, **searches**
+ * Saved objects on unauthorized indices, e.g.: **dashboards**, **searches**
 
 to end users and avoid unauthorized changes to configuration objects or use
 of certain parts of the system.
@@ -1147,12 +1147,12 @@ There are two kinds of rules:
 The `everyone` role defines permissions for all the users in the system, and is
 mapped by default to any user logged in Kibi; by default it grants all users
 read only access to the Kibi configuration (**Advanced settings**), saved
-searches and index patterns as well as view all applications and UI elements.
+searches and index patterns as well as permission to view all applications and UI elements.
 
 ._The everyone role_
 image::images/access_control/everyone_role.png["The everyone role",align="center"]
 
-Denying access to certain saved object like **saved search** using the first sets
+Denying access to certain saved objects like **saved search** using the first sets
 of rules is usually transparent to the user which means that he will simply
 not see the objects anywhere in Kibi.
 

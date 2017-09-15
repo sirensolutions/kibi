@@ -1,0 +1,8 @@
+== Kibi 5.4.3-1 and Kibana 5.4.3
+
+[float]
+=== Kibi Changes
+
+Changed:
+
+* Vanguard version bumped from 5.4.3 to 5.4.3-1

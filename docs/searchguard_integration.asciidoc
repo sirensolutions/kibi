@@ -1128,17 +1128,53 @@ image::images/access_control/acl_section_5.png["The ACL section",align="center"]
 ==== Kibi roles and rules
 
 The ACL Roles panel in the ACL section allows to define Kibi roles, which
-are collections of permissions on saved objects; the main purpose of this
-system is to hide dashboards on unauthorized indices to end users and avoid
-unauthorized changes to configuration objects.
+are collections of permissions on saved objects and UI elements.
+The main purpose of this system is to hide and block access to:
+
+ * UI elements - applications, e.g.: **Timelion**, **Access control**, **Sentinl**
+ * UI elements - specific functionalities e.g.: **export CSV feature**
+ * UI elements - Kibi sections, e.g.: **discover**, **management**
+ * Saved objects on unauthorized indices, e.g.: **dashboards**, **searches**
+
+to end users and avoid unauthorized changes to configuration objects or use
+of certain parts of the system.
+
+There are two kinds of rules:
+
+ * rules - to set permissions for saved objects
+ * ui rules - to set permissions to view different UI elements
 
 The `everyone` role defines permissions for all the users in the system, and is
-mapped by default to any user logged in Kibi; by default it allows all users
+mapped by default to any user logged in Kibi; by default it grants all users
 read only access to the Kibi configuration (**Advanced settings**), saved
-searches and index patterns.
+searches and index patterns as well as permission to view all applications and UI elements.
 
 ._The everyone role_
-image::images/access_control/everyone.png["The everyone role",align="center"]
+image::images/access_control/everyone_role.png["The everyone role",align="center"]
+
+Denying access to certain saved objects like **saved search** using the first sets
+of rules is usually transparent to the user which means that he will simply
+not see the objects anywhere in Kibi.
+
+Usually it is not required to create explicit UI rules for the **dashboard** application
+as access to specific dashboards can be restricted through saved object rules.
+
+Denying access to an application like **Timelion**
+or a Kibi section like **management** will hide the navigation menu elements,
+block access at the route level and display an error.
+
+._Blocked Timelion application and Kibi management section_
+image::images/access_control/blocked_timelion_and_management_uirules.png["Blocked Timelion application and Kibi management section",align="center"]
+
+When the user tries to access **app/timelion**, the error below is shown.
+
+._Blocked Timelion error_
+image::images/access_control/blocked_timelion_error.png["Blocked timelion error",align="center", width="800"]
+
+When the user tries to access **/app/kibana#/management**, the error below is shown.
+
+._Blocked Kibi management section error_
+image::images/access_control/blocked_managemnent_error.png["Blocked Kibi management section error",align="center", width="800"]
 
 For most setups it makes sense to grant **view** permissions on visualizations
 as well, then set specific permissions on dashboards and dashboard groups for

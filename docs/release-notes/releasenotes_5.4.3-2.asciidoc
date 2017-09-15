@@ -5,7 +5,7 @@
 
 Fixed: 
 
-* Fixed issue where Kibi could not start when used with Elasticsearch 5.5.2 
+* Fixed issue where Kibi would not start when used with Elasticsearch 5.5.2 due to mapping loading problem  
 
 Changed:
 
@@ -13,6 +13,9 @@ Changed:
 * Update Vanguard to version 5.5.2-1
 
 Added: 
+
+* Added new UI element rules in Access Control plugin to controll access to certain parts of the UI
+  e.g: applications (Timelion, Sentinl), Kibi sections (discover, management), specific features (export CSV functionality) 
 
 * Added ability to limit number of collected tuples per shard during the join operations
   This option can now be set globally via kibi:relationsDefaultLimitPerShard in Advanced Settings 

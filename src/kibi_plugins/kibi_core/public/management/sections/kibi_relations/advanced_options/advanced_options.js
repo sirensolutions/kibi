@@ -33,7 +33,7 @@ uiModules
   }
 
   if (!$scope.relation.limit_per_shard) {
-    $scope.relation.limit_per_shard = config.get('kibi:relationsDefaultLimitPerShard');
+    $scope.relation.limit_per_shard = -1; // -1 to take the global one from kibi:relationsDefaultLimitPerShard
   }
 
   // cancel button

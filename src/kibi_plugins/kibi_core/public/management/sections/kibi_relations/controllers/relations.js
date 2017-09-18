@@ -24,7 +24,7 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
 
   $scope.unique = _.unique;
   $scope.defaults = {
-    limit_per_shard: config.get('kibi:relationsDefaultLimitPerShard'),
+    limit_per_shard: -1, // -1 mean use the global one from kibi:relationsDefaultLimitPerShard
     type: 'SEARCH_JOIN'
   };
 

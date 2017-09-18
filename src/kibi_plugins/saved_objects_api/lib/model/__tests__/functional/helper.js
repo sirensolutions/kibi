@@ -164,8 +164,15 @@ export default class ModelTestHelper {
    * Tests the mapping created by the model class when creating an object against the @expectedMapping.
    */
   async testMappingsCreation(expectedMapping) {
-    const mappingsBefore = await this.getMappings(this._typename);
-    // expect(mappingsBefore).to.eql({}); //TODO MERGE 5.5.2 update this to the new result
+    let mappingsErrorBefore;
+    try {
+      await this.getMappings(this._typename);
+    } catch (e) {
+      mappingsErrorBefore = e;
+    }
+
+    expect(mappingsErrorBefore.status).to.eql(404);
+    expect(mappingsErrorBefore.displayName).to.eql('NotFound');
 
     const model = this.getInstance();
     const id = `${this._prefix}1`;
@@ -184,8 +191,15 @@ export default class ModelTestHelper {
    * Tests the mapping created by the model class when indexing an object against the @expectedMapping.
    */
   async testMappingsIndexing(expectedMapping) {
-    const mappingsBefore = await this.getMappings(this._typename);
-    // expect(mappingsBefore).to.eql({}); //TODO MERGE 5.5.2 update this to the new result
+    let mappingsErrorBefore;
+    try {
+      await this.getMappings(this._typename);
+    } catch (e) {
+      mappingsErrorBefore = e;
+    }
+
+    expect(mappingsErrorBefore.status).to.eql(404);
+    expect(mappingsErrorBefore.displayName).to.eql('NotFound');
 
     const model = this.getInstance();
     const id = `${this._prefix}1`;

@@ -262,12 +262,16 @@ export default function RelationsHelperFactory(config) {
         }
       }
 
-      // set the advanced properties
-      [ 'type', 'limit_per_shard' ].forEach(advancedKey => {
-        if (indexRelation[advancedKey]) {
-          rel[advancedKey] = indexRelation[advancedKey];
-        }
-      });
+      if (indexRelation.type) {
+        rel.type = indexRelation.type;
+      }
+
+      if (indexRelation.limit_per_shard && indexRelation.limit_per_shard > 0) {
+        rel.limit_per_shard = indexRelation.limit_per_shard;
+      } else {
+        rel.limit_per_shard = config.get('kibi:relationsDefaultLimitPerShard');
+      }
+
     }
   }
 

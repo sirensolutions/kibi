@@ -22,11 +22,10 @@
               </p>
             </div>
             -->
-
             <div class="form-group">
               <label>Limit per shard</label>
-              <input type="number" min="0" step="100000" ng-model="relation.limit_per_shard" class="form-control small-input"/>
-              <p class="field-description">Per shard limit of collected tuples during join operation.
+              <input type="number" min="-1" step="100000" ng-model="relation.limit_per_shard" class="form-control small-input"/>
+              <p class="field-description">Per shard limit of collected tuples during join operation. Set to -1 to use the global limit from Advanced Settings -> kibi:relationsDefaultLimitPerShard
               </p>
             </div>
 

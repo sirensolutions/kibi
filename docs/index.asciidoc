@@ -4,9 +4,9 @@
 :docinfo: shared
 
 :java-version: 1.8
-:vanguard-version: 5.4.3-1
+:vanguard-version: 5.5.2-1
 :vanguard-website: https://docs.support.siren.io/5.4.3-1/vanguard/
-:version: 5.4.3-1
+:version: 5.4.3-2
 :kibana-version: 5.4.3
 :kibana-announcement: https://www.elastic.co/blog/kibana-5-4-3-released
 :kibana-ref: https://www.elastic.co/guide/en/kibana/5.4
@@ -14,7 +14,7 @@
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.4/
 :logstash-ref: https://www.elastic.co/guide/en/logstash/
 :es-ref: {elastic-ref}
-:elasticsearch-version: 5.4.3
+:elasticsearch-version: 5.5.2
 :es-default-port: 9220
 :searchguard-ref: http://floragunncom.github.io/search-guard-docs/
 :searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
@@ -24,7 +24,7 @@
 :searchguard-jwt-ref: https://github.com/floragunncom/search-guard-authbackend-jwt
 :searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
 :searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
-:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-5.4.0
+:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-5.5.2
 :searchguard-tls-certificate-ref: https://floragunn.com/tls-certificate-generator/
 :kibi-ref: http://siren.solutions/kibi/docs/current/
 :dockerhub-ref: https://hub.docker.com/u/sirensolutions/
@@ -39,8 +39,8 @@
 release-state can be: released | prerelease | unreleased
 //////////
 :release-state:  released
-:version: 5.4.3
-:compatible-es-versions: 5.4.x
+:version: 5.4.3-2
+:compatible-es-versions: 5.4.x, 5.5.2
 :es-compability-table-ref: https://github.com/sirensolutions/kibi/blob/master/README.md#compatibility-table-kibi--elasticsearch
 
 :repo: https://github.com/elastic/kibana/

@@ -21,7 +21,7 @@ program
 
 // attach commands
 serveCommand(program);
-//TODO MERGE 5.5.2 add kibi comment as needed
+// kibi: kibi commands
 replaceEncryptionKeyCommand(program);
 upgradeCommand(program);
 backupCommand(program);

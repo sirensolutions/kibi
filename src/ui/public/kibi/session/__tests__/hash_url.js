@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import rison from 'rison-node';
 import { hashUrl } from '../hash_url';

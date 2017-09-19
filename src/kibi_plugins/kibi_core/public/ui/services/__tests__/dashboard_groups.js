@@ -6,7 +6,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { MockState } from 'fixtures/mock_state';
 import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import chrome from 'ui/chrome';
 import _ from 'lodash';
 

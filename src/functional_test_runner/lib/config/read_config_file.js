@@ -3,8 +3,6 @@ import { defaultsDeep } from 'lodash';
 import { Config } from './config';
 import { transformDeprecations } from './transform_deprecations';
 
-//TODO MERGE 5.5.2 check this file bcos is complete different to upstream
-
 async function getSettingsFromFile(log, path, settingOverrides) {
   log.debug('Loading config file from %j', path);
 

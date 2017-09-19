@@ -1,5 +1,5 @@
 import { QueryBuilderFactory  } from '../query_builder';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import _ from 'lodash';
 import { MockState } from 'fixtures/mock_state';
 import expect from 'expect.js';

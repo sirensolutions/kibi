@@ -1,4 +1,4 @@
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 
 function MockMap(container, chartData, params) {
   this.container = container;

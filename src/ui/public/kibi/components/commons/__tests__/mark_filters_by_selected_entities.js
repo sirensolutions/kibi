@@ -1,6 +1,6 @@
 import { MarkFiltersBySelectedEntitiesFactory } from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 import noDigestPromises from 'test_utils/no_digest_promises';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import * as onPage from 'ui/kibi/utils/on_page';

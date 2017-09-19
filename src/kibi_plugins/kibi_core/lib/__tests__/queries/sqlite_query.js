@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import SqliteQuery from '../../queries/sqlite_query';
 
 const fakeServer = {

@@ -6,7 +6,7 @@ import installCommand from './install';
 import removeCommand from './remove';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
-//TODO MERGE 5.5.2 add kibi comment as needed
+// kibi: updates plugin executable name to kibi
 const program = new Command('bin/kibi-plugin');
 
 program

@@ -13,7 +13,7 @@ const createCluster = (options = {}) => {
   return libesvm.createCluster(merge({
     directory: DIRECTORY,
     binary: BINARY
-    //TODO MERGE 5.5.2 add kibi comment as needed
+    // kibi: removes branch parameter
     //branch: VERSION,
   }, options));
 };

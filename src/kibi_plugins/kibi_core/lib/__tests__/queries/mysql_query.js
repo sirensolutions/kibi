@@ -1,7 +1,7 @@
 import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../../_symbols';
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import MysqlQuery from '../../queries/mysql_query';
 
 const fakeServer = {

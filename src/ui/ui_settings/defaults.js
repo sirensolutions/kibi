@@ -9,7 +9,7 @@ export function getDefaultSettings(kibiEnterpriseEnabled) {
   // wrapped in provider so that a new instance is given to each app/test
 
   const options = {
-    //TODO MERGE 5.5.2 add kibi comment
+    // kibi: removes buildNum option
     'query:queryString:options': {
       value: '{ "analyze_wildcard": true }',
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank">Options</a> for the lucene query string parser',

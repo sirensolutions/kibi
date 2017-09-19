@@ -113,7 +113,7 @@ export class UiSettings {
   _getClientSettings() {
     const config = this._server.config();
     const index = config.get('kibana.index');
-    //TODO MERGE 5.5.2 add kibi comment
+    // kibi: set index id to kibi
     const id = 'kibi';
     const type = 'config';
     return { index, type, id };

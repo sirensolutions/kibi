@@ -1,4 +1,4 @@
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { VisProvider } from 'ui/vis';

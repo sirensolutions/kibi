@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import Promise from 'bluebird';
 import QueryHelper from '../query_helper';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 
 describe('Query Helper', function () {
   let createClientStub;

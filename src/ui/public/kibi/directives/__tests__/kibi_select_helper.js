@@ -1,5 +1,5 @@
 import { Notifier } from 'ui/notify/notifier';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import { KibiSelectHelperFactory } from 'ui/kibi/directives/kibi_select_helper';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';

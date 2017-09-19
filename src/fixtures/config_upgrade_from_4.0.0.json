@@ -16,8 +16,8 @@
             "_id": "4.0.0",
             "_score": 1,
             "_source": {
-               //TODO MERGE 5.5.2 add kibi comment as needed
-               "defaultIndex": "logstash-*"
+                // kibi: removes buildNum
+                "defaultIndex": "logstash-*"
             }
          }
       ]

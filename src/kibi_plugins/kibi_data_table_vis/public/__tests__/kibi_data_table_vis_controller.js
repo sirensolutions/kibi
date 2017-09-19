@@ -4,7 +4,7 @@ import mockUiState from 'fixtures/mock_ui_state';
 import { Notifier } from 'ui/notify/notifier';
 import expect from 'expect.js';
 import _ from 'lodash';
-import sinon from 'sinon'; //TODO MERGE 5.5.2 check if sandbox is needed
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import { VirtualIndexPatternFactory } from 'ui/kibi/components/commons/virtual_index_pattern';
 import { DashboardHelperFactory } from 'ui/kibi/helpers/dashboard_helper';

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './advanced_options.html';
 
 uiRoutes.when('/management/siren/relations/:id', {

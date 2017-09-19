@@ -107,8 +107,7 @@ export default class ModelTestHelper {
   async getMappings(type) {
     return await this._cluster.callWithInternalUser('indices.getMapping', {
       index: '.kibi',
-      type: type,
-      ignore: [404]
+      type: type
     });
   }
 

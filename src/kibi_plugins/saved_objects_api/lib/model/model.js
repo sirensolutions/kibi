@@ -135,8 +135,7 @@ export default class Model {
     }
     const parameters = {
       index: this._config.get('kibana.index'),
-      type: this._type,
-      ignore: [404]
+      type: this._type
     };
     this._setCredentials(parameters, request);
 

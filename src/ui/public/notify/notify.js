@@ -1,10 +1,8 @@
 import { uiModules } from 'ui/modules';
-import { Notifier as uiNotifier } from 'ui/notify/notifier'; // kibi: import stock notifier
-import { Notifier } from 'kibie/notify/notifier'; // kibi: import ee notifier
+import { Notifier } from 'ui/notify/notifier';
 import 'ui/notify/directives';
 import { metadata } from 'ui/metadata';
 
-//TODO MERGE 5.5.2 fix problem with notifier
 const module = uiModules.get('kibana/notify');
 export const notify = new Notifier();
 export { Notifier } from 'ui/notify/notifier';
@@ -21,16 +19,12 @@ module.factory('Notifier', function () {
 
 // teach Notifier how to use angular interval services
 module.run(function (config, $interval, $compile) {
-  // kibi: do this for all notifiers ...
-  for (const Class of [Notifier, uiNotifier]) {
-    Class.applyConfig({
-      setInterval: $interval,
-      clearInterval: $interval.cancel
-    });
-    applyConfig(config);
-    Class.$compile = $compile;
-  }
-  // kibi: end
+  Notifier.applyConfig({
+    setInterval: $interval,
+    clearInterval: $interval.cancel
+  });
+  applyConfig(config);
+  Notifier.$compile = $compile;
 });
 
 // if kibana is not included then the notify service can't
@@ -43,12 +37,7 @@ if (!!metadata.kbnIndex) {
 }
 
 function applyConfig(config) {
-  const authWarningKey = 'kibi:shieldAuthorizationWarning'; // kibi: configuration key
   Notifier.applyConfig({
-    // kibi: set the awesomeDemoMode and shieldAuthorizationWarning flag
-    awesomeDemoMode: config.get('kibi:awesomeDemoMode'),
-    shieldAuthorizationWarning: config.isDeclared(authWarningKey) ? config.get(authWarningKey) : true,
-    // kibi: end
     bannerLifetime: config.get('notifications:lifetime:banner'),
     errorLifetime: config.get('notifications:lifetime:error'),
     warningLifetime: config.get('notifications:lifetime:warning'),

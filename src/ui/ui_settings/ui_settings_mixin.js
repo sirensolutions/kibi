@@ -9,7 +9,7 @@ export function uiSettingsMixin(kbnServer, server, config) {
     return;
   }
 
-  const uiSettings = new UiSettings(server, status);
+  const uiSettings = new UiSettings(kbnServer, server, status); // kibi: adds kbnServer parameter
   server.decorate('server', 'uiSettings', () => uiSettings);
   kbnServer.ready().then(() => {
     mirrorStatus(status, kbnServer.status.getForPluginId('elasticsearch'));

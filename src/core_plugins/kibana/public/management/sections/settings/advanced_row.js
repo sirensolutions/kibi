@@ -1,6 +1,6 @@
 import 'ui/elastic_textarea';
 import 'ui/filters/markdown';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import advancedRowTemplate from 'plugins/kibana/management/sections/settings/advanced_row.html';
 
 uiModules.get('apps/management')
@@ -27,14 +27,15 @@ uiModules.get('apps/management')
         conf.loading = true;
         fn()
           .then(function () {
+            //TODO MERGE 5.5.2 add kibi comment
             conf.loading = false;
             conf.editing = false;
           })
-          // siren: not loading anymore but stay in edit mode so that the user may fix what's wrong with his change
+          // kibi: not loading anymore but stay in edit mode so that the user may fix what's wrong with his change
           .catch((error) => {
             conf.loading = false;
           });
-          // siren: end
+          // kibi: end
       };
 
       $scope.maybeCancel = function ($event, conf) {
@@ -69,6 +70,7 @@ uiModules.get('apps/management')
           return config.remove(conf.name);
         });
       };
+       //TODO MERGE 5.5.2 explain why the code was removed
     }
   };
 });

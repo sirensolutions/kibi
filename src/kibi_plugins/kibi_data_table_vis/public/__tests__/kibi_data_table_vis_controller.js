@@ -1,14 +1,14 @@
 import * as onPage from 'ui/kibi/utils/on_page';
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 import mockUiState from 'fixtures/mock_ui_state';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import expect from 'expect.js';
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
-import VirtualIndexPatternProvider from 'ui/kibi/components/commons/virtual_index_pattern';
-import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
-import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import { VirtualIndexPatternFactory } from 'ui/kibi/components/commons/virtual_index_pattern';
+import { DashboardHelperFactory } from 'ui/kibi/helpers/dashboard_helper';
+import { StubbedSearchSourceProvider } from 'fixtures/stubbed_search_source';
 
 describe('Kibi data table controller', function () {
   let $window;
@@ -18,6 +18,7 @@ describe('Kibi data table controller', function () {
   let confirmModalStub;
   let kibiState;
   let courier;
+  let onVisualizePageStub;
 
   const init = function ({ props, getAppState, searchSourceMeta, kibiStateMeta }) {
     ngMock.inject(function (Private, _$window_, $rootScope, $controller) {
@@ -28,8 +29,8 @@ describe('Kibi data table controller', function () {
         });
       }
 
-      VirtualIndexPattern = Private(VirtualIndexPatternProvider);
-      dashboardHelper = Private(DashboardHelperProvider);
+      VirtualIndexPattern = Private(VirtualIndexPatternFactory);
+      dashboardHelper = Private(DashboardHelperFactory);
       dashboardHelper.switchDashboard = sinon.stub();
 
       kibiState = new MockState({ filters: [] });
@@ -46,7 +47,7 @@ describe('Kibi data table controller', function () {
       _.assign($parentScope, props);
 
       $parentScope.uiState = mockUiState;
-      sinon.stub(onPage, 'onVisualizePage').returns(true);
+      onVisualizePageStub = sinon.stub(onPage, 'onVisualizePage').returns(true);
 
       courier = {
         fetch: sinon.stub()
@@ -71,6 +72,7 @@ describe('Kibi data table controller', function () {
   afterEach(function () {
     $parentScope.$destroy();
     Notifier.prototype._notifs.length = 0;
+    onVisualizePageStub.restore();
   });
 
   describe('column alias', function () {

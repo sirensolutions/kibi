@@ -1,6 +1,6 @@
-import VisVisTypeProvider from 'ui/vis/vis_type';
-import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 import image from './images/icon-vertical.svg';
 
@@ -60,7 +60,9 @@ export default function PointSeriesVisType(Private) {
               filter: false,
               truncate: 100
             },
-            title: {}
+            title: {
+              text: 'Count'
+            }
           }
         ],
         seriesParams: [
@@ -80,15 +82,8 @@ export default function PointSeriesVisType(Private) {
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        showCircles: true,
-        interpolate: 'linear',
-        scale: 'linear',
-        drawLinesBetweenPoints: true,
-        radiusRatio: 9,
         times: [],
         addTimeMarker: false,
-        defaultYExtents: false,
-        setYExtents: false
       },
       positions: ['top', 'left', 'right', 'bottom'],
       chartTypes: [{

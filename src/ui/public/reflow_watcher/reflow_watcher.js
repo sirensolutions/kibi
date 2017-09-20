@@ -1,7 +1,8 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import EventsProvider from 'ui/events';
-export default function ReflowWatcherService(Private, $rootScope, $http) {
+import { EventsProvider } from 'ui/events';
+
+export function ReflowWatcherProvider(Private, $rootScope, $http) {
 
   const EventEmitter = Private(EventsProvider);
   const $body = $(document.body);

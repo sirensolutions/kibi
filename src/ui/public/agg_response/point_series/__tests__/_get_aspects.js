@@ -2,10 +2,13 @@ import _ from 'lodash';
 import moment from 'moment';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
-import VisAggConfigProvider from 'ui/vis/agg_config';
-import AggResponsePointSeriesGetAspectsProvider from 'ui/agg_response/point_series/_get_aspects';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { VisProvider } from 'ui/vis';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { PointSeriesGetAspectsProvider } from 'ui/agg_response/point_series/_get_aspects';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
+//TODO MERGE 5.5.2 add kibi comments
+
+
 describe('getAspects', function () {
   let Vis;
   let AggConfig;
@@ -18,8 +21,8 @@ describe('getAspects', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     AggConfig = Private(VisAggConfigProvider);
-    getAspects = Private(AggResponsePointSeriesGetAspectsProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    getAspects = Private(PointSeriesGetAspectsProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
   }));
 
   let vis;

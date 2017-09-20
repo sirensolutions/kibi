@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import SqliteQuery from '../../queries/sqlite_query';
 
 const fakeServer = {

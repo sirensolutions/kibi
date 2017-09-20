@@ -1,12 +1,12 @@
 import angular from 'angular';
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import getFakeRow from 'fixtures/fake_row';
 import $ from 'jquery';
 import 'plugins/kibana/discover/index';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
 
 const SORTABLE_FIELDS = ['bytes', '@timestamp'];
@@ -27,7 +27,7 @@ describe('Doc Table', function () {
   beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {
     config = _config_;
     $parentScope = $rootScope;
-    $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    $parentScope.indexPattern = Private(stubbedLogstashIndexPatternService);
     mapping = $parentScope.indexPattern.fields.byName;
   }));
 
@@ -50,13 +50,12 @@ describe('Doc Table', function () {
   //
   const columnTests = function (elemType, parentElem) {
 
-    it('should create a time column if the timefield is defined', function (done) {
+    it('should create a time column if the timefield is defined', function () {
       const childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(2);
-      done();
     });
 
-    it('should be able to add and remove columns', function (done) {
+    it('should be able to add and remove columns', function () {
       let childElems;
       // Should include a column for toggling and the time column by default
       $parentScope.columns = ['bytes'];
@@ -76,16 +75,14 @@ describe('Doc Table', function () {
       childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(3);
       expect($(childElems[2]).text()).to.contain('request_body');
-      done();
     });
 
-    it('should create only the toggle column if there is no timeField', function (done) {
+    it('should create only the toggle column if there is no timeField', function () {
       delete parentElem.scope().indexPattern.timeFieldName;
       parentElem.scope().$digest();
 
       const childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(1);
-      done();
     });
 
   };
@@ -351,7 +348,7 @@ describe('Doc Table', function () {
       $root.filtering = sinon.spy();
       $root.maxLength = 50;
       $root.mapping = mapping;
-      $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      $root.indexPattern = Private(stubbedLogstashIndexPatternService);
 
       $row = $('<tr>')
       .attr({

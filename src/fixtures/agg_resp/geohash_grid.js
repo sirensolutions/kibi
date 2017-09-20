@@ -1,5 +1,5 @@
 import _ from 'lodash';
-export default function GeoHashGridAggResponseFixture() {
+export function GeoHashGridAggResponseFixture() {
   // for vis:
   //
   // vis = new Vis(indexPattern, {

@@ -1,6 +1,6 @@
 import 'ui/kibi/directives/kibi_angular_qtip2';
 import 'ui/kibi/directives/kibi_select_dashboard.less';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import kibiUtils from 'kibiutils';
 import _ from 'lodash';
 import kibiSelectDashboardTemplate from 'ui/kibi/directives/kibi_select_dashboard.html';

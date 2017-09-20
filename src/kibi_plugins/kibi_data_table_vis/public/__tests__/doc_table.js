@@ -4,9 +4,9 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import 'ui/private';
 import 'ui/doc_table';
-import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
-import MockState from 'fixtures/mock_state';
+import { StubbedSearchSourceProvider } from 'fixtures/stubbed_search_source';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
+import { MockState } from 'fixtures/mock_state';
 
 describe('Kibi doc table extra features', function () {
   let $elem;

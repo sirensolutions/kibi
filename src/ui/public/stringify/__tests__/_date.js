@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import moment from 'moment-timezone';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 describe('Date Format', function () {
   let fieldFormats;
   let settings;
@@ -44,5 +44,9 @@ describe('Date Format', function () {
 
     expect(chicagoTime).not.to.equal(phoenixTime);
     off();
+  });
+
+  it('should parse date math values', function () {
+    expect(convert('2015-01-01||+1M/d')).to.be('January 1st 2015, 00:00:00.000');
   });
 });

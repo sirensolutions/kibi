@@ -1,10 +1,10 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import searchResponse from 'fixtures/search_response';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
-export default function stubSearchSource(Private, $q, Promise) {
+export function StubbedSearchSourceProvider(Private, $q, Promise) {
   let deferedResult = $q.defer();
-  const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  const indexPattern = Private(stubbedLogstashIndexPatternService);
 
   let onResultsCount = 0;
   return {

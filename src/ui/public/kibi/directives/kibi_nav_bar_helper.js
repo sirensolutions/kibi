@@ -1,16 +1,16 @@
 import angular from 'angular';
 import _ from 'lodash';
-import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
+import { DelayExecutionHelperFactory } from 'ui/kibi/helpers/delay_execution_helper';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
-export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState, getAppState, createNotifier, Private, $rootScope,
+export function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState, getAppState, createNotifier, Private, $rootScope,
   savedDashboards, timefilter) {
 
   const notify = createNotifier({
     location: 'Kibi Navbar helper'
   });
 
-  const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
+  const DelayExecutionHelper = Private(DelayExecutionHelperFactory);
 
   const NO_METADATA_UPDATE = Symbol.for('no metadata to update on any dashboard');
 

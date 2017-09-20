@@ -14,7 +14,8 @@
       color: @link-hover-color;
     }
   }
-
+  
+  /* TODO MERGE 5.5.2 add kibi comment */
   .dashboards-nav-link {
     .anchor {
       color: #ebf7fa;
@@ -88,30 +89,6 @@
         color: @table-sort-desc-color;
       }
     }
-  }
-
-
-// /src/ui/public/styles/bootstrap/buttons.less
-  .btn {
-    background-color: @dark-button-bg;
-    color: @dark-button-font;
-
-    &:hover,
-    &:focus,
-    &.focus {
-      color: @btn-default-color;
-    }
-
-    .findme {
-      font-weight: bold;
-    }
-  }
-
-  .btn-default {
-    .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
-  }
-  .btn-primary {
-    .button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
   }
 
 
@@ -303,6 +280,10 @@
     fill: @svg-tick-text-color;
   }
 
+  .chart-label {
+    fill: @svg-tick-text-color;
+  }
+
   .brush .extent {
     stroke: @svg-brush-color;
   }
@@ -341,14 +322,6 @@
 
   .legend-value-details {
     border-bottom: 1px solid @sidebar-bg;
-
-    .filter-button {
-      background-color: @sidebar-bg;
-
-      &:hover {
-        background-color: @sidebar-hover-bg;
-      }
-    }
   }
 
 

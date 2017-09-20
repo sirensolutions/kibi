@@ -1,6 +1,5 @@
-import requirefrom from 'requirefrom';
 import Migration from 'kibiutils/lib/migrations/migration';
-const pkg = requirefrom('src/utils')('package_json');
+import { pkg } from '../../../../utils/package_json';
 
 /**
  * Kibi Core - Migration 4.

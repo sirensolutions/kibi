@@ -1,4 +1,4 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 function MockMap(container, chartData, params) {
   this.container = container;

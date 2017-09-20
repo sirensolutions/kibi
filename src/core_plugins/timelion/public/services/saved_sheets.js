@@ -1,15 +1,17 @@
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 // kibi: timelion-sheet saved object via savedObjectsAPI
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 
 define(function (require) {
   const module = require('ui/modules').get('app/sheet');
   // bring in the factory
   require('./_saved_sheet.js');
 
+
   // Register this service with the saved object registry so it can be
   // edited by the object editor.
-  require('plugins/kibana/management/saved_object_registry').register({
+  savedObjectManagementRegistry.register({
     service: 'savedSheets',
     title: 'sheets'
   });

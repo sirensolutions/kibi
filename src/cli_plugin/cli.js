@@ -1,11 +1,12 @@
 import _ from 'lodash';
-import pkg from '../utils/package_json';
+import { pkg } from '../utils';
 import Command from '../cli/command';
 import listCommand from './list';
 import installCommand from './install';
 import removeCommand from './remove';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
+// kibi: updates plugin executable name to kibi
 const program = new Command('bin/kibi-plugin');
 
 program

@@ -7,22 +7,25 @@ import 'ui/collapsible_sidebar';
 import 'ui/share';
 import chrome from 'ui/chrome';
 import angular from 'angular';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
-import DocTitleProvider from 'ui/doc_title';
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
-import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
+import { Notifier } from 'ui/notify/notifier';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { DocTitleProvider } from 'ui/doc_title';
+import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { getDefaultQuery } from 'ui/parse_query';
 
 // kibi: imports
 import 'ui/kibi/directives/kibi_param_entity_uri';
-import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { DoesVisDependsOnSelectedEntitiesProvider } from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
 uiRoutes
@@ -30,7 +33,7 @@ uiRoutes
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
-      const visTypes = Private(RegistryVisTypesProvider);
+      const visTypes = Private(VisTypesRegistryProvider);
       const visType = _.find(visTypes, { name: $route.current.params.type });
       if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
         throw new Error('You must provide either an indexPattern or a savedSearchId');
@@ -46,6 +49,7 @@ uiRoutes
 .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
   template: editorTemplate,
   resolve: {
+    //TODO MERGE 5.5.2 add kibi comment as needed
     isEntityDependent: function (Private, savedVisualizations, $route) {
       const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
       return savedVisualizations.get($route.current.params.id)
@@ -54,6 +58,7 @@ uiRoutes
     },
     savedVis: function (savedVisualizations, courier, $route) {
       return savedVisualizations.get($route.current.params.id)
+      //TODO MERGE 5.5.2 add kibi comment as needed
       .catch(courier.redirectWhenMissing({
         'visualization': '/visualize',
         'search': '/management/siren/objects/savedVisualizations/' + $route.current.params.id,
@@ -77,12 +82,12 @@ uiModules
   };
 });
 
-function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, createNotifier,
-  kibiState) {
+function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, kbnBaseUrl,
+  createNotifier, kibiState) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   // kibi: added by kibi
   const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
@@ -92,6 +97,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     location: 'Visualization Editor'
   });
 
+  //TODO MERGE 5.5.2 add kibi comment as needed
   $scope.holder = {
     entityURIEnabled: $route.current.locals.isEntityDependent,
     visible: true
@@ -104,10 +110,13 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
   });
 
   let stateMonitor;
-  const $appStatus = this.appStatus = {};
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
+
+  const $appStatus = this.appStatus = {
+    dirty: !savedVis.id
+  };
 
   // Instance of src/ui/public/vis/vis.js.
   const vis = savedVis.vis;
@@ -162,7 +171,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || { query_string: { query: '*' } },
+    query: searchSource.getOwn('query') || getDefaultQuery(),
     filters: searchSource.getOwn('filter') || [],
     vis: savedVisState
   };
@@ -196,6 +205,8 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     $scope.indexPattern = vis.indexPattern;
     $scope.editableVis = editableVis;
     $scope.state = $state;
+    $scope.queryDocLinks = documentationLinks.query;
+    $scope.dateDocLinks = documentationLinks.date;
 
     // kibi: Multichart needs the savedVis reference
     if (vis.type.name === 'kibi_multi_chart_vis') {
@@ -218,24 +229,24 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     vis.setUiState($scope.uiState);
 
     // kibi: allows restore the uiState after click edit visualization on dashboard
-    const kibiPanelId = hashedItemStoreSingleton.getItem('kibi_panel_id');
+    const kibiPanelId = HashedItemStoreSingleton.getItem('kibi_panel_id');
     if (kibiPanelId) {
       const { visId, panelId } = JSON.parse(kibiPanelId);
       if (visId === $scope.savedVis.id) {
-        $scope.uiState.fromString(hashedItemStoreSingleton.getItem('kibi_ui_state'));
+        $scope.uiState.fromString(HashedItemStoreSingleton.getItem('kibi_ui_state'));
         vis.setUiState($scope.uiState);
         $scope.uiState.on('set', () => {
-          hashedItemStoreSingleton.setItem('kibi_ui_state', $scope.vis.getUiState().toString());
+          HashedItemStoreSingleton.setItem('kibi_ui_state', $scope.vis.getUiState().toString());
           const kibiPanelId = {
             visId,
             panelId,
             updated: true
           };
-          hashedItemStoreSingleton.setItem('kibi_panel_id', JSON.stringify(kibiPanelId));
+          HashedItemStoreSingleton.setItem('kibi_panel_id', JSON.stringify(kibiPanelId));
         });
       } else {
-        hashedItemStoreSingleton.removeItem('kibi_panel_id');
-        hashedItemStoreSingleton.removeItem('kibi_ui_state');
+        HashedItemStoreSingleton.removeItem('kibi_panel_id');
+        HashedItemStoreSingleton.removeItem('kibi_ui_state');
       }
     }
     // kibi: end
@@ -253,7 +264,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
-      $appStatus.dirty = status.dirty;
+      $appStatus.dirty = status.dirty || !savedVis.id;
     });
     $scope.$on('$destroy', () => {
       stateMonitor.destroy();
@@ -391,11 +402,20 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
         if ($scope.isAddToDashMode()) {
+          const savedVisualizationUrl =
+            kbnUrl.eval(`${kbnBaseUrl}#${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
+
+          // Manually insert a new url so the back button will open the saved visualization.
+          $window.history.pushState({}, '', `${chrome.getBasePath()}${savedVisualizationUrl}`);
+          // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
+          // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
+          // url, not the unsaved one.
+          chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationUrl);
+
           const dashboardBaseUrl = chrome.getNavLinkById('kibana:dashboard');
-          // Not using kbnUrl.change here because the dashboardBaseUrl is a full path, not a url suffix.
-          // Rather than guess the right substring, we'll just navigate there directly, just as if the user
-          // clicked the dashboard link in the UI.
-          $window.location.href = `${dashboardBaseUrl.lastSubUrl}&${DashboardConstants.NEW_VISUALIZATION_ID_PARAM}=${savedVis.id}`;
+          const dashUrlPieces = dashboardBaseUrl.lastSubUrl.match(/(.*)kibana#(.*)/);
+          const dashSubUrl = `${dashUrlPieces[2]}&${DashboardConstants.NEW_VISUALIZATION_ID_PARAM}={{id}}`;
+          kbnUrl.change(dashSubUrl, { id: savedVis.id });
         } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {

@@ -1,10 +1,10 @@
 import noDigestPromises from 'test_utils/no_digest_promises';
-import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
+import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { intersection } from 'lodash';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
-import sinon from 'auto-release-sinon';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
+import sinon from 'sinon';
 
 const fakeSavedVisualisations = [
   {
@@ -56,6 +56,7 @@ const fakeSavedDashboardGroups = [
 let deleteHelper;
 let computeGroupsStub;
 let $window;
+let alertStub;
 
 describe('Kibi Components', function () {
   describe('deleteHelper', function () {
@@ -79,7 +80,7 @@ describe('Kibi Components', function () {
 
       ngMock.inject(function (_$window_, dashboardGroups, Private, Promise) {
         $window = _$window_;
-        deleteHelper = Private(DeleteHelperProvider);
+        deleteHelper = Private(DeleteHelperFactory);
 
         computeGroupsStub = sinon.stub(dashboardGroups, 'computeGroups').returns(Promise.resolve('computed groups'));
 
@@ -88,6 +89,12 @@ describe('Kibi Components', function () {
         getGroupIdsStub.withArgs(_matchInArray).returns([ 'group-1' ]);
         getGroupIdsStub.withArgs(sinon.match.any).returns([]);
       });
+
+      alertStub = sinon.stub($window, 'alert', () => false);
+    });
+
+    afterEach(function () {
+      alertStub.restore();
     });
 
     noDigestPromises.activateForSuite();
@@ -137,7 +144,6 @@ describe('Kibi Components', function () {
 
     it('should not delete query that is used by a visualisation', function () {
       const deleteSpy = sinon.spy();
-      const alertStub = sinon.stub($window, 'alert', () => false);
 
       return deleteHelper.deleteByType('query', [ '123' ], deleteSpy).then(function () {
         sinon.assert.called(alertStub);
@@ -167,7 +173,6 @@ describe('Kibi Components', function () {
 
     it('should not delete dashboard that is in a group', function () {
       const deleteSpy = sinon.spy();
-      const alertStub = sinon.stub($window, 'alert', () => false);
 
       return deleteHelper.deleteByType('dashboard', [ 'Companies' ], deleteSpy)
       .then(function () {

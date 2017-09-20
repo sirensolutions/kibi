@@ -1,4 +1,4 @@
-import getAlternativeSortingField from '../get_alternative_sorting_field';
+import { getAlternativeSortingField } from '../get_alternative_sorting_field';
 import expect from 'expect.js';
 
 describe('Kibi Components', function () {

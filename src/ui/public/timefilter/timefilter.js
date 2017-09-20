@@ -2,11 +2,11 @@ import _ from 'lodash';
 import moment from 'moment';
 import 'ui/state_management/global_state';
 import 'ui/config';
-import EventsProvider from 'ui/events';
-import TimefilterLibDiffTimeProvider from 'ui/timefilter/lib/diff_time';
-import TimefilterLibDiffIntervalProvider from 'ui/timefilter/lib/diff_interval';
+import { EventsProvider } from 'ui/events';
+import { TimefilterLibDiffTimeProvider } from 'ui/timefilter/lib/diff_time';
+import { TimefilterLibDiffIntervalProvider } from 'ui/timefilter/lib/diff_interval';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 // kibi: imports
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';

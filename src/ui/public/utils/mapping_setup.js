@@ -44,7 +44,6 @@ define(function () {
         }
         throw error;
       });
-
     });
 
     mappingSetup.expandShorthand = function (sh) {

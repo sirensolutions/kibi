@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function RelationsHelperFactory(config) {
+export function RelationsHelperFactory(config) {
   const SEPARATOR = '/';
 
   let relations;

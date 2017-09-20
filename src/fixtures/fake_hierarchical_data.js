@@ -527,6 +527,7 @@ data.oneFilterBucket = {
   }
 };
 
+// kibi: exteranl query filter bucket fake data
 data.oneExternalQueryFilterBucket = {
   took: 11,
   timed_out: false,
@@ -550,6 +551,7 @@ data.oneExternalQueryFilterBucket = {
     }
   }
 };
+// kibi: end
 
 data.oneHistogramBucket = {
   'took': 37,

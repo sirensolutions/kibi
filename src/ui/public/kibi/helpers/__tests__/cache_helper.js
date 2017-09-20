@@ -1,4 +1,4 @@
-import CacheHelperProvider from 'ui/kibi/helpers/cache_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -13,7 +13,7 @@ describe('Kibi Components', function () {
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
         $rootScope = _$rootScope_;
-        cacheHelper = Private(CacheHelperProvider);
+        cacheHelper = Private(CacheProvider);
       });
     });
 

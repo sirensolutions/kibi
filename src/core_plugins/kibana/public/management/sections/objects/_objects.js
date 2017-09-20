@@ -1,26 +1,28 @@
 import { saveAs } from '@spalger/filesaver';
 import { filter, each, extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lodash';
 import angular from 'angular';
-import registry from 'plugins/kibana/management/saved_object_registry';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 // kibi: imports
-import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
-import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
-import ObjectActionsRegistry from 'ui/registry/object_actions';
+import { RefreshKibanaIndex } from 'plugins/kibana/management/sections/indices/refresh_kibana_index';
+import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
+import { ObjectActionsRegistryProvider } from 'ui/registry/object_actions';
 import ImportExportProvider from 'plugins/kibi_core/management/sections/objects/import_export_helper';
 // kibi: end
 
 uiRoutes
+//TODO MERGE 5.5.2 add kibi comments as needed
 .when('/management/siren/objects', {
   template: objectIndexHTML
 });
 
 uiRoutes
+//TODO MERGE 5.5.2 add kibi comments as needed
 .when('/management/siren/objects/:service', {
   redirectTo: '/management/siren/objects'
 });
@@ -30,8 +32,8 @@ uiModules.get('apps/management')
 
   // kibi: all below dependencies added by kibi to improve import/export and delete operations
   const cache = Private(CacheProvider);
-  const deleteHelper = Private(DeleteHelperProvider);
-  const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
+  const deleteHelper = Private(DeleteHelperFactory);
+  const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const importExportHelper = Private(ImportExportProvider);
   // kibi: end
 
@@ -48,7 +50,7 @@ uiModules.get('apps/management')
       $scope.selectedItems = [];
 
       // kibi: object actions registry
-      $scope.objectActions = Private(ObjectActionsRegistry).toJSON();
+      $scope.objectActions = Private(ObjectActionsRegistryProvider).toJSON();
       // kibi: end
 
       this.areAllRowsChecked = function areAllRowsChecked() {
@@ -59,7 +61,7 @@ uiModules.get('apps/management')
       };
 
       const getData = function (filter) {
-        const services = registry.all().map(function (obj) {
+        const services = savedObjectManagementRegistry.all().map(function (obj) {
           const service = $injector.get(obj.service);
           return service.find(filter).then(function (data) {
             return {
@@ -118,12 +120,12 @@ uiModules.get('apps/management')
           id: item.id
         };
 
+        //TODO MERGE 5.5.2 add kibi comments as needed
         kbnUrl.change('/management/siren/objects/{{ service }}/{{ id }}', params);
       };
 
       // TODO: Migrate all scope methods to the controller.
       $scope.bulkDelete = function () {
-
         function doBulkDelete() {
           // kibi: modified to do some checks before the delete
           const _delete = function () {

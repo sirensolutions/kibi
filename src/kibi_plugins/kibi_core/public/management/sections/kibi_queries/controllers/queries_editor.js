@@ -10,7 +10,7 @@ import 'ui/kibi/directives/kibi_array_param';
 import 'ui/kibi/directives/kibi_param_entity_uri';
 import template from 'plugins/kibi_core/management/sections/kibi_queries/index.html';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import angular from 'angular';
 import kibiUtils from 'kibiutils';

@@ -20,7 +20,7 @@ const dataTypes = [
   ['series neg', seriesNeg],
   ['histogram columns', histogramColumns],
   ['range rows', rangeRows],
-  ['term series', termSeries]
+  ['term series', termSeries],
 ];
 
 describe('Vislib Line Chart', function () {
@@ -148,21 +148,6 @@ describe('Vislib Line Chart', function () {
             if (yAxis.yMin < 0 && yAxis.yMax > 0) {
               expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
             }
-          });
-        });
-      });
-
-      describe('containerTooSmall error', function () {
-        beforeEach(function () {
-          $(vis.el).height(0);
-          $(vis.el).width(0);
-        });
-
-        it('should throw an error', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(function () {
-              chart.render();
-            }).to.throwError();
           });
         });
       });

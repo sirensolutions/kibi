@@ -1,4 +1,5 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
+
 import _ from 'lodash';
 
 export class PanelUtils {
@@ -7,8 +8,9 @@ export class PanelUtils {
    * @param {PanelState} panel
    * @param {Config} config - Reference to config service // siren: added by Siren
    */
-  static initializeDefaults(panel, config) { // siren: added config
+  static initializeDefaults(panel, config) { // kibi: added config
     panel.size_x = panel.size_x || DEFAULT_PANEL_WIDTH;
+    //TODO MERGE 5.5.2 add kibi comment as needed
     panel.size_y = panel.size_y || config.get('kibi:panel_vertical_size', DEFAULT_PANEL_HEIGHT); // siren: get from config
 
     if (!panel.id) {

@@ -8,7 +8,7 @@ import compareFilters from 'ui/filter_bar/lib/compare_filters';
  * @param {object} comparatorOptions Parameters to use for comparison
  * @returns {bool} Filter arrays are the same
  */
-export default function (firstArray, secondArray, comparatorOptions) {
+export function CompareFilterArraysFn(firstArray, secondArray, comparatorOptions) {
   if (firstArray.length !== secondArray.length) {
     return false;
   } else {

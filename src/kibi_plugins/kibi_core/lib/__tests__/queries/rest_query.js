@@ -1,7 +1,7 @@
 import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../../_symbols';
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import RestQuery from '../../queries/rest_query';
 import rp from 'request-promise';
 
@@ -48,6 +48,12 @@ const fakeDoc2 = {
 };
 
 describe('RestQuery', () => {
+
+  beforeEach(() => {
+    if (rp.Request.restore) {
+      rp.Request.restore();
+    }
+  });
 
   describe('checkIfItIsRelevant - should be active', () => {
 

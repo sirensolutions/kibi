@@ -13,10 +13,11 @@ import angular from 'angular';
 import _ from 'lodash';
 
 import { SavedObjectNotFound } from 'ui/errors';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
-import DocSourceProvider from '../data_source/admin_doc_source';
-import SearchSourceProvider from '../data_source/search_source';
+
+import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
+import { SearchSourceProvider } from '../data_source/search_source';
 import { getTitleAlreadyExists } from './get_title_already_exists';
 
 /**
@@ -40,22 +41,22 @@ function isErrorNonFatal(error) {
 }
 
 // kibi: imports
-import SavedObjectSourceProvider from 'ui/courier/data_source/savedobject_source';
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 // kibi: end
 
 // kibi: include savedObjectsAPI dependencies
-export default function SavedObjectFactory(
+export function SavedObjectProvider(
   esAdmin, kbnIndex, Promise, Private, createNotifier, confirmModalPromise, indexPatterns,
   savedObjectsAPI, savedObjectsAPITypes
   ) {
 
-  const DocSource = Private(DocSourceProvider);
+  const DocSource = Private(AdminDocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
 
   // kibi: imports
-  const SavedObjectSource = Private(SavedObjectSourceProvider); // use a custom source for objects managed by the Saved Objects API
+  const SavedObjectSource = Private(SavedObjectSourceFactory); // use a custom source for objects managed by the Saved Objects API
   const cache = Private(CacheProvider); // added to clear the cache on object save
   // kibi: end
 

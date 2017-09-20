@@ -2,7 +2,7 @@ import _ from 'lodash';
 import antlr4 from 'antlr4-base';
 import antlr4Sparql from 'antlr4-sparql';
 
-export default function SparqlHelperFactory() {
+export function SparqlHelperFactory() {
   function SparqlParserHelper() {}
   SparqlParserHelper.prototype = (function () {
 

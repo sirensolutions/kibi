@@ -1,15 +1,15 @@
 import _ from 'lodash';
 
 // kibi: require savedobjectsapi
-export default function GetIndexPatternIdsFn(savedObjectsAPI, kbnIndex) {
+export function IndexPatternsGetIdsProvider(savedObjectsAPI, kbnIndex) {
 
-  // many places may require the id list, so we will cache it seperately
-  // didn't incorportate with the indexPattern cache to prevent id collisions.
+  // many places may require the id list, so we will cache it separately
+  // didn't incorporate with the indexPattern cache to prevent id collisions.
   let cachedPromise;
 
   const getIds = function () {
     if (cachedPromise) {
-      // retrun a clone of the cached response
+      // return a clone of the cached response
       return cachedPromise.then(function (cachedResp) {
         return _.clone(cachedResp);
       });
@@ -19,6 +19,7 @@ export default function GetIndexPatternIdsFn(savedObjectsAPI, kbnIndex) {
     cachedPromise = savedObjectsAPI.search({
       index: kbnIndex,
       type: 'index-pattern',
+      //TODO MERGE 5.5.2 create an issue for this or remove if it isn't necessary anymore
       // KIBI5: @fabiocorneti how to pass this ? storedFields: [],
       // storedFields: [],
       size: 10000

@@ -1,8 +1,8 @@
-import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import { Notifier } from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 
-import ErrorHandlersProvider from '../../_error_handlers';
+import { ErrorHandlersProvider } from '../../_error_handlers';
 
-export default function RequestErrorHandlerFactory(Private) {
+export function ErrorHandlerRequestProvider(Private) {
   const errHandlers = Private(ErrorHandlersProvider);
 
   const notify = new Notifier({

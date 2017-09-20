@@ -1,10 +1,10 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
-import RequestQueueProv from '../../_request_queue';
-import SearchSourceProv from '../search_source';
-import StubIndexPatternProv from 'test_utils/stub_index_pattern';
+import { RequestQueueProvider } from '../../_request_queue';
+import { SearchSourceProvider } from '../search_source';
+import { StubIndexPatternProvider } from 'test_utils/stub_index_pattern';
 
 describe('SearchSource', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -16,15 +16,16 @@ describe('SearchSource', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    requestQueue = Private(RequestQueueProv);
-    SearchSource = Private(SearchSourceProv);
+    requestQueue = Private(RequestQueueProvider);
+    SearchSource = Private(SearchSourceProvider);
 
-    const IndexPattern = Private(StubIndexPatternProv);
+    const IndexPattern = Private(StubIndexPatternProvider);
     indexPattern = new IndexPattern('test-*', null, []);
     indexPattern2 = new IndexPattern('test2-*', null, []);
     expect(indexPattern).to.not.be(indexPattern2);
   }));
 
+  //TODO MERGE 5.5.2 add kibi comment
   describe('Kibi', function () {
     it('should put user queries into the query clause of the filtered query', function () {
       const initialState = {

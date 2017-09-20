@@ -28,6 +28,7 @@ $globalInputBorderColor--darkTheme: $globalInputBackgroundColor--darkTheme;
 $globalFontFamily: "Open Sans", Helvetica, Arial, sans-serif;
 $globalFontSize: 14px;
 $globalLineHeight: 1.5;
+$globalSubTextFontSize: 12px;
 $globalTitleFontSize: 18px;
 $globalFontWeightRegular: 400;
 $globalFontWeightBold: 700;
@@ -40,12 +41,14 @@ $globalWarningColor: #ec9800;
 $globalDangerColor: #D86051;
 $globalFocusColor: #6EADC1;
 $globalFocusDangerColor: #ff523c;
+$globalFocusWarningColor: #ffa500;
 $globalFocusBackgroundColor: #ffffff;
 $globalFontColor: #191E23;
 $globalSubduedTextColor: #9fa3a7;
 $globalLinkHoverColor: #006E8A;
 $globalSelectedBorderColor: #6EADC1;
 $globalDangerBorderColor: $globalDangerColor;
+$globalFormControlBorderColor: #DEDEDE;
 
 // Borders
 $globalBorderColor: #E4E4E4;
@@ -61,3 +64,7 @@ $toolBarHeight: 50px;
 $toolBarPadding: 10px;
 $toolBarSectionSpacing: 50px;
 $toolBarItsemSpacing: 10px;
+
+// Form
+$globalFormControlHorizontalPadding: 12px;
+$globalFormControlPadding: 3px $globalFormControlHorizontalPadding 4px;

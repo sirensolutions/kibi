@@ -43,17 +43,17 @@
 
     <!-- Tabs -->
     <div class="kuiViewContentItem kuiVerticalRhythm">
+      <!-- TODO MERGE 5.5.2 add kibi comments as needed -->
       <div class="kuiTabs kibi-break-tabs">
         <button
           class="kuiTab kbn-management-tab"
           ng-class="{ 'kuiTab-isSelected': state.tab === service.title }"
           ng-repeat="service in services"
-          title="{{ service.title }}"
           ng-click="changeTab(service)"
         >
           {{ service.title }}
-          <small>
-          ({{service.data.length}}<span ng-show="service.total > service.data.length"> of {{service.total}}</span>)
+          <small aria-label="{{:: service.data.length + ' of ' + service.total + ' ' + service.title }}">
+            ({{service.data.length}}<span ng-show="service.total > service.data.length"> of {{service.total}}</span>)
           </small>
         </button>
       </div>
@@ -78,6 +78,7 @@
               ng-model="managementObjectsController.advancedFilter"
             >
             <!--kibi: added tooltip for searching with special characters-->
+            <!-- TODO MERGE 5.5.2 create an issue for this -->
             <!--KIBI5: add this back somewhere-->
             <!--<kbn-info class="input-group-addon" placement="left" info="This filter query does not support these characters: +, |, -, *, ( and ). If you need to use them, surround all your query with quotes."></kbn-info>-->
           </div>
@@ -121,7 +122,7 @@
         class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
         ng-if="!service.data.length"
       >
-        <div class="kuiNoItems">
+        <div class="kuiTableInfo">
           No {{service.title}} matched your search.
         </div>
       </div>
@@ -165,7 +166,7 @@
                   {{ item.title }}
                 </a>
 
-                <!-- siren: kuiTableRowHoverReveal class removed to make actions always visible -->
+                <!-- kibi: kuiTableRowHoverReveal class removed to make actions always visible -->
                 <button
                   class="kuiMicroButton"
                   ng-click="open(item)"
@@ -178,7 +179,7 @@
                   ></span>
                 </button>
 
-                <!-- siren: icon for object level actions, kuiTableRowHoverReveal class removed to make actions always visible   -->
+                <!-- kibi: icon for object level actions, kuiTableRowHoverReveal class removed to make actions always visible   -->
                 <button
                   ng-repeat="action in objectActions"
                   ng-click="action.execute(service, item)"

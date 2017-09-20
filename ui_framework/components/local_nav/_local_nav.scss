@@ -10,6 +10,7 @@
   min-height: 70px; /* 1 */
   color: $localNavTextColor;
   background-color: $localNavBackgroundColor;
+  line-height: $globalLineHeight;
 
   @include darkTheme {
     color: $localNavTextColor--darkTheme;
@@ -17,18 +18,30 @@
   }
 }
 
+/**
+ * 1. Allow row to expand if the content is so long that it wraps.
+ */
 .kuiLocalNavRow {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
-  height: 32px;
+  min-height: 32px; /* 1 */
 }
 
 .kuiLocalNavRow__section {
-  height: 100%;
+  display: flex;
+  align-items: stretch;
 }
 
+/**
+ * 1. We make this row flex-start because it usually contains a search input, which may expand
+ *    beyond the height of this container. We can't use `align-items: center`, because this would
+ *    cause the search input to overflow both on the top and bottom; `align-items: flex-start`
+ *    makes it only overflow on the bottom. But this means we need to manually center the content
+ *    of this container using padding.
+ */
 .kuiLocalNavRow--secondary {
-  height: 38px;
-  padding: 0 $localNavSideSpacing;
+  height: 38px; /* 1 */
+  padding: 4px $localNavSideSpacing 0; /* 1 */
+  align-items: flex-start; /* 1 */
 }

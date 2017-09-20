@@ -1,7 +1,7 @@
-import PatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
+import { PatternToWildcardFn } from './_pattern_to_wildcard';
 
-export default function (Private) {
-  const patternToWildcard = Private(PatternToWildcardProvider);
+export function IndexPathProvider(Private) {
+  const patternToWildcard = Private(PatternToWildcardFn);
 
   return function (indexOrIndexPattern) {
     if (indexOrIndexPattern.indexOf('*') !== -1) {

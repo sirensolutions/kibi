@@ -3,7 +3,7 @@ import noDigestPromises from 'test_utils/no_digest_promises';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import Promise from 'bluebird';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 let savedTemplates;
 

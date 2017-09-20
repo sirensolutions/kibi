@@ -1,12 +1,12 @@
 import 'ui/kibi/styles/external_query_terms_filter.less';
 import _ from 'lodash';
-import BucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
-import CreateFilterProvider from 'ui/agg_types/buckets/create_filter/filters';
+import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { AggTypesBucketsCreateFilterFiltersProvider } from 'ui/agg_types/buckets/create_filter/filters';
 import editor from 'ui/kibi/agg_types/controls/external_query_terms_filter.html';
 
-export default function RelatedEntitiesAggDefinition(Private, createNotifier, kibiState, $rootScope, $timeout) {
-  const BucketAggType = Private(BucketAggTypeProvider);
-  const createFilter = Private(CreateFilterProvider);
+export function RelatedEntitiesAggDefinition(Private, createNotifier, kibiState, $rootScope, $timeout) {
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
   const notify = createNotifier({ location: 'External Query Terms Filter Aggregation' });
 
   return new BucketAggType({

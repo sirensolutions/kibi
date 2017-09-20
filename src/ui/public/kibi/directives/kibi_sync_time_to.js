@@ -3,8 +3,8 @@ import 'ui/kibi/directives/kibi_select_dashboard.js';
 import _ from 'lodash';
 import kibiTemplate from 'ui/kibi/directives/kibi_sync_time_to.html';
 import kibanaTemplate from 'ui/kibi/directives/kibana_sync_time_to.html';
-import uiModules from 'ui/modules';
-import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
+import { uiModules } from 'ui/modules';
+import { DashboardHelperFactory } from 'ui/kibi/helpers/dashboard_helper';
 
 uiModules
 .get('ui/kibi/kibi_sync_time_to')
@@ -13,7 +13,7 @@ uiModules
 
   function linkWithKibiState($scope, $el, $attrs) {
     const kibiState = $injector.get('kibiState');
-    const dashboardHelper = Private(DashboardHelperProvider);
+    const dashboardHelper = Private(DashboardHelperFactory);
 
     let currentDashId = kibiState._getCurrentDashboardId();
     const dashboardsFromState = kibiState.getSyncedDashboards(kibiState._getCurrentDashboardId());

@@ -1,4 +1,4 @@
-import ShouldEntityURIBeEnabledProvider from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
+import { ShouldEntityURIBeEnabledFactory } from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
 import 'plugins/kibi_core/management/sections/kibi_templates/styles/kibi_templates.less';
 import 'plugins/kibi_core/management/sections/kibi_templates/services/_saved_template';
 import 'plugins/kibi_core/management/sections/kibi_templates/services/saved_templates';
@@ -9,7 +9,7 @@ import 'ui/kibi/directives/kibi_param_entity_uri';
 import 'ace';
 import 'angular-sanitize';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import angular from 'angular';
 import template from 'plugins/kibi_core/management/sections/kibi_templates/index.html';
@@ -38,7 +38,7 @@ uiRoutes
 });
 
 function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngineClient, kibiState, $element, $routeParams) {
-  const _shouldEntityURIBeEnabled = Private(ShouldEntityURIBeEnabledProvider);
+  const _shouldEntityURIBeEnabled = Private(ShouldEntityURIBeEnabledFactory);
   const notify = createNotifier({
     location: 'Templates editor'
   });

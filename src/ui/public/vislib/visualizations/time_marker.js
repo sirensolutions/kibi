@@ -2,8 +2,9 @@ import d3 from 'd3';
 
 // kibi: imports
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
+// kibi: end
 
-export default function TimeMarkerFactory($rootScope) {
+export function VislibVisualizationsTimeMarkerProvider($rootScope) {
 
   class TimeMarker {
     constructor(times, xScale, height) {

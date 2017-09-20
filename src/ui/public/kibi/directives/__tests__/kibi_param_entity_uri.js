@@ -1,5 +1,5 @@
-import MockState from 'fixtures/mock_state';
-import sinon from 'auto-release-sinon';
+import { MockState } from 'fixtures/mock_state';
+import sinon from 'sinon';
 import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
@@ -12,6 +12,9 @@ let $scope;
 let esStub;
 let kibiState;
 let $rootScope;
+let onVisualizePageStub;
+let warningStub;
+let errorStub;
 
 const init = function () {
   ngMock.module('kibana', function ($compileProvider, $provide) {
@@ -31,13 +34,13 @@ const init = function () {
   // Create the scope
   ngMock.inject(function (_kibiState_, _Notifier_, es, _$rootScope_, $compile) {
     $rootScope = _$rootScope_;
-    sinon.stub(onPage, 'onVisualizePage').returns(true);
+    onVisualizePageStub = sinon.stub(onPage, 'onVisualizePage').returns(true);
     kibiState = _kibiState_;
     esStub = sinon.stub(es, 'search');
 
     Notifier = _Notifier_;
-    sinon.stub(Notifier.prototype, 'warning');
-    sinon.stub(Notifier.prototype, 'error');
+    warningStub = sinon.stub(Notifier.prototype, 'warning');
+    errorStub =  sinon.stub(Notifier.prototype, 'error');
 
     const entityParamUri = '<kibi-param-entity-uri entity-uri-holder="holder"></kibi-param-entity-uri>';
     const $elem = $compile(entityParamUri)($rootScope);
@@ -49,6 +52,12 @@ describe('Kibi Directives', function () {
   describe('kibi-param-entity-uri directive', function () {
 
     beforeEach(init);
+
+    afterEach(function () {
+      onVisualizePageStub.restore();
+      warningStub.restore();
+      errorStub.restore();
+    });
 
     describe('Set entity from KibiState', function () {
       it('should set the selected entity displayed by the directive', function () {

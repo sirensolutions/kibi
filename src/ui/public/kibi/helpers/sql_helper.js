@@ -1,7 +1,7 @@
 import antlr4 from 'antlr4-base';
 import antlr4SQL from 'antlr4-sql';
 
-export default function SQLHelperFactory() {
+export function SQLHelperFactory() {
 
   function SQLParserHelper() {}
 

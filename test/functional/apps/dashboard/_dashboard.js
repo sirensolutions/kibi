@@ -5,11 +5,17 @@ import {
   DEFAULT_PANEL_HEIGHT,
 } from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
 
+import {
+  VisualizeConstants
+} from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const remote = getService('remote');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
+
 
   describe('dashboard tab', function describeIndexTests() {
     before(async function () {
@@ -17,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to add visualizations to dashboard', async function addVisualizations() {
-      await PageObjects.common.saveScreenshot('Dashboard-no-visualizations');
+      await screenshots.take('Dashboard-no-visualizations');
 
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
@@ -30,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
 
       log.debug('done adding visualizations');
-      await PageObjects.common.saveScreenshot('Dashboard-add-visualizations');
+      await screenshots.take('Dashboard-add-visualizations');
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {
@@ -47,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('now re-load previously saved dashboard');
         return PageObjects.dashboard.loadSavedDashboard(dashboardName);
       });
-      await PageObjects.common.saveScreenshot('Dashboard-load-saved');
+      await screenshots.take('Dashboard-load-saved');
     });
 
     it('should have all the expected visualizations', function checkVisualizations() {
@@ -59,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
         });
       })
       .then(function () {
-        PageObjects.common.saveScreenshot('Dashboard-has-visualizations');
+        screenshots.take('Dashboard-has-visualizations');
       });
     });
 
@@ -80,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.dashboard.getPanelSizeData()
           .then(function (panelTitles) {
             log.info('visualization titles = ' + panelTitles);
-            PageObjects.common.saveScreenshot('Dashboard-visualization-sizes');
+            screenshots.take('Dashboard-visualization-sizes');
             expect(panelTitles).to.eql(visObjects);
           });
       });
@@ -129,21 +135,50 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('add new visualization link', async function () {
-      await PageObjects.dashboard.clickAddVisualization();
-      await PageObjects.dashboard.clickAddNewVisualizationLink();
-      await PageObjects.visualize.clickAreaChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.visualize.saveVisualization('visualization from add new link');
-      await PageObjects.header.clickToastOK();
-      await PageObjects.header.clickToastOK();
+    describe('Directly modifying url updates dashboard state', () => {
+      it('for query parameter', async function () {
+        const currentQuery = await PageObjects.dashboard.getQuery();
+        expect(currentQuery).to.equal('');
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace('match_all:()', 'query_string:(query:hi)');
+        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
+        // soft refresh.
+        await remote.get(newUrl.toString(), false);
+        const newQuery = await PageObjects.dashboard.getQuery();
+        expect(newQuery).to.equal('hi');
+      });
 
-      const visualizations = PageObjects.dashboard.getTestVisualizations();
-      return retry.tryForTime(10000, async function () {
-        const panelTitles = await PageObjects.dashboard.getPanelSizeData();
-        log.info('visualization titles = ' + panelTitles.map(item => item.title));
-        PageObjects.common.saveScreenshot('Dashboard-visualization-sizes');
-        expect(panelTitles.length).to.eql(visualizations.length + 1);
+      it('for panel size parameters', async function () {
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace(`size_x:${DEFAULT_PANEL_WIDTH}`, `size_x:${DEFAULT_PANEL_WIDTH * 2}`);
+        await remote.get(newUrl.toString(), false);
+        const allPanelInfo = await PageObjects.dashboard.getPanelSizeData();
+        expect(allPanelInfo[0].dataSizeX).to.equal(`${DEFAULT_PANEL_WIDTH * 2}`);
+      });
+    });
+
+    describe('add new visualization link', () => {
+      it('adds a new visualization', async () => {
+        await PageObjects.dashboard.clickAddVisualization();
+        await PageObjects.dashboard.clickAddNewVisualizationLink();
+        await PageObjects.visualize.clickAreaChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.visualize.saveVisualization('visualization from add new link');
+        await PageObjects.header.clickToastOK();
+
+        const visualizations = PageObjects.dashboard.getTestVisualizations();
+        return retry.tryForTime(10000, async function () {
+          const panelTitles = await PageObjects.dashboard.getPanelSizeData();
+          log.info('visualization titles = ' + panelTitles.map(item => item.title));
+          screenshots.take('Dashboard-visualization-sizes');
+          expect(panelTitles.length).to.eql(visualizations.length + 1);
+        });
+      });
+
+      it('saves the saved visualization url to the app link', async () => {
+        await PageObjects.header.clickVisualize();
+        const currentUrl = await remote.getCurrentUrl();
+        expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
       });
     });
 

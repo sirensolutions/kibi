@@ -4,12 +4,11 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { PanelUtils } from './panel/panel_utils';
 import moment from 'moment';
 
-import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
-import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+import { createPanelState, getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 
 // kibi: need to call private on filter_utils
-import FilterUtilsProvider from './filter_utils';
+import { FilterUtilsProvider } from './filter_utils';
 
 let FilterUtils;
 // kibi: end
@@ -18,6 +17,7 @@ function getStateDefaults(dashboard) {
   return {
     id: dashboard.id, // kibi: added to identity a dashboard in helper methods
     title: dashboard.title,
+    description: dashboard.description,
     timeRestore: dashboard.timeRestore,
     panels: dashboard.panelsJSON ? JSON.parse(dashboard.panelsJSON) : [],
     options: dashboard.optionsJSON ? JSON.parse(dashboard.optionsJSON) : {},
@@ -80,8 +80,21 @@ class DashboardState {
     //in the 'lose changes' warning message.
     this.lastSavedDashboardFilters = this.getFilterState();
 
+    // A mapping of panel index to the index pattern it uses.
+    this.panelIndexPatternMapping = {};
+
     PanelUtils.initPanelIndexes(this.getPanels());
     this.createStateMonitor();
+  }
+
+  registerPanelIndexPatternMap(panelIndex, indexPattern) {
+    if (indexPattern) {
+      this.panelIndexPatternMapping[panelIndex] = indexPattern;
+    }
+  }
+
+  getPanelIndexPatterns() {
+    return _.uniq(Object.values(this.panelIndexPatternMapping));
   }
 
   /**
@@ -126,6 +139,15 @@ class DashboardState {
 
   getTitle() {
     return this.appState.title;
+  }
+
+  getDescription() {
+    return this.appState.description;
+  }
+
+  setDescription(description) {
+    this.appState.description = description;
+    this.saveState();
   }
 
   setTitle(title) {
@@ -276,6 +298,7 @@ class DashboardState {
     _.remove(this.getPanels(), (panel) => {
       if (panel.panelIndex === panelIndex) {
         this.uiState.removeChild(getPersistedStateId(panel));
+        delete this.panelIndexPatternMapping[panelIndex];
         return true;
       } else {
         return false;
@@ -362,7 +385,8 @@ class DashboardState {
     this.saveState();
 
     const timeRestoreObj = _.pick(timeFilter.refreshInterval, ['display', 'pause', 'section', 'value']);
-    this.savedDashboard.title = this.appState.title;
+    this.savedDashboard.title = this.getTitle();
+    this.savedDashboard.description = this.getDescription();
     this.savedDashboard.timeRestore = this.appState.timeRestore;
     this.savedDashboard.panelsJSON = toJson(this.appState.panels);
     this.savedDashboard.uiStateJSON = toJson(this.uiState.getChanges());
@@ -441,7 +465,8 @@ class DashboardState {
   }
 }
 
-export default function DashboardStateFactory(Private) {
+//TODO MERGE 5.5.2 add kibi comment as needed
+export function DashboardStateProvider(Private) {
   FilterUtils = Private(FilterUtilsProvider);
   return DashboardState;
 };

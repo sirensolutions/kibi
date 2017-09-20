@@ -1,10 +1,10 @@
 import noDigestPromises from 'test_utils/no_digest_promises';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import jQuery from 'jquery';
 
 describe('Kibi Management', function () {

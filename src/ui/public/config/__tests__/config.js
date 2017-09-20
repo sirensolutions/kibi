@@ -1,4 +1,6 @@
-import Notifier from 'ui/notify/notifier';
+//TODO MERGE 5.5.2 add kibi comment as needed
+
+import { Notifier } from 'ui/notify/notifier';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 

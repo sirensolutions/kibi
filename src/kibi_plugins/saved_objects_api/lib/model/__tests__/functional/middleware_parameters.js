@@ -1,4 +1,4 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import Scenario from './scenarios/empty/scenario';
 import ModelTestHelper from './helper';
 

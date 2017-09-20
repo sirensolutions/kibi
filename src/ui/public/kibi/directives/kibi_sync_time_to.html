@@ -13,21 +13,21 @@
     <tr>
       <td>
         <label><input type="checkbox"  ng-model="allSelected" ng-click="selectAll()"/> Select all</label>
-        <!-- NOTE: do not remove kbn-timepicker-go class as it is used in tests -->
         <button
           type="submit"
           ng-if="mode === 'absolute'"
-          class="btn btn-primary kbn-timepicker-go"
+          class="btn btn-primary"
+          data-test-subj="timepickerGoButton"
           ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to"
           ng-click="syncTimeTo()">Apply</button>
         <span class="small" ng-show="mode == 'absolute' && absolute.from > absolute.to">
           <strong>From</strong> must occur before <strong>To</strong>
         </span>
-        <!-- NOTE: do not remove kbn-timepicker-go class as it is used in tests -->
         <button
           type="submit"
           ng-if="mode === 'relative'"
-          class="btn btn-primary kbn-timepicker-go"
+          class="btn btn-primary"
+          data-test-subj="timepickerGoButton"
           ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()"
           ng-click="syncTimeTo()">Apply</button>
       </td>

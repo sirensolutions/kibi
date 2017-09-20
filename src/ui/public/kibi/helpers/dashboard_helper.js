@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 
-export default function DashboardHelperFactory($timeout, kbnUrl, kibiState, savedDashboards, savedSearches) {
+export function DashboardHelperFactory($timeout, kbnUrl, kibiState, savedDashboards, savedSearches) {
 
   function DashboardHelper() {}
 
@@ -17,7 +17,7 @@ export default function DashboardHelperFactory($timeout, kbnUrl, kibiState, save
       });
       return Promise.all(promisses).then((savedSearchesRes) => {
         _.each(savedSearchesRes, (savedSearch) => {
-          if (!savedSearch.searchSource.index().hasTimeField()) {
+          if (!savedSearch.searchSource.index().isTimeBased()) {
             _.remove(dashboards, 'savedSearchId', savedSearch.id);
           }
         });

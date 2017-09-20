@@ -2,19 +2,17 @@ import 'plugins/kibana/management/sections';
 import 'plugins/kibana/management/styles/main.less';
 import 'ui/filters/start_from';
 import 'ui/field_editor';
-import 'plugins/kibana/management/sections/indices/_indexed_fields';
-import 'plugins/kibana/management/sections/indices/_scripted_fields';
-import 'plugins/kibana/management/sections/indices/source_filters/source_filters';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import appTemplate from 'plugins/kibana/management/app.html';
 import landingTemplate from 'plugins/kibana/management/landing.html';
-import management from 'ui/management';
+import { management } from 'ui/management';
 import 'ui/kbn_top_nav';
 
 // kibi: imports
 import _ from 'lodash';
 import moment from 'moment-timezone';
+import loadDefault from 'ui/index_patterns/route_setup/load_default';
 // kibi: end
 
 uiRoutes
@@ -27,7 +25,8 @@ uiRoutes
   redirectTo: '/management'
 });
 
-require('ui/index_patterns/route_setup/load_default')({
+//TODO MERGE 5.5.2 add kibi comment
+loadDefault({
   whenMissingRedirectTo: '/management/siren/index'
 });
 

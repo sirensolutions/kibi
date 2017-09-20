@@ -12,7 +12,6 @@ import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 import setupLogging from '../../server/logging';
 import { transformDeprecations } from '../../server/config/transform_deprecations';
 
-
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
 export default class BasePathProxy {

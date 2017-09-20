@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import angular from 'angular';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 
@@ -13,19 +13,22 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 import dashboardTemplate from 'plugins/kibana/dashboard/dashboard.html';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import DocTitleProvider from 'ui/doc_title';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
-import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
+import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 // kibi: need to call private on dashboard_state
-import DashboardStateProvider from './dashboard_state';
-import notify from 'ui/notify';
+import { DashboardStateProvider } from './dashboard_state';
+import { notify } from 'ui/notify';
+import './panel/get_object_loaders_for_dashboard';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { showCloneModal } from './top_nav/show_clone_modal';
 
 // kibi: imports
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
 const app = uiModules.get('app/dashboard', [
@@ -34,7 +37,7 @@ const app = uiModules.get('app/dashboard', [
   'kibana/courier',
   'kibana/config',
   'kibana/notify',
-  'kibana/typeahead'
+  'kibana/typeahead',
 ]);
 
 uiRoutes
@@ -74,19 +77,28 @@ uiRoutes
     }
   });
 
-app.directive('dashboardApp', function (createNotifier, courier, AppState, timefilter, quickRanges, kbnUrl, confirmModal, Private) {
+app.directive('dashboardApp', function (createNotifier, $injector) {
+  const courier = $injector.get('courier');
+  const AppState = $injector.get('AppState');
+  const timefilter = $injector.get('timefilter');
+  const quickRanges = $injector.get('quickRanges');
+  const kbnUrl = $injector.get('kbnUrl');
+  const confirmModal = $injector.get('confirmModal');
+  const Private = $injector.get('Private');
+
   const brushEvent = Private(UtilsBrushEventProvider);
-  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState,
-      // kibi: added dashboardGroups, kibiState, config, $timeout
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile,
+      // kibi: added dashboardGroups, kibiState, config, $window, chrome, $timeout
       dashboardGroups, kibiState, config, $window, chrome, $timeout) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = createNotifier({ location: 'Dashboard' });
+      $scope.queryDocLinks = documentationLinks.query;
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
@@ -159,6 +171,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
           darkTheme: dashboardState.getDarkTheme(),
           timeRestore: dashboardState.getTimeRestore(),
           title: dashboardState.getTitle(),
+          description: dashboardState.getDescription(),
         };
         $scope.panels = dashboardState.getPanels();
       };
@@ -182,13 +195,13 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
 
       updateState();
 
-      $scope.panels = dashboardState.getPanels();
       $scope.refresh = (...args) => {
         $rootScope.$broadcast('fetch');
         courier.fetch(...args);
       };
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
+      //TODO MERGE 5.5.2 add kibi comment as needed
       $scope.showSavedSearchExplanation = false;
       $scope.dashboardViewMode = dashboardState.getViewMode();
 
@@ -197,6 +210,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
       $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
+      //TODO MERGE 5.5.2 add kibi comment as needed
       $scope.getDashTitle = () => getDashboardTitle(
         dashboardState.getTitle(),
         dashboardState.getViewMode(),
@@ -222,10 +236,12 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       };
 
       // called by the saved-object-finder when a user clicks a vis
-      $scope.addVis = function (hit) {
+      $scope.addVis = function (hit, showToast = true) {
         pendingVisCount++;
         dashboardState.addNewPanel(hit.id, 'visualization');
-        notify.info(`Visualization successfully added to your dashboard`);
+        if (showToast) {
+          notify.info(`Visualization successfully added to your dashboard`);
+        }
       };
 
       $scope.addSearch = function (hit) {
@@ -245,17 +261,26 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         return dashboardState.uiState.createChild(path, uiState, true);
       };
 
-      $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
-      $scope.toggleSavedSearchExplanation = () => $scope.showSavedSearchExplanation = !$scope.showSavedSearchExplanation;
-      $scope.jumpToDiscover = () => $window.location.href = chrome.getNavLinkById('kibana:discover').url;
-
       $scope.$watch('model.darkTheme', () => {
         dashboardState.setDarkTheme($scope.model.darkTheme);
         updateTheme();
       });
+      //TODO MERGE 5.5.2 add kibi comment
       $scope.$watch('model.hideBorders', () => dashboardState.setHideBorders($scope.model.hideBorders));
+      $scope.$watch('model.description', () => dashboardState.setDescription($scope.model.description));
       $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
       $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
+      $scope.indexPatterns = [];
+
+      $scope.registerPanelIndexPattern = (panelIndex, pattern) => {
+        dashboardState.registerPanelIndexPatternMap(panelIndex, pattern);
+        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
+      };
+
+      $scope.onPanelRemoved = (panelIndex) => {
+        dashboardState.removePanel(panelIndex);
+        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
+      };
 
       $scope.$listen(timefilter, 'fetch', () => {
         // kibi: the listener below is needed to react when the global time is changed by the user
@@ -315,12 +340,6 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         );
       };
 
-      const navActions = {};
-      navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
-      navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
-
-      updateViewMode(dashboardState.getViewMode());
-
       // kibi: allows to change the view mode and select the current menu option (issue #3368)
       $scope.$on('kibi:dashboardviewmode:change', (event, newMode, topNavKey) => {
         updateViewMode(newMode);
@@ -345,8 +364,33 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
               updateViewMode(DashboardViewMode.VIEW);
             }
           }
-        }).catch(notify.error); // kibi: downgraded to error
+          return id;
+        }).catch(notify.error);
       };
+
+      const navActions = {};
+      navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
+      navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
+      navActions[TopNavIds.CLONE] = () => {
+        const currentTitle = $scope.model.title;
+        const onClone = (newTitle) => {
+          dashboardState.savedDashboard.copyOnSave = true;
+          dashboardState.setTitle(newTitle);
+          return $scope.save().then(id => {
+            // If the save wasn't successful, put the original title back.
+            if (!id) {
+              $scope.model.title = currentTitle;
+              // There is a watch on $scope.model.title that *should* call this automatically but
+              // angular is failing to trigger it, so do so manually here.
+              dashboardState.setTitle(currentTitle);
+            }
+            return id;
+          });
+        };
+
+        showCloneModal(onClone, currentTitle, $rootScope, $compile);
+      };
+      updateViewMode(dashboardState.getViewMode());
 
       // kibi: update root source on kibiState reset
       $scope.$listen(kibiState, 'reset_app_state_query', function (query) {
@@ -396,7 +440,11 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       });
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
-        $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] });
+        // Hide the toast message since they will already see a notification from saving the visualization,
+        // and one is sufficient (especially given how the screen jumps down a bit for each unique notification).
+        const showToast = false;
+        $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] }, showToast);
+
         kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
         kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
       }
@@ -417,34 +465,15 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       };
 
       // kibi: Merge the parameters saved on kibi_appstate_param
-      const passedState = JSON.parse(hashedItemStoreSingleton.getItem('kibi_appstate_param'));
+      const passedState = JSON.parse(HashedItemStoreSingleton.getItem('kibi_appstate_param'));
       if (passedState && passedState.dashboardOptions) {
         _.assign($scope.opts.dashboard, _.cloneDeep(passedState.dashboardOptions));
         delete passedState.dashboardOptions;
-        hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
+        HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
       }
       // kibi: end
 
       $scope.$emit('application.load');
-
-      // KIBI5: try to add this back
-      //// kibi: If you click the back/forward browser button:
-      //// 1. The $locationChangeSuccess event is fired when you click back/forward browser button.
-      //$rootScope.$on('$locationChangeSuccess', () => $rootScope.actualLocation = $location.url());
-      //// 2. The following watcher is fired.
-      //$rootScope.$watch(() => { return $location.url(); }, (newLocation, oldLocation) => {
-        //if ($rootScope.actualLocation === newLocation) {
-          //[> kibi: Here we execute init() if the newLocation is equal to the URL we saved during
-          //the $locationChangeSuccess event above. */
-          //init();
-        //}
-      //});
-      //[> kibi: If you click an ordinary hyperlink, the above order is reversed.
-         //First, you have the watcher fired, then the $locationChangeSuccess event.
-         //That's why the actualLocation and newLocation will never be equal inside the watcher callback
-         //if you click on an ordinary hyperlink.
-       //*/
-      //init();
     }
   };
 });

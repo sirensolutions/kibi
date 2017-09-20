@@ -12,9 +12,9 @@ table entry and then click the *View surrounding documents* link.
 image::images/Expanded-Document.png[Expanded Document]
 {nbsp}
 
-The context view displays a number of documents before and after the anchor 
-document. The anchor document itself is highlighted in blue. The view is sorted 
-by the time field specified in the index pattern configuration and uses the 
+The context view displays a number of documents before and after the anchor
+document. The anchor document itself is highlighted in blue. The view is sorted
+by the time field specified in the index pattern configuration and uses the
 same set of columns as the Discover view the context was opened from. If there
 are multiple documents with the same time field value, the internal document
 order is used as a secondary sorting criterion by default.
@@ -30,18 +30,18 @@ about to be displayed. The first suitable field is then used as the tiebreaking
 field. A field is suitable if the field exists and is sortable in the index
 pattern the context is based on.
 
-While not required, it is recommended to only 
-use fields which have {es-ref}doc-values.html[doc values] enabled to achieve 
-good performance and avoid unnecessary {es-ref}modules-fielddata.html[field 
-data] usage. Common examples for suitable fields include log line numbers, 
+While not required, it is recommended to only
+use fields which have {ref}/doc-values.html[doc values] enabled to achieve
+good performance and avoid unnecessary {ref}/modules-fielddata.html[field
+data] usage. Common examples for suitable fields include log line numbers,
 monotonically increasing counters and high-precision timestamps.
 --
 
-image::images/Discover-ContextView_5.png[Context View]
+image::images/Discover-ContextView.png[Context View]
 
 NOTE: The number of documents displayed by default can be configured
 via the `context:defaultSize` setting in <<advanced-options, *Management >
-Advanced Options*>>.
+Advanced Settings*>>.
 
 === Changing the Context Size
 
@@ -64,4 +64,23 @@ image::images/Discover-ContextView-SizePicker-Older.png[]
 
 NOTE: The default number of documents loaded with each button click can be
 configured via the `context:step` setting in <<advanced-options, *Management >
-Advanced Options*>>.
+Advanced Settings*>>.
+
+=== Filtering the Context
+
+Depending on how the documents are partitioned into index patterns, the context
+view might contain a large number of documents not related to the event under
+investigation. In order to adapt the focus of the context view to the task at
+hand, you can use filters to restrict the documents considered by Kibana for
+display in the context view.
+
+When switching from the discover view to the context view, the previously
+applied filters are carried over. Pinned filters remain active while normal
+filters are copied in a disabled state. You can selectively re-enabled them to
+refine your context view.
+
+New filters can be added via the *Add a filter* link in the filter bar, by
+clicking the filter icons appearing when hovering a field, or by expanding
+documents and clicking the filter icons in the table.
+
+image::images/Discover-ContextView-FilterMontage.png[]

@@ -12,7 +12,7 @@ module.exports = function (kibana) {
   }
 
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'saved_objects_api'],  // siren: added saved_objects_api
+    require: ['kibana', 'elasticsearch', 'saved_objects_api'],  // kibi: added saved_objects_api
     uiExports: {
       app: {
         title: 'Timelion',
@@ -36,7 +36,8 @@ module.exports = function (kibana) {
       ],
       visTypes: [
         'plugins/timelion/vis'
-      ]
+      ],
+      mappings: require('./mappings.json')
     },
     init: require('./init.js'),
   });

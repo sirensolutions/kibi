@@ -1,5 +1,5 @@
 import 'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups';
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import $ from 'jquery';
 import _ from 'lodash';
 import dashboardNavEditLinkTemplate from './dashboard_nav_edit_link.html';
@@ -7,8 +7,8 @@ import './dashboard_nav_edit_link.less';
 import 'ui/kibi/directives/kibi_context_menu';
 import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dashboard_view_mode';
 import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
-import uiModules from 'ui/modules';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('kibana')
@@ -201,7 +201,7 @@ uiModules
               currentKey: item.topNavKey
             }
           };
-          hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
+          HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
           globalNavState.setOpen(false);
           dashboardGroups.selectDashboard(id);
         }

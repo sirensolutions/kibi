@@ -1,6 +1,6 @@
 import angular from 'angular';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
@@ -26,7 +26,7 @@ module.factory('SavedDashboard', function (courier, config) {
         panelsJSON: '[]',
         optionsJSON: angular.toJson({
           darkTheme: config.get('dashboard:defaultDarkTheme'),
-          hideBorders: false //siren: set it false as default
+          hideBorders: false //kibi: set it false as default
         }),
         uiStateJSON: '{}',
         version: 1,
@@ -58,6 +58,7 @@ module.factory('SavedDashboard', function (courier, config) {
     uiStateJSON: 'string',
     version: 'integer',
     timeRestore: 'boolean',
+    //TODO MERGE 5.5.2 add kibi comment as needed
     timeMode: 'string',
     timeTo: 'string',
     timeFrom: 'string',
@@ -70,6 +71,7 @@ module.factory('SavedDashboard', function (courier, config) {
         value: { type: 'integer' }
       }
     },
+    //TODO MERGE 5.5.2 add kibi comment as needed
     savedSearchId: 'string',
     priority: 'integer' // kibi: added to sort dashboards
   };

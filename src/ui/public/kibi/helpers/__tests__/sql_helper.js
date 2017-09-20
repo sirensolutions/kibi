@@ -1,4 +1,4 @@
-import SqlHelperProvider from 'ui/kibi/helpers/sql_helper';
+import { SQLHelperFactory } from 'ui/kibi/helpers/sql_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
@@ -8,7 +8,7 @@ function init() {
   return function () {
     ngMock.module('kibana');
     ngMock.inject(function (Private) {
-      sqlHelper = Private(SqlHelperProvider);
+      sqlHelper = Private(SQLHelperFactory);
     });
   };
 }
@@ -137,4 +137,3 @@ describe('Kibi Components', function () {
   });
 
 });
-

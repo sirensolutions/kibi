@@ -1,3 +1,4 @@
+/*eslint import/namespace: [2, { allowComputed: true }]*/
 import _ from 'lodash';
 import Chainable from '../../lib/classes/chainable';
 import * as regress from './lib/regress';

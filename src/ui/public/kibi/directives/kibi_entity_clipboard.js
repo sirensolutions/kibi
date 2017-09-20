@@ -1,6 +1,6 @@
 import 'ui/kibi/directives/kibi_entity_clipboard.less';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import template from 'ui/kibi/directives/kibi_entity_clipboard.html';
 

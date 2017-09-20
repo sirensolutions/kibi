@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import Binder from 'ui/binder';
+import { Binder } from 'ui/binder';
 import chrome from 'ui/chrome';
 import 'gridster';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { DashboardViewMode } from 'plugins/kibana/dashboard/dashboard_view_mode';
 import { PanelUtils } from 'plugins/kibana/dashboard/panel/panel_utils';
 
@@ -13,6 +13,8 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
   return {
     restrict: 'E',
     scope: {
+      //TODO MERGE 5.5.2 add kibi comment as needed
+
       /**
        * toggle borders around panels
        * @author kibi
@@ -28,6 +30,12 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
        * @type {function} - Returns a {PersistedState} child uiState for this scope.
        */
       createChildUiState: '=',
+      /**
+       * Registers an index pattern with the dashboard app used by each panel. The index patterns are used by the
+       * filter bar for generating field suggestions.
+       * @type {function(IndexPattern)}
+       */
+      registerPanelIndexPattern: '=',
       /**
        * Trigger after a panel has been removed from the grid.
        */
@@ -122,7 +130,7 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
             stop: readGridsterChangeHandler
           },
           draggable: {
-            handle: '.panel-move, .fa-arrows',
+            handle: '[data-dashboard-panel-drag-handle]',
             stop: readGridsterChangeHandler
           }
         }).data('gridster');
@@ -216,7 +224,9 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
 
       // tell gridster to add the panel, and create additional meatadata like $scope
       function addPanel(panel) {
-        PanelUtils.initializeDefaults(panel, config); // siren: pass config to PanelUtils
+        PanelUtils.initializeDefaults(panel, config); // kibi: pass config to PanelUtils
+
+        //TODO MERGE 5.5.2 add kibi comment as needed
         const panelHtml = `
             <li>
                 <dashboard-panel
@@ -229,6 +239,7 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
                   get-vis-click-handler="getVisClickHandler"
                   get-vis-brush-handler="getVisBrushHandler"
                   save-state="saveState"
+                  register-panel-index-pattern="registerPanelIndexPattern"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
                   create-child-ui-state="createChildUiState">
             </li>`;

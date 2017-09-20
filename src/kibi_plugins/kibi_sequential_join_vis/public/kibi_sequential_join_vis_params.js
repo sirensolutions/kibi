@@ -4,7 +4,7 @@ import 'ui/kibi/directives/kibi_menu_template';
 import _ from 'lodash';
 import menuTemplateHtml from 'ui/kibi/directives/kibi_menu_template_sequential_join_vis.html';
 import template from 'plugins/kibi_sequential_join_vis/kibi_sequential_join_vis_params.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('kibana/kibi_kibi_sequential_join_vis')

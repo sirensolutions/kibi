@@ -40,7 +40,7 @@ const init = function () {
 
     $provide.service('config', function () {
       this.get = sinon.stub().returns(typeaheadHistoryCount);
-      this.isDeclared = sinon.stub().returns(false); // siren: mock isDeclared
+      this.isDeclared = sinon.stub().returns(false); // kibi: mock isDeclared
     });
   });
 

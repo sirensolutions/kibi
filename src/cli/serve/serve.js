@@ -104,7 +104,9 @@ module.exports = function (program) {
   .option('--verbose', 'Turns on verbose logging')
   .option('-H, --host <host>', 'The host to bind to')
   .option('-l, --log-file <path>', 'The file to log to')
+  // kibi: adds option to quit server after optimization
   .option('--quit-after-init', 'Quit the server after a successful initialization.')
+  // kibi: end
   .option(
     '--plugin-dir <path>',
     'A path to scan for plugins, this can be specified multiple ' +
@@ -162,9 +164,11 @@ module.exports = function (program) {
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();
+      // kibi: adds option to quit server after optimization
       if (opts.quitAfterInit) {
         process.exit(0);
       }
+      // kibi: end
     }
     catch (err) {
       const { server } = kbnServer;

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { doesQueryDependOnEntity } from 'kibiutils';
 
-export default function ShouldEntityURIBeEnabledFactory(savedQueries, Promise) {
+export function ShouldEntityURIBeEnabledFactory(savedQueries, Promise) {
   return function (queryIds) {
     if (!queryIds) {
       return Promise.resolve(false);

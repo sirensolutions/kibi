@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import QueryEngine from '../query_engine';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import { EventEmitter } from 'events';
 import SqliteQuery from '../queries/sqlite_query';
 
@@ -109,10 +109,12 @@ describe('Query Engine', function () {
 
   describe('_getQueries', function () {
     let queryEngine;
+    let stubLoadPredefinedData;
+    let stubLoadTemplates;
 
     beforeEach(function () {
-      sinon.stub(QueryEngine.prototype, 'loadPredefinedData').returns(Promise.resolve());
-      sinon.stub(QueryEngine.prototype, '_loadTemplates').returns(Promise.resolve());
+      stubLoadPredefinedData = sinon.stub(QueryEngine.prototype, 'loadPredefinedData').returns(Promise.resolve());
+      stubLoadTemplates = sinon.stub(QueryEngine.prototype, '_loadTemplates').returns(Promise.resolve());
       callWithInternalUserStub
         .withArgs('search', { index: '.kibi', type: 'datasource', size: 100 })
         .returns(Promise.resolve({
@@ -135,6 +137,11 @@ describe('Query Engine', function () {
         }));
 
       queryEngine = new QueryEngine(fakeServer);
+    });
+
+    afterEach(() => {
+      stubLoadPredefinedData.restore();
+      stubLoadTemplates.restore();
     });
 
     it('should be a deactivated query', function () {
@@ -163,14 +170,17 @@ describe('Query Engine', function () {
           }
         }));
       // for the call to check the activation query
-      sinon.stub(SqliteQuery.prototype, '_executeQuery').returns(Promise.resolve([]));
-      sinon.spy(SqliteQuery.prototype, 'generateCacheKey');
+      const stubExecuteQuery = sinon.stub(SqliteQuery.prototype, '_executeQuery').returns(Promise.resolve([]));
+      const stubGenerateCacheKey = sinon.spy(SqliteQuery.prototype, 'generateCacheKey');
 
       return queryEngine.getQueriesHtml(queryDefs, options)
       .then(([ result ]) => {
         expect(result.queryId).to.be('query1');
         expect(result.queryActivated).to.be(false);
         expect(result.html).to.be('No query template is triggered now. Select a document?');
+
+        stubExecuteQuery.restore();
+        stubGenerateCacheKey.restore();
       });
     });
 
@@ -212,8 +222,8 @@ describe('Query Engine', function () {
           }
         }));
       // for the call to check the activation query
-      sinon.stub(SqliteQuery.prototype, '_executeQuery').returns(Promise.resolve([]));
-      sinon.spy(SqliteQuery.prototype, 'generateCacheKey');
+      const stubExecuteQuery = sinon.stub(SqliteQuery.prototype, '_executeQuery').returns(Promise.resolve([]));
+      const stubGenerateCacheKey = sinon.spy(SqliteQuery.prototype, 'generateCacheKey');
 
       return queryEngine.getQueriesHtml(queryDefs, options)
       .then(([ result1, result2 ]) => {
@@ -224,6 +234,9 @@ describe('Query Engine', function () {
         expect(result2.queryId).to.be('query2');
         expect(result2.queryActivated).to.be(true);
         expect(result2.html).to.be('The query <b>Query 2</b> needs a document to be selected');
+
+        stubExecuteQuery.restore();
+        stubGenerateCacheKey.restore();
       });
     });
   });

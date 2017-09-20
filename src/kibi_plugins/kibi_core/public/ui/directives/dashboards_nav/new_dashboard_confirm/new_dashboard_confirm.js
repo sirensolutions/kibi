@@ -5,7 +5,7 @@ import 'ui/directives/info';
 import { ModalOverlay } from 'ui/modals/modal_overlay';
 import './new_dashboard_confirm.less';
 import template from './new_dashboard_confirm.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('kibana');
 

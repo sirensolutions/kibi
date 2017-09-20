@@ -1,5 +1,5 @@
-import Notifier from 'ui/notify/notifier';
-import sinon from 'auto-release-sinon';
+import { Notifier } from 'ui/notify/notifier';
+import sinon from 'sinon';
 import angular from 'angular';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';

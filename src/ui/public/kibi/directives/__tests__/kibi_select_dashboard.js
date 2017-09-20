@@ -1,11 +1,10 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import '../kibi_select';
-import SelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';
-import MockState from 'fixtures/mock_state';
+import { MockState } from 'fixtures/mock_state';
 
 let $rootScope;
 let $scope;

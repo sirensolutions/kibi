@@ -1,6 +1,7 @@
-import buildQueryFilter from 'ui/filter_manager/lib/query';
+import { buildQueryFilter } from 'ui/filter_manager/lib/query';
 import _ from 'lodash';
-export default function CreateFilterFiltersProvider() {
+
+export function AggTypesBucketsCreateFilterFiltersProvider() {
   return function (aggConfig, key) {
     // kibi: need to split the compound dbfilter query to remove the label
     // e.g. "8as7df7a89sdf - my query" -> "8as7df7a89sdf"

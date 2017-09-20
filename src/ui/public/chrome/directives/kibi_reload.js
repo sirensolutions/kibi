@@ -1,6 +1,6 @@
-import UiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
-UiModules
+uiModules
 .get('kibana')
 .directive('kibiReload', function ($timeout, $window) {
   return {

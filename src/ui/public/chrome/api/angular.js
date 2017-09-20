@@ -1,21 +1,21 @@
 import _ from 'lodash';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import modules from 'ui/modules';
-import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
-import kibiRemoveHashedParams from './kibi_remove_hashed_params'; // kibi: import util to clean the url
+import { uiModules } from 'ui/modules';
+import { Notifier } from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import { kibiRemoveHashedParams } from './kibi_remove_hashed_params'; // kibi: import util to clean the url
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
-import directivesProvider from '../directives';
+import { directivesProvider } from '../directives';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 
-export default function (chrome, internals) {
+export function initAngularApi(chrome, internals) {
   chrome.getFirstPathSegment = _.noop;
   chrome.getBreadcrumbs = _.noop;
 
   chrome.setupAngular = function () {
-    const kibana = modules.get('kibana');
+    const kibana = uiModules.get('kibana');
 
     _.forOwn(chrome.getInjected(), function (val, name) {
       kibana.value(name, val);
@@ -28,7 +28,7 @@ export default function (chrome, internals) {
     .value('kibiKibanaAnnouncement', internals.kibiKibanaAnnouncement) // kibi:
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)
-    .value('buildTimestamp', internals.buildTimestamp)
+    .value('buildTimestamp', internals.buildTimestamp) // kibi:
     .value('serverName', internals.serverName)
     .value('uiSettings', internals.uiSettings)
     .value('sessionId', Date.now())
@@ -85,6 +85,7 @@ export default function (chrome, internals) {
         try {
           if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
             notify.directive({
+              //TODO MERGE 5.5.2 add kibi comment
               template: `
                 <p>
                   The URL has gotten big and may cause Kibana
@@ -103,6 +104,7 @@ export default function (chrome, internals) {
           const { host, path, search, protocol } = parseUrl(window.location.href);
           // rewrite the entire url to force the browser to reload and
           // discard any potentially unstable state from before
+          //TODO MERGE 5.5.2 add kibi comment
           window.location.href = formatUrl({ host, pathname: path, search, protocol, hash: '#/error/url-overflow' });
         }
       };
@@ -113,7 +115,7 @@ export default function (chrome, internals) {
 
     directivesProvider(chrome, internals);
 
-    modules.link(kibana);
+    uiModules.link(kibana);
   };
 
 }

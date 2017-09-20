@@ -1,5 +1,5 @@
-import VisVisTypeProvider from 'ui/vis/vis_type';
-import TemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 // we need to load the css ourselves
 import 'plugins/kibi_query_viewer_vis/kibi_query_viewer_vis.less';
 // we also need to load the controller and used by the template
@@ -7,7 +7,7 @@ import 'plugins/kibi_query_viewer_vis/kibi_query_viewer_vis_controller';
 // our params are a bit complex so we will manage them with a directive
 import 'plugins/kibi_query_viewer_vis/kibi_query_viewer_vis_params';
 // register the provider with the visTypes registry
-import registry from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import template from 'plugins/kibi_query_viewer_vis/kibi_query_viewer_vis.html';
 
 function KibiQueryViewerVisTypeProvider(Private) {
@@ -34,7 +34,7 @@ function KibiQueryViewerVisTypeProvider(Private) {
   });
 }
 
-registry.register(KibiQueryViewerVisTypeProvider);
+VisTypesRegistryProvider.register(KibiQueryViewerVisTypeProvider);
 
 // export the provider so that the visType can be required with Private()
 export default KibiQueryViewerVisTypeProvider;

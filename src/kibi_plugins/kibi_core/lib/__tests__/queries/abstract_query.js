@@ -1,7 +1,7 @@
 import AbstractQuery from '../../queries/abstract_query';
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 const searchStub = sinon.stub();
 

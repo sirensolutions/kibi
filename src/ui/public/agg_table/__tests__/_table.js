@@ -4,11 +4,13 @@ import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import sinon from 'auto-release-sinon';
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import VisProvider from 'ui/vis';
+import sinon from 'sinon';
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
+import { VisProvider } from 'ui/vis';
 describe('AggTable Directive', function () {
+//TODO MERGE 5.5.2 add kibi comments
+
 
   let $rootScope;
   let $compile;
@@ -21,8 +23,8 @@ describe('AggTable Directive', function () {
     $provide.constant('kbnDefaultAppId', '');
   }));
   beforeEach(ngMock.inject(function ($injector, Private, config) {
-    tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    tabifyAggResponse = Private(AggResponseTabifyProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     Vis = Private(VisProvider);
     settings = config;
 

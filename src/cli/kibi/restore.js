@@ -2,7 +2,7 @@ import KbnServer from '../../server/kbn_server';
 import Promise from 'bluebird';
 import { has, get, merge } from 'lodash';
 import readYamlConfig from '../serve/read_yaml_config';
-import fromRoot from '../../utils/from_root';
+import { fromRoot } from '../../utils/from_root';
 import { resolve } from 'path';
 import RestoreKibi from './_restore_kibi';
 import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';

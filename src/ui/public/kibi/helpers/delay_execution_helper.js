@@ -11,7 +11,7 @@
   * - delayStrategy - strategy of the delay
   *
   */
-export default function DelayExecutionHelperFactory(Promise, $timeout) {
+export function DelayExecutionHelperFactory(Promise, $timeout) {
   class DelayExecutionHelper {
     static get DELAY_STRATEGY() {
       return {

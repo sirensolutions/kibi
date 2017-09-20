@@ -1,11 +1,12 @@
-import GetIdsProvider from 'ui/index_patterns/_get_ids';
+import { IndexPatternsGetIdsProvider }  from 'ui/index_patterns/_get_ids';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import _ from 'lodash';
 
 export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVersion, kbnIndex,
   queryEngineClient, Private, Promise, indexPatterns) {
 
-  const getIds = Private(GetIdsProvider);
-  const visTypes = Private(require('ui/registry/vis_types'));
+  const getIds = Private(IndexPatternsGetIdsProvider);
+  const visTypes = Private(VisTypesRegistryProvider);
 
   class ImportExportHelper {
 

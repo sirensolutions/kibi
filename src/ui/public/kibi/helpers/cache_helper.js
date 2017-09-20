@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-export default function CacheHelperFactory($rootScope, Promise) {
+export function CacheProvider($rootScope, Promise) {
 
   // we will store values in memory
   let cache = {};

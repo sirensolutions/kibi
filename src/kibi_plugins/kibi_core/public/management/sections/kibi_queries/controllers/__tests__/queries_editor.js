@@ -1,15 +1,16 @@
 import * as onPage from 'ui/kibi/utils/on_page';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import jQuery from 'jquery';
 import Promise from 'bluebird';
 import noDigestPromises from 'test_utils/no_digest_promises';
-import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
-import Notifier from 'ui/notify/notifier';
+import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
+import { Notifier } from 'ui/notify/notifier';
 
 let kibiState;
 let $scope;
+let onManagementPageStub;
 
 const savedDatasources = [
   {
@@ -66,7 +67,7 @@ describe('Kibi Controllers', function () {
     });
 
     ngMock.inject(function ($rootScope, $controller, _kibiState_) {
-      sinon.stub(onPage, 'onManagementPage').returns(true);
+      onManagementPageStub = sinon.stub(onPage, 'onManagementPage').returns(true);
 
       kibiState = _kibiState_;
       sinon.stub(kibiState, 'getEntityURI').returns({ index: 'a', type: 'b', id: 'c' });
@@ -88,6 +89,10 @@ describe('Kibi Controllers', function () {
         $element: jQuery('<div><form name="objectForm" class="ng-valid"></form></div>')
       });
       $scope.$digest();
+    });
+
+    afterEach(function () {
+      onManagementPageStub.restore();
     });
   }
 

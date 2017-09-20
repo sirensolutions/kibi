@@ -1,4 +1,4 @@
-import testSubjSelector from '@spalger/test-subj-selector';
+import testSubjSelector from '@elastic/test-subj-selector';
 import { filter as filterAsync } from 'bluebird';
 
 export function TestSubjectsProvider({ getService }) {
@@ -49,6 +49,13 @@ export function TestSubjectsProvider({ getService }) {
       log.debug('in findAllTestSubjects: ' + testSubjSelector(selector));
       const all = await find.allByCssSelector(testSubjSelector(selector));
       return await filterAsync(all, el => el.isDisplayed());
+    }
+
+    async setValue(selector, value) {
+      const input = await retry.try(() => this.find(selector));
+      await retry.try(() => input.click());
+      await input.clearValue();
+      await input.type(value);
     }
   }
 

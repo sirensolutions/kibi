@@ -1,14 +1,15 @@
 import 'plugins/kibi_core/management/sections/kibi_queries/services/_saved_query';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
-import CacheProvider from 'ui/kibi/helpers/cache_helper';
-import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
+import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import savedQueryRegister from 'plugins/kibi_core/management/sections/kibi_queries/services/saved_query_register';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 
-savedObjectRegistry.register(savedQueryRegister);
+SavedObjectRegistryProvider.register(savedQueryRegister);
 
 // Register this service with the saved object registry so it can be edited by the object editor.
-require('plugins/kibana/management/saved_object_registry').register({
+savedObjectManagementRegistry.register({
   service: 'savedQueries',
   title: 'queries'
 });

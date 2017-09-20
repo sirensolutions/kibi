@@ -5,6 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
 
   describe('shared links', function describeIndexTests() {
@@ -27,13 +28,13 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
 
       // delete .kibana index and update configDoc
-      return kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
-      })
+      return esArchiver.load('discover')
       .then(function loadkibanaIndexPattern() {
         log.debug('load kibana index with default index pattern');
-        return esArchiver.load('discover');
+        return kibanaServer.uiSettings.replace({
+          'dateFormat:tz': 'UTC',
+          'defaultIndex': 'logstash-*'
+        });
       })
       // and load a set of makelogs data
       .then(function loadIfEmptyMakelogs() {
@@ -54,12 +55,13 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+
     describe('shared link', function () {
       it('should show "Share a link" caption', function () {
         const expectedCaption = 'Share saved';
         return PageObjects.discover.clickShare()
         .then(function () {
-          PageObjects.common.saveScreenshot('Discover-share-link');
+          screenshots.take('Discover-share-link');
           return PageObjects.discover.getShareCaption();
         })
         .then(function (actualCaption) {
@@ -97,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.header.getToastMessage();
         })
         .then(function (toastMessage) {
-          PageObjects.common.saveScreenshot('Discover-copy-to-clipboard-toast');
+          screenshots.take('Discover-copy-to-clipboard-toast');
           expect(toastMessage).to.match(expectedToastMessage);
         })
         .then(function () {

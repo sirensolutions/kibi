@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import getSort from 'ui/doc_table/lib/get_sort';
+import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import 'ui/doc_table';
 import 'ui/visualize';
@@ -14,18 +14,20 @@ import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
-import VisProvider from 'ui/vis';
-import DocTitleProvider from 'ui/doc_title';
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
+import { VisProvider } from 'ui/vis';
+import { DocTitleProvider } from 'ui/doc_title';
+import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import FilterManagerProvider from 'ui/filter_manager';
-import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
-import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterManagerProvider } from 'ui/filter_manager';
+import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
-import StateProvider from 'ui/state_management/state';
+import { StateProvider } from 'ui/state_management/state';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { getDefaultQuery } from 'ui/parse_query';
 
 // kibi: imports
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
@@ -125,6 +127,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
     location: 'Discover'
   });
 
+  $scope.queryDocLinks = documentationLinks.query;
   $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
   $scope.showInterval = false;
 
@@ -173,13 +176,15 @@ function discoverController($scope, config, courier, $route, $window, createNoti
   }
 
   let stateMonitor;
-  const $appStatus = $scope.appStatus = this.appStatus = {};
+  const $appStatus = $scope.appStatus = this.appStatus = {
+    dirty: !savedSearch.id
+  };
   const $state = $scope.state = new AppState(getStateDefaults());
   $scope.uiState = $state.makeStateful('uiState');
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.get('query') || '',
+      query: $scope.searchSource.get('query') || getDefaultQuery(),
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
@@ -218,7 +223,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
 
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
     stateMonitor.onChange((status) => {
-      $appStatus.dirty = status.dirty;
+      $appStatus.dirty = status.dirty || !savedSearch.id;
     });
     $scope.$on('$destroy', () => stateMonitor.destroy());
 
@@ -477,6 +482,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
     });
   }).catch(notify.fatal);
 
+//TODO MERGE 5.5.2 add kibi comment as needed
   $scope.updateTime = function () {
     $scope.timeRange = {
       from: parseWithPrecision(timefilter.time.from, false, $scope.kibiTimePrecision),
@@ -533,8 +539,8 @@ function discoverController($scope, config, courier, $route, $window, createNoti
     // If we're not setting anything up we need to return an empty promise
     // kibi: added condition to check if there are any fields
     if (!$scope.opts.timefield  || $scope.indexPattern.fields.length === 0) return Promise.resolve();
-
     if (loadingVis) return loadingVis;
+
     const visStateAggs = [
       {
         type: 'count',
@@ -558,8 +564,6 @@ function discoverController($scope, config, courier, $route, $window, createNoti
       $scope.vis.setState(visState);
       return Promise.resolve($scope.vis);
     }
-
-
 
     $scope.vis = new Vis($scope.indexPattern, {
       title: savedSearch.title,

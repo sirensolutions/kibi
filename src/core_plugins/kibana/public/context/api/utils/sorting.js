@@ -59,24 +59,6 @@ function getFirstSortableField(indexPattern, fieldNames) {
  * @property {SortDirection} order
  */
 
-
-/**
- * Return a copy of a query with the sort direction reversed.
- *
- * @param {Object} query - The query to reverse the sort direction of.
- *
- * @returns {Object}
- */
-function reverseQuerySort(query) {
-  return Object.assign(
-    {},
-    query,
-    {
-      sort: _.get(query, 'sort', []).map(reverseSortDirective),
-    }
-  );
-}
-
 /**
  * Return a copy of the directive with the sort direction reversed. If the
  * field name is '_score', it inverts the default sort direction in the same
@@ -119,7 +101,6 @@ function reverseSortDirection(sortDirection) {
 
 export {
   getFirstSortableField,
-  reverseQuerySort,
   reverseSortDirection,
   reverseSortDirective,
 };

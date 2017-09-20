@@ -16,7 +16,8 @@
             "_id": "4.0.0",
             "_score": 1,
             "_source": {
-               "defaultIndex": "logstash-*"
+                // kibi: removes buildNum
+                "defaultIndex": "logstash-*"
             }
          }
       ]

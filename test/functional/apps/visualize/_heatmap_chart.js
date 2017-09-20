@@ -3,6 +3,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer'); // kibi: import kibanaServer
   const log = getService('log');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
@@ -89,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
         .then(function showData(data) {
           log.debug('data=' + data);
           log.debug('data.length=' + data.length);
-          PageObjects.common.saveScreenshot('Visualize-heatmap-chart');
+          screenshots.take('Visualize-heatmap-chart');
           expect(data).to.eql(expectedChartValues);
         });
       });

@@ -1,19 +1,19 @@
-import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
+import { DashboardHelperFactory } from 'ui/kibi/helpers/dashboard_helper';
 import * as columnsActions from './actions/columns';
-import FilterManagerProvider from 'ui/filter_manager';
+import { FilterManagerProvider } from 'ui/filter_manager';
 import { onVisualizePage } from 'ui/kibi/utils/on_page';
 import _ from 'lodash';
 import 'ui/kibi/directives/kibi_param_entity_uri';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 // allow to query external datasources for populating a column
 import 'ui/kibi/components/query_engine_client/query_engine_client';
-import VirtualIndexPatternProvider from 'ui/kibi/components/commons/virtual_index_pattern';
+import { VirtualIndexPatternFactory } from 'ui/kibi/components/commons/virtual_index_pattern';
 
 function KibiDataTableVisController(getAppState, courier, $window, createNotifier, confirmModal,
   kibiState, $rootScope, $scope, Private, config) {
-  const dashboardHelper = Private(DashboardHelperProvider);
-  const VirtualIndexPattern = Private(VirtualIndexPatternProvider);
+  const dashboardHelper = Private(DashboardHelperFactory);
+  const VirtualIndexPattern = Private(VirtualIndexPatternFactory);
   const filterManager = Private(FilterManagerProvider);
   const configMode = onVisualizePage();
   const notify = createNotifier({

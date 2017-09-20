@@ -6,8 +6,9 @@
  */
 
 import _ from 'lodash';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function AggConfigFactory(Private, fieldTypeFilter) {
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+
+export function VisAggConfigProvider(Private, fieldTypeFilter) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function AggConfig(vis, opts) {
@@ -168,8 +169,12 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     return this.type.params.write(this);
   };
 
+  AggConfig.prototype.isFilterable = function () {
+    return _.isFunction(this.type.createFilter);
+  };
+
   AggConfig.prototype.createFilter = function (key) {
-    if (!_.isFunction(this.type.createFilter)) {
+    if (!this.isFilterable()) {
       throw new TypeError('The "' + this.type.title + '" aggregation does not support filtering.');
     }
 

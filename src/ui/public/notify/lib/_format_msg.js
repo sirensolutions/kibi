@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import formatESMsg from 'ui/notify/lib/_format_es_msg';
+import { formatESMsg } from 'ui/notify/lib/_format_es_msg';
 const has = _.has;
 
 /**
@@ -9,7 +9,7 @@ const has = _.has;
  * @param  {String} from - Prefix for message indicating source (optional)
  * @returns {string}
  */
-function formatMsg(err, from) {
+export function formatMsg(err, from) {
   let rtn = '';
   if (from) {
     rtn += from + ': ';
@@ -53,5 +53,3 @@ formatMsg.describeRequestPromiseError = function (err) {
   return msg;
 };
 // kibi: end
-
-export default formatMsg;

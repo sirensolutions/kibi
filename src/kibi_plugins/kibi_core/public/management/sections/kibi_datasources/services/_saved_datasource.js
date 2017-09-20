@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import SetDatasourceSchemaProvider from '../lib/set_datasource_schema';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('kibi_datasources/services/saved_datasources')

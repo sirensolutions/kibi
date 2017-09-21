@@ -81,9 +81,9 @@ task cloneSources << {
 
 def getBuildArgs() {
   if (project.version.endsWith("-SNAPSHOT")) {
-    return ["run", "build", "--", "--release=false", "--skip-os-packages=true"]
+    return ["run", "build", "--", "--release=false"]
   }
-  return ["run", "build", "--", "--release=true", "--skip-os-packages=true"]
+  return ["run", "build", "--", "--release=true"]
 }
 
 task npmBuildWithOpts(type: NpmTask) {

@@ -6,7 +6,7 @@
 :java-version: 1.8
 :vanguard-version: 5.5.2-SNAPSHOT
 :vanguard-website: https://docs.support.siren.io/5.4.3/vanguard/
-:version: 5.4.4-SNAPSHOT
+:version: 5.5.2-SNAPSHOT
 :kibana-version: 5.4.3
 :kibana-announcement: https://www.elastic.co/blog/kibana-5-4-3-released
 :kibana-ref: https://www.elastic.co/guide/en/kibana/5.5

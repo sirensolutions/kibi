@@ -85,23 +85,24 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
     // call out to elasticsearch
     Promise.map(requestsToFetch, function (request) {
       return Promise.try(request.getFetchParams, void 0, request)
-        .then(function (fetchParams) {
-          return (request.fetchParams = fetchParams);
-        })
-        .then(value => ({ resolved: value }))
-        .catch(error => ({ rejected: error }));
-    })
-    .then(function (results) {
       // kibi: call to requestAdapter function of the related visualization
-      results.forEach(function (req) {
-        if (req.getSource) {
-          const source = req.getSource();
+      .then(function (fetchParams) {
+        if (fetchParams.getSource) {
+          const source = fetchParams.getSource();
           if (source && source.vis && source.vis.requestAdapter) {
-            source.vis.requestAdapter(req);
+            source.vis.requestAdapter(fetchParams);
           }
         }
-      });
+        return fetchParams;
+      })
       // kibi: end
+      .then(function (fetchParams) {
+        return (request.fetchParams = fetchParams);
+      })
+      .then(value => ({ resolved: value }))
+      .catch(error => ({ rejected: error }));
+    })
+    .then(function (results) {
       const requestsWithFetchParams = [];
       // Gather the fetch param responses from all the successful requests.
       results.forEach((result, index) => {

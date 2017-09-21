@@ -58,7 +58,7 @@ module.factory('SavedDashboard', function (courier, config) {
     uiStateJSON: 'string',
     version: 'integer',
     timeRestore: 'boolean',
-    //TODO MERGE 5.5.2 add kibi comment as needed
+    // kibi: 'timeMode' is added to mapping
     timeMode: 'string',
     timeTo: 'string',
     timeFrom: 'string',
@@ -71,7 +71,7 @@ module.factory('SavedDashboard', function (courier, config) {
         value: { type: 'integer' }
       }
     },
-    //TODO MERGE 5.5.2 add kibi comment as needed
+    // kibi: 'savedSearchId' is added to mapping
     savedSearchId: 'string',
     priority: 'integer' // kibi: added to sort dashboards
   };

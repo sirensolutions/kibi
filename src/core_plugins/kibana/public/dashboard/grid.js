@@ -13,7 +13,7 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
   return {
     restrict: 'E',
     scope: {
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: `hideBorders` is added
 
       /**
        * toggle borders around panels
@@ -226,7 +226,7 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
       function addPanel(panel) {
         PanelUtils.initializeDefaults(panel, config); // kibi: pass config to PanelUtils
 
-        //TODO MERGE 5.5.2 add kibi comment as needed
+        // kibi:'hide-borders' property is added
         const panelHtml = `
             <li>
                 <dashboard-panel

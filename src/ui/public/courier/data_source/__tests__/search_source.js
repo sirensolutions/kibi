@@ -25,7 +25,7 @@ describe('SearchSource', function () {
     expect(indexPattern).to.not.be(indexPattern2);
   }));
 
-  //TODO MERGE 5.5.2 add kibi comment
+  // kibi: added by kibi
   describe('Kibi', function () {
     it('should put user queries into the query clause of the filtered query', function () {
       const initialState = {
@@ -62,6 +62,7 @@ describe('SearchSource', function () {
         });
     });
   });
+  // kibi: end
 
   describe('#onResults()', function () {
     it('adds a request to the requestQueue', function () {

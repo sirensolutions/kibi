@@ -465,7 +465,7 @@ class DashboardState {
   }
 }
 
-//TODO MERGE 5.5.2 add kibi comment as needed
+// kibi: we need to call Private on this
 export function DashboardStateProvider(Private) {
   FilterUtils = Private(FilterUtilsProvider);
   return DashboardState;

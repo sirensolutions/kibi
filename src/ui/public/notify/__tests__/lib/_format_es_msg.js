@@ -18,7 +18,7 @@ describe('formatESMsg', function () {
     expect(actual).to.be(undefined);
   });
 
-  //TODO MERGE 5.5.2 add kibi comment
+  // kibi: added by kibi
   it('kibi - should return the root_cause if $http is used for making a request against Elasticsearch', function () {
     const err = {
       data: {
@@ -36,6 +36,7 @@ describe('formatESMsg', function () {
 
     expect(actual).to.equal('I am the detailed message');
   });
+  // kibi: end
 
   it('should return the root_cause if passed an extended elasticsearch', function () {
     const err = new Error('This is an elasticsearch error');

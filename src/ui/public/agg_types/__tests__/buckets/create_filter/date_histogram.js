@@ -7,8 +7,6 @@ import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { AggTypesBucketsCreateFilterDateHistogramProvider } from 'ui/agg_types/buckets/create_filter/date_histogram';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
-//TODO MERGE 5.5.2 add kibi comments
-
 
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
@@ -22,6 +20,7 @@ describe('AggConfig Filters', function () {
 
     let init;
 
+    // kibi: provide constant 'kbnDefaultAppId'
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
     }));

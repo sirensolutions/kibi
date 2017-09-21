@@ -4,7 +4,6 @@ import expect from 'expect.js';
 import resp from 'fixtures/agg_resp/range';
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
-//TODO MERGE 5.5.2 add kibi comments
 
 
 describe('Range Agg', function () {
@@ -13,6 +12,7 @@ describe('Range Agg', function () {
   let Vis;
   let indexPattern;
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

@@ -3,9 +3,7 @@ import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
-//TODO MERGE 5.5.2 add kibi comment as needed
-
-
+// kibi: 'allowSpyMode()' is added
 const allowSpyMode = function (visType) {
   return !visType.requiresMultiSearch && visType.name !== 'kibi-data-table';
 };

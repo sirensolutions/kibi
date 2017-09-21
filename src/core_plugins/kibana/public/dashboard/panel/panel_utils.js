@@ -6,12 +6,11 @@ export class PanelUtils {
   /**
    * Fills in default parameters where not specified.
    * @param {PanelState} panel
-   * @param {Config} config - Reference to config service // siren: added by Siren
+   * @param {Config} config - Reference to config service // kibi: added by Siren
    */
   static initializeDefaults(panel, config) { // kibi: added config
     panel.size_x = panel.size_x || DEFAULT_PANEL_WIDTH;
-    //TODO MERGE 5.5.2 add kibi comment as needed
-    panel.size_y = panel.size_y || config.get('kibi:panel_vertical_size', DEFAULT_PANEL_HEIGHT); // siren: get from config
+    panel.size_y = panel.size_y || config.get('kibi:panel_vertical_size', DEFAULT_PANEL_HEIGHT); // kibi: get from config
 
     if (!panel.id) {
       // In the interest of backwards comparability

@@ -6,8 +6,6 @@ import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
-//TODO MERGE 5.5.2 add kibi comments
-
 
 let Vis;
 let Notifier;
@@ -17,6 +15,7 @@ let buildHierarchicalData;
 describe('buildHierarchicalData', function () {
   const sandbox = sinon.sandbox.create();
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

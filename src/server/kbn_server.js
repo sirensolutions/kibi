@@ -110,7 +110,7 @@ module.exports = class KbnServer {
    * @return undefined
    */
   async listen() {
-    //TODO MERGE 5.5.2 add kibi comment as needed
+    // kibi: config is added here for 'shutdown_manager'
     const { server, config } = this;
 
     await this.ready();

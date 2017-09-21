@@ -3,8 +3,6 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-//TODO MERGE 5.5.2 add all the necessary kibi comments
-
 import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import { MockState } from 'fixtures/mock_state';
 import $ from 'jquery';
@@ -29,9 +27,11 @@ describe('Filter Bar Directive', function () {
 
   beforeEach(function () {
     // load the application
+    // kibi: provide constant 'kbnDefaultAppId'
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
 
+    // kibi: added by kibi
       $provide.service('kibiState', function () {
         return new MockState({
           _getCurrentDashboardId: _.noop,
@@ -51,16 +51,17 @@ describe('Filter Bar Directive', function () {
       $provide.service('savedQueries', (Promise, Private) => mockSavedObjects(Promise, Private)('savedQueries'));
     });
 
-    ngMock.module('kibana/courier', function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
-    });
-
     ngMock.module('discover/saved_searches', function ($provide) {
       $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearch'));
     });
 
     ngMock.module('app/dashboard', function ($provide) {
       $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboard'));
+    });
+    // kibi: end
+
+    ngMock.module('kibana/courier', function ($provide) {
+      $provide.service('courier', require('fixtures/mock_courier'));
     });
 
     ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {
@@ -76,6 +77,7 @@ describe('Filter Bar Directive', function () {
     });
   });
 
+  // kibi: init() function added
   function init(filters, done) {
     Promise.map(filters, mapFilter).then(function (filters) {
       appState.filters = filters;

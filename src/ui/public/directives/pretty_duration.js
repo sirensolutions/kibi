@@ -70,7 +70,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
             if ($scope[time] === 'now') {
               display[time] = 'now';
             } else {
-              //TODO MERGE 5.5.2 add kibi comments
+              // kibi: use 'parseWithPrecision' instead of 'dateMath.parse'
               const tryParse = parseWithPrecision($scope[time], time === 'to' ? true : false, $scope.kibiTimePrecision);
               display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
             }

@@ -25,7 +25,7 @@ uiRoutes
   redirectTo: '/management'
 });
 
-//TODO MERGE 5.5.2 add kibi comment
+// kibi: 'whenMissingRedirectTo' is changed
 loadDefault({
   whenMissingRedirectTo: '/management/siren/index'
 });

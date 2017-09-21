@@ -45,7 +45,7 @@ export default function (kbnServer, server, config) {
     handler: function (request, reply) {
       const v6Format = config.get('status.v6ApiFormat');
       if (v6Format) {
-        //TODO MERGE 5.5.2 add kibi comment as needed
+        // kibi: 'build_timestamp' is added
         return reply({
           name: config.get('server.name'),
           uuid: config.get('server.uuid'),
@@ -61,7 +61,7 @@ export default function (kbnServer, server, config) {
         });
       }
 
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: 'build_timestamp' is added
       return reply({
         name: config.get('server.name'),
         version: config.get('pkg.version'),

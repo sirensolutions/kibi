@@ -10,17 +10,10 @@ import _ from 'lodash';
 import { VisProvider } from 'ui/vis';
 import { uiModules } from 'ui/modules';
 
-//TODO MERGE 5.5.2 add kibi comment as needed
-
-
 uiModules
 .get('app/visualize')
-.factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, createNotifier) {
+.factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private) {
   const Vis = Private(VisProvider);
-
-  const notify = createNotifier({
-    location: 'SavedVis'
-  });
 
   _.class(SavedVis).inherits(courier.SavedObject);
   function SavedVis(opts) {

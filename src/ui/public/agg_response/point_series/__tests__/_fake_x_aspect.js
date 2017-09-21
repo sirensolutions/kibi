@@ -6,8 +6,6 @@ import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import { PointSeriesFakeXAxisProvider } from 'ui/agg_response/point_series/_fake_x_aspect';
 
 describe('makeFakeXAspect', function () {
-//TODO MERGE 5.5.2 add kibi comments
-
 
   let makeFakeXAspect;
   let Vis;
@@ -15,6 +13,7 @@ describe('makeFakeXAspect', function () {
   let AggConfig;
   let indexPattern;
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

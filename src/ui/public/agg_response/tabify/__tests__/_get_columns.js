@@ -7,9 +7,8 @@ describe('get columns', function () {
   let getColumns;
   let Vis;
   let indexPattern;
-//TODO MERGE 5.5.2 add kibi comments
 
-
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

@@ -4,8 +4,6 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/visualize/editor/agg';
 
-//TODO MERGE 5.5.2 add kibi comment as needed
-
 describe('Vis-Editor-Agg plugin directive', function () {
   const $parentScope = {};
   let $elem;
@@ -40,6 +38,7 @@ describe('Vis-Editor-Agg plugin directive', function () {
     };
   }
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

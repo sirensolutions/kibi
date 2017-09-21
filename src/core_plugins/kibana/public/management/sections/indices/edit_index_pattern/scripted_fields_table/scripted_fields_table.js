@@ -20,7 +20,8 @@ uiModules.get('apps/management')
     scope: true,
     link: function ($scope) {
 
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: change '/management/kibana/indices/{{ indexPattern }}/scriptedField'
+      // to '/management/siren/indices/{{ indexPattern }}/scriptedField'
       const fieldCreatorPath = '/management/siren/indices/{{ indexPattern }}/scriptedField';
       const fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 

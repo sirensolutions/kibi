@@ -16,13 +16,13 @@ import ImportExportProvider from 'plugins/kibi_core/management/sections/objects/
 // kibi: end
 
 uiRoutes
-//TODO MERGE 5.5.2 add kibi comments as needed
+// kibi: route is changed
 .when('/management/siren/objects', {
   template: objectIndexHTML
 });
 
 uiRoutes
-//TODO MERGE 5.5.2 add kibi comments as needed
+// kibi: route is changed
 .when('/management/siren/objects/:service', {
   redirectTo: '/management/siren/objects'
 });
@@ -120,7 +120,7 @@ uiModules.get('apps/management')
           id: item.id
         };
 
-        //TODO MERGE 5.5.2 add kibi comments as needed
+        // kibi: route is changed
         kbnUrl.change('/management/siren/objects/{{ service }}/{{ id }}', params);
       };
 

@@ -7,8 +7,6 @@ import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
-//TODO MERGE 5.5.2 add kibi comment as needed
-
 
 describe('Controller', function () {
   let $rootScope;
@@ -57,6 +55,7 @@ describe('Controller', function () {
     );
   }
 
+  // kibi: added by kibi and used in kibi test
   function getExternalQueryVis(params) {
     return new Vis(
       Private(stubbedLogstashIndexPatternService),
@@ -79,6 +78,7 @@ describe('Controller', function () {
       }
     );
   }
+  // kibi: end
 
   // basically a parameterized beforeEach
   function initController(vis) {
@@ -214,6 +214,7 @@ describe('Controller', function () {
     expect(spiedTabify.firstCall.args[2]).to.have.property('partialRows', false);
   });
 
+  // kibi: added by kibi
   describe('kibi', function () {
     it('converts external_query_terms_filter aggs row values to the query label', function () {
       const tabifyResponse = {
@@ -244,4 +245,5 @@ describe('Controller', function () {
       expect($scope.tableGroups.tables[0].rows[0][0].value).to.eql('my query label');
     });
   });
+  // kibi: end
 });

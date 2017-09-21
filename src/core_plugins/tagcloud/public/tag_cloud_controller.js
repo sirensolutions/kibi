@@ -90,12 +90,13 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     tagCloud.resize();
   }, 500, { trailing: true }), true);
 
-  //TODO MERGE 5.5.2 add kibi comment as needed
   $scope.$on('$destroy', function () {
     removeWatch();
   });
+  // kibi: end
 
-  //TODO MERGE 5.5.2 add kibi comment as needed
+  // kibi: height: $element.height() changed to
+  // $element.parent().height()
   function getContainerSize() {
     return { width: $element.parent().width(), height: $element.parent().height() };
   }

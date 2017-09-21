@@ -10,8 +10,8 @@ import { getDefaultPatternForInterval } from './get_default_pattern_for_interval
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { pickCreateButtonText } from './pick_create_button_text';
 
-//TODO MERGE 5.5.2 add kibi comment as needed
-
+// kibi: change route from '/management/kibana/index'
+// to '/management/siren/index'
 uiRoutes
 .when('/management/siren/index', {
   template,

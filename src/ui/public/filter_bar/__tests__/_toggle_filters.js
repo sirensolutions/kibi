@@ -5,8 +5,6 @@ import sinon from 'sinon';
 import { MockState } from 'fixtures/mock_state';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
-//TODO MERGE 5.5.2 add kibi comments
-
 describe('toggle filters', function () {
   let filters;
   let queryFilter;
@@ -22,6 +20,7 @@ describe('toggle filters', function () {
     function ($provide) {
       $provide.service('courier', require('fixtures/mock_courier'));
 
+      // kibi: provide 'kibiState' service
       $provide.service('kibiState', function () {
         isFilterOutdatedStub = sinon.stub();
         return new MockState({

@@ -5,14 +5,13 @@ import ngMock from 'ng_mock';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
-//TODO MERGE 5.5.2 add kibi comments
-
 
 describe('tabifyAggResponse Integration', function () {
   let Vis;
   let indexPattern;
   let tabifyAggResponse;
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

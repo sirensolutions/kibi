@@ -9,7 +9,7 @@ import indexTemplate from 'plugins/kibana/management/sections/settings/index.htm
 import 'ui/kibi/directives/kibi_select_dashboard';
 
 uiRoutes
-//TODO MERGE 5.5.2 add kibi comment
+// kibi: reoute is changed
 .when('/management/siren/settings', {
   template: indexTemplate
 });
@@ -42,7 +42,7 @@ uiModules.get('apps/management')
   };
 });
 
-//TODO MERGE 5.5.2 add kibi comment
+// kibi: url is changed
 management.getSection('kibana').register('settings', {
   display: 'Advanced Settings',
   order: 20,

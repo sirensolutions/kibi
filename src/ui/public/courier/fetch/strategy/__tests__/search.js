@@ -50,11 +50,11 @@ describe('SearchStrategyProvider', () => {
       });
     });
 
-    //TODO MERGE 5.5.2 check this test and add kibi comment as needed
     describe('when indexList is empty', () => {
       beforeEach(() => {
         reqsFetchParams.forEach(request => request.index = []);
       });
+      // kibi: query is changed
       const emptySearch = JSON.stringify({
         query: {
           match_none: {}
@@ -63,6 +63,7 @@ describe('SearchStrategyProvider', () => {
 
       it('sends a match_none query to the index pattern', () => {
         return search.reqsFetchParamsToBody(reqsFetchParams).then(value => {
+          // kibi: 'index' changed to '.kibi'
           expect(_.includes(value, '"index":[".kibi"]')).to.be(true);
           expect(_.includes(value, emptySearch)).to.be(true);
         });

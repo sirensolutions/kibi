@@ -12,15 +12,15 @@ savedObjectManagementRegistry.register({
   service: 'savedVisualizations',
   title: 'visualizations'
 });
-//TODO MERGE 5.5.2 add kibi comment as needed
 
-
+// kibi: 'savedObjectsAPI' is added
 app.service('savedVisualizations', function (savedObjectsAPI, Promise, esAdmin, kbnIndex, SavedVis, Private, createNotifier, kbnUrl) {
   const visTypes = Private(VisTypesRegistryProvider);
   const notify = createNotifier({
     location: 'Saved Visualization Service'
   });
 
+  // kibi: 'savedObjectsAPI' is added
   const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI });
   saveVisualizationLoader.mapHits = function (hit) {
     const source = hit._source;

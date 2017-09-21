@@ -6,7 +6,6 @@ import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from 'ui/vis';
 describe('AggTableGroup Directive', function () {
-//TODO MERGE 5.5.2 add kibi comments
 
 
   let $rootScope;
@@ -15,6 +14,7 @@ describe('AggTableGroup Directive', function () {
   let Vis;
   let indexPattern;
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

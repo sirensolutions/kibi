@@ -8,7 +8,7 @@ const CONFIG_PATHS = [
   //'/etc/kibana/kibana.yml' kibi: no such config location in kibi
 ].filter(Boolean);
 
-//TODO MERGE 5.5.2 add kibi comment as needed
+// kibi: use '/var/lib/kibi'
 const DATA_PATHS = [
   process.env.DATA_PATH,
   fromRoot('data'),

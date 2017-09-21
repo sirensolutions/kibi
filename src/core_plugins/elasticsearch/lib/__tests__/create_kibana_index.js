@@ -102,7 +102,7 @@ describe('plugins/elasticsearch', function () {
         const error = new Error('Oops!');
         callWithInternalUser.withArgs('indices.create', sinon.match.any).returns(Promise.reject(error));
         const fn = createKibanaIndex(server);
-        //TODO MERGE 5.5.2 add kibi comments as needed
+        //kibi: Kibana changed to Kibi in message
         return fn.catch(function (err) {
           expect(err.message).to.be('Unable to create Kibi index ".my-kibana"');
           expect(err).to.have.property('origError', error);
@@ -113,7 +113,7 @@ describe('plugins/elasticsearch', function () {
         callWithInternalUser.withArgs('indices.create', sinon.match.any).returns(Promise.resolve());
         callWithInternalUser.withArgs('cluster.health', sinon.match.any).returns(Promise.reject(new Error()));
         const fn = createKibanaIndex(server);
-        //TODO MERGE 5.5.2 add kibi comments as needed
+        //kibi: Kibana changed to Kibi in message
         return fn.catch(function (err) {
           expect(err.message).to.be('Waiting for Kibi index ".my-kibana" to come online failed.');
         });

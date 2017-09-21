@@ -2,14 +2,16 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
-//TODO MERGE 5.5.2 add kibi comments
 
+// kibi: imports
 import { MockState } from 'fixtures/mock_state';
+// kibi: end
 
 describe('AggTypeMetricMedianProvider class', function () {
   let indexPattern;
   let aggDsl;
 
+  // kibi: provide 'kibiState' service
   beforeEach(ngMock.module('kibana', $provide => {
     $provide.service('kibiState', function () {
       return new MockState({ filters: [] });

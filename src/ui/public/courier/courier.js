@@ -85,7 +85,7 @@ uiModules.get('kibana/courier')
      * individual errors are routed to their respective requests.
      */
     self.fetch = function () {
-      //TODO MERGE 5.5.2 add kibi comment
+      // kibi: return this
       return fetch.fetchQueued(searchStrategy).then(function () {
         searchLooper.restart();
       });

@@ -5,8 +5,9 @@ import ngMock from 'ng_mock';
 import 'ui/private';
 import 'ui/doc_table';
 import { StubbedSearchSourceProvider } from 'fixtures/stubbed_search_source';
-//TODO MERGE 5.5.2 add kibi comments
+// kibi: imports
 import { MockState } from 'fixtures/mock_state';
+// kibi: end
 
 let $parentScope;
 let $scope;

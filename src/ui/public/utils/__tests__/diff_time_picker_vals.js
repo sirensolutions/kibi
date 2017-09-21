@@ -3,10 +3,10 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { UtilsDiffTimePickerValsProvider } from 'ui/utils/diff_time_picker_vals';
 
-//TODO MERGE 5.5.2 add kibi comments
-
 describe('Diff Time Picker Values', function () {
   let diffTimePickerValues;
+
+  // kibi: $rootScope is added for 'kibiTimePrecision'
   let $rootScope;
 
   beforeEach(ngMock.module('kibana'));
@@ -20,6 +20,7 @@ describe('Diff Time Picker Values', function () {
     expect(diff).to.be(false);
   });
 
+  // kibi: added by kibi
   describe('kibi - time precision', function () {
     it('dateMath ranges with moment object', function () {
       const rangeA = {
@@ -94,6 +95,7 @@ describe('Diff Time Picker Values', function () {
       expect(diffTimePickerValues(rangeAto, rangeBto)).to.be(false);
     });
   });
+  // kibi: end
 
   describe('dateMath ranges', function () {
     it('knows a match', function () {

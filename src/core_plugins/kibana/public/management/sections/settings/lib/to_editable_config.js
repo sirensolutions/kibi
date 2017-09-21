@@ -25,7 +25,7 @@ export function toEditableConfig({ def, name, value, isCustom }) {
   const editor = getEditorType(conf);
   conf.json = editor === 'json';
   conf.select = editor === 'select';
-  //TODO MERGE 5.5.2 add kibi comment
+  // kibi: 'kibiSelectDashboard' is added
   conf.kibiSelectDashboard = editor === 'kibiSelectDashboard';
   conf.bool = editor === 'boolean';
   conf.array = editor === 'array';

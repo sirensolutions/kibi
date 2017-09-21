@@ -118,7 +118,7 @@ describe('Saved Object', function () {
       $provide.decorator('confirmModalPromise', () => overrideConfirm);
     })
   );
-  //TODO MERGE 5.5.2 add kibi comments as needed
+  // kibi: 'savedObjectsAPI' is added
   beforeEach(ngMock.inject(function (es, esAdmin, Private, $window, savedObjectsAPI) {
     SavedObject = Private(SavedObjectProvider);
     IndexPattern = Private(IndexPatternProvider);

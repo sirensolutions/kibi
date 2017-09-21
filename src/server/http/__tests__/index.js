@@ -66,7 +66,7 @@ describe('routes', function () {
     };
 
     it('generates shortened urls', (done) => {
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: use optionsDiscover instead of shortenOptions
       kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
         expect(typeof res.payload).to.be('string');
         expect(res.payload.length > 0).to.be(true);
@@ -75,7 +75,7 @@ describe('routes', function () {
     });
 
     it('redirects shortened urls', (done) => {
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: use optionsDiscover instead of shortenOptions
       kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
         const payload = res.payload; // kibi: store payload
         const gotoOptions = {

@@ -3,16 +3,17 @@ import ngMock from 'ng_mock';
 import { AggTypesMetricsPercentileRanksProvider } from 'ui/agg_types/metrics/percentile_ranks';
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
-//TODO MERGE 5.5.2 add kibi comments
 
+// kibi: imports
 import { MockState } from 'fixtures/mock_state';
-
+// kibi: end
 describe('AggTypesMetricsPercentileRanksProvider class', function () {
 
   let Vis;
   let indexPattern;
   let aggTypeMetricPercentileRanks;
 
+  // kibi: provide 'kibiState' service
   beforeEach(ngMock.module('kibana', $provide => {
     $provide.service('kibiState', function () {
       return new MockState({ filters: [] });

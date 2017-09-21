@@ -4,8 +4,6 @@ import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { AggTypesBucketsCreateFilterFiltersProvider } from 'ui/agg_types/buckets/create_filter/filters';
-//TODO MERGE 5.5.2 add kibi comments
-
 
 describe('AggConfig Filters', function () {
   describe('filters', function () {
@@ -13,6 +11,7 @@ describe('AggConfig Filters', function () {
     let Vis;
     let createFilter;
 
+    // kibi: provide constant 'kbnDefaultAppId'
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
     }));
@@ -45,6 +44,8 @@ describe('AggConfig Filters', function () {
       expect(filter.meta).to.have.property('index', indexPattern.id);
 
     });
+
+    // kibi: added by kibi
     describe('kibi', function () {
       it('should separate compound query and get raw key', function () {
         const vis = new Vis(indexPattern, {
@@ -70,5 +71,6 @@ describe('AggConfig Filters', function () {
 
       });
     });
+    // kibi:end
   });
 });

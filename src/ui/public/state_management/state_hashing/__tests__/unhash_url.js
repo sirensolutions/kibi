@@ -71,8 +71,7 @@ describe('unhashUrl', () => {
     expect(unhashUrl(urlWithHashes, unhashableStates)).to.be(exp);
   });
 
-  //TODO MERGE 5.5.2 add kibi comment or remove this
-
+  // kibi: test kibi replaces blank spaces with "%20" instead if "+"
   it('replaces blank spaces with "%20" instead if "+"', () => {
     const urlWithHashes = 'https://localhost:5601/#/?new foo=bar&testParam=hash&second foo=bar&third foo=bar';
     const exp = 'https://localhost:5601/#/?new%20foo=bar&testParam=replacement&second%20foo=bar&third%20foo=bar';

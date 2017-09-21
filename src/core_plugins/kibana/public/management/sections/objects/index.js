@@ -8,8 +8,7 @@ import { uiModules } from 'ui/modules';
 // add the module deps to this module
 uiModules.get('apps/management');
 
-//TODO MERGE 5.5.2 add kibi comments as needed
-
+// kibi: url is changed
 management.getSection('kibana').register('objects', {
   display: 'Saved Objects',
   order: 10,

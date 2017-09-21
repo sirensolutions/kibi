@@ -4,10 +4,9 @@ import { AggTypesMetricsStdDeviationProvider } from 'ui/agg_types/metrics/std_de
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
-//TODO MERGE 5.5.2 add kibi comments
-
+// kibi:imports
 import { MockState } from 'fixtures/mock_state';
-
+// kibi:end
 
 describe('AggTypeMetricStandardDeviationProvider class', function () {
 
@@ -15,6 +14,7 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
   let indexPattern;
   let aggTypeMetricStandardDeviation;
 
+  // kibi: provide 'kibiState' service
   beforeEach(ngMock.module('kibana', $provide => {
     $provide.service('kibiState', function () {
       return new MockState({ filters: [] });

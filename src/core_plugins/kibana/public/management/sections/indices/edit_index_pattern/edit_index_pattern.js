@@ -16,7 +16,8 @@ import { IndexPatternAuthorizationError } from 'ui/errors';
 // kibi: end
 
 uiRoutes
-//TODO MERGE 5.5.2 add kibi comment as needed
+// kibi: change route from '/management/kibana/indices/:indexPatternId'
+// to '/management/siren/indices/:indexPatternId'
 .when('/management/siren/indices/:indexPatternId', {
   template: editTemplate,
   resolve: {
@@ -125,7 +126,8 @@ uiModules.get('apps/management')
         }
       }
 
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: change '$location.url('/management/kibana/index')'
+      // to '$location.url('/management/siren/index')'
       courier.indexPatterns.delete($scope.indexPattern)
         .then(refreshKibanaIndex)
         .then(function () {

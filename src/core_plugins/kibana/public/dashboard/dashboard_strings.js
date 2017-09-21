@@ -36,7 +36,7 @@ export function getUnsavedChangesWarningMessage(changedFilters) {
  * @param maxLength {integer} the maximum number of characters to show for a name.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-//TODO MERGE 5.5.2 add kibi comment as needed
+// kibi: 'maxLength' added to truncate long dashboard title
 export function getDashboardTitle(title, viewMode, isDirty, maxLength) {
   if (maxLength !== undefined && title.length > maxLength) {
     title = title.substring(0, maxLength) + '...';

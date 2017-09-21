@@ -15,8 +15,7 @@ savedObjectManagementRegistry.register({
   title: 'searches'
 });
 
-//TODO MERGE 5.5.2 add kibi comment as needed
-
+// kibi: savedObjectsAPI is added
 module.service('savedSearches', function (Private, savedObjectsAPI, kbnIndex, esAdmin, SavedSearch, kbnUrl) {
   const options = {
     caching: {

@@ -219,7 +219,7 @@ module.exports = function (tlConfig) {
     sheet = parseSheet(request.sheet);
     return preProcessSheet(sheet).then(function () {
       return _.map(sheet, function (chainList, i) {
-        //TODO MERGE 5.5.2 add kibi comment as needed
+        // kibi: check 'chainList.failed'
         if (chainList.failed) {
           return chainList;
         }
@@ -227,7 +227,7 @@ module.exports = function (tlConfig) {
           stats.sheetTime = (new Date()).getTime();
           return seriesList;
         }).catch(function (e) {
-          //TODO MERGE 5.5.2 add kibi comment as needed
+          // kibi: return wrapped error
           return {
             failed: true,
             cell: i,

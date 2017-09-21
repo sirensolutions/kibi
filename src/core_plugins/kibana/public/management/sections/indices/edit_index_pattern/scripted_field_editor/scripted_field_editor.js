@@ -4,8 +4,8 @@ import UrlProvider from 'ui/url';
 import uiRoutes from 'ui/routes';
 import template from './scripted_field_editor.html';
 
-//TODO MERGE 5.5.2 add kibi comment as needed
-
+// kibi: change '/management/kibana/indices/:' and '/management\/kibana\/indices\/[^\/]'
+// to '/management/siren/indices/:' and '/management\/siren\/indices\/[^\/]'
 uiRoutes
 .when('/management/siren/indices/:indexPatternId/field/:fieldName*', { mode: 'edit' })
 .when('/management/siren/indices/:indexPatternId/create-field/', { mode: 'create' })

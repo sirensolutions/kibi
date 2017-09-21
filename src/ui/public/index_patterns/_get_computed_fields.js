@@ -4,7 +4,7 @@ import _ from 'lodash';
 export function getComputedFields() {
   const self = this;
   const scriptFields = {};
-  //TODO MERGE 5.5.2 add kibi comment
+  // kibi: use const for 'docvalueFields' instead of let
   const docvalueFields = _.map(_.reject(self.fields.byType.date, 'scripted'), 'name');
 
   _.each(self.getScriptedFields(), function (field) {

@@ -3,8 +3,6 @@ import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { AggTypesBucketsCreateFilterHistogramProvider } from 'ui/agg_types/buckets/create_filter/histogram';
-//TODO MERGE 5.5.2 add kibi comments
-
 
 describe('AggConfig Filters', function () {
   describe('histogram', function () {
@@ -12,6 +10,7 @@ describe('AggConfig Filters', function () {
     let Vis;
     let createFilter;
 
+    // kibi: provide constant 'kbnDefaultAppId'
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
     }));

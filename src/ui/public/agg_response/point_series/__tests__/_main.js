@@ -7,8 +7,6 @@ import { VisProvider } from 'ui/vis';
 import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { AggResponsePointSeriesProvider } from 'ui/agg_response/point_series/point_series';
-//TODO MERGE 5.5.2 add kibi comments
-
 
 describe('pointSeriesChartDataFromTable', function () {
   this.slow(1000);
@@ -19,6 +17,7 @@ describe('pointSeriesChartDataFromTable', function () {
   let Table;
   let Vis;
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

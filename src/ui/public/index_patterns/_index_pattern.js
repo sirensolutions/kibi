@@ -189,7 +189,7 @@ export function IndexPatternProvider(Private, createNotifier, config, kbnIndex, 
     .then(fields => {
       const scripted = indexPattern.getScriptedFields();
       const all = fields.concat(scripted);
-      //TODO MERGE 5.5.2 add kibi comment
+      // kibi: return this
       return initFields(indexPattern, all);
     });
   }

@@ -7,8 +7,6 @@ import { GeoHashGridAggResponseFixture } from 'fixtures/agg_resp/geohash_grid';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 
-//TODO MERGE 5.5.2 add kibi comments
-
 describe('GeoJson Agg Response Converter', function () {
   let vis;
   let tabify;
@@ -16,6 +14,7 @@ describe('GeoJson Agg Response Converter', function () {
   let esResponse;
   let expectedAggs;
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

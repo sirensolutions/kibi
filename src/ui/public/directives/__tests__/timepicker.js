@@ -206,7 +206,7 @@ describe('timepicker directive', function () {
       expect(button.length).to.be(1);
     });
 
-    //TODO MERGE 5.5.2 add explanation why this test was added
+    // kibi: added by kibi to test when year is negative
     describe('kibi', function () {
       it('disables the submit button if the year is negative', function () {
         let button = $elem.find('button[disabled]');

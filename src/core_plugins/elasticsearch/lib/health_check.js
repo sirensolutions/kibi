@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import createKibanaIndex from './create_kibana_index';
 import kibanaVersion from './kibana_version';
-//TODO MERGE 5.5.2 add kibi comments as needed
+// kibi: added by kibi to know the list of installed plugins
 import pluginList from './wait_for_plugin_list';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';

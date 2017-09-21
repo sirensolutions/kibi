@@ -9,14 +9,13 @@ import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_in
 
 let Vis;
 let indexPattern;
-//TODO MERGE 5.5.2 add kibi comments
-
 
 describe('buildHierarchicalData()', function () {
   describe('createRawData()', function () {
     let vis;
     let results;
 
+    // kibi: provide constant 'kbnDefaultAppId'
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
     }));

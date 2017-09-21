@@ -3,12 +3,11 @@ import ngMock from 'ng_mock';
 import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import AggParamWriterProvider from '../agg_param_writer';
 describe('Histogram Agg', function () {
-//TODO MERGE 5.5.2 add kibi comments
-
 
   describe('ordered', function () {
     let histogram;
 
+    // kibi: provide constant 'kbnDefaultAppId'
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
     }));
@@ -29,6 +28,7 @@ describe('Histogram Agg', function () {
   describe('params', function () {
     let paramWriter;
 
+    // kibi: provide constant 'kbnDefaultAppId'
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
     }));

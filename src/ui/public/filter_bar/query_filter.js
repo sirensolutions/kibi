@@ -285,21 +285,19 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
       });
     };
 
-    //TODO MERGE 5.5.2 specify if the following code is modified by us.
-
     // existing globalFilters should be mutated by appFilters
     for (let i = appFilters.length - 1; i >= 0; i--) {
       const filter = appFilters[i];
       const match = findFilterInGlobalFilters(globalFilters, filter);
 
       // no match, do nothing
-      //TODO MERGE 5.5.2 specify if the following code is modified by us.
       if (!match) break;
 
       // matching filter in globalState, update global and remove from appState
       _.assign(match.meta, filter.meta);
       appFilters.splice(i, 1);
     }
+    // kibi: end
 
     return [
       uniqFilters(globalFilters, { disabled: true }),

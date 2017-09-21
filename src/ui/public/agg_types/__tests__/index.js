@@ -9,14 +9,13 @@ import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
 import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
 
-//TODO MERGE 5.5.2 add kibi comments
-
 describe('AggTypesComponent', function () {
 
   describe('bucket aggs', function () {
     let bucketAggs;
     let BucketAggType;
 
+    // kibi: provide constant 'kbnDefaultAppId'
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
     }));

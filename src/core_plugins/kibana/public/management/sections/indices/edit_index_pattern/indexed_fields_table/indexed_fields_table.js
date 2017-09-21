@@ -48,7 +48,7 @@ uiModules.get('apps/management')
         const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters);
         _.find($scope.editSections, { index: 'indexedFields' }).count = fields.length; // Update the tab count
 
-        //TODO MERGE 5.5.2 add kibi comment as needed
+        // kibi: get 'relations' from config
         const relations = config.get('kibi:relations');
         $scope.rows = fields.map(function (field) {
           const childScope = _.assign($scope.$new(), {

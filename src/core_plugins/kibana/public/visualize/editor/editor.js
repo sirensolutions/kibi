@@ -49,7 +49,7 @@ uiRoutes
 .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
   template: editorTemplate,
   resolve: {
-    //TODO MERGE 5.5.2 add kibi comment as needed
+    // kibi: 'isEntityDependent' is added
     isEntityDependent: function (Private, savedVisualizations, $route) {
       const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
       return savedVisualizations.get($route.current.params.id)
@@ -58,7 +58,7 @@ uiRoutes
     },
     savedVis: function (savedVisualizations, courier, $route) {
       return savedVisualizations.get($route.current.params.id)
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: urls are changed
       .catch(courier.redirectWhenMissing({
         'visualization': '/visualize',
         'search': '/management/siren/objects/savedVisualizations/' + $route.current.params.id,
@@ -97,7 +97,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     location: 'Visualization Editor'
   });
 
-  //TODO MERGE 5.5.2 add kibi comment as needed
+  // kibi: added by kibi
   $scope.holder = {
     entityURIEnabled: $route.current.locals.isEntityDependent,
     visible: true
@@ -108,6 +108,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
       $scope.fetch();
     }
   });
+  // kibi: end
 
   let stateMonitor;
 

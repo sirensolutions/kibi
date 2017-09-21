@@ -169,8 +169,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         $scope.formatRelative(key);
       };
 
-      //TODO MERGE 5.5.2 add kibi comments
-
+      // kibi: use kibi 'parse()' function instead of 'dateMath.parse()'
       $scope.checkRelative = function () {
         if ($scope.relative.from.count != null && $scope.relative.to.count != null) {
           const from = parse(getRelativeString('from'));

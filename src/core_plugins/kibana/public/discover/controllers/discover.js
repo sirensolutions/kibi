@@ -482,7 +482,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
     });
   }).catch(notify.fatal);
 
-//TODO MERGE 5.5.2 add kibi comment as needed
+// kibi: use parseWithPrecision()
   $scope.updateTime = function () {
     $scope.timeRange = {
       from: parseWithPrecision(timefilter.time.from, false, $scope.kibiTimePrecision),

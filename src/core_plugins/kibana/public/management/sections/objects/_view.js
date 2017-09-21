@@ -5,7 +5,7 @@ import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_o
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-//TODO MERGE 5.5.2 add kibi comments as needed
+// kibi: import 'DeleteHelperFactory'
 import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
 import { castEsToKbnFieldTypeName } from '../../../../../../utils';
 
@@ -108,7 +108,7 @@ uiModules.get('apps/management')
 
       $scope.title = service.type;
 
-      //TODO MERGE 5.5.2 add kibi comments as needed
+      // kibi: use `savedObjectsAPI` instead of `esAdmin`
       savedObjectsAPI.get({
         index: kbnIndex,
         type: service.type,

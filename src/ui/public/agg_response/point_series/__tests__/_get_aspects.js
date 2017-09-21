@@ -6,8 +6,6 @@ import { VisProvider } from 'ui/vis';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { PointSeriesGetAspectsProvider } from 'ui/agg_response/point_series/_get_aspects';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
-//TODO MERGE 5.5.2 add kibi comments
-
 
 describe('getAspects', function () {
   let Vis;
@@ -15,6 +13,7 @@ describe('getAspects', function () {
   let indexPattern;
   let getAspects;
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

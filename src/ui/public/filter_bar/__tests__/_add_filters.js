@@ -5,8 +5,6 @@ import ngMock from 'ng_mock';
 import { MockState } from 'fixtures/mock_state';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
-//TODO MERGE 5.5.2 add kibi comments
-
 describe('add filters', function () {
   let filters;
   let queryFilter;
@@ -21,6 +19,7 @@ describe('add filters', function () {
     function ($provide) {
       $provide.service('courier', require('fixtures/mock_courier'));
 
+      // kibi: provide 'kibiState' service
       $provide.service('kibiState', function () {
         return new MockState({ filters: [] });
       });

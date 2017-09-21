@@ -15,7 +15,7 @@ describe('Query decorator', function () {
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; },
-          //TODO MERGE 5.5.2 kibi comment missing??
+          // kibi: 'isDeclared' is added
           isDeclared: () => false
         };
       });

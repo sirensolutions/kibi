@@ -5,8 +5,6 @@ import sinon from 'sinon';
 import noDigestPromise from 'test_utils/no_digest_promises';
 import mockUiState from 'fixtures/mock_ui_state';
 
-//TODO MERGE 5.5.2 add kibi comment as needed
-
 describe('dashboard panel', function () {
   let $scope;
   let $el;
@@ -70,7 +68,7 @@ describe('dashboard panel', function () {
   it('should not visualize the visualization if it does not exist', function () {
     init({ found: false });
     return $scope.loadedPanel.then(() => {
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: kibi uses savedObjectsAPI, error is different from kibana
       expect($scope.error).to.be('Could not locate object of type: visualization. (id: foo1)');
       parentScope.$digest();
       const content = $el.find('.panel-content');

@@ -27,7 +27,7 @@ uiModules.get('apps/management')
         conf.loading = true;
         fn()
           .then(function () {
-            //TODO MERGE 5.5.2 add kibi comment
+            // kibi: set 'conf.loading' and 'conf.editing' false
             conf.loading = false;
             conf.editing = false;
           })

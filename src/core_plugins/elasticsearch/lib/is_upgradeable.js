@@ -1,8 +1,9 @@
 import semver from 'semver';
-//TODO MERGE 5.5.2 check this bcos is complete different from upstream
 
+// kibi: check alpha,beta and rc not only rc
 const preReleaseRegex = /(\d+\.\d+\.\d+)-(rc|alpha|beta)-?(\d+)/i;
 
+// kibi: compute pre-release index
 function computePreReleaseIndex(matches) {
   const version = matches[1];
   const specifier = matches[2];

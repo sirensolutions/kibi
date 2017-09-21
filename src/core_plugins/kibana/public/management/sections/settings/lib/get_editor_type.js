@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-//TODO MERGE 5.5.2 add kibi comment
+// kibi: 'kibiSelectDashboard' is added
 const NAMED_EDITORS = ['json', 'array', 'boolean', 'select', 'markdown', 'kibiSelectDashboard'];
 const NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
 

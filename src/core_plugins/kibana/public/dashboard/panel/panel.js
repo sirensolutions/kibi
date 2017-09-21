@@ -34,7 +34,7 @@ uiModules
     restrict: 'E',
     template: panelTemplate,
     scope: {
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: 'hideBorders' is added
 
       /**
        * toggle borders around panels

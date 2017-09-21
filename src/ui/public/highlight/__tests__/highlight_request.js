@@ -43,7 +43,7 @@ describe('getHighlightRequest', () => {
     expect(getHighlightRequest).to.be.a(Function);
   });
 
-  //TODO MERGE 5.5.2 add kibi comment
+  // kibi: added by kibi
   describe('kibi', function () {
     it('should remove join queries from the highlight_query for a query with must and must not clauses', () => {
       const queries = {
@@ -90,6 +90,7 @@ describe('getHighlightRequest', () => {
     });
 
   });
+  // kibi: end
 
   it('should add the all_fields param with query_string query without modifying original query', () => {
     getHighlightRequest = getHighlightRequestProvider(config);

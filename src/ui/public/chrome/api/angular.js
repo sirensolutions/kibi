@@ -85,7 +85,7 @@ export function initAngularApi(chrome, internals) {
         try {
           if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
             notify.directive({
-              //TODO MERGE 5.5.2 add kibi comment
+              // kibi: 'href' is changed
               template: `
                 <p>
                   The URL has gotten big and may cause Kibana
@@ -104,7 +104,7 @@ export function initAngularApi(chrome, internals) {
           const { host, path, search, protocol } = parseUrl(window.location.href);
           // rewrite the entire url to force the browser to reload and
           // discard any potentially unstable state from before
-          //TODO MERGE 5.5.2 add kibi comment
+          // kibi: 'path' is changed to 'pathname: path'
           window.location.href = formatUrl({ host, pathname: path, search, protocol, hash: '#/error/url-overflow' });
         }
       };

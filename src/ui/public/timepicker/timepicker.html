@@ -38,7 +38,7 @@
         </div>
 
         <div class="col-md-10">
-          <!-- TODO MERGE 5.5.2 add kibi comment -->
+          <!-- kibi: 'kibi-float-left' is added to class -->
           <div ng-switch on="mode" class="container-fluid kibi-float-left">
             <div ng-switch-when="quick">
 
@@ -125,7 +125,7 @@
                   </label>
                   <br>
                   <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
-                    <!-- TODO MERGE 5.5.2 add kibi comment -->
+                    <!-- kibi: 'kibi-input-field' is added to class -->
                     <input
                       required
                       ng-model="relative.to.count"
@@ -204,12 +204,11 @@
             </div>
           </div>
 
-          <!-- TODO MERGE 5.5.2 add kibi comment -->
-
+          <!-- kibi: added by kibi -->
           <div class="container-fluid kibi-float-left">
             <kibi-sync-time-to class="kbn-timepicker-section"></kibi-sync-time-to>
           </div>
-
+          <!-- kibi: end -->
         </div>
       </div>
     </div>

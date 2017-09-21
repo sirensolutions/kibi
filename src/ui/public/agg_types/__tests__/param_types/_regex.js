@@ -5,8 +5,6 @@ import { AggTypesParamTypesRegexProvider } from 'ui/agg_types/param_types/regex'
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
-//TODO MERGE 5.5.2 add kibi comments
-
 describe('Regex', function () {
 
   let BaseAggParam;
@@ -14,6 +12,7 @@ describe('Regex', function () {
   let Vis;
   let indexPattern;
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

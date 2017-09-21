@@ -4,8 +4,6 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
-//TODO MERGE 5.5.2 add kibi comment as needed
-
 
 describe('Integration', function () {
   let $rootScope;
@@ -15,6 +13,7 @@ describe('Integration', function () {
   let indexPattern;
   let fixtures;
 
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', 'kibana/table_vis', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

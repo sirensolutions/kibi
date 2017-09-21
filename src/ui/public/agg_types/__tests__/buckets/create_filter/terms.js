@@ -5,14 +5,13 @@ import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_in
 import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/create_filter/terms';
 
 describe('AggConfig Filters', function () {
-//TODO MERGE 5.5.2 add kibi comments
-
 
   describe('terms', function () {
     let indexPattern;
     let Vis;
     let createFilter;
 
+    // kibi: provide constant 'kbnDefaultAppId'
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
     }));

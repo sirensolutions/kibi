@@ -201,7 +201,7 @@ app.directive('dashboardApp', function (createNotifier, $injector) {
       };
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: set 'showSavedSearchExplanation' to false
       $scope.showSavedSearchExplanation = false;
       $scope.dashboardViewMode = dashboardState.getViewMode();
 
@@ -210,7 +210,7 @@ app.directive('dashboardApp', function (createNotifier, $injector) {
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
       $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
-      //TODO MERGE 5.5.2 add kibi comment as needed
+      // kibi: pass max length of dashboard title to getDashboardTitle()
       $scope.getDashTitle = () => getDashboardTitle(
         dashboardState.getTitle(),
         dashboardState.getViewMode(),
@@ -265,7 +265,7 @@ app.directive('dashboardApp', function (createNotifier, $injector) {
         dashboardState.setDarkTheme($scope.model.darkTheme);
         updateTheme();
       });
-      //TODO MERGE 5.5.2 add kibi comment
+      // kibi: watch 'model.hideBorders'
       $scope.$watch('model.hideBorders', () => dashboardState.setHideBorders($scope.model.hideBorders));
       $scope.$watch('model.description', () => dashboardState.setDescription($scope.model.description));
       $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));

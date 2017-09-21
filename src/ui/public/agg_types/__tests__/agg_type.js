@@ -9,8 +9,6 @@ import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 
-//TODO MERGE 5.5.2 add kibi comments
-
 describe('AggType Class', function () {
   let AggType;
   let AggParams;
@@ -18,7 +16,7 @@ describe('AggType Class', function () {
   let fieldFormat;
   let Vis;
 
-
+  // kibi: provide constant 'kbnDefaultAppId'
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
   }));

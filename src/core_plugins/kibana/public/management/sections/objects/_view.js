@@ -232,11 +232,7 @@ uiModules.get('apps/management')
         })
         .then(function (resp) {
           // kibi: flush the cache on the server side
-          // TODO MERGE 5.5.2 create an issue for this
-          // KIBI5: put this condition inside queryEngineClient
-          if (service.type === 'query' || service.type === 'template' || service.type === 'script') {
-            return queryEngineClient.clearCache();
-          }
+          queryEngineClient.clearCache(service);
           $rootScope.$emit('kibi:' + service.type + ':changed', resp);
           // kibi: end
         })

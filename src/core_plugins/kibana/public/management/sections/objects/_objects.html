@@ -77,10 +77,8 @@
               aria-label="Filter"
               ng-model="managementObjectsController.advancedFilter"
             >
-            <!--kibi: added tooltip for searching with special characters-->
-            <!-- TODO MERGE 5.5.2 create an issue for this -->
-            <!--KIBI5: add this back somewhere-->
-            <!--<kbn-info class="input-group-addon" placement="left" info="This filter query does not support these characters: +, |, -, *, ( and ). If you need to use them, surround all your query with quotes."></kbn-info>-->
+            <!--kibi: added tooltip for searching with special characters, 'saved-object-finder' is added to class-->
+            <kbn-info class="saved-object-finder" placement="right" info="This filter query does not support these characters: +, |, -, *, ( and ). If you need to use them, surround all your query with quotes."></kbn-info>
           </div>
         </div>
 

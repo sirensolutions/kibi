@@ -13,6 +13,7 @@ import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
 import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import { ObjectActionsRegistryProvider } from 'ui/registry/object_actions';
 import ImportExportProvider from 'plugins/kibi_core/management/sections/objects/import_export_helper';
+import 'plugins/kibana/management/sections/objects/_objects.less';
 // kibi: end
 
 uiRoutes

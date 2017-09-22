@@ -353,7 +353,7 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
     },
     'kibi:joinResultsLimit': {
       type: 'number',
-      value: 1000000,
+      value: 5000000,
       description:
       'The default value of join limit. Can be overwritten per relation in relations advanced options. Set to -1 to remove the limit'
     },

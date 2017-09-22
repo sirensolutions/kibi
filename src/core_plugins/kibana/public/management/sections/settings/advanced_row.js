@@ -70,7 +70,15 @@ uiModules.get('apps/management')
           return config.remove(conf.name);
         });
       };
-       //TODO MERGE 5.5.2 explain why the code was removed
+
+      $scope.isDefaultValue = (conf) => {
+        // conf.isCustom = custom setting, provided by user, so there is no notion of
+        // having a default or non-default value for it
+        return conf.isCustom
+          || conf.value === undefined
+          || conf.value === ''
+          || String(conf.value) === String(conf.defVal);
+      };
     }
   };
 });

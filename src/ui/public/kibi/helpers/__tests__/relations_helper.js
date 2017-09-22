@@ -624,7 +624,7 @@ describe('Kibi Components', function () {
         $rootScope.$digest();
 
         relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1.limit).to.be(1000000);
+        expect(relation1.limit).to.be(5000000);
       });
 
       it('should set limit to default one if present but equal -1', function () {
@@ -664,7 +664,7 @@ describe('Kibi Components', function () {
         $rootScope.$digest();
 
         relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1.limit).to.be(1000000);
+        expect(relation1.limit).to.be(5000000);
       });
 
       it('should set limit to the correct value', function () {

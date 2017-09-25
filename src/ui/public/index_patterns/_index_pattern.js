@@ -134,7 +134,7 @@ export function IndexPatternProvider(Private, createNotifier, config, kbnIndex, 
     if (isFieldRefreshRequired(indexPattern)) {
       promise = indexPattern.refreshFields();
     }
-    return promise.then(() => {initFields(indexPattern);});
+    return promise.then(() =>  initFields(indexPattern));
   }
 
   function setId(indexPattern, id) {
@@ -173,10 +173,6 @@ export function IndexPatternProvider(Private, createNotifier, config, kbnIndex, 
       const newValue = input || oldValue || [];
       indexPattern.fields = new FieldList(indexPattern, newValue);
     });
-
-    const oldValue = indexPattern.fields;
-    const newValue = input || oldValue || [];
-    indexPattern.fields = new FieldList(indexPattern, newValue);
   }
 
   function fetchFields(indexPattern) {

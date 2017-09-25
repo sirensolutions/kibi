@@ -19,9 +19,6 @@ export function IndexPatternsGetIdsProvider(savedObjectsAPI, kbnIndex) {
     cachedPromise = savedObjectsAPI.search({
       index: kbnIndex,
       type: 'index-pattern',
-      //TODO MERGE 5.5.2 create an issue for this or remove if it isn't necessary anymore
-      // KIBI5: @fabiocorneti how to pass this ? storedFields: [],
-      // storedFields: [],
       size: 10000
     })
     // kibi: end

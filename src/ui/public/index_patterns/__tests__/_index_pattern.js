@@ -19,6 +19,10 @@ import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_clie
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
 import { IndexPatternsCalculateIndicesProvider } from '../_calculate_indices';
 
+// kibi: kibi imports
+import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
+// kibi: end
+
 describe('index pattern', function () {
   NoDigestPromises.activateForSuite();
 
@@ -34,6 +38,9 @@ describe('index pattern', function () {
   let intervals;
   let indexPatternsApiClient;
   let defaultTimeField;
+
+  // kibi: mapper added
+  let mapper;
 
   beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule, (PrivateProvider) => {
     PrivateProvider.swap(IndexPatternsCalculateIndicesProvider, () => {
@@ -53,6 +60,7 @@ describe('index pattern', function () {
     mockLogstashFields = Private(stubbedLogstashFields);
     defaultTimeField = mockLogstashFields.find(f => f.type === 'date');
     docSourceResponse = Private(stubbedDocSourceResponse);
+    mapper = Private(IndexPatternsMapperProvider);
 
     DocSource = Private(SavedObjectSourceFactory);
     sinon.stub(DocSource.prototype, 'doIndex');
@@ -64,18 +72,17 @@ describe('index pattern', function () {
       return Promise.resolve(true);
     });
 
-    //TODO MERGE 5.5.2 this need to be rewritten
-    // // kibi: needed to support dotted field names
-    // sinon.stub(mapper, 'getPathsSequenceForIndexPattern', function () {
-    //   const paths = _(mockLogstashFields)
-    //   .filter({ scripted: false })
-    //   .pluck('name')
-    //   .map(fieldName => [ fieldName, fieldName.split('.') ])
-    //   .zipObject()
-    //   .value();
-    //   return Promise.resolve(paths);
-    // });
-    // // kibi: end
+    // kibi: needed to support dotted field names
+    sinon.stub(mapper, 'getPathsSequenceForIndexPattern', function () {
+      const paths = _(mockLogstashFields)
+       .filter({ scripted: false })
+       .pluck('name')
+       .map(fieldName => [ fieldName, fieldName.split('.') ])
+       .zipObject()
+       .value();
+      return Promise.resolve(paths);
+    });
+    // kibi: end
 
     // spy on intervals
     intervals = Private(IndexPatternsIntervalsProvider);

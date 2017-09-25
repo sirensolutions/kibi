@@ -1,5 +1,3 @@
-//TODO MERGE 5.5.2 imports removed, add again if necessary and put kibi comment
-
 export function getUnhashableStatesProvider(getAppState, globalState, $injector) {
   return function getUnhashableStates() {
     // kibi: added kibiState via injector

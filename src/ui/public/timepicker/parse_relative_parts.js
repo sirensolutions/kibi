@@ -1,6 +1,5 @@
-//TODO MERGE 5.5.2 Review if this need an issue or could be removed
-// KIBI5: use the kibi parse with precision helper
-import dateMath from '@elastic/datemath';
+// kibi: 'dateMath' removed and 'parseWithPrecision' is added
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import moment from 'moment';
 import _ from 'lodash';
 import { relativeOptions } from './relative_options';
@@ -28,7 +27,8 @@ export function parseRelativeString(part) {
 
   } else {
     results = { count: 0, unit: 's', round: false };
-    const duration = moment.duration(moment().diff(dateMath.parse(part)));
+    // kibi: use 'parseWithPrecision' instead of 'dateMath.parse()'
+    const duration = moment.duration(moment().diff(parseWithPrecision(part)));
     const units = _.pluck(_.clone(relativeOptions).reverse(), 'value')
       .filter(s => /^[smhdwMy]$/.test(s));
     let unitOp = '';

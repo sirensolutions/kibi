@@ -163,10 +163,6 @@ export function IndexPatternProvider(Private, createNotifier, config, kbnIndex, 
   }
 
   function initFields(indexPattern, input) {
-
-  //TODO MERGE 5.5.2 this need to be fix
-  // AFTER `getPathsSequenceForIndexPattern` STUB FIX IN __test__/_index_pattern.js
-  /*
     // kibi: if paths not fetched yet do it first
     let promise = Promise.resolve();
     if (!indexPattern.kibiPathsFetched) {
@@ -176,7 +172,7 @@ export function IndexPatternProvider(Private, createNotifier, config, kbnIndex, 
       const oldValue = indexPattern.fields;
       const newValue = input || oldValue || [];
       indexPattern.fields = new FieldList(indexPattern, newValue);
-    }); */
+    });
 
     const oldValue = indexPattern.fields;
     const newValue = input || oldValue || [];
@@ -424,9 +420,7 @@ export function IndexPatternProvider(Private, createNotifier, config, kbnIndex, 
     refreshFields() {
       return Promise.resolve()
       .then(() => mapper.clearCache(this))
-      //TODO MERGE 5.5.2 this need to be fix
-      // AFTER `getPathsSequenceForIndexPattern` STUB FIX IN __test__/_index_pattern.js
-      //.then(() => this._fetchFieldsPath()) // kibi: retrieve the path of each field
+      .then(() => this._fetchFieldsPath()) // kibi: retrieve the path of each field
       .then(() => fetchFields(this))
       .then(() => this.save())
       .catch((err) => {

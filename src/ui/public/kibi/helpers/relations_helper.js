@@ -266,10 +266,10 @@ export default function RelationsHelperFactory(config) {
         rel.type = indexRelation.type;
       }
 
-      if (indexRelation.limit_per_shard && indexRelation.limit_per_shard > 0) {
-        rel.limit_per_shard = indexRelation.limit_per_shard;
+      if (indexRelation.limit && indexRelation.limit > 0) {
+        rel.limit = indexRelation.limit;
       } else {
-        rel.limit_per_shard = config.get('kibi:relationsDefaultLimitPerShard');
+        rel.limit = config.get('kibi:joinResultsLimit');
       }
 
     }

@@ -79,7 +79,7 @@ export default function sirenJoin(server) {
     }
 
     // check element of the sequence
-    const relationFields = [ 'pattern', 'queries', 'path', 'indices', 'types', 'type', 'orderBy', 'limit_per_shard', 'termsEncoding' ];
+    const relationFields = [ 'pattern', 'queries', 'path', 'indices', 'types', 'type', 'orderBy', 'limit', 'termsEncoding' ];
     _.each(sequence, function (element, index) {
       if (element.group) {
         if (index !== 0) {
@@ -145,7 +145,7 @@ export default function sirenJoin(server) {
         targetIndex: join[0],
         negate: sequence[i].negate,
         type: sequence[i].type,
-        limitPerShard: sequence[i].limit_per_shard
+        limit: sequence[i].limit
       };
       const { child } = _addJoin(options);
       if (!child) {
@@ -168,7 +168,7 @@ export default function sirenJoin(server) {
         targetIndex: lastJoin[0],
         negate: sequence[0].negate,
         type: sequence[0].type,
-        limitPerShard: sequence[0].limit_per_shard
+        limit: sequence[0].limit
       };
       const { child } = _addJoin(options);
       if (!child) {
@@ -180,7 +180,7 @@ export default function sirenJoin(server) {
   }
 
   function _superGraph(relations) {
-    const relationFields = [ 'pattern', 'path', 'indices', 'types', 'orderBy', 'limit_per_shard', 'termsEncoding' ];
+    const relationFields = [ 'pattern', 'path', 'indices', 'types', 'orderBy', 'limit', 'termsEncoding' ];
 
     return _(relations)
     .each((relation) => {
@@ -222,9 +222,9 @@ export default function sirenJoin(server) {
         if (!clone.termsEncoding) {
           delete clone.termsEncoding;
         }
-        clone.limit_per_shard = targetRel.limit_per_shard;
-        if (!clone.limit_per_shard || clone.limit_per_shard === -1) {
-          delete clone.limit_per_shard;
+        clone.limit = targetRel.limit;
+        if (!clone.limit || clone.limit === -1) {
+          delete clone.limit;
         }
 
         addJoinToParent(node.parent, { join: clone }, sourceRel.types);
@@ -321,7 +321,7 @@ export default function sirenJoin(server) {
   /**
    * Adds a join to the given query, from the source index to the target index
    */
-  function _addJoin({ query, sourcePath, sourceIndex, targetPath, targetIndex, negate, type, limitPerShard }) {
+  function _addJoin({ query, sourcePath, sourceIndex, targetPath, targetIndex, negate, type, limit }) {
     if (!targetIndex) {
       throw new Error('The target index must be defined');
     }
@@ -353,8 +353,8 @@ export default function sirenJoin(server) {
     // if (type) {
     // join.type = type;
     // }
-    if (limitPerShard) {
-      join.limit_per_shard = limitPerShard;
+    if (limit) {
+      join.limit = limit;
     }
 
     const child = join.request.query.bool;
@@ -403,7 +403,7 @@ export default function sirenJoin(server) {
    * - types: the corresponding array of types
    * - type: the kind of type to execute
    * - orderBy: the join ordering option
-   * - limit_per_shard: the maximum number of tuples collected per shard
+   * - limit: join limit parameter
    * - queries: and array of queries that are applied on the set of indices
    *
    * A relation can be negated by setting the field "negate" to true.
@@ -436,7 +436,7 @@ export default function sirenJoin(server) {
    *     - types: the corresponding array of types
    *     - path: the path to the joined field
    *     - orderBy: the join ordering option
-   *     - limit_per_shard: the maximum number of tuples collected per shard
+   *     - limit: join limit parameter
    * - queries: the queries for each index/dashboard as an object. The queries are within an array for each pair.
    */
   const set = function (json) {

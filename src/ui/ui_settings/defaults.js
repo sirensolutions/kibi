@@ -405,12 +405,7 @@ export function getDefaultSettings() {
       type: 'kibiSelectDashboard',
       value: '',
       description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.'
-    }
-    // kibi: end
-  };
-
-  // kibi: enterprise options
-  const enterpriseOptions = {
+    },
     'kibi:shieldAuthorizationWarning': {
       value: true,
       description: 'Set to true to show all authorization warnings'
@@ -439,8 +434,8 @@ export function getDefaultSettings() {
       value: 15,
       description: 'Limit the number of concurrent calls done by the Graph Browser'
     }
+    // kibi: end
   };
 
-  return merge({}, options, enterpriseOptions);
-  // kibi: end
+  return options;
 }

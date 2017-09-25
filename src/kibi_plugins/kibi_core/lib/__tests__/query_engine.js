@@ -28,8 +28,6 @@ const fakeServer = {
             return '.kibi';
           case 'kibi_core.gremlin_server.ssl.ca':
             return null;
-          case 'pkg.kibiEnterpriseEnabled':
-            return false;
           case 'kibi_core.load_jdbc':
             return false;
           default:

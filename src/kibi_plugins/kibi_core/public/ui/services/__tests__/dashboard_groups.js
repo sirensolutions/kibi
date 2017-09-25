@@ -130,7 +130,6 @@ function init({
   getAppStateUndefined = false
 } = {}) {
   ngMock.module('kibana', function ($provide) {
-    $provide.constant('kibiEnterpriseEnabled', false);
     $provide.constant('kbnDefaultAppId', 'dashboard');
 
     appState = new MockState({ filters: [] });

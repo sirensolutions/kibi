@@ -62,7 +62,6 @@ describe('Kibi Components', function () {
   describe('deleteHelper', function () {
     beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
-        $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', '');
       });
 

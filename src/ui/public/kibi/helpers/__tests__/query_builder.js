@@ -30,7 +30,6 @@ describe('Kibi Components', function () {
 
     beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
-        $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', '');
 
         appState = new MockState({ filters: [] });

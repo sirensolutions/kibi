@@ -26,11 +26,10 @@ export class UiSettings {
   constructor(kbnServer, server, status) { // kibi: adds kbnServer argument
     this._server = server;
     this._status = status;
-    this._kibiEnterpriseEnabled = kbnServer.kibiEnterpriseEnabled; // kibi: adds _kibiEnterpriseEnabled
   }
 
   getDefaults() {
-    return getDefaultSettings(this._kibiEnterpriseEnabled); // kibi: adds kibiEnterpriseEnabled parameter
+    return getDefaultSettings();
   }
 
   // returns a Promise for the value of the requested setting
@@ -56,7 +55,7 @@ export class UiSettings {
   async getRaw(req) {
     assertRequest(req);
     return this.getUserProvided(req)
-      .then(user => defaultsDeep(user, this.getDefaults(this._kibiEnterpriseEnabled))); // kibi: adds kibiEnterpriseEnabled parameter
+      .then(user => defaultsDeep(user, this.getDefaults()));
   }
 
   async getUserProvided(req, { ignore401Errors = false } = {}) {

@@ -1,8 +1,7 @@
 import { merge } from 'lodash';
 import moment from 'moment-timezone';
 
-// kibi: added kibiEnterpriseEnabled argument
-export function getDefaultSettings(kibiEnterpriseEnabled) {
+export function getDefaultSettings() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
 
@@ -406,12 +405,7 @@ export function getDefaultSettings(kibiEnterpriseEnabled) {
       type: 'kibiSelectDashboard',
       value: '',
       description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.'
-    }
-    // kibi: end
-  };
-
-  // kibi: enterprise options
-  const enterpriseOptions = {
+    },
     'kibi:shieldAuthorizationWarning': {
       value: true,
       description: 'Set to true to show all authorization warnings'
@@ -440,12 +434,8 @@ export function getDefaultSettings(kibiEnterpriseEnabled) {
       value: 15,
       description: 'Limit the number of concurrent calls done by the Graph Browser'
     }
+    // kibi: end
   };
-
-  if (kibiEnterpriseEnabled) {
-    return merge({}, options, enterpriseOptions);
-  }
-  // kibi: end
 
   return options;
 }

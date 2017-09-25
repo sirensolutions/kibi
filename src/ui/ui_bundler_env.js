@@ -32,7 +32,7 @@ module.exports = class UiBundlerEnv {
       test_harness: fromRoot('src/test_harness/public'),
       querystring: 'querystring-browser',
       // kibi: this alias should be use only for components which have special implementation in kibi enterprise version
-      kibie: fromRoot('src/ui/public'),
+      kibie: fromRoot('src/kibi_plugins/kibi_core/public/ui'),
       // kibi: added test_utils alias to simplify imports
       test_utils: fromRoot('src/test_utils'),
       // kibi: added alias to test folder to simplify imports
@@ -80,13 +80,6 @@ module.exports = class UiBundlerEnv {
 
   addContext(key, val) {
     this.context[key] = val;
-    // kibi: switch the kibie alias,
-    // for enterprise edition it will point to kibi_enterprise_components
-    // which comes as a enterprise plugin
-    if (key === 'kibiEnterpriseEnabled' && val === true) {
-      this.aliases.kibie = 'plugins/kibi_enterprise_components';
-    }
-    // kibi: end
   }
 
   addPostLoader(loader) {

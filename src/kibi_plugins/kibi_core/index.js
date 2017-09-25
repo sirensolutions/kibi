@@ -8,6 +8,7 @@ import cryptoHelper from './lib/crypto_helper';
 import datasourcesSchema from './lib/datasources_schema';
 import QueryEngine from './lib/query_engine';
 import IndexHelper from './lib/index_helper';
+import { patchElasticsearchClient } from './lib/elasticsearch/patch_elasticsearch_client';
 
 import migration1 from './lib/migrations/migration_1';
 import migration2 from './lib/migrations/migration_2';
@@ -123,7 +124,8 @@ module.exports = function (kibana) {
         'plugins/kibi_core/ui/chrome/services/dashboards_nav_state',
         'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups',
         'plugins/kibi_core/ui/services/dashboard_groups',
-        'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button'
+        'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button',
+        'plugins/kibi_core/api/api'
       ],
       managementSections: [
         'plugins/kibi_core/management/sections/kibi_datasources',
@@ -190,6 +192,8 @@ module.exports = function (kibana) {
     init: function (server, options) {
       const config = server.config();
       const datasourceCacheSize   = config.get('kibi_core.datasource_cache_size');
+
+      patchElasticsearchClient(server);
 
       if (config.get('kibi_core.default_dashboard_title') !== '') {
         server.log(['warning','kibi_core'], 'kibi_core.default_dashboard_title is deprecated ' +

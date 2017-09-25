@@ -30,7 +30,6 @@ module.exports = class KbnServer {
     this.version = pkg.version;
     this.kibiVersion = pkg.kibi_version; // kibi: added to manage kibi version
     this.kibiKibanaAnnouncement = pkg.kibi_kibana_announcement; // kibi: added by kibi
-    this.kibiEnterpriseEnabled = pkg.kibi_enterprise_enabled; // kibi: added by kibi
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};

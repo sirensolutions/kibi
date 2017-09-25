@@ -15,7 +15,6 @@ describe('Kibi Management', function () {
   function init({ digest = true, mappings, savedSearches, relations, events }) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', 'dashboard');
-      $provide.constant('kibiEnterpriseEnabled', false);
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {

@@ -32,15 +32,12 @@ uiRoutes
   }
 });
 
-function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, queryEngineClient, $element, kibiWarnings,
-  kibiEnterpriseEnabled) {
+function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, queryEngineClient, $element, kibiWarnings) {
   const setDatasourceSchema = Private(SetDatasourceSchemaProvider);
   const notify = createNotifier({
     location: 'Datasources Configuration Editor'
   });
   const datasource = $scope.datasource = $route.current.locals.datasource;
-
-  $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
 
   $scope.isValid = function () {
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');

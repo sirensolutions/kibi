@@ -29,8 +29,6 @@ export default async (kbnServer, server, config) => {
   bundlerEnv.addContext('kibiVersion', config.get('pkg.kibiVersion'));
   // kibi: added to display the version of kibana this kibi is based on
   bundlerEnv.addContext('kibiKibanaAnnouncement', config.get('pkg.kibiKibanaAnnouncement'));
-  // kibi: set to true for kibi enterprise
-  bundlerEnv.addContext('kibiEnterpriseEnabled', config.get('pkg.kibiEnterpriseEnabled'));
   bundlerEnv.addContext('buildNum', config.get('pkg.buildNum'));
   uiExports.addConsumer(bundlerEnv);
 
@@ -93,7 +91,6 @@ export default async (kbnServer, server, config) => {
       version: kbnServer.version,
       kibiVersion: kbnServer.kibiVersion, // kibi: added to manage kibi version
       kibiKibanaAnnouncement: kbnServer.kibiKibanaAnnouncement, // kibi: added to manage kibi announcement
-      kibiEnterpriseEnabled: kbnServer.kibiEnterpriseEnabled, // kibi: added to manage kibi enterprise
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       buildTimestamp: config.get('pkg.buildTimestamp'),

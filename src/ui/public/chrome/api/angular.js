@@ -24,7 +24,6 @@ export function initAngularApi(chrome, internals) {
     kibana
     .value('kbnVersion', internals.version)
     .value('kibiVersion', internals.kibiVersion) // kibi: added to manage kibi version
-    .value('kibiEnterpriseEnabled', internals.kibiEnterpriseEnabled) // kibi:
     .value('kibiKibanaAnnouncement', internals.kibiKibanaAnnouncement) // kibi:
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)

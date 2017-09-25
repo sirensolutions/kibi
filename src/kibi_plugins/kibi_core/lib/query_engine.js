@@ -104,17 +104,13 @@ QueryEngine.prototype.loadPredefinedData = function () {
       self._isKibiIndexPresent().then(function () {
         self._loadTemplatesMapping().then(function () {
           self._loadTemplates().then(function () {
-            if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-              return self._loadDatasources().then(function () {
-                return self._loadQueries().then(function () {
-                  return self._refreshKibiIndex().then(function () {
-                    fulfill(true);
-                  });
+            return self._loadDatasources().then(function () {
+              return self._loadQueries().then(function () {
+                return self._refreshKibiIndex().then(function () {
+                  fulfill(true);
                 });
               });
-            } else {
-              fulfill(true);
-            }
+            });
           }).catch(reject);
         }).catch(reject);
       }).catch(function (err) {

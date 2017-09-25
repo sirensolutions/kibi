@@ -92,7 +92,6 @@ module.exports = class Config {
       kibiVersion: _.get(pkg, 'kibi_version', ''),
       buildTimestamp: _.get(pkg, 'build.timestamp', ''),
       kibiKibanaAnnouncement: _.get(pkg, 'kibi_kibana_announcement', ''),
-      kibiEnterpriseEnabled: _.get(pkg, 'kibi_enterprise_enabled', false),
       buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _.get(pkg, 'build.sha', '')
     };
 

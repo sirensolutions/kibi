@@ -2,7 +2,7 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 
 module.exports = Promise.method(function (kbnServer, server, config) {
-  if (config.get('plugins.initialize') && config.get('pkg.kibiEnterpriseEnabled')) {
+  if (config.get('plugins.initialize')) {
     const _config = server.config();
     const gremlinServerPath = _config.get('kibi_core.gremlin_server');
 

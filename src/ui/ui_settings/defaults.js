@@ -1,8 +1,7 @@
 import { merge } from 'lodash';
 import moment from 'moment-timezone';
 
-// kibi: added kibiEnterpriseEnabled argument
-export function getDefaultSettings(kibiEnterpriseEnabled) {
+export function getDefaultSettings() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
 
@@ -442,10 +441,6 @@ export function getDefaultSettings(kibiEnterpriseEnabled) {
     }
   };
 
-  if (kibiEnterpriseEnabled) {
-    return merge({}, options, enterpriseOptions);
-  }
+  return merge({}, options, enterpriseOptions);
   // kibi: end
-
-  return options;
 }

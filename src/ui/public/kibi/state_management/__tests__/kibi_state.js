@@ -32,7 +32,6 @@ describe('State Management', function () {
   const defaultEndTime = '2010-09-05T12:00:00.000Z';
 
   const init = function ({
-      kibiEnterpriseEnabled = false,
       pinned,
       savedDashboards = [],
       savedSearches = [],
@@ -66,7 +65,6 @@ describe('State Management', function () {
       $provide.service('globalState', () => globalState);
 
       $provide.constant('kbnIndex', '.kibi');
-      $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
       $provide.constant('kbnDefaultAppId', '');
     });
 

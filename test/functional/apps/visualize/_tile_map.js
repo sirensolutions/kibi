@@ -56,22 +56,13 @@ export default function ({ getService, getPageObjects }) {
 
       function tokenize(row) {
         const tokens = row.split(' ');
-        //TODO MERGE 5.5.2
-        // // kibi: lo vede che stuzzica?
-        // if (tokens.length === 1) {
-        //   return row;
-        // }
-        // return {
-        //   count: tokens[0],
-        //   lat: Math.floor(parseFloat(tokens[3])),
-        //   lon: Math.floor(parseFloat(tokens[5]))
-        // };
-        // // kibi: end
+        if (tokens.length === 1) {
+          return row;
+        }
         return {
-          geohash: tokens[0],
-          count: tokens[1],
-          lat: Math.floor(parseFloat(tokens[4])),
-          lon: Math.floor(parseFloat(tokens[6]))
+          count: tokens[0],
+          lat: Math.floor(parseFloat(tokens[3])),
+          lon: Math.floor(parseFloat(tokens[5]))
         };
       }
 

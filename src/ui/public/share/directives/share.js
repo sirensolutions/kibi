@@ -135,7 +135,8 @@ app.directive('share', function (Private) {
         updateUrls();
       });
 
-      //TODO MERGE 5.5.2 explain why we remove the kibana code and add kibi comment
+      // kibi: toggleShortSnapshotUrl() and toggleShortSnapshotIframeUrl()
+      // removed because we are shortening urls by default
 
       this.copyToClipboard = selector => {
         const notify = new Notifier({

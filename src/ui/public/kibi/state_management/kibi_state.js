@@ -734,6 +734,59 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   };
 
   /**
+   * Returns the current state of the dashboards with given IDs
+   */
+  KibiState.prototype.getStates = function (dashboardIds) {
+    if (!(dashboardIds instanceof Array)) {
+      return Promise.reject(new Error('Expected dashboardIds to be an Array'));
+    }
+    if (!dashboardIds.length) {
+      return Promise.reject(new Error('Expected not empty dashboardIds array'));
+    }
+
+    const options = {
+      pinned: true,
+      disabled: false
+    };
+
+    const appState = getAppState();
+    const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds);
+
+    return getMetas
+    .then((metas) => {
+      const promises = [];
+      for (let i = 0; i < metas.length; i++) {
+        const meta = metas[i];
+        promises.push(meta.savedDash.id);
+        promises.push(meta.savedSearchMeta ? meta.savedSearchMeta.index : null);
+        promises.push(this._getFilters(meta.savedDash.id, appState, meta, options));
+        promises.push(this._getQueries(meta.savedDash.id, appState, meta));
+        promises.push(this._getTime(meta.savedDash.id, meta.savedSearchMeta ? meta.savedSearchMeta.index : null));
+      }
+
+      return Promise.all(promises)
+      .then(results => {
+        // create a map iterating every 5
+        const statesMap = {};
+        for (let i = 0; i < results.length; i = i + 5) {
+          const dashId = results[i];
+          const index = results[i + 1];
+          const filters = results[i + 2];
+          const queries = results[i + 3];
+          const time = results[i + 4];
+          statesMap[dashId] = {
+            index,
+            filters,
+            queries,
+            time
+          };
+        }
+        return statesMap;
+      });
+    });
+  };
+
+  /**
    * Returns the current state of the dashboard with given ID
    */
   KibiState.prototype.getState = function (dashboardId) {

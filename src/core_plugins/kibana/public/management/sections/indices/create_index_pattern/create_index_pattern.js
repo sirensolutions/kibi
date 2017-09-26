@@ -32,6 +32,7 @@ uiModules.get('apps/management')
     expandWildcard: false,
     nameInterval: _.find(intervals, { name: 'daily' }),
     timeFieldOption: null,
+    excludeIndices: true
   };
 
   // UI state.
@@ -288,6 +289,7 @@ uiModules.get('apps/management')
       longDescription,
       icon,
       color
+      excludeIndices
     } = this.formValues;
 
     const id = name;
@@ -312,6 +314,7 @@ uiModules.get('apps/management')
       timeFieldName,
       intervalName,
       notExpandable,
+      excludeIndices
     }).then(createdId => {
       if (!createdId) {
         return;

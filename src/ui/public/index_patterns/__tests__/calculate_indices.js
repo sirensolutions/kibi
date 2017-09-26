@@ -14,6 +14,7 @@ describe('IndexPatternsCalculateIndicesProvider', () => {
   let config;
   let constraints;
   let indices;
+  let configObject; // kibi: added
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     response = {
@@ -32,14 +33,15 @@ describe('IndexPatternsCalculateIndicesProvider', () => {
     });
   }));
 
-  beforeEach(ngMock.inject((Private, $injector) => {
+  beforeEach(ngMock.inject((Private, $injector, _config_) => {
     $rootScope = $injector.get('$rootScope');
     es = $injector.get('es');
     calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
+    configObject = _config_; // kibi: inject config ready to stub
   }));
 
-  function run({ start = undefined, stop = undefined } = {}) {
-    calculateIndices('wat-*-no', '@something', start, stop).then(value => {
+  function run({ start = undefined, stop = undefined, sortDirection = undefined, excludeIndices = false } = {}) {
+    calculateIndices('wat-*-no', '@something', start, stop, sortDirection, excludeIndices).then(value => {
       indices = pluck(value, 'index');
     });
     $rootScope.$apply();
@@ -114,6 +116,32 @@ describe('IndexPatternsCalculateIndicesProvider', () => {
       expect(_.includes(indices, 'mock-*')).to.be(true);
       expect(_.includes(indices, 'ignore-*')).to.be(false);
     });
+
+    // kibi: check if excludeIndices works
+    describe('Kibi filters out indices specified in kibi:indexExclusionRegexList', function () {
+      beforeEach(function () {
+        sinon.stub(configObject, 'get', function (key) {
+          if (key === 'kibi:indexExclusionRegexList') {
+            return ['mock.*'];
+          } else if (key === 'truncate:maxHeight') {
+            return 115;
+          } else {
+            throw new Error('The following key needs to be mocked too: ' + key);
+          }
+        });
+      });
+
+      afterEach(function () {
+        configObject.get.restore();
+      });
+
+      it('should filter out mock-* pattern', function () {
+        run({ excludeIndices: true });
+        expect(_.includes(indices, 'mock-*')).to.be(false);
+        expect(_.includes(indices, 'ignore-*')).to.be(false);
+      });
+    });
+    // kibi: end
   });
 
   describe('response sorting', function () {

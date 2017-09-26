@@ -367,6 +367,11 @@ export function getUiSettingDefaults() {
       value: true,
       description: 'Set to true to show all authorization warnings'
     },
+    'siren:indexExclusionRegexList': {
+      type: 'json',
+      value: JSON.stringify(['\\.siren.*', 'watcher.*']),
+      description: 'List of regex pattern strings, used to filter out indices when performing searches'
+    },
     'siren:graphUseWebGl' : {
       value: true,
       description: 'Set to false to disable WebGL rendering'

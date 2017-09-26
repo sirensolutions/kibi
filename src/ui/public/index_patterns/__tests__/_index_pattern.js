@@ -24,6 +24,8 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 // kibi: kibi imports
 import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
 import { stubbedDocSourceResponse } from 'fixtures/kibi/stubbed_doc_source_response';
+import { IndexPatternsExcludeIndicesProvider } from 'ui/kibi/index_patterns/_exclude_indices';
+import { IndexPatternsCalculateWildcardIndicesProvider } from 'ui/kibi/index_patterns/_calculate_wildcard_indices';
 // kibi: end
 
 describe('index pattern', function () {
@@ -46,6 +48,10 @@ describe('index pattern', function () {
   let DocSource;
   let docSourceResponse;
   let mappingSetup;
+  let exclusions;
+  let config;
+  let calculateWildcardIndices;
+  // kibi: end
 
   beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule, (PrivateProvider) => {
     PrivateProvider.swap(IndexPatternsCalculateIndicesProvider, () => {
@@ -57,9 +63,22 @@ describe('index pattern', function () {
 
       return calculateIndices;
     });
+
+    // kibi: added to stub calculateWildcardIndices
+    PrivateProvider.swap(IndexPatternsCalculateWildcardIndicesProvider, () => {
+      calculateWildcardIndices = sinon.spy(function () {
+        return Promise.resolve([
+          { index: 'foo', max: Infinity, min: -Infinity },
+          { index: 'bar', max: Infinity, min: -Infinity }
+        ]);
+      });
+
+      return calculateWildcardIndices;
+    });
+    // kibi: end
   }));
 
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, _config_) {
     mockLogstashFields = Private(stubbedLogstashFields);
     defaultTimeField = mockLogstashFields.find(f => f.type === 'date');
     savedObjectsResponse = Private(FixturesStubbedSavedObjectIndexPatternProvider);
@@ -92,6 +111,10 @@ describe('index pattern', function () {
        .value();
       return Promise.resolve(paths);
     });
+    // spy on exclusions
+    exclusions = Private(IndexPatternsExcludeIndicesProvider);
+    // set up config ready to stub
+    config = _config_;
     // kibi: end
 
     // spy on intervals
@@ -323,6 +346,168 @@ describe('index pattern', function () {
       });
     });
   });
+
+  // kibi: tests added to verify the behaviour when excludeIndices is set
+  describe('Kibi index pattern #toDetailedIndexList with excludeIndices enabled' , function () {
+
+    describe('and default kibi:indexExclusionRegexList containing "foo" pattern' , function () {
+
+      const expectedNotFiltered = [
+        { index: 'foo', max: Infinity, min: -Infinity },
+        { index: 'bar', max: Infinity, min: -Infinity }
+      ];
+
+      describe('when index pattern is an interval', function () {
+        let interval;
+        let spy;
+        beforeEach(function () {
+          interval = 'result:getInterval';
+          sinon.stub(indexPattern, 'getInterval').returns(interval);
+          sinon.stub(indexPattern, 'isTimeBasedInterval').returns(true);
+          sinon.stub(indexPattern, 'isExcludeIndicesOn').returns(true);
+          spy = sinon.spy(exclusions, 'excludeIndices');
+          // stub config
+          sinon.stub(config, 'get', function (key) {
+            if (key === 'kibi:indexExclusionRegexList') {
+              return ['foo'];
+            } else {
+              throw new Error('The following key needs to be mocked too: ' + key);
+            }
+          });
+        });
+
+        afterEach(function () {
+          config.get.restore();
+        });
+
+        it('invokes interval toDetailedIndexList with given start/stop times', async function () {
+          const indexList = await indexPattern.toDetailedIndexList(1, 2);
+          expect(indexList.map(i => i.index)).to.eql(['bar']); // here foo got filtered out
+          const id = indexPattern.id;
+          sinon.assert.calledWith(intervals.toIndexList, id, interval, 1, 2);
+          sinon.assert.calledOnce(spy);
+          sinon.assert.calledWith(spy, expectedNotFiltered);
+        });
+
+        it('is fulfilled by the result of interval toDetailedIndexList', async function () {
+          const indexList = await indexPattern.toDetailedIndexList();
+          expect(indexList.map(i => i.index)).to.eql(['bar']); // here foo got filtered out
+          sinon.assert.calledOnce(spy);
+          sinon.assert.calledWith(spy, expectedNotFiltered);
+        });
+
+        describe('with sort order', function () {
+          it('passes the sort order to the intervals module', async function () {
+            const indexList = await indexPattern.toDetailedIndexList(1, 2, 'SORT_DIRECTION');
+            expect(indexList.map(i => i.index)).to.eql(['bar']); // here foo got filtered out
+            sinon.assert.calledOnce(intervals.toIndexList);
+            expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
+            sinon.assert.calledOnce(spy);
+            sinon.assert.calledWith(spy, expectedNotFiltered);
+          });
+        });
+      });
+
+      // NOTE:
+      // when index pattern is a time-base wildcard or just a wildcard
+      // then **calculateIndices** or **calculateWildcardIndices** are called is called which is a stub in this test suit
+      // we test the exclude indices directly in calculate_indices.js test suit
+
+      describe('when index pattern is neither an interval nor a time-based wildcard, just a wildcard', function () {
+        let spy;
+
+        beforeEach(function () {
+          indexPattern.id = 'logstash-*';
+          indexPattern.timeFieldName = null;
+          indexPattern.intervalName = null;
+          indexPattern.notExpandable = true;
+
+          sinon.stub(indexPattern, 'isExcludeIndicesOn').returns(true);
+          spy = sinon.spy(exclusions, 'excludeIndices');
+        });
+
+        it('is fulfilled by unfiltered results from calculateWildcardIndices', async function () {
+          const indexList = await indexPattern.toDetailedIndexList();
+          expect(indexList).to.eql(expectedNotFiltered);
+          sinon.assert.calledOnce(spy);
+          sinon.assert.calledWith(spy, expectedNotFiltered);
+        });
+      });
+    });
+
+    describe('and default kibi:indexExclusionRegexList', function () {
+
+      const expectedNotFiltered = [
+        { index: 'foo', max: Infinity, min: -Infinity },
+        { index: 'bar', max: Infinity, min: -Infinity }
+      ];
+
+      describe('when index pattern is an interval', function () {
+        let interval;
+        let spy;
+        beforeEach(function () {
+          interval = 'result:getInterval';
+          sinon.stub(indexPattern, 'getInterval').returns(interval);
+          sinon.stub(indexPattern, 'isTimeBasedInterval').returns(true);
+          sinon.stub(indexPattern, 'isExcludeIndicesOn').returns(true);
+          spy = sinon.spy(exclusions, 'excludeIndices');
+        });
+
+        it('invokes interval toDetailedIndexList with given start/stop times', async function () {
+          await indexPattern.toDetailedIndexList(1, 2);
+          const id = indexPattern.id;
+          sinon.assert.calledWith(intervals.toIndexList, id, interval, 1, 2);
+          sinon.assert.calledOnce(spy);
+          sinon.assert.calledWith(spy, expectedNotFiltered);
+        });
+
+        it('is fulfilled by the result of interval toDetailedIndexList', async function () {
+          const indexList = await indexPattern.toDetailedIndexList();
+          expect(indexList.map(i => i.index)).to.eql(['foo', 'bar']);
+          sinon.assert.calledOnce(spy);
+          sinon.assert.calledWith(spy, expectedNotFiltered);
+        });
+
+        describe('with sort order', function () {
+          it('passes the sort order to the intervals module', async function () {
+            await indexPattern.toDetailedIndexList(1, 2, 'SORT_DIRECTION');
+            sinon.assert.calledOnce(intervals.toIndexList);
+            expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
+            sinon.assert.calledOnce(spy);
+            sinon.assert.calledWith(spy, expectedNotFiltered);
+          });
+        });
+      });
+
+      // NOTE:
+      // when index pattern is a time-base wildcard or just a wildcard
+      // then **calculateIndices** or **calculateWildcardIndices** are called is called which is a stub in this test suit
+      // we test the exclude indices directly in calculate_indices.js test suit
+
+      describe('when index pattern is neither an interval nor a time-based wildcard, just a wildcard', function () {
+        let spy;
+
+        beforeEach(function () {
+          indexPattern.id = 'logstash-*';
+          indexPattern.timeFieldName = null;
+          indexPattern.intervalName = null;
+          indexPattern.notExpandable = true;
+
+          sinon.stub(indexPattern, 'isExcludeIndicesOn').returns(true);
+          spy = sinon.spy(exclusions, 'excludeIndices');
+        });
+
+        it('is fulfilled by unfiltered results from calculateWildcardIndices', async function () {
+          const indexList = await indexPattern.toDetailedIndexList();
+          expect(indexList).to.eql(expectedNotFiltered);
+          sinon.assert.calledOnce(spy);
+          sinon.assert.calledWith(spy, expectedNotFiltered);
+        });
+      });
+
+    });
+  });
+  // kibi: ends
 
   describe('#toDetailedIndexList', function () {
     describe('when index pattern is an interval', function () {

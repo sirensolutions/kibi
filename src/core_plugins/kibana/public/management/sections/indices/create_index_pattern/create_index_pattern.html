@@ -165,6 +165,22 @@
             </div>
           </div>
 
+          <!-- kibi: excludeIndices checkbox -->
+          <div class="kuiVerticalRhythm"">
+            <label class="kuiCheckBoxLabel kuiVerticalRhythm">
+              <input
+                class="kuiCheckBox"
+                type="checkbox"
+                data-test-subj="createIndexPatternEnableExclude"
+                ng-model="controller.formValues.excludeIndices"
+              >
+              <span class="kuiCheckBoxLabel__text">
+                Exclude indices using regexes from Advanced Settings kibi:indexExclusionRegexList
+              </span>
+            </label>
+         </div>
+         <!-- kibi: end -->
+
           <!-- Expand index pattern checkbox -->
           <div class="kuiVerticalRhythm" ng-if="controller.canEnableExpandWildcard()">
             <label class="kuiCheckBoxLabel kuiVerticalRhythm">

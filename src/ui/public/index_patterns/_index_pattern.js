@@ -19,6 +19,8 @@ import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects'
 // kibi: imports
 import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
 import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source'; // kibi: use the SavedObjectSource as DocSource
+import { IndexPatternsCalculateWildcardIndicesProvider } from 'ui/kibi/index_patterns/_calculate_wildcard_indices';
+import { IndexPatternsExcludeIndicesProvider } from 'ui/kibi/index_patterns/_exclude_indices';
 // kibi: end
 
 // kibi: added mappings and createNotifier dependency
@@ -35,7 +37,12 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const type = 'index-pattern';
   // kibi: adds
   const DocSource = Private(SavedObjectSourceFactory);
+  const calculateWildcardIndices = Private(IndexPatternsCalculateWildcardIndicesProvider);
+  const exclusions = Private(IndexPatternsExcludeIndicesProvider);
   const mapper = Private(IndexPatternsMapperProvider);
+  // kibi: end
+
+  const type = 'index-pattern';
   const notify = createNotifier();
   const configWatchers = new WeakMap();
   const docSources = new WeakMap();
@@ -57,6 +64,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     intervalName: 'string',
     fields: 'json',
     sourceFilters: 'json',
+    excludeIndices: 'boolean', // kibi: force index expansion and filtering
     paths: 'json', // kibi: store the path of each field, in order to support dotted field names
     fieldFormatMap: {
       type: 'string',
@@ -334,32 +342,53 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     async toDetailedIndexList(start, stop, sortDirection) {
-      if (this.isTimeBasedInterval()) {
-        return await intervals.toIndexList(
-          this.title, this.getInterval(), start, stop, sortDirection
-        );
-      }
+      return Promise.resolve().then(() => {
+        if (this.isTimeBasedInterval()) {
 
-      if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
-        try {
+          // kibi: added exclussion
+          const indices = intervals.toIndexList(
+            this.id, this.getInterval(), start, stop, sortDirection
+          );
+          if (this.isExcludeIndicesOn()) {
+            return exclusions.excludeIndices(indices);
+          }
+          return indices;
+          // kibi: end
+        }
+
+        if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
           return await calculateIndices(
-            this.title, this.timeFieldName, start, stop, sortDirection
+            // kibi: passing this.excludeIndices inside to filter before sorting
+            this.title, this.timeFieldName, start, stop, sortDirection, this.isExcludeIndicesOn()
           );
         } catch(error) {
           if (!isFieldStatsError(error)) {
             throw error;
           }
         }
-      }
 
-      return [
-        {
-          index: this.title,
-          min: -Infinity,
-          max: Infinity
+        // kibi: added to expand and filter star pattern when it is not timebased
+        if (this.isWildcard() && this.isExcludeIndicesOn()) {
+          return calculateWildcardIndices(this.id)
+          .then(indices => exclusions.excludeIndices(indices));
         }
-      ];
+        // kibi: end
+
+        return [
+          {
+            index: this.title,
+            min: -Infinity,
+            max: Infinity
+          }
+        ];
+      });
     }
+
+    // kibi: added
+    isExcludeIndicesOn() {
+      return this.excludeIndices;
+    }
+    // kibi: end
 
     isIndexExpansionEnabled() {
       return !this.notExpandable;

@@ -97,7 +97,6 @@ image:images/remove-all-filters_5.png[float="right",align="center"]
 One can save with dashboard some specific filters, a custom query or a certain time range.
 If you click on the *Reset* button in the toolbar panel, the temporary filters/queries/time set on **all** dashboards would be removed, reverted to a dashboard's default state with the saved filters/query/time.
 
-NOTE: If the <<kibi-settings-relations,relational panel>> is <<kibi-advanced-settings-relationalPanel,enabled>>, clicking this button does not remove the <<_filters,filter>>. If you want to do so, you need to disable the relational panel in the <<kibi-settings-relations,Relations settings>>.
 
 [[customizing-your-dashboard]]
 == Customizing Dashboard Elements

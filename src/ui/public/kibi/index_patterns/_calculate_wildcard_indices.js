@@ -11,8 +11,8 @@ export function IndexPatternsCalculateWildcardIndicesProvider(Private, es) {
         fields: [ '_id' ]
       }
     })
-    .then(indices => {
-      return map(indices, function (value, key) {
+    .then(resp => {
+      return map(resp.indices, function (value, key) {
         return {
           index: key,
           min: -Infinity,

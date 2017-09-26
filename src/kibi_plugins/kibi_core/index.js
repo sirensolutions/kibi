@@ -159,6 +159,7 @@ module.exports = function (kibana) {
         enabled: Joi.boolean().default(true),
 
         load_jdbc: Joi.boolean().default(false),
+        clusterplugins: Joi.any(),
 
         enterprise_enabled: Joi.boolean().default(false),
         elasticsearch: Joi.object({

@@ -51,9 +51,6 @@ module.exports = function (kibana) {
         logQueries: boolean().default(false),
         ssl: sslSchema,
         apiVersion: Joi.string().default('5.x'),
-        // kibi: we set the list of plugins during health checks
-        plugins: Joi.array().default([]),
-        // kibi: end
         healthCheck: object({
           delay: number().default(2500)
         }).default(),

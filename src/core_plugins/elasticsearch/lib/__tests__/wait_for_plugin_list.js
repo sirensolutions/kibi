@@ -77,7 +77,7 @@ describe('plugins/elasticsearch', function () {
 
       return waitForPluginList(fakePlugin, fakeServer)
       .then(function () {
-        expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-vanguard']);
+        expect(fakeConfig['kibi_core.clusterplugins']).to.eql(['siren-vanguard']);
         expect(fakePlugin.status.red()).to.eql(undefined);
       });
     });
@@ -112,7 +112,7 @@ describe('plugins/elasticsearch', function () {
       );
 
       return waitForPluginList(fakePlugin, fakeServer).then(function () {
-        expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-vanguard']);
+        expect(fakeConfig['kibi_core.clusterplugins']).to.eql(['siren-vanguard']);
         expect(fakePlugin.status.red()).to.eql(undefined);
       });
     });
@@ -147,7 +147,7 @@ describe('plugins/elasticsearch', function () {
       );
 
       return waitForPluginList(fakePlugin, fakeServer).then(function () {
-        expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-vanguard', 'missing-siren-vanguard']);
+        expect(fakeConfig['kibi_core.clusterplugins']).to.eql(['siren-vanguard', 'missing-siren-vanguard']);
         expect(fakePlugin.status.red()).to.eql(
           'Siren Vanguard plugin is missing at data node:[nodeB] ip:[127.0.0.1]\n' +
           'Siren Vanguard plugin should be installed on all data nodes.'
@@ -186,7 +186,7 @@ describe('plugins/elasticsearch', function () {
       );
 
       return waitForPluginList(fakePlugin, fakeServer).then(function () {
-        expect(fakeConfig['elasticsearch.plugins']).to.eql(['other-plugin']);
+        expect(fakeConfig['kibi_core.clusterplugins']).to.eql(['other-plugin']);
         expect(fakePlugin.status.red()).to.eql(undefined);
       });
     });

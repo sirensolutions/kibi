@@ -124,7 +124,8 @@ describe('Notifier', function () {
 
     it('has css class helper functions', function () {
       expect(notify('error').getIconClass()).to.equal('fa fa-warning');
-      expect(notify('error').getButtonClass()).to.equal('kuiButton--danger');
+      // kibi: 'kuiButton--danger' is changed to 'btn-danger'
+      expect(notify('error').getButtonClass()).to.equal('btn-danger');
       expect(notify('error').getAlertClassStack()).to.equal('toast-stack alert alert-danger');
       expect(notify('error').getAlertClass()).to.equal('toast alert alert-danger');
       expect(notify('error').getButtonGroupClass()).to.equal('toast-controls');
@@ -171,7 +172,8 @@ describe('Notifier', function () {
 
     it('has css class helper functions', function () {
       expect(notify('warning').getIconClass()).to.equal('fa fa-warning');
-      expect(notify('warning').getButtonClass()).to.equal('kuiButton--warning');
+      // kibi: 'kuiButton--warning' is changed to 'btn-warning'
+      expect(notify('warning').getButtonClass()).to.equal('btn-warning');
       expect(notify('warning').getAlertClassStack()).to.equal('toast-stack alert alert-warning');
       expect(notify('warning').getAlertClass()).to.equal('toast alert alert-warning');
       expect(notify('warning').getButtonGroupClass()).to.equal('toast-controls');
@@ -218,7 +220,8 @@ describe('Notifier', function () {
 
     it('has css class helper functions', function () {
       expect(notify('info').getIconClass()).to.equal('fa fa-info-circle');
-      expect(notify('info').getButtonClass()).to.equal('kuiButton--primary');
+      // kibi: 'kuiButton--primary' is changed to 'btn-info'
+      expect(notify('info').getButtonClass()).to.equal('btn-info');
       expect(notify('info').getAlertClassStack()).to.equal('toast-stack alert alert-info');
       expect(notify('info').getAlertClass()).to.equal('toast alert alert-info');
       expect(notify('info').getButtonGroupClass()).to.equal('toast-controls');
@@ -286,9 +289,11 @@ describe('Notifier', function () {
         expect(action).to.have.property('getButtonClass');
         expect(action.getButtonClass).to.be.a('function');
         if (idx === 0) {
-          expect(action.getButtonClass()).to.be('kuiButton--primary kuiButton--primary');
+          // kibi: 'kuiButton--primary kuiButton--primary' is changed to 'kuiButton--primary btn-info'
+          expect(action.getButtonClass()).to.be('kuiButton--primary btn-info');
         } else {
-          expect(action.getButtonClass()).to.be('kuiButton--basic kuiButton--primary');
+          // kibi: 'kuiButton--basic kuiButton--primary' is changed to 'kuiButton--basic btn-info'
+          expect(action.getButtonClass()).to.be('kuiButton--basic btn-info');
         }
       });
     });
@@ -402,7 +407,8 @@ describe('Notifier', function () {
 
     it('has css class helper functions', function () {
       expect(notify('banner').getIconClass()).to.equal('');
-      expect(notify('banner').getButtonClass()).to.equal('kuiButton--basic');
+      // kibi: 'kuiButton--basic' is changed to 'btn-banner'
+      expect(notify('banner').getButtonClass()).to.equal('btn-banner');
       expect(notify('banner').getAlertClassStack()).to.equal('toast-stack alert alert-banner');
       expect(notify('banner').getAlertClass()).to.equal('alert alert-banner');
       expect(notify('banner').getButtonGroupClass()).to.equal('toast-controls-banner');

@@ -25,7 +25,7 @@ module.exports = function createProxy(server, method, path, config) {
 
   const serverConfig = server.config();
   function getCredentials(request) {
-    let credentials = serverConfig.has('shield.cookieName') ? request.state[serverConfig.get('shield.cookieName')] : null;
+    let credentials = serverConfig.has('xpack.security.cookieName') ? request.state[serverConfig.get('xpack.security.cookieName')] : null;
     if (request.auth && request.auth.credentials && request.auth.credentials.proxyCredentials) {
       credentials = request.auth.credentials.proxyCredentials;
     }

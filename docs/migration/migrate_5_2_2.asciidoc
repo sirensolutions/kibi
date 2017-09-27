@@ -773,8 +773,25 @@ Arguments:
 [float]
 === License
 
-You will need to upload your license once the cluster is up and running; to
-upload the license you can use curl as follows:
+You will need to upload your license once the cluster is up and running.
+
+==== In Kibi
+To upload the license in Kibi, navigate to the management section.
+
+image::images/management_no-license.jpg[]
+
+This page will show the license has not been installed.
+
+Click on `License` and select `Upload Licence`
+ 
+image::images/license_page_before_install.jpg[] 
+
+Once you have selected your license and it has been uploaded, the page will show the license details.
+
+image::images/license_page_after_install.jpg[]
+
+==== Via CLI
+To upload the license you can use curl as follows:
 
 [source,bash]
 ----

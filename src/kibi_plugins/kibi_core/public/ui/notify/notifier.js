@@ -109,11 +109,6 @@ const typeToAlertClassMap = {
 
 
 function add(notif, cb) {
-  // kibi: with awesomeDemoMode we ignore errors
-  if (notif.type === 'danger' && Notifier.config.awesomeDemoMode) {
-    return;
-  }
-
   _.set(notif, 'info.version', version);
   _.set(notif, 'info.buildNum', buildNum);
 
@@ -245,7 +240,6 @@ export function Notifier(opts) {
 }
 
 Notifier.config = {
-  awesomeDemoMode: false, // kibi: hide error messages
   shieldAuthorizationWarning: false, // kibi: show/hide shield warnings
   bannerLifetime: 3000000,
   errorLifetime: 300000,

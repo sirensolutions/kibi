@@ -357,10 +357,6 @@ export function getDefaultSettings() {
     },
 
     // kibi: kibi options
-    'kibi:awesomeDemoMode' : {
-      value: false,
-      description: 'Set to true to suppress all warnings and errors'
-    },
     'kibi:timePrecision' : {
       type: 'string',
       value: 's',
@@ -413,10 +409,6 @@ export function getDefaultSettings() {
     'kibi:graphUseWebGl' : {
       value: true,
       description: 'Set to false to disable WebGL rendering'
-    },
-    'kibi:graphUseFiltersFromDashboards' : {
-      value: false,
-      description: 'Set to true to use filters from dashboards on expansion'
     },
     'kibi:graphStatesLimit': {
       value: 5,

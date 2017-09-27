@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { isEqual } from 'lodash';
 import qs from 'ui/utils/query_string';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
@@ -117,7 +116,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
         query: '*'
       }
     });
-    return isEqual(query, defaultQuery);
+    return _.isEqual(query, defaultQuery);
   };
 
   /**
@@ -733,6 +732,12 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     return _.keys(this[this._properties.dashboards]);
   };
 
+  const wrapPromise = function (p) {
+    return new Promise(function (resolve, reject) {
+      p.then(res => resolve(res)).catch(err => resolve(err));
+    });
+  };
+
   /**
    * Returns the current state of the dashboards with given IDs
    */
@@ -741,7 +746,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       return Promise.reject(new Error('Expected dashboardIds to be an Array'));
     }
     if (!dashboardIds.length) {
-      return Promise.reject(new Error('Expected not empty dashboardIds array'));
+      return Promise.resolve({});
     }
 
     const options = {
@@ -750,18 +755,20 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     };
 
     const appState = getAppState();
-    const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds);
+    const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds, false);
 
     return getMetas
     .then((metas) => {
       const promises = [];
       for (let i = 0; i < metas.length; i++) {
         const meta = metas[i];
+        // this promises can not fail so we correctly report errors
+        // lets wrap them
         promises.push(meta.savedDash.id);
         promises.push(meta.savedSearchMeta ? meta.savedSearchMeta.index : null);
-        promises.push(this._getFilters(meta.savedDash.id, appState, meta, options));
-        promises.push(this._getQueries(meta.savedDash.id, appState, meta));
-        promises.push(this._getTime(meta.savedDash.id, meta.savedSearchMeta ? meta.savedSearchMeta.index : null));
+        promises.push(wrapPromise(this._getFilters(meta.savedDash.id, appState, meta, options)));
+        promises.push(wrapPromise(this._getQueries(meta.savedDash.id, appState, meta)));
+        promises.push(wrapPromise(this._getTime(meta.savedDash.id, meta.savedSearchMeta ? meta.savedSearchMeta.index : null)));
       }
 
       return Promise.all(promises)
@@ -774,13 +781,33 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
           const filters = results[i + 2];
           const queries = results[i + 3];
           const time = results[i + 4];
-          statesMap[dashId] = {
-            index,
-            filters,
-            queries,
-            time
-          };
+
+          if (filters instanceof Error) {
+            notify.warning(filters);
+            statesMap[dashId] = { error: filters };
+          } else if (queries instanceof Error) {
+            notify.warning(queries);
+            statesMap[dashId] = { error: queries };
+          } else if (time instanceof Error) {
+            notify.warning(time);
+            statesMap[dashId] = { error: time };
+          } else {
+            statesMap[dashId] = {
+              index,
+              filters,
+              queries,
+              time
+            };
+          }
         }
+
+        // here add the one for which the meta is missing
+        _.each(dashboardIds, dashId => {
+          if (!statesMap[dashId]) {
+            statesMap[dashId] = {};
+          }
+        });
+
         return statesMap;
       });
     });

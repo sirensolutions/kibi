@@ -218,40 +218,53 @@ uiModules
           const metadataPromises = [];
           for (const dashboardId in results) {
             if (results.hasOwnProperty(dashboardId)) {
-              const index = results[dashboardId].index;
-              const filters = results[dashboardId].filters;
-              const queries = results[dashboardId].queries;
-              const time = results[dashboardId].time;
+              let p;
+              const error = results[dashboardId].error;
+              if (error) {
+                p = Promise.resolve({
+                  dashboardId: dashboardId,
+                  filters: [],
+                  queries: [],
+                  indices: [],
+                  indexPattern: null,
+                  error: true
+                });
 
-              const query = queryBuilder(filters, queries, time);
-              query.size = 0; // we do not need hits just a count
-              const p =  kibiState.timeBasedIndices(index, dashboardId)
-              .then(indices => {
-                return {
-                  dashboardId,
-                  filters,
-                  queries,
-                  query,
-                  indices,
-                  indexPattern: index
-                };
-              })
-              .catch((error) => {
-                // If computing the indices failed because of an authorization error
-                // set indices to an empty array and mark the dashboard as forbidden.
-                if (error.status === 403) {
+              } else {
+                const index = results[dashboardId].index;
+                const filters = results[dashboardId].filters;
+                const queries = results[dashboardId].queries;
+                const time = results[dashboardId].time;
+                const query = queryBuilder(filters, queries, time);
+                query.size = 0; // we do not need hits just a count
+                p =  kibiState.timeBasedIndices(index, dashboardId)
+                .then(indices => {
                   return {
                     dashboardId,
                     filters,
                     queries,
                     query,
-                    forbidden: true,
-                    indices: [],
+                    indices,
                     indexPattern: index
                   };
-                }
-                throw error;
-              });
+                })
+                .catch((error) => {
+                  // If computing the indices failed because of an authorization error
+                  // set indices to an empty array and mark the dashboard as forbidden.
+                  if (error.status === 403) {
+                    return {
+                      dashboardId,
+                      filters,
+                      queries,
+                      query,
+                      forbidden: true,
+                      indices: [],
+                      indexPattern: index
+                    };
+                  }
+                  throw error;
+                });
+              }
               metadataPromises.push(p);
             }
           }

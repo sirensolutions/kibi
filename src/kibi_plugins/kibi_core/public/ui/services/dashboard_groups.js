@@ -207,80 +207,97 @@ uiModules
     _getDashboardsMetadata(ids, forceCountsUpdate = false) {
       return savedDashboards.find()
       .then((resp) => {
-        const dashboards = _.filter(resp.hits, dashboard => dashboard.savedSearchId && _.contains(ids, dashboard.id));
-        const metadataPromises = _.map(dashboards, (dashboard) => {
-          return kibiState.getState(dashboard.id)
-          .then(({ index, filters, queries, time }) => {
-            const query = queryBuilder(filters, queries, time);
-            query.size = 0; // we do not need hits just a count
-            // here take care about correctly expanding timebased indices
-            return kibiState.timeBasedIndices(index, dashboard.id)
-            .then(indices => {
-              return {
-                dashboardId: dashboard.id,
-                filters,
-                queries,
-                query,
-                indices,
-                indexPattern: index
-              };
-            })
-            .catch((error) => {
-              // If computing the indices failed because of an authorization error
-              // set indices to an empty array and mark the dashboard as forbidden.
-              if (error.status === 403) {
-                return {
-                  dashboardId: dashboard.id,
-                  filters,
-                  queries,
-                  query,
-                  forbidden: true,
+
+        const dashboardIds = _(resp.hits)
+        .filter(dashboard => dashboard.savedSearchId && _.contains(ids, dashboard.id))
+        .pluck('id')
+        .value();
+
+        return kibiState.getStates(dashboardIds).then((results) => {
+          // remap to an array
+          const metadataPromises = [];
+          for (const dashboardId in results) {
+            if (results.hasOwnProperty(dashboardId)) {
+              let p;
+              const error = results[dashboardId].error;
+              if (error) {
+                p = Promise.resolve({
+                  dashboardId: dashboardId,
+                  filters: [],
+                  queries: [],
                   indices: [],
-                  indexPattern: index
-                };
+                  indexPattern: null,
+                  error: true
+                });
+
+              } else {
+                const index = results[dashboardId].index;
+                const filters = results[dashboardId].filters;
+                const queries = results[dashboardId].queries;
+                const time = results[dashboardId].time;
+                const query = queryBuilder(filters, queries, time);
+                query.size = 0; // we do not need hits just a count
+                p =  kibiState.timeBasedIndices(index, dashboardId)
+                .then(indices => {
+                  return {
+                    dashboardId,
+                    filters,
+                    queries,
+                    query,
+                    indices,
+                    indexPattern: index
+                  };
+                })
+                .catch((error) => {
+                  // If computing the indices failed because of an authorization error
+                  // set indices to an empty array and mark the dashboard as forbidden.
+                  if (error.status === 403) {
+                    return {
+                      dashboardId,
+                      filters,
+                      queries,
+                      query,
+                      forbidden: true,
+                      indices: [],
+                      indexPattern: index
+                    };
+                  }
+                  throw error;
+                });
               }
-              throw error;
-            });
-          })
-          .catch(err => {
-            notify.warning(err);
-            return {
-              dashboardId: dashboard.id,
-              filters: [],
-              queries: [],
-              indices: [],
-              indexPattern: null,
-              error: true
-            };
+              metadataPromises.push(p);
+            }
+          }
+
+          return Promise.all(metadataPromises).then((metadata) => {
+
+            metadata = _.sortBy(metadata, result => ids.indexOf(result.dashboardId));
+            // here fire the query to get counts
+            const countsQuery = _.map(metadata, result => {
+              return searchHelper.optimize(result.indices, result.query, result.indexPattern);
+            })
+            .join('');
+
+            if (countsQuery) {
+              if (lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {
+                _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+              } else {
+                return es.msearch({
+                  body: countsQuery,
+                  getCountsOnTabs: '' // ?getCountsOnTabs= has no meaning it is just useful to filter when inspecting requests
+                })
+                .then(response => {
+                  lastFiredMultiCountsQuery = countsQuery;
+                  lastMultiCountsQueryResults = response.responses;
+                  _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+                  return metadata;
+                });
+              }
+            }
+            return metadata;
           });
         });
 
-        return Promise.all(metadataPromises).then((metadata) => {
-          metadata = _.sortBy(metadata, result => ids.indexOf(result.dashboardId));
-          // here fire the query to get counts
-          const countsQuery = _.map(metadata, result => {
-            return searchHelper.optimize(result.indices, result.query, result.indexPattern);
-          })
-          .join('');
-
-          if (countsQuery) {
-            if (lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {
-              _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
-            } else {
-              return es.msearch({
-                body: countsQuery,
-                getCountsOnTabs: '' // ?getCountsOnTabs= has no meaning it is just useful to filter when inspecting requests
-              })
-              .then(response => {
-                lastFiredMultiCountsQuery = countsQuery;
-                lastMultiCountsQueryResults = response.responses;
-                _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
-                return metadata;
-              });
-            }
-          }
-          return metadata;
-        });
       });
     }
 

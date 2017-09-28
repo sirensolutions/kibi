@@ -844,7 +844,7 @@ describe('Kibi Services', function () {
 
       it('dashboard does NOT exist', function (done) {
         dashboardGroups._getDashboardsMetadata(['dash-do-not-exist']).then(function (meta) {
-          expect(meta).to.eql([]);
+          expect(meta).to.eql({});
           done();
         }).catch(done);
       });
@@ -860,9 +860,7 @@ describe('Kibi Services', function () {
         sinon.stub(es, 'msearch').returns(Promise.resolve({
           responses: [
             {
-              hits: {
-                total: 0
-              }
+              error: 'Unknown saved search'
             },
             {
               hits: {
@@ -893,9 +891,7 @@ describe('Kibi Services', function () {
         sinon.stub(es, 'msearch').returns(Promise.resolve({
           responses: [
             {
-              hits: {
-                total: 0
-              }
+              error: 'Index does not exist'
             },
             {
               hits: {

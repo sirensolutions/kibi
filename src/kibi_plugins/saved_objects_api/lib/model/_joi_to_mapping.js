@@ -11,6 +11,8 @@ function getElasticsearchMappingType(joi) {
       return { type: 'text' };
     case 'boolean':
       return { type: 'boolean' };
+    case 'any':
+      return { type: 'object' };
     case 'object':
       if (joi.children) {
         const body = {

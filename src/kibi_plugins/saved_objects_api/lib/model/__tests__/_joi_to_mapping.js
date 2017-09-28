@@ -16,6 +16,7 @@ describe('saved_objects_api', function () {
           title: Joi.string(),
           created: Joi.date(),
           json: Joi.object(),
+          dynamic: Joi.any(),
           nested: Joi.object().keys({
             id: Joi.number().integer(),
             nested: Joi.object().keys({
@@ -43,6 +44,9 @@ describe('saved_objects_api', function () {
           json: {
             type: 'string'
           },
+          dynamic: {
+            type: 'object'
+          },
           nested: {
             properties: {
               id: {
@@ -62,7 +66,7 @@ describe('saved_objects_api', function () {
 
       it('should throw an error if a Joi type is not recognized.', function () {
         const schema = Joi.object().keys({
-          id: Joi.any()
+          id: Joi.lazy(() => {})
         });
 
         expect(() => {joiToMapping(schema);}).to.throwError();

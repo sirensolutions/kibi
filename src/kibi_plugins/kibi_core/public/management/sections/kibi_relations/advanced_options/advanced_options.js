@@ -33,7 +33,7 @@ uiModules
   }
 
   if (!$scope.relation.limit) {
-    $scope.relation.limit = -1; // -1 to take the global one from kibi:joinResultsLimit
+    $scope.relation.limit = -1; // -1 to take the global one from kibi:joinLimit
   }
 
   // cancel button

@@ -268,7 +268,7 @@ export function RelationsHelperFactory(config) {
 
       let defaultJoinLimit = -1;
       try {
-        defaultJoinLimit = parseInt(config.get('kibi:joinResultsLimit'));
+        defaultJoinLimit = parseInt(config.get('kibi:joinLimit'));
       } catch (e) {
         // ignore parsing error they should be handled when user is saving the value
       }

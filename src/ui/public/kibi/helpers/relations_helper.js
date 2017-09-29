@@ -266,10 +266,17 @@ export default function RelationsHelperFactory(config) {
         rel.type = indexRelation.type;
       }
 
+      let defaultJoinLimit = -1;
+      try {
+        defaultJoinLimit = parseInt(config.get('kibi:joinLimit'));
+      } catch (e) {
+        // ignore parsing error they should be handled when user is saving the value
+      }
+
       if (indexRelation.limit && indexRelation.limit > 0) {
         rel.limit = indexRelation.limit;
-      } else {
-        rel.limit = config.get('kibi:joinResultsLimit');
+      } else if (defaultJoinLimit > 0) {
+        rel.limit = defaultJoinLimit;
       }
 
     }

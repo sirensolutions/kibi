@@ -667,6 +667,46 @@ describe('Kibi Components', function () {
         expect(relation1.limit).to.be(5000000);
       });
 
+      it('should NOT set limit to default one if present but equal zero', function () {
+        const relations = {
+          relationsIndices: [
+            {
+              limit: 0,
+              indices: [
+                {
+                  indexPatternId: 'investor',
+                  path: 'id'
+                },
+                {
+                  indexPatternId: 'investment',
+                  path: 'investorid'
+                }
+              ],
+              label: 'by',
+              id: 'investment//investorid/investor//id'
+            }
+          ]
+        };
+        const relation1 = {
+          relation: [
+            {
+              indices: [ 'investment' ],
+              path: 'investorid'
+            },
+            {
+              indices: [ 'investor' ],
+              path: 'id'
+            }
+          ]
+        };
+
+        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$digest();
+
+        relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
+        expect(relation1.limit).to.be(undefined);
+      });
+
       it('should set limit to the correct value', function () {
         const relations = {
           relationsIndices: [

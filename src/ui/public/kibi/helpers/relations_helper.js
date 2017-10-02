@@ -268,9 +268,14 @@ export default function RelationsHelperFactory(config) {
 
       let defaultJoinLimit = -1;
       try {
-        defaultJoinLimit = parseInt(config.get('kibi:joinLimit'));
+        defaultJoinLimit = parseInt(config.get('kibi:joinLimit'), 10);
       } catch (e) {
         // ignore parsing error they should be handled when user is saving the value
+      }
+
+      if (indexRelation.limit === 0) {
+        // allow to disable limit for single relation when set to exactly zero
+        return;
       }
 
       if (indexRelation.limit && indexRelation.limit > 0) {

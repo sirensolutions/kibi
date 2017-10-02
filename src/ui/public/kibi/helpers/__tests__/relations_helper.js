@@ -588,7 +588,7 @@ describe('Kibi Components', function () {
       });
 
 
-      it('should set limit to default one if not present', function () {
+      it('should set limit to default Advanced Setting -> kibi:joinLimit if not present', function () {
         const relations = {
           relationsIndices: [
             {
@@ -627,7 +627,7 @@ describe('Kibi Components', function () {
         expect(relation1.limit).to.be(5000000);
       });
 
-      it('should set limit to default one if present but equal -1', function () {
+      it('should set limit to default Advanced Setting -> kibi:joinLimit if present but equal -1', function () {
         const relations = {
           relationsIndices: [
             {
@@ -667,7 +667,7 @@ describe('Kibi Components', function () {
         expect(relation1.limit).to.be(5000000);
       });
 
-      it('should NOT set limit to default one if present but equal zero', function () {
+      it('should NOT set limit to default Advanced Setting -> kibi:joinLimit if present but equal zero', function () {
         const relations = {
           relationsIndices: [
             {
@@ -707,7 +707,7 @@ describe('Kibi Components', function () {
         expect(relation1.limit).to.be(undefined);
       });
 
-      it('should set limit to the correct value', function () {
+      it('should set limit to the correct value if it is a valid positive integer', function () {
         const relations = {
           relationsIndices: [
             {

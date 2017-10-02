@@ -2,6 +2,7 @@ import { metadata } from '../metadata';
 
 const urlVersion = metadata.branch;
 const baseUrl = 'https://www.elastic.co/';
+const kibiDocsBaseUrl = 'https://docs.support.siren.io/latest/platform/';
 
 export const documentationLinks = {
   filebeat: {
@@ -21,7 +22,7 @@ export const documentationLinks = {
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
   },
   query: {
-    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`,
+    luceneQuerySyntax: `${kibiDocsBaseUrl}#search`,
     queryDsl: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl.html`,
   },
   date: {

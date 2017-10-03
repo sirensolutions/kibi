@@ -23,7 +23,11 @@
             </div>
             -->
             <div class="form-group">
-              <label>Left relation join limit</label>
+              <label>Left relation join limit
+                <a href="https://docs.support.siren.io/latest/platform/#kibi_join_limit" target="_blank">
+                  <kbn-info info="Learn more"></kbn-info>
+                </a>
+              </label>
               <input type="number" min="-1" step="100000" ng-model="relation.limit" class="form-control small-input"/>
               <p class="field-description">
                 Limit of collected tuples during join operation.

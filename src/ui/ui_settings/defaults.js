@@ -377,6 +377,7 @@ export function getDefaultSettings() {
       description:
       'Global upper limit on the documents returned from source index used to filter target index. ' +
       'The number of documents queried per shard is computed dynamically based on the number of shards taken by the indices. ' +
+      'Set to 0 to disable the global upper limit. ' +
       'Can be overwritten per relation in each relation\'s advanced options in the relational panel.'
     },
     'kibi:panel_vertical_size': {

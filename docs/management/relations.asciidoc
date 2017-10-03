@@ -30,14 +30,23 @@ image::images/relations_settings/indices_settings_5.png["Graph of Index Patterns
 [[kibi-join-limit]]
 ==== Join Limit
 Clicking the image:images/EditVis.png["Edit pencil"] opens the advanced setting for each relation 
-where you can set the number of documents returned from the Left Relation index for that relation. 
-These documents will filter the documents on the Right Relation index in the relation.
+where you can set the number of documents returned from the related index pattern for that relation. 
+
+As a semi-join, these documents will be filtered based on the presence of a *non-empty* value for the `join` field
+in the other index pattern in the relation. 
+
+The limit is a total upper limit on the number of those documents on the other index pattern for which the `join` field exists.
+This limit is dynamically allocated over the shards where the index is located. 
+
+The index pattern in question is then filtered by the documents returned. 
+
+These are used for displaying counts on relational buttons, for the content displayed on the current dashboard, etc.
 
 Setting the limit here to -1 here sets the limit to the default `kibi:joinLimit` set in the Kibi Advanced Settings 
 and setting the limit to 0 here disables the limit entirely.
 
 ===== Example
-- Index `A` has 100 documents and Index `B` has 50 documents
+- Index Pattern `A` has 100 documents and Index Pattern `B` has 50 documents
 - The documents of `A` are filtered by adding a relation with `B`
 - The limit is set to 10 for that relation
 

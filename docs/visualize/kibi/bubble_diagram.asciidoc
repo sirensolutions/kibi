@@ -48,7 +48,7 @@ In the diagram there are three options
 
 image::images/bubble_diagram/options.png["Options configuration",align="center",]
 
-*Show Parents*:: If checked parent bubbles are visible when doing the the subaggregation.
+*Show Parents*:: If checked parent bubbles are visible when doing the subaggregation.
 
 *Hidden Label*:: If checked the labels are hidden.
 

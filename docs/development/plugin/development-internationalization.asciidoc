@@ -52,7 +52,7 @@ the right language code”]
 git checkout -b translate-mt
 * For each translation scope (see link:#Enabling%20Translations%20on%20Existing%20Plugins[Enabling Translations on Existing Plugins], below), generate a Kibana plugin with name _plugin_-_languagecode_ using the https://github.com/elastic/generator-kibana-plugin[Kibana Plugin Yeoman Generator]:
 +
-* Replace the the `es.json` translation file with _languagecode_`.json`:
+* Replace the `es.json` translation file with _languagecode_`.json`:
 `mv src/plugins/kibana-mt/translations/es.json src/plugins/kibana-mt/translations/mt.json`
 * Translate the `mt.json` file in a JSON editor
 * Edit index file (`kibana-mt/index.js`), updating the

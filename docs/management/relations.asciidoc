@@ -27,13 +27,35 @@ relationships have defined. You can add a new relationship by clicking on the
 
 image::images/relations_settings/indices_settings_5.png["Graph of Index Patterns",align="center"]
 
+[[kibi-join-limit]]
+==== Join Limit
+Clicking the image:images/EditVis.png["Edit pencil"] opens the advanced setting for each relation 
+where you can set the number of documents returned from the Left Relation index for that relation. 
+These documents will filter the documents on the Right Relation index in the relation.
+
+Setting the limit here to -1 here sets the limit to the default `kibi:joinLimit` set in the Kibi Advanced Settings 
+and setting the limit to 0 here disables the limit entirely.
+
+===== Example
+- Index `A` has 100 documents and Index `B` has 50 documents
+- The documents of `A` are filtered by adding a relation with `B`
+- The limit is set to 10 for that relation
+
+- In this case, the limit is set on `B`, so *10* documents are returned from `B`
+- These 10 documents are then used to filter the documents in index `A`
+- Potentially, this could return many more (or many less) than the limit set as
+  there could be a large number of documents in `A` that match the 10 documents 
+  returned from `B`
+- The final number of documents returned is always limited by the Elasticsearch `size` parameter
+
+==== Index Patterns Management Icon
 A relation is also indicated on the <<index-patterns,Index Patterns>> Management application thanks
-to the icon image:images/relations_settings/index_relation_icon.png["Index
-relation icon"].  If you hover the mouse over it, a tooltip message is
-displayed indicating the index pattern and field that field is joined with.
+to the image:images/relations_settings/index_relation_icon.png["Index
+relation icon"] icon.  If you hover the mouse over it, a tooltip message is
+displayed indicating the index pattern and field with which that field is joined.
 
 For example, in the image below, that icon is displayed next to the field "id"
-of the "investor" index, which is join with the field "investorid" of the
+of the "investor" index, which is joined with the field "investorid" of the
 "investment" index.
 
 image::images/relations_settings/investor_index.png["Investor Index",align="center"]

@@ -15,7 +15,7 @@ module.exports = [
   },
   {
     kibanaSavedObjectMeta: {
-      searchSourceJSON: '{\"filters\":{}}'
+      searchSourceJSON: '{"filters":{}}'
     }
   }
 ];

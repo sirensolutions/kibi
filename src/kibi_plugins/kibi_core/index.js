@@ -22,6 +22,7 @@ import migration9 from './lib/migrations/migration_9';
 import migration10 from './lib/migrations/migration_10';
 import migration11 from './lib/migrations/migration_11';
 import migration12 from './lib/migrations/migration_12';
+import migration13 from './lib/migrations/migration_13';
 
 /**
  * The Kibi core plugin.
@@ -48,7 +49,8 @@ module.exports = function (kibana) {
     migration9,
     migration10,
     migration11,
-    migration12
+    migration12,
+    migration13
   ];
 
   const _validateQueryDefs = function (queryDefs) {

@@ -32,7 +32,8 @@ uiModules
     $scope.relation.type = 'SEARCH_JOIN'; // default join type
   }
 
-  if (!$scope.relation.limit) {
+  // check if the limit property is present
+  if (typeof $scope.relation.limit === 'undefined') {
     $scope.relation.limit = -1; // -1 to take the global one from kibi:joinLimit
   }
 

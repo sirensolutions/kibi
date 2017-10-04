@@ -375,7 +375,7 @@ export function getDefaultSettings() {
       type: 'number',
       value: 5000000,
       description:
-      'Global upper limit on the documents returned from source index used to filter target index. ' +
+      'Global upper limit on the unique values returned from source index used to filter target index. ' +
       'Set to 0 to disable the global upper limit. ' +
       'Can be overwritten per relation in each relation\'s advanced options in the relational panel.'
     },

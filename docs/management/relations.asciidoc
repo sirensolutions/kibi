@@ -30,7 +30,7 @@ image::images/relations_settings/indices_settings_5.png["Graph of Index Patterns
 [[kibi-join-limit]]
 ==== Join Limit
 Clicking the image:images/EditVis.png["Edit pencil"] opens the advanced setting for each relation 
-where you can set the number of unique values returned from the related index pattern for that relation. 
+where you can set the maximum number of unique values returned from the related index pattern for that relation. 
 
 As a semi-join, these documents will be filtered based on the presence of a *non-empty* value for the `join` field
 in the other index pattern in the relation. 
@@ -56,7 +56,7 @@ and setting the limit to 0 here disables the limit entirely.
 - Potentially, this could return many more (or many less) than the limit set as
   there could be a large number of documents in `A` that match the 10 values 
   returned from `B`
-- The final number of values returned is always limited by the Elasticsearch `size` parameter
+- The final number of documents returned is always limited by the Elasticsearch `size` parameter
 
 ==== Index Patterns Management Icon
 A relation is also indicated on the <<index-patterns,Index Patterns>> Management application thanks

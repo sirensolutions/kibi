@@ -39,7 +39,7 @@ describe('kibi_core/migrations/functional', function () {
   describe('Migration 14 - Functional test', function () {
     let configuration;
 
-    describe('two indices with "exclude" and "include" property', function () {
+    describe('two visualisations with "exclude" and "include" property', function () {
       beforeEach(async () => {
         await scenarioManager.reload(Scenario1);
         configuration = {
@@ -72,7 +72,7 @@ describe('kibi_core/migrations/functional', function () {
         for (const [id, original] of before) {
           const upgraded = after.get(id);
 
-          if(original._type === 'visualization' && original._id === 'kibi') {
+          if(original._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = original._source.kibanaSavedObjectMeta;
             const expectedResult = {
               "searchSourceJSON": "{\"source\":{\"exclude\":\"rnews:articleBody\"}}"
@@ -80,7 +80,7 @@ describe('kibi_core/migrations/functional', function () {
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
 
-          if(original._type === 'visualization' && original._id === 'kibi1') {
+          if(original._type === 'visualization' && original._id === 'vis1') {
             const kibanaSavedObjectMeta = original._source.kibanaSavedObjectMeta;
             const expectedResult = {
               "searchSourceJSON": "{\"source\":{\"include\":\"rnews:companyBody\"}}"
@@ -88,7 +88,7 @@ describe('kibi_core/migrations/functional', function () {
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
 
-          if(upgraded._type === 'visualization' && original._id === 'kibi') {
+          if(upgraded._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = upgraded._source.kibanaSavedObjectMeta;
             const expectedResult = {
               "searchSourceJSON": "{\"source\":{}}"
@@ -96,7 +96,7 @@ describe('kibi_core/migrations/functional', function () {
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
 
-          if(upgraded._type === 'visualization' && original._id === 'kibi1') {
+          if(upgraded._type === 'visualization' && original._id === 'vis1') {
             const kibanaSavedObjectMeta = upgraded._source.kibanaSavedObjectMeta;
             const expectedResult = {
               "searchSourceJSON": "{\"source\":{}}"
@@ -107,7 +107,7 @@ describe('kibi_core/migrations/functional', function () {
       });
     });
 
-    describe('one indice with "exclude" and "include" property', function () {
+    describe('one visualisation with "exclude" and "include" property', function () {
       beforeEach(async () => {
         await scenarioManager.reload(Scenario2);
         configuration = {
@@ -140,7 +140,7 @@ describe('kibi_core/migrations/functional', function () {
         for (const [id, original] of before) {
           const upgraded = after.get(id);
 
-          if(original._type === 'visualization' && original._id === 'kibi') {
+          if(original._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = original._source.kibanaSavedObjectMeta;
             const expectedResult = {
               "searchSourceJSON": "{\"source\":{\"include\":\"rnews:articleBody\", \"exclude\":\"rnews:companyBody\"}}"
@@ -148,7 +148,7 @@ describe('kibi_core/migrations/functional', function () {
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
 
-          if(upgraded._type === 'visualization' && original._id === 'kibi') {
+          if(upgraded._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = upgraded._source.kibanaSavedObjectMeta;
             const expectedResult = {
               "searchSourceJSON": "{\"source\":{}}"
@@ -192,7 +192,7 @@ describe('kibi_core/migrations/functional', function () {
         for (const [id, original] of before) {
           const upgraded = after.get(id);
 
-          if(original._type === 'visualization' && original._id === 'kibi') {
+          if(original._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = original._source.kibanaSavedObjectMeta;
             const expectedResult = {
               "searchSourceJSON": "{\"filters\":{}, \"source\":{\"include\":\"rnews:articleBody\", \"exclude\":\"rnews:companyBody\"}}"
@@ -200,7 +200,7 @@ describe('kibi_core/migrations/functional', function () {
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
 
-          if(upgraded._type === 'visualization' && original._id === 'kibi') {
+          if(upgraded._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = upgraded._source.kibanaSavedObjectMeta;
             const expectedResult = {
               "searchSourceJSON": "{\"filters\":{}}"

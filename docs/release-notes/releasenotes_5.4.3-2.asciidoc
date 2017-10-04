@@ -6,6 +6,11 @@
 Fixed: 
 
 * Fixed issue where Kibi would not start when used with Elasticsearch 5.5.2 due to mapping loading problem  
+* Kibi no longer use the `elasticsearch.plugins` configuration setting to store installed Elasticsearch plugin names
+* Improved X-Pack security compatibility
+* Improved migration from Kibi 4.6.x, where the sourceFiltering property was previously set for any index-pattern
+* Improved migration from Kibi 4.6.x, where the pageSize parameter was previously incorrectly saved as string
+* Various improvements in Sentinl see https://github.com/sirensolutions/sentinl/releases/tag/tag-5.5 for details
 
 Changed:
 
@@ -15,5 +20,6 @@ Changed:
 Added: 
 
 * Added ability to limit number of collected tuples per shard during the join operations
-  This option can now be set globally via kibi:relationsDefaultLimitPerShard in Advanced Settings 
-  or per relation in Advanced Relation Settings menu 
+  This option can now be set globally via kibi:joinLimit in each relation's settings in the Relational Panel 
+
+* Added support for dynamic object mapping type to Saved Object API 

@@ -32,8 +32,8 @@ uiModules
     $scope.relation.type = 'SEARCH_JOIN'; // default join type
   }
 
-  if (!$scope.relation.limit_per_shard) {
-    $scope.relation.limit_per_shard = -1; // -1 to take the global one from kibi:relationsDefaultLimitPerShard
+  if (!$scope.relation.limit) {
+    $scope.relation.limit = -1; // -1 to take the global one from kibi:joinLimit
   }
 
   // cancel button

@@ -1,4 +1,6 @@
+<!-- kibi: added property data-ui-acl to be able to hide ui elements via uiacl -->
 <global-nav-link
+  data-ui-acl="app:{{ ::link.id.replace(':', '@') }}"
   ng-repeat="link in switcher.links"
   ng-if="!link.hidden"
   is-active="link.active"

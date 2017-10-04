@@ -266,10 +266,22 @@ export default function RelationsHelperFactory(config) {
         rel.type = indexRelation.type;
       }
 
-      if (indexRelation.limit_per_shard && indexRelation.limit_per_shard > 0) {
-        rel.limit_per_shard = indexRelation.limit_per_shard;
-      } else {
-        rel.limit_per_shard = config.get('kibi:relationsDefaultLimitPerShard');
+      let defaultJoinLimit = -1;
+      try {
+        defaultJoinLimit = parseInt(config.get('kibi:joinLimit'), 10);
+      } catch (e) {
+        // ignore parsing error they should be handled when user is saving the value
+      }
+
+      if (indexRelation.limit === 0) {
+        // allow to disable limit for single relation when set to exactly zero
+        return;
+      }
+
+      if (indexRelation.limit && indexRelation.limit > 0) {
+        rel.limit = indexRelation.limit;
+      } else if (defaultJoinLimit > 0) {
+        rel.limit = defaultJoinLimit;
       }
 
     }

@@ -61,6 +61,8 @@ module.exports = function () {
         'jison-lex@0.2.1': ['MIT'],
         'jison@0.4.13': ['MIT'],
         'nomnom@1.5.2': ['MIT'],
+        'jsonify@0.0.0': ['MIT'],
+        'js-base64@2.3.1': ['BSD-3-Clause']
       }
     }
   };

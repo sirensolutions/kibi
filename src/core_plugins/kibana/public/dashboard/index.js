@@ -67,7 +67,7 @@ uiRoutes
         }
 
         return Promise.all([
-          savedDashboards.find('', 1),
+          savedDashboards.find('', false, 1),
           getDefaultDashboard
         ])
         .then(([

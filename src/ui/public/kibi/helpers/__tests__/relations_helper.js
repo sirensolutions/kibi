@@ -588,7 +588,7 @@ describe('Kibi Components', function () {
       });
 
 
-      it('should set limit_per_shard to default one if not present', function () {
+      it('should set limit to default Advanced Setting -> kibi:joinLimit if not present', function () {
         const relations = {
           relationsIndices: [
             {
@@ -624,14 +624,14 @@ describe('Kibi Components', function () {
         $rootScope.$digest();
 
         relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1.limit_per_shard).to.be(1000000);
+        expect(relation1.limit).to.be(5000000);
       });
 
-      it('should set limit_per_shard to default one if present but equal -1', function () {
+      it('should set limit to default Advanced Setting -> kibi:joinLimit if present but equal -1', function () {
         const relations = {
           relationsIndices: [
             {
-              limit_per_shard: -1,
+              limit: -1,
               indices: [
                 {
                   indexPatternId: 'investor',
@@ -664,14 +664,14 @@ describe('Kibi Components', function () {
         $rootScope.$digest();
 
         relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1.limit_per_shard).to.be(1000000);
+        expect(relation1.limit).to.be(5000000);
       });
 
-      it('should set limit_per_shard to the correct value', function () {
+      it('should NOT set limit to default Advanced Setting -> kibi:joinLimit if present but equal zero', function () {
         const relations = {
           relationsIndices: [
             {
-              limit_per_shard: 123456,
+              limit: 0,
               indices: [
                 {
                   indexPatternId: 'investor',
@@ -704,7 +704,47 @@ describe('Kibi Components', function () {
         $rootScope.$digest();
 
         relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1.limit_per_shard).to.be(123456);
+        expect(relation1.limit).to.be(undefined);
+      });
+
+      it('should set limit to the correct value if it is a valid positive integer', function () {
+        const relations = {
+          relationsIndices: [
+            {
+              limit: 123456,
+              indices: [
+                {
+                  indexPatternId: 'investor',
+                  path: 'id'
+                },
+                {
+                  indexPatternId: 'investment',
+                  path: 'investorid'
+                }
+              ],
+              label: 'by',
+              id: 'investment//investorid/investor//id'
+            }
+          ]
+        };
+        const relation1 = {
+          relation: [
+            {
+              indices: [ 'investment' ],
+              path: 'investorid'
+            },
+            {
+              indices: [ 'investor' ],
+              path: 'id'
+            }
+          ]
+        };
+
+        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$digest();
+
+        relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
+        expect(relation1.limit).to.be(123456);
       });
 
     });

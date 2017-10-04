@@ -86,8 +86,8 @@ module.exports = function (kibana) {
     }
 
     const config = server.config();
-    if (config.has('shield.cookieName')) {
-      options.credentials = req.state[config.get('shield.cookieName')];
+    if (config.has('xpack.security.cookieName')) {
+      options.credentials = req.state[config.get('xpack.security.cookieName')];
     }
     if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
       options.credentials = req.auth.credentials.proxyCredentials;
@@ -159,6 +159,7 @@ module.exports = function (kibana) {
         enabled: Joi.boolean().default(true),
 
         load_jdbc: Joi.boolean().default(false),
+        clusterplugins: Joi.any(),
 
         enterprise_enabled: Joi.boolean().default(false),
         elasticsearch: Joi.object({
@@ -257,8 +258,8 @@ module.exports = function (kibana) {
             const config = server.config();
             const params = JSON.parse(datasource.datasourceParams);
             params.credentials = null;
-            if (config.has('shield.cookieName')) {
-              const { username, password } = req.state[config.get('shield.cookieName')];
+            if (config.has('xpack.security.cookieName')) {
+              const { username, password } = req.state[config.get('xpack.security.cookieName')];
               params.credentials = { username, password };
             }
             if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
@@ -296,7 +297,10 @@ module.exports = function (kibana) {
             server.plugins.elasticsearch.inject.save(query);
             return query;
           }).map((query) => {
-            let credentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
+            let credentials = null;
+            if (serverConfig.has('xpack.security.cookieName')) {
+              credentials = req.state[serverConfig.get('xpack.security.cookieName')];
+            }
             if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
               credentials = req.auth.credentials.proxyCredentials;
             }

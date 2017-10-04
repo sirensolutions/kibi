@@ -55,6 +55,17 @@ export default async (kbnServer, server, config) => {
     method: 'GET',
     async handler(req, reply) {
       const id = req.params.id;
+
+      // kibi: block access to specific apps
+      // we exclude kibana as then nothing would work at all
+      if (server.plugins.kibi_access_control && id !== 'kibana') {
+        const user = req.auth.credentials;
+        const result = await server.plugins.kibi_access_control.isAllowed(user, ['view'], 'app:' + id);
+        if (result === false) {
+          return reply(`Access to ${id} denied by ACL.<br/><a href="../">Go back</a>`);
+        }
+      }
+
       const app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 

@@ -706,7 +706,7 @@ describe('Join query builder', function () {
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2',
-      limitPerShard: 10,
+      limit: 10,
       orderBy: '_doc',
       termsEncoding: 'integer'
     });
@@ -715,7 +715,7 @@ describe('Join query builder', function () {
         join: {
           indices: [ 'i2' ],
           on: [ 'id1', 'id2' ],
-          limit_per_shard: 10,
+          limit: 10,
           orderBy: '_doc',
           termsEncoding: 'integer',
           request: {
@@ -740,13 +740,13 @@ describe('Join query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should not set limitPerShard if === -1', function () {
+  it('should not set limit if === -1', function () {
     const builder = new JoinBuilder();
     builder.addJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2',
-      limitPerShard: -1
+      limit: -1
     });
     const expected = [
       {

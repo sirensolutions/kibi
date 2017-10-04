@@ -351,11 +351,13 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
       description: 'Relations between index patterns and dashboards'
     },
-    'kibi:relationsDefaultLimitPerShard': {
+    'kibi:joinLimit': {
       type: 'number',
-      value: 1000000,
+      value: 5000000,
       description:
-      'Default value of limit_per_shard join parameter. Can be overriten in relations advanced options. Set to -1 to remove the limit'
+      'Global upper limit on the documents returned from source index used to filter target index. ' +
+      'Set to 0 to disable the global upper limit. ' +
+      'Can be overwritten per relation in each relation\'s advanced options in the relational panel.'
     },
     'kibi:panel_vertical_size': {
       type: 'number',

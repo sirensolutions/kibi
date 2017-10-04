@@ -33,17 +33,20 @@ export default class Migration14 extends Migration {
   }
 
   static get description() {
-    return 'Remove deprecated "exclude" and "include" properties from visualizations';
+    return 'Remove deprecated "exclude" and "include" properties from visualizations ' +
+    '_source.kibanaSavedObjectMeta.searchSourceJSON.source property';
   }
 
   async _fetchVisualizations() {
     this._visualizations = [];
     const visualizations = await this.scrollSearch(this._index, this._type, this._query);
     _.each(visualizations, visualization => {
-      const sourceObject = JSON.parse(visualization._source.kibanaSavedObjectMeta.searchSourceJSON);
-      if(sourceObject.source) {
-        if (sourceObject.source.include || sourceObject.source.exclude) {
-          this._visualizations.push(visualization);
+      if (_.get(visualization, '_source.kibanaSavedObjectMeta.searchSourceJSON.source')) {
+        const sourceObject = JSON.parse(visualization._source.kibanaSavedObjectMeta.searchSourceJSON);
+        if(sourceObject.source) {
+          if (sourceObject.source.include || sourceObject.source.exclude) {
+            this._visualizations.push(visualization);
+          }
         }
       }
     });
@@ -75,12 +78,14 @@ export default class Migration14 extends Migration {
         let upgradedSourceObjectSource;
 
         if (include) {
-          const message = '[ include ] property in visualization is deprecated, removing from visualization';
+          const message = '[ include ] property is deprecated, removing from visualizations ' +
+          '_source.kibanaSavedObjectMeta.searchSourceJSON.source property';
           this._logger.warning(message);
           upgradedSourceObjectSource = _.omit(sourceObject.source,'include');
         }
         if (exclude) {
-          const message = '[ exclude ] property in visualization is deprecated, removing from visualization';
+          const message = '[ exclude ] property is deprecated, removing from visualizations ' +
+          '_source.kibanaSavedObjectMeta.searchSourceJSON.source property';
           this._logger.warning(message);
           upgradedSourceObjectSource = _.omit(sourceObject.source,'exclude');
         }

@@ -5,7 +5,7 @@ module.exports = {
   mappings: {
     config: {
       properties: {
-        'kibanaSavedObjectMeta': {
+        kibanaSavedObjectMeta: {
           type: 'object'
         }
       }

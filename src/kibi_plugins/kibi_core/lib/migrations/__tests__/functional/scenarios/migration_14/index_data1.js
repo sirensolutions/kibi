@@ -10,24 +10,24 @@ module.exports = [
     index: {
       _index: '.kibi',
       _type: 'visualization',
-      _id: 'kibi'
+      _id: 'vis'
     }
   },
   {
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"source\":{\"exclude\":\"rnews:articleBody\"}}"
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: '{\"source\":{\"exclude\":\"rnews:articleBody\"}}'
     }
   },
   {
     index: {
       _index: '.kibi',
       _type: 'visualization',
-      _id: 'kibi1'
+      _id: 'vis1'
     }
   },
   {
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"source\":{\"include\":\"rnews:companyBody\"}}"
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: '{\"source\":{\"include\":\"rnews:companyBody\"}}'
     }
   }
 ];

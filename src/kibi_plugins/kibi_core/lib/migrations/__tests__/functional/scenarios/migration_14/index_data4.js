@@ -10,12 +10,12 @@ module.exports = [
     index: {
       _index: '.kibi',
       _type: 'visualization',
-      _id: 'kibi1'
+      _id: 'vis'
     }
   },
   {
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"filters\":{}, \"source\":{\"include\":\"rnews:articleBody\", \"exclude\":\"rnews:companyBody\"}}"
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: '{\"filters\":{}, \"source\":{\"include\":\"rnews:articleBody\", \"exclude\":\"rnews:companyBody\"}}'
     }
   }
 ];

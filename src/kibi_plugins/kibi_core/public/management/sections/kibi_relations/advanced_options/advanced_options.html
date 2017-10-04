@@ -23,14 +23,14 @@
             </div>
             -->
             <div class="form-group">
-              <label>Semi-join limit
+              <label>Relation join limit
                 <a href="https://docs.support.siren.io/latest/platform/#kibi_join_limit" target="_blank">
                   <kbn-info info="Learn more"></kbn-info>
                 </a>
               </label>
               <input type="number" min="-1" step="100000" ng-model="relation.limit" class="form-control small-input"/>
               <p class="field-description">
-                Maximum number of joined documents used for filtering during semi-join operation.
+                Maximum number of joined documents used for filtering during join operation.
                 <br/>
                 Set to -1 to use the global limit from Advanced Settings -> kibi:joinLimit, set to 0 to disable limit for this relation.
               </p>

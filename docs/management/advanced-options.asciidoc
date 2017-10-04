@@ -99,6 +99,7 @@ Markdown.
 `kibi:splitTabs` :: Set to true to split dashboard tabs on two lines.
 `kibi:timePrecision` :: Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y.
 `kibi:relations` :: Relations between index patterns and dashboards.
+`kibi:joinLimit` :: Maximum number of source documents in a relation returned to filter the target documents
 `kibi:session_cookie_expire`:: Set duration of cookie session (in seconds).
 `kibi:enableAllDashboardsCounts`:: Enable counts on all dashboards.
 `kibi:enableAllRelBtnCounts`:: Enable counts on all relational buttons.

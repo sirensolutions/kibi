@@ -75,7 +75,7 @@ describe('kibi_core/migrations/functional', function () {
           if(original._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = original._source.kibanaSavedObjectMeta;
             const expectedResult = {
-              "searchSourceJSON": "{\"source\":{\"exclude\":\"rnews:articleBody\"}}"
+              searchSourceJSON: '{"source":{"exclude":"rnews:articleBody"}}'
             };
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
@@ -83,7 +83,7 @@ describe('kibi_core/migrations/functional', function () {
           if(original._type === 'visualization' && original._id === 'vis1') {
             const kibanaSavedObjectMeta = original._source.kibanaSavedObjectMeta;
             const expectedResult = {
-              "searchSourceJSON": "{\"source\":{\"include\":\"rnews:companyBody\"}}"
+              searchSourceJSON: '{"source":{"include":"rnews:companyBody"}}'
             };
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
@@ -91,7 +91,7 @@ describe('kibi_core/migrations/functional', function () {
           if(upgraded._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = upgraded._source.kibanaSavedObjectMeta;
             const expectedResult = {
-              "searchSourceJSON": "{\"source\":{}}"
+              searchSourceJSON: '{\"source\":{}}'
             };
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
@@ -99,7 +99,7 @@ describe('kibi_core/migrations/functional', function () {
           if(upgraded._type === 'visualization' && original._id === 'vis1') {
             const kibanaSavedObjectMeta = upgraded._source.kibanaSavedObjectMeta;
             const expectedResult = {
-              "searchSourceJSON": "{\"source\":{}}"
+              searchSourceJSON: '{\"source\":{}}'
             };
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
@@ -143,7 +143,7 @@ describe('kibi_core/migrations/functional', function () {
           if(original._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = original._source.kibanaSavedObjectMeta;
             const expectedResult = {
-              "searchSourceJSON": "{\"source\":{\"include\":\"rnews:articleBody\", \"exclude\":\"rnews:companyBody\"}}"
+              searchSourceJSON: '{"source":{"include":"rnews:articleBody","exclude":"rnews:companyBody"}}'
             };
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
@@ -151,7 +151,7 @@ describe('kibi_core/migrations/functional', function () {
           if(upgraded._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = upgraded._source.kibanaSavedObjectMeta;
             const expectedResult = {
-              "searchSourceJSON": "{\"source\":{}}"
+              searchSourceJSON: '{"source":{}}'
             };
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
@@ -195,7 +195,7 @@ describe('kibi_core/migrations/functional', function () {
           if(original._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = original._source.kibanaSavedObjectMeta;
             const expectedResult = {
-              "searchSourceJSON": "{\"filters\":{}, \"source\":{\"include\":\"rnews:articleBody\", \"exclude\":\"rnews:companyBody\"}}"
+              searchSourceJSON: '{"filters":{}, "source":{"include":"rnews:articleBody","exclude":"rnews:companyBody"}}'
             };
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }
@@ -203,7 +203,7 @@ describe('kibi_core/migrations/functional', function () {
           if(upgraded._type === 'visualization' && original._id === 'vis') {
             const kibanaSavedObjectMeta = upgraded._source.kibanaSavedObjectMeta;
             const expectedResult = {
-              "searchSourceJSON": "{\"filters\":{}}"
+              searchSourceJSON: '{"filters":{},"source":{}}'
             };
             expect(_.isEqual(expectedResult,kibanaSavedObjectMeta)).to.equal(true);
           }

@@ -15,7 +15,7 @@ module.exports = [
   },
   {
     kibanaSavedObjectMeta: {
-      searchSourceJSON: '{\"source\":{\"exclude\":\"rnews:articleBody\"}}'
+      searchSourceJSON: '{"source":{"exclude":"rnews:articleBody"}}'
     }
   },
   {
@@ -27,7 +27,7 @@ module.exports = [
   },
   {
     kibanaSavedObjectMeta: {
-      searchSourceJSON: '{\"source\":{\"include\":\"rnews:companyBody\"}}'
+      searchSourceJSON: '{"source":{"include":"rnews:companyBody"}}'
     }
   }
 ];

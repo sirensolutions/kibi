@@ -389,7 +389,8 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       });
     };
 
-    const isEqual = _($scope.relations.relationsIndices).map(function (relation) {
+    const isEqual = _($scope.relations.relationsIndices)
+    .map(function (relation) {
       return _.omit(relation, [ '$$hashKey', 'errors', 'id' ]);
     }).isEqual(oldRelations);
     if (!isEqual) {
@@ -430,6 +431,10 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
     }
   });
 
+  const unsavedRelationsMsg = 'There are unsaved changes to the relational configuration,' +
+                              ' are you sure you want to leave the page?';
+  const unsavedRelationsLogoutMsg = 'There are unsaved changes to the relational configuration,' +
+                                    ' are you sure you want to logout?';
   // The State is listening for this event too, and modifies the location in the handler,
   // which means that a second routeChangeStart event will be triggered when clicking on section links.
   // To avoid displaying a double confirmation, we store the user choice for the whole cycle.
@@ -439,8 +444,7 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       return;
     }
     if ($scope.dialogResult === null) {
-      $scope.dialogResult = $window.confirm('There are unsaved changes to the relational configuration,' +
-                                            ' are you sure you want to leave the page?');
+      $scope.dialogResult = $window.confirm(unsavedRelationsMsg);
     }
     if ($scope.dialogResult === false) {
       event.preventDefault();
@@ -452,17 +456,17 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
 
   const onBeforeUnload = function () {
     if ($scope.changed) {
-      return 'There are unsaved changes to the relational configuration, are you sure you want to leave the page?';
+      return unsavedRelationsMsg;
     }
   };
+
   $($window).on('beforeunload', onBeforeUnload);
 
   const cancelLogoutHandler = $rootScope.$on('kibi_access_control:logout', function (event) {
     if (!$scope.changed) {
       return;
     }
-    if ($window.confirm('There are unsaved changes to the relational configuration,' +
-                        ' are you sure you want to logout?') === false) {
+    if ($window.confirm(unsavedRelationsLogoutMsg) === false) {
       event.preventDefault();
       return;
     }

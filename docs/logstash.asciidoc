@@ -219,7 +219,7 @@ the _Index name or pattern_ field:
 
 image::images/logstash/company-minimal-index_5.png["Adding the company-minimal index",align="center"]
 
-Click on _Create_ to create the the index reference, then click on the
+Click on _Create_ to create the index reference, then click on the
 _Discover_ tab and select _company-minimal_ in the dark grey dropdown:
 
 image::images/logstash/company-minimal-discover-dd_5.png["Discovering the company-minimal index",align="center"]

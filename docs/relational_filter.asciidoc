@@ -12,14 +12,14 @@ The relational filter visualization allows to "pivot" from a dashboard
 to another by creating a join between multiple indices based on their
 relations. This allows to interactivelly build the sequence of dashboards to join.
 
-The relational filter visualzation is configured based on the <<kibi-settings-relations,relationships>> between indices defined in the settings tab.
+The relational filter visualization is configured based on the <<kibi-settings-relations,relationships>> between indices defined in the settings tab.
 For example, let's take the following indices:
 
 [horizontal]
 _article_:: an index containing articles; each document in the index has a field called `companies` which is an array that contains the ID of companies mentioned in the article. This index is displayed on the dashboard entitled `Articles`.
 _company_:: an index containing information about companies; each document in the index has a field called `id` that contains the ID of the company. This index is displayed on the dashboard entitled `Companies`.
 
-Both indices are <<kibi-settings-relations,configured>> so that they are joined on the field `companies` of `article` with the the field `id` of `company`. Then, it is possible to use that configuration in order to create a relational filter that would filter companies based on connected articles (or vice-versa).
+Both indices are <<kibi-settings-relations,configured>> so that they are joined on the field `companies` of `article` with the field `id` of `company`. Then, it is possible to use that configuration in order to create a relational filter that would filter companies based on connected articles (or vice-versa).
 
 In the _Articles_ dashboard, the relational filter visualization is displayed as a button which indicates the number of documents in the _Companies_ dashboard that are mentioned in the articles of the current dashboard.
 
@@ -135,3 +135,11 @@ The raw response from the server, presented in JSON format.
 The Debug tab presents the JSON object that Kibi uses for this relational filter.
 
 image::images/relational_filter/spy_debug.png["Debug spy panel of the relational filter visualization",align="center"]
+
+[float]
+==== Join Limit
+The number of unique values returned from the `source` of the relation is limited by the `kibi:joinLimit` Advanced Setting in the management section.
+These `source` values are then used to filter the documents on the `destination`. In general, the `destination` is the current dashboard.
+
+
+For more on this and how to set the limit for each relation individually, see the <<kibi-join-limit,Join Limit>> section of the Relation Panel documentation.

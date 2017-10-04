@@ -76,7 +76,7 @@ To configure a click handler, you must set the following parameters:
 replaced with the value of the field set in _URL field_.
 
 _URL format_ can be used to create dynamic URL; the screenshot
-below shows a configuration in which the value of the the _id_ field is
+below shows a configuration in which the value of the _id_ field is
 used to define the path of an URL on example.org.
 
 With this configuration, if the _id_ field is set to 11 the resulting URL

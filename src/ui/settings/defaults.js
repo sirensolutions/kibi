@@ -355,11 +355,9 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       type: 'number',
       value: 5000000,
       description:
-      'The default value of join limit. ' +
-      'Can be overwritten per relation in each relation\'s advanced options in the relational panel. ' +
-      'Set to -1 to remove the limit. Explanation: ' +
-      'The limit is a global upper limit on the documents scanned (from the target). ' +
-      'The number of documents scanned per shard is computed dynamically based on the number of shards taken by the indices'
+      'Global upper limit on the unique values returned from source index used to filter target index. ' +
+      'Set to 0 to disable the global upper limit. ' +
+      'Can be overwritten per relation in each relation\'s advanced options in the relational panel.'
     },
     'kibi:panel_vertical_size': {
       type: 'number',

@@ -8,7 +8,7 @@ To save a Timelion visualization as a dashboard panel, follow the steps below.
 . Select the visualization you’d like to add to one (or multiple) dashboards
 . Click the `Save` option in the top menu
 . Select `Save current expression as Kibana dashboard panel`
-. Name your panel and and click `Save` to save as a dashboard visualization
+. Name your panel and click `Save` to save as a dashboard visualization
 
 image::images/timelion-save01.png[]
 {nbsp}

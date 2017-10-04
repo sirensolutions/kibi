@@ -11,7 +11,7 @@ import Migration from 'kibiutils/lib/migrations/migration';
  *
  * Then:
  *
- * - migrate them to new source filter syntax
+ * - migrate "sourceFiltering" property to new source filter syntax
  */
 export default class Migration13 extends Migration {
 
@@ -31,7 +31,7 @@ export default class Migration13 extends Migration {
   }
 
   static get description() {
-    return 'Migrate old source filtering syntax in Index Pattern to new source filtering syntax';
+    return 'Migrate deprecated "SourceFiltering" property in Index Pattern to "SourceFilters" property';
   }
 
   async _fetchIndexPatterns() {
@@ -39,17 +39,15 @@ export default class Migration13 extends Migration {
   }
 
   async count() {
-    const count = 0;
     await this._fetchIndexPatterns();
-    if (this._indexPatterns.length === 0) {
-      return count;
+    if (this._indexPatterns) {
+      return this._indexPatterns.length;
     }
-    return this._indexPatterns.length;
+    return 0;
   }
 
   async upgrade() {
     let upgraded = 0;
-    const self = this;
     await this._fetchIndexPatterns();
     if (this._indexPatterns.length === 0) {
       return upgraded;
@@ -60,22 +58,20 @@ export default class Migration13 extends Migration {
 
     await this._fetchIndexPatterns();
 
-    _.each(this._indexPatterns, function (indexPattern) {
+    _.each(this._indexPatterns, indexPattern => {
       if (indexPattern._source.sourceFiltering) {
         const sourceFilteringObject = JSON.parse(indexPattern._source.sourceFiltering);
         const graphBrowserFilter = sourceFilteringObject.kibi_graph_browser;
         const allExclude = sourceFilteringObject.all.exclude;
         const allInclude = sourceFilteringObject.all.include;
 
-        if (graphBrowserFilter || allInclude) {
-          if (graphBrowserFilter) {
-            const message = '[ Graph Browser ] property in source filter is deprecated, removing from index pattern';
-            self._logger.warning(message);
-          }
-          if (allInclude) {
-            const message = '[ Include ] property in source filter is deprecated, removing from index pattern';
-            self._logger.warning(message);
-          }
+        if (graphBrowserFilter) {
+          const message = '[ Graph Browser ] property in source filter is deprecated, removing from index pattern';
+          this._logger.warning(message);
+        }
+        if (allInclude) {
+          const message = '[ Include ] property in source filter is deprecated, removing from index pattern';
+          this._logger.warning(message);
         }
 
         if (allExclude) {
@@ -83,12 +79,12 @@ export default class Migration13 extends Migration {
           if (_.isArray(allExclude)) {
             _.each(allExclude, function (filter) {
               newFilter.push({
-                'value': filter
+                value: filter
               });
             });
           } else if (_.isString(allExclude)) {
             newFilter.push({
-              'value': allExclude
+              value: allExclude
             });
           }
           const newFilterString = JSON.stringify(newFilter);

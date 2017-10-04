@@ -7,6 +7,7 @@ import Scenario2 from './scenarios/migration_13/scenario2';
 import Scenario3 from './scenarios/migration_13/scenario3';
 import Scenario4 from './scenarios/migration_13/scenario4';
 import Scenario5 from './scenarios/migration_13/scenario5';
+import Scenario6 from './scenarios/migration_13/scenario6';
 import url from 'url';
 
 const serverConfig = requirefrom('test')('server_config');
@@ -38,7 +39,6 @@ describe('kibi_core/migrations/functional', function () {
 
   describe('Migration 13 - Functional test', function () {
     let configuration;
-
 
     describe('two indices with sourceFiltering', function () {
       beforeEach(async () => {
@@ -99,6 +99,7 @@ describe('kibi_core/migrations/functional', function () {
         }
       });
     });
+
     describe('should not migrate include, but exclude should be migrated', function () {
       beforeEach(async () => {
         await scenarioManager.reload(Scenario3);
@@ -113,7 +114,7 @@ describe('kibi_core/migrations/functional', function () {
       });
 
       afterEach(async () => {
-        await scenarioManager.unload(Scenario1);
+        await scenarioManager.unload(Scenario3);
       });
 
       it('should count all upgradeable objects', async () => {
@@ -146,6 +147,7 @@ describe('kibi_core/migrations/functional', function () {
         }
       });
     });
+
     describe('should not migrate include and kibi_graph_browser with exclude but exclude should be migrated', function () {
       beforeEach(async () => {
         await scenarioManager.reload(Scenario4);
@@ -160,7 +162,7 @@ describe('kibi_core/migrations/functional', function () {
       });
 
       afterEach(async () => {
-        await scenarioManager.unload(Scenario1);
+        await scenarioManager.unload(Scenario4);
       });
 
       it('should count all upgradeable objects', async () => {
@@ -194,6 +196,7 @@ describe('kibi_core/migrations/functional', function () {
         }
       });
     });
+
     describe('should not migrate include and kibi_graph_browser with exclude and include but exclude should be migrated', function () {
       beforeEach(async () => {
         await scenarioManager.reload(Scenario5);
@@ -208,7 +211,7 @@ describe('kibi_core/migrations/functional', function () {
       });
 
       afterEach(async () => {
-        await scenarioManager.unload(Scenario1);
+        await scenarioManager.unload(Scenario5);
       });
 
       it('should count all upgradeable objects', async () => {
@@ -291,5 +294,28 @@ describe('kibi_core/migrations/functional', function () {
       });
     });
 
+    describe('should not migrate if there is no "SourceFiltering" property', function () {
+      beforeEach(async () => {
+        await scenarioManager.reload(Scenario6);
+        configuration = {
+          config: fakeConfig,
+          client: cluster.getClient(),
+          logger: {
+            warning: sinon.spy(),
+            info: sinon.spy()
+          }
+        };
+      });
+
+      afterEach(async () => {
+        await scenarioManager.unload(Scenario6);
+      });
+
+      it('should count all upgradeable objects', async () => {
+        const migration = new Migration(configuration);
+        const result = await migration.count();
+        expect(result).to.be(0);
+      });
+    });
   });
 });

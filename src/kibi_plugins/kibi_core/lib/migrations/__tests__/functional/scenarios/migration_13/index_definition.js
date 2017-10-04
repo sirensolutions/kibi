@@ -5,10 +5,6 @@ module.exports = {
   mappings: {
     config: {
       properties: {
-        buildNum: {
-          type: 'string',
-          index: 'not_analyzed'
-        },
         'sourceFiltering': {
           type: 'string',
           index: 'not_analyzed'

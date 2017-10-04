@@ -138,8 +138,8 @@ image::images/relational_filter/spy_debug.png["Debug spy panel of the relational
 
 [float]
 ==== Join Limit
-The number of documents returned from the `source` of the relation is limited by the `kibi:joinLimit` Advanced Setting in the management section.
-These `source` documents are then used to filter the documents on the `destination`. In general, the `destination` is the current dashboard.
+The number of unique values returned from the `source` of the relation is limited by the `kibi:joinLimit` Advanced Setting in the management section.
+These `source` values are then used to filter the documents on the `destination`. In general, the `destination` is the current dashboard.
 
 
 For more on this and how to set the limit for each relation individually, see the <<kibi-join-limit,Join Limit>> section of the Relation Panel documentation.

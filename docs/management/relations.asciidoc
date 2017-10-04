@@ -30,15 +30,15 @@ image::images/relations_settings/indices_settings_5.png["Graph of Index Patterns
 [[kibi-join-limit]]
 ==== Join Limit
 Clicking the image:images/EditVis.png["Edit pencil"] opens the advanced setting for each relation 
-where you can set the number of documents returned from the related index pattern for that relation. 
+where you can set the number of unique values returned from the related index pattern for that relation. 
 
 As a semi-join, these documents will be filtered based on the presence of a *non-empty* value for the `join` field
 in the other index pattern in the relation. 
 
-The limit is a total upper limit on the number of those documents on the other index pattern for which the `join` field exists.
+The limit is a total upper limit on the number of unique values of the join field on the other index pattern for which the `join` field exists.
 This limit is dynamically allocated over the shards where the index is located. 
 
-The index pattern in question is then filtered by the documents returned. 
+The index pattern in question is then filtered by the values returned. 
 
 These are used for displaying counts on relational buttons, for the content displayed on the current dashboard, etc.
 
@@ -50,12 +50,13 @@ and setting the limit to 0 here disables the limit entirely.
 - The documents of `A` are filtered by adding a relation with `B`
 - The limit is set to 10 for that relation
 
-- In this case, the limit is set on `B`, so *10* documents are returned from `B`
-- These 10 documents are then used to filter the documents in index `A`
+- In this case, the limit is set on `B`, so *10* unique values are returned from `B`
+    * e.g. If the field joined had only `true`/`false` values, only 2 values would be returned, `true` and `false`
+- These 10 values are then used to filter the documents in index `A`
 - Potentially, this could return many more (or many less) than the limit set as
-  there could be a large number of documents in `A` that match the 10 documents 
+  there could be a large number of documents in `A` that match the 10 values 
   returned from `B`
-- The final number of documents returned is always limited by the Elasticsearch `size` parameter
+- The final number of values returned is always limited by the Elasticsearch `size` parameter
 
 ==== Index Patterns Management Icon
 A relation is also indicated on the <<index-patterns,Index Patterns>> Management application thanks

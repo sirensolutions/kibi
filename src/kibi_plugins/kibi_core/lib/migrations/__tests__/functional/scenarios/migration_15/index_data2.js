@@ -4,7 +4,7 @@
  * Defines the following objects:
  *
  * - two visualization with a pageSize, one of them int other one string
- * - two config with discover:sampleSize, one of them int other one string
+ * - one config without discover:sampleSize
  */
 module.exports = [
   {
@@ -31,20 +31,10 @@ module.exports = [
     index: {
       _index: '.kibi',
       _type: 'config',
-      _id: 'conf'
+      _id: 'kibi'
     }
   },
   {
-    'discover:sampleSize': '50'
-  },
-  {
-    index: {
-      _index: '.kibi',
-      _type: 'config',
-      _id: 'conf1'
-    }
-  },
-  {
-    'discover:sampleSize': 50
+    'kibi:relationalPanel': true
   }
 ];

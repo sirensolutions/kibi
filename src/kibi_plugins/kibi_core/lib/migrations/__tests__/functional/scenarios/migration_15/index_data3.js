@@ -3,7 +3,8 @@
 /**
  * Defines the following objects:
  *
- * - two visualization with a pageSize, one of them int other one string
+ * - one visualization without pageSize
+ * - one config without discover:sampleSize
  */
 module.exports = [
   {
@@ -14,16 +15,16 @@ module.exports = [
     }
   },
   {
-    visState: '{"title":"vis","type":"kibi-data-table","params":{"clickOptions":[{"columnField":"rnews:headline","type":"select","targetDashboardId":"Graph"}],"pageSize":"40"}}'
+    visState: '{"title":"vis","type":"kibi-data-table","params":{"clickOptions":[{"columnField":"rnews:headline","type":"select","targetDashboardId":"Graph"}]}}'
   },
   {
     index: {
       _index: '.kibi',
-      _type: 'visualization',
-      _id: 'vis1'
+      _type: 'config',
+      _id: 'kibi'
     }
   },
   {
-    visState: '{"title":"vis1","type":"kibi-data-table","params":{"clickOptions":[{"columnField":"rnews:headline","type":"select","targetDashboardId":"Graph"}],"pageSize":30}}'
+    'kibi:relationalPanel': true
   }
 ];

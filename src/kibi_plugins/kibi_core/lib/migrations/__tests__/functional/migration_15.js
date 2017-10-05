@@ -6,8 +6,6 @@ import Migration from '../../migration_15';
 import Scenario1 from './scenarios/migration_15/scenario1';
 import Scenario2 from './scenarios/migration_15/scenario2';
 import Scenario3 from './scenarios/migration_15/scenario3';
-import Scenario4 from './scenarios/migration_15/scenario4';
-import Scenario5 from './scenarios/migration_15/scenario5';
 import url from 'url';
 
 const serverConfig = requirefrom('test')('server_config');
@@ -40,7 +38,7 @@ describe('kibi_core/migrations/functional', function () {
   describe('Migration 15 - Functional test', function () {
     let configuration;
 
-    describe('one config and two visualization with string "discover:sampleSize" and string "pageSize"', function () {
+    describe('one config with string "discover:sampleSize" and two visualization with string "pageSize"', function () {
       beforeEach(async () => {
         await scenarioManager.reload(Scenario1);
         configuration = {
@@ -116,7 +114,7 @@ describe('kibi_core/migrations/functional', function () {
       });
     });
 
-    describe('two visualisation with "pageSize" and two config with "discover:sampleSize" property', function () {
+    describe('two visualization with "pageSize", one of them string other one integer', function () {
       beforeEach(async () => {
         await scenarioManager.reload(Scenario2);
         configuration = {
@@ -136,14 +134,14 @@ describe('kibi_core/migrations/functional', function () {
       it('should count all upgradeable objects', async () => {
         const migration = new Migration(configuration);
         const result = await migration.count();
-        expect(result).to.be(2);
+        expect(result).to.be(1);
       });
 
       it('should upgrade all upgradeable objects', async () => {
         const before = await snapshot();
         const migration = new Migration(configuration);
         const result = await migration.upgrade();
-        expect(result).to.be(2);
+        expect(result).to.be(1);
         const after = await snapshot();
 
         for (const [id, original] of before) {
@@ -163,35 +161,17 @@ describe('kibi_core/migrations/functional', function () {
             expect(visState).to.equal(expectedResult);
           }
 
-          if(original._type === 'config' && original._id === 'conf') {
-            const sampleSize = original._source['discover:sampleSize'];
-            const expectedResult = '50';
-            expect(sampleSize).to.equal(expectedResult);
-          }
-
-          if(original._type === 'config' && original._id === 'conf1') {
-            const sampleSize = original._source['discover:sampleSize'];
-            const expectedResult = 50;
-            expect(sampleSize).to.equal(expectedResult);
-          }
-
           if(upgraded._type === 'visualization' && upgraded._id === 'vis') {
             const visState = upgraded._source.visState;
             const expectedResult = '{"title":"vis","type":"kibi-data-table",' +
             '"params":{"clickOptions":[{"columnField":"rnews:headline","type":"select","targetDashboardId":"Graph"}],"pageSize":40}}';
             expect(visState).to.equal(expectedResult);
           }
-
-          if(upgraded._type === 'config' && upgraded._id === 'conf') {
-            const sampleSize = upgraded._source['discover:sampleSize'];
-            const expectedResult = 50;
-            expect(sampleSize).to.equal(expectedResult);
-          }
         }
       });
     });
 
-    describe('two visualization with "pageSize", one of them string other one integer', function () {
+    describe('should not migrate if there is no "discover:sampleSize" or "pageSize" property', function () {
       beforeEach(async () => {
         await scenarioManager.reload(Scenario3);
         configuration = {
@@ -206,117 +186,6 @@ describe('kibi_core/migrations/functional', function () {
 
       afterEach(async () => {
         await scenarioManager.unload(Scenario3);
-      });
-
-      it('should count all upgradeable objects', async () => {
-        const migration = new Migration(configuration);
-        const result = await migration.count();
-        expect(result).to.be(1);
-      });
-
-      it('should upgrade all upgradeable objects', async () => {
-        const before = await snapshot();
-        const migration = new Migration(configuration);
-        const result = await migration.upgrade();
-        expect(result).to.be(1);
-        const after = await snapshot();
-
-        for (const [id, original] of before) {
-          const upgraded = after.get(id);
-
-          if(original._type === 'visualization' && original._id === 'vis') {
-            const visState = original._source.visState;
-            const expectedResult = '{"title":"vis","type":"kibi-data-table",' +
-            '"params":{"clickOptions":[{"columnField":"rnews:headline","type":"select","targetDashboardId":"Graph"}],"pageSize":"40"}}';
-            expect(visState).to.equal(expectedResult);
-          }
-
-          if(original._type === 'visualization' && original._id === 'vis1') {
-            const visState = original._source.visState;
-            const expectedResult = '{"title":"vis1","type":"kibi-data-table",' +
-            '"params":{"clickOptions":[{"columnField":"rnews:headline","type":"select","targetDashboardId":"Graph"}],"pageSize":30}}';
-            expect(visState).to.equal(expectedResult);
-          }
-
-          if(upgraded._type === 'visualization' && upgraded._id === 'vis') {
-            const visState = upgraded._source.visState;
-            const expectedResult = '{"title":"vis","type":"kibi-data-table",' +
-            '"params":{"clickOptions":[{"columnField":"rnews:headline","type":"select","targetDashboardId":"Graph"}],"pageSize":40}}';
-            expect(visState).to.equal(expectedResult);
-          }
-        }
-      });
-    });
-
-    describe('two config with "discover:sampleSize", one of them string other one integer', function () {
-      beforeEach(async () => {
-        await scenarioManager.reload(Scenario4);
-        configuration = {
-          config: fakeConfig,
-          client: cluster.getClient(),
-          logger: {
-            warning: sinon.spy(),
-            info: sinon.spy()
-          }
-        };
-      });
-
-      afterEach(async () => {
-        await scenarioManager.unload(Scenario4);
-      });
-
-      it('should count all upgradeable objects', async () => {
-        const migration = new Migration(configuration);
-        const result = await migration.count();
-        expect(result).to.be(1);
-      });
-
-      it('should upgrade all upgradeable objects', async () => {
-        const before = await snapshot();
-        const migration = new Migration(configuration);
-        const result = await migration.upgrade();
-        expect(result).to.be(1);
-        const after = await snapshot();
-
-        for (const [id, original] of before) {
-          const upgraded = after.get(id);
-
-          if(original._type === 'config' && original._id === 'conf') {
-            const sampleSize = original._source['discover:sampleSize'];
-            const expectedResult = '50';
-            expect(sampleSize).to.equal(expectedResult);
-          }
-
-          if(original._type === 'config' && original._id === 'conf1') {
-            const sampleSize = upgraded._source['discover:sampleSize'];
-            const expectedResult = 40;
-            expect(sampleSize).to.equal(expectedResult);
-          }
-
-          if(upgraded._type === 'config' && upgraded._id === 'conf') {
-            const sampleSize = upgraded._source['discover:sampleSize'];
-            const expectedResult = 50;
-            expect(sampleSize).to.equal(expectedResult);
-          }
-        }
-      });
-    });
-
-    describe('should not migrate if there is no "discover:sampleSize" or "pageSize" property', function () {
-      beforeEach(async () => {
-        await scenarioManager.reload(Scenario5);
-        configuration = {
-          config: fakeConfig,
-          client: cluster.getClient(),
-          logger: {
-            warning: sinon.spy(),
-            info: sinon.spy()
-          }
-        };
-      });
-
-      afterEach(async () => {
-        await scenarioManager.unload(Scenario5);
       });
 
       it('should count all upgradeable objects', async () => {

@@ -31,7 +31,7 @@ module.exports = [
     index: {
       _index: '.kibi',
       _type: 'config',
-      _id: 'conf'
+      _id: 'kibi'
     }
   },
   {

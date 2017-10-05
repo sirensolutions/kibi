@@ -3,7 +3,7 @@ import 'plugins/kibana/management/sections/indices/_indexed_fields';
 import 'plugins/kibana/management/sections/indices/_scripted_fields';
 import 'plugins/kibana/management/sections/indices/source_filters/source_filters';
 import 'plugins/kibana/management/sections/indices/_index_header';
-import RefreshKibanaIndex from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
+// kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
 import UrlProvider from 'ui/url';
 import IndicesEditSectionsProvider from 'plugins/kibana/management/sections/indices/_edit_sections';
 import uiRoutes from 'ui/routes';
@@ -58,7 +58,7 @@ uiModules.get('apps/management')
 
   const notify = createNotifier();
   const $state = $scope.state = new AppState();
-  const refreshKibanaIndex = Private(RefreshKibanaIndex);
+  // kibi: removed refreshKibanaIndex as in Kibi refresh is done by saved object API
 
   $scope.kbnUrl = Private(UrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
@@ -124,7 +124,7 @@ uiModules.get('apps/management')
       }
 
       courier.indexPatterns.delete($scope.indexPattern)
-        .then(refreshKibanaIndex)
+        // kibi: removed refreshKibanaIndex as in Kibi refresh is done by saved object API
         .then(function () {
           $location.url('/management/siren/index');
         })

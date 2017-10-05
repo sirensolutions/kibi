@@ -21,11 +21,12 @@ export default class Migration15 extends Migration {
 
     this._logger = configuration.logger;
     this._client = configuration.client;
-    this._config =  configuration.config;
     this._index = configuration.config.get('kibana.index');
     this._configQuery = {
-      'query': {
-        'exists' : { 'field' : 'discover:sampleSize' }
+      "query": {
+        "bool": {
+          "filter":{ "term":  { "_id": "kibi" } }
+        }
       }
     };
     this._visQuery = {
@@ -40,14 +41,13 @@ export default class Migration15 extends Migration {
     'if any of them a string, parse to number';
   }
 
-  async _fetchConfigs() {
-    this._configs = [];
+  async _fetchConfig() {
+    this._config = '';
     const configs = await this.scrollSearch(this._index, 'config', this._configQuery);
-    _.each(configs, config => {
-      if (_.isString(config._source['discover:sampleSize'])) {
-        this._configs.push(config);
-      }
-    });
+    const kibiConfig = configs[0];
+    if (_.isString(kibiConfig._source['discover:sampleSize'])) {
+      this._config = kibiConfig;
+    }
   }
 
   async _fetchVisualizations() {
@@ -55,26 +55,26 @@ export default class Migration15 extends Migration {
     const visualizations = await this.scrollSearch(this._index, 'visualization', this._visQuery);
     _.each(visualizations, visualization => {
       const visState = JSON.parse(visualization._source.visState);
-      if (_.get(visState.params, 'pageSize') && _.isString(_.get(visState.params, 'pageSize'))) {
+      if (_.isString(_.get(visState.params, 'pageSize'))) {
         this._visualizations.push(visualization);
       }
     });
   }
 
   async count() {
-    await this._fetchConfigs();
+    await this._fetchConfig();
     await this._fetchVisualizations();
-    if (this._configs || this._visualizations) {
-      return this._visualizations.length + this._configs.length;
+    if (this._config || !_.isEmpty(this._visualizations)) {
+      return this._visualizations.length + (this._config ? 1 : 0);
     }
     return 0;
   }
 
   async upgrade() {
     let upgraded = 0;
-    await this._fetchConfigs();
+    await this._fetchConfig();
     await this._fetchVisualizations();
-    if (this._visualizations.length === 0 && this._configs.length === 0) {
+    if (this._visualizations.length === 0 && !this._config) {
       return upgraded;
     }
 
@@ -82,28 +82,27 @@ export default class Migration15 extends Migration {
     this._logger.info('Checking "discover:sampleSize" property in config and ' +
     '"pageSize" property in "visState" property of visualizations');
 
-    _.each(this._configs, config => {
-      if (_.get(config._source, 'discover:sampleSize')) {
-        const sampleSize = _.get(config._source, 'discover:sampleSize');
-        if (_.isString(sampleSize)) {
-          const sampleSizeInt =  parseInt(sampleSize);
 
-          this._logger.info('Parsing "discover:sampleSize" property in [ ' + config._id + ' ] to number');
-          body += JSON.stringify({
-            update: {
-              _index: config._index,
-              _type: config._type,
-              _id: config._id
-            }
-          })  + '\n' + JSON.stringify({
-            doc: {
-              'discover:sampleSize': sampleSizeInt
-            }
-          }) + '\n';
-          upgraded++;
-        }
+    if (_.get(this._config._source,'discover:sampleSize')) {
+      const sampleSize = _.get(this._config._source, 'discover:sampleSize');
+      if (_.isString(sampleSize)) {
+        const sampleSizeInt =  parseInt(sampleSize);
+
+        this._logger.info('Parsing "discover:sampleSize" property in [ ' + this._config._id + ' ] to number');
+        body += JSON.stringify({
+          update: {
+            _index: this._config._index,
+            _type: this._config._type,
+            _id: this._config._id
+          }
+        })  + '\n' + JSON.stringify({
+          doc: {
+            'discover:sampleSize': sampleSizeInt
+          }
+        }) + '\n';
+        upgraded++;
       }
-    });
+    }
 
     _.each(this._visualizations, visualization => {
       const visState = JSON.parse(visualization._source.visState);

@@ -2,7 +2,7 @@ import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import QueryBuilderProvider from 'ui/kibi/helpers/query_builder';
 import _ from 'lodash';
 
-export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private) {
+export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private, kibiMeta) {
   const queryBuilder = Private(QueryBuilderProvider);
   const relationsHelper = Private(RelationsHelperProvider);
 
@@ -97,10 +97,16 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
             this.joinSeqFilter.meta.alias = alias;
             if (alias.indexOf('$COUNT') !== -1) {
               this.joinSeqFilter.meta.alias_tmpl = alias;
-              return this.getSourceCount(currentDashboardId, updateOnClick)
-              .then((sourceCount) => {
-                this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, sourceCount);
-                switchToDashboard.apply(this);
+              this.getSourceCount(currentDashboardId).then(results => {
+                // here we expect only 1 result
+                const metaDefinitions = [{
+                  definition: results[0].button,
+                  callback: meta => {
+                    this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total);
+                    switchToDashboard.apply(this);
+                  }
+                }];
+                kibiMeta.getMetaForRelationalButtons(metaDefinitions);
               });
             } else {
               switchToDashboard.apply(this);

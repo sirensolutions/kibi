@@ -1,3 +1,4 @@
+
 <div
   class="global-nav-link {{classes}}"
   ng-click="onClick({ $event: $event, force: true })"
@@ -6,7 +7,10 @@
   tooltip-placement="right"
   tooltip-popup-delay="0"
   tooltip-append-to-body="1"
+  tooltip-extra-classes="{{ kibiTooltipExtraClasses }}"
 >
+<!-- kibi: added tooltip-extra-classes ^^ -->
+
   <!-- kibi: allows user to click on empty areas -->
   <a
     class="global-nav-link__anchor"

@@ -18,9 +18,11 @@ module.directive('globalNavLink', chrome => {
       kbnRoute: '=',
       icon: '=',
       label: '=',
-      // kibi: adds customizing options
+      // kibi: adds customization options
+      kibiTooltipExtraClasses: '@',
       kibiIndicatorClass: '=',
       kibiIndicatorIcon: '='
+      // kibi: end
     },
     template: globalNavLinkTemplate,
     link: scope => {

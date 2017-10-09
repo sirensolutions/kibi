@@ -209,7 +209,7 @@
     "angular-animate": "1.4.8",
     "kibi-icons": "sirensolutions/kibi-icons#1.0.0",
     "@bigfunger/decompress-zip": "0.2.0-stripfix3",
-    "lru-cache": "4.0.2",
+    "lru-cache": "4.1.1",
     "request-promise": "4.1.1",
     "node-forge": "^0.6.37",
     "kibiutils": "sirensolutions/kibiutils#1.9.0",

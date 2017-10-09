@@ -116,6 +116,9 @@ src/ui/public/agg_types/AggType.js
 src/ui/public/agg_types/buckets/create_filter/filters.js
 src/ui/public/agg_types/index.js
 
+src/ui/public/angular-bootstrap/tooltip/tooltip-popup.html
+src/ui/public/angular-bootstrap/tooltip/tooltip.js
+
 src/ui/public/chrome/api/controls.js
 src/ui/public/chrome/chrome.html
 src/ui/public/chrome/chrome.js

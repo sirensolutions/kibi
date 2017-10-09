@@ -100,6 +100,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
           'title="'+startSym+'title'+endSym+'" '+
           'content="'+startSym+'content'+endSym+'" '+
           'placement="'+startSym+'placement'+endSym+'" '+
+          'extra-classes="{{ extraClasses }}" ' + // kibi: mmm
           'animation="animation" '+
           'is-open="isOpen"'+
           '>'+
@@ -253,6 +254,9 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             function prepareTooltip() {
               prepPlacement();
               prepPopupDelay();
+              // kibi: pass extraClasses to tooltip scope
+              const val = attrs[`${prefix}ExtraClasses`];
+              ttScope.extraClasses = angular.isDefined ( val ) ? val : '';
             }
 
             /**
@@ -337,7 +341,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
   return {
     restrict: 'EA',
     replace: true,
-    scope: { content: '@', placement: '@', animation: '&', isOpen: '&' },
+    scope: { content: '@', placement: '@', animation: '&', isOpen: '&', extraClasses: '@' }, // kibi: added extraClasses
     templateUrl: 'template/tooltip/tooltip-popup.html'
   };
 })
@@ -350,7 +354,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
   return {
     restrict: 'EA',
     replace: true,
-    scope: { content: '@', placement: '@', animation: '&', isOpen: '&' },
+    scope: { content: '@', placement: '@', animation: '&', isOpen: '&', extraClasses: '@' }, // kibi: added extraClasses
     templateUrl: 'template/tooltip/tooltip-html-unsafe-popup.html'
   };
 })

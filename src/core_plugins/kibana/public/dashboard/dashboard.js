@@ -25,7 +25,8 @@ import DashboardStateProvider from './dashboard_state';
 import notify from 'ui/notify';
 
 // kibi: imports
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import 'ui/kibi/directives/kibi_human_readable';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
 const app = uiModules.get('app/dashboard', [
@@ -94,23 +95,17 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       }
 
       // kibi: adds information about the group membership and stats
-      const numeral = require('numeral')();
       function getMetadata() {
         delete dash.group;
         if (dash.id) {
           dash.group = dashboardGroups.getGroup(dash.id);
           if (dash.group) {
-            const count = _(dash.group.dashboards).filter(d => d.id === dash.id).map('count').value();
-            if (count && count.length) {
-              if (_.isNumber(count[0])) {
-                dash.formattedCount = numeral.set(count[0]).format('0,0');
-              } else {
-                dash.formattedCount = count[0];
-              }
-            }
+            const found = _.find(dash.group.dashboards, d => d.id === dash.id);
+            dash.count = found.count;
           }
         }
       }
+
       dashboardGroups.on('groupsMetadataUpdated', () => {
         getMetadata();
       }).on('dashboardsMetadataUpdated', () => {
@@ -417,11 +412,11 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       };
 
       // kibi: Merge the parameters saved on kibi_appstate_param
-      const passedState = JSON.parse(hashedItemStoreSingleton.getItem('kibi_appstate_param'));
+      const passedState = JSON.parse(HashedItemStoreSingleton.getItem('kibi_appstate_param'));
       if (passedState && passedState.dashboardOptions) {
         _.assign($scope.opts.dashboard, _.cloneDeep(passedState.dashboardOptions));
         delete passedState.dashboardOptions;
-        hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
+        HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
       }
       // kibi: end
 

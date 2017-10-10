@@ -7,15 +7,18 @@ import './dashboard_nav_edit_link.less';
 import 'ui/kibi/directives/kibi_context_menu';
 import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dashboard_view_mode';
 import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
-import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
-import uiModules from 'ui/modules';
+import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { uiModules } from 'ui/modules';
+import 'ui/kibi/directives/kibi_human_readable';
+import { KibiHumanReadableHelperProvider } from 'ui/kibi/directives/kibi_human_readable_helper';
 
 uiModules
 .get('kibana')
 .directive('dashboardNavEditLink', ($rootScope, $route, dashboardGroups, createNotifier,
   dashboardsNavState, savedDashboardGroups, Private, globalNavState, kibiState, AppState,
   savedDashboards, kbnUrl, confirmModalPromise, $timeout) => {
-  const numeral = require('numeral')();
+
+  const kibiHumanReadableHelper = Private(KibiHumanReadableHelperProvider);
 
   return {
     restrict: 'E',
@@ -201,7 +204,7 @@ uiModules
               currentKey: item.topNavKey
             }
           };
-          hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
+          HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
           globalNavState.setOpen(false);
           dashboardGroups.selectDashboard(id);
         }
@@ -303,21 +306,12 @@ uiModules
         return false;
       };
 
-      $scope.humanNotation = number => {
-        if (_.isNumber(number)) {
-          return numeral.set(number).format('0.[0]a');
-        }
-      };
-
       $scope.isSidebarOpen = dashboardsNavState.isOpen();
       $scope.$watch(dashboardsNavState.isOpen, isOpen => {
         $scope.isSidebarOpen = isOpen;
       });
 
       $scope.addTooltip = function (event, reference, isDashboard, includeFilters = false) {
-        function formatCount(count) {
-          return numeral.set(count).format('0,000');
-        }
         let title;
         let filterMessage = null;
         if (isDashboard) {
@@ -325,7 +319,7 @@ uiModules
           title = dashboard.title;
           filterMessage = dashboard.filterIconMessage;
           if (dashboard.count !== undefined) {
-            title += ' (' + formatCount(dashboard.count) + ')';
+            title += ' (' + kibiHumanReadableHelper.formatNumber(dashboard.count, '0,000') + ')';
           }
         } else {
           const group = $scope.group;
@@ -334,7 +328,7 @@ uiModules
             filterMessage = group.selected.filterIconMessage;
           }
           if (group.virtual && group.selected.count !== undefined) {
-            title += ' (' + formatCount(group.selected.count)  + ')';
+            title += ' (' + kibiHumanReadableHelper.formatNumber(group.selected.count, '0,000') + ')';
           }
         }
         $scope.tooltipContent = title + ((filterMessage && includeFilters) ? filterMessage : '');

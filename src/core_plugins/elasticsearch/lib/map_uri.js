@@ -47,7 +47,6 @@ export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
     const requestQuery = request.query;
     if (requestQuery) {
       delete requestQuery.getMeta;
-      delete requestQuery.getCountsOnTabs;
       delete requestQuery.getEntitiesFromDashboard;
     }
     // kibi: end

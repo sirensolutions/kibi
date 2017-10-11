@@ -42,15 +42,15 @@ uiRoutes
 uiRoutes
 .when('/management/siren/indices', {
   resolve: {
-    redirect: function ($location, config) {
-      const defaultIndex = config.get('defaultIndex');
-      let path = '/management/siren/index';
-
-      if (defaultIndex) {
-        path = `/management/siren/indices/${defaultIndex}`;
-      }
-
-      $location.path(path).replace();
+    redirect: function ($location, config, kibiDefaultIndexPattern) {
+      // kibi: use our service to get default indexPattern
+      return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
+        const path = `/management/siren/indices/${defaultIndex.id}`;
+        $location.path(path).replace();
+      }).catch(err => {
+        const path = '/management/siren/index';
+        $location.path(path).replace();
+      });
     }
   }
 });
@@ -119,6 +119,8 @@ uiModules.get('apps/management')
 
   $scope.removePattern = function () {
     function doRemove() {
+      // kibi: here is fine to use config.get('defaultIndex')
+      // if user do not have rights s/he will get an authorisation error
       if ($scope.indexPattern.id === config.get('defaultIndex')) {
         config.remove('defaultIndex');
         if (otherIds.length) {

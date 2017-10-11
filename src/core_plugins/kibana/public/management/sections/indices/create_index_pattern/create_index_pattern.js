@@ -297,9 +297,8 @@ uiModules.get('apps/management')
       }
 
       refreshKibanaIndex().then(() => {
-        if (!config.get('defaultIndex')) {
-          config.set('defaultIndex', id);
-        }
+        // kibi: do not try to set the default index pattern automatically
+        // as user might not have permissions to do it
 
         indexPatterns.cache.clear(id);
         kbnUrl.change(`/management/siren/indices/${id}`);

@@ -66,6 +66,7 @@ uiModules
   class DashboardGroups extends SimpleEmitter {
     constructor() {
       super();
+      this.groups = [];
       this._initialized = false;
       this.init = _.once(() => {
         // NOTE: It is important to wait until appState is fully ready before doing the init

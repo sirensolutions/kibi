@@ -18,6 +18,7 @@ Changed:
 * Update Vanguard to version 5.5.2-1
 * Default Access Control plugin policy on conflicting roles changed to DENY_IF_AT_LEAST_ONE_ROLE_IS_DENIED,
   to revert to previous policy set kibi_access_control.acl.policy property to ALLOW_IF_AT_LEAST_ONE_ROLE_IS_ALLOWED in kibi.yml file 
+* Update Kibi Timeline plugin to version 5.4.3-2
 
 Added: 
 

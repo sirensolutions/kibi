@@ -16,10 +16,13 @@ Changed:
 
 * Update Siren Platform distributions to use Elasticsearch version 5.5.2
 * Update Vanguard to version 5.5.2-1
+* Default Access Control plugin policy on conflicting roles changed to DENY_IF_AT_LEAST_ONE_ROLE_IS_DENIED,
+  to revert to previous policy set kibi_access_control.acl.policy property to ALLOW_IF_AT_LEAST_ONE_ROLE_IS_ALLOWED in kibi.yml file 
 
 Added: 
 
+* Added new UI element rules in Access Control plugin to controll access to certain parts of the UI
+   e.g: applications (Timelion, Sentinl), Kibi sections (discover, management), specific features (export CSV functionality) 
 * Added ability to limit number of collected tuples per shard during the join operations
   This option can now be set globally via kibi:joinLimit in each relation's settings in the Relational Panel 
-
 * Added support for dynamic object mapping type to Saved Object API 

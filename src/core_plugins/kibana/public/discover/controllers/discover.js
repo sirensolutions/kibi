@@ -46,8 +46,8 @@ uiRoutes
   template: indexTemplate,
   reloadOnSearch: false,
   resolve: {
-    // kibi: added createNotifier, kbnUrl
-    ip: function (Promise, courier, config, $location, Private, createNotifier, kbnUrl) {
+    // kibi: added createNotifier, kbnUrl, kibiDefaultIndexPattern
+    ip: function (Promise, courier, config, $location, Private, createNotifier, kbnUrl, kibiDefaultIndexPattern) {
       const State = Private(StateProvider);
       return courier.indexPatterns.getIds()
       .then(function (list) {
@@ -64,22 +64,33 @@ uiRoutes
 
         const specified = !!state.index;
         const exists = _.contains(list, state.index);
-        const id = exists ? state.index : config.get('defaultIndex');
+
+        // kibi: use our service in case we need default indexPattern
+        let idPromise;
+        if (exists) {
+          idPromise = Promise.resolve(state.index);
+        } else {
+          idPromise = kibiDefaultIndexPattern.getDefaultIndexPattern(list).then(indexPattern => indexPattern.id);
+        }
+        // kibi: end
+
         state.destroy();
 
-        return Promise.props({
-          list: list,
-          loaded: courier.indexPatterns.get(id),
-          stateVal: state.index,
-          stateValFound: specified && exists
-        })
-        // kibi: redirect if access to index pattern is forbidden
-        .catch(error => {
-          if (error instanceof IndexPatternAuthorizationError) {
-            createNotifier().warning(`Access to index pattern ${id} is forbidden.`);
-            kbnUrl.redirect('/discover');
-            return Promise.halt();
-          }
+        return idPromise.then(id => {
+          return Promise.props({
+            list: list,
+            loaded: courier.indexPatterns.get(id),
+            stateVal: state.index,
+            stateValFound: specified && exists
+          })
+          // kibi: redirect if access to index pattern is forbidden
+          .catch(error => {
+            if (error instanceof IndexPatternAuthorizationError) {
+              createNotifier().warning(`Access to index pattern ${id} is forbidden.`);
+              kbnUrl.redirect('/discover');
+              return Promise.halt();
+            }
+          });
         });
       });
     },

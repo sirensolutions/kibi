@@ -7,7 +7,7 @@ import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import kibiUtils from 'kibiutils';
 
 export default function KibiSelectHelperFactory(config, indexPatterns, Private, Promise, kibiState, es, savedSearches, savedTemplates,
-  savedDashboards, savedQueries, savedDatasources, mappings) {
+  savedDashboards, savedQueries, savedDatasources, mappings, kibiDefaultIndexPattern) {
 
   function KibiSelectHelper() {
   }
@@ -140,15 +140,15 @@ export default function KibiSelectHelperFactory(config, indexPatterns, Private, 
 
   KibiSelectHelper.prototype.getFields = function (indexPatternId, fieldTypes, scriptedFields = false) {
     const metaFields = config.get('metaFields');
-    let defId;
+    let defaultIndexPattern;
 
     if (indexPatternId) {
-      defId = indexPatternId;
+      defaultIndexPattern = indexPatterns.get(indexPatternId);
     } else {
-      defId = config.get('defaultIndex');
+      defaultIndexPattern = kibiDefaultIndexPattern.getDefaultIndexPattern();
     }
 
-    return indexPatterns.get(defId).then(function (index) {
+    return defaultIndexPattern.then(function (index) {
       return _.chain(index.fields)
       .filter(function (field) {
         if (!field.name || _.contains(metaFields, field.name)) {

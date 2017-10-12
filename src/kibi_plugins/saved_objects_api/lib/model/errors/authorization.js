@@ -14,5 +14,6 @@ export default class AuthorizationError extends BaseError {
     super(message, inner);
     this.name = 'AuthorizationError';
     this.status = 403;
+    this.statusCode = 403;
   }
 }

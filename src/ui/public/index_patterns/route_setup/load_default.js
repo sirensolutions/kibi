@@ -18,19 +18,20 @@ module.exports = function (opts) {
   let defaultRequiredToasts = null;
 
   uiRoutes
-  .addSetupWork(function loadDefaultIndexPattern(indexPatterns, Private, Promise, $route, config) {
+  .addSetupWork(function loadDefaultIndexPattern(indexPatterns, Private, Promise, $route, config, kibiDefaultIndexPattern) {
     const rootSearchSource = Private(RootSearchSourceProvider);
     const getIds = Private(GetIdsProvider);
     const route = _.get($route, 'current.$$route');
 
     return getIds()
     .then(function (patterns) {
+      // kibi: here using config.get('defaultIndex') is fine in other places use kibiDefaultIndexPattern service instead
       let defaultId = config.get('defaultIndex');
       let defined = !!defaultId;
       const exists = _.contains(patterns, defaultId);
 
       if (defined && !exists) {
-        config.remove('defaultIndex');
+        // kibi: do not try to delete the default as user might not have rights to do so
         defaultId = defined = false;
       }
 
@@ -38,36 +39,21 @@ module.exports = function (opts) {
         // If there is only one index pattern, set it as default
         if (patterns.length === 1) {
           defaultId = patterns[0];
-          config.set('defaultIndex', defaultId);
+          // kibi: do not try to delete the default as user might not have rights to do so
         } else {
           throw new NoDefaultIndexPattern();
         }
-      }
 
-      // kibi: handle authorization errors when accessing the default index
-      return notify.event('loading default index pattern', function loadIndexPattern(indexPattern) {
-        const indexPatternId = indexPattern || defaultId;
-        return indexPatterns.get(indexPatternId).then(function (pattern) {
-          if (indexPatternId !== defaultId) {
-            config.set('defaultIndex', indexPatternId);
-            defaultId = indexPatternId;
-          }
-          rootSearchSource.getGlobalSource().set('index', pattern);
-          notify.log('index pattern set to', indexPatternId);
-        })
-        .catch(err => {
-          if (err instanceof IndexPatternAuthorizationError) {
-            if (patterns.length) {
-              return loadIndexPattern(patterns.pop());
-            } else {
-              // kibi: unset the defaultIndex since none of the known index patterns can be accessed
-              config.remove('defaultIndex');
-              throw new NoDefaultIndexPattern();
-            }
-          }
-          throw err;
+        // kibi:
+        // set the default indexPattern as it is required by the route
+        // handle authorization errors
+        notify.event('loading default index pattern');
+        kibiDefaultIndexPattern.getDefaultIndexPattern(patterns, undefined, defaultId)
+        .then(indexPattern => {
+          rootSearchSource.getGlobalSource().set('index', indexPattern);
+          notify.log('index pattern set to', indexPattern.id);
         });
-      });
+      }
     });
   })
   .afterWork(

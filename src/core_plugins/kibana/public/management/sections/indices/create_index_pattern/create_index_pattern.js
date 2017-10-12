@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
-import { RefreshKibanaIndex } from '../refresh_kibana_index';
+// kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
@@ -20,7 +20,7 @@ uiRoutes
 uiModules.get('apps/management')
 .controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
   const notify = new Notifier();
-  const refreshKibanaIndex = Private(RefreshKibanaIndex);
+  // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
   const intervals = indexPatterns.intervals;
   let loadingCount = 0;
 
@@ -296,17 +296,16 @@ uiModules.get('apps/management')
         return;
       }
 
-      refreshKibanaIndex().then(() => {
-        if (!config.get('defaultIndex')) {
-          config.set('defaultIndex', id);
-        }
+      // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
+      // kibi: do not try to set the default index pattern automatically
+      // as user might not have permissions to do it
 
-        indexPatterns.cache.clear(id);
-        kbnUrl.change(`/management/siren/indices/${id}`);
+      indexPatterns.cache.clear(id);
+      kbnUrl.change(`/management/siren/indices/${id}`);
 
-        // force loading while kbnUrl.change takes effect
-        loadingCount = Infinity;
-      });
+      // force loading while kbnUrl.change takes effect
+      loadingCount = Infinity;
+
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
         return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));

@@ -27,7 +27,8 @@ describe('Kibi Directives', function () {
         savedTemplates = [],
         savedDashboards = [],
         stubIndexPatterns = false,
-        stubConfig = false
+        stubConfig = false,
+        stubKibiDefaultIndexPattern = false
       } = {}) {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kbnIndex', '.kibi');
@@ -40,6 +41,17 @@ describe('Kibi Directives', function () {
         if (savedSearches) {
           $provide.service('savedSearches', (Promise, Private) => {
             return mockSavedObjects(Promise, Private)('savedSearches', savedSearches);
+          });
+        }
+
+        if (stubKibiDefaultIndexPattern) {
+          $provide.service('kibiDefaultIndexPattern', function (Promise, Private) {
+            const indexPattern = Private(stubbedLogstashIndexPatternService);
+            return {
+              getDefaultIndexPattern: function () {
+                return Promise.resolve(indexPattern);
+              }
+            };
           });
         }
       });
@@ -402,7 +414,8 @@ describe('Kibi Directives', function () {
       beforeEach(function () {
         init({
           stubIndexPatterns: true,
-          stubConfig: true
+          stubConfig: true,
+          stubKibiDefaultIndexPattern: true
         });
       });
 

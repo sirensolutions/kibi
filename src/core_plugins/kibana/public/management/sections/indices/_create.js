@@ -73,9 +73,8 @@ uiModules.get('apps/management')
       .then(function (id) {
         if (id) {
           // kibi: removed refreshKibanaIndex as in Kibi refresh is done by saved object API
-          if (!config.get('defaultIndex')) {
-            config.set('defaultIndex', indexPattern.id);
-          }
+          // kibi: do not try to set the default index pattern automatically
+          // as user might not have permissions to do it
           indexPatterns.cache.clear(indexPattern.id);
           kbnUrl.change('/management/siren/indices/' + indexPattern.id);
         }

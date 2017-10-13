@@ -40,7 +40,7 @@
   ],
   "scripts": {
     "test": "grunt test",
-    "test:dev": "grunt test:dev",
+    "test:dev": "grunt test:dev --kbnServer.ignoreDevYml",
     "test:quick": "grunt test:quick",
     "test:browser": "grunt test:browser",
     "test:ui": "grunt test:ui",

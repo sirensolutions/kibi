@@ -83,13 +83,13 @@ describe('Kibi Components', function () {
       button1 = {
         indexRelationId: 'index1//f1/index2//f2',
         label: 'button 1',
-        getSourceCount: function () {}
+        updateSourceCount: function () {}
       };
-      sinon.stub(button1, 'getSourceCount').returns(Promise.resolve([ { button: button1 } ]));
+      sinon.stub(button1, 'updateSourceCount').returns(Promise.resolve([ { button: button1 } ]));
     });
 
     afterEach(function () {
-      button1.getSourceCount.restore();
+      button1.updateSourceCount.restore();
     });
 
     noDigestPromises.activateForSuite();
@@ -291,7 +291,7 @@ describe('Kibi Components', function () {
           };
 
           return button.click().then(() => {
-            sinon.assert.calledOnce(buttonDefs[0].getSourceCount);
+            sinon.assert.calledOnce(buttonDefs[0].updateSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('... related to (123) from dashboard 1');
           });
         });
@@ -314,7 +314,7 @@ describe('Kibi Components', function () {
 
 
           return button.click().then(() => {
-            sinon.assert.calledOnce(buttonDefs[0].getSourceCount);
+            sinon.assert.calledOnce(buttonDefs[0].updateSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label with placeholders 123 dashboard 1');
           });
         });
@@ -336,7 +336,7 @@ describe('Kibi Components', function () {
           };
 
           return button.click().then(() => {
-            sinon.assert.notCalled(buttonDefs[0].getSourceCount);
+            sinon.assert.notCalled(buttonDefs[0].updateSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label dashboard 1');
           });
         });
@@ -358,7 +358,7 @@ describe('Kibi Components', function () {
           };
 
           return button.click().then(() => {
-            sinon.assert.calledOnce(buttonDefs[0].getSourceCount);
+            sinon.assert.calledOnce(buttonDefs[0].updateSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label 123');
           });
         });
@@ -380,7 +380,7 @@ describe('Kibi Components', function () {
           };
 
           return button.click().then(() => {
-            sinon.assert.notCalled(buttonDefs[0].getSourceCount);
+            sinon.assert.notCalled(buttonDefs[0].updateSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label');
           });
         });

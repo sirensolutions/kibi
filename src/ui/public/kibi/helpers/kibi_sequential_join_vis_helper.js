@@ -101,7 +101,7 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
             this.joinSeqFilter.meta.alias = alias;
             if (alias.indexOf('$COUNT') !== -1) {
               this.joinSeqFilter.meta.alias_tmpl = alias;
-              return this.getSourceCount(currentDashboardId).then(results => {
+              return this.updateSourceCount(currentDashboardId).then(results => {
                 return new Promise((fulfill, reject) => {
                 // here we expect only 1 result
                   const metaDefinitions = [{

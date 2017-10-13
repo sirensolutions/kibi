@@ -41,27 +41,6 @@ uiModules
     delete dashboard.filterIconMessage;
   };
 
-  const _dashboardMetadataCallback = function (dashboard, meta) {
-    if (dashboard.error) {
-      dashboard.count = 'Error';
-    } else if (dashboard.forbidden) {
-      dashboard.count = 'Forbidden';
-    } else if (!_.contains(Object.keys(meta), 'error')) {
-      dashboard.count = meta.hits.total;
-    } else if (_.contains(Object.keys(meta), 'error') && meta.error.reason) {
-      dashboard.count = 'Error: ' + meta.error.reason;
-    } else if (_.contains(Object.keys(meta), 'error') && _.contains(meta.error, 'ElasticsearchSecurityException')) {
-      dashboard.count = 'Forbidden';
-    } else {
-      dashboard.count = 'Error';
-    }
-    dashboard.isPruned = isJoinPruned(meta);
-    return joinExplanation.constructFilterIconMessage(dashboard.filters,dashboard.queries)
-    .then(filterIconMessage => {
-      dashboard.filterIconMessage = filterIconMessage;
-    });
-  };
-
   class DashboardGroups extends SimpleEmitter {
     constructor() {
       super();
@@ -116,6 +95,27 @@ uiModules
 
     get isInitialized() {
       return this._initialized;
+    }
+
+    _dashboardMetadataCallback(dashboard, meta, filters, queries) {
+      if (dashboard.error) {
+        dashboard.count = 'Error';
+      } else if (dashboard.forbidden) {
+        dashboard.count = 'Forbidden';
+      } else if (!_.contains(Object.keys(meta), 'error')) {
+        dashboard.count = meta.hits.total;
+      } else if (_.contains(Object.keys(meta), 'error') && meta.error.reason) {
+        dashboard.count = 'Error: ' + meta.error.reason;
+      } else if (_.contains(Object.keys(meta), 'error') && _.contains(meta.error, 'ElasticsearchSecurityException')) {
+        dashboard.count = 'Forbidden';
+      } else {
+        dashboard.count = 'Error';
+      }
+      dashboard.isPruned = isJoinPruned(meta);
+      return joinExplanation.constructFilterIconMessage(filters, queries)
+      .then(filterIconMessage => {
+        dashboard.filterIconMessage = filterIconMessage;
+      });
     }
 
     _shortenDashboardName(groupTitle, dashboardTitle) {
@@ -286,20 +286,38 @@ uiModules
       return this._getDashboardsMetadata(ids, forceCountsUpdate)
       .then(metadata => {
 
+        const mapOfDashboardsRequestedButNoMetaFound = {};
+        _.each(this.getGroups(), g => {
+          _.each(g.dashboards, d => {
+            if (ids.indexOf(d.id) !== -1 && !mapOfDashboardsRequestedButNoMetaFound[d.id]) {
+              mapOfDashboardsRequestedButNoMetaFound[d.id] = d;
+            }
+          });
+        });
+
         const metaDefinitions = [];
         _.each(this.getGroups(), g => {
           _.each(g.dashboards, d => {
             const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
             if (foundDashboardMetadata) {
 
+              // remove every dashbopard we found meta for
+              if (mapOfDashboardsRequestedButNoMetaFound[d.id]) {
+                delete mapOfDashboardsRequestedButNoMetaFound[d.id];
+              }
+
               _clearAllMeta(d);
 
               metaDefinitions.push({
                 definition: {
+                  id: foundDashboardMetadata.dashboardId,
                   query: foundDashboardMetadata.query,
                 },
-                callback: function (meta) {
-                  _dashboardMetadataCallback(d, meta).then(() => {
+                callback: function (error, meta) {
+                  if (error) {
+                    notify.error('Could not update metadata for dashboard ' + d.id);
+                  }
+                  self._dashboardMetadataCallback(d, meta, foundDashboardMetadata.filters, foundDashboardMetadata.queries).then(() => {
                     self.emit('dashboardsMetadataUpdated', [d.id]);
                   });
                 }
@@ -307,6 +325,12 @@ uiModules
             }
           });
         });
+
+        // clear meta for all dashboards requested but for which we did not found meta
+        _.each(mapOfDashboardsRequestedButNoMetaFound, (dashboard, id) => {
+          _clearAllMeta(dashboard);
+        });
+
         kibiMeta.getMetaForDashboards(metaDefinitions);
       });
     }

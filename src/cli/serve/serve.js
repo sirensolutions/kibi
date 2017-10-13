@@ -133,12 +133,16 @@ module.exports = function (program) {
     .option('--dev', 'Run the server with development mode defaults')
     .option('--no-ssl', 'Don\'t run the dev server using HTTPS')
     .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
-    .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
+    .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+    // kibi: extra option adde to be able to ignore kibi.dev.yml when running tests
+    .option('--ignoreDevYml', 'Allow to ignore kibi.dev.yml file when running in dev mode. ' +
+                              'Useful for running tests like: grunt test:dev --kbnServer.ignoreDevYml');
   }
 
   command
   .action(async function (opts) {
-    if (opts.dev) {
+    // kibi: added extra condition !opts.ignoreDevYml
+    if (opts.dev && !opts.ignoreDevYml) {
       try {
         const kbnDevConfig = fromRoot('config/kibi.dev.yml'); // kibi: renamed kibana to kibi
         if (statSync(kbnDevConfig).isFile()) {

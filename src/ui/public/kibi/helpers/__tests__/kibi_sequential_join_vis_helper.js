@@ -14,6 +14,8 @@ let appState;
 let $rootScope;
 let saveAppStateStub;
 let config;
+let kibiMeta;
+let button1;
 
 const defaultTimeStart = '2006-09-01T12:00:00.000Z';
 const defaultTimeEnd = '2009-09-01T12:00:00.000Z';
@@ -53,10 +55,11 @@ function init({
     $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
   });
 
-  ngMock.inject(function (_config_, _$rootScope_, timefilter, _kibiState_, Private, Promise) {
+  ngMock.inject(function (_config_, _$rootScope_, timefilter, _kibiState_, Private, Promise, _kibiMeta_) {
     config = _config_;
     $rootScope = _$rootScope_;
     kibiState = _kibiState_;
+    kibiMeta = _kibiMeta_;
     sequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
@@ -76,6 +79,19 @@ function init({
 describe('Kibi Components', function () {
   describe('sequentialJoinVisHelper', function () {
 
+    beforeEach(function () {
+      button1 = {
+        indexRelationId: 'index1//f1/index2//f2',
+        label: 'button 1',
+        getSourceCount: function () {}
+      };
+      sinon.stub(button1, 'getSourceCount').returns(Promise.resolve([ { button: button1 } ]));
+    });
+
+    afterEach(function () {
+      button1.getSourceCount.restore();
+    });
+
     noDigestPromises.activateForSuite();
 
     it('should not do anything when a button is clicked in the config window', function () {
@@ -84,13 +100,8 @@ describe('Kibi Components', function () {
       });
 
       const index = 'index1';
-      const buttonDefs = [
-        {
-          indexRelationId: 'index1//f1/index2//f2',
-          label: 'button 1',
-          getSourceCount: sinon.stub().returns(Promise.resolve(123))
-        }
-      ];
+      const buttonDefs = [ button1 ];
+
       const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
 
       expect(buttons.length).to.equal(1);
@@ -235,10 +246,10 @@ describe('Kibi Components', function () {
       });
 
       it('empty buttonsDef array', function () {
+        init();
         const buttonDefs = [];
         const expected = [];
 
-        init();
         expect(sequentialJoinVisHelper.constructButtonsArray(buttonDefs)).to.eql(expected);
       });
 
@@ -246,16 +257,22 @@ describe('Kibi Components', function () {
         let index;
         let buttonDefs;
 
-        beforeEach(() => init());
-        beforeEach(function () {
+        beforeEach(() => {
+          init();
           index = 'index1';
-          buttonDefs = [
-            {
-              indexRelationId: 'index1//f1/index2//f2',
-              label: 'button 1',
-              getSourceCount: sinon.stub().returns(Promise.resolve(123))
-            }
-          ];
+          buttonDefs = [ button1 ];
+
+          sinon.stub(kibiMeta, 'getMetaForRelationalButtons', function (defs) {
+            defs[0].callback(undefined, {
+              hits: {
+                total: 123
+              }
+            });
+          });
+        });
+
+        afterEach(function () {
+          kibiMeta.getMetaForRelationalButtons.restore();
         });
 
         it('should set the default filter label if no custom is set', function () {

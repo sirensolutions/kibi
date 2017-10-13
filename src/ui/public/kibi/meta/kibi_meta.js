@@ -74,7 +74,7 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
      * Where dashboards is an array of objects in a following format
      * {
      *   definition: object with a query property
-     *   callback: (Function to be executed when count is ready)
+     *   callback: function to be executed when count is ready
      * }
      *
      * This method only adds to the queue
@@ -90,7 +90,7 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
      * Where buttons is an array of objects in a following format
      * {
      *   definition: object with a query property
-     *   callback: function (meta) {} -Function to be executed when count is ready
+     *   callback: function (error, meta) {} - Function to be executed when count is ready
      * }
      *
      * Meta contains following properties
@@ -155,7 +155,7 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
           if (this.cache) {
             this.cache.set(o.definition.query, hit);
           }
-          o.callback(hit);
+          o.callback(undefined, hit);
         });
 
         // maybe move this to finally
@@ -175,7 +175,9 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
             queue.push(o);
           } else {
             // report error to the user
-            notify.error('Could not fetch meta for ' + JSON.stringify(o) + ' after retrying ' + strategy.retryOnError + ' times');
+            o.callback(
+              new Error('Could not fetch meta for ' + JSON.stringify(o) + ' after retrying ' + strategy.retryOnError + ' times')
+            );
           }
         });
 

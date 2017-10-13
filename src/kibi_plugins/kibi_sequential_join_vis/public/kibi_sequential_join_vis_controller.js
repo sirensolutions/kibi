@@ -296,6 +296,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
       // assign data to $scope.buttons once the promises are done
       $scope.buttons = new Array(buttons.length);
+      // TODO: rename it to updateSourceCount
       const getSourceCount = function (currentDashboardId, callback) {
         const virtualButton = {
           sourceField: this.targetField,
@@ -310,6 +311,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
         return _addButtonQuery.call(self, [ virtualButton ], this.targetDashboardId)
         .then(results => {
           updateCounts(results, $scope);
+          return results;
         })
         .catch(notify.error);
       };

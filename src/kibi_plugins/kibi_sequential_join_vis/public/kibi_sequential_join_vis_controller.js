@@ -296,8 +296,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
       // assign data to $scope.buttons once the promises are done
       $scope.buttons = new Array(buttons.length);
-      // TODO: rename it to updateSourceCount
-      const getSourceCount = function (currentDashboardId, callback) {
+      const updateSourceCount = function (currentDashboardId, callback) {
         const virtualButton = {
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
@@ -317,7 +316,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       };
 
       for (let i = 0; i < buttons.length; i++) {
-        buttons[i].getSourceCount = getSourceCount;
+        buttons[i].updateSourceCount = updateSourceCount;
         // Returns the count of documents involved in the join
         $scope.buttons[buttons[i].btnIndex] = buttons[i];
       }

@@ -834,6 +834,24 @@ describe('Kibi Services', function () {
         savedSearches: fakeSavedSearches
       }));
 
+      const defaultQuery = {
+        query_string: {
+          analyze_wildcard: true,
+          query: '*'
+        }
+      };
+
+      // remove the time values
+      const fixTime = function (s) {
+        const o = JSON.parse(s);
+        return JSON.stringify(o, function (key, value) {
+          if (key === 'gte' || key === 'lte') {
+            return;
+          }
+          return value;
+        });
+      };
+
       afterEach(() => {
         Notifier.prototype._notifs.length = 0;
       });
@@ -853,30 +871,43 @@ describe('Kibi Services', function () {
       });
 
       it('dashboard exist and it references an unknown saved search', function () {
-        sinon.stub(es, 'msearch').returns(Promise.resolve({
-          responses: [
-            {
-              hits: {
-                total: 0
-              }
-            },
-            {
-              hits: {
-                total: 42
-              }
-            }
-          ]
-        }));
 
         return dashboardGroups._getDashboardsMetadata([ 'dashboardX', 'time-testing-4' ])
         .then(function (metas) {
           expect(metas.length).to.equal(2);
-          expect(metas[0].count).to.equal('Error');
-          expect(metas[0].dashboardId).to.equal('dashboardX');
-          expect(metas[1].count).to.equal(42);
-          expect(metas[1].isPruned).to.equal(false);
-          expect(metas[1].dashboardId).to.equal('time-testing-4');
-          expect(metas[1].indices).to.eql(['time-testing-4']);
+
+          let meta = metas[0];
+          let expectedQuery =
+            '{"index":["time-testing-4"],"ignore_unavailable": true}\n' +
+            '{"query":{"bool":{"must":[{"query_string":{"query":"*","analyze_wildcard":true}},{},' +
+            '{"range":{"date":{"gte":1508140856342,"lte":1508141756343,"format":"epoch_millis"}}}],"must_not":[]}},"size":0}\n';
+          let expectedQueryParts = expectedQuery.split('\n');
+          let queryParts = meta.query.split('\n');
+
+          expect(meta.dashboardId).to.equal('time-testing-4');
+          expect(meta.indexPattern).to.equal('time-testing-4');
+          expect(meta.indices).to.eql(['time-testing-4']);
+          expect(meta.filters).to.eql([]);
+          expect(meta.queries).to.eql([defaultQuery, {}]);
+          expect(queryParts[0]).to.eql(expectedQueryParts[0]);
+          expect(fixTime(queryParts[1])).to.eql(fixTime(expectedQueryParts[1]));
+
+          meta = metas[1];
+          expectedQuery =
+            '{"index":["time-testing-4"],"ignore_unavailable": true}\n' +
+            '{"query":{"bool":{"must":[],"must_not":[]}},"size":0}\n';
+          expectedQueryParts = expectedQuery.split('\n');
+          queryParts = meta.query.split('\n');
+
+          expect(meta.dashboardId).to.equal('dashboardX');
+          expect(meta.indexPattern).to.equal(undefined);
+          // TODO: why this one is returned here ?? default one ??
+          // https://github.com/sirensolutions/kibi-internal/issues/3739
+          expect(meta.indices).to.eql(['time-testing-4']);
+          expect(meta.filters).to.eql(undefined);
+          expect(meta.queries).to.eql(undefined);
+          expect(queryParts[0]).to.eql(expectedQueryParts[0]);
+          expect(queryParts[1]).to.eql(expectedQueryParts[1]);
 
           expect(Notifier.prototype._notifs).to.have.length(1);
           expect(Notifier.prototype._notifs[0].type).to.be('warning');
@@ -886,30 +917,37 @@ describe('Kibi Services', function () {
       });
 
       it('dashboard exist and it has savedSearch but index does not exists', function () {
-        sinon.stub(es, 'msearch').returns(Promise.resolve({
-          responses: [
-            {
-              hits: {
-                total: 0
-              }
-            },
-            {
-              hits: {
-                total: 42
-              }
-            }
-          ]
-        }));
 
         return dashboardGroups._getDashboardsMetadata([ 'search-ste', 'time-testing-4' ])
         .then(function (metas) {
+
           expect(metas.length).to.equal(2);
-          expect(metas[0].count).to.equal('Error');
-          expect(metas[0].dashboardId).to.equal('search-ste');
-          expect(metas[1].count).to.equal(42);
-          expect(metas[1].isPruned).to.equal(false);
-          expect(metas[1].dashboardId).to.equal('time-testing-4');
-          expect(metas[1].indices).to.eql(['time-testing-4']);
+
+          let meta = metas[0];
+
+          expect(meta.error).to.equal(true);
+          expect(meta.dashboardId).to.equal('search-ste');
+          expect(meta.indexPattern).to.equal(null);
+          expect(meta.indices).to.eql([]);
+          expect(meta.filters).to.eql([]);
+          expect(meta.queries).to.eql([]);
+          expect(meta.query).to.eql(undefined);
+
+          meta = metas[1];
+          const expectedQuery =
+            '{"index":["time-testing-4"],"ignore_unavailable": true}\n' +
+            '{"query":{"bool":{"must":[{"query_string":{"query":"*","analyze_wildcard":true}},{},' +
+            '{"range":{"date":{"gte":1508140856342,"lte":1508141756343,"format":"epoch_millis"}}}],"must_not":[]}},"size":0}\n';
+          const expectedQueryParts = expectedQuery.split('\n');
+          const queryParts = meta.query.split('\n');
+
+          expect(meta.dashboardId).to.equal('time-testing-4');
+          expect(meta.indexPattern).to.equal('time-testing-4');
+          expect(meta.indices).to.eql(['time-testing-4']);
+          expect(meta.filters).to.eql([]);
+          expect(meta.queries).to.eql([defaultQuery, {}]);
+          expect(queryParts[0]).to.eql(expectedQueryParts[0]);
+          expect(fixTime(queryParts[1])).to.eql(fixTime(expectedQueryParts[1]));
 
           expect(Notifier.prototype._notifs).to.have.length(1);
           expect(Notifier.prototype._notifs[0].type).to.be('warning');
@@ -918,86 +956,65 @@ describe('Kibi Services', function () {
       });
 
       it('dashboard exist and it has savedSearch and index exists', function () {
-        sinon.stub(es, 'msearch').returns(Promise.resolve({
-          responses: [
-            {
-              hits: {
-                total: 42
-              }
-            }
-          ]
-        }));
 
         return dashboardGroups._getDashboardsMetadata(['time-testing-4'])
         .then(function (metas) {
           expect(metas.length).to.equal(1);
-          expect(metas[0].count).to.equal(42);
-          expect(metas[0].isPruned).to.equal(false);
-          expect(metas[0].dashboardId).to.equal('time-testing-4');
-          expect(metas[0].indices).to.eql(['time-testing-4']);
-        });
-      });
 
-      it('dashboard exist and it has savedSearch and index exists the results were pruned', function () {
-        sinon.stub(es, 'msearch').returns(Promise.resolve({
-          responses: [
-            {
-              hits: {
-                total: 42
-              },
-              planner: {
-                is_pruned: true
-              }
-            }
-          ]
-        }));
+          const meta = metas[0];
+          const expectedQuery =
+            '{"index":["time-testing-4"],"ignore_unavailable": true}\n' +
+            '{"query":{"bool":{"must":[{"query_string":{"query":"*","analyze_wildcard":true}},{},' +
+            '{"range":{"date":{"gte":1508140856342,"lte":1508141756343,"format":"epoch_millis"}}}],"must_not":[]}},"size":0}\n';
+          const expectedQueryParts = expectedQuery.split('\n');
+          const queryParts = meta.query.split('\n');
 
-        return dashboardGroups._getDashboardsMetadata(['time-testing-4'])
-        .then(function (metas) {
-          expect(metas.length).to.equal(1);
-          expect(metas[0].count).to.equal(42);
-          expect(metas[0].isPruned).to.equal(true);
-          expect(metas[0].dashboardId).to.equal('time-testing-4');
-          expect(metas[0].indices).to.eql(['time-testing-4']);
+          expect(meta.dashboardId).to.equal('time-testing-4');
+          expect(meta.indexPattern).to.equal('time-testing-4');
+          expect(meta.indices).to.eql(['time-testing-4']);
+          expect(meta.filters).to.eql([]);
+          expect(meta.queries).to.eql([defaultQuery, {}]);
+          expect(queryParts[0]).to.eql(expectedQueryParts[0]);
+          expect(fixTime(queryParts[1])).to.eql(fixTime(expectedQueryParts[1]));
         });
       });
 
       it('dashboard exist and it has savedSearch and index exists but is not accessible', function () {
         const authError = new Error();
         authError.status = 403;
-
         sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(authError));
-
-        sinon.stub(es, 'msearch').returns(Promise.resolve({
-          responses: [{
-            hits: {
-              total: 0
-            }
-          }]
-        }));
 
         return dashboardGroups._getDashboardsMetadata(['time-testing-4'])
         .then(function (metas) {
-          expect(metas.length).to.equal(1);
-          expect(metas[0].count).to.equal('Forbidden');
-          expect(metas[0].forbidden).to.be(true);
-          expect(metas[0].dashboardId).to.equal('time-testing-4');
-          expect(metas[0].indices).to.eql([]);
+
+          const meta = metas[0];
+          const expectedQuery =
+            '{"index":["time-testing-4"],"ignore_unavailable": true}\n' +
+            '{"query":{"match_none":{}}}\n';
+          const expectedQueryParts = expectedQuery.split('\n');
+          const queryParts = meta.query.split('\n');
+
+          expect(meta.forbidden).to.equal(true);
+          expect(meta.dashboardId).to.equal('time-testing-4');
+          expect(meta.indexPattern).to.equal('time-testing-4');
+          expect(meta.indices).to.eql([]);
+          expect(meta.filters).to.eql([]);
+          expect(meta.queries).to.eql([defaultQuery, {}]);
+          expect(queryParts[0]).to.eql(expectedQueryParts[0]);
+          expect(queryParts[1]).to.eql(expectedQueryParts[1]);
+
         });
       });
 
-      it('dashboard exist and it has savedSearch and index exists but a non auth error occurs when resolving indices', function () {
+      it('dashboard exist and it has savedSearch and index exists but a non auth error occurs when resolving indices', function (done) {
         sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(new Error('timeBasedIndices failed')));
 
         dashboardGroups._getDashboardsMetadata(['time-testing-4'])
         .then(function (metas) {
-          expect(metas.length).to.equal(1);
-          expect(metas[0].count).to.equal('Error');
-          expect(metas[0].indices).to.eql(['time-testing-4']);
-
-          expect(Notifier.prototype._notifs).to.have.length(1);
-          expect(Notifier.prototype._notifs[0].type).to.be('warning');
-          expect(Notifier.prototype._notifs[0].content).to.contain('timeBasedIndices failed');
+          done('Should not go here');
+        }).catch(err => {
+          expect(err.message).to.equal('timeBasedIndices failed');
+          done();
         });
       });
     });

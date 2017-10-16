@@ -2,11 +2,6 @@ import lru from 'lru-cache';
 import { each, map } from 'lodash';
 import { uiModules } from 'ui/modules';
 
-// TODO:
-//  add ability to cancel the queue
-//  collectFor
-// requestInProgress
-
 function KibiMetaProvider(createNotifier, kibiState, es) {
 
   const notify = createNotifier({
@@ -44,30 +39,40 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
         this.cache = cache;
       }
 
-      // queues of requests to group and fire using _msearch
-      // for a start have a single default queue
+      // in order to make sure we are not executing
+      // a callback from a previous object for particular id
+      // while later one was already executed
+      // we need to track this in the 2 maps
+      this.counters = {};
+
       this.queues = {
-        default: [],
         buttons: [],
         dashboards: []
       };
 
-      this.strategies = {
-        buttons: {
-          batchSize: 2,
-          batchDelay: 50,
-          retryOnError: 1,
-          collectFor: 750,
-          requestInProgress: false
-        },
-        dashboards: {
-          batchSize: 2,
-          batchDelay: 50,
-          retryOnError: 1,
-          collectFor: 750,
-          requestInProgress: false
-        }
-      };
+      this.strategies = {};
+      this.setStrategy('buttons', {
+        batchSize: 2,
+        retryOnError: 1,
+        //batchDelay: 50,
+        //collectFor: 750,
+        _requestInProgress: false
+      });
+      this.setStrategy('dashboards', {
+        batchSize: 2,
+        retryOnError: 1,
+        //batchDelay: 50,
+        //collectFor: 750,
+        _requestInProgress: false
+      });
+    }
+
+    flushCache() {
+      this.cache.reset();
+    }
+
+    setStrategy(name, strategy) {
+      this.strategies[name] = strategy;
     }
 
     /*
@@ -81,7 +86,7 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
      */
     getMetaForDashboards(dashboards = []) {
       each(dashboards, d => {
-        this.queues.dashboards.push(d);
+        this._addToQueue(d, 'dashboards');
       });
       this._processSingleQueue('dashboards');
     }
@@ -99,9 +104,29 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
      */
     getMetaForRelationalButtons(buttons = []) {
       each(buttons, b => {
-        this.queues.buttons.push(b);
+        this._addToQueue(b, 'buttons');
       });
       this._processSingleQueue('buttons');
+    }
+
+    _addToQueue(o, queueName) {
+      this._checkDefinition(o, queueName);
+      this.queues[queueName].push(o);
+    }
+
+    _checkDefinition(d, queueName) {
+      if (!d.definition) {
+        throw new Error(
+          'Wrong ' + queueName + ' definition: ' + JSON.stringify(d) +
+          '. Defintion requires a definition object like { id: ID, query: query}'
+        );
+      }
+      if (!d.definition.id || !d.definition.query) {
+        throw new Error(
+          'Wrong ' + queueName + ' definition object: ' + JSON.stringify(d.definition) +
+          '. Defintion object requires two mandatory properties: id and query'
+        );
+      }
     }
 
     _processQueues() {
@@ -110,11 +135,23 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
       });
     }
 
+    _updateCounter(id, type) {
+      if (!this.counters[id]) {
+        this.counters[id] = {};
+      }
+      if (!this.counters[id][type]) {
+        this.counters[id][type] = 1;
+      } else {
+        this.counters[id][type]++;
+      }
+      return this.counters[id][type];
+    }
+
     _processSingleQueue(queueName) {
       const strategy = this.strategies[queueName];
       const queue = this.queues[queueName];
       // check if there is request in progress
-      if (strategy.requestInProgress) {
+      if (strategy._requestInProgress) {
         // do nothing as it will call _processSingleQueue once request is finished
         return;
       }
@@ -144,6 +181,12 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
 
       // fire the msearch
       const query = map(toProcess, o => o.definition.query).join('');
+
+      // set counters before sending the request
+      each(toProcess, o =>{
+        o._sentCounter = this._updateCounter(o.definition.id, 'sent');
+      });
+
       es
       .msearch({
         body: query,
@@ -155,6 +198,12 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
           if (this.cache) {
             this.cache.set(o.definition.query, hit);
           }
+
+          o._callbackCounter = this._updateCounter(o.definition.id, 'callback');
+          if (o._sentCounter < o._callbackCounter) {
+            // do not execute callback from this old request which have just arrived;
+            return;
+          }
           o.callback(undefined, hit);
         });
 
@@ -165,12 +214,12 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
       }).catch(err => {
         // retry a number of times according to strategy but then stop
         each(toProcess, o => {
-          if (!o.error) {
-            o.error = 1;
+          if (!o.retried) {
+            o.retried = 1;
           } else {
-            o.error++;
+            o.retried++;
           }
-          if (o.error < strategy.retryOnError) {
+          if (o.retried <= strategy.retryOnError) {
             // put back to queue
             queue.push(o);
           } else {

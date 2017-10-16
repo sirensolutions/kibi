@@ -12,7 +12,7 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
     constructor({
       enableCache = true,
       cacheSize = 500,
-      cacheMaxAge = 1000 * 60 * 60
+      cacheMaxAge = 1000 * 60
     } = {}) {
 
       // map to cache the counts based on generated query
@@ -162,7 +162,7 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
       for (let i = 0; i < n; i++) {
         const o = queue.shift();
         if (this.cache && this.cache.get(o.definition.query)) {
-          o.callback(this.cache.get(o.definition.query));
+          o.callback(undefined, this.cache.get(o.definition.query));
           continue;
         }
         toProcess.push(o);

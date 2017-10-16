@@ -266,6 +266,58 @@ describe('Kibi meta service', function () {
           );
         });
       });
+
+      describe('test cache', function () {
+        it('default policy - 3 definitions to trigger two msearch calls, response OK, third def identical to first one', function (done) {
+          const expectedMeta1 = { hits: { total: 11 } };
+          const expectedMeta2 = { hits: { total: 22 } };
+          const expectedMeta3 = { hits: { total: 11 } };
+
+          const msearchStub = sinon.stub(es, 'msearch');
+          msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1, expectedMeta2 ] }));
+          const callback1Spy = sinon.spy();
+          const callback2Spy = sinon.spy();
+          const callback3Spy = sinon.spy();
+          const definitions = [
+            {
+              definition: { id: 'dash1', query: 'query1' },
+              callback: callback1Spy
+            },
+            {
+              definition: { id: 'dash2', query: 'query2' },
+              callback: callback2Spy
+            },
+            {
+              definition: { id: 'dash1', query: 'query1' },
+              callback: callback3Spy
+            }
+          ];
+
+          kibiMeta.getMetaForDashboards(definitions);
+
+          pollUntil(
+            function () {
+              return callback1Spy.called && callback2Spy.called && callback3Spy.called;
+            },
+            2000, 2,
+            function (err) {
+              if (err) {
+                done(err);
+              }
+              sinon.assert.calledOnce(msearchStub);
+              expect(msearchStub.getCall(0).args[0]).to.eql({ body: 'query1query2', getMeta: 'dashboards' });
+              sinon.assert.calledOnce(callback1Spy);
+              sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
+              sinon.assert.calledOnce(callback2Spy);
+              sinon.assert.calledWith(callback2Spy, undefined, expectedMeta2);
+              sinon.assert.calledOnce(callback3Spy);
+              sinon.assert.calledWith(callback3Spy, undefined, expectedMeta1);
+              sinon.assert.callOrder(callback1Spy, callback2Spy, callback3Spy);
+              done();
+            }
+          );
+        });
+      });
     });
 
     describe('test a retry when response failed', function () {

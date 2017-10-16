@@ -204,18 +204,21 @@ describe('Kibi meta service', function () {
               sinon.assert.calledWith(callback2Spy, undefined, expectedMeta2);
               sinon.assert.calledOnce(callback3Spy);
               sinon.assert.calledWith(callback3Spy, undefined, expectedMeta3);
-              sinon.assert.callOrder(callback1Spy, callback2Spy, callback3Spy);
+              // here we are also veryfying that second msearch start only after first to callback are executed
+              sinon.assert.callOrder(msearchStub, callback1Spy, callback2Spy, msearchStub, callback3Spy);
               done();
             }
           );
         });
 
-        it('default policy - 3 definitions to trigger two msearch calls which arrives out of order, response OK', function (done) {
+        it('default policy - 3 definitions to trigger two msearch calls, first one delayed, response OK', function (done) {
           const expectedMeta1 = { hits: { total: 11 } };
           const expectedMeta2 = { hits: { total: 22 } };
           const expectedMeta3 = { hits: { total: 33 } };
 
           const msearchStub = sinon.stub(es, 'msearch');
+
+
           msearchStub.onCall(0).returns(new Promise (function (fulfill, reject) {
             setTimeout(function () {
               fulfill({ responses: [ expectedMeta1, expectedMeta2 ] });
@@ -260,7 +263,7 @@ describe('Kibi meta service', function () {
               sinon.assert.calledWith(callback2Spy, undefined, expectedMeta2);
               sinon.assert.calledOnce(callback3Spy);
               sinon.assert.calledWith(callback3Spy, undefined, expectedMeta3);
-              sinon.assert.callOrder(callback1Spy, callback2Spy, callback3Spy);
+              sinon.assert.callOrder(msearchStub, callback1Spy, callback2Spy, msearchStub, callback3Spy);
               done();
             }
           );
@@ -397,6 +400,16 @@ describe('Kibi meta service', function () {
     });
 
     describe('single msearch fired twice, responces are coming out of order', function () {
+
+      beforeEach(function () {
+        kibiMeta.updateStrategy('dashboards', 'parallelRequests', 2);
+      });
+
+      afterEach(function () {
+        kibiMeta.updateStrategy('dashboards', 'parallelRequests', 1);
+      });
+
+      // this test make sense only when strategy.parallelRequests = 2
       it('earlier callback should be cancelled if later one was already executed for particular dashboard', function (done) {
 
         const expectedMetaA = {
@@ -416,7 +429,7 @@ describe('Kibi meta service', function () {
         msearchStub.onCall(0).returns(new Promise (function (fulfill, reject) {
           setTimeout(function () {
             fulfill({ responses: [ expectedMetaA ] });
-          }, 500);
+          }, 1000);
         }));
         msearchStub.onCall(1).returns(Promise.resolve({ responses: [ expectedMetaB ] }));
 
@@ -451,8 +464,9 @@ describe('Kibi meta service', function () {
               sinon.assert.calledTwice(msearchStub);
               sinon.assert.calledOnce(callbackSpy);
               sinon.assert.calledWith(callbackSpy, undefined, expectedMetaB);
+              sinon.assert.callOrder(msearchStub, msearchStub, callbackSpy);
               done();
-            }, 1000);
+            }, 2000);
           }
         );
       });

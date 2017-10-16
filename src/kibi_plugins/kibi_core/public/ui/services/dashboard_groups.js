@@ -252,7 +252,7 @@ uiModules
                 .catch((error) => {
                   // If computing the indices failed because of an authorization error
                   // set indices to an empty array and mark the dashboard as forbidden.
-                  if (error.status === 403) {
+                  if (error.status === 403 || error.statusCode === 403) {
                     const optimizedQuery = searchHelper.optimize([], query, index);
                     return {
                       dashboardId,

@@ -66,9 +66,26 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
 
   const updateCounts = function (results, scope) {
     const metaDefinitions = _.map(results, result => {
+      const definition = result.button;
+      // adding unique id as required by kibiMeta
+      definition.id =
+        result.button.sourceDashboardId +
+        result.button.targetDashboardId +
+        relationsHelper.getJoinIndicesUniqueID(
+          result.button.sourceIndexPatternId,
+          result.button.sourceIndexPatternType,
+          result.button.sourceField,
+          result.button.targetIndexPatternId,
+          result.button.targetIndexPatternType,
+          result.button.targetField,
+        );
+
       return {
-        definition: result.button,
-        callback: function (meta) {
+        definition: definition,
+        callback: function (error, meta) {
+          if (error) {
+            notify.error(error);
+          }
           if (scope && scope.multiSearchData) {
             const stats = {
               index: result.button.targetIndexPatternId,

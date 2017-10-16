@@ -43,16 +43,39 @@ export default class Migration15 extends Migration {
 
   async _fetchConfig() {
     this._config = '';
-    const configs = await this.scrollSearch(this._index, 'config', this._configQuery);
-    const kibiConfig = configs[0];
-    if (_.isString(kibiConfig._source['discover:sampleSize'])) {
-      this._config = kibiConfig;
+    if(this._index) {
+      let configs;
+      try {
+        configs = await this.scrollSearch(this._index, 'config', this._configQuery);
+      } catch (error) {
+        if (error.status === 404) {
+          return 0;
+        } else {
+          throw(error);
+        }
+      }
+      if(configs && configs.length > 0) {
+        const kibiConfig = configs[0];
+        if (_.isString(kibiConfig._source['discover:sampleSize'])) {
+          this._config = kibiConfig;
+        }
+      }
     }
   }
 
   async _fetchVisualizations() {
     this._visualizations = [];
-    const visualizations = await this.scrollSearch(this._index, 'visualization', this._visQuery);
+    let visualizations;
+    try {
+      visualizations = await this.scrollSearch(this._index, 'visualization', this._visQuery);
+    } catch (error) {
+      if (error.status === 404) {
+        return 0;
+      } else {
+        throw(error);
+      }
+    }
+
     _.each(visualizations, visualization => {
       const visState = JSON.parse(visualization._source.visState);
       if (_.isString(_.get(visState.params, 'pageSize'))) {

@@ -54,16 +54,18 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
       this.setStrategy('buttons', {
         batchSize: 2,
         retryOnError: 1,
+        parallelRequests: 1,
         //batchDelay: 50,
         //collectFor: 750,
-        _requestInProgress: false
+        _requestInProgress: 0
       });
       this.setStrategy('dashboards', {
         batchSize: 2,
         retryOnError: 1,
+        parallelRequests: 1,
         //batchDelay: 50,
         //collectFor: 750,
-        _requestInProgress: false
+        _requestInProgress: 0
       });
     }
 
@@ -73,6 +75,10 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
 
     setStrategy(name, strategy) {
       this.strategies[name] = strategy;
+    }
+
+    updateStrategy(name, property, value) {
+      this.strategies[name][property] = value;
     }
 
     /*
@@ -149,13 +155,13 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
 
     _processSingleQueue(queueName) {
       const strategy = this.strategies[queueName];
-      const queue = this.queues[queueName];
       // check if there is request in progress
-      if (strategy._requestInProgress) {
+      if (strategy._requestInProgress >= strategy.parallelRequests) {
         // do nothing as it will call _processSingleQueue once request is finished
         return;
       }
 
+      const queue = this.queues[queueName];
       // take a number of queries to process
       const toProcess = [];
       const n = Math.min(strategy.batchSize, queue.length);
@@ -187,12 +193,14 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
         o._sentCounter = this._updateCounter(o.definition.id, 'sent');
       });
 
+      strategy._requestInProgress++;
       es
       .msearch({
         body: query,
         getMeta: queueName // ?getMeta= has no meaning it is just useful to filter by specific strategy
       })
       .then(data => {
+        strategy._requestInProgress--;
         each(data.responses, (hit, i) => {
           const o = toProcess[i];
           if (this.cache) {
@@ -212,6 +220,7 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
           this._processSingleQueue(queueName);
         }
       }).catch(err => {
+        strategy._requestInProgress--;
         // retry a number of times according to strategy but then stop
         each(toProcess, o => {
           if (!o.retried) {

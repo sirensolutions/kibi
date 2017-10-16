@@ -6,6 +6,8 @@ import Migration from '../../migration_15';
 import Scenario1 from './scenarios/migration_15/scenario1';
 import Scenario2 from './scenarios/migration_15/scenario2';
 import Scenario3 from './scenarios/migration_15/scenario3';
+import Scenario4 from './scenarios/migration_15/scenario4';
+import Scenario5 from './scenarios/migration_15/scenario5';
 import url from 'url';
 
 const serverConfig = requirefrom('test')('server_config');
@@ -170,10 +172,57 @@ describe('kibi_core/migrations/functional', function () {
         }
       });
     });
+    describe('should not migrate if there is no .kibi index', function () {
+      beforeEach(async () => {
+        await scenarioManager.load(Scenario4);
+        configuration = {
+          config: fakeConfig,
+          client: cluster.getClient(),
+          logger: {
+            warning: sinon.spy(),
+            info: sinon.spy()
+          }
+        };
+      });
+
+      afterEach(async () => {
+        await scenarioManager.unload(Scenario4);
+      });
+
+      it('should count all upgradeable objects', async () => {
+        const migration = new Migration(configuration);
+        const result = await migration.count();
+        expect(result).to.be(0);
+      });
+    });
+
+    describe('should not migrate if there is no config', function () {
+      beforeEach(async () => {
+        await scenarioManager.load(Scenario5);
+        configuration = {
+          config: fakeConfig,
+          client: cluster.getClient(),
+          logger: {
+            warning: sinon.spy(),
+            info: sinon.spy()
+          }
+        };
+      });
+
+      afterEach(async () => {
+        await scenarioManager.unload(Scenario5);
+      });
+
+      it('should count all upgradeable objects', async () => {
+        const migration = new Migration(configuration);
+        const result = await migration.count();
+        expect(result).to.be(0);
+      });
+    });
 
     describe('should not migrate if there is no "discover:sampleSize" or "pageSize" property', function () {
       beforeEach(async () => {
-        await scenarioManager.reload(Scenario3);
+        await scenarioManager.load(Scenario3);
         configuration = {
           config: fakeConfig,
           client: cluster.getClient(),

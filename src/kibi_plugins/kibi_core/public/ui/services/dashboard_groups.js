@@ -23,7 +23,6 @@ uiModules
   const dashboardHelper = Private(DashboardHelperFactory);
   const queryBuilder = Private(QueryBuilderFactory);
   const searchHelper = new SearchHelper(kbnIndex);
-  const selectDelay = 750;
   let lastSelectDashboardEventTimer;
   const cache = Private(CacheProvider);
 
@@ -366,6 +365,15 @@ uiModules
 
     selectDashboard(dashboardId) {
       $timeout.cancel(lastSelectDashboardEventTimer);
+      // do not delay the switch if we are switching to the same dashboard
+      // do a little delay when switching to a different one
+      // to avoid "multiple fast clicking issue"
+      const currentDashboardId = kibiState._getCurrentDashboardId();
+      const delay = currentDashboardId === dashboardId ? 0 : 250;
+      // only update meta if we stay on the same dashboard
+      // in other cases the meta will be triggered by a watcher kibiState._getCurrentDashboardId
+      const updateMeta = currentDashboardId === dashboardId ? true : false;
+
       lastSelectDashboardEventTimer = $timeout(() => {
         // save which one was selected for:
         // - iterate over dashboard groups remove the active group
@@ -373,7 +381,7 @@ uiModules
         _.each(this.getGroups(), group => {
           group.active = false;
         });
-        this.updateMetadataOfDashboardIds(dashboardId, true);
+
         const activeGroup = _.findWhere(this.getGroups(), { dashboards: [ { id: dashboardId } ] });
         activeGroup.active = true;
         activeGroup.selected = _.find(activeGroup.dashboards, 'id', dashboardId);
@@ -381,8 +389,13 @@ uiModules
           kibiState.setSelectedDashboardId(activeGroup.id, dashboardId);
           kibiState.save();
         }
-        return dashboardHelper.switchDashboard(dashboardId);
-      }, selectDelay);
+        return dashboardHelper.switchDashboard(dashboardId)
+        .then(() => {
+          if (updateMeta) {
+            this.updateMetadataOfDashboardIds([ dashboardId ], true);
+          }
+        });
+      }, delay);
       return lastSelectDashboardEventTimer;
     }
 

@@ -36,7 +36,7 @@
               ng-show="dash.id && dash.group.selected.count !== undefined"
               class="dashboard-stats"
             >
-              ({{dash.formattedCount}})
+              (<kibi-human-readable-number value="dash.count" format="0,000"></kibi-human-readable-number>)
             </span>
           </div>
         </div>

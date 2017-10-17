@@ -9,13 +9,16 @@ import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dash
 import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
 import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 import { uiModules } from 'ui/modules';
+import 'ui/kibi/directives/kibi_human_readable_number';
+import { KibiHumanReadableHelperProvider } from 'ui/kibi/directives/kibi_human_readable_helper';
 
 uiModules
 .get('kibana')
 .directive('dashboardNavEditLink', ($rootScope, $route, dashboardGroups, createNotifier,
   dashboardsNavState, savedDashboardGroups, Private, globalNavState, kibiState, AppState,
   savedDashboards, kbnUrl, confirmModalPromise, $timeout) => {
-  const numeral = require('numeral')();
+
+  const kibiHumanReadableHelper = Private(KibiHumanReadableHelperProvider);
 
   return {
     restrict: 'E',
@@ -303,21 +306,12 @@ uiModules
         return false;
       };
 
-      $scope.humanNotation = number => {
-        if (_.isNumber(number)) {
-          return numeral.set(number).format('0.[0]a');
-        }
-      };
-
       $scope.isSidebarOpen = dashboardsNavState.isOpen();
       $scope.$watch(dashboardsNavState.isOpen, isOpen => {
         $scope.isSidebarOpen = isOpen;
       });
 
       $scope.addTooltip = function (event, reference, isDashboard, includeFilters = false) {
-        function formatCount(count) {
-          return numeral.set(count).format('0,000');
-        }
         let title;
         let filterMessage = null;
         if (isDashboard) {
@@ -325,7 +319,7 @@ uiModules
           title = dashboard.title;
           filterMessage = dashboard.filterIconMessage;
           if (dashboard.count !== undefined) {
-            title += ' (' + formatCount(dashboard.count) + ')';
+            title += ' (' + kibiHumanReadableHelper.formatNumber(dashboard.count, '0,000') + ')';
           }
         } else {
           const group = $scope.group;
@@ -334,7 +328,7 @@ uiModules
             filterMessage = group.selected.filterIconMessage;
           }
           if (group.virtual && group.selected.count !== undefined) {
-            title += ' (' + formatCount(group.selected.count)  + ')';
+            title += ' (' + kibiHumanReadableHelper.formatNumber(group.selected.count, '0,000') + ')';
           }
         }
         $scope.tooltipContent = title + ((filterMessage && includeFilters) ? filterMessage : '');

@@ -8,6 +8,7 @@ import { uiModules } from 'ui/modules';
 
 import 'ui/autoload/all';
 import 'ui/kibi/index_patterns/kibi_default_index_pattern'; // kibi: added by kibi
+import 'ui/kibi/meta/kibi_meta'; // kibi: added by kibi for our state
 import 'ui/kibi/state_management/kibi_state'; // kibi: added by kibi for our state
 import 'plugins/kibana/discover/index';
 import 'plugins/kibana/visualize/index';

@@ -2,9 +2,13 @@ import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import { QueryBuilderFactory } from 'ui/kibi/helpers/query_builder';
 import _ from 'lodash';
 
-export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private) {
+export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private, kibiMeta, Promise, createNotifier) {
   const queryBuilder = Private(QueryBuilderFactory);
   const relationsHelper = Private(RelationsHelperFactory);
+
+  const notify = createNotifier({
+    location: 'Kibi Sequential Join Vis'
+  });
 
   function KibiSequentialJoinVisHelper() {}
 
@@ -97,10 +101,23 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
             this.joinSeqFilter.meta.alias = alias;
             if (alias.indexOf('$COUNT') !== -1) {
               this.joinSeqFilter.meta.alias_tmpl = alias;
-              return this.getSourceCount(currentDashboardId, updateOnClick)
-              .then((sourceCount) => {
-                this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, sourceCount);
-                switchToDashboard.apply(this);
+              return this.updateSourceCount(currentDashboardId).then(results => {
+                return new Promise((fulfill, reject) => {
+                // here we expect only 1 result
+                  const metaDefinitions = [{
+                    definition: results[0].button,
+                    callback: (error, meta) => {
+                      if (error) {
+                        notify.error(error);
+                        return reject(error);
+                      }
+                      this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total);
+                      switchToDashboard.apply(this);
+                      fulfill(meta.hits.total);
+                    }
+                  }];
+                  kibiMeta.getMetaForRelationalButtons(metaDefinitions);
+                });
               });
             } else {
               switchToDashboard.apply(this);

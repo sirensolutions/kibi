@@ -17,16 +17,13 @@ uiRoutes
 
 uiModules
 .get('kibana')
-.service('dashboardGroups', (createNotifier, es, $timeout, kibiState, Private, savedDashboards,
-                             savedDashboardGroups, Promise, kbnIndex, joinExplanation, getAppState) => {
+.service('dashboardGroups', function (createNotifier, es, $timeout, kibiState, Private, savedDashboards,
+                             savedDashboardGroups, Promise, kbnIndex, joinExplanation, getAppState, kibiMeta) {
   const notify = createNotifier();
   const dashboardHelper = Private(DashboardHelperFactory);
   const queryBuilder = Private(QueryBuilderFactory);
   const searchHelper = new SearchHelper(kbnIndex);
-  const selectDelay = 750;
   let lastSelectDashboardEventTimer;
-  let lastFiredMultiCountsQuery;
-  let lastMultiCountsQueryResults;
   const cache = Private(CacheProvider);
 
   const _getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
@@ -37,30 +34,10 @@ uiModules
     };
   };
 
-  const _updateCountOnMetadata = function (metadata, responses) {
-    if (responses && metadata) {
-      if (responses.length === metadata.length) {
-        for (let i = 0; i < responses.length; i++) {
-          const response = responses[i];
-          if (metadata[i].error) {
-            metadata[i].count = 'Error';
-          } else if (metadata[i].forbidden) {
-            metadata[i].count = 'Forbidden';
-          } else if (!_.contains(Object.keys(response), 'error')) {
-            metadata[i].count = response.hits.total;
-          } else if (_.contains(Object.keys(response), 'error') && response.error.reason) {
-            metadata[i].count = 'Error: ' + response.error.reason;
-          } else if (_.contains(Object.keys(response), 'error') && _.contains(response.error, 'ElasticsearchSecurityException')) {
-            metadata[i].count = 'Forbidden';
-          } else {
-            metadata[i].count = 'Error';
-          }
-          metadata[i].isPruned = isJoinPruned(response);
-        }
-      } else {
-        throw new Error('Metadata size different than responses size');
-      }
-    }
+  const _clearAllMeta = function (dashboard) {
+    delete dashboard.count;
+    delete dashboard.isPruned;
+    delete dashboard.filterIconMessage;
   };
 
   class DashboardGroups extends SimpleEmitter {
@@ -117,6 +94,27 @@ uiModules
 
     get isInitialized() {
       return this._initialized;
+    }
+
+    _dashboardMetadataCallback(dashboard, meta, filters, queries) {
+      if (dashboard.error) {
+        dashboard.count = 'Error';
+      } else if (dashboard.forbidden) {
+        dashboard.count = 'Forbidden';
+      } else if (!_.contains(Object.keys(meta), 'error')) {
+        dashboard.count = meta.hits.total;
+      } else if (_.contains(Object.keys(meta), 'error') && meta.error.reason) {
+        dashboard.count = 'Error: ' + meta.error.reason;
+      } else if (_.contains(Object.keys(meta), 'error') && _.contains(meta.error, 'ElasticsearchSecurityException')) {
+        dashboard.count = 'Forbidden';
+      } else {
+        dashboard.count = 'Error';
+      }
+      dashboard.isPruned = isJoinPruned(meta);
+      return joinExplanation.constructFilterIconMessage(filters, queries)
+      .then(filterIconMessage => {
+        dashboard.filterIconMessage = filterIconMessage;
+      });
     }
 
     _shortenDashboardName(groupTitle, dashboardTitle) {
@@ -240,27 +238,29 @@ uiModules
                 query.size = 0; // we do not need hits just a count
                 p =  kibiState.timeBasedIndices(index, dashboardId)
                 .then(indices => {
+                  const optimizedQuery = searchHelper.optimize(indices, query, index);
                   return {
                     dashboardId,
+                    query: optimizedQuery,
+                    indexPattern: index,
                     filters,
                     queries,
-                    query,
-                    indices,
-                    indexPattern: index
+                    indices
                   };
                 })
                 .catch((error) => {
                   // If computing the indices failed because of an authorization error
                   // set indices to an empty array and mark the dashboard as forbidden.
-                  if (error.status === 403) {
+                  if (error.status === 403 || error.statusCode === 403) {
+                    const optimizedQuery = searchHelper.optimize([], query, index);
                     return {
                       dashboardId,
+                      query: optimizedQuery,
+                      indexPattern: index,
                       filters,
                       queries,
-                      query,
-                      forbidden: true,
                       indices: [],
-                      indexPattern: index
+                      forbidden: true
                     };
                   }
                   throw error;
@@ -270,39 +270,13 @@ uiModules
             }
           }
 
-          return Promise.all(metadataPromises).then((metadata) => {
-
-            metadata = _.sortBy(metadata, result => ids.indexOf(result.dashboardId));
-            // here fire the query to get counts
-            const countsQuery = _.map(metadata, result => {
-              return searchHelper.optimize(result.indices, result.query, result.indexPattern);
-            })
-            .join('');
-
-            if (countsQuery) {
-              if (lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {
-                _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
-              } else {
-                return es.msearch({
-                  body: countsQuery,
-                  getCountsOnTabs: '' // ?getCountsOnTabs= has no meaning it is just useful to filter when inspecting requests
-                })
-                .then(response => {
-                  lastFiredMultiCountsQuery = countsQuery;
-                  lastMultiCountsQueryResults = response.responses;
-                  _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
-                  return metadata;
-                });
-              }
-            }
-            return metadata;
-          });
+          return Promise.all(metadataPromises);
         });
-
       });
     }
 
     updateMetadataOfDashboardIds(ids, forceCountsUpdate = false) {
+      const self = this;
       if (console) {
         const msg = `update metadata for following dashboards: ${JSON.stringify(ids, null, ' ')}`;
         console.log(msg); // eslint-disable-line no-console
@@ -310,57 +284,53 @@ uiModules
 
       return this._getDashboardsMetadata(ids, forceCountsUpdate)
       .then(metadata => {
-        const promises = [];
+
+        const mapOfDashboardsRequestedButNoMetaFound = {};
+        _.each(this.getGroups(), g => {
+          _.each(g.dashboards, d => {
+            if (ids.indexOf(d.id) !== -1 && !mapOfDashboardsRequestedButNoMetaFound[d.id]) {
+              mapOfDashboardsRequestedButNoMetaFound[d.id] = d;
+            }
+          });
+        });
+
+        const metaDefinitions = [];
         _.each(this.getGroups(), g => {
           _.each(g.dashboards, d => {
             const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
             if (foundDashboardMetadata) {
-              promises.push(joinExplanation.constructFilterIconMessage(
-                foundDashboardMetadata.filters,
-                foundDashboardMetadata.queries
-              ).then(filterIconMessage => {
-                d.count = foundDashboardMetadata.count;
-                d.isPruned = foundDashboardMetadata.isPruned;
-                d.filterIconMessage = filterIconMessage;
-              }));
-            } else if (_.contains(ids, d.id)) {
-              // count for that dashboard was requested but is not in the metadata, likely because it doesn't have a savedSearchId
-              delete d.count;
-              delete d.isPruned;
-              delete d.filterIconMessage;
-              promises.push(Promise.resolve());
+
+              // remove every dashboard we found meta for
+              if (mapOfDashboardsRequestedButNoMetaFound[d.id]) {
+                delete mapOfDashboardsRequestedButNoMetaFound[d.id];
+              }
+
+              _clearAllMeta(d);
+
+              metaDefinitions.push({
+                definition: {
+                  id: foundDashboardMetadata.dashboardId,
+                  query: foundDashboardMetadata.query,
+                },
+                callback: function (error, meta) {
+                  if (error) {
+                    notify.error('Could not update metadata for dashboard ' + d.id);
+                  }
+                  self._dashboardMetadataCallback(d, meta, foundDashboardMetadata.filters, foundDashboardMetadata.queries).then(() => {
+                    self.emit('dashboardsMetadataUpdated', [d.id]);
+                  });
+                }
+              });
             }
           });
         });
-        return Promise.all(promises).then(() => {
-          this.emit('dashboardsMetadataUpdated', ids);
-        });
-      });
-    }
 
-    updateMetadataOfGroupId(groupId, forceCountsUpdate = false) {
-      const group = _.find(this.getGroups(), 'id', groupId);
-      // take all dashboards except the selected one
-      const dashboardIds = _(group.dashboards).reject('id', group.selected.id).map('id').value();
-
-      return this._getDashboardsMetadata(dashboardIds)
-      .then(metadata => {
-        return Promise.map(group.dashboards, d => {
-          const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
-          if (foundDashboardMetadata) {
-            return joinExplanation.constructFilterIconMessage(
-              foundDashboardMetadata.filters,
-              foundDashboardMetadata.queries
-            ).then(filterIconMessage => {
-              d.count = foundDashboardMetadata.count;
-              d.isPruned = foundDashboardMetadata.isPruned;
-              d.filterIconMessage = filterIconMessage;
-            });
-          }
-        })
-        .then(() => {
-          this.emit('groupsMetadataUpdated', groupId);
+        // clear meta for all dashboards requested but for which we did not found meta
+        _.each(mapOfDashboardsRequestedButNoMetaFound, (dashboard, id) => {
+          _clearAllMeta(dashboard);
         });
+
+        kibiMeta.getMetaForDashboards(metaDefinitions);
       });
     }
 
@@ -395,6 +365,15 @@ uiModules
 
     selectDashboard(dashboardId) {
       $timeout.cancel(lastSelectDashboardEventTimer);
+      // do not delay the switch if we are switching to the same dashboard
+      // do a little delay when switching to a different one
+      // to avoid "multiple fast clicking issue"
+      const currentDashboardId = kibiState._getCurrentDashboardId();
+      const delay = currentDashboardId === dashboardId ? 0 : 250;
+      // only update meta if we stay on the same dashboard
+      // in other cases the meta will be triggered by a watcher kibiState._getCurrentDashboardId
+      const updateMeta = currentDashboardId === dashboardId ? true : false;
+
       lastSelectDashboardEventTimer = $timeout(() => {
         // save which one was selected for:
         // - iterate over dashboard groups remove the active group
@@ -402,7 +381,7 @@ uiModules
         _.each(this.getGroups(), group => {
           group.active = false;
         });
-        this.updateMetadataOfDashboardIds(dashboardId, true);
+
         const activeGroup = _.findWhere(this.getGroups(), { dashboards: [ { id: dashboardId } ] });
         activeGroup.active = true;
         activeGroup.selected = _.find(activeGroup.dashboards, 'id', dashboardId);
@@ -410,8 +389,13 @@ uiModules
           kibiState.setSelectedDashboardId(activeGroup.id, dashboardId);
           kibiState.save();
         }
-        return dashboardHelper.switchDashboard(dashboardId);
-      }, selectDelay);
+        return dashboardHelper.switchDashboard(dashboardId)
+        .then(() => {
+          if (updateMeta) {
+            this.updateMetadataOfDashboardIds([ dashboardId ], true);
+          }
+        });
+      }, delay);
       return lastSelectDashboardEventTimer;
     }
 

@@ -28,7 +28,7 @@ import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 
 // kibi: imports
-import 'ui/kibi/directives/kibi_human_readable';
+import 'ui/kibi/directives/kibi_human_readable_number';
 import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 

@@ -147,7 +147,7 @@ describe('Kibi Directives', function () {
         });
 
         sinon.stub(kibiMeta, 'getMetaForDashboards', function (defs) {
-          // execute callback immedatelly only for definition about dashboard2
+          // execute callback immediately only for definition about dashboard2
           _.each(defs, def => {
             if (def.definition.id === 'dashboard2') {
               def.callback(undefined, metaForDash2);

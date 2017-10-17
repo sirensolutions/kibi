@@ -9,7 +9,18 @@ describe('Kibi meta service', function () {
   let es;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (_kibiMeta_, _es_) {
+  beforeEach(ngMock.inject(function (_kibiMeta_, _es_, config) {
+    sinon.stub(config, 'get', function (key) {
+      if (key === 'kibi:countFetchingStrategyDashboards' || key === 'kibi:countFetchingStrategyRelationalFilters') {
+        return {
+          batchSize: 2,
+          retryOnError: 1,
+          parallelRequests: 1
+        };
+      } else {
+        throw new Error('Stub also key: ' + key);
+      }
+    });
     kibiMeta = _kibiMeta_;
     kibiMeta.flushCache();
     es = _es_;

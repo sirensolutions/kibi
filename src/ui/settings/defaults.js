@@ -416,6 +416,16 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
     'kibi:graphMaxConcurrentCalls' : {
       value: 15,
       description: 'Limit the number of concurrent calls done by the Graph Browser'
+    },
+    'kibi:countFetchingStrategyDashboards' : {
+      type: 'json',
+      value: '{ "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
+      description: 'Strategy used to fetch the counts for dashboards'
+    },
+    'kibi:countFetchingStrategyRelationalFilters' : {
+      type: 'json',
+      value: '{ "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
+      description: 'Strategy used to fetch the counts for relational filters'
     }
   };
 

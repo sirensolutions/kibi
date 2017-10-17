@@ -270,6 +270,63 @@ describe('Kibi meta service', function () {
         });
       });
 
+      describe('Flush queues', function () {
+        it('should not make next request after flushing the queue', function (done) {
+          const expectedMeta1 = { hits: { total: 11 } };
+          const expectedMeta2 = { hits: { total: 22 } };
+
+          const msearchStub = sinon.stub(es, 'msearch');
+          msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1, expectedMeta2 ] }));
+          const callback1Spy = sinon.spy();
+          const callback2Spy = sinon.spy();
+          const callback3Spy = sinon.spy();
+          const definitions = [
+            {
+              definition: { id: 'dash1', query: 'query1' },
+              callback: callback1Spy
+            },
+            {
+              definition: { id: 'dash2', query: 'query2' },
+              callback: callback2Spy
+            },
+            {
+              definition: { id: 'dash1', query: 'query1' },
+              callback: callback3Spy
+            }
+          ];
+
+          kibiMeta.getMetaForDashboards(definitions);
+          kibiMeta.flushQueues();
+
+          pollUntil(
+            function () {
+              return callback1Spy.called && callback2Spy.called;
+            },
+            2000, 2,
+            function (err) {
+              if (err) {
+                done(err);
+              }
+
+              // here before the check wait a bit to make sure
+              // the second msearch and third callback were not called
+              // in case a second callback was called twice or with a wrong data from the first call we would like to know
+              setTimeout(function () {
+                sinon.assert.calledOnce(msearchStub);
+                expect(msearchStub.getCall(0).args[0]).to.eql({ body: 'query1query2', getMeta: 'dashboards' });
+                sinon.assert.calledOnce(callback1Spy);
+                sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
+                sinon.assert.calledOnce(callback2Spy);
+                sinon.assert.calledWith(callback2Spy, undefined, expectedMeta2);
+                sinon.assert.notCalled(callback3Spy);
+                sinon.assert.callOrder(msearchStub, callback1Spy, callback2Spy);
+                done();
+              }, 1000);
+            }
+          );
+        });
+      });
+
       describe('test cache', function () {
         it('default policy - 3 definitions to trigger two msearch calls, response OK, third def identical to first one', function (done) {
           const expectedMeta1 = { hits: { total: 11 } };

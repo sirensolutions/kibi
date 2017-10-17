@@ -394,6 +394,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     delayExecutionHelper.cancel();
     kibiDashboardChangedOff();
     removeAutorefreshHandler();
+    kibiMeta.flushQueues();
   });
 
   $scope.hoverIn = function (button) {

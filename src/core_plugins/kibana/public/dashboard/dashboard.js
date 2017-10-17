@@ -84,7 +84,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState,
       // kibi: added dashboardGroups, kibiState, config, $timeout
-      dashboardGroups, kibiState, config, $window, chrome, $timeout) {
+      dashboardGroups, kibiState, config, $window, chrome, $timeout, kibiMeta) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = createNotifier({ location: 'Dashboard' });
@@ -363,7 +363,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
 
       $scope.$on('$destroy', () => {
         dashboardState.destroy();
-
+        kibiMeta.flushQueues();
         // Remove dark theme to keep it from affecting the appearance of other apps.
         setLightTheme();
       });

@@ -54,18 +54,12 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
       this.setStrategy('buttons', {
         batchSize: 2,
         retryOnError: 1,
-        parallelRequests: 1,
-        //batchDelay: 50,
-        //collectFor: 750,
-        _requestInProgress: 0
+        parallelRequests: 1
       });
       this.setStrategy('dashboards', {
         batchSize: 2,
         retryOnError: 1,
-        parallelRequests: 1,
-        //batchDelay: 50,
-        //collectFor: 750,
-        _requestInProgress: 0
+        parallelRequests: 1
       });
     }
 
@@ -73,12 +67,24 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
       this.cache.reset();
     }
 
-    setStrategy(name, strategy) {
-      this.strategies[name] = strategy;
+    flushQueues() {
+      each(this.queues, (o, key) => {
+        this.queues[key] = [];
+      });
     }
 
-    updateStrategy(name, property, value) {
-      this.strategies[name][property] = value;
+    setStrategy(strategyName, strategy) {
+      this.strategies[strategyName] = strategy;
+      // set counters
+      this._setDefaultMeta(strategyName);
+    }
+
+    _setDefaultMeta(strategyName) {
+      this.strategies[strategyName]._requestInProgress = 0;
+    }
+
+    updateStrategy(strategyName, propertyName, propertyValue) {
+      this.strategies[strategyName][propertyName] = propertyValue;
     }
 
     /*
@@ -105,8 +111,12 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
      * }
      *
      * Meta contains following properties
-     *   hit - full response for given query
-     *   duration - time in ms that took to execute this msearch
+     *   hits
+     *   status
+     *   took
+     *   planner
+     *   timed_out
+     *   _shards
      */
     getMetaForRelationalButtons(buttons = []) {
       each(buttons, b => {

@@ -199,7 +199,7 @@ function init({
 
   ngMock.inject(function (Private, _es_, _dashboardGroups_, _kibiState_, _joinExplanation_, _config_) {
     const dashboardHelper = Private(DashboardHelperFactory);
-    switchDashboardStub = sinon.stub(dashboardHelper, 'switchDashboard');
+    switchDashboardStub = sinon.stub(dashboardHelper, 'switchDashboard').returns(Promise.resolve());
     kibiState = _kibiState_;
     dashboardGroups = _dashboardGroups_;
     config = _config_;

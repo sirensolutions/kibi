@@ -44,7 +44,7 @@
           <div class="indicators" ng-if="group.virtual" ng-mouseenter="refreshTooltipIndicator($event, group)">
             <!--dashboard count-->
             <span ng-if="group.selected.count !== undefined && group.selected.savedSearchId">
-              <kibi-human-readable value="group.selected.count" format="0.[0]a"></kibi-human-readable>
+              <kibi-human-readable-number value="group.selected.count" format="0.[0]a"></kibi-human-readable-number>
             </span>
 
             <span ng-if="group.selected.count === undefined && group.selected.savedSearchId">
@@ -95,7 +95,7 @@
             <div class="indicators" ng-mouseenter="refreshTooltipIndicator($event, $index, true)">
               <!--dashboard count-->
               <span ng-if="dashboard.count !== undefined && dashboard.savedSearchId">
-                <kibi-human-readable value="dashboard.count" format="0.[0]a"></kibi-human-readable>
+                <kibi-human-readable-number value="dashboard.count" format="0.[0]a"></kibi-human-readable-number>
               </span>
               <span ng-if="dashboard.count === undefined && dashboard.savedSearchId">
                 <div class="spinner">

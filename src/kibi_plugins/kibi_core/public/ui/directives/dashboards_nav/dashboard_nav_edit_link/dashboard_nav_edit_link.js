@@ -9,7 +9,7 @@ import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dash
 import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
 import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 import { uiModules } from 'ui/modules';
-import 'ui/kibi/directives/kibi_human_readable';
+import 'ui/kibi/directives/kibi_human_readable_number';
 import { KibiHumanReadableHelperProvider } from 'ui/kibi/directives/kibi_human_readable_helper';
 
 uiModules

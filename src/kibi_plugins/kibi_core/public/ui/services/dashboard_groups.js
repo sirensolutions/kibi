@@ -300,7 +300,7 @@ uiModules
             const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
             if (foundDashboardMetadata) {
 
-              // remove every dashbopard we found meta for
+              // remove every dashboard we found meta for
               if (mapOfDashboardsRequestedButNoMetaFound[d.id]) {
                 delete mapOfDashboardsRequestedButNoMetaFound[d.id];
               }

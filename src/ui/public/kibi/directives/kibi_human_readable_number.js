@@ -4,7 +4,7 @@ import { KibiHumanReadableHelperProvider } from './kibi_human_readable_helper';
 
 uiModules
 .get('kibana')
-.directive('kibiHumanReadable', function (Private) {
+.directive('kibiHumanReadableNumber', function (Private) {
   const kibiHumanReadableHelper = Private(KibiHumanReadableHelperProvider);
   return {
     restrict: 'E',

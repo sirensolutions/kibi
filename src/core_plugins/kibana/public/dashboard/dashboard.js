@@ -25,7 +25,7 @@ import DashboardStateProvider from './dashboard_state';
 import notify from 'ui/notify';
 
 // kibi: imports
-import 'ui/kibi/directives/kibi_human_readable';
+import 'ui/kibi/directives/kibi_human_readable_number';
 import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 

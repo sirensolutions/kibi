@@ -63,11 +63,13 @@ uiModules
             group.dashboards.forEach(dash => dash.$$highlight = false);
           });
           const group = dashboardGroups.getGroup(id);
-          group.collapsed = false;
-          $scope.persistCollapsedGroupState();
-          const dashboardIds = _(group.dashboards).filter(d => !d.count).map('id').value();
-          if (dashboardIds.length > 0 && dashboardGroups.isInitialized) {
-            dashboardGroups.updateMetadataOfDashboardIds(dashboardIds);
+          if (group) {
+            group.collapsed = false;
+            $scope.persistCollapsedGroupState();
+            const dashboardIds = _(group.dashboards).filter(d => !d.count).map('id').value();
+            if (dashboardIds.length > 0 && dashboardGroups.isInitialized) {
+              dashboardGroups.updateMetadataOfDashboardIds(dashboardIds);
+            }
           }
         }
       });

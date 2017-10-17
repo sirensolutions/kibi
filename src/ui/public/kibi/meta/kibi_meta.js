@@ -2,7 +2,7 @@ import lru from 'lru-cache';
 import { each, map } from 'lodash';
 import { uiModules } from 'ui/modules';
 
-function KibiMetaProvider(createNotifier, kibiState, es) {
+function KibiMetaProvider(createNotifier, kibiState, es, config) {
 
   const notify = createNotifier({
     location: 'Kibi meta service'
@@ -51,16 +51,8 @@ function KibiMetaProvider(createNotifier, kibiState, es) {
       };
 
       this.strategies = {};
-      this.setStrategy('buttons', {
-        batchSize: 2,
-        retryOnError: 1,
-        parallelRequests: 1
-      });
-      this.setStrategy('dashboards', {
-        batchSize: 2,
-        retryOnError: 1,
-        parallelRequests: 1
-      });
+      this.setStrategy('dashboards', config.get('kibi:countFetchingStrategyDashboards'));
+      this.setStrategy('buttons', config.get('kibi:countFetchingStrategyRelationalFilters'));
     }
 
     flushCache() {

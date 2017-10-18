@@ -732,6 +732,87 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     return _.keys(this[this._properties.dashboards]);
   };
 
+  const wrapPromise = function (p) {
+    return new Promise(function (resolve, reject) {
+      p.then(res => resolve(res)).catch(err => resolve(err));
+    });
+  };
+
+  /**
+   * Returns the current state of the dashboards with given IDs
+   */
+  KibiState.prototype.getStates = function (dashboardIds) {
+    if (!(dashboardIds instanceof Array)) {
+      return Promise.reject(new Error('Expected dashboardIds to be an Array'));
+    }
+    if (!dashboardIds.length) {
+      return Promise.resolve({});
+    }
+
+    const options = {
+      pinned: true,
+      disabled: false
+    };
+
+    const appState = getAppState();
+    const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds, false);
+
+    return getMetas
+    .then((metas) => {
+      const promises = [];
+      for (let i = 0; i < metas.length; i++) {
+        const meta = metas[i];
+        // this promises can not fail so we correctly report errors
+        // lets wrap them
+        promises.push(meta.savedDash.id);
+        promises.push(meta.savedSearchMeta ? meta.savedSearchMeta.index : null);
+        promises.push(wrapPromise(this._getFilters(meta.savedDash.id, appState, meta, options)));
+        promises.push(wrapPromise(this._getQueries(meta.savedDash.id, appState, meta)));
+        promises.push(wrapPromise(this._getTime(meta.savedDash.id, meta.savedSearchMeta ? meta.savedSearchMeta.index : null)));
+      }
+
+      return Promise.all(promises)
+      .then(results => {
+        // create a map iterating every 5
+        const statesMap = {};
+        for (let i = 0; i < results.length; i = i + 5) {
+          const dashId = results[i];
+          const index = results[i + 1];
+          const filters = results[i + 2];
+          const queries = results[i + 3];
+          const time = results[i + 4];
+
+          if (filters instanceof Error) {
+            notify.warning(filters);
+            statesMap[dashId] = { error: filters };
+          } else if (queries instanceof Error) {
+            notify.warning(queries);
+            statesMap[dashId] = { error: queries };
+          } else if (time instanceof Error) {
+            notify.warning(time);
+            statesMap[dashId] = { error: time };
+          } else {
+            statesMap[dashId] = {
+              index,
+              filters,
+              queries,
+              time
+            };
+          }
+        }
+
+        // here add the one for which the meta is missing
+        _.each(dashboardIds, dashId => {
+          if (!statesMap[dashId]) {
+            statesMap[dashId] = {};
+          }
+        });
+
+        return statesMap;
+      });
+    });
+  };
+
   /**
    * Returns the current state of the dashboard with given ID
    */

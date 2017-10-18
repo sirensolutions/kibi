@@ -25,6 +25,7 @@ import DashboardStateProvider from './dashboard_state';
 import notify from 'ui/notify';
 
 // kibi: imports
+import 'ui/kibi/directives/kibi_human_readable_number';
 import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
@@ -83,7 +84,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState,
       // kibi: added dashboardGroups, kibiState, config, $timeout
-      dashboardGroups, kibiState, config, $window, chrome, $timeout) {
+      dashboardGroups, kibiState, config, $window, chrome, $timeout, kibiMeta) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = createNotifier({ location: 'Dashboard' });
@@ -94,23 +95,17 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       }
 
       // kibi: adds information about the group membership and stats
-      const numeral = require('numeral')();
       function getMetadata() {
         delete dash.group;
         if (dash.id) {
           dash.group = dashboardGroups.getGroup(dash.id);
           if (dash.group) {
-            const count = _(dash.group.dashboards).filter(d => d.id === dash.id).map('count').value();
-            if (count && count.length) {
-              if (_.isNumber(count[0])) {
-                dash.formattedCount = numeral.set(count[0]).format('0,0');
-              } else {
-                dash.formattedCount = count[0];
-              }
-            }
+            const found = _.find(dash.group.dashboards, d => d.id === dash.id);
+            dash.count = found.count;
           }
         }
       }
+
       dashboardGroups.on('groupsMetadataUpdated', () => {
         getMetadata();
       }).on('dashboardsMetadataUpdated', () => {
@@ -368,7 +363,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
 
       $scope.$on('$destroy', () => {
         dashboardState.destroy();
-
+        kibiMeta.flushQueues();
         // Remove dark theme to keep it from affecting the appearance of other apps.
         setLightTheme();
       });

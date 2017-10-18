@@ -46,8 +46,7 @@ export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
     // kibi: remove request parameters used only for differentiating requests
     const requestQuery = request.query;
     if (requestQuery) {
-      delete requestQuery.getCountsOnButtons;
-      delete requestQuery.getCountsOnTabs;
+      delete requestQuery.getMeta;
       delete requestQuery.getEntitiesFromDashboard;
     }
     // kibi: end

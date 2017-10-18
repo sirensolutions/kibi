@@ -383,6 +383,16 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       type: 'kibiSelectDashboard',
       value: '',
       description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.'
+    },
+    'kibi:countFetchingStrategyDashboards' : {
+      type: 'json',
+      value: '{ "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
+      description: 'Strategy used to fetch the counts for dashboards'
+    },
+    'kibi:countFetchingStrategyRelationalFilters' : {
+      type: 'json',
+      value: '{ "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
+      description: 'Strategy used to fetch the counts for relational filters'
     }
     // kibi: end
   };

@@ -104,12 +104,12 @@ describe('plugins/elasticsearch', function () {
       });
 
       describe('debug tags', function () {
-        it('getCountsOnButtons', function () {
+        it('getMeta=buttons', function () {
           const func = mapUri(stubCluster(), '/elasticsearch', serverWithoutSirenPlugin, false);
 
           request.path = '/elasticsearch/_search';
           request.query = {
-            getCountsOnButtons: '',
+            getMeta: 'buttons',
             size: 100
           };
           func(request, (err, upstreamUri, upstreamHeaders) => {
@@ -118,12 +118,12 @@ describe('plugins/elasticsearch', function () {
           });
         });
 
-        it('getCountsOnTabs', function () {
+        it('getMeta=dashboards', function () {
           const func = mapUri(stubCluster(), '/elasticsearch', serverWithoutSirenPlugin, false);
 
           request.path = '/elasticsearch/_search';
           request.query = {
-            getCountsOnTabs: '',
+            getMeta: 'dashboards',
             size: 100
           };
           func(request, (err, upstreamUri, upstreamHeaders) => {

@@ -18,7 +18,7 @@ import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
 function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, es, createNotifier, globalState, Promise,
-  kbnIndex, config, savedDashboards, timefilter) {
+  kbnIndex, config, savedDashboards, timefilter, kibiMeta) {
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const searchHelper = new SearchHelper(kbnIndex);
   const edit = onVisualizePage();
@@ -38,8 +38,78 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     return config.get('kibi:enableAllRelBtnCounts');
   };
 
+  const buttonMetaCallback = function (button, meta) {
+    if (button.forbidden) {
+      button.warning = 'Access to an index referred by this button is forbidden.';
+      return;
+    }
+    if (meta.error) {
+      const error = JSON.stringify(meta.error, null, ' ');
+      if (error.match(/ElasticsearchSecurityException/)) {
+        button.warning = 'Access to an index referred by this button is forbidden.';
+        notify.error(error);
+      } else if (error.match(/index_not_found_exception/)) {
+        // do not notify about missing index error
+        button.warning = 'Index referred by this button does not exist.';
+      } else {
+        button.warning = `Got an unexpected error while computing this button's count.`;
+        notify.error(JSON.stringify(error, null, ' '));
+      }
+      return;
+    }
+    button.targetCount = meta.hits.total;
+    button.warning = '';
+    if (isJoinPruned(meta)) {
+      button.warning = 'Results from this filter are pruned';
+    }
+  };
+
+  const updateCounts = function (results, scope) {
+    const metaDefinitions = _.map(results, result => {
+      const definition = result.button;
+      // adding unique id as required by kibiMeta
+      definition.id =
+        result.button.sourceDashboardId +
+        result.button.targetDashboardId +
+        relationsHelper.getJoinIndicesUniqueID(
+          result.button.sourceIndexPatternId,
+          result.button.sourceIndexPatternType,
+          result.button.sourceField,
+          result.button.targetIndexPatternId,
+          result.button.targetIndexPatternType,
+          result.button.targetField,
+        );
+
+      return {
+        definition: definition,
+        callback: function (error, meta) {
+          if (error) {
+            notify.error(error);
+          }
+          if (scope && scope.multiSearchData) {
+            const stats = {
+              index: result.button.targetIndexPatternId,
+              type: result.button.targetIndexPatternType,
+              meta: {
+                label: result.button.label
+              },
+              response: meta,
+              query: result.button.query
+            };
+            if (isJoinPruned(meta)) {
+              stats.pruned = true;
+            }
+            $scope.multiSearchData.add(stats);
+          }
+          buttonMetaCallback(result.button, meta);
+        }
+      };
+    });
+    kibiMeta.getMetaForRelationalButtons(metaDefinitions);
+  };
+
   // Update the counts on each button of the related filter
-  const _fireUpdateCounts = function (buttons, dashboardId, updateOnClick = false) {
+  const _addButtonQuery = function (buttons, dashboardId, updateOnClick = false) {
     if ($scope.multiSearchData) {
       $scope.multiSearchData.clear();
     }
@@ -55,10 +125,11 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
         if ($scope.btnCountsEnabled() || updateOnClick) {
           return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
           .then((query) => {
-            return { query, button, indices };
+            button.query = searchHelper.optimize(indices, query, button.targetIndexPatternId);
+            return { button, indices };
           });
         } else {
-          return { query: undefined, button, indices };
+          return { button, indices };
         }
       })
       .catch((error) => {
@@ -72,78 +143,21 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
         if ($scope.btnCountsEnabled() || updateOnClick) {
           return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
           .then((query) => {
-            return { query, button, indices: [] };
+            button.query = searchHelper.optimize([], query, button.targetIndexPatternId);
+            return { button, indices: [] };
           });
         } else {
           return { button, indices: [] };
         }
       });
-    })).then((results) => {
-      if (!$scope.btnCountsEnabled() && !updateOnClick) {
-        return Promise.resolve(_.map(results, (result) => result.button));
-      }
-      const query = _.map(results, result => {
-        return searchHelper.optimize(result.indices, result.query, result.button.targetIndexPatternId);
-      }).join('');
-      const duration = moment();
-
-      return es.msearch({
-        body: query,
-        getCountsOnButtons: '' // ?getCountsOnButtons= has no meaning it is just useful to filter when inspecting requests
-      })
-      .then((data) => {
-        if ($scope.multiSearchData) {
-          $scope.multiSearchData.setDuration(duration.diff() * -1);
-        }
-        _.each(data.responses, function (hit, i) {
-          const stats = {
-            index: results[i].button.targetIndexPatternId,
-            type: results[i].button.targetIndexPatternType,
-            meta: {
-              label: results[i].button.label
-            },
-            response: hit,
-            query: results[i].query
-          };
-
-          if (results[i].button.forbidden) {
-            results[i].button.warning = 'Access to an index referred by this button is forbidden.';
-            return;
-          }
-          if (hit.error) {
-            const error = JSON.stringify(hit.error, null, ' ');
-            if (error.match(/ElasticsearchSecurityException/)) {
-              results[i].button.warning = 'Access to an index referred by this button is forbidden.';
-              notify.error(error);
-            } else if (error.match(/index_not_found_exception/)) {
-              // do not notify about missing index error
-              results[i].button.warning = 'Index referred by this button does not exist.';
-            } else {
-              results[i].button.warning = `Got an unexpected error while computing this button's count.`;
-              notify.error(JSON.stringify(error, null, ' '));
-            }
-            if ($scope.multiSearchData) {
-              $scope.multiSearchData.add(stats);
-            }
-            return;
-          }
-          results[i].button.targetCount = hit.hits.total;
-          results[i].button.warning = '';
-          if (isJoinPruned(hit)) {
-            results[i].button.warning = 'Results from this filter are pruned';
-            stats.pruned = true;
-          }
-          if ($scope.multiSearchData) {
-            $scope.multiSearchData.add(stats);
-          }
-        });
-        return _.map(results, 'button');
-      });
-    }).catch(notify.error);
+    })).catch(notify.error);
   };
 
   $scope.getCurrentDashboardBtnCounts = function () {
-    _fireUpdateCounts($scope.buttons, currentDashboardId, true);
+    _addButtonQuery($scope.buttons, currentDashboardId, true) // TODO take care about this true parameter
+    .then(results => {
+      updateCounts(results, $scope);
+    });
   };
 
   const delayExecutionHelper = new DelayExecutionHelper(
@@ -152,7 +166,10 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       alreadyCollectedData.buttons = data.buttons;
     },
     (data) => {
-      _fireUpdateCounts(data.buttons, data.dashboardId);
+      _addButtonQuery(data.buttons, data.dashboardId)
+      .then(results => {
+        updateCounts(results, $scope);
+      });
     },
     750,
     DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
@@ -296,7 +313,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
       // assign data to $scope.buttons once the promises are done
       $scope.buttons = new Array(buttons.length);
-      const getSourceCount = function (currentDashboardId) {
+      const updateSourceCount = function (currentDashboardId, callback) {
         const virtualButton = {
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
@@ -306,18 +323,17 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
           targetIndexPatternType: this.sourceIndexPatternType,
           targetDashboardId: currentDashboardId
         };
-        // NOTE:
-        // here we do not want to delay the count update
-        // this is why for now we call directly _fireUpdateCounts
-        // instead of _collectUpdateCountsRequest
-        // This could be done in future to further reduce the number of calls but
-        // as it requires greater refactoring I postponed it for now
-        return _fireUpdateCounts.call(self, [ virtualButton ], this.targetDashboardId)
-        .then(() => virtualButton.targetCount)
+
+        return _addButtonQuery.call(self, [ virtualButton ], this.targetDashboardId)
+        .then(results => {
+          updateCounts(results, $scope);
+          return results;
+        })
         .catch(notify.error);
       };
+
       for (let i = 0; i < buttons.length; i++) {
-        buttons[i].getSourceCount = getSourceCount;
+        buttons[i].updateSourceCount = updateSourceCount;
         // Returns the count of documents involved in the join
         $scope.buttons[buttons[i].btnIndex] = buttons[i];
       }
@@ -378,6 +394,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     delayExecutionHelper.cancel();
     kibiDashboardChangedOff();
     removeAutorefreshHandler();
+    kibiMeta.flushQueues();
   });
 
   $scope.hoverIn = function (button) {

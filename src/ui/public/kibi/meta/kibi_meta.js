@@ -1,6 +1,6 @@
 import lru from 'lru-cache';
 import { each, map } from 'lodash';
-import { uiModules } from 'ui/modules';
+import uiModules from 'ui/modules';
 
 function KibiMetaProvider(createNotifier, kibiState, es, config) {
 

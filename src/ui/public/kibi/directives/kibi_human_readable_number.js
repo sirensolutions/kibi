@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import uiModules from 'ui/modules';
 import { isNumber } from 'lodash';
 import { KibiHumanReadableHelperProvider } from './kibi_human_readable_helper';
 

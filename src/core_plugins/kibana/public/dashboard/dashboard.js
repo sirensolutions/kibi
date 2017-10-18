@@ -26,7 +26,7 @@ import notify from 'ui/notify';
 
 // kibi: imports
 import 'ui/kibi/directives/kibi_human_readable_number';
-import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
 // kibi: end
 
 const app = uiModules.get('app/dashboard', [
@@ -412,11 +412,11 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       };
 
       // kibi: Merge the parameters saved on kibi_appstate_param
-      const passedState = JSON.parse(HashedItemStoreSingleton.getItem('kibi_appstate_param'));
+      const passedState = JSON.parse(hashedItemStoreSingleton.getItem('kibi_appstate_param'));
       if (passedState && passedState.dashboardOptions) {
         _.assign($scope.opts.dashboard, _.cloneDeep(passedState.dashboardOptions));
         delete passedState.dashboardOptions;
-        HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
+        hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(passedState));
       }
       // kibi: end
 

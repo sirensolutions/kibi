@@ -7,7 +7,7 @@ import './dashboard_nav_edit_link.less';
 import 'ui/kibi/directives/kibi_context_menu';
 import { DashboardViewMode } from 'src/core_plugins/kibana/public/dashboard/dashboard_view_mode';
 import { DashboardConstants } from 'src/core_plugins/kibana/public/dashboard/dashboard_constants';
-import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
+import { hashedItemStoreSingleton } from 'ui/state_management/state_storage';
 import uiModules from 'ui/modules';
 import 'ui/kibi/directives/kibi_human_readable_number';
 import { KibiHumanReadableHelperProvider } from 'ui/kibi/directives/kibi_human_readable_helper';
@@ -204,7 +204,7 @@ uiModules
               currentKey: item.topNavKey
             }
           };
-          HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
+          hashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
           globalNavState.setOpen(false);
           dashboardGroups.selectDashboard(id);
         }

@@ -283,129 +283,129 @@ mechanisms and backends; the above configuration:
 [source,yaml]
 ----
 UNLIMITED:
-  - "*"
+  - '*'
 
 ###### INDEX LEVEL ######
 
 INDICES_ALL:
-  - "indices:*"
+  - 'indices:*'
 
 # for backward compatibility
 ALL:
   - INDICES_ALL
 
 MANAGE:
-  - "indices:monitor/*"
-  - "indices:admin/*"
+  - 'indices:monitor/*'
+  - 'indices:admin/*'
 
 CREATE_INDEX:
-  - "indices:admin/create"
-  - "indices:admin/mapping/put"
+  - 'indices:admin/create'
+  - 'indices:admin/mapping/put'
 
 MANAGE_ALIASES:
-  - "indices:admin/aliases*"
+  - 'indices:admin/aliases*'
 
 # for backward compatibility
 MONITOR:
   - INDICES_MONITOR
 
 INDICES_MONITOR:
-  - "indices:monitor/*"
+  - 'indices:monitor/*'
 
 DATA_ACCESS:
-  - "indices:data/*"
+  - 'indices:data/*'
   - CRUD
 
 WRITE:
-  - "indices:data/write*"
-  - "indices:admin/mapping/put"
+  - 'indices:data/write*'
+  - 'indices:admin/mapping/put'
 
 READ:
-  - "indices:data/read*"
-  - "indices:admin/mappings/fields/get*"
+  - 'indices:data/read*'
+  - 'indices:admin/mappings/fields/get*'
 
 DELETE:
-  - "indices:data/write/delete*"
+  - 'indices:data/write/delete*'
 
 CRUD:
   - READ
   - WRITE
 
 SEARCH:
-  - "indices:data/read/search*"
-  - "indices:data/read/msearch*"
-  - "indices:siren/plan*"
-  - "indices:siren/mplan*"
+  - 'indices:data/read/search*'
+  - 'indices:data/read/msearch*'
+  - 'indices:siren/plan*'
+  - 'indices:siren/mplan*'
   - SUGGEST
 
 SUGGEST:
-  - "indices:data/read/suggest*"
+  - 'indices:data/read/suggest*'
 
 INDEX:
-  - "indices:data/write/index*"
-  - "indices:data/write/update*"
-  - "indices:admin/mapping/put"
-  - "indices:data/write/bulk*"
+  - 'indices:data/write/index*'
+  - 'indices:data/write/update*'
+  - 'indices:admin/mapping/put'
+  - 'indices:data/write/bulk*'
 
 GET:
-  - "indices:data/read/get*"
-  - "indices:data/read/mget*"
+  - 'indices:data/read/get*'
+  - 'indices:data/read/mget*'
 
 ###### CLUSTER LEVEL ######
 
 CLUSTER_ALL:
-  - "cluster:*"
+  - 'cluster:*'
 
 CLUSTER_MONITOR:
-  - "cluster:monitor/*"
+  - 'cluster:monitor/*'
 
 CLUSTER_COMPOSITE_OPS_RO:
-  - "indices:data/read/mget"
-  - "indices:data/read/msearch"
-  - "indices:siren/mplan"
-  - "indices:data/read/mtv"
-  - "indices:admin/aliases/exists*"
-  - "indices:admin/aliases/get*"
+  - 'indices:data/read/mget'
+  - 'indices:data/read/msearch'
+  - 'indices:siren/mplan'
+  - 'indices:data/read/mtv'
+  - 'indices:admin/aliases/exists*'
+  - 'indices:admin/aliases/get*'
 
 CLUSTER_COMPOSITE_OPS:
-  - "indices:data/write/bulk"
-  - "indices:admin/aliases*"
+  - 'indices:data/write/bulk'
+  - 'indices:admin/aliases*'
   - CLUSTER_COMPOSITE_OPS_RO
 
 ##### KIBI #####
 
 KIBI_CLUSTER:
-  - "indices:data/read/scroll"
-  - "indices:data/read/scroll/clear"
-  - "cluster:internal/data/transfer/*"
-  - "indices:data/read/msearch*"
+  - 'indices:data/read/scroll'
+  - 'indices:data/read/scroll/clear'
+  - 'cluster:internal/data/transfer/*'
+  - 'indices:data/read/msearch*'
   - CLUSTER_COMPOSITE_OPS_RO
 
 KIBI_COMPOSITE:
-  - "indices:siren/mplan*"
+  - 'indices:siren/mplan*'
 
 KIBI_READONLY:
-  - "indices:data/read/field_stats*"
-  - "indices:data/read/field_caps*"
-  - "indices:data/read/get*"
-  - "indices:data/read/mget*"
-  - "indices:data/read/search*"
-  - "indices:siren/plan"
-  - "indices:siren/task/search"
-  - "indices:admin/mappings/get*"
-  - "indices:admin/mappings/fields/get*"
-  - "indices:admin/validate/query*"
-  - "indices:admin/get*"
-  - "indices:admin/version/get*"
+  - 'indices:data/read/field_stats*'
+  - 'indices:data/read/field_caps*'
+  - 'indices:data/read/get*'
+  - 'indices:data/read/mget*'
+  - 'indices:data/read/search*'
+  - 'indices:siren/plan'
+  - 'indices:siren/task/search'
+  - 'indices:admin/mappings/get*'
+  - 'indices:admin/mappings/fields/get*'
+  - 'indices:admin/validate/query*'
+  - 'indices:admin/get*'
+  - 'indices:admin/version/get*'
   - KIBI_COMPOSITE
 
 KIBI_READWRITE:
-  - "indices:admin/exists*"
-  - "indices:admin/mapping/put*"
-  - "indices:admin/refresh*"
-  - "indices:data/write/delete*"
-  - "indices:data/write/index*"
-  - "indices:data/write/update*"
+  - 'indices:admin/exists*'
+  - 'indices:admin/mapping/put*'
+  - 'indices:admin/refresh*'
+  - 'indices:data/write/delete*'
+  - 'indices:data/write/index*'
+  - 'indices:data/write/update*'
   - KIBI_READONLY
 ----
 
@@ -448,8 +448,10 @@ sg_readall:
 # Permissions for a Logstash client.
 logstash:
   cluster:
-    - indices:admin/template/get
-    - indices:admin/template/put
+    - 'indices:data/write/bulk*'
+    - 'indices:admin/template/*'
+    - CLUSTER_MONITOR
+    - KIBI_CLUSTER
   indices:
     'logstash-*':
       '*':
@@ -482,8 +484,8 @@ monitoring:
 sentinl:
   cluster:
     - KIBI_CLUSTER
-    - "indices:data/write/bulk*"
-    - "indices:admin/template/*"
+    - 'indices:data/write/bulk*'
+    - 'indices:admin/template/*'
   indices:
     '*':
       '*':
@@ -812,8 +814,8 @@ user, e.g.:
 
 [source,yaml]
 ----
-elasticsearch.username: "kibiserver"
-elasticsearch.password: "password"
+elasticsearch.username: 'kibiserver'
+elasticsearch.password: 'password'
 ----
 
 If HTTPS is enabled for the Elasticsearch REST API, make sure that the
@@ -821,7 +823,7 @@ _elasticsearch.url_ setting contains a URL starting with _https_, e.g.:
 
 [source,yaml]
 ----
-elasticsearch.url: "https://localhost:9220"
+elasticsearch.url: 'https://localhost:9220'
 ----
 
 If the certificate is not signed by a public authority, you will also need to
@@ -830,7 +832,7 @@ format, e.g.:
 
 [source,yaml]
 ----
-elasticsearch.ssl.ca: "pki/searchguard/ca.pem"
+elasticsearch.ssl.ca: 'pki/searchguard/ca.pem'
 ----
 
 If you're using the certificates generated by the TLS generator service, the
@@ -850,7 +852,7 @@ Set the **kibi_core.elasticsearch.auth_plugin** option to **searchguard**:
 ----
 kibi_core:
   elasticsearch:
-    auth_plugin: "searchguard"
+    auth_plugin: 'searchguard'
 ----
 
 E.g.:
@@ -859,7 +861,7 @@ E.g.:
 ----
 kibi_core:
   elasticsearch:
-    auth_plugin: "searchguard"
+    auth_plugin: 'searchguard'
 ----
 
 To enable the Kibi access control plugin, specify the following configuration
@@ -894,7 +896,7 @@ E.g.:
 kibi_access_control:
   enabled: true
   cookie:
-    password: "12345678123456781234567812345678"
+    password: '12345678123456781234567812345678'
 ----
 
 If Kibi is running behind a reverse SSL proxy like Nginx, remember to set
@@ -905,7 +907,7 @@ If Kibi is running behind a reverse SSL proxy like Nginx, remember to set
 kibi_access_control:
   enabled: true
   cookie:
-    password: "12345678123456781234567812345678"
+    password: '12345678123456781234567812345678'
     secure: false
 ----
 
@@ -1256,11 +1258,11 @@ E.g.:
 ----
 output {
     elasticsearch {
-       hosts => ["localhost:9220"]
+       hosts => ['localhost:9220']
        user => logstash
        password => password
        ssl => true
-       truststore => "/etc/pki/logstash/truststore.jks"
+       truststore => '/etc/pki/logstash/truststore.jks'
        truststore_password => password
     }
 }
@@ -1286,14 +1288,14 @@ E.g.:
 output:
 
   elasticsearch:
-    hosts: ["localhost:9220"]
+    hosts: ['localhost:9220']
 
-    protocol: "https"
-    username: "logstash"
-    password: "password"
+    protocol: 'https'
+    username: 'logstash'
+    password: 'password'
 
     tls:
-      certificate_authorities: ["/etc/pki/filebeat/ca.pem"]
+      certificate_authorities: ['/etc/pki/filebeat/ca.pem']
 ----
 
 The root certification authority in PEM format must be copied to all nodes
@@ -1308,10 +1310,10 @@ Search Guard set the following parameters in `config/kibi.yml`:
 ----
 console.proxyConfig:
   - match:
-      protocol: "https"
+      protocol: 'https'
 
     ssl:
-      ca: "pki/searchguard/ca.pem"
+      ca: 'pki/searchguard/ca.pem'
 ----
 
 `console.proxyConfig.ssl.ca` must point to the CA certificate bundle, so it can
@@ -1343,7 +1345,7 @@ user:
 xpack.monitoring.exporters:
   id1:
     type: http
-    host: ["https://localhost:9220"]
+    host: ['https://localhost:9220']
 
     auth:
       username: monitoring

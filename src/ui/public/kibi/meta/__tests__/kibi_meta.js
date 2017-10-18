@@ -7,9 +7,13 @@ describe('Kibi meta service', function () {
 
   let kibiMeta;
   let es;
+  let config;
+  let msearchStub;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (_kibiMeta_, _es_, config) {
+
+  beforeEach(ngMock.inject(function (_es_, _config_, _kibiMeta_) {
+    config = _config_;
     sinon.stub(config, 'get', function (key) {
       if (key === 'kibi:countFetchingStrategyDashboards' || key === 'kibi:countFetchingStrategyRelationalFilters') {
         return {
@@ -17,14 +21,18 @@ describe('Kibi meta service', function () {
           retryOnError: 1,
           parallelRequests: 1
         };
-      } else {
-        throw new Error('Stub also key: ' + key);
       }
     });
+    es = _es_;
     kibiMeta = _kibiMeta_;
     kibiMeta.flushCache();
-    es = _es_;
+    msearchStub = sinon.stub(es, 'msearch');
   }));
+
+  afterEach(function () {
+    config.get.restore();
+    es.msearch.restore();
+  });
 
   describe('getMetaForDashboards', function () {
 
@@ -91,7 +99,6 @@ describe('Kibi meta service', function () {
               total: 11
             }
           };
-          const msearchStub = sinon.stub(es, 'msearch');
           msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1 ] }));
           const callback1Spy = sinon.spy();
           const definitions = [{
@@ -129,7 +136,6 @@ describe('Kibi meta service', function () {
               total: 22
             }
           };
-          const msearchStub = sinon.stub(es, 'msearch');
           msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1, expectedMeta2 ] }));
           const callback1Spy = sinon.spy();
           const callback2Spy = sinon.spy();
@@ -174,7 +180,6 @@ describe('Kibi meta service', function () {
           const expectedMeta2 = { hits: { total: 22 } };
           const expectedMeta3 = { hits: { total: 33 } };
 
-          const msearchStub = sinon.stub(es, 'msearch');
           msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1, expectedMeta2 ] }));
           msearchStub.onCall(1).returns(Promise.resolve({ responses: [ expectedMeta3 ] }));
           const callback1Spy = sinon.spy();
@@ -226,9 +231,6 @@ describe('Kibi meta service', function () {
           const expectedMeta1 = { hits: { total: 11 } };
           const expectedMeta2 = { hits: { total: 22 } };
           const expectedMeta3 = { hits: { total: 33 } };
-
-          const msearchStub = sinon.stub(es, 'msearch');
-
 
           msearchStub.onCall(0).returns(new Promise (function (fulfill, reject) {
             setTimeout(function () {
@@ -286,7 +288,6 @@ describe('Kibi meta service', function () {
           const expectedMeta1 = { hits: { total: 11 } };
           const expectedMeta2 = { hits: { total: 22 } };
 
-          const msearchStub = sinon.stub(es, 'msearch');
           msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1, expectedMeta2 ] }));
           const callback1Spy = sinon.spy();
           const callback2Spy = sinon.spy();
@@ -344,7 +345,6 @@ describe('Kibi meta service', function () {
           const expectedMeta2 = { hits: { total: 22 } };
           const expectedMeta3 = { hits: { total: 11 } };
 
-          const msearchStub = sinon.stub(es, 'msearch');
           msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1, expectedMeta2 ] }));
           const callback1Spy = sinon.spy();
           const callback2Spy = sinon.spy();
@@ -396,7 +396,6 @@ describe('Kibi meta service', function () {
         const expectedError1 = { error: 'Sorry error' };
         const expectedMeta1 = { hits: { total: 11 } };
 
-        const msearchStub = sinon.stub(es, 'msearch');
         msearchStub.onCall(0).returns(Promise.reject({ responses: [ expectedError1 ] }));
         msearchStub.onCall(1).returns(Promise.resolve({ responses: [ expectedMeta1 ] }));
         const callback1Spy = sinon.spy();
@@ -430,7 +429,6 @@ describe('Kibi meta service', function () {
 
       it('default strategy - 1 definitions, should failed after 1 unsuccessful retry', function (done) {
         const expectedError1 = { error: 'Sorry error' };
-        const msearchStub = sinon.stub(es, 'msearch');
         msearchStub.onCall(0).returns(Promise.reject({ responses: [ expectedError1 ] }));
         msearchStub.onCall(1).returns(Promise.reject({ responses: [ expectedError1 ] }));
         const callback1Spy = sinon.spy();
@@ -490,8 +488,6 @@ describe('Kibi meta service', function () {
             total: 11
           }
         };
-
-        const msearchStub = sinon.stub(es, 'msearch');
 
         // first call will arrive late
         msearchStub.onCall(0).returns(new Promise (function (fulfill, reject) {

@@ -132,8 +132,8 @@ module.exports = function (kibana) {
 
       translations: [
         resolve(__dirname, './translations/en.json')
-      ],
-      mappings
+      ]
+      // kibi: removed the kibana original mappings as our one are done by saved_objec_api
     },
 
     preInit: async function (server) {

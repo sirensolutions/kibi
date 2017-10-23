@@ -26,7 +26,7 @@ uiModules
   OntologyClient.prototype._removeNs = function (str) {
     const value = str.replace(defaultKibiNs, '');
     return value;
-  }
+  };
 
   OntologyClient.prototype._removeNsDecode = function (str) {
     if (!str) {
@@ -171,14 +171,13 @@ uiModules
           Promise.reject(new Error('Failed to retrieve entities from the schema. An error has occurred.'));
         } else if (res.data) {
           const entities = _.reduce(res.data, (total, entity) => {
-            entity.id = this._removeNsDecode(entity.id),
+            entity.id = this._removeNsDecode(entity.id);
             entity.longDescr = this._removeNsDecode(entity.longDescr);
 
             total.push(entity);
             return total;
           }, []);
           this._cachedEntitiesList = entities;
-          console.log(entities);
           return entities;
         }
         Promise.reject(new Error('Failed to retrieve entities from the schema. No data retrieved.'));
@@ -264,7 +263,7 @@ uiModules
         this.clearCache();
       });
     }
-  }
+  };
 
   /*
    * Executes the passed SPARQLE UPDATE query.

@@ -13,7 +13,7 @@ describe('Kibi Components', function () {
         $provide.service('savedDashboards', function () {
           return {
             find: function () {
-              return Promise.resolve({ hits: []});
+              return Promise.resolve({ hits: [] });
             }
           };
         });
@@ -67,7 +67,7 @@ describe('Kibi Components', function () {
     });
 
     it('gets an entity by id', function () {
-      $httpBackend.expectPOST(/\/schema/).respond({ data: { id: 'something'}});
+      $httpBackend.expectPOST(/\/schema/).respond({ data: { id: 'something' } });
       ontologyClient.getEntityById('id');
       $httpBackend.flush();
     });

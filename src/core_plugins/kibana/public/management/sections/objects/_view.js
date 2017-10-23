@@ -177,7 +177,7 @@ uiModules.get('apps/management')
         const doDelete = function () {
           // kibi: wrapped the original function
           // as we need to do our checks before
-          const _delete = function () {
+          const _delete = function (filteredIds) {
             return savedObjectsAPI.delete({
               index: kbnIndex,
               type: service.type,
@@ -192,7 +192,7 @@ uiModules.get('apps/management')
             .catch(notify.error); // kibi: changed from fatal to error
           };
 
-          deleteHelper.deleteByType(service.type, [$routeParams.id], _delete);
+          deleteHelper.deleteByType(service.type, { id: $routeParams.id }, _delete);
           // kibi: end
         };
 

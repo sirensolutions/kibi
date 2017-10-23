@@ -118,6 +118,12 @@ uiModules.get('apps/management')
           id: item.id
         };
 
+        // kibi: for sql_jdbc_new we open the dedicated editor
+        // as this is not real saved object
+        if (item.datasourceType && item.datasourceType === 'sql_jdbc_new') {
+          return kbnUrl.change(item.url.substr(1));
+        }
+        // kibi: route is changed
         kbnUrl.change('/management/siren/objects/{{ service }}/{{ id }}', params);
       };
 
@@ -126,8 +132,9 @@ uiModules.get('apps/management')
 
         function doBulkDelete() {
           // kibi: modified to do some checks before the delete
-          const _delete = function () {
-            return $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
+
+          const _delete = function (filteredIds) {
+            return $scope.currentTab.service.delete(filteredIds)
             .then(cache.invalidate) // kibi: invalidate the cache of saved objects
             .then(refreshData)
             .then(function () {
@@ -136,7 +143,7 @@ uiModules.get('apps/management')
             .catch(notify.error);
           };
 
-          deleteHelper.deleteByType($scope.currentTab.service.type, pluck($scope.selectedItems, 'id'), _delete);
+          deleteHelper.deleteByType($scope.currentTab.service.type, $scope.selectedItems, _delete);
           // kibi: end
         }
 

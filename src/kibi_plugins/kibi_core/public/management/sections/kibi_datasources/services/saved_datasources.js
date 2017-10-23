@@ -17,14 +17,15 @@ require('plugins/kibana/management/saved_object_registry').register({
 // This is the only thing that gets injected into controllers
 uiModules
 .get('kibi_datasources/services/saved_datasources')
-.service('savedDatasources', function (savedObjectsAPI, Private, SavedDatasource, kbnIndex, esAdmin, kbnUrl) {
+.service('savedDatasources', function (savedObjectsAPI, Private, SavedDatasource, kbnIndex, esAdmin, kbnUrl, jdbcDatasources) {
   const options = {
     caching: {
       find: true,
       get: true,
       cache: Private(CacheProvider)
     },
-    savedObjectsAPI
+    savedObjectsAPI,
+    jdbcDatasources
   };
   const SavedDatasourceLoader = new SavedObjectLoader(SavedDatasource, kbnIndex, esAdmin, kbnUrl, options);
 

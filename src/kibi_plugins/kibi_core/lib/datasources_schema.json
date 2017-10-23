@@ -1,17 +1,4 @@
 {
-  "base": [
-    {
-      "name": "timeout",
-      "label": "Timeout",
-      "inputType": "number",
-      "dataType": "integer",
-      "required": false,
-      "multivalued": false,
-      "encrypted": false,
-      "defaultValue": 1000,
-      "placeholder": "Timeout in ms"
-    }
-  ],
   "sqlite": [
     {
       "name": "db_file_path",
@@ -60,6 +47,17 @@
       "encrypted": false,
       "defaultValue": 3600000,
       "placeholder": "The max age of an object in the cache, in milliseconds"
+    },
+    {
+      "name": "timeout",
+      "label": "Timeout",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 1000,
+      "placeholder": "Timeout in ms"
     }
   ],
   "mysql": [
@@ -123,6 +121,17 @@
       "encrypted": false,
       "defaultValue": 3600000,
       "placeholder": "The max age of an object in the cache, in milliseconds"
+    },
+    {
+      "name": "timeout",
+      "label": "Timeout",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 1000,
+      "placeholder": "Timeout in ms"
     }
   ],
   "postgresql": [
@@ -186,9 +195,30 @@
       "encrypted": false,
       "defaultValue": 3600000,
       "placeholder": "The max age of an object in the cache, in milliseconds"
+    },
+    {
+      "name": "timeout",
+      "label": "Timeout",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 1000,
+      "placeholder": "Timeout in ms"
     }
   ],
   "rest": [
+    {
+      "name": "url",
+      "label": "URL",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "Rest API url"
+    },
     {
       "name": "headers",
       "label": "Headers",
@@ -228,16 +258,6 @@
       },
       "defaultValue": [],
       "placeholder": "Parameters to be used for each request"
-    },
-    {
-      "name": "url",
-      "label": "URL",
-      "required": true,
-      "multivalued": false,
-      "encrypted": false,
-      "inputType": "text",
-      "defaultValue": "",
-      "placeholder": "Rest API url"
     },
     {
       "name": "response_type",
@@ -302,6 +322,17 @@
       "encrypted": false,
       "defaultValue": 3600000,
       "placeholder": "The max age of an object in the cache, in milliseconds"
+    },
+    {
+      "name": "timeout",
+      "label": "Timeout",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 1000,
+      "placeholder": "Timeout in ms"
     }
   ],
   "sparql_http": [
@@ -355,6 +386,17 @@
       "encrypted": false,
       "defaultValue": 3600000,
       "placeholder": "The max age of an object in the cache, in milliseconds"
+    },
+    {
+      "name": "timeout",
+      "label": "Timeout",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 1000,
+      "placeholder": "Timeout in ms"
     }
   ],
   "jdbc": [
@@ -386,8 +428,8 @@
       "encrypted": false,
       "inputType": "text",
       "defaultValue": "",
-      "placeholder": "Connection string without username and password"
-    },
+      "placeholder": "Connection string without username and password (e.g.: jdbc:mysql://localhost:3306/databasename)"
+     },
     {
       "name": "libs",
       "label": "Libraries",
@@ -438,6 +480,17 @@
       "encrypted": false,
       "defaultValue": 3600000,
       "placeholder": "The max age of an object in the cache, in milliseconds"
+    },
+    {
+      "name": "timeout",
+      "label": "Timeout",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 1000,
+      "placeholder": "Timeout in ms"
     }
   ],
   "tinkerpop3": [
@@ -460,6 +513,58 @@
       "encrypted": false,
       "defaultValue": 5000,
       "placeholder": "Timeout in ms"
+    }
+  ],
+  "jdbc_new": [
+    {
+      "name": "drivername",
+      "label": "Driver name",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "com.mysql.jdbc.Driver",
+      "placeholder": "JDBC driver class name (e.g.: com.mysql.jdbc.Driver)"
+    },
+    {
+      "name": "connection_string",
+      "label": "Connection string",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "jdbc:mysql://localhost:3306/employees",
+      "placeholder": "Connection string without username and password (e.g.: jdbc:mysql://localhost:3306/databasename)"
+    },
+    {
+      "name": "username",
+      "label": "Username",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Username"
+    },
+    {
+      "name": "password",
+      "label": "Password",
+      "inputType": "password",
+      "required": false,
+      "multivalued": false,
+      "encrypted": true,
+      "defaultValue": "",
+      "placeholder": "Password"
+    },
+    {
+      "name": "timezone",
+      "label": "Timezone",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "UTC",
+      "placeholder": "e.g.: UTC"
     }
   ]
 }

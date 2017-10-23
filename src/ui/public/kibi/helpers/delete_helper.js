@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export function DeleteHelperFactory(Promise, dashboardGroups, savedVisualizations, Private, $window, config) {
+export function DeleteHelperFactory(Promise, dashboardGroups, savedVisualizations, Private, $window, config, jdbcDatasources) {
 
   function DeleteHelper() {
   }
@@ -35,13 +35,15 @@ export function DeleteHelperFactory(Promise, dashboardGroups, savedVisualization
   /**
    * Delete selected objects with pre-processing that depends on the type of the service
    */
-  DeleteHelper.prototype.deleteByType = function (type, ids, delcb) {
+  DeleteHelper.prototype.deleteByType = function (type, items, delcb) {
     if (!delcb) {
       throw new Error('delete method was not passed');
     }
 
-    const _delete = function () {
-      let promise = delcb();
+    const ids = _.pluck(items, 'id');
+
+    const _delete = function (filteredIds) {
+      let promise = delcb(filteredIds);
       if (!Promise.is(promise)) {
         promise = Promise.resolve();
       }
@@ -51,6 +53,31 @@ export function DeleteHelperFactory(Promise, dashboardGroups, savedVisualization
     switch (type) {
       case 'dashboardgroup':
         return _delete().then(() => dashboardGroups.computeGroups(`deleted dashboard groups ${JSON.stringify(ids, null, ' ')}`));
+
+      case 'datasource':
+        // grab jdbc datasources ids
+        const jdbcIds = _(items).filter(item => {
+          return item.datasourceType === 'sql_jdbc_new';
+        })
+        .pluck('id')
+        .value();
+
+        const otherIds = _(items).filter(item => {
+          return item.datasourceType !== 'sql_jdbc_new';
+        })
+        .pluck('id')
+        .value();
+
+        if (jdbcIds.length > 0) {
+          const promises = [];
+          _.each(jdbcIds, id => {
+            promises.push(jdbcDatasources.delete(id));
+          });
+          return Promise.all(promises).then(() => {
+            return _delete(otherIds);
+          });
+        }
+        return _delete(otherIds);
 
       case 'dashboard':
         const dashboardGroupNames = dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids);
@@ -71,7 +98,7 @@ export function DeleteHelperFactory(Promise, dashboardGroups, savedVisualization
             config.set('kibi:defaultDashboardId', '');
           }
         });
-        return _delete().then(() => dashboardGroups.computeGroups(`deleted dashboards ${JSON.stringify(ids, null, ' ')}`));
+        return _delete(ids).then(() => dashboardGroups.computeGroups(`deleted dashboards ${JSON.stringify(ids, null, ' ')}`));
 
       case 'query':
         return this._getVisualisations(ids).then(function (visData) {
@@ -84,12 +111,12 @@ export function DeleteHelperFactory(Promise, dashboardGroups, savedVisualization
               (visData[1].length === 1 ? ' this visualization ' : ' those visualizations ') + 'first.\n\n';
             $window.alert(msg);
           } else {
-            delcb();
+            delcb(ids);
           }
         });
 
       default:
-        return _delete();
+        return _delete(ids);
     }
   };
 

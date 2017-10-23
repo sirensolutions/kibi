@@ -19,6 +19,9 @@ export default function setDatasourceSchemaFactory(kibiDatasourcesSchema) {
       case DatasourceTypes.sparql_http:
         datasource.schema = kibiDatasourcesSchema.sparql_http;
         break;
+      case 'sql_jdbc_new':
+        datasource.schema = kibiDatasourcesSchema.jdbc_new;
+        break;
       case DatasourceTypes.sql_jdbc:
       case DatasourceTypes.sparql_jdbc:
         datasource.schema = kibiDatasourcesSchema.jdbc;

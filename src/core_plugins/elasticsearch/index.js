@@ -140,6 +140,12 @@ module.exports = function (kibana) {
 
       createKibiProxy(server, 'GET', '/{paths*}');
       createKibiProxy(server, 'POST', '/_mget');
+
+      createKibiProxy(server, 'PUT', '/_vanguard/connector/{type}/{id}'); // kibi:
+      createKibiProxy(server, 'GET', '/_vanguard/connector/{type}/{id}'); // kibi:
+      createKibiProxy(server, 'POST', '/_vanguard/connector/{type}/{id}/{action}'); // kibi:
+      createKibiProxy(server, 'DELETE', '/_vanguard/connector/{type}/{id}'); // kibi:
+
       createKibiProxy(server, 'PUT', '/_siren/license'); // kibi: Insert new license
       createKibiProxy(server, 'DELETE', '/_siren/license'); // kibi: Delete existing license
       createKibiProxy(server, 'POST', '/{index}/_search');

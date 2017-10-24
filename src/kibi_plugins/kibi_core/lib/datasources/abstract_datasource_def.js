@@ -11,7 +11,7 @@ function AbstractDatasourceDef(server, datasource) {
   }
   this.datasource = datasource;
   this.config = server.config();
-  this.schema = datasourcesSchema.getBase();
+  this.schema = [];
 }
 
 AbstractDatasourceDef.prototype.getSchema = function () {

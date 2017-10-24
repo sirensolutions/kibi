@@ -48,5 +48,14 @@
   "KIBANA-INDICES_MATCH_PATTERN" : "Unable to fetch mapping. Do you have indices matching the pattern?",
   "KIBANA-ADD_NEW" : "Add New",
   "KIBANA-SEE" : "See",
-  "KIBANA-CREATE" : "Create"
+  "KIBANA-CREATE" : "Create",
+  "KIBANA-FIELD_IS_REQUIRED": "{{fieldName}} is required",
+
+  "KIBI-VIRTUAL_INDEX_PATTERN_CREATE_BUTTON": "Add Virtual Index Pattern",
+  "KIBI-VIRTUAL_INDEX_PATTERN_RESOURCE": "Resource name (table name)",
+  "KIBI-VIRTUAL_INDEX_PATTERN_RESOURCE_PRIMARY_KEY": "Primary key (primary key for the table)",
+  "KIBI-VIRTUAL_INDEX_PATTERN_NAME": "Index pattern name",
+  "KIBI-VIRTUAL_INDEX_LIST_OF_INDICES": "List of virtual indices",
+  "KIBI-VIRTUAL_INDEX_PATTERN_ADD_NEW": "Add new virtual index",
+  "KIBI-JDBC_DATASOURCE": "Jdbc datasource name"
 }

@@ -7,6 +7,7 @@ import RestDatasourceDef from './rest_datasource_def';
 import SqlJdbcDatasourceDef from './jdbc_datasource_def';
 import SparqlJdbcDatasourceDef from './jdbc_datasource_def';
 import TinkerPop3DatasourceDef from './tinkerpop3_datasource_def';
+import SqlJdbcNewDatasourceDef from './jdbc_new_datasource_def';
 
 module.exports = function (server, datasource) {
 
@@ -25,6 +26,9 @@ module.exports = function (server, datasource) {
       break;
     case kibiUtils.DatasourceTypes.sparql_http:
       datasource.datasourceClazz = new SparqlHttpDatasourceDef(server, datasource);
+      break;
+    case 'sql_jdbc_new':
+      datasource.datasourceClazz = new SqlJdbcNewDatasourceDef(server, datasource);
       break;
     case kibiUtils.DatasourceTypes.sql_jdbc:
       datasource.datasourceClazz = new SqlJdbcDatasourceDef(server, datasource);

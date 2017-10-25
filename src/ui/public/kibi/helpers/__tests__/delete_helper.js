@@ -136,15 +136,14 @@ describe('Kibi Components', function () {
     it('should call the delegated delete method method if the query is not used by any visualisations', function () {
       const deleteSpy = sinon.spy();
 
-      return deleteHelper.deleteByType('query', [ '666' ], deleteSpy).then(function () {
+      return deleteHelper.deleteByType('query', [{ id: '666' }], deleteSpy).then(function () {
         sinon.assert.called(deleteSpy);
       });
     });
 
     it('should not delete query that is used by a visualisation', function () {
       const deleteSpy = sinon.spy();
-
-      return deleteHelper.deleteByType('query', [ '123' ], deleteSpy).then(function () {
+      return deleteHelper.deleteByType('query', [{ id: '123' }], deleteSpy).then(function () {
         sinon.assert.called(alertStub);
         sinon.assert.notCalled(deleteSpy);
       });
@@ -153,7 +152,7 @@ describe('Kibi Components', function () {
     it('should recompute dashboard groups if a group was deleted', function () {
       const deleteSpy = sinon.spy();
 
-      return deleteHelper.deleteByType('dashboardgroup', [ 'group-1' ], deleteSpy)
+      return deleteHelper.deleteByType('dashboardgroup', [{ id: 'group-1' }], deleteSpy)
       .then(function () {
         sinon.assert.called(deleteSpy);
         sinon.assert.called(computeGroupsStub);
@@ -163,7 +162,7 @@ describe('Kibi Components', function () {
     it('should call the delegated delete method method if the dashboard is not in any group', function () {
       const deleteSpy = sinon.spy();
 
-      return deleteHelper.deleteByType('dashboard', [ 'dashboard 666' ], deleteSpy)
+      return deleteHelper.deleteByType('dashboard', [{ id: 'dashboard 666' }], deleteSpy)
       .then(function () {
         sinon.assert.called(deleteSpy);
         sinon.assert.called(computeGroupsStub); // should recompute the dashboard groups
@@ -173,7 +172,7 @@ describe('Kibi Components', function () {
     it('should not delete dashboard that is in a group', function () {
       const deleteSpy = sinon.spy();
 
-      return deleteHelper.deleteByType('dashboard', [ 'Companies' ], deleteSpy)
+      return deleteHelper.deleteByType('dashboard', [{ id: 'Companies' }], deleteSpy)
       .then(function () {
         sinon.assert.called(alertStub);
         sinon.assert.notCalled(deleteSpy);

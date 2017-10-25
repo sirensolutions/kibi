@@ -8,6 +8,7 @@ import template from 'plugins/kibi_core/management/sections/kibi_datasources/ind
 import kibiUtils from 'kibiutils';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { jdbcDatasourceTranslate } from 'plugins/kibi_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
 
 uiRoutes
 .when('/management/siren/datasources', {
@@ -16,6 +17,9 @@ uiRoutes
   resolve: {
     datasource: function (savedDatasources) {
       return savedDatasources.get();
+    },
+    isNew: function () {
+      return true;
     }
   }
 })
@@ -23,27 +27,47 @@ uiRoutes
   template,
   reloadOnSearch: false,
   resolve: {
-    datasource: function ($route, courier, savedDatasources) {
-      return savedDatasources.get($route.current.params.id)
-      .catch(courier.redirectWhenMissing({
-        datasource: '/management/siren/datasources'
-      }));
+    datasource: function ($route, courier, savedDatasources, jdbcDatasources) {
+      // first try to get it from _vanguard/connector
+      return jdbcDatasources.get($route.current.params.id)
+      .then(datasource => {
+        return jdbcDatasourceTranslate.jdbcDatasourceToSavedDatasource(datasource);
+      })
+      .catch(err => {
+        return savedDatasources.get($route.current.params.id)
+        .catch(courier.redirectWhenMissing({
+          datasource: '/management/siren/datasources'
+        }));
+      });
+    },
+    isNew: function () {
+      return false;
     }
   }
 });
 
-function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, queryEngineClient, $element, kibiWarnings) {
+function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, queryEngineClient, $element, kibiWarnings, jdbcDatasources) {
   const setDatasourceSchema = Private(SetDatasourceSchemaProvider);
   const notify = createNotifier({
     location: 'Datasources Configuration Editor'
   });
   const datasource = $scope.datasource = $route.current.locals.datasource;
+  $scope.isNew = $route.current.locals.isNew;
 
   $scope.isValid = function () {
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };
 
   $scope.saveObject = function () {
+
+    if (datasource.datasourceType === 'sql_jdbc_new') {
+      const d = jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource);
+      return jdbcDatasources.save(d).then(() => {
+        notify.info('Datasource ' + d._id + ' successfully saved');
+        kbnUrl.change('management/siren/datasources/' + d._id);
+      });
+    }
+
     if (kibiWarnings.datasource_encryption_warning) {
       let encrypted = false;
       for (let s = 0; s < datasource.schema.length; s++) {
@@ -59,6 +83,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
       }
     }
 
+    // old jdbc datasources
     if (kibiUtils.isJDBC(datasource.datasourceType)) {
       const msg = 'Changes in a JDBC datasource requires the application to be restarted. ' +
         'Please restart Kibi and do not forget to set kibi_core.load_jdbc to true.';
@@ -104,6 +129,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
 
     datasource.save().then(function (datasourceId) {
       if (datasourceId) {
+        $scope.isNew = false;
         notify.info('Datasource ' + datasource.title + ' successfully saved');
         queryEngineClient.clearCache().then(function () {
           kbnUrl.change('management/siren/datasources/' + datasourceId);
@@ -118,8 +144,23 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
 
   $scope.$watch('datasource.datasourceType', function () {
     // here reinit the datasourceDef
+    if (datasource.datasourceType === 'sql_jdbc_new' && datasource.title === 'New saved datasource') {
+      datasource.title = '';
+    }
+
     setDatasourceSchema(datasource);
   });
+
+  // currently supported only for sql_jdbc_new
+  $scope.testConnection = function () {
+    jdbcDatasources.validate(jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource))
+    .then(res => {
+      $scope.connectionStatus = res;
+    })
+    .catch(err => {
+      $scope.connectionStatus = err;
+    });
+  };
 
   // expose some methods to the navbar buttons
   [ 'isValid', 'newObject', 'saveObject' ]

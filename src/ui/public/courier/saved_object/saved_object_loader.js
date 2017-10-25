@@ -2,8 +2,15 @@ import _ from 'lodash';
 import { Scanner } from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 
+// kibi: imports
+import { jdbcDatasourceTranslate } from 'plugins/kibi_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
+// kibi: end
+
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit, exclude } = {}) {
+  constructor(
+    SavedObjectClass, kbnIndex, esAdmin, kbnUrl,
+    { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit, exclude, jdbcDatasources } = {}
+  ) {
     // kibi: kibi properties
     this.savedObjectsAPI = savedObjectsAPI;
     this.mapHit = mapHit;
@@ -12,6 +19,7 @@ export class SavedObjectLoader {
     this.cacheFind = find;
     this.exclude = exclude;
     this.reservedCharactersRegex = new RegExp('[+\\-=&|><!(){}[\\\]^"~*?:]', 'g');
+    this.jdbcDatasources = jdbcDatasources;
     // kibi: end
 
     this.type = SavedObjectClass.type;
@@ -116,7 +124,7 @@ export class SavedObjectLoader {
 
     // kibi: cache results
     const cacheKey = `${this.lowercaseType}-${searchString || ''}`;
-    if (this.cacheFind && this.cache && this.cache.get(cacheKey)) {
+    if (this.cacheFind && this.type !== 'datasource' && this.cache && this.cache.get(cacheKey)) {
       return Promise.resolve(this.cache.get(cacheKey));
     }
 
@@ -146,6 +154,16 @@ export class SavedObjectLoader {
         total: resp.hits.total,
         hits: resp.hits.hits.map((hit) => this.mapHits(hit))
       };
+
+      if (this.type === 'datasource') {
+        return this.jdbcDatasources.list().then(datasources => {
+          _.each(datasources, datasource => {
+            result.hits.push(jdbcDatasourceTranslate.jdbcDatasourceToSavedDatasource(datasource));
+          });
+          return result;
+        });
+      }
+
       if (this.cache && this.cacheFind) {
         this.cache.set(cacheKey, result);
       }

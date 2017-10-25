@@ -1,5 +1,6 @@
 import chrome from 'ui/chrome';
-import { uiModules } from 'ui/modules';
+import uiModules from 'ui/modules';
+
 uiModules
 .get('kibi_datasources/services/jdbc_datasources')
 .service('jdbcDatasources', function ($http, Promise) {

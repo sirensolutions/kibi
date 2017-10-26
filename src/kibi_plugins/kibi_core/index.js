@@ -136,6 +136,7 @@ module.exports = function (kibana) {
       managementSections: [
         'plugins/kibi_core/management/sections/kibi_virtual_indices',
         'plugins/kibi_core/management/sections/kibi_datasources',
+        'plugins/kibi_core/management/sections/kibi_entities',
         'plugins/kibi_core/management/sections/kibi_queries',
         'plugins/kibi_core/management/sections/kibi_relations',
         'plugins/kibi_core/management/sections/kibi_templates'

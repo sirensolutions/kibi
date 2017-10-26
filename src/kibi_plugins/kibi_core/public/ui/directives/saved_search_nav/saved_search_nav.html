@@ -1,0 +1,53 @@
+<div class="kibi-saved-search-nav treeview"
+     ui-tree="treeOptions"
+     ng-if="showIf"
+>
+  <ol ui-tree-nodes="" ng-model="treeModel">
+    <li ng-repeat="item in treeModel" ui-tree-node>
+      <div ui-tree-handle>
+        <a class="btn btn-default btn-xs" data-nodrag ng-click="toggleItem(item)">
+          <span ng-class="{ 'fa fa-caret-right': item.collapsed, 'fa fa-caret-down': !item.collapsed }">
+          </span>
+        </a>
+        <span ng-if="$index === 0">
+          {{item.id}} ({{ item.sub.length }})
+        </span>
+        <em ng-if="$index === 1">
+          {{item.id}} ({{ item.sub.length }})
+        </em>
+        <span
+          aria-hidden="true"
+          class="kuiIcon item-type fa {{item.icon}}"
+        ></span>
+      </div>
+      <ol ui-tree-nodes=""
+          ng-show="item.sub && !item.collapsed"
+          ng-model="item.sub">
+        <li ng-repeat="subItem in item.sub"
+            ui-tree-node>
+          <div ui-tree-handle
+               ng-class="{ active: subItem.id === selected.id }"
+          >
+            <span
+              aria-hidden="true"
+              ng-if="defaultIndex === subItem.id"
+              class="kuiIcon fa-star"
+            ></span>
+            <span ng-if="subItem.type === 'INDEX_PATTERN'">
+              {{ subItem.label.substring(0, subItem.label.indexOf('@')) }}
+            </span>
+            <em ng-if="!subItem.type || subItem.type === 'VIRTUAL_ENTITY'">
+              {{ subItem.label.substring(0, subItem.label.indexOf('@')) }}
+            </em>
+            <span
+              aria-hidden="true"
+              class="kuiIcon item-type {{subItem.icon}}"
+            >
+            </span>
+
+          </div>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</div>

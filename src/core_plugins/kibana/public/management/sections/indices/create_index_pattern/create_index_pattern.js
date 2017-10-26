@@ -18,7 +18,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
+.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate, ontologyClient) {
   const notify = new Notifier();
   // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
   const intervals = indexPatterns.intervals;
@@ -262,12 +262,18 @@ uiModules.get('apps/management')
       });
   };
 
-  this.createIndexPattern = () => {
+  this.createIndexPattern = (overrideUrl) => {
+    console.log('overrideUrl');
+    console.log(overrideUrl);
     const {
       name,
       timeFieldOption,
       nameIsPattern,
       nameInterval,
+      shortDescription,
+      longDescription,
+      icon,
+      color
     } = this.formValues;
 
     const id = name;
@@ -301,11 +307,17 @@ uiModules.get('apps/management')
       // as user might not have permissions to do it
 
       indexPatterns.cache.clear(id);
-      kbnUrl.change(`/management/siren/indices/${id}`);
 
-      // force loading while kbnUrl.change takes effect
-      loadingCount = Infinity;
-
+      return ontologyClient.insertEntity(id, id, 'INDEX_PATTERN', icon, color, shortDescription, longDescription)
+      .then(() => {
+        if (overrideUrl) {
+          kbnUrl.change(overrideUrl + id);
+        } else {
+          kbnUrl.change(`/management/siren/indices/${id}`);
+        }
+        // force loading while kbnUrl.change takes effect
+        loadingCount = Infinity;
+      });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
         return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));

@@ -244,8 +244,27 @@ uiModules
 
   /*
    * Inserts an entity into the relational model.
+   * The passed fields must not be already encoded. If this is the case use <insertEncodedEntity> instead.
+   * Supported types: INDEX_PATTERN or VIRTUAL_ENTITY
    */
-  OntologyClient.prototype.insertEntity = function (entity) {
+  OntologyClient.prototype.insertEntity = function (id, label, type, icon, color, shortDescription, longDescription) {
+    const entity = {
+      id: this._encodeUrl(id),
+      label: label,
+      type: type,
+      icon: icon,
+      color: color,
+      shortDescription: shortDescription,
+      longDescription: this._encodeUrl(longDescription)
+    };
+    return this.insertEncodedEntity(entity);
+  };
+
+  /*
+   * Inserts an entity into the relational model. This entity object should have the relevant fields already encoded.
+   * Look at the <insertEntity> function to see the fields that need encoding.
+   */
+  OntologyClient.prototype.insertEncodedEntity = function (entity) {
     if (!entity.id) {
       return Promise.reject('Missing entity id');
     } else {

@@ -62,16 +62,8 @@ uiModules
             $scope.selected = sourceNodeScope.subItem;
             console.log('changed selected');
             console.log(sourceNodeScope.subItem);
-          } else if (sourceNodeScope.item) {
-            // To selected the start index pattern
-            $scope.selected = sourceNodeScope.item;
-            console.log('changed selected');
-            console.log(sourceNodeScope.item);
           }
 
-          $timeout(() => {
-            $scope.$apply();
-          });
           // for now we disable drag and drop for every item
           return false;
         }, 50,  { trailing: false }),

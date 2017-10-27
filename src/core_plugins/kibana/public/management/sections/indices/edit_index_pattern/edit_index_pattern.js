@@ -9,51 +9,51 @@ import UrlProvider from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import editTemplate from './edit_index_pattern.html';
+// import editTemplate from './edit_index_pattern.html';
 
 // kibi: import authorization error
 import { IndexPatternAuthorizationError } from 'ui/errors';
 // kibi: end
 
-uiRoutes
-// kibi: change route from '/management/kibana/indices/:indexPatternId'
-// to '/management/siren/indices/:indexPatternId'
-.when('/management/siren/indices/:indexPatternId', {
-  template: editTemplate,
-  resolve: {
-    indexPattern: function ($route, courier, Promise, createNotifier, kbnUrl) { // kibi: added Promise, createNotifier, kbnUrl
-      return courier.indexPatterns
-      .get($route.current.params.indexPatternId)
-      // kibi: handle authorization errors
-      .catch((error) => {
-        if (error instanceof IndexPatternAuthorizationError) {
-          createNotifier().warning(`Access to index pattern ${$route.current.params.indexPatternId} is forbidden`);
-          kbnUrl.redirect('/management/siren/indices');
-          return Promise.halt();
-        } else {
-          return courier.redirectWhenMissing('/management/siren/indices')(error);
-        }
-      });
-      // kibi: end
-    }
-  }
-});
+// uiRoutes
+// // kibi: change route from '/management/kibana/indices/:indexPatternId'
+// // to '/management/siren/indices/:indexPatternId'
+// .when('/management/siren/entities/:indexPatternId', {
+//   template: editTemplate,
+//   resolve: {
+//     indexPattern: function ($route, courier, Promise, createNotifier, kbnUrl) { // kibi: added Promise, createNotifier, kbnUrl
+//       return courier.indexPatterns
+//       .get($route.current.params.indexPatternId)
+//       // kibi: handle authorization errors
+//       .catch((error) => {
+//         if (error instanceof IndexPatternAuthorizationError) {
+//           createNotifier().warning(`Access to index pattern ${$route.current.params.indexPatternId} is forbidden`);
+//           kbnUrl.redirect('/management/siren/entities');
+//           return Promise.halt();
+//         } else {
+//           return courier.redirectWhenMissing('/management/siren/entities')(error);
+//         }
+//       });
+//       // kibi: end
+//     }
+//   }
+// });
 
-uiRoutes
-.when('/management/siren/indices', {
-  resolve: {
-    redirect: function ($location, config, kibiDefaultIndexPattern) {
-      // kibi: use our service to get default indexPattern
-      return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
-        const path = `/management/siren/indices/${defaultIndex.id}`;
-        $location.path(path).replace();
-      }).catch(err => {
-        const path = '/management/siren/index';
-        $location.path(path).replace();
-      });
-    }
-  }
-});
+// uiRoutes
+// .when('/management/siren/entities', {
+//   resolve: {
+//     redirect: function ($location, config, kibiDefaultIndexPattern) {
+//       // kibi: use our service to get default indexPattern
+//       return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
+//         const path = `/management/siren/entities/${defaultIndex.id}`;
+//         $location.path(path).replace();
+//       }).catch(err => {
+//         const path = '/management/siren/entities';
+//         $location.path(path).replace();
+//       });
+//     }
+//   }
+// });
 
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
@@ -64,7 +64,7 @@ uiModules.get('apps/management')
   // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
 
   $scope.kbnUrl = Private(UrlProvider);
-  $scope.indexPattern = $route.current.locals.selectedItem;
+  $scope.indexPattern = $route.current.locals.selectedEntity;
   docTitle.change($scope.indexPattern.id);
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
@@ -134,7 +134,7 @@ uiModules.get('apps/management')
       courier.indexPatterns.delete($scope.indexPattern)
         // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
         .then(function () {
-          $location.url('/management/siren/index');
+          $location.url('/management/siren/entities');
         })
         .catch(notify.error);
     }

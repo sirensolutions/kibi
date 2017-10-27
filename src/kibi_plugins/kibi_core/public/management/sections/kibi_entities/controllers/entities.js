@@ -22,23 +22,22 @@ uiRoutes
 .when('/management/siren/entities/:entityId', {
   template: template,
   resolve: {
-    selectedItem: function ($route, courier, Promise, createNotifier, kbnUrl, ontologyClient) {
+    selectedEntity: function ($route, courier, Promise, createNotifier, kbnUrl, ontologyClient) {
       const objectId = $route.current.params.entityId;
       console.log('look for: ' + objectId);
       return courier.indexPatterns
       .getIds()
       .then((indexPattenrIds) => {
-        console.log('indexPattenrIds');
-        console.log(indexPattenrIds);
         if (_.contains(indexPattenrIds, objectId)) {
-          return courier.indexPatterns.get(objectId);
+          return courier.indexPatterns.get(objectId)
+          .then((indexPattern) => {
+            indexPattern.type = 'INDEX_PATTERN';
+            return indexPattern;
+          });
         } else {
           // check the virtual entities
-          console.log('checking virtual entities');
           return ontologyClient.getEntityById(objectId)
           .then((virtualEntity) => {
-            console.log('found VirtualEntity');
-            console.log(virtualEntity);
             return virtualEntity;
           });
         }
@@ -51,6 +50,22 @@ uiRoutes
         } else {
           return courier.redirectWhenMissing('/management/siren/entities')(error);
         }
+      });
+    }
+  }
+});
+
+uiRoutes
+.when('/management/siren/entities', {
+  resolve: {
+    redirect: function ($location, config, kibiDefaultIndexPattern) {
+      // kibi: use our service to get default indexPattern
+      return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
+        const path = `/management/siren/entities/${defaultIndex.id}`;
+        $location.path(path).replace();
+      }).catch(err => {
+        const path = '/management/siren/entities';
+        $location.path(path).replace();
       });
     }
   }
@@ -73,78 +88,22 @@ function controller($scope, $route, kbnUrl, createNotifier, indexPatterns, ontol
 
   // Needed until we migrate the panels to use the new generic "entity"
   $scope.$watch('selectedMenuItem', (item) => {
-    const isNewEntity = !!$scope.entity;
     let entityPromise = Promise.resolve();
-    console.log('$scope.entity');
-    console.log($scope.entity);
-    console.log('item');
+    console.log('selectedMenuItem Entities');
     console.log(item);
-    if (!$scope.entity || !(item.id === $scope.entity.id && item.type === $scope.entity.type)) {
-      if (item && item.type === 'INDEX_PATTERN') {
-        console.log('watched selectedMenuItem - index-pattern');
-        console.log(item);
 
-        entityPromise =  indexPatterns.get(item.id).then((indexPattern) => {
-          indexPattern.type = 'INDEX_PATTERN';
-          return indexPattern;
-        });
-      } else if (item && item.type === 'VIRTUAL_ENTITY') {
-        console.log('watched selectedMenuItem - virtual-entity');
-        console.log(item);
-
-        entityPromise = ontologyClient.getEntityById(item.id)
-        .then((entity) => {
-          return entity;
-        });
-      } else if (item === undefined) {
-        // just check for undefined, as we set it to null when we create an indexpattern/eid
-        // triggered on watch initialization
-        const routeItem = $route.current.locals.selectedItem;
-        if (routeItem) {
-          const selectedItem = { id: routeItem.id };
-          // check if it is an indexPattern
-          if (routeItem.constructor.name === 'IndexPattern') {
-            selectedItem.type = 'INDEX_PATTERN';
-          } else {
-            selectedItem.type = 'VIRTUAL_ENTITY';
-          }
-          entityPromise = Promise.resolve(selectedItem);
-        } else {
-          // select the first indexpattern
-          entityPromise = indexPatterns.getIds()
-          .then((ids) => {
-            if (ids.length) {
-              const sortedIds = _.sortBy(ids, (id) => { return id; });
-              return indexPatterns.get(sortedIds[0])
-              .then((indexPattern) => {
-                console.log('autoselecting first indexpattern: ' + indexPattern.id);
-                indexPattern.type = 'INDEX_PATTERN';
-                console.log('autoselect item');
-                return indexPattern;
-              });
-            }
-          });
-        }
+    if (item && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== item.id)) {
+      kbnUrl.change(`/management/siren/entities/${item.id}`);
+    } else {
+      const entity = $route.current.locals.selectedEntity;
+      if (entity && (!$scope.entity || $scope.entity.id !== entity.id || $scope.entity.type !== entity.type)) {
+        $scope.entity = entity;
+        $scope.selectedMenuItem = { id: entity.id, type: entity.type };
       }
-
-      // Keep it here as it will be needed for the relational graph
-      Promise.resolve(entityPromise)
-      .then((entity) => {
-        console.log('isNewEntity');
-        console.log(isNewEntity);
-        if (isNewEntity) {
-          kbnUrl.change(`/management/siren/entities/${entity.id}`);
-        } else {
-          console.log('final entity');
-          console.log(entity);
-          $scope.entity = entity;
-          $scope.selectedMenuItem = { id: entity.id, type: entity.type };
-        }
-      })
     }
   });
 }
 
 uiModules
 .get('apps/management', ['kibana', 'ui.tree'])
-.controller('Entities', controller);
+.controller('entities', controller);

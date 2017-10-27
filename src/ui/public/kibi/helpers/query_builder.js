@@ -29,10 +29,9 @@ const translateToQuery = function (filter) {
   }
 
   if (filter.range) {
-    const rangeQuery = {
+    return {
       range: filter.range
     };
-    return rangeQuery;
   }
 
   return filter;

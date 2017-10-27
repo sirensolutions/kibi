@@ -28,6 +28,13 @@ const translateToQuery = function (filter) {
     return filter.query;
   }
 
+  if (filter.range) {
+    const rangeQuery = {
+      range: filter.range
+    };
+    return rangeQuery;
+  }
+
   return filter;
 };
 

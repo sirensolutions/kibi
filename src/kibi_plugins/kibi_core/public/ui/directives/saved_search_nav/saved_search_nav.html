@@ -34,10 +34,10 @@
               class="kuiIcon fa-star"
             ></span>
             <span ng-if="subItem.type === 'INDEX_PATTERN'">
-              {{ subItem.label.substring(0, subItem.label.indexOf('@')) }}
+              {{ subItem.label }}
             </span>
             <em ng-if="!subItem.type || subItem.type === 'VIRTUAL_ENTITY'">
-              {{ subItem.label.substring(0, subItem.label.indexOf('@')) }}
+              {{ subItem.label }}
             </em>
             <span
               aria-hidden="true"

@@ -47,7 +47,7 @@
           <!-- Header -->
           <kbn-management-index-header
             ng-if="state.tab === 'indexedFields' ||  state.tab === 'scriptedFields' || state.tab === 'sourceFilters'"
-            entity="selectedMenuItem"
+            entity="indexPattern"
             set-default="setDefaultPattern()"
             refresh-fields="refreshFields()"
             delete="removePattern('/management/siren/entities')"
@@ -56,7 +56,7 @@
 
           <kbn-management-index-header
             ng-if="state.tab === 'entitiesRelations'"
-            entity="selectedMenuItem"
+            entity="indexPattern"
             save="saveRelations()"
             delete="removePattern('/management/siren/entities')"
             toggle-graph="toggleRelationalGraph()"
@@ -64,7 +64,7 @@
 
           <kbn-management-index-header
             ng-if="state.tab === 'indexOptions'"
-            entity="selectedMenuItem"
+            entity="indexPattern"
             save="saveEntityOptions()"
             delete="removePattern('/management/siren/entities')"
             toggle-graph="toggleRelationalGraph()"
@@ -205,27 +205,26 @@
           <!-- Tab content -->
           <index-options
             ng-show="state.tab === 'indexOptions'"
-            index-pattern="indexPattern"
-            virtual-entity="virtualEntity"
+            entity="indexPattern"
             save="saveEntityOptions"
             class="fields index-options"
           ></index-options>
 
-          <indexed-fields
-            ng-if="selectedMenuItem.type === 'index-pattern' && state.tab === 'indexedFields'"
+          <indexed-fields-table
+            ng-if="entity.type === 'INDEX_PATTERN' && state.tab === 'indexedFields'"
             class="fields indexed-fields"
-          ></indexed-fields>
+          ></indexed-fields-table>
 
-          <scripted-fields
-            ng-if="selectedMenuItem.type === 'index-pattern' && state.tab === 'scriptedFields'"
+          <scripted-fields-table
+            ng-if="selectedMenuItem.type === 'INDEX_PATTERN' && state.tab === 'scriptedFields'"
             class="fields scripted-fields"
-          ></scripted-fields>
+          ></scripted-fields-table>
 
-          <source-filters
-            ng-if="selectedMenuItem.type === 'index-pattern' && state.tab === 'sourceFilters'"
+          <source-filters-table
+            ng-if="selectedMenuItem.type === 'INDEX_PATTERN' && state.tab === 'sourceFilters'"
             index-pattern="indexPattern"
             class="fields source-filters"
-          ></source-filters>
+          ></source-filters-table>
 
           <!-- <entities-relations
             ng-show="state.tab === 'entitiesRelations'"

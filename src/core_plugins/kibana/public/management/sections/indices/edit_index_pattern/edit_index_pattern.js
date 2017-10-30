@@ -69,20 +69,24 @@ uiModules.get('apps/management')
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
   $scope.$watch('indexPattern.fields', function () {
-    $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
-    $scope.refreshFilters();
+    // if ($scope.indexPattern.fields) {
+      $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
+      $scope.refreshFilters();
+    // }
   });
 
   $scope.refreshFilters = function () {
     const indexedFieldTypes = [];
     const scriptedFieldLanguages = [];
-    $scope.indexPattern.fields.forEach(field => {
-      if (field.scripted) {
-        scriptedFieldLanguages.push(field.lang);
-      } else {
-        indexedFieldTypes.push(field.type);
-      }
-    });
+    if ($scope.indexPattern.fields) {
+      $scope.indexPattern.fields.forEach(field => {
+        if (field.scripted) {
+          scriptedFieldLanguages.push(field.lang);
+        } else {
+          indexedFieldTypes.push(field.type);
+        }
+      });
+    }
 
     $scope.indexedFieldTypes = _.unique(indexedFieldTypes);
     $scope.scriptedFieldLanguages = _.unique(scriptedFieldLanguages);
@@ -98,12 +102,14 @@ uiModules.get('apps/management')
   };
 
   $scope.$watch('state.tab', function (tab) {
-    if (!tab) $scope.changeTab($scope.editSections[0]);
+    if (!tab && $scope.editSections) $scope.changeTab($scope.editSections[0]);
   });
 
   $scope.$watchCollection('indexPattern.fields', function () {
-    $scope.conflictFields = $scope.indexPattern.fields
-      .filter(field => field.type === 'conflict');
+    if ($scope.indexPattern.fields) {
+      $scope.conflictFields = $scope.indexPattern.fields
+        .filter(field => field.type === 'conflict');
+    }
   });
 
   $scope.refreshFields = function () {

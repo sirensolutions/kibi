@@ -8,7 +8,7 @@ uiModules
     template,
     replace: true,
     scope: {
-      indexPattern: '=',
+      entity: '=',
       setDefault: '&',
       refreshFields: '&',
       delete: '&',

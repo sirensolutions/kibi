@@ -173,6 +173,7 @@ uiModules
           const entities = _.reduce(res.data, (total, entity) => {
             entity.id = this._removeNsDecode(entity.id);
             entity.longDescr = this._removeNsDecode(entity.longDescr);
+            entity.label = entity.label.substring(0, entity.label.lastIndexOf('@'))
 
             total.push(entity);
             return total;

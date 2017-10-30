@@ -7,6 +7,7 @@ import template from 'plugins/kibi_core/management/sections/kibi_entities/index.
 import 'plugins/kibi_core/ui/directives/saved_search_nav/saved_search_nav';
 import 'plugins/kibana/management/sections/indices/edit_index_pattern/edit_index_pattern';
 import 'plugins/kibi_core/management/sections/kibi_entities/styles/entities.less';
+import 'plugins/kibi_core/management/sections/indices/index_options/index_options';
 import './create_index_pattern';
 import './create_eid';
 import 'angular-ui-tree';

@@ -19,6 +19,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
+                esType: 'date',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -26,6 +27,7 @@ export default function ({ getService }) {
               {
                 name: 'number_conflict',
                 type: 'number',
+                esType: 'integer',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -33,6 +35,7 @@ export default function ({ getService }) {
               {
                 name: 'string_conflict',
                 type: 'string',
+                esType: 'text',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
@@ -40,6 +43,7 @@ export default function ({ getService }) {
               {
                 name: 'success',
                 type: 'conflict',
+                esType: 'conflict',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,

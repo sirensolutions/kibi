@@ -65,6 +65,21 @@
         <span ng-if="indexPattern.metaFields.includes(field)" tooltip="Unable to filter for presence of meta fields">
           <i class="fa fa-asterisk text-muted"></i>
         </span>
+
+        <span ng-if="isForMoreLikeThis(field)">
+          <button
+            class="doc-viewer-button"
+            ng-click="filter('_more_like_this_', flattened[field], '+', { fieldName: field })"
+          >
+            <i
+              tooltip="Filter for more like this"
+              tooltip-append-to-body="1"
+            >~</i>
+          </button>
+        </span>
+        <span ng-if="!isForMoreLikeThis(field)" tooltip="Unable to filter more like this">
+          <i class="text-muted">~</i>
+        </span>
       </td>
 
       <td>

@@ -24,7 +24,7 @@ DocViewsRegistryProvider.register(function () {
         $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
         $scope.fields = _.keys($scope.flattened).sort();
 
-        // kibi: constructing aliases map
+        // kibi: constructing aliases map and handle more like this filters
         $scope.aliases = {};
         _.each($scope.fields, (fieldName) =>{
           $scope.aliases[fieldName] = fieldName;
@@ -35,6 +35,12 @@ DocViewsRegistryProvider.register(function () {
             }
           }
         });
+
+        $scope.isForMoreLikeThis = function (fieldName) {
+          // TODO: How to detects and exclude floats?
+          const dataType = $scope.mapping[fieldName].type;
+          return dataType === 'string' || dataType === 'number';
+        };
         // kibi: end
 
         $scope.canToggleColumns = function canToggleColumn() {

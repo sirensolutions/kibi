@@ -132,6 +132,7 @@ module.exports = function (kibana) {
         'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button'
       ],
       managementSections: [
+        'plugins/kibi_core/management/sections/kibi_virtual_indices',
         'plugins/kibi_core/management/sections/kibi_datasources',
         'plugins/kibi_core/management/sections/kibi_queries',
         'plugins/kibi_core/management/sections/kibi_relations',

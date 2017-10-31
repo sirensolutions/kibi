@@ -37,9 +37,12 @@ DocViewsRegistryProvider.register(function () {
         });
 
         $scope.isForMoreLikeThis = function (fieldName) {
-          // TODO: How to detects and exclude floats?
-          const dataType = $scope.mapping[fieldName].type;
-          return dataType === 'string' || dataType === 'number';
+          if ($scope.mapping[fieldName]) {
+            const dataType = $scope.mapping[fieldName].type;
+            // TODO: How to detects and exclude floats?
+            return dataType === 'string' || dataType === 'number';
+          }
+          return false;
         };
         // kibi: end
 

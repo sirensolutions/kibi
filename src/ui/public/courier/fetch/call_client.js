@@ -3,6 +3,7 @@ import _ from 'lodash';
 import IsRequestProvider from './is_request';
 import MergeDuplicatesRequestProvider from './merge_duplicate_requests';
 import ReqStatusProvider from './req_status';
+import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
 
 export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
 
@@ -88,6 +89,18 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
     .then(function (reqsFetchParams) {
       // kibi: call to requestAdapter function of the related visualization
       reqsFetchParams.forEach(function (req) {
+        // If the request is a default wildcard query
+        // convert it to a match_all (and if there is another match_all, dedupe)
+        if (req.body && req.body.query && req.body.query.bool && req.body.query.bool.must) {
+          req.body.query.bool.must = uniqFilters(req.body.query.bool.must.map(query => {
+            if (_.isEqual(query, { query_string: { query: "*", analyze_wildcard: true } })) {
+              query = { match_all: {} };
+            }
+
+            return query;
+          }));
+        }
+
         if (req.getSource) {
           const source = req.getSource();
           if (source && source.vis && source.vis.requestAdapter) {

@@ -50,9 +50,14 @@ export function FilterManagerProvider(Private) {
 
       switch (fieldName) {
         case '_more_like_this_':
+          let truncatedFirstValue = values[0];
+          if (truncatedFirstValue.length > 10) {
+            truncatedFirstValue = truncatedFirstValue.substring(0, 10) + ' ...';
+          }
+
           filter = {
             meta: {
-              alias: 'More like this ...',
+              alias: 'More like this: ' + truncatedFirstValue,
               negate,
               index
             },

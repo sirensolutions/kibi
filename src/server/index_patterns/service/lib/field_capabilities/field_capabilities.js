@@ -28,6 +28,7 @@ export async function getFieldCapabilities(callCluster, indices = [], metaFields
     .reduce(concatIfUniq, [])
     .map(name => defaults({}, fieldsFromFieldCapsByName[name], {
       name,
+      esType: 'text',
       type: 'string',
       searchable: false,
       aggregatable: false,

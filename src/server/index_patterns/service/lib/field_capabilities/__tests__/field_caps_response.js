@@ -65,6 +65,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
           {
             name: 'success',
             type: 'conflict',
+            esType: 'conflict',
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,

@@ -12,9 +12,11 @@ uiModules
       setDefault: '&',
       refreshFields: '&',
       delete: '&',
+      save: '&'
     },
     link: function ($scope, $el, attrs) {
       $scope.delete = attrs.delete ? $scope.delete : null;
+      $scope.save = attrs.save ? $scope.save : null;
       $scope.setDefault = attrs.setDefault ? $scope.setDefault : null;
       $scope.refreshFields = attrs.refreshFields ? $scope.refreshFields : null;
       config.bindToScope($scope, 'defaultIndex');

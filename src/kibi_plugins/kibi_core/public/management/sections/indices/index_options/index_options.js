@@ -14,15 +14,32 @@ uiModules.get('apps/management')
     },
     link: function ($scope) {
       $scope.save = function () {
-        console.log('UPDATING NEW OPTIONS');
-        // if ($scope.entity.type === 'INDEX_PATTERN') {
-        //   return $scope.entity.save()
-        //   .then(() => {
-        //     return ontologyClient.updateEntity($scope.entity);
-        //   });
-        // } else if ($scope.indexPattern) {
-        //   return ontologyClient.updateEntity($scope.entity);
-        // }
+        if ($scope.entity.type === 'VIRTUAL_ENTITY') {
+          return ontologyClient.updateEntity($scope.entity);
+        } else {
+          const entity = {
+            id: $scope.entity.id
+          };
+          if ($scope.entity.label) {
+            entity.label = $scope.entity.label;
+          }
+          if ($scope.entity.type) {
+            entity.type = $scope.entity.type;
+          }
+          if ($scope.entity.icon) {
+            entity.icon = $scope.entity.icon;
+          }
+          if ($scope.entity.color) {
+            entity.color = $scope.entity.color;
+          }
+          if ($scope.entity.shortDescription) {
+            entity.shortDescription = $scope.entity.shortDescription;
+          }
+          if ($scope.entity.longDescription) {
+            entity.longDescription = $scope.entity.longDescription;
+          }
+          return ontologyClient.updateEntity(entity);
+        }
       }
     }
   };

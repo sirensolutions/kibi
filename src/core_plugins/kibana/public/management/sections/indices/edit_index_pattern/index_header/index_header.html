@@ -17,6 +17,20 @@
 
   <div class="kuiBarSection">
     <button
+      ng-if="save"
+      ng-click="save()"
+      aria-label="Save"
+      tooltip="Save"
+      class="kuiButton kuiButton--basic"
+      data-test-subj="saveButton"
+    >
+      <span class="sr-only">Save</span>
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-floppy-o"
+      ></span>
+    </button>
+    <button
       ng-if="setDefault"
       ng-click="setDefault()"
       tooltip="Set as default index"

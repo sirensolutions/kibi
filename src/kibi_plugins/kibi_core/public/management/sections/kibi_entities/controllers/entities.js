@@ -29,19 +29,17 @@ uiRoutes
       return courier.indexPatterns
       .getIds()
       .then((indexPattenrIds) => {
-        if (_.contains(indexPattenrIds, objectId)) {
-          return courier.indexPatterns.get(objectId)
-          .then((indexPattern) => {
-            indexPattern.type = 'INDEX_PATTERN';
-            return indexPattern;
-          });
-        } else {
-          // check the virtual entities
-          return ontologyClient.getEntityById(objectId)
-          .then((virtualEntity) => {
+        return ontologyClient.getEntityById(objectId)
+        .then((virtualEntity) => {
+          if (_.contains(indexPattenrIds, objectId)) {
+            return courier.indexPatterns.get(objectId)
+            .then((indexPattern) => {
+              return _.assign(indexPattern, virtualEntity);
+            });
+          } else {
             return virtualEntity;
-          });
-        }
+          }
+        });
       })
       .catch((error) => {
         if (error instanceof IndexPatternAuthorizationError) {

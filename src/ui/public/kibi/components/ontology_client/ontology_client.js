@@ -172,8 +172,12 @@ uiModules
         } else if (res.data) {
           const entities = _.reduce(res.data, (total, entity) => {
             entity.id = this._removeNsDecode(entity.id);
-            entity.longDescr = this._removeNsDecode(entity.longDescr);
-            entity.label = entity.label.substring(0, entity.label.lastIndexOf('@'))
+            if (entity.longDescription) {
+              entity.longDescription = this._removeNsDecode(entity.longDescription);
+            }
+            if (entity.label) {
+              entity.label = entity.label.substring(0, entity.label.lastIndexOf('@'));
+            }
 
             total.push(entity);
             return total;
@@ -298,6 +302,10 @@ uiModules
    */
   OntologyClient.prototype.updateEntity = function (entity) {
     const encodedId = this._encodeUrl(entity.id);
+    entity.id = encodedId;
+    if (entity.longDescription) {
+      entity.longDescription = this._encodeUrl(entity.longDescription);
+    }
     return this._executeSchemaAndClearCache({
       path: '/schema/entity/' + encodedId,
       method: 'PUT',

@@ -83,6 +83,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
       return {
         name: fieldName,
         type: 'conflict',
+        esType: 'conflict',
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: false,

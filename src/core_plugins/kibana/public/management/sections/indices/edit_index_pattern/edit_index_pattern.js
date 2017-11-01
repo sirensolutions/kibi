@@ -15,46 +15,6 @@ import { uiModules } from 'ui/modules';
 import { IndexPatternAuthorizationError } from 'ui/errors';
 // kibi: end
 
-// uiRoutes
-// // kibi: change route from '/management/kibana/indices/:indexPatternId'
-// // to '/management/siren/indices/:indexPatternId'
-// .when('/management/siren/entities/:indexPatternId', {
-//   template: editTemplate,
-//   resolve: {
-//     indexPattern: function ($route, courier, Promise, createNotifier, kbnUrl) { // kibi: added Promise, createNotifier, kbnUrl
-//       return courier.indexPatterns
-//       .get($route.current.params.indexPatternId)
-//       // kibi: handle authorization errors
-//       .catch((error) => {
-//         if (error instanceof IndexPatternAuthorizationError) {
-//           createNotifier().warning(`Access to index pattern ${$route.current.params.indexPatternId} is forbidden`);
-//           kbnUrl.redirect('/management/siren/entities');
-//           return Promise.halt();
-//         } else {
-//           return courier.redirectWhenMissing('/management/siren/entities')(error);
-//         }
-//       });
-//       // kibi: end
-//     }
-//   }
-// });
-
-// uiRoutes
-// .when('/management/siren/entities', {
-//   resolve: {
-//     redirect: function ($location, config, kibiDefaultIndexPattern) {
-//       // kibi: use our service to get default indexPattern
-//       return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
-//         const path = `/management/siren/entities/${defaultIndex.id}`;
-//         $location.path(path).replace();
-//       }).catch(err => {
-//         const path = '/management/siren/entities';
-//         $location.path(path).replace();
-//       });
-//     }
-//   }
-// });
-
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
     $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal) {
@@ -123,6 +83,10 @@ uiModules.get('apps/management')
     );
   };
 
+  $scope.removeEntity = function () {
+
+  };
+
   $scope.removePattern = function () {
     function doRemove() {
       // kibi: here is fine to use config.get('defaultIndex')
@@ -145,8 +109,13 @@ uiModules.get('apps/management')
         .catch(notify.error);
     }
 
+    let removeLabel = 'entity identifier';
+    if ($scope.indexPattern.type === 'INDEX_PATTERN') {
+      removeLabel = 'index pattern';
+    }
+
     const confirmModalOptions = {
-      confirmButtonText: 'Remove index pattern',
+      confirmButtonText: 'Remove ' + removeLabel,
       onConfirm: doRemove
     };
     confirmModal('Are you sure you want to remove this index pattern?', confirmModalOptions);

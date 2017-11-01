@@ -112,8 +112,8 @@ uiModules
         if (!moreLikeThisTemplate) {
           // set the default options
           $scope.vis.params.moreLikeThisTemplate = JSON.stringify({
-            max_query_terms : 12,
-            min_term_freq : 1,
+            max_query_terms : 25,
+            min_term_freq : 2,
             max_doc_freq: 0,
             min_word_length: 0,
             max_word_length: 0,

@@ -65,7 +65,7 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
     // here grab the index
     const index = $scope.searchSource.get('index').id;
     // add a template for more like this
-    if (options && field === '_more_like_this_') {
+    if (options && field === '_more_like_this_' && $scope.vis.params.moreLikeThisTemplate) {
       options.moreLikeThisTemplate = JSON.parse($scope.vis.params.moreLikeThisTemplate);
     }
     filterManager.add(field, value, operator, index, options);

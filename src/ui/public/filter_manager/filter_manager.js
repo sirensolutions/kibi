@@ -64,7 +64,10 @@ export function FilterManagerProvider(Private) {
             query: {
               more_like_this: {
                 fields: [ options.fieldName ],
-                like: values
+                like: values,
+                // if no moreLikeThisTemplate present
+                // the query without min_term_freq option would return 0
+                min_term_freq: 1
               }
             }
           };

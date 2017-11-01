@@ -10,7 +10,7 @@ module.exports = function (kibana) {
     id: 'siren_federate',
 
     init: function (server, options) {
-      this.status.yellow('Checking for siren federate.');
+      this.status.yellow('Checking for Siren Federate.');
 
       const checkSirenFederate = () => {
 
@@ -19,7 +19,7 @@ module.exports = function (kibana) {
           if (contains(plugins, 'siren-vanguard')) {
             this.status.green('Siren Federate is found.');
           } else {
-            this.status.red(' Siren Investigate requires the use of an Elasticsearch where the Siren Federate plugin has been installed');
+            this.status.red('Siren Federate is not found in Elasticsearch plugins. Please install and restart Elasticsearch.');
           }
         });
       };

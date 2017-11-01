@@ -92,6 +92,11 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
       reqsFetchParams.forEach(function (req) {
         // If the request is a default wildcard query
         // convert it to a match_all (and if there is another match_all, dedupe)
+        // This conversion is done here - just pre-request - to limit the need
+        // to make multiple checks/modifications in the state of the dashboards
+        // when getting or setting the state. Making modifications at that point
+        // would propagate through the dashboards with the getCounts requests for the
+        // dashboard state metadata leading to inconsistent state between front and backend.
         if (req.body && req.body.query && req.body.query.bool && req.body.query.bool.must) {
           const defaultQuery = decorateQuery({
             query_string: {

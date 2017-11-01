@@ -6,6 +6,7 @@
 Fixed: 
 
 * Fixed issue where doc_table rendering was slow due to large text fields
+* Fixed issue where range filters were not passed by relational filter to other dashboards correctly
 
 Changed:
 

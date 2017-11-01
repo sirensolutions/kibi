@@ -1,0 +1,14 @@
+== Kibi 5.4.3-3 and Kibana 5.4.3
+
+[float]
+=== Kibi Changes
+
+Fixed: 
+
+* Fixed issue where doc_table rendering was slow due to large text fields
+
+Changed:
+
+* Update Siren Platform distributions to use Elasticsearch version 5.6.3
+* Update Siren Platform distributions to use Vanguard version 5.6.3
+* Update Siren Platform distributions to use Searchguard version 5.6.3-16

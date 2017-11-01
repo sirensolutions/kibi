@@ -20,17 +20,19 @@
                     ng-model="datasource.datasourceType"
                     class="form-control span9"
                     required>
-                <option value="sql_jdbc_new">SQL JDBC (new)</option>
+                <!-- Commented out as Vanguard Connector not ready for this versiion -->
+                <!-- <option value="sql_jdbc_new">SQL JDBC (new)</option> -->
                 <option value="rest">REST</option>
                 <option value="tinkerpop3">TinkerPop3</option>
                 <option value="sparql_http">Sparql over http</option>
                 <option value="sparql_jdbc">Sparql JDBC</option>
-              <optgroup label="Deprecated - all replaced via new SQL JDBC">
+              <!-- <optgroup label="Deprecated - all replaced via new SQL JDBC"> -->
                 <option value="sqlite">SQLite</option>
                 <option value="mysql">MySQL</option>
                 <option value="postgresql">PostgreSQL</option>
-                <option value="sql_jdbc">SQL JDBC (old)</option>
-              </optgroup>
+                <!-- <option value="sql_jdbc">SQL JDBC (old)</option> -->
+                <option value="sql_jdbc">SQL JDBC</option>
+              <!-- </optgroup> -->
             </select>
           </div>
 

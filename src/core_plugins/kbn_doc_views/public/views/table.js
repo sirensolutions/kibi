@@ -36,7 +36,7 @@ DocViewsRegistryProvider.register(function () {
           }
         });
 
-        $scope.isForMoreLikeThis = function (fieldName) {
+        $scope.isMoreLikeThisCompatible = function (fieldName) {
           if ($scope.indexPattern.metaFields.includes(fieldName)) {
             return false;
           }

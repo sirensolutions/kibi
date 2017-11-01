@@ -1,6 +1,12 @@
 [[releasenotes]]
 = Release Notes
 
+include::release-notes/releasenotes_5.4.3-3.asciidoc[]
+
+include::release-notes/releasenotes_5.4.3-2.asciidoc[]
+
+include::release-notes/releasenotes_5.4.3-1.asciidoc[]
+
 include::release-notes/releasenotes_5.4.3.asciidoc[]
 
 include::release-notes/releasenotes_5.4.0.asciidoc[]

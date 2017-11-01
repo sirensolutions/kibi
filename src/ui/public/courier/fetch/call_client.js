@@ -4,9 +4,10 @@ import IsRequestProvider from './is_request';
 import MergeDuplicatesRequestProvider from './merge_duplicate_requests';
 import ReqStatusProvider from './req_status';
 import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
+import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 
 export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
-
+  const decorateQuery = Private(DecorateQueryProvider);
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
 
@@ -92,8 +93,14 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
         // If the request is a default wildcard query
         // convert it to a match_all (and if there is another match_all, dedupe)
         if (req.body && req.body.query && req.body.query.bool && req.body.query.bool.must) {
+          const defaultQuery = decorateQuery({
+            query_string: {
+              query: '*'
+            }
+          });
+
           req.body.query.bool.must = uniqFilters(req.body.query.bool.must.map(query => {
-            if (_.isEqual(query, { query_string: { query: "*", analyze_wildcard: true } })) {
+            if (_.isEqual(query, defaultQuery)) {
               query = { match_all: {} };
             }
 

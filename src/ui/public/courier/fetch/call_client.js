@@ -3,9 +3,11 @@ import _ from 'lodash';
 import IsRequestProvider from './is_request';
 import MergeDuplicatesRequestProvider from './merge_duplicate_requests';
 import ReqStatusProvider from './req_status';
+import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
+import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 
 export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
-
+  const decorateQuery = Private(DecorateQueryProvider);
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
 
@@ -88,6 +90,29 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
     .then(function (reqsFetchParams) {
       // kibi: call to requestAdapter function of the related visualization
       reqsFetchParams.forEach(function (req) {
+        // If the request is a default wildcard query
+        // convert it to a match_all (and if there is another match_all, dedupe)
+        // This conversion is done here - just pre-request - to limit the need
+        // to make multiple checks/modifications in the state of the dashboards
+        // when getting or setting the state. Making modifications at that point
+        // would propagate through the dashboards with the getCounts requests for the
+        // dashboard state metadata leading to inconsistent state between front and backend.
+        if (req.body && req.body.query && req.body.query.bool && req.body.query.bool.must) {
+          const defaultQuery = decorateQuery({
+            query_string: {
+              query: '*'
+            }
+          });
+
+          req.body.query.bool.must = uniqFilters(req.body.query.bool.must.map(query => {
+            if (_.isEqual(query, defaultQuery)) {
+              query = { match_all: {} };
+            }
+
+            return query;
+          }));
+        }
+
         if (req.getSource) {
           const source = req.getSource();
           if (source && source.vis && source.vis.requestAdapter) {

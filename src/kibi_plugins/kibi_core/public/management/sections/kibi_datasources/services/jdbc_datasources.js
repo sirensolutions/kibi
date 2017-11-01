@@ -16,9 +16,11 @@ uiModules
 
     list() {
       // TODO: remove when Fabio will give me new jar
-      return $http.get(chrome.getBasePath() + '/elasticsearch/.vanguard-datasources/_search?size=100').then(res => {
-        return res.data.hits.hits;
-      });
+      return Promise.resolve([]);
+      // Commented in 5.4.3
+      //return $http.get(chrome.getBasePath() + '/elasticsearch/.vanguard-datasources/_search?size=100').then(res => {
+      //  return res.data.hits.hits;
+      //});
     }
 
     save(datasource) {
@@ -55,9 +57,11 @@ uiModules
 
     listVirtualIndices() {
       // TODO remove this hardcoded stuff
-      return $http.get(chrome.getBasePath() + '/elasticsearch/.vanguard-indices/_search?size=100').then(res => {
-        return res.data.hits.hits;
-      });
+      return Promise.resolve([]);
+      // Commented in 5.4.3
+      //return $http.get(chrome.getBasePath() + '/elasticsearch/.vanguard-indices/_search?size=100').then(res => {
+      //  return res.data.hits.hits;
+      //});
     }
 
   }

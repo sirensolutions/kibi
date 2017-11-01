@@ -24,7 +24,7 @@ DocViewsRegistryProvider.register(function () {
         $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
         $scope.fields = _.keys($scope.flattened).sort();
 
-        // kibi: constructing aliases map
+        // kibi: constructing aliases map and handle more like this filters
         $scope.aliases = {};
         _.each($scope.fields, (fieldName) =>{
           $scope.aliases[fieldName] = fieldName;
@@ -35,6 +35,17 @@ DocViewsRegistryProvider.register(function () {
             }
           }
         });
+
+        $scope.isMoreLikeThisCompatible = function (fieldName) {
+          if ($scope.indexPattern.metaFields.includes(fieldName)) {
+            return false;
+          }
+          if ($scope.mapping[fieldName]) {
+            const dataType = $scope.mapping[fieldName].esType;
+            return dataType === 'text';
+          }
+          return false;
+        };
         // kibi: end
 
         $scope.canToggleColumns = function canToggleColumn() {

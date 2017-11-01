@@ -35,6 +35,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
           expect(Object.keys(field)).to.eql([
             'name',
             'type',
+            'esType',
             'searchable',
             'aggregatable',
             'readFromDocValues'
@@ -64,6 +65,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
           {
             name: 'success',
             type: 'conflict',
+            esType: 'conflict',
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,

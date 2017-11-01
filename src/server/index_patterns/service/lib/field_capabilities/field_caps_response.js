@@ -83,6 +83,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
       return {
         name: fieldName,
         type: 'conflict',
+        esType: 'conflict',
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: false,
@@ -97,6 +98,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
     return {
       name: fieldName,
       type: castEsToKbnFieldTypeName(esType),
+      esType: esType,
       searchable: isSearchable,
       aggregatable: isAggregatable,
       readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),

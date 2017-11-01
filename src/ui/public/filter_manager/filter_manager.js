@@ -7,7 +7,8 @@ export function FilterManagerProvider(Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterManager = {};
 
-  filterManager.add = function (field, values, operation, index) {
+  // kibi: here additional parameter options was needed for more_like_this filter
+  filterManager.add = function (field, values, operation, index, options) {
     values = _.isArray(values) ? values : [values];
     const fieldName = _.isObject(field) ? field.name : field;
     const filters = _.flatten([queryFilter.getAppFilters()]);
@@ -48,6 +49,36 @@ export function FilterManagerProvider(Private) {
       }
 
       switch (fieldName) {
+        case '_more_like_this_':
+          let truncatedFirstValue = values[0];
+          if (truncatedFirstValue.length > 10) {
+            truncatedFirstValue = truncatedFirstValue.substring(0, 10) + ' ...';
+          }
+
+          filter = {
+            meta: {
+              alias: 'More like this: ' + truncatedFirstValue,
+              negate,
+              index
+            },
+            query: {
+              more_like_this: {
+                fields: [ options.fieldName ],
+                like: values,
+                // if no moreLikeThisTemplate present
+                // the query without min_term_freq option would return 0
+                min_term_freq: 1
+              }
+            }
+          };
+          if (options.moreLikeThisTemplate) {
+            _.each(options.moreLikeThisTemplate, (value, key) => {
+              if (value) {
+                filter.query.more_like_this[key] = value;
+              }
+            });
+          }
+          break;
         case '_exists_':
           filter = {
             meta: { negate, index },

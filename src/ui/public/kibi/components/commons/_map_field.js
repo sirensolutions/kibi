@@ -40,6 +40,7 @@ export function MapFieldFn(Private, config) {
 
     mapping.analyzed = mapping.index === 'analyzed' || mapping.type === 'text';
 
+    mapping.esType = mapping.type;
     mapping.type = castMappingType(mapping.type);
 
     if (mappingOverrides[name]) {

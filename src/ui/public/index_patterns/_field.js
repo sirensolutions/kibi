@@ -49,6 +49,7 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
     const visualizable = aggregatable;
 
     obj.fact('name');
+    obj.fact('esType', spec.esType);
     obj.fact('type');
     obj.writ('count', spec.count || 0);
 

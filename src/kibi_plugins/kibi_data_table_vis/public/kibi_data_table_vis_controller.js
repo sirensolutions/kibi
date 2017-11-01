@@ -61,10 +61,14 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
   });
 
   // NOTE: filter to enable little icons in doc-viewer to filter and add/remove columns
-  $scope.filter = function (field, value, operator) {
+  $scope.filter = function (field, value, operator, options) {
     // here grab the index
     const index = $scope.searchSource.get('index').id;
-    filterManager.add(field, value, operator, index);
+    // add a template for more like this
+    if (options && field === '_more_like_this_' && $scope.vis.params.moreLikeThisTemplate) {
+      options.moreLikeThisTemplate = JSON.parse($scope.vis.params.moreLikeThisTemplate);
+    }
+    filterManager.add(field, value, operator, index, options);
   };
 
   const _populateClickHandlers = function () {

@@ -22,6 +22,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
+                esType: 'date',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -29,6 +30,7 @@ export default function ({ getService }) {
               {
                 name: 'Jan01',
                 type: 'boolean',
+                esType: 'boolean',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -36,6 +38,7 @@ export default function ({ getService }) {
               {
                 name: 'Jan02',
                 type: 'boolean',
+                esType: 'boolean',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -59,6 +62,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
+                esType: 'date',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -66,6 +70,7 @@ export default function ({ getService }) {
               {
                 name: 'Jan02',
                 type: 'boolean',
+                esType: 'boolean',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -90,6 +95,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
+                esType: 'date',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -97,6 +103,7 @@ export default function ({ getService }) {
               {
                 name: 'Jan02',
                 type: 'boolean',
+                esType: 'boolean',
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -104,6 +111,7 @@ export default function ({ getService }) {
               {
                 name: 'meta1',
                 type: 'string',
+                esType: 'text',
                 aggregatable: false,
                 searchable: false,
                 readFromDocValues: false,
@@ -111,6 +119,7 @@ export default function ({ getService }) {
               {
                 name: 'meta2',
                 type: 'string',
+                esType: 'text',
                 aggregatable: false,
                 searchable: false,
                 readFromDocValues: false,

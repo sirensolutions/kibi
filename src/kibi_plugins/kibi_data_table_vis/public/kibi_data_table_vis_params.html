@@ -220,4 +220,27 @@
       ></kibi-select>
     </div>
   </section>
+  <section>
+    <div class="header">
+      <h2>More like this query template</h2>
+    </div>
+    <div class="form-group">
+      <span class="small-note">Modify template to be used for more like this filters.</span><br/>
+      <div
+        ui-ace="{
+          onLoad: aceLoaded,
+          mode: 'javascript',
+          advanced: {
+            tabSize: 2
+          },
+          rendererOptions: {
+            showPrintMargin: false,
+            maxLines: 4294967296
+          }
+        }"
+        ng-model="vis.params.moreLikeThisTemplate"
+      ></div>
+    </div>
+  </section>
+
 </div>

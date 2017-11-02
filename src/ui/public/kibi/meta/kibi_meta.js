@@ -1,6 +1,7 @@
 import lru from 'lru-cache';
 import { each, map } from 'lodash';
 import { uiModules } from 'ui/modules';
+import { countStrategyValidator } from 'ui/kibi/meta/strategy_validator';
 
 function KibiMetaProvider(createNotifier, kibiState, es, config) {
 
@@ -45,14 +46,22 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       // we need to track this in the 2 maps
       this.counters = {};
 
-      this.queues = {
-        buttons: [],
-        dashboards: []
-      };
-
+      this.queues = {};
       this.strategies = {};
-      this.setStrategy('dashboards', config.get('kibi:countFetchingStrategyDashboards'));
-      this.setStrategy('buttons', config.get('kibi:countFetchingStrategyRelationalFilters'));
+      const dashboardStrategy = config.get('kibi:countFetchingStrategyDashboards');
+      this._validateStrategy(dashboardStrategy);
+      this.setStrategy(dashboardStrategy);
+      this.dashboardStrategyName = dashboardStrategy.name;
+      this.setQueue(dashboardStrategy.name);
+      const relFilterStrategy = config.get('kibi:countFetchingStrategyRelationalFilters');
+      this._validateStrategy(relFilterStrategy);
+      this.setStrategy(relFilterStrategy);
+      this.relFilterStrategyName = relFilterStrategy.name;
+      this.setQueue(relFilterStrategy.name);
+    }
+
+    setQueue(strategyName) {
+      this.queues[strategyName] = [];
     }
 
     flushCache() {
@@ -65,10 +74,18 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       });
     }
 
-    setStrategy(strategyName, strategy) {
-      this.strategies[strategyName] = strategy;
+    _validateStrategy(strategy) {
+      try {
+        countStrategyValidator(strategy);
+      } catch (e) {
+        notify.error(e.message);
+      }
+    }
+
+    setStrategy(strategy) {
+      this.strategies[strategy.name] = strategy;
       // set counters
-      this._setDefaultMeta(strategyName);
+      this._setDefaultMeta(strategy.name);
     }
 
     _setDefaultMeta(strategyName) {
@@ -90,9 +107,9 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
      */
     getMetaForDashboards(dashboards = []) {
       each(dashboards, d => {
-        this._addToQueue(d, 'dashboards');
+        this._addToQueue(d, this.dashboardStrategyName);
       });
-      this._processSingleQueue('dashboards');
+      this._processSingleQueue(this.dashboardStrategyName);
     }
 
     /*
@@ -112,9 +129,9 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
      */
     getMetaForRelationalButtons(buttons = []) {
       each(buttons, b => {
-        this._addToQueue(b, 'buttons');
+        this._addToQueue(b, this.relFilterStrategyName);
       });
-      this._processSingleQueue('buttons');
+      this._processSingleQueue(this.relFilterStrategyName);
     }
 
     _addToQueue(o, queueName) {

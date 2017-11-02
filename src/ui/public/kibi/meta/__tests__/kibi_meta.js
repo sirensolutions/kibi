@@ -12,17 +12,31 @@ describe('Kibi meta service', function () {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function (_es_, _config_, _kibiMeta_) {
+  // NOTE: important that we stub config before we inject kibiMeta
+  // do not try to merge this beforeEach with next one
+  beforeEach(ngMock.inject(function (_config_) {
     config = _config_;
     sinon.stub(config, 'get', function (key) {
-      if (key === 'kibi:countFetchingStrategyDashboards' || key === 'kibi:countFetchingStrategyRelationalFilters') {
+      if (key === 'kibi:countFetchingStrategyDashboards') {
         return {
+          name: 'dashboards',
+          batchSize: 2,
+          retryOnError: 1,
+          parallelRequests: 1
+        };
+      }
+      if (key === 'kibi:countFetchingStrategyRelationalFilters') {
+        return {
+          name: 'buttons',
           batchSize: 2,
           retryOnError: 1,
           parallelRequests: 1
         };
       }
     });
+  }));
+
+  beforeEach(ngMock.inject(function (_es_, _kibiMeta_) {
     es = _es_;
     kibiMeta = _kibiMeta_;
     kibiMeta.flushCache();

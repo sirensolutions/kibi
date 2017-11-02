@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { ReqStatusProvider } from './req_status';
+import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
 
 export function CallClientProvider(Private, Promise, esAdmin, es) {
 
@@ -87,6 +88,23 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
       return Promise.try(request.getFetchParams, void 0, request)
       // kibi: call to requestAdapter function of the related visualization
       .then(function (fetchParams) {
+        // If the request is a default wildcard query
+        // convert it to a match_all (and if there is another match_all, dedupe)
+        // This conversion is done here - just pre-request - to limit the need
+        // to make multiple checks/modifications in the state of the dashboards
+        // when getting or setting the state. Making modifications at that point
+        // would propagate through the dashboards with the getCounts requests for the
+        // dashboard state metadata leading to inconsistent state between front and backend.
+        if (fetchParams.body && fetchParams.body.query && fetchParams.body.query.bool && fetchParams.body.query.bool.must) {
+          fetchParams.body.query.bool.must = uniqFilters(fetchParams.body.query.bool.must.map(query => {
+            if (_.isEqual(query, { query_string: { query: "*", analyze_wildcard: true } })) {
+              query = { match_all: {} };
+            }
+
+            return query;
+          }));
+        }
+
         if (fetchParams.getSource) {
           const source = fetchParams.getSource();
           if (source && source.vis && source.vis.requestAdapter) {

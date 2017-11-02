@@ -203,7 +203,7 @@ $ bin/elasticsearch
 
 If either a certificate or a password is incorrect, Elasticsearch will not
 start.
-
+[[access_control_configuration]]
 === Access control configuration
 
 Access control configuration (users, roles and privileges) is stored in an
@@ -869,6 +869,8 @@ values in the **kibi_access_control** section:
 
 - **enabled**: set to **true** to enable the Kibi access control plugin.
   Defaults to **false**.
+- **backend**: backend type of authentication.
+  Defaults to **searchguard**.
 - **session.ttl**: the lifetime of the session in milliseconds.
   If not set, the session will last as long as the session cookie is valid.
   Defaults to **3600000** (1 hour).
@@ -1356,33 +1358,6 @@ xpack.monitoring.exporters:
       truststore.password: password
 ----
 
-=== X-Pack plugin for Kibana
-
-The X-Pack security plugin is not compatible with Kibi access control; you can disable
-it by adding the following lines to the `kibi.yml` file:
-
-[source,yaml]
-----
-xpack:
-  security:
-    enabled: false
-----
-
-To enable Kibana monitoring in X-Pack, you'll need to grant the
-`cluster:admin/xpack/monitoring/bulk` permission to the `kibiserver` role; the permission
-can be added to the existing permissions in the `cluster` section of the role.
-
-If you do not need Kibana monitoring, you can add the following lines to `kibi.yml` to disable it:
-
-[source,yaml]
-----
-xpack:
-  monitoring:
-    kibana:
-      collection:
-        enabled: false
-----
-
 === Handling of authorization errors
 
 Kibi  parses generic authorization errors from Elasticsearch to report them
@@ -1430,3 +1405,47 @@ image::images/authorization-visualization-error.png["A visualization that loads 
 
 ._A visualizations that refers to an unauthorized index._
 image::images/authorization-visualization-empty.png["A visualization that refers to an unauthorized index.",align="left"]
+
+
+== X-Pack integration and Kibi access control
+
+If you have an existing Elasticsearch instance with X-Pack installed and wish to integrate with Kibi,
+there are a few short steps to take:
+
+First, set the backend parameter of the `kibi_access_control` section of the `kibi.yml` to `xpack`:
+
+[source,yaml]
+----
+kibi_access_control:
+  enabled: true
+  backend: xpack
+----
+
+You may also need to set the `encryptionKey` of X-pack under `kibi_access_control.backends` section.
+
+[source,yaml]
+----
+kibi_access_control:
+  backends:
+    xpack:
+      encryptionKey: "something_at_least_32_characters"
+----
+
+To enable Kibana monitoring in X-Pack, you'll need to grant the
+`cluster:admin/xpack/monitoring/bulk` permission to the `kibiserver` role; the permission
+can be added to the existing permissions in the `cluster` section of the role. 
+
+See the <<access_control_configuration, Access control configuration>> section for more information.
+
+If you do not need Kibana monitoring, you can add the following lines to `kibi.yml` to disable it:
+
+[source,yaml]
+----
+xpack:
+  monitoring:
+    kibana:
+      collection:
+        enabled: false
+---- 
+
+If you are not accessing Elasticsearch over HTTPS, you need to set `kibi_access_control.cookie.secure` to *false*.

@@ -1421,16 +1421,6 @@ kibi_access_control:
   backend: xpack
 ----
 
-You may also need to set the `encryptionKey` of X-Pack under `kibi_access_control.backends` section.
-
-[source,yaml]
-----
-kibi_access_control:
-  backends:
-    xpack:
-      encryptionKey: "something_at_least_32_characters"
-----
-
 To enable Kibana monitoring in X-Pack, you'll need to grant the
 `cluster:admin/xpack/monitoring/bulk` permission to the `kibiserver` role; the permission
 can be added to the existing permissions in the `cluster` section of the role. 
@@ -1447,5 +1437,3 @@ xpack:
       collection:
         enabled: false
 ---- 
-
-If you are not accessing Elasticsearch over HTTPS, you need to set `kibi_access_control.cookie.secure` to *false*.

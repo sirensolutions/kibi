@@ -869,7 +869,7 @@ values in the **kibi_access_control** section:
 
 - **enabled**: set to **true** to enable the Kibi access control plugin.
   Defaults to **false**.
-- **backend**: backend type of authentication.
+- **backend**: backend type of authentication. Currently available backends are **searchguard** and **xpack**.
   Defaults to **searchguard**.
 - **session.ttl**: the lifetime of the session in milliseconds.
   If not set, the session will last as long as the session cookie is valid.
@@ -1421,7 +1421,7 @@ kibi_access_control:
   backend: xpack
 ----
 
-You may also need to set the `encryptionKey` of X-pack under `kibi_access_control.backends` section.
+You may also need to set the `encryptionKey` of X-Pack under `kibi_access_control.backends` section.
 
 [source,yaml]
 ----

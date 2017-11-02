@@ -1,7 +1,7 @@
 import pluginList from '../../core_plugins/elasticsearch/lib/wait_for_plugin_list.js';
-import { contains } from 'lodash';
+
 /**
- * The federate plugin checks if there is siren federate plugin in elasticsearch.
+ * The siren_federate plugin checks if there is Siren Federate plugin in Elasticsearch.
  */
 module.exports = function (kibana) {
 
@@ -10,16 +10,16 @@ module.exports = function (kibana) {
     id: 'siren_federate',
 
     init: function (server, options) {
-      this.status.yellow('Checking for Siren Federate.');
+      this.status.yellow('Checking for Siren Federate Elasticsearch plugin.');
 
       const checkSirenFederate = () => {
 
         pluginList(this, server)
         .then((plugins)=> {
-          if (contains(plugins, 'siren-vanguard')) {
-            this.status.green('Siren Federate is found.');
+          if (plugins.indexOf('siren-vanguard') !== -1) {
+            this.status.green('Siren Federate plugin is found.');
           } else {
-            this.status.red('Siren Federate is not found in Elasticsearch plugins. Please install and restart Elasticsearch.');
+            this.status.red('Siren Federate plugin is not found. Please install it and restart Elasticsearch.');
           }
         });
       };
@@ -35,7 +35,6 @@ module.exports = function (kibana) {
         });
       }
     }
-
   });
 
 };

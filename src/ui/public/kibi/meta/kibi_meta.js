@@ -43,7 +43,7 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       // in order to make sure we are not executing
       // a callback from a previous object for particular id
       // while later one was already executed
-      // we need to track this in the 2 maps
+      // we need to track this in the counters maps
       this.counters = {};
 
       this.queues = {};
@@ -52,16 +52,10 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       this._validateStrategy(dashboardStrategy);
       this.setStrategy(dashboardStrategy);
       this.dashboardStrategyName = dashboardStrategy.name;
-      this.setQueue(dashboardStrategy.name);
       const relFilterStrategy = config.get('kibi:countFetchingStrategyRelationalFilters');
       this._validateStrategy(relFilterStrategy);
       this.setStrategy(relFilterStrategy);
       this.relFilterStrategyName = relFilterStrategy.name;
-      this.setQueue(relFilterStrategy.name);
-    }
-
-    setQueue(strategyName) {
-      this.queues[strategyName] = [];
     }
 
     flushCache() {
@@ -86,10 +80,16 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       this.strategies[strategy.name] = strategy;
       // set counters
       this._setDefaultMeta(strategy.name);
+      // set queue
+      this._setQueue(strategy.name);
     }
 
     _setDefaultMeta(strategyName) {
       this.strategies[strategyName]._requestInProgress = 0;
+    }
+
+    _setQueue(strategyName) {
+      this.queues[strategyName] = [];
     }
 
     updateStrategy(strategyName, propertyName, propertyValue) {
@@ -181,6 +181,30 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       }
 
       const queue = this.queues[queueName];
+
+      // sort queue by target index name
+      queue.sort(function (a, b) {
+        const queryA = a.definition.query;
+        const queryB = b.definition.query;
+        const queryAParts = queryA.split('\n');
+        const queryBParts = queryB.split('\n');
+        const metaPartA = queryAParts[0];
+        const metaPartB = queryBParts[0];
+        const metaA = JSON.parse(metaPartA);
+        const metaB = JSON.parse(metaPartB);
+        const indexA = metaA.index;
+        const indexB = metaB.index;
+        if (indexA instanceof Array) {
+          indexA.sort();
+        }
+        if (indexB instanceof Array) {
+          indexB.sort();
+        }
+        const aString = JSON.stringify(indexA);
+        const bString = JSON.stringify(indexB);
+        return aString.localeCompare(bString);
+      });
+
       // take a number of queries to process
       const toProcess = [];
       const n = Math.min(strategy.batchSize, queue.length);
@@ -213,11 +237,14 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       });
 
       strategy._requestInProgress++;
-      es
-      .msearch({
+
+      const payload = {
         body: query,
         getMeta: queueName // ?getMeta= has no meaning it is just useful to filter by specific strategy
-      })
+      };
+
+      es
+      .msearch(payload)
       .then(data => {
         strategy._requestInProgress--;
         each(data.responses, (hit, i) => {

@@ -115,8 +115,10 @@ describe('Kibi meta service', function () {
           };
           msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1 ] }));
           const callback1Spy = sinon.spy();
+
+          const query1 = '{"index":["index_A"]}\nquery1';
           const definitions = [{
-            definition: { id: 'dash1', query: 'query1' },
+            definition: { id: 'dash1', query: query1 },
             callback: callback1Spy
           }];
 
@@ -153,13 +155,15 @@ describe('Kibi meta service', function () {
           msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1, expectedMeta2 ] }));
           const callback1Spy = sinon.spy();
           const callback2Spy = sinon.spy();
+          const query1 = '{"index":["index_A"]}\nquery1';
+          const query2 = '{"index":["index_A"]}\nquery2';
           const definitions = [
             {
-              definition: { id: 'dash1', query: 'query1' },
+              definition: { id: 'dash1', query: query1 },
               callback: callback1Spy
             },
             {
-              definition: { id: 'dash2', query: 'query2' },
+              definition: { id: 'dash2', query: query2 },
               callback: callback2Spy
             }
           ];
@@ -199,17 +203,20 @@ describe('Kibi meta service', function () {
           const callback1Spy = sinon.spy();
           const callback2Spy = sinon.spy();
           const callback3Spy = sinon.spy();
+          const query1 = '{"index":["index_A"]}\nquery1';
+          const query2 = '{"index":["index_A"]}\nquery2';
+          const query3 = '{"index":["index_A"]}\nquery3';
           const definitions = [
             {
-              definition: { id: 'dash1', query: 'query1' },
+              definition: { id: 'dash1', query: query1 },
               callback: callback1Spy
             },
             {
-              definition: { id: 'dash2', query: 'query2' },
+              definition: { id: 'dash2', query: query2 },
               callback: callback2Spy
             },
             {
-              definition: { id: 'dash3', query: 'query3' },
+              definition: { id: 'dash3', query: query3 },
               callback: callback3Spy
             }
           ];
@@ -226,8 +233,8 @@ describe('Kibi meta service', function () {
                 done(err);
               }
               sinon.assert.calledTwice(msearchStub);
-              expect(msearchStub.getCall(0).args[0]).to.eql({ body: 'query1query2', getMeta: 'dashboards' });
-              expect(msearchStub.getCall(1).args[0]).to.eql({ body: 'query3', getMeta: 'dashboards' });
+              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards' });
+              expect(msearchStub.getCall(1).args[0]).to.eql({ body: query3, getMeta: 'dashboards' });
               sinon.assert.calledOnce(callback1Spy);
               sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
               sinon.assert.calledOnce(callback2Spy);
@@ -255,17 +262,20 @@ describe('Kibi meta service', function () {
           const callback1Spy = sinon.spy();
           const callback2Spy = sinon.spy();
           const callback3Spy = sinon.spy();
+          const query1 = '{"index":["index_A"]}\nquery1';
+          const query2 = '{"index":["index_A"]}\nquery2';
+          const query3 = '{"index":["index_A"]}\nquery3';
           const definitions = [
             {
-              definition: { id: 'dash1', query: 'query1' },
+              definition: { id: 'dash1', query: query1 },
               callback: callback1Spy
             },
             {
-              definition: { id: 'dash2', query: 'query2' },
+              definition: { id: 'dash2', query: query2 },
               callback: callback2Spy
             },
             {
-              definition: { id: 'dash3', query: 'query3' },
+              definition: { id: 'dash3', query: query3 },
               callback: callback3Spy
             }
           ];
@@ -282,8 +292,8 @@ describe('Kibi meta service', function () {
                 done(err);
               }
               sinon.assert.calledTwice(msearchStub);
-              expect(msearchStub.getCall(0).args[0]).to.eql({ body: 'query1query2', getMeta: 'dashboards' });
-              expect(msearchStub.getCall(1).args[0]).to.eql({ body: 'query3', getMeta: 'dashboards' });
+              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards' });
+              expect(msearchStub.getCall(1).args[0]).to.eql({ body: query3, getMeta: 'dashboards' });
               sinon.assert.calledOnce(callback1Spy);
               sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
               sinon.assert.calledOnce(callback2Spy);
@@ -306,17 +316,19 @@ describe('Kibi meta service', function () {
           const callback1Spy = sinon.spy();
           const callback2Spy = sinon.spy();
           const callback3Spy = sinon.spy();
+          const query1 = '{"index":["index_A"]}\nquery1';
+          const query2 = '{"index":["index_A"]}\nquery2';
           const definitions = [
             {
-              definition: { id: 'dash1', query: 'query1' },
+              definition: { id: 'dash1', query: query1 },
               callback: callback1Spy
             },
             {
-              definition: { id: 'dash2', query: 'query2' },
+              definition: { id: 'dash2', query: query2 },
               callback: callback2Spy
             },
             {
-              definition: { id: 'dash1', query: 'query1' },
+              definition: { id: 'dash1', query: query1 },
               callback: callback3Spy
             }
           ];
@@ -339,7 +351,7 @@ describe('Kibi meta service', function () {
               // in case a second callback was called twice or with a wrong data from the first call we would like to know
               setTimeout(function () {
                 sinon.assert.calledOnce(msearchStub);
-                expect(msearchStub.getCall(0).args[0]).to.eql({ body: 'query1query2', getMeta: 'dashboards' });
+                expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards' });
                 sinon.assert.calledOnce(callback1Spy);
                 sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
                 sinon.assert.calledOnce(callback2Spy);
@@ -363,17 +375,19 @@ describe('Kibi meta service', function () {
           const callback1Spy = sinon.spy();
           const callback2Spy = sinon.spy();
           const callback3Spy = sinon.spy();
+          const query1 = '{"index":["index_A"]}\nquery1';
+          const query2 = '{"index":["index_A"]}\nquery2';
           const definitions = [
             {
-              definition: { id: 'dash1', query: 'query1' },
+              definition: { id: 'dash1', query: query1 },
               callback: callback1Spy
             },
             {
-              definition: { id: 'dash2', query: 'query2' },
+              definition: { id: 'dash2', query: query2 },
               callback: callback2Spy
             },
             {
-              definition: { id: 'dash1', query: 'query1' },
+              definition: { id: 'dash1', query: query1 },
               callback: callback3Spy
             }
           ];
@@ -390,7 +404,7 @@ describe('Kibi meta service', function () {
                 done(err);
               }
               sinon.assert.calledOnce(msearchStub);
-              expect(msearchStub.getCall(0).args[0]).to.eql({ body: 'query1query2', getMeta: 'dashboards' });
+              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards' });
               sinon.assert.calledOnce(callback1Spy);
               sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
               sinon.assert.calledOnce(callback2Spy);
@@ -413,9 +427,10 @@ describe('Kibi meta service', function () {
         msearchStub.onCall(0).returns(Promise.reject({ responses: [ expectedError1 ] }));
         msearchStub.onCall(1).returns(Promise.resolve({ responses: [ expectedMeta1 ] }));
         const callback1Spy = sinon.spy();
+        const query1 = '{"index":["index_A"]}\nquery1';
         const definitions = [
           {
-            definition: { id: 'dash1', query: 'query1' },
+            definition: { id: 'dash1', query: query1 },
             callback: callback1Spy
           }
         ];
@@ -432,8 +447,8 @@ describe('Kibi meta service', function () {
               done(err);
             }
             sinon.assert.calledTwice(msearchStub);
-            expect(msearchStub.getCall(0).args[0]).to.eql({ body: 'query1', getMeta: 'dashboards' });
-            expect(msearchStub.getCall(1).args[0]).to.eql({ body: 'query1', getMeta: 'dashboards' });
+            expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1, getMeta: 'dashboards' });
+            expect(msearchStub.getCall(1).args[0]).to.eql({ body: query1, getMeta: 'dashboards' });
             sinon.assert.calledOnce(callback1Spy);
             sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
             done();
@@ -446,9 +461,10 @@ describe('Kibi meta service', function () {
         msearchStub.onCall(0).returns(Promise.reject({ responses: [ expectedError1 ] }));
         msearchStub.onCall(1).returns(Promise.reject({ responses: [ expectedError1 ] }));
         const callback1Spy = sinon.spy();
+        const query1 = '{"index":["index_A"]}\nquery1';
         const definitions = [
           {
-            definition: { id: 'dash1', query: 'query1' },
+            definition: { id: 'dash1', query: query1 },
             callback: callback1Spy
           }
         ];
@@ -465,8 +481,8 @@ describe('Kibi meta service', function () {
               done(err);
             }
             sinon.assert.calledTwice(msearchStub);
-            expect(msearchStub.getCall(0).args[0]).to.eql({ body: 'query1', getMeta: 'dashboards' });
-            expect(msearchStub.getCall(1).args[0]).to.eql({ body: 'query1', getMeta: 'dashboards' });
+            expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1, getMeta: 'dashboards' });
+            expect(msearchStub.getCall(1).args[0]).to.eql({ body: query1, getMeta: 'dashboards' });
             sinon.assert.calledOnce(callback1Spy);
             sinon.assert.calledWith(callback1Spy, new Error(
               'Could not fetch meta for ' +
@@ -513,13 +529,15 @@ describe('Kibi meta service', function () {
 
         const callbackSpy = sinon.spy();
 
+        const queryA = '{"index":["index_A"]}\nqueryA';
         const definitionsA = [{
-          definition: { id: 'dash1', query: 'queryA' },
+          definition: { id: 'dash1', query: queryA },
           callback: callbackSpy
         }];
 
+        const queryB = '{"index":["index_A"]}\nqueryB';
         const definitionsB = [{
-          definition: { id: 'dash1', query: 'queryB' },
+          definition: { id: 'dash1', query: queryB },
           callback: callbackSpy
         }];
 

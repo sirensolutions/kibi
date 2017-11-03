@@ -33,20 +33,25 @@ module.exports = function (kibana) {
                 break;
               }
               // for this 2 versions we check because only in -1 releases Vanguard does support "limit" parameter
-              if (elasticsearchVersion === '5.4.3' && isVanguardVersionGreaterOrEqual(vanguard.version, '5.4.3-1')) {
-                this.status.green('Siren Federate plugin is found.');
-                return;
-              } else {
-                this.status.red('Siren Federate plugin version too low. Upgrade to version >= 5.4.3-1');
-                return;
+              if (elasticsearchVersion === '5.4.3') {
+                if (isVanguardVersionGreaterOrEqual(vanguard.version, '5.4.3-1')) {
+                  this.status.green('Siren Federate plugin is found.');
+                  return;
+                } else {
+                  this.status.red('Siren Federate plugin version too low. Upgrade to version >= 5.4.3-1');
+                  return;
+                }
               }
-              if (elasticsearchVersion === '5.5.2' && isVanguardVersionGreaterOrEqual(vanguard.version, '5.5.2-1')) {
-                this.status.green('Siren Federate plugin is found.');
-                return;
-              } else {
-                this.status.red('Siren Federate plugin version too low. Upgrade to version >= 5.5.2-1');
-                return;
+              if (elasticsearchVersion === '5.5.2') {
+                if (isVanguardVersionGreaterOrEqual(vanguard.version, '5.5.2-1')) {
+                  this.status.green('Siren Federate plugin is found.');
+                  return;
+                } else {
+                  this.status.red('Siren Federate plugin version too low. Upgrade to version >= 5.5.2-1');
+                  return;
+                }
               }
+              this.status.green('Siren Federate plugin is found.');
             });
           } else {
             this.status.red('Siren Federate plugin is not found. Please install it and restart Elasticsearch.');

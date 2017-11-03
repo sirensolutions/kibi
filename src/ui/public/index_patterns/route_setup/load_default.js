@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Notifier } from 'kibie/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 // kibi: IndexPatternAuthorizationError is added
 import { IndexPatternAuthorizationError, NoDefaultIndexPattern } from 'ui/errors';
 import { IndexPatternsGetIdsProvider } from '../_get_ids';

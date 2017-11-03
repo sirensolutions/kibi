@@ -1,20 +1,20 @@
-import _ from 'lodash';
 import ngMock from 'ng_mock';
+import _ from 'lodash';
+import { Notifier } from '../notifier';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { Notifier } from 'ui/notify/notifier';
 
 describe('Notifier', function () {
   let $interval;
   let notifier;
   let params;
+  let message = 'Oh, the humanity!';
   const version = window.__KBN__.version;
   const buildNum = window.__KBN__.buildNum;
-  const message = 'Oh, the humanity!';
   const customText = 'fooMarkup';
   const customParams = {
     title: 'fooTitle',
-    actions:[{
+    actions: [{
       text: 'Cancel',
       callback: sinon.spy()
     }, {
@@ -24,7 +24,9 @@ describe('Notifier', function () {
   };
 
   beforeEach(function () {
-    ngMock.module('kibana');
+    ngMock.module('kibana', function ($provide) {
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    });
 
     ngMock.inject(function (_$interval_) {
       $interval = _$interval_;
@@ -33,7 +35,12 @@ describe('Notifier', function () {
 
   beforeEach(function () {
     params = { location: 'foo' };
+    while (Notifier.prototype._notifs.pop()); // clear global notifications
     notifier = new Notifier(params);
+    Notifier.applyConfig({
+      setInterval: $interval,
+      clearInterval: $interval.cancel
+    });
   });
 
   afterEach(function () {
@@ -439,6 +446,47 @@ describe('Notifier', function () {
       });
     });
   }
+
+  describe('kibi - shield warnings', function () {
+    function checkShieldAuthorizationWarning(shieldAuthorizationWarning) {
+      Notifier.applyConfig({ shieldAuthorizationWarning });
+      if (shieldAuthorizationWarning) {
+        expect(notify('error').content).to.equal(params.location + ': ' + message);
+        expect(notify('error').type).to.equal('warning');
+      } else {
+        expect(notify('error')).to.not.be.ok();
+      }
+    }
+
+    [true, false]
+      .forEach(shieldAuthorizationWarning => {
+        const prefix = shieldAuthorizationWarning ? '' : 'not ';
+        describe(`shieldAuthorizationWarning is ${shieldAuthorizationWarning}`, function () {
+          it(`should ${prefix} change type from error to warning with unauthorized in the message`, function () {
+            message = 'bla bla unauthorized bla bla';
+            checkShieldAuthorizationWarning(shieldAuthorizationWarning);
+          });
+
+          it(`should ${prefix} change type from error to warning with ElasticsearchSecurityException in the message`, function () {
+            message = 'bla bla bla ElasticsearchSecurityException bla bla bla';
+            checkShieldAuthorizationWarning(shieldAuthorizationWarning);
+          });
+
+          it(`should ${prefix} change type from error to warning with security_exception in the message`, function () {
+            message = 'bla bla bla security_exception bla bla bla';
+            checkShieldAuthorizationWarning(shieldAuthorizationWarning);
+          });
+        });
+      });
+
+    describe('other error message (no authorization warning)', function () {
+      it('should return danger type with exception in the message', function () {
+        message = 'bla bla bla exception bla bla bla';
+        expect(notify('error').content).to.equal(params.location + ': ' + message);
+        expect(notify('error').type).to.equal('danger');
+      });
+    });
+  });
 });
 
 describe('Directive Notification', function () {
@@ -455,7 +503,7 @@ describe('Directive Notification', function () {
   };
   const customParams = {
     title: 'fooTitle',
-    actions:[{
+    actions: [{
       text: 'Cancel',
       callback: sinon.spy()
     }, {
@@ -490,10 +538,10 @@ describe('Directive Notification', function () {
     beforeEach(() => {
       scope.notif = notifier.directive(directiveParam, customParams);
       const template = `
-        <render-directive
-          definition="notif.directive"
-          notif="notif"
-        ></render-directive>`;
+      <render-directive
+        definition="notif.directive"
+        notif="notif"
+      ></render-directive>`;
       element = compile(template)(scope);
       scope.$apply();
     });

@@ -7,7 +7,7 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import { Notifier } from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import { Notifier } from 'ui/notify/notifier';
 
 import { UrlShortenerProvider } from '../lib/url_shortener';
 

@@ -1,7 +1,7 @@
 import angular from 'angular';
 import { isEqual, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
 import { uiModules } from 'ui/modules';
-import { Notifier } from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import { Notifier } from 'ui/notify/notifier';
 import { ConfigDelayedUpdaterProvider } from 'ui/config/_delayed_updater';
 const module = uiModules.get('kibana/config');
 

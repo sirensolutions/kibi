@@ -52,7 +52,7 @@ export function DeleteHelperFactory(Promise, dashboardGroups, savedVisualization
 
     switch (type) {
       case 'dashboardgroup':
-        return _delete().then(() => dashboardGroups.computeGroups(`deleted dashboard groups ${JSON.stringify(ids, null, ' ')}`));
+        return _delete(ids).then(() => dashboardGroups.computeGroups(`deleted dashboard groups ${JSON.stringify(ids, null, ' ')}`));
 
       case 'datasource':
         // grab jdbc datasources ids

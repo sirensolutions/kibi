@@ -17,6 +17,6 @@ describe('is_vanguard_version_greater_or_equal', function () {
     expect(isVanguardVersionGreaterOrEqual('5.4.3-2', '5.4.3-1')).to.equal(true);
     expect(isVanguardVersionGreaterOrEqual('5.5.2-2', '5.5.2-1')).to.equal(true);
 
-    expect(isVanguardVersionGreaterOrEqual('7.8.9-12', '7.8.9-11')).to.equal(false);
+    expect(isVanguardVersionGreaterOrEqual('7.8.9-12', '7.8.9-11')).to.equal(true);
   });
 });

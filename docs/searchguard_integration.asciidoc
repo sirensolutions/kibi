@@ -1445,6 +1445,46 @@ Second, replace the kibiserver role with the following; make sure to set the cor
   ]
 }
 
+Once you log in to system you can configure roles from Kibi Access Control UI. You can find example role in below.
+
+[source, json]
+{
+  "cluster": [
+    "cluster:admin/plugin/siren/license/get",
+    "cluster:internal/data/transfer/start",
+    "cluster:internal/data/transfer/delete",
+    "cluster:internal/data/transfer/end",
+    "cluster:internal/data/transfer/packet"
+  ],
+  "indices" : [
+    {
+      "names" : [ "*" ],
+      "privileges" : [ "indices:siren/mplan" ]
+    },
+    {
+      "names" : [ "company" ],
+      "privileges" : [ "read", "view_index_metadata", "indices:siren", "indices:admin/version/get" ],
+      "field_security": {
+        "grant" : [ "*" ],
+        "except": [ "city" ]
+      },
+      "query": {
+        "match": {
+          "category_code": "software"
+        }
+      }
+    },
+    {
+      "names" : [ "article", "investment" ],
+      "privileges" : [ "read", "view_index_metadata", "indices:siren", "indices:admin/version/get" ]
+    },
+    {
+      "names" : [ ".kibi*" ],
+      "privileges" : [ "read" ]
+    }
+  ]
+}
+
 To enable Kibana monitoring in X-Pack, you'll need to grant the
 `cluster:admin/xpack/monitoring/bulk` permission to the `kibiserver` role; the permission
 can be added to the existing permissions in the `cluster` section of the role. 

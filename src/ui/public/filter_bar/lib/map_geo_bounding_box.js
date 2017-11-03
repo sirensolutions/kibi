@@ -10,6 +10,11 @@ export function FilterBarLibMapGeoBoundingBoxProvider(Promise, courier) {
         const key = _.keys(filter.geo_bounding_box)
           .filter(key => key !== 'ignore_unmapped')[0];
         const field = indexPattern.fields.byName[key];
+        // kibi: handle case where the field is no longer present in the index-pattern
+        if (!field) {
+          return Promise.reject(filter);
+        }
+        // kibi: end
         const geoBoundingBox = filter.geo_bounding_box[key];
         const topLeft = field.format.convert(geoBoundingBox.top_left);
         const bottomRight = field.format.convert(geoBoundingBox.bottom_right);

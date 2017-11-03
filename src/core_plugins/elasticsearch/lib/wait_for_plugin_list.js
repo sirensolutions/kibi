@@ -7,9 +7,10 @@ module.exports = function (plugin, server) {
   return Promise.all(
     [
       callWithInternalUser('cat.nodes', { h: 'name,node.role,ip', format:'json' }),
-      callWithInternalUser('cat.plugins', { h: 'name,component', format: 'json' })
+      callWithInternalUser('cat.plugins', { h: 'name,component,version', format: 'json' })
     ]
   ).then(([ nodeList, pluginList ]) => {
+    const elasticsearchPluginNames = [];
     const elasticsearchPlugins = [];
 
     if (nodeList && pluginList) {
@@ -25,15 +26,16 @@ module.exports = function (plugin, server) {
 
       // 1 first gather list of all plugins
       _.each(pluginList, function (pluginEntry) {
-        if (elasticsearchPlugins.indexOf(pluginEntry.component) === -1) {
-          elasticsearchPlugins.push(pluginEntry.component);
+        if (elasticsearchPluginNames.indexOf(pluginEntry.component) === -1) {
+          elasticsearchPluginNames.push(pluginEntry.component);
+          elasticsearchPlugins.push(pluginEntry);
         }
         if (pluginEntry.component === 'siren-vanguard') {
           detectedSirenJoin = true;
         }
       });
 
-      config.set('kibi_core.clusterplugins', elasticsearchPlugins);
+      config.set('kibi_core.clusterplugins', elasticsearchPluginNames);
 
       // 2 if siren-vanguard detected verify that it is installed on all data nodes
       if (detectedSirenJoin) {

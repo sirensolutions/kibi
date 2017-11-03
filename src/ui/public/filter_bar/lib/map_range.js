@@ -8,7 +8,13 @@ export default function mapRangeProvider(Promise, courier) {
     .get(filter.meta.index)
     .then(function (indexPattern) {
       const key = Object.keys(filter.range)[0];
-      const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
+      // kibi: handle case where the field is no longer present in the index-pattern
+      const field = indexPattern.fields.byName[key];
+      if (!field) {
+        return Promise.reject(filter);
+      }
+      // kibi: end
+      const convert = field.format.getConverterFor('text');
       const range = filter.range[key];
 
       let left = has(range, 'gte') ? range.gte : range.gt;

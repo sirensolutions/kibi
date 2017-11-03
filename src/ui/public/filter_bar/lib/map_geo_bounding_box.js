@@ -13,6 +13,11 @@ export default function mapGeoBoundBoxProvider(Promise, courier) {
         key = _.keys(filter.geo_bounding_box)
           .filter(key => key !== 'ignore_unmapped')[0];
         field = indexPattern.fields.byName[key];
+        // kibi: handle case where the field is no longer present in the index-pattern
+        if (!field) {
+          return Promise.reject(filter);
+        }
+        // kibi: end
         topLeft = field.format.convert(filter.geo_bounding_box[field.name].top_left);
         bottomRight = field.format.convert(filter.geo_bounding_box[field.name].bottom_right);
         value = topLeft + ' to ' + bottomRight;

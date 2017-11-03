@@ -11,6 +11,11 @@ define(function () {
           key = filter.meta.field;
           field = indexPattern.fields.byName[key];
 
+          // kibi: handle case where the field is no longer present in the index-pattern
+          if (!field) {
+            return Promise.reject(filter);
+          }
+          // kibi: end
           if (filter.meta.formattedValue) {
             value = filter.meta.formattedValue;
           } else {

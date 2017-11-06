@@ -155,10 +155,6 @@ publishing {
         classifier "windows-x86_64"
       }
 
-      artifact(new File("${projectDir}/target", "kibi-${project.version}-linux-x86.zip")) {
-        classifier "linux-x86"
-      }
-
       /**
        * Source artifact
        */

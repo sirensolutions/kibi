@@ -38,7 +38,7 @@ export default (grunt) => {
   };
 
   // kibi: before building the archives we have to swap few native bindings
-  // we already chnaged the versionedLinks.js task to copy node_modules instead of symlinking them
+  // we already changed the versionedLinks.js task to copy node_modules instead of symlinking them
   // now lets swap the bindings
   function copyFile(source, target) {
     return new Promise(function (resolve, reject) {
@@ -66,10 +66,6 @@ export default (grunt) => {
       case 'linux-x86_64':
         sqliteBindingSrc   = `${__dirname}/../../resources/nodesqlite3bindings/${name}/node-${nodeVersion}-linux-x64/node_sqlite3.node`;
         sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-linux-x64';
-        break;
-      case 'linux-x86':
-        sqliteBindingSrc   = `${__dirname}/../../resources/nodesqlite3bindings/${name}/node-${nodeVersion}-linux-ia32/node_sqlite3.node`;
-        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-linux-ia32';
         break;
       case 'windows-x86_64':
         sqliteBindingSrc   = `${__dirname}/../../resources/nodesqlite3bindings/${name}/node-${nodeVersion}-win32-x64/node_sqlite3.node`;

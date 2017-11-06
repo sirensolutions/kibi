@@ -11,7 +11,6 @@ module.exports = function (grunt) {
   return [
     'darwin-x64',
     'linux-x64',
-    'linux-x86', // kibi: we still support linux 32 bit
     'windows-x64'
   ].map(function (baseName) {
     const win = baseName === 'windows-x64';
@@ -39,11 +38,11 @@ module.exports = function (grunt) {
     let debArch;
     let rpmArch;
     if (name.match('linux')) {
-      debArch = name.match('x86_64') ? 'amd64' : 'i386';
+      debArch = 'amd64';
       debName = `kibana-${version}-${debArch}.deb`;
       debPath = resolve(rootPath, `target/${debName}`);
 
-      rpmArch = name.match('x86_64') ? 'x86_64' : 'i686';
+      rpmArch = 'x86_64';
       rpmName = `kibana-${version}-${rpmArch}.rpm`;
       rpmPath = resolve(rootPath, `target/${rpmName}`);
     }

@@ -45,7 +45,7 @@ describe('Filter Bar Directive', function () {
         meta: { index: 'logstash-*' },
         query: { match: { non_existing_field: { query: 'apache', type: 'phrase' } } }
       };
-      mapTerms(filter).catch(function (result) {
+      mapPhrase(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });

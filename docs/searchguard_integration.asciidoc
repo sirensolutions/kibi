@@ -1448,7 +1448,7 @@ Next, replace the kibiserver role with the following settings; If using a custom
 }
 
 Once you log into Kibi, you can configure roles as needed from Kibi's Access Control section. You can find an example role below.
-See the <<access_control_app, Access control app>> section for more information.
+See the <<access_control_app, Access Control>> section for more information.
 
 [source, json]
 {

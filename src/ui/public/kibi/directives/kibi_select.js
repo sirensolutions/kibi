@@ -1,4 +1,5 @@
 import 'ui/kibi/directives/kibi_angular_qtip2';
+import 'ui/kibi/directives/kibi_select.less';
 import { uiModules } from 'ui/modules';
 import kibiUtils from 'kibiutils';
 import _ from 'lodash';

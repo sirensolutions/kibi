@@ -9,7 +9,6 @@ import UrlProvider from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-// import editTemplate from './edit_index_pattern.html';
 
 // kibi: import authorization error
 import { IndexPatternAuthorizationError } from 'ui/errors';
@@ -17,7 +16,7 @@ import { IndexPatternAuthorizationError } from 'ui/errors';
 
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
-    $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal) {
+    $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal, ontologyClient) {
 
   const notify = createNotifier();
   const $state = $scope.state = new AppState();
@@ -98,15 +97,18 @@ uiModules.get('apps/management')
         }
       }
 
-      // kibi: change '$location.url('/management/kibana/index')'
-      // to '$location.url('/management/siren/index')'
-      // changed notify.fatal to notify.error
-      courier.indexPatterns.delete($scope.indexPattern)
+      return courier.indexPatterns.get($scope.indexPattern.id)
+      .then((indexPatternObj) => {
+        // kibi: change '$location.url('/management/kibana/index')'
+        // to '$location.url('/management/siren/entities')'
+        return courier.indexPatterns.delete(indexPatternObj)
         // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
         .then(function () {
-          $location.url('/management/siren/entities');
+          return ontologyClient.deleteEntity(indexPatternObj.id)
+          .then($location.url('/management/siren/entities'));
         })
-        .catch(notify.error);
+        .catch(notify.fatal);
+      });
     }
 
     let removeLabel = 'entity identifier';

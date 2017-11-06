@@ -1002,6 +1002,8 @@ otherwise it is possible to generate the bundle manually by using cat, e.g.:
 $ cat user.crt.pem ca-chain.pem > user.crtfull.pem
 ----
 
+[[access_control_app]]
+
 Once the certificate is setup, restart Kibi, login with a user having an
 administrative role, click on the apps button, then click on **Access control**
 and finally on **Authentication**.
@@ -1421,7 +1423,7 @@ kibi_access_control:
   backend: xpack
 ----
 
-Second, replace the kibiserver role with the following; make sure to set the correct names for the main kibi (.kibi by default) and access control (.kibiaccess by default) indices if using a custom configuration
+Next, replace the kibiserver role with the following settings; If using a custom configuration, replace the kibi (default: .kibi) and access control (default: .kibiaccess) indices with your index names
 
 [source, json]
 {
@@ -1445,7 +1447,8 @@ Second, replace the kibiserver role with the following; make sure to set the cor
   ]
 }
 
-Once you log in to system you can configure roles from Kibi Access Control UI. You can find example role in below.
+Once you log into Kibi, you can configure roles as needed from Kibi's Access Control section. You can find an example role below.
+See the <<access_control_app, Access control app>> section for more information.
 
 [source, json]
 {

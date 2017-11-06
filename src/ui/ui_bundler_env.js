@@ -31,8 +31,6 @@ module.exports = class UiBundlerEnv {
       ui: fromRoot('src/ui/public'),
       test_harness: fromRoot('src/test_harness/public'),
       querystring: 'querystring-browser',
-      // kibi: this alias should be use only for components which have special implementation in kibi enterprise version
-      kibie: fromRoot('src/kibi_plugins/kibi_core/public/ui'),
       // kibi: added test_utils alias to simplify imports
       test_utils: fromRoot('src/test_utils'),
       // kibi: added alias to test folder to simplify imports

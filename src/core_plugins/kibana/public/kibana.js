@@ -21,7 +21,7 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
-import { Notifier } from 'kibie/notify/notifier'; // kibi:
+import { Notifier } from 'ui/notify/notifier';
 import 'leaflet';
 
 routes.enable();

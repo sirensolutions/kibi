@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
 import moment from 'moment';
-import { Notifier } from 'kibie/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import 'ui/timepicker/timepicker.less';
 import 'ui/directives/input_datetime';
 import 'ui/directives/inequality';

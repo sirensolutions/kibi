@@ -5,6 +5,7 @@ import { metadata } from 'ui/metadata';
 import { formatMsg } from 'ui/notify/lib/_format_msg';
 import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
 import 'ui/render_directive';
+import chrome from 'ui/chrome';
 /* eslint no-console: 0 */
 
 const notifs = [];
@@ -92,7 +93,7 @@ const typeToButtonClassMap = {
   info: 'btn-info',
   banner: 'btn-banner'
 };
-// kibi: end
+// kibi:end
 
 const buttonHierarchyClass = (index) => {
   if (index === 0) {
@@ -236,12 +237,13 @@ export function Notifier(opts) {
   // label type thing to say where notifications came from
   self.from = opts.location;
 
-  'event lifecycle timed fatal error warning info banner'.split(' ').forEach(function (m) {
+  'event lifecycle timed fatal error warning info'.split(' ').forEach(function (m) {
     self[m] = _.bind(self[m], self);
   });
 }
 
 Notifier.config = {
+  shieldAuthorizationWarning: true, // kibi: show/hide shield warnings
   bannerLifetime: 3000000,
   errorLifetime: 300000,
   warningLifetime: 10000,
@@ -363,7 +365,7 @@ Notifier.prototype._showFatal = function (err) {
 
   if (!$container.size()) {
     $(document.body)
-      // in case the app has not completed boot
+    // in case the app has not completed boot
     .removeAttr('ng-cloak')
     .html(fatalSplashScreen);
 
@@ -388,16 +390,50 @@ Notifier.prototype.error = function (err, opts, cb) {
     opts = {};
   }
 
-  const config = _.assign({
-    type: 'danger',
-    content: formatMsg(err, this.from),
-    icon: 'warning',
-    title: 'Error',
-    lifetime: Notifier.config.errorLifetime,
-    actions: ['report', 'accept'],
-    stack: formatStack(err)
-  }, _.pick(opts, overrideableOptions));
-  return add(config, cb);
+  // we have to use a replacer to properly stringify javascript error object
+  // without it it would just give you an empty object
+  function replaceErrors(key, value) {
+    if (value instanceof Error) {
+      const error = {};
+      Object.getOwnPropertyNames(value).forEach(function (key) {
+        error[key] = value[key];
+      });
+      return error;
+    }
+    // kibi: if value is greater than 1KB ellipse it
+    if (value && value.length > 1000) {
+      value = value.substring(0, 997) + '...';
+    }
+    return value;
+  }
+
+  const jsonErr = JSON.stringify(err, replaceErrors);
+
+  // kibi: This is added to redirect to the root when one or more XHR calls
+  // fail because the cookie is invalid or expired; an auth plugin
+  // will then redirect to the login page.
+  if (jsonErr && jsonErr.match(/Invalid cookie/)) {
+    window.location.href = chrome.getBasePath();
+  }
+
+  if (jsonErr && jsonErr.match(/.*(unauthorized|security_exception|no permissions|ElasticsearchSecurityException|Forbidden).*/i)) {
+    if (Notifier.config.shieldAuthorizationWarning !== false) {
+      return this.warning(err, opts, cb);
+    } else {
+      console.warn('Shield Authorization Warning: ' + formatMsg(err, this.from));
+    }
+  } else {
+    const config = _.assign({
+      type: 'danger',
+      content: formatMsg(err, this.from),
+      icon: 'warning',
+      title: 'Error',
+      lifetime: Notifier.config.errorLifetime,
+      actions: ['report', 'accept'],
+      stack: formatStack(err)
+    }, _.pick(opts, overrideableOptions));
+    return add(config, cb);
+  }
 };
 
 /**

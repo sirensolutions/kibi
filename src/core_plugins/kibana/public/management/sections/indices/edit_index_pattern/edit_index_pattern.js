@@ -130,12 +130,13 @@ uiModules.get('apps/management')
 
       // kibi: change '$location.url('/management/kibana/index')'
       // to '$location.url('/management/siren/index')'
+      // changed notify.fatal to notify.error
       courier.indexPatterns.delete($scope.indexPattern)
         // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
         .then(function () {
           $location.url('/management/siren/index');
         })
-        .catch(notify.fatal);
+        .catch(notify.error);
     }
 
     const confirmModalOptions = {

@@ -233,8 +233,8 @@ describe('Kibi meta service', function () {
                 done(err);
               }
               sinon.assert.calledTwice(msearchStub);
-              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards' });
-              expect(msearchStub.getCall(1).args[0]).to.eql({ body: query3, getMeta: 'dashboards' });
+              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards__dashboard__dashboard' });
+              expect(msearchStub.getCall(1).args[0]).to.eql({ body: query3, getMeta: 'dashboards__dashboard' });
               sinon.assert.calledOnce(callback1Spy);
               sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
               sinon.assert.calledOnce(callback2Spy);
@@ -292,8 +292,8 @@ describe('Kibi meta service', function () {
                 done(err);
               }
               sinon.assert.calledTwice(msearchStub);
-              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards' });
-              expect(msearchStub.getCall(1).args[0]).to.eql({ body: query3, getMeta: 'dashboards' });
+              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards__dashboard__dashboard' });
+              expect(msearchStub.getCall(1).args[0]).to.eql({ body: query3, getMeta: 'dashboards__dashboard' });
               sinon.assert.calledOnce(callback1Spy);
               sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
               sinon.assert.calledOnce(callback2Spy);
@@ -351,7 +351,7 @@ describe('Kibi meta service', function () {
               // in case a second callback was called twice or with a wrong data from the first call we would like to know
               setTimeout(function () {
                 sinon.assert.calledOnce(msearchStub);
-                expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards' });
+                expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards__dashboard__dashboard' });
                 sinon.assert.calledOnce(callback1Spy);
                 sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
                 sinon.assert.calledOnce(callback2Spy);
@@ -404,7 +404,7 @@ describe('Kibi meta service', function () {
                 done(err);
               }
               sinon.assert.calledOnce(msearchStub);
-              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards' });
+              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query2, getMeta: 'dashboards__dashboard__dashboard' });
               sinon.assert.calledOnce(callback1Spy);
               sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
               sinon.assert.calledOnce(callback2Spy);
@@ -447,8 +447,8 @@ describe('Kibi meta service', function () {
               done(err);
             }
             sinon.assert.calledTwice(msearchStub);
-            expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1, getMeta: 'dashboards' });
-            expect(msearchStub.getCall(1).args[0]).to.eql({ body: query1, getMeta: 'dashboards' });
+            expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1, getMeta: 'dashboards__dashboard' });
+            expect(msearchStub.getCall(1).args[0]).to.eql({ body: query1, getMeta: 'dashboards__dashboard' });
             sinon.assert.calledOnce(callback1Spy);
             sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
             done();
@@ -481,8 +481,8 @@ describe('Kibi meta service', function () {
               done(err);
             }
             sinon.assert.calledTwice(msearchStub);
-            expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1, getMeta: 'dashboards' });
-            expect(msearchStub.getCall(1).args[0]).to.eql({ body: query1, getMeta: 'dashboards' });
+            expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1, getMeta: 'dashboards__dashboard' });
+            expect(msearchStub.getCall(1).args[0]).to.eql({ body: query1, getMeta: 'dashboards__dashboard' });
             sinon.assert.calledOnce(callback1Spy);
             sinon.assert.calledWith(callback1Spy, new Error(
               'Could not fetch meta for ' +

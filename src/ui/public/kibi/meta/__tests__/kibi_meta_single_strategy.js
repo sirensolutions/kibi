@@ -110,8 +110,8 @@ describe('Kibi meta service - single strategy', function () {
           // then
           // first call should have queries 1 and 2 for index_A
           // second call should have queries 3 and 4 for index_B
-          expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query3, getMeta: 'default' });
-          expect(msearchStub.getCall(1).args[0]).to.eql({ body: query2 + query4, getMeta: 'default' });
+          expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1 + query3, getMeta: 'default__dashboard__dashboard' });
+          expect(msearchStub.getCall(1).args[0]).to.eql({ body: query2 + query4, getMeta: 'default__dashboard__dashboard' });
 
           sinon.assert.calledOnce(callback1Spy);
           sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);

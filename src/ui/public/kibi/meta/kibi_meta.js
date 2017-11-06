@@ -1,5 +1,5 @@
 import lru from 'lru-cache';
-import { each, map } from 'lodash';
+import { each, map, cloneDeep } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { countStrategyValidator } from 'ui/kibi/meta/strategy_validator';
 
@@ -107,7 +107,7 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
      */
     getMetaForDashboards(dashboards = []) {
       each(dashboards, d => {
-        this._addToQueue(d, this.dashboardStrategyName);
+        this._addToQueue(d, this.dashboardStrategyName, 'dashboard');
       });
       this._processSingleQueue(this.dashboardStrategyName);
     }
@@ -129,14 +129,21 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
      */
     getMetaForRelationalButtons(buttons = []) {
       each(buttons, b => {
-        this._addToQueue(b, this.relFilterStrategyName);
+        this._addToQueue(b, this.relFilterStrategyName, 'button');
       });
       this._processSingleQueue(this.relFilterStrategyName);
     }
 
-    _addToQueue(o, queueName) {
+    _addToQueue(o, queueName, debugType) {
+      // first validate
       this._checkDefinition(o, queueName);
-      this.queues[queueName].push(o);
+      // clone the definition to avoid surprises that the definition is changed while inside the queue
+      const obj = {
+        definition: cloneDeep(o.definition),
+        callback: o.callback
+      };
+      obj.definition._debug_type = debugType;
+      this.queues[queueName].push(obj);
     }
 
     _checkDefinition(d, queueName) {
@@ -229,18 +236,31 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       }
 
       // fire the msearch
-      const query = map(toProcess, o => o.definition.query).join('');
+      let query = '';
+      let debugInfo = '';
 
-      // set counters before sending the request
-      each(toProcess, o =>{
-        o._sentCounter = this._updateCounter(o.definition.id, 'sent');
-      });
+      for (let i = 0; i < toProcess.length; i++) {
+        // set counters before sending the request
+        toProcess[i]._sentCounter = this._updateCounter(toProcess[i].definition.id, 'sent');
+        // compose query and debug info
+        query += toProcess[i].definition.query;
+        debugInfo += toProcess[i].definition._debug_type;
+        if (i !== toProcess.length - 1) {
+          debugInfo += '__';
+        };
+      }
 
       strategy._requestInProgress++;
 
       const payload = {
         body: query,
-        getMeta: queueName // ?getMeta= has no meaning it is just useful to filter by specific strategy
+        // NOTE:
+        // ?getMeta= has no meaning for elasticsearch
+        // it is just useful to filter by specific strategy name
+        // or to quickly know for what objects the individual queries where
+        // e.g.: if the strategy name is default, first query is for dashboard and the second in for a button
+        // the getMeta=getMeta=default__dashboard__button
+        getMeta: queueName + '__' + debugInfo
       };
 
       es

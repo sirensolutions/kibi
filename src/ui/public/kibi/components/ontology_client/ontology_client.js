@@ -13,6 +13,16 @@ uiModules
     this._cachedEntitiesMap = {};
   }
 
+  OntologyClient.prototype._encodeUrl = function (str) {
+    return encodeURIComponent(str)
+    .replace(/!/g, '%21')
+    .replace(/'/g, '%27')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29')
+    .replace(/\*/g, '%2A')
+    .replace(/%20/g, '+');
+  };
+
   OntologyClient.prototype._decodeUrl = function (str) {
     const encodedUrl = str.replace(/%21/g, '!')
     .replace(/%27/g, '\'')
@@ -34,16 +44,6 @@ uiModules
     }
     const value = this._removeNs(str);
     return this._decodeUrl(value);
-  };
-
-  OntologyClient.prototype._encodeUrl = function (str) {
-    return encodeURIComponent(str)
-    .replace(/!/g, '%21')
-    .replace(/'/g, '%27')
-    .replace(/\(/g, '%28')
-    .replace(/\)/g, '%29')
-    .replace(/\*/g, '%2A')
-    .replace(/%20/g, '+');
   };
 
   /*
@@ -212,16 +212,15 @@ uiModules
     .then((ranges) => {
       const indexPatterns = new Set(_.map(ranges, 'indexPattern'));
       return savedDashboards.find().then(function (dashboards) {
-        const promises = [];
-        _.each(dashboards.hits, (dashboard) => {
-          promises.push(savedSearches.get(dashboard.savedSearchId).then((savedSearch) => {
+        const promises = _.map(dashboards.hits, (dashboard) => {
+          savedSearches.get(dashboard.savedSearchId).then((savedSearch) => {
             if (savedSearch.kibanaSavedObjectMeta && savedSearch.kibanaSavedObjectMeta.searchSourceJSON) {
               const index = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON).index;
               if (indexPatterns.has(index)) {
                 return dashboard;
               }
             }
-          }));
+          });
         });
         return Promise.all(promises).then((dashboards) => {
           return _.filter(dashboards, (dashboard) => {
@@ -236,13 +235,10 @@ uiModules
    * Inserts a list of relations into the relational model.
    */
   OntologyClient.prototype.insertRelations = function (relations) {
-    return queryEngineClient.schema({
+    return this._executeSchemaAndClearCache({
       path: '/schema/relations',
       method: 'POST',
       data: relations
-    })
-    .then(() => {
-      this.clearCache();
     });
   };
 
@@ -254,13 +250,10 @@ uiModules
       return Promise.reject('Missing entity id');
     } else {
       const encodedId = this._encodeUrl(entity.id);
-      return queryEngineClient.schema({
+      return this._executeSchemaAndClearCache({
         path: '/schema/entity/' + encodedId,
         method: 'POST',
         data: entity
-      })
-      .then(() => {
-        this.clearCache();
       });
     }
   };
@@ -270,13 +263,10 @@ uiModules
    */
   OntologyClient.prototype.updateWithQuery = function (query) {
     if (query) {
-      return queryEngineClient.schema({
+      return this._executeSchemaAndClearCache({
         path: '/schema/update',
         method: 'POST',
         data: { query: query }
-      })
-      .then(() => {
-        this.clearCache();
       });
     } else {
       return Promise.reject('You are trying to issue a SPARQL update with an empty query');
@@ -288,13 +278,10 @@ uiModules
    */
   OntologyClient.prototype.updateEntity = function (entity) {
     const encodedId = this._encodeUrl(entity.id);
-    return queryEngineClient.schema({
+    return this._executeSchemaAndClearCache({
       path: '/schema/entity/' + encodedId,
       method: 'PUT',
       data: entity
-    })
-    .then(() => {
-      this.clearCache();
     });
   };
 
@@ -302,12 +289,9 @@ uiModules
    * Delete an entity by id.
    */
   OntologyClient.prototype.deleteEntity = function (entityId) {
-    return queryEngineClient.schema({
+    return this._executeSchemaAndClearCache({
       path: '/schema/entity/' + this._encodeUrl(entityId),
       method: 'DELETE'
-    })
-    .then(() => {
-      this.clearCache();
     });
   };
 
@@ -315,10 +299,22 @@ uiModules
    * Delete all relations having the passed entity as domain or range.
    */
   OntologyClient.prototype.deleteByDomainOrRange = function (entityId) {
-    return queryEngineClient.schema({
+    return this._executeSchemaAndClearCache({
       path: '/schema/relationByDomainOrRange/' + this._encodeUrl(entityId),
       method: 'DELETE'
-    })
+    });
+  };
+
+  OntologyClient.prototype._executeSchemaAndClearCache = function (options) {
+    const params = {
+      path: options.path,
+      method: options.method
+    };
+    if (options.entity) {
+      params.entity = options.enity;
+    }
+
+    return queryEngineClient.schema(params)
     .then(() => {
       this.clearCache();
     });

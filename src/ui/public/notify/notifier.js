@@ -86,12 +86,15 @@ function restartNotifTimer(notif, cb) {
   startNotifTimer(notif, cb);
 }
 
+// kibi: button classes is changed
 const typeToButtonClassMap = {
   danger: 'btn-danger', // NOTE: `error` type is internally named as `danger`
   warning: 'btn-warning',
   info: 'btn-info',
   banner: 'btn-banner'
 };
+// kibi:end
+
 const buttonHierarchyClass = (index) => {
   if (index === 0) {
     // first action: primary className

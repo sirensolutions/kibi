@@ -4,6 +4,7 @@ import { getHighlightRequestProvider } from '../highlight_request';
 
 describe('getHighlightRequest', () => {
   const queryStringQuery = { query_string: { query: 'foo' } };
+  const defaultWildcardQuery = { query_string: { query: '*', analyze_wildcard: false } };
   const queryStringWithDefaultFieldQuery = { query_string: { query: 'foo', default_field: 'bar' } };
   const queryStringWithFieldQuery = { query_string: { query: 'foo', fields: ['bar'] } };
   const rangeQuery = { range: { '@timestamp': { gte: 0, lte: 0 } } };
@@ -25,17 +26,21 @@ describe('getHighlightRequest', () => {
   let previousHighlightConfig;
   let previousAllFieldsConfig;
   let getHighlightRequest;
+  let previousQueryStringOptions;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_config_) {
     config = _config_;
     previousHighlightConfig = config.get('doc_table:highlight');
     previousAllFieldsConfig = config.get('doc_table:highlight:all_fields');
+    previousQueryStringOptions = config.get('query:queryString:options');
+    config.set('query:queryString:options', '{"analyze_wildcard": false}');
   }));
 
   afterEach(() => {
     config.set('doc_table:highlight', previousHighlightConfig);
     config.set('doc_table:highlight:all_fields', previousAllFieldsConfig);
+    config.set('query:queryString:options', previousQueryStringOptions);
   });
 
   it('should be a function', () => {
@@ -89,6 +94,22 @@ describe('getHighlightRequest', () => {
       expect(request.fields['*'].highlight_query.bool.must[0].query_string).to.have.property('all_fields');
     });
 
+  });
+
+  it('should replace the default wildcard highlight query with a match_all query', () => {
+    const query = {
+      bool: {
+        must: [defaultWildcardQuery]
+      }
+    };
+
+    getHighlightRequest = getHighlightRequestProvider(config);
+    const request = getHighlightRequest(query);
+
+    expect(request.fields['*']).to.have.property('highlight_query');
+    expect(request.fields['*'].highlight_query.bool.must).to.have.length(1);
+    expect(request.fields['*'].highlight_query.bool.must[0]).to.have.property('match_all');
+    expect(Object.keys(request.fields['*'].highlight_query.bool.must[0].match_all)).to.have.length(0);
   });
   // kibi: end
 

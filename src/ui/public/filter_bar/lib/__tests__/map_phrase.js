@@ -39,5 +39,18 @@ describe('Filter Bar Directive', function () {
       $rootScope.$apply();
     });
 
+    // kibi:
+    it('should reject when field no longer exists in the index', function (done) {
+      const filter = {
+        meta: { index: 'logstash-*' },
+        query: { match: { non_existing_field: { query: 'apache', type: 'phrase' } } }
+      };
+      mapPhrase(filter).catch(function (result) {
+        expect(result).to.be(filter);
+        done();
+      });
+      $rootScope.$apply();
+    });
+    // kibi: end
   });
 });

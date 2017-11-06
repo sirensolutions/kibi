@@ -13,7 +13,13 @@ export function FilterBarLibMapRangeProvider(Promise, courier) {
     .then(function (indexPattern) {
       const type = 'range';
       const key = isScriptedRangeFilter ? filter.meta.field : Object.keys(filter.range)[0];
-      const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
+      // kibi: handle case where the field is no longer present in the index-pattern
+      const field = indexPattern.fields.byName[key];
+      if (!field) {
+        return Promise.reject(filter);
+      }
+      // kibi: end
+      const convert = field.format.getConverterFor('text');
       const range = isScriptedRangeFilter ? filter.script.script.params : filter.range[key];
 
       let left = has(range, 'gte') ? range.gte : range.gt;

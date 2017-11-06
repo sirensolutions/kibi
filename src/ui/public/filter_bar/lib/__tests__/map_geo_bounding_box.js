@@ -74,5 +74,27 @@ describe('Filter Bar Directive', function () {
       $rootScope.$apply();
     });
 
+    // kibi:
+    it('should reject when field no longer exists in the index', function (done) {
+      const filter = {
+        meta: {
+          index: 'logstash-*'
+        },
+        geo_bounding_box: {
+          ignore_unmapped: true,
+          non_existing_field: { // field name
+            top_left: { lat: 5, lon: 10 },
+            bottom_right: { lat: 15, lon: 20 }
+          }
+        }
+      };
+      mapGeoBoundingBox(filter).catch(function (result) {
+        expect(result).to.be(filter);
+        done();
+      });
+      $rootScope.$apply();
+    });
+    // kibi: end
+
   });
 });

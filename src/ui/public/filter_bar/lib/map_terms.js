@@ -10,6 +10,11 @@ export default function mapTermsProvider(Promise, courier) {
       .get(filter.meta.index).then(function (indexPattern) {
         key = _.keys(filter.query.match)[0];
         field = indexPattern.fields.byName[key];
+        // kibi: handle case where the field is no longer present in the index-pattern
+        if (!field) {
+          return Promise.reject(filter);
+        }
+        // kibi: end
         value = filter.query.match[key].query;
         value = field.format.convert(value);
         return { key: key, value: value };

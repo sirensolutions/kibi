@@ -176,7 +176,7 @@ simply remove the file create by `kinit`.
 Kerberos authentication support requires the installation of the commercial
 Search Guard Kerberos HTTP Authentication add-on; to install it, download the
 correct jar for your Search Guard version from {searchguard-kerberos-ref}[this
-page] and copy it to the `plugins/search-guard-2` directory on each node.
+page] and copy it to the `plugins/search-guard-5` directory on each node.
 
 [float]
 ==== Kerberos configuration file

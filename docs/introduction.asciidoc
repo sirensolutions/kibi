@@ -3,7 +3,7 @@
 
 Kibi is an open source data intelligence platform built upon
 {kibana-announcement}[Kibana {kibana-version}].
-Kibi {kibi-version} supports Elasticsearch {elasticsearch-version}
+Kibi {version} supports Elasticsearch {elasticsearch-version}
 and the Vanguard plugin version {vanguard-version}. The Siren Vanguard plugin replaces the Siren Join plugin for distribution based on Elasticsearch 5.x.
 
 Kibi allows you to perform complex analytics on large volumes of data by providing

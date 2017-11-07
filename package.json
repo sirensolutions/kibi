@@ -160,7 +160,7 @@
     "jsonpath": "0.2.5",
     "jstimezonedetect": "1.0.5",
     "kibi-h2o2": "sirensolutions/h2o2#5.4.0-kibi-1",
-    "kibi-icons": "sirensolutions/kibi-icons#1.0.0",
+    "kibi-icons": "sirensolutions/kibi-icons#1.1.0",
     "kibiutils": "sirensolutions/kibiutils#1.9.0",
     "leaflet": "0.7.5",
     "less": "2.7.1",

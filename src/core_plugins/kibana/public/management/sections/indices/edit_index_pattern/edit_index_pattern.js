@@ -16,7 +16,7 @@ import { IndexPatternAuthorizationError } from 'ui/errors';
 
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
-    $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal, ontologyClient) {
+    $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal, ontologyClient, kbnUrl) {
 
   const notify = createNotifier();
   const $state = $scope.state = new AppState();
@@ -105,7 +105,7 @@ uiModules.get('apps/management')
         // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
         .then(function () {
           return ontologyClient.deleteEntity(indexPatternObj.id)
-          .then($location.url('/management/siren/entities'));
+          .then(kbnUrl.change('/management/siren/entities'));
         })
         .catch(notify.fatal);
       });

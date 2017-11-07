@@ -115,7 +115,7 @@ uiModules
     return this.getRelations()
     .then((relations) => {
       const filteredRelations = _.filter(relations, (rel) => {
-        return rel.domain.indexPattern === domainId;
+        return rel.domain.id === domainId;
       });
       return filteredRelations;
     });

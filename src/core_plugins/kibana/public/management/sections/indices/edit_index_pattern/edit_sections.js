@@ -34,6 +34,11 @@ export function IndicesEditSectionsProvider() {
           title: 'source filters',
           index: 'sourceFilters',
           count: fieldCount.sourceFilters
+        },
+        {
+          title: 'relations',
+          index: 'entityRelations',
+          count: fieldCount.relations
         }
       ];
     } else {
@@ -45,6 +50,11 @@ export function IndicesEditSectionsProvider() {
         {
           title: 'generic',
           index: 'indexOptions'
+        },
+        {
+          title: 'relations',
+          index: 'entityRelations',
+          count: fieldCount.relations
         }
       ];
     }

@@ -55,7 +55,7 @@
           ></kbn-management-index-header>
 
           <kbn-management-index-header
-            ng-if="state.tab === 'entitiesRelations'"
+            ng-if="state.tab === 'entityRelations'"
             entity="indexPattern"
             save="saveRelations()"
             delete="removePattern('/management/siren/entities')"
@@ -155,7 +155,7 @@
           <!-- Field Filters -->
           <form role="form"
                 class="kuiFieldGroup kuiVerticalRhythm"
-                ng-if="state.tab !== 'indexOptions' && state.tab !== 'entitiesRelations'
+                ng-if="state.tab !== 'indexOptions' && state.tab !== 'entityRelations'
                   && selectedMenuItem"
           >
             <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
@@ -211,7 +211,7 @@
           ></index-options>
 
           <indexed-fields-table
-            ng-if="entity.type === 'INDEX_PATTERN' && state.tab === 'indexedFields'"
+            ng-show="entity.type === 'INDEX_PATTERN' && state.tab === 'indexedFields'"
             class="fields indexed-fields"
           ></indexed-fields-table>
 
@@ -226,10 +226,10 @@
             class="fields source-filters"
           ></source-filters-table>
 
-          <!-- <entities-relations
-            ng-show="state.tab === 'entitiesRelations'"
+          <entity-relations
+            ng-show="state.tab === 'entityRelations'"
             class="fields index-options"
-          ></entities-relations> -->
+          ></entity-relations>
         </div>
       </div>
     </div>

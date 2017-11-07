@@ -28,7 +28,7 @@ the current cluster configuration through the `sgadmin` tool;
 after the upgrade, you'll need to change these files with new
 permission identifiers and reload it to the cluster.
 
-`sgadmin.sh` is available in the _plugins/search-guard-2/tools_ directory on
+`sgadmin.sh` is available in the _plugins/search-guard-5/tools_ directory on
 each Elasticsearch instance in which Search Guard has been installed; a
 standalone version (`sgadmin-standalone.zip`) can be downloaded from
 {searchguard-sgadmin-ref}[this page].

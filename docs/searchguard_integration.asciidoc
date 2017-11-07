@@ -218,7 +218,7 @@ in the cluster, so it is not necessary to copy the Search Guard configuration
 directory to all the Elasticsearch nodes, just on the node from where sgadmin
 is run.
 
-`sgadmin.sh` is available in the _plugins/search-guard-2/tools_ directory in
+`sgadmin.sh` is available in the _plugins/search-guard-5/tools_ directory in
 each Elasticsearch instance in which Search Guard has been installed; a
 standalone version (`sgadmin-standalone.zip`) can be downloaded from
 {searchguard-sgadmin-ref}[this page].
@@ -628,7 +628,7 @@ documentation].
 [source,yaml]
 ----
 # Internal user database
-# The hash value is a bcrypt hash and can be generated with plugins/searchguard-2/tools/hash.sh
+# The hash value is a bcrypt hash and can be generated with plugins/search-guard-5/tools/hash.sh
 admin:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 kibiserver:
@@ -655,12 +655,12 @@ stored as hashes in the _hash_ attribute beneath each username.
 The password for all the accounts above is _password_.
 
 To change the password of a user, you will need to generate the corresponding
-hash; this can be done by executing the _plugins/search-guard-2/tools/hash.sh_
+hash; this can be done by executing the _plugins/search-guard-5/tools/hash.sh_
 script as follows:
 
 [source,bash]
 ----
-$ bash plugins/search-guard-2/tools/hash.sh -p password
+$ bash plugins/search-guard-5/tools/hash.sh -p password
 ----
 
 The script will output the hash for the password specified after the _-p_
@@ -710,11 +710,11 @@ a client certificate are identified by the Distinguished Name in the certificate
 
 To upload the configuration defined in the previous steps, go to the
 Elasticsearch directory and execute the
-_plugins/search-guard-2/tools/sgadmin.sh_ script as follows:
+_plugins/search-guard-5/tools/sgadmin.sh_ script as follows:
 
 [source,bash]
 ----
-$ bash plugins/search-guard-2/tools/sgadmin.sh \
+$ bash plugins/search-guard-5/tools/sgadmin.sh \
   -cd config/sgconfig \
   -cn kibi-distribution \
   -ts config/truststore.jks \
@@ -731,7 +731,7 @@ To reload the configuration you have to use the same same command with the
 
 [source,bash]
 ----
-$ bash plugins/search-guard-2/tools/sgadmin.sh \
+$ bash plugins/search-guard-5/tools/sgadmin.sh \
   -rl
   -cn kibi-distribution \
   -ts config/truststore.jks \
@@ -945,7 +945,7 @@ users.
 To install the Search Guard REST Management API add-on it is required
 to download the correct jar for your Elasticsearch / Search Guard version
 from {searchguard-management-api-ref}[this page]
-and copy it to the `plugins/search-guard-2` directory of each node in the
+and copy it to the `plugins/search-guard-5` directory of each node in the
 cluster.
 
 To access the API it is required to use a client certificate with

@@ -16,7 +16,7 @@ that it works as expected.
 JWT authentication support require the installation of the commercial Search
 Guard Kerberos JWT HTTP Authentication add-on; to install it, download the
 correct jar for your Search Guard version from {searchguard-jwt-ref}[this page]
-and copy it to the `plugins/search-guard-2` directory on each node, then
+and copy it to the `plugins/search-guard-5` directory on each node, then
 perform a rolling restart of the cluster.
 
 [float]

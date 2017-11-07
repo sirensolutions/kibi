@@ -79,13 +79,9 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
     setStrategy(strategy) {
       this.strategies[strategy.name] = strategy;
       // set counters
-      this._setDefaultMeta(strategy.name);
+      this.updateStrategy(strategy.name, '_requestInProgress', 0);
       // set queue
       this._setQueue(strategy.name);
-    }
-
-    _setDefaultMeta(strategyName) {
-      this.strategies[strategyName]._requestInProgress = 0;
     }
 
     _setQueue(strategyName) {
@@ -134,29 +130,29 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       this._processSingleQueue(this.relFilterStrategyName);
     }
 
-    _addToQueue(o, queueName, debugType) {
+    _addToQueue(definitionObject, queueName, debugType) {
       // first validate
-      this._checkDefinition(o, queueName);
+      this._checkDefinition(definitionObject, queueName);
       // clone the definition to avoid surprises that the definition is changed while inside the queue
       const obj = {
-        definition: cloneDeep(o.definition),
-        callback: o.callback
+        definition: cloneDeep(definitionObject.definition),
+        callback: definitionObject.callback
       };
       obj.definition._debug_type = debugType;
       this.queues[queueName].push(obj);
     }
 
-    _checkDefinition(d, queueName) {
-      if (!d.definition) {
+    _checkDefinition(definitionObject, queueName) {
+      if (!definitionObject.definition) {
         throw new Error(
-          'Wrong ' + queueName + ' definition: ' + JSON.stringify(d) +
-          '. Defintion requires a definition object like { id: ID, query: query}'
+          'Wrong ' + queueName + ' definition: ' + JSON.stringify(definitionObject) +
+          '. Definition requires a definition object like { id: ID, query: query}'
         );
       }
-      if (!d.definition.id || !d.definition.query) {
+      if (!definitionObject.definition.id || !definitionObject.definition.query) {
         throw new Error(
-          'Wrong ' + queueName + ' definition object: ' + JSON.stringify(d.definition) +
-          '. Defintion object requires two mandatory properties: id and query'
+          'Wrong ' + queueName + ' definition object: ' + JSON.stringify(definitionObject.definition) +
+          '. Definition object requires two mandatory properties: id and query'
         );
       }
     }
@@ -179,6 +175,18 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       return this.counters[id][type];
     }
 
+    _getSortedIndices(definitionObject) {
+      const query = definitionObject.definition.query;
+      const queryParts = query.split('\n');
+      const metaPart = queryParts[0];
+      const meta = JSON.parse(metaPart);
+      const index = meta.index;
+      if (index instanceof Array) {
+        index.sort();
+      }
+      return JSON.stringify(index);
+    }
+
     _processSingleQueue(queueName) {
       const strategy = this.strategies[queueName];
       // check if there is request in progress
@@ -189,26 +197,13 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
 
       const queue = this.queues[queueName];
 
-      // sort queue by target index name
-      queue.sort(function (a, b) {
-        const queryA = a.definition.query;
-        const queryB = b.definition.query;
-        const queryAParts = queryA.split('\n');
-        const queryBParts = queryB.split('\n');
-        const metaPartA = queryAParts[0];
-        const metaPartB = queryBParts[0];
-        const metaA = JSON.parse(metaPartA);
-        const metaB = JSON.parse(metaPartB);
-        const indexA = metaA.index;
-        const indexB = metaB.index;
-        if (indexA instanceof Array) {
-          indexA.sort();
-        }
-        if (indexB instanceof Array) {
-          indexB.sort();
-        }
-        const aString = JSON.stringify(indexA);
-        const bString = JSON.stringify(indexB);
+      // NOTE:
+      // Sort queue by target index name/s
+      // Done to increase the chance of parts of queries beeing reused
+      // by Vanguard during join computation while processing single msearch request
+      queue.sort((a, b) => {
+        const aString = this._getSortedIndices(a);
+        const bString = this._getSortedIndices(b);
         return aString.localeCompare(bString);
       });
 
@@ -218,7 +213,7 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       for (let i = 0; i < n; i++) {
         const o = queue.shift();
         if (this.cache && this.cache.get(o.definition.query)) {
-          o.callback(undefined, this.cache.get(o.definition.query));
+          o.callback(null, this.cache.get(o.definition.query));
           continue;
         }
         toProcess.push(o);
@@ -258,8 +253,8 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
         // ?getMeta= has no meaning for elasticsearch
         // it is just useful to filter by specific strategy name
         // or to quickly know for what objects the individual queries where
-        // e.g.: if the strategy name is default, first query is for dashboard and the second in for a button
-        // the getMeta=getMeta=default__dashboard__button
+        // e.g.: if the strategy name is default, first query is for dashboard and the second is for a button
+        // the getMeta=default__dashboard__button
         getMeta: queueName + '__' + debugInfo
       };
 
@@ -278,7 +273,7 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
             // do not execute callback from this old request which have just arrived;
             return;
           }
-          o.callback(undefined, hit);
+          o.callback(null, hit);
         });
 
         // maybe move this to finally

@@ -35,13 +35,13 @@ export function countStrategyValidator(strategy) {
   }
 
   if (strategy.batchSize < 1) {
-    throwShouldValidInteger('batchSize', '>= 1');
+    throwShouldValidInteger('batchSize', 'greater than or equal to 1');
   }
   if (strategy.retryOnError < 0) {
-    throwShouldValidInteger('retryOnError', '>= 0');
+    throwShouldValidInteger('retryOnError', 'greater than or equal to 0');
   }
   if (strategy.parallelRequests < 1) {
-    throwShouldValidInteger('parallelRequests', '>=1');
+    throwShouldValidInteger('parallelRequests', 'greater than or equal to 1');
   }
 
   return strategy;

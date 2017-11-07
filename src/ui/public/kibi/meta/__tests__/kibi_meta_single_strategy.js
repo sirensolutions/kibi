@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
-import pollUntil from 'ui//kibi/directives/__tests__/_poll_until.js';
+import pollUntil from 'ui/kibi/directives/__tests__/_poll_until.js';
 
 describe('Kibi meta service - single strategy', function () {
 
@@ -114,13 +114,13 @@ describe('Kibi meta service - single strategy', function () {
           expect(msearchStub.getCall(1).args[0]).to.eql({ body: query2 + query4, getMeta: 'default__dashboard__dashboard' });
 
           sinon.assert.calledOnce(callback1Spy);
-          sinon.assert.calledWith(callback1Spy, undefined, expectedMeta1);
+          sinon.assert.calledWith(callback1Spy, null, expectedMeta1);
           sinon.assert.calledOnce(callback2Spy);
-          sinon.assert.calledWith(callback2Spy, undefined, expectedMeta2);
+          sinon.assert.calledWith(callback2Spy, null, expectedMeta2);
           sinon.assert.calledOnce(callback3Spy);
-          sinon.assert.calledWith(callback3Spy, undefined, expectedMeta3);
+          sinon.assert.calledWith(callback3Spy, null, expectedMeta3);
           sinon.assert.calledOnce(callback4Spy);
-          sinon.assert.calledWith(callback4Spy, undefined, expectedMeta4);
+          sinon.assert.calledWith(callback4Spy, null, expectedMeta4);
 
           sinon.assert.callOrder(callback1Spy, callback3Spy, callback2Spy, callback4Spy);
           done();

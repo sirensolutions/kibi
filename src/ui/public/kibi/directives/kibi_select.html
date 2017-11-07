@@ -30,6 +30,7 @@
 
   <input ng-show="getVariable" type="text" ng-model="modelObject.value" class="form-control"/>
   <select
+    class="kibi-select"
     ng-class="{ 'form-control' : true, 'ng-invalid' : isInvalid() }"
     ng-show="!getVariable"
     ng-model="modelObject"

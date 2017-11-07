@@ -1,6 +1,7 @@
 import lru from 'lru-cache';
-import { each, map } from 'lodash';
+import { each, map, cloneDeep } from 'lodash';
 import { uiModules } from 'ui/modules';
+import { countStrategyValidator } from 'ui/kibi/meta/strategy_validator';
 
 function KibiMetaProvider(createNotifier, kibiState, es, config) {
 
@@ -42,17 +43,19 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       // in order to make sure we are not executing
       // a callback from a previous object for particular id
       // while later one was already executed
-      // we need to track this in the 2 maps
+      // we need to track this in the counters maps
       this.counters = {};
 
-      this.queues = {
-        buttons: [],
-        dashboards: []
-      };
-
+      this.queues = {};
       this.strategies = {};
-      this.setStrategy('dashboards', config.get('kibi:countFetchingStrategyDashboards'));
-      this.setStrategy('buttons', config.get('kibi:countFetchingStrategyRelationalFilters'));
+      const dashboardStrategy = config.get('kibi:countFetchingStrategyDashboards');
+      this._validateStrategy(dashboardStrategy);
+      this.setStrategy(dashboardStrategy);
+      this.dashboardStrategyName = dashboardStrategy.name;
+      const relFilterStrategy = config.get('kibi:countFetchingStrategyRelationalFilters');
+      this._validateStrategy(relFilterStrategy);
+      this.setStrategy(relFilterStrategy);
+      this.relFilterStrategyName = relFilterStrategy.name;
     }
 
     flushCache() {
@@ -65,14 +68,24 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       });
     }
 
-    setStrategy(strategyName, strategy) {
-      this.strategies[strategyName] = strategy;
-      // set counters
-      this._setDefaultMeta(strategyName);
+    _validateStrategy(strategy) {
+      try {
+        countStrategyValidator(strategy);
+      } catch (e) {
+        notify.error(e.message);
+      }
     }
 
-    _setDefaultMeta(strategyName) {
-      this.strategies[strategyName]._requestInProgress = 0;
+    setStrategy(strategy) {
+      this.strategies[strategy.name] = strategy;
+      // set counters
+      this.updateStrategy(strategy.name, '_requestInProgress', 0);
+      // set queue
+      this._setQueue(strategy.name);
+    }
+
+    _setQueue(strategyName) {
+      this.queues[strategyName] = [];
     }
 
     updateStrategy(strategyName, propertyName, propertyValue) {
@@ -90,9 +103,9 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
      */
     getMetaForDashboards(dashboards = []) {
       each(dashboards, d => {
-        this._addToQueue(d, 'dashboards');
+        this._addToQueue(d, this.dashboardStrategyName, 'dashboard');
       });
-      this._processSingleQueue('dashboards');
+      this._processSingleQueue(this.dashboardStrategyName);
     }
 
     /*
@@ -112,27 +125,34 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
      */
     getMetaForRelationalButtons(buttons = []) {
       each(buttons, b => {
-        this._addToQueue(b, 'buttons');
+        this._addToQueue(b, this.relFilterStrategyName, 'button');
       });
-      this._processSingleQueue('buttons');
+      this._processSingleQueue(this.relFilterStrategyName);
     }
 
-    _addToQueue(o, queueName) {
-      this._checkDefinition(o, queueName);
-      this.queues[queueName].push(o);
+    _addToQueue(definitionObject, queueName, debugType) {
+      // first validate
+      this._checkDefinition(definitionObject, queueName);
+      // clone the definition to avoid surprises that the definition is changed while inside the queue
+      const obj = {
+        definition: cloneDeep(definitionObject.definition),
+        callback: definitionObject.callback
+      };
+      obj.definition._debug_type = debugType;
+      this.queues[queueName].push(obj);
     }
 
-    _checkDefinition(d, queueName) {
-      if (!d.definition) {
+    _checkDefinition(definitionObject, queueName) {
+      if (!definitionObject.definition) {
         throw new Error(
-          'Wrong ' + queueName + ' definition: ' + JSON.stringify(d) +
-          '. Defintion requires a definition object like { id: ID, query: query}'
+          'Wrong ' + queueName + ' definition: ' + JSON.stringify(definitionObject) +
+          '. Definition requires a definition object like { id: ID, query: query}'
         );
       }
-      if (!d.definition.id || !d.definition.query) {
+      if (!definitionObject.definition.id || !definitionObject.definition.query) {
         throw new Error(
-          'Wrong ' + queueName + ' definition object: ' + JSON.stringify(d.definition) +
-          '. Defintion object requires two mandatory properties: id and query'
+          'Wrong ' + queueName + ' definition object: ' + JSON.stringify(definitionObject.definition) +
+          '. Definition object requires two mandatory properties: id and query'
         );
       }
     }
@@ -155,6 +175,18 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       return this.counters[id][type];
     }
 
+    _getSortedIndices(definitionObject) {
+      const query = definitionObject.definition.query;
+      const queryParts = query.split('\n');
+      const metaPart = queryParts[0];
+      const meta = JSON.parse(metaPart);
+      const index = meta.index;
+      if (index instanceof Array) {
+        index.sort();
+      }
+      return JSON.stringify(index);
+    }
+
     _processSingleQueue(queueName) {
       const strategy = this.strategies[queueName];
       // check if there is request in progress
@@ -164,13 +196,24 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       }
 
       const queue = this.queues[queueName];
+
+      // NOTE:
+      // Sort queue by target index name/s
+      // Done to increase the chance of parts of queries beeing reused
+      // by Vanguard during join computation while processing single msearch request
+      queue.sort((a, b) => {
+        const aString = this._getSortedIndices(a);
+        const bString = this._getSortedIndices(b);
+        return aString.localeCompare(bString);
+      });
+
       // take a number of queries to process
       const toProcess = [];
       const n = Math.min(strategy.batchSize, queue.length);
       for (let i = 0; i < n; i++) {
         const o = queue.shift();
         if (this.cache && this.cache.get(o.definition.query)) {
-          o.callback(undefined, this.cache.get(o.definition.query));
+          o.callback(null, this.cache.get(o.definition.query));
           continue;
         }
         toProcess.push(o);
@@ -188,19 +231,35 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       }
 
       // fire the msearch
-      const query = map(toProcess, o => o.definition.query).join('');
+      let query = '';
+      let debugInfo = '';
 
-      // set counters before sending the request
-      each(toProcess, o =>{
-        o._sentCounter = this._updateCounter(o.definition.id, 'sent');
-      });
+      for (let i = 0; i < toProcess.length; i++) {
+        // set counters before sending the request
+        toProcess[i]._sentCounter = this._updateCounter(toProcess[i].definition.id, 'sent');
+        // compose query and debug info
+        query += toProcess[i].definition.query;
+        debugInfo += toProcess[i].definition._debug_type;
+        if (i !== toProcess.length - 1) {
+          debugInfo += '__';
+        };
+      }
 
       strategy._requestInProgress++;
-      es
-      .msearch({
+
+      const payload = {
         body: query,
-        getMeta: queueName // ?getMeta= has no meaning it is just useful to filter by specific strategy
-      })
+        // NOTE:
+        // ?getMeta= has no meaning for elasticsearch
+        // it is just useful to filter by specific strategy name
+        // or to quickly know for what objects the individual queries where
+        // e.g.: if the strategy name is default, first query is for dashboard and the second is for a button
+        // the getMeta=default__dashboard__button
+        getMeta: queueName + '__' + debugInfo
+      };
+
+      es
+      .msearch(payload)
       .then(data => {
         strategy._requestInProgress--;
         each(data.responses, (hit, i) => {
@@ -214,7 +273,7 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
             // do not execute callback from this old request which have just arrived;
             return;
           }
-          o.callback(undefined, hit);
+          o.callback(null, hit);
         });
 
         // maybe move this to finally

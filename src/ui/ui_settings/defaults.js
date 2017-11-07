@@ -430,13 +430,15 @@ export function getDefaultSettings() {
     },
     'kibi:countFetchingStrategyDashboards' : {
       type: 'json',
-      value: '{ "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
-      description: 'Strategy used to fetch the counts for dashboards'
+      value: '{ "name": "default", "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
+      description: 'Strategy used to fetch the counts for dashboards',
+      validator: 'countStrategyValidator'
     },
     'kibi:countFetchingStrategyRelationalFilters' : {
       type: 'json',
-      value: '{ "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
-      description: 'Strategy used to fetch the counts for relational filters'
+      value: '{ "name": "default", "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
+      description: 'Strategy used to fetch the counts for relational filters',
+      validator: 'countStrategyValidator'
     }
     // kibi: end
   };

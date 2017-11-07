@@ -2,6 +2,7 @@ import angular from 'angular';
 import { isEqual, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
+import { countStrategyValidator } from 'ui/kibi/meta/strategy_validator'; // kibi: validator for strategies
 import { ConfigDelayedUpdaterProvider } from 'ui/config/_delayed_updater';
 const module = uiModules.get('kibana/config');
 
@@ -69,6 +70,15 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
           throw `Should be a positive integer but was [${val}].`;
         }
         return parseInt(val);
+      case 'countStrategyValidator':
+        let strategy;
+        try {
+          strategy = JSON.parse(val);
+        } catch (e) {
+          throw `Should be valid JSON string but was [${val}].`;
+        }
+        countStrategyValidator(strategy);
+        return strategy;
       default:
         throw `Unknown validator [${validator}] for [${val}].`;
     }

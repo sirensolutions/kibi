@@ -567,5 +567,91 @@ describe('Kibi meta service', function () {
         );
       });
     });
+
+    describe('slow network', function () {
+
+      beforeEach(function () {
+        kibiMeta.updateStrategy('dashboards', 'batchSize', 1);
+      });
+
+      afterEach(function () {
+        kibiMeta.updateStrategy('dashboards', 'batchSize', 2);
+      });
+
+      it('make sure that each of the definitions becomes unmutable after submitting it to the service', function (done) {
+        const expectedError1 = { error: 'Sorry error' };
+
+        const expectedMeta1 = {
+          hits: {
+            total: 1
+          }
+        };
+        const expectedMeta2 = {
+          hits: {
+            total: 2
+          }
+        };
+
+        msearchStub.onCall(0).returns(new Promise (function (fulfill, reject) {
+          // we make the first response slow and then fail it
+          // so we have time to try to change the queries in the definitions
+          // before they are reused in second and third call
+          setTimeout(function () {
+            reject({ responses: [ expectedError1 ] });
+          }, 1000);
+        }));
+        msearchStub.onCall(1).returns(Promise.resolve({ responses: [ expectedMeta1 ] }));
+        msearchStub.onCall(2).returns(Promise.resolve({ responses: [ expectedMeta2 ] }));
+
+        const callbackSpy1 = sinon.spy();
+        const callbackSpy2 = sinon.spy();
+        const query1 = '{"index":["index_1"]}\nquery1';
+        const query1changed = '{"index":["index_1"]}\nquery1changed';
+        const query2 = '{"index":["index_2"]}\nquery2';
+        const query2changed = '{"index":["index_2"]}\nquery2changed';
+
+        const definitions = [
+          {
+            definition: { id: 'dash1', query: query1 },
+            callback: callbackSpy1
+          },
+          {
+            definition: { id: 'dash2', query: query2 },
+            callback: callbackSpy2
+          }
+        ];
+
+        kibiMeta.getMetaForDashboards(definitions);
+        // Now change the query in second definition
+        definitions[0].definition.query = query1changed;
+        definitions[1].definition.query = query2changed;
+
+        pollUntil(
+          function () {
+            return callbackSpy1.called && callbackSpy2;
+          },
+          2000, 2,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+
+            sinon.assert.calledThrice(msearchStub);
+            sinon.assert.calledOnce(callbackSpy1);
+            sinon.assert.calledOnce(callbackSpy2);
+            sinon.assert.calledWith(callbackSpy1, undefined, expectedMeta1);
+            sinon.assert.calledWith(callbackSpy2, undefined, expectedMeta2);
+
+            expect(msearchStub.getCall(1).args[0]).to.eql({ body: query1, getMeta: 'dashboards__dashboard' });
+            // here we expect that the second and third call to msearch will still have original queries
+            expect(msearchStub.getCall(1).args[0]).to.eql({ body: query1, getMeta: 'dashboards__dashboard' });
+            expect(msearchStub.getCall(2).args[0]).to.eql({ body: query2, getMeta: 'dashboards__dashboard' });
+            sinon.assert.callOrder(msearchStub, msearchStub, callbackSpy1, msearchStub, callbackSpy2);
+            done();
+          }
+        );
+      });
+
+    });
   });
 });

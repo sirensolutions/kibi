@@ -114,6 +114,7 @@ app.directive('dashboardApp', function (createNotifier, $injector) {
           if (dash.group) {
             const found = _.find(dash.group.dashboards, d => d.id === dash.id);
             dash.count = found.count;
+            dash.isPruned = found.isPruned;
           }
         }
       }

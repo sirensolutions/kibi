@@ -71,7 +71,8 @@ uiRoutes
   }
 });
 
-function controller($scope, $route, kbnUrl, createNotifier, indexPatterns, ontologyClient) {
+uiModules.get('apps/management', ['kibana', 'ui.tree'])
+.controller('entities', function ($scope, $route, kbnUrl, createNotifier, indexPatterns, ontologyClient) {
   $scope.state = { section: 'entity_panel' };
 
   const notify = createNotifier({
@@ -102,8 +103,9 @@ function controller($scope, $route, kbnUrl, createNotifier, indexPatterns, ontol
       }
     }
   });
-}
 
-uiModules
-.get('apps/management', ['kibana', 'ui.tree'])
-.controller('entities', controller);
+  $scope.$watch($scope.fieldFilter, (filter) => {
+    console.log('fieldfilter entities');
+    console.log(filter);
+  });
+});

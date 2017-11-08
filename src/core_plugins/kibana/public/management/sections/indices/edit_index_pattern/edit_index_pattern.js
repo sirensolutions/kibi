@@ -28,10 +28,8 @@ uiModules.get('apps/management')
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
   $scope.$watch('indexPattern.fields', function () {
-    // if ($scope.indexPattern.fields) {
-      $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
-      $scope.refreshFilters();
-    // }
+    $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
+    $scope.refreshFilters();
   });
 
   $scope.refreshFilters = function () {

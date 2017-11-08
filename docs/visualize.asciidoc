@@ -8,7 +8,7 @@ Elasticsearch indices. You can then build <<dashboard, dashboards>> that
 display related visualizations.
 
 Visualizations are based on Elasticsearch queries. By using a
-series of Elasticsearch {es-ref}search-aggregations.html[aggregations]
+series of Elasticsearch {elastic-ref}search-aggregations.html[aggregations]
 to extract and process your data, you can create charts that show
 you the trends, spikes, and dips you need to know about.
 
@@ -69,23 +69,23 @@ visualization's Y axis:
 
 * *Metric Aggregations*:
 
-* {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
-* {es-ref}search-aggregations-metrics-avg-aggregation.html[average]
-* {es-ref}search-aggregations-metrics-sum-aggregation.html[sum]
-* {es-ref}search-aggregations-metrics-min-aggregation.html[min]
-* {es-ref}search-aggregations-metrics-max-aggregation.html[max]
-* {es-ref}search-aggregations-metrics-cardinality-aggregation.html[unique count]
-* {es-ref}search-aggregations-metrics-percentile-aggregation.html[median] (50th percentile)
-* {es-ref}search-aggregations-metrics-percentile-aggregation.html[percentiles]
-* {es-ref}search-aggregations-metrics-percentile-rank-aggregation.html[percentile ranks]
+* {elastic-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
+* {elastic-ref}search-aggregations-metrics-avg-aggregation.html[average]
+* {elastic-ref}search-aggregations-metrics-sum-aggregation.html[sum]
+* {elastic-ref}search-aggregations-metrics-min-aggregation.html[min]
+* {elastic-ref}search-aggregations-metrics-max-aggregation.html[max]
+* {elastic-ref}search-aggregations-metrics-cardinality-aggregation.html[unique count]
+* {elastic-ref}search-aggregations-metrics-percentile-aggregation.html[median] (50th percentile)
+* {elastic-ref}search-aggregations-metrics-percentile-aggregation.html[percentiles]
+* {elastic-ref}search-aggregations-metrics-percentile-rank-aggregation.html[percentile ranks]
 
 . For the visualizations X axis, select a bucket aggregation:
 +
-* {es-ref}search-aggregations-bucket-datehistogram-aggregation.html[date histogram]
-* {es-ref}search-aggregations-bucket-range-aggregation.html[range]
-* {es-ref}search-aggregations-bucket-terms-aggregation.html[terms]
-* {es-ref}search-aggregations-bucket-filters-aggregation.html[filters]
-* {es-ref}search-aggregations-bucket-significantterms-aggregation.html[significant terms]
+* {elastic-ref}search-aggregations-bucket-datehistogram-aggregation.html[date histogram]
+* {elastic-ref}search-aggregations-bucket-range-aggregation.html[range]
+* {elastic-ref}search-aggregations-bucket-terms-aggregation.html[terms]
+* {elastic-ref}search-aggregations-bucket-filters-aggregation.html[filters]
+* {elastic-ref}search-aggregations-bucket-significantterms-aggregation.html[significant terms]
 
 For example, if you're indexing Apache server logs, you could build a horizontal bar chart
 that shows the distribution of incoming requests by geographic location by

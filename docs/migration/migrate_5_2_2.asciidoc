@@ -1050,7 +1050,7 @@ It should now be defined as follows (with a space between ### and the title):
 via a generic JSON editor. If users took advantage of any deprecated Elasticsearch
 features in this way, then they will cause errors in Kibana since they're removed
 from Elasticsearch 5.0. Check the Elasticsearch
-{es-ref}/breaking_50_search_changes.html#_deprecated_queries_removed[breaking changes]
+{elastic-ref}/breaking_50_search_changes.html#_deprecated_queries_removed[breaking changes]
 documentation for more details.
 
 *Impact*: Discover, Visualize, and Dashboard will error for any saved objects that

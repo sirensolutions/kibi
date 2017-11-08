@@ -8,7 +8,7 @@ An existing Kibi installation can be upgraded as follows:
 - backup the `.kibi` index.
 - backup the Kibi configuration file (`config/kibi.yml`)
 - backup the `.kibiaccess` if ACL (Access Control Layer) is enabled.
-- {es-ref}setup-upgrade.html[upgrade Elasticsearch];
+- {elastic-ref}setup-upgrade.html[upgrade Elasticsearch];
 - before restarting each Elasticsearch node, make sure to install a compatible version of the
   {vanguard-website}#compatibility[Vanguard] plugin and access control plugins if required.
 - download and extract the new Kibi version.

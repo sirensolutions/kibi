@@ -177,7 +177,7 @@ include::filter_pinning.asciidoc[]
 
 Dashboards can be organized in dashboard groups.
 
-image::images/dashboard/Dashboardgroups.png["Dashboard Groups Panel",align="center"]
+image::images/dashboard/DashboardGroups.png["Dashboard Groups Panel",align="center"]
 
 If the dashboard is associated with a saved search, the count of documents on the dashboard is displayed next to the dashboard name.
 Two additional indicators that might be displayed are:

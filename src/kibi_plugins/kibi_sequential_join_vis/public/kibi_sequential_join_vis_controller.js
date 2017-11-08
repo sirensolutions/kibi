@@ -60,6 +60,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     button.targetCount = meta.hits.total;
     button.warning = '';
     if (isJoinPruned(meta)) {
+      button.isPruned = true;
       button.warning = 'Results from this filter are pruned';
     }
   };

@@ -220,7 +220,7 @@ uiModules
     });
   };
 
-  const explainJoinSequence = function (joinSequence) {
+  const explainJoinSequence = function (joinSequence, isPruned) {
     // clone and reverse to iterate backwards to show the last step on top
     const sequence = _.cloneDeep(joinSequence);
     sequence.reverse();
@@ -238,6 +238,10 @@ uiModules
       let html = '<table class="sequence">';
       for (let i = 0; i < sequenceElementExplanations.length; i++) {
         html += '<tr' + (sequence[i].negate ? 'class="negated"' : '') + '><td>' + sequenceElementExplanations[i] + '</td></tr>';
+      }
+
+      if (isPruned) {
+        html += '<tr><td><b>Notice:</b> This is a sample of the results because join operation was pruned</td></tr>';
       }
       return html + '</table>';
     });
@@ -266,7 +270,7 @@ uiModules
     const promises = [];
     _.each(filters, function (f) {
       if (f.join_sequence) {
-        promises.push(explainJoinSequence(f.join_sequence));
+        promises.push(explainJoinSequence(f.join_sequence, f.meta.isPruned));
       } else {
         promises.push(explainFilter(f));
       }

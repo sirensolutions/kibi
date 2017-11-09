@@ -41,7 +41,23 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         this.isEditingQueryDsl = false;
         this.queryDsl = getQueryDslFromFilter(filter);
         if (filter.meta.isNew) {
-          this.setFocus('field');
+          const isNew = filter.meta.isNew;
+          let focus = 'field';
+
+          if(isNew.field) {
+            this.setField(isNew.field);
+            focus = 'operator';
+          }
+          if(isNew.operator) {
+            this.setOperator(isNew.operator);
+            focus = 'params';
+          }
+          if(isNew.params) {
+            this.setParams(isNew.params);
+            focus = '';
+          }
+
+          if(focus) { this.setFocus(focus); }
         } else {
           getFieldFromFilter(filter, indexPatterns)
             .then((field) => {

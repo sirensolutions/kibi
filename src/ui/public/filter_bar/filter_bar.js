@@ -81,9 +81,9 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
         }
       };
 
-      $scope.addFilter = () => {
+      $scope.addFilter = (newFilter = true) => {
         $scope.editingFilter = {
-          meta: { isNew: true }
+          meta: { isNew: newFilter }
         };
       };
 
@@ -120,6 +120,8 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
       $scope.$watch(getAppState, function (appState) {
         $scope.state = appState;
       });
+
+      $scope.$on('NewFilterEditor', (e, filter) => $scope.addFilter(filter));
 
       /**
        * kibi: replace '$COUNT' to '...' in filters

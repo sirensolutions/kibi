@@ -5,14 +5,38 @@
   position: relative;
 
   .typeahead-items {
-    border: 1px solid;
-    border-color: @typeahead-item-border;
     color: @typeahead-item-color;
-    background-color: @typeahead-item-bg;
     position: absolute;
     top: 32px;
     z-index: @zindex-typeahead;
     width: 100%;
+
+    .typeahead-tab {
+      display: inline-block;
+      background-color: @gray11;
+      padding: .1rem .5rem;
+      border: 1px solid;
+      border-top: 0;
+      border-color: @typeahead-item-border;
+      cursor: pointer;
+    }
+
+    .typeahead-tab.active {
+      background-color: @typeahead-item-bg;
+      font-weight: bold;
+      cursor: default;
+    }
+
+    .typeahead-tab-content {
+      display: block;
+      max-height: 70vh;
+      overflow: auto;
+    }
+
+    .typeahead-items-list {
+      border: 1px solid @typeahead-item-border;
+      background-color: @typeahead-item-bg;
+    }
 
     .typeahead-item {
       border-bottom: 1px solid;
@@ -27,9 +51,18 @@
     .typeahead-item.active {
       background-color: @typeahead-item-active-bg;
     }
+
+
+    .typeahead-filter-index-name {
+      padding: @padding-xs-vertical @padding-small-horizontal;
+      border: 1px solid @typeahead-item-border;
+      border-bottom: 0px;
+      background-color: @gray13;
+    }
   }
 }
 
+.button-group .typeahead.visible .input-group,
 .inline-form .typeahead.visible .input-group {
   > :first-child {
     .border-bottom-radius(0);

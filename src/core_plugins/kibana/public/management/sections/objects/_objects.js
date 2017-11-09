@@ -1,14 +1,14 @@
-import { saveAs } from '@spalger/filesaver';
-import { filter, each, extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lodash';
+import { saveAs } from '@elastic/filesaver';
+import { find, flattenDeep, pluck, sortBy, partialRight, pick, filter } from 'lodash';
 import angular from 'angular';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 
 // kibi: imports
-import { RefreshKibanaIndex } from 'plugins/kibana/management/sections/indices/refresh_kibana_index';
 import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
 import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import { ObjectActionsRegistryProvider } from 'ui/registry/object_actions';
@@ -34,17 +34,18 @@ uiModules.get('apps/management')
   // kibi: all below dependencies added by kibi to improve import/export and delete operations
   const cache = Private(CacheProvider);
   const deleteHelper = Private(DeleteHelperFactory);
-  const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const importExportHelper = Private(ImportExportProvider);
   // kibi: end
+
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
     // kibi: replaces esAdmin with savedObjectsAPI
-    controller: function (kbnVersion, queryEngineClient, $scope, $injector, $q, AppState, savedObjectsAPI) {
+    // kibi: added savedObjectsAPI, kbnVersion, queryEngineClient
+    controller: function ($scope, $injector, $q, AppState, savedObjectsAPI, kbnVersion, queryEngineClient) {
       const notify = createNotifier({ location: 'Saved Objects' });
-
       // TODO: Migrate all scope variables to the controller.
       const $state = $scope.state = new AppState();
       $scope.currentTab = null;
@@ -161,7 +162,10 @@ uiModules.get('apps/management')
 
       // TODO: Migrate all scope methods to the controller.
       $scope.bulkExport = function () {
-        const objs = $scope.selectedItems.map(partialRight(extend, { type: $scope.currentTab.type }));
+        const objs = $scope.selectedItems.map(item => {
+          return { type: $scope.currentTab.type, id: item.id };
+        });
+
         retrieveAndExportDocs(objs);
       };
 
@@ -170,7 +174,7 @@ uiModules.get('apps/management')
         return Promise
         .map($scope.services, service => service.service
           .scanAll('')
-          .then(result => result.hits.map(hit => extend(hit, { type: service.type })))
+          .then(result => result.hits)
         )
         .then((results) => {
           // kibi: add extra objects to the export
@@ -240,7 +244,6 @@ uiModules.get('apps/management')
           // lets order the export to make sure that searches comes before visualisations
           // then also import object sequentially to avoid errors
           return importExportHelper.importDocuments(docs, $scope.services, notify, overwriteAll)
-          .then(refreshKibanaIndex)
           .then(() => queryEngineClient.clearCache()) // kibi: to clear backend cache
           .then(importExportHelper.reloadQueries) // kibi: to clear backend cache
           .then(refreshData)

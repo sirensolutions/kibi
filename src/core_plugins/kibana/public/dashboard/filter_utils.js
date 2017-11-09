@@ -1,11 +1,7 @@
 import _ from 'lodash';
 import { getDefaultQuery } from 'ui/parse_query';
 
-/**
- * @typedef {Object} QueryFilter
- * @property query_string {Object}
- * @property query_string.query {String}
- */
+// kibi: wrap in provider function to inject kibiState dependency
 export function FilterUtilsProvider(kibiState) {
   return class FilterUtils {
     /**
@@ -15,7 +11,7 @@ export function FilterUtilsProvider(kibiState) {
      * (e.g. goes in the query input bar), false otherwise (e.g. is in the filter bar).
      */
     static isQueryFilter(filter) {
-      return filter.query && filter.query.query_string && !filter.meta;
+      return filter.query && !filter.meta;
     }
 
     /**
@@ -27,6 +23,7 @@ export function FilterUtilsProvider(kibiState) {
     static getDashboardFilters(dashboard) {
       return dashboard.searchSource.getOwn('filter');
     }
+
 
     /**
      * Grabs a saved query to use from the dashboard, or if none exists, creates a default one.
@@ -54,11 +51,12 @@ export function FilterUtilsProvider(kibiState) {
      * given dashboard
      */
     static getFilterBarsForDashboard(dashboard) {
-      // do not take pinned filters !
+      //kibi: do not take pinned filters !
       const dashboardFilters = kibiState._getDashboardProperty(dashboard.id, kibiState._properties.filters);
       if (dashboardFilters) {
         return dashboardFilters;
       }
+      // kibi: end
       return _.reject(this.getDashboardFilters(dashboard), this.isQueryFilter);
     }
   };

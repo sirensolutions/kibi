@@ -1,0 +1,51 @@
+:toc: right
+:docinfo: shared
+
+:version: 5.6.3
+:kibi-version: {version}
+:kibi-ref: http://siren.solutions/kibi/docs/current/
+:kibi-default-port: 5606
+:start-url: http://localhost:5606
+:download-ref: https://support.siren.io
+:branch: 5.6
+
+:java-version: 1.8
+
+:vanguard-version: 5.6.3
+:vanguard-website: https://docs.support.siren.io/5.6.3/vanguard/
+
+:kibana-version: 5.6.3
+:kibana-announcement: https://www.elastic.co/blog/kibana-5-6-3-released
+:kibana-ref: https://www.elastic.co/guide/en/kibana/5.6
+:logstash-ref: https://www.elastic.co/guide/en/logstash/
+
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.5/
+:es-ref: {elastic-ref}
+:elasticsearch-version: 5.6.3
+:es-default-port: 9220
+
+:searchguard-ref: http://floragunncom.github.io/search-guard-docs/
+:searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
+:searchguard-dlsfls-ref: https://github.com/floragunncom/search-guard-module-dlsfls/wiki
+:searchguard-ldap-ref: https://github.com/floragunncom/search-guard-authbackend-ldap/wiki
+:searchguard-kerberos-ref: https://github.com/floragunncom/search-guard-auth-http-kerberos/wiki
+:searchguard-jwt-ref: https://github.com/floragunncom/search-guard-authbackend-jwt
+:searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
+:searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
+:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-5.4.0
+:searchguard-tls-certificate-ref: https://floragunn.com/tls-certificate-generator/
+
+:dockerhub-ref: https://hub.docker.com/u/sirensolutions/
+:docker-image-name: siren-platform
+
+:k4issue: https://github.com/elastic/kibana/issues/
+:k4pull: https://github.com/elastic/kibana/pull/
+//////////
+release-state can be: released | prerelease | unreleased
+//////////
+:release-state:  released
+:compatible-es-versions: >=5.4.3
+:es-compability-table-ref: https://github.com/sirensolutions/kibi/blob/master/README.md#compatibility-table-kibi--elasticsearch
+
+
+

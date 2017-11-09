@@ -33,8 +33,7 @@ module.exports = function () {
         'Unlicense',
         'WTFPL OR ISC',
         'WTFPL',
-        // kibi: license for node-forge
-        '(BSD-3-Clause OR GPL-2.0)',
+        '(BSD-3-Clause OR GPL-2.0)' // kibi: license for node-forge
       ],
       overrides: {
         'assert-plus@0.1.5': ['MIT'],
@@ -62,6 +61,7 @@ module.exports = function () {
         'nomnom@1.5.2': ['MIT'],
         'jsonify@0.0.0': ['MIT'],
         'js-base64@2.3.1': ['BSD-3-Clause']
+        // kibi: end
       }
     }
   };

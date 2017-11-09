@@ -1,10 +1,10 @@
 import { IndexPatternAuthorizationError, NoDefaultIndexPattern } from 'ui/errors';
-import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
+import { IndexPatternsGetProvider } from 'ui/index_patterns/_get';
 import { uiModules } from 'ui/modules';
 
 function KibiDefaultIndexPatternProvider(Private, indexPatterns) {
 
-  const getIds = Private(IndexPatternsGetIdsProvider);
+  const getIds = Private(IndexPatternsGetProvider)('id');
 
   const _loadIndexPattern = function (patterns, indexPattern, defaultId) {
     const indexPatternId = indexPattern || defaultId;

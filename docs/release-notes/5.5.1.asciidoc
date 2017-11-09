@@ -25,7 +25,7 @@ Design::
 * [Fix for #12738] [UI Framework] Update LocalNav layout to fix menu button hover state. {pull}12739[#12739]
 Platform::
 * Bump node.js to version 6.11.1 {pull}12776[#12776]
-* [Fix for #10546] Update regex used to detect IE for long length warnings {pull}12617[#12617]
+* [Fix for #10546] Update regex used to detect  IE for long length warnings {pull}12617[#12617]
 Other::
 * [Fix for #12692] Make filter editor suggestions opt-in {pull}12710[#12710]
 * [Fix for #12627] do not allow registration of undefined indexpatterns in dashboard state {pull}12628[#12628]

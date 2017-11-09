@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { get } from 'lodash';
 
 export default function (server) {
 
@@ -66,16 +67,16 @@ export default function (server) {
 
       return createUrlDoc(url, sirenSession, urlId, req);
     },
-    async getUrl(urlId, req) {
+
+    async getUrl(id, req) {
       try {
-        const urlDoc = await getUrlDoc(urlId, req);
-        if (!urlDoc) throw new Error('Requested shortened url does not exist in kibana index');
+        const doc = await getUrlDoc(id, req);
+        updateMetadata(id, doc, req);
 
-        updateMetadata(urlId, urlDoc, req);
-
+        // kibi: returns an object with url and sirenSession instead of a url string
         return {
-          url: urlDoc._source.url,
-          sirenSession: urlDoc._source.sirenSession
+          url: doc._source.url,
+          sirenSession: doc._source.sirenSession
         };
       } catch (err) {
         return '/';

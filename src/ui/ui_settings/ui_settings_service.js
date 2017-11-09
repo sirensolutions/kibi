@@ -1,0 +1,208 @@
+import { defaultsDeep, noop } from 'lodash';
+
+function hydrateUserSettings(userSettings) {
+  return Object.keys(userSettings)
+    .map(key => ({ key, userValue: userSettings[key] }))
+    .filter(({ userValue }) => userValue !== null)
+    .reduce((acc, { key, userValue }) => ({ ...acc, [key]: { userValue } }), {});
+}
+
+// kibi: added
+function assertRequest(req) {
+  if (
+    !req ||
+    typeof req !== 'object' ||
+    typeof req.path !== 'string' ||
+    !req.headers ||
+    typeof req.headers !== 'object'
+  ) {
+    throw new TypeError('all uiSettings methods must be passed a hapi.Request object');
+  }
+}
+// kibi: end
+
+/**
+ *  Service that provides access to the UiSettings stored in elasticsearch.
+ *
+ *  @class UiSettingsService
+ *  @param {Object} options
+ *  @property {string} options.index Elasticsearch index name where settings are stored
+ *  @property {string} options.type type of ui settings Elasticsearch doc
+ *  @property {string} options.id id of ui settings Elasticsearch doc
+ *  @property {AsyncFunction} options.callCluster function that accepts a method name and
+ *                            param object which causes a request via some elasticsearch client
+ *  @property {AsyncFunction} [options.readInterceptor] async function that is called when the
+ *                            UiSettingsService does a read() an has an oportunity to intercept the
+ *                            request and return an alternate `_source` value to use.
+ */
+export class UiSettingsService {
+  constructor(options) {
+    const {
+      type,
+      id,
+      savedObjectsClient,
+      readInterceptor = noop,
+      // we use a function for getDefaults() so that defaults can be different in
+      // different scenarios, and so they can change over time
+      getDefaults = () => ({}),
+      server, // kibi: added
+      status  // kibi: added
+    } = options;
+
+    this._savedObjectsClient = savedObjectsClient;
+    this._getDefaults = getDefaults;
+    this._readInterceptor = readInterceptor;
+    this._type = type;
+    this._id = id;
+
+    this._server = server;
+    this._status = status;
+  }
+
+  async getDefaults() {
+    return await this._getDefaults();
+  }
+
+  // returns a Promise for the value of the requested setting
+  async get(req, key) {
+    assertRequest(req); // kibi: added
+    const all = await this.getAll(req);
+    return all[key];
+  }
+
+  async getAll(req) {
+    assertRequest(req); // kibi: added
+    const raw = await this.getRaw(req);
+
+    return Object.keys(raw)
+      .reduce((all, key) => {
+        const item = raw[key];
+        const hasUserValue = 'userValue' in item;
+        all[key] = hasUserValue ? item.userValue : item.value;
+        return all;
+      }, {});
+  }
+
+  async getRaw(req) {
+    assertRequest(req); // kibi: added
+    const userProvided = await this.getUserProvided(req);
+    return defaultsDeep(userProvided, await this.getDefaults());
+  }
+
+  async getUserProvided(req, { ignore401Errors = false } = {}) {
+    assertRequest(req); // kibi: added
+
+    // kibi: replace original code and adds savedObjectsAPI logic
+    const { errors } = this._server.plugins.elasticsearch.getCluster('admin');
+    const savedObjetsAPI = this._server.plugins.saved_objects_api;
+
+    // kibi:
+    // If the ui settings status isn't green, we shouldn't be attempting to get
+    // user settings, since we can't be sure that all the necessary conditions
+    // (e.g. elasticsearch being available) are met.
+    if (this._status.state !== 'green' || savedObjetsAPI.status.state !== 'green') { // kibi: added savedObjectsAPI
+      return hydrateUserSettings(await this._read(req, {}));
+    }
+
+    // kibi: adds savedObjetsAPI logic
+    const configModel = savedObjetsAPI.getModel('config');
+
+    let userSettings = {};
+    try {
+      const resp = await configModel.get('kibi', req, { wrap401Errors: !ignore401Errors });
+      if (resp.found) {
+        userSettings = resp._source;
+      }
+    } catch (err) {
+      if (err.status === 401 && !ignore401Errors) {
+        throw err;
+      }
+      if (!(err instanceof errors.NoConnections) && err.status !== 403 && err.status !== 404) {
+        throw err;
+      }
+    }
+    return hydrateUserSettings(userSettings);
+    // kibi: end
+  }
+
+  async setMany(req, changes) {
+    assertRequest(req); // kibi: added
+    await this._write(req, changes);
+  }
+
+  async set(req, key, value) {
+    assertRequest(req); // kibi: added
+    await this.setMany(req, { [key]: value });
+  }
+
+  async remove(req, key) {
+    assertRequest(req); // kibi: added
+    await this.set(req, key, null);
+  }
+
+  async removeMany(req, keys) {
+    assertRequest(req); // kibi: added
+    const changes = {};
+    keys.forEach(key => {
+      changes[key] = null;
+    });
+    await this.setMany(changes);
+  }
+
+  async _write(req, changes) {
+    // kibi: replace original code and adds savedObjectsAPI logic
+    const configModel = this._server.plugins.saved_objects_api.getModel('config');
+
+    try {
+      await configModel.patch('kibi', changes, req);
+    } catch (err) {
+      if (err.status === 404) {
+        await configModel.create('kibi', changes, req);
+      } else {
+        throw err;
+      }
+    }
+    return {};
+    // kibi: end
+  }
+
+  // MERGE 5.6
+  // this method is still using _savedObjectsClient
+  // it was not present in src/ui/ui_settings/ui_settings.js
+  // review and merge any missing changes from this deleted file
+  async _read(req, options = {}) {
+    const interceptValue = await this._readInterceptor(options);
+    if (interceptValue != null) {
+      return interceptValue;
+    }
+
+    const {
+      ignore401Errors = false
+    } = options;
+
+    const {
+      isNotFoundError,
+      isForbiddenError,
+      isEsUnavailableError,
+      isNotAuthorizedError
+    } = this._savedObjectsClient.errors;
+
+    const isIgnorableError = error => (
+      isNotFoundError(error) ||
+      isForbiddenError(error) ||
+      isEsUnavailableError(error) ||
+      (ignore401Errors && isNotAuthorizedError(error))
+    );
+
+    try {
+      const resp = await this._savedObjectsClient.get(this._type, this._id);
+      return resp.attributes;
+    } catch (error) {
+      if (isIgnorableError(error)) {
+        return {};
+      }
+
+      throw error;
+    }
+  }
+}

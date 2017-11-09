@@ -1,19 +1,18 @@
 import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import url from 'url';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
 import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
-import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
+import { esTestConfig } from '../../../../test_utils/es';
 import * as determineEnabledScriptingLangsNS from '../determine_enabled_scripting_langs';
 import { determineEnabledScriptingLangs } from '../determine_enabled_scripting_langs';
-
-const esPort = esTestServerUrlParts.port;
-const esUrl = url.format(esTestServerUrlParts);
+import * as ensureTypesExistNS from '../ensure_types_exist';
+const esPort = esTestConfig.getPort();
+const esUrl = esTestConfig.getUrl();
 
 describe('plugins/elasticsearch', () => {
   describe('lib/health_check', function () {
@@ -34,6 +33,7 @@ describe('plugins/elasticsearch', () => {
 
       // Stub the Kibana version instead of drawing from package.json.
       sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
+      sandbox.stub(ensureTypesExistNS, 'ensureTypesExist');
 
       // setup the plugin stub
       plugin = {
@@ -51,6 +51,7 @@ describe('plugins/elasticsearch', () => {
       cluster.callWithInternalUser.withArgs('cat.plugins', sinon.match.any).returns(Promise.resolve());
       // kibi: end
       cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
+      cluster.callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: '1', _version: 1 }));
       cluster.callWithInternalUser.withArgs('mget', sinon.match.any).returns(Promise.resolve({ ok: true }));
       cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
       cluster.callWithInternalUser.withArgs('search', sinon.match.any).returns(Promise.resolve({ hits: { hits: [] } }));
@@ -70,6 +71,7 @@ describe('plugins/elasticsearch', () => {
       const get = sinon.stub();
       get.withArgs('elasticsearch.url').returns(esUrl);
       get.withArgs('kibana.index').returns('.my-kibana');
+      get.withArgs('pkg.version').returns('1.0.0');
 
       const set = sinon.stub();
 
@@ -84,6 +86,10 @@ describe('plugins/elasticsearch', () => {
             getCluster: sinon.stub().returns(cluster)
           }
         },
+        savedObjectsClientFactory: () => ({
+          find: sinon.stub().returns(Promise.resolve({ saved_objects: [] })),
+          create: sinon.stub().returns(Promise.resolve({ id: 'foo' })),
+        }),
         ext: sinon.stub()
       };
 

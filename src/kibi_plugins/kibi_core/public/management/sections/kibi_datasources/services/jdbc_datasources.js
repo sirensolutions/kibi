@@ -15,6 +15,7 @@ uiModules
 
     list() {
       // TODO: remove when Fabio will give me new jar
+      return Promise.resolve([]);
       return $http.get(chrome.getBasePath() + '/elasticsearch/.vanguard-datasources/_search?size=100').then(res => {
         return res.data.hits.hits;
       });
@@ -53,6 +54,7 @@ uiModules
     }
 
     listVirtualIndices() {
+      return Promise.resolve([]);
       // TODO remove this hardcoded stuff
       return $http.get(chrome.getBasePath() + '/elasticsearch/.vanguard-indices/_search?size=100').then(res => {
         return res.data.hits.hits;

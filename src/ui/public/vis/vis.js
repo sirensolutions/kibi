@@ -107,6 +107,7 @@ export function VisProvider(createNotifier, Private) {
     // kibi: aditional visualization settings
     this.kibiSettings = _.defaults({}, state.kibiSettings);
     // kibi: end
+
     updateVisualizationConfig(state.params, this.params);
 
     this.aggs = new AggConfigs(this, state.aggs);

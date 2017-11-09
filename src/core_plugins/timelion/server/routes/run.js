@@ -17,7 +17,8 @@ module.exports = (server) => {
     path: '/api/timelion/run',
     handler: async (request, reply) => {
       try {
-        const uiSettings = await server.uiSettings().getAll(request);
+        // kibi: pass request to getAll method
+        const uiSettings = await request.getUiSettingsService().getAll(request);
 
         const tlConfig = require('../handlers/lib/tl_config.js')({
           server,

@@ -4,6 +4,7 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import noDigestPromise from 'test_utils/no_digest_promises';
 import mockUiState from 'fixtures/mock_ui_state';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 describe('dashboard panel', function () {
   let $scope;
@@ -17,17 +18,27 @@ describe('dashboard panel', function () {
     ngMock.module('kibana', $provide => {
       $provide.constant('kibiDatasourcesSchema', {});
     });
-    ngMock.inject(($rootScope, $compile, esAdmin, savedObjectsAPI, kibiState) => {
+    ngMock.inject(($rootScope, $compile, Private, esAdmin, savedObjectsAPI, kibiState) => {
       // kibi: use the savedObjectsAPI instead of esAdmin, inject getEntityURI() for check in panel.js
       mgetStub = sinon.stub(savedObjectsAPI, 'mget').returns(Promise.resolve({ docs: [ mockDocResponse ] }));
       sinon.stub(kibiState, 'getEntityURI').returns({ index: 'a', type: 'b', id: 'c' });
-      sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
-        '.kibana': {
-          mappings: {
-            visualization: {}
-          }
-        }
-      }));
+      // kibi: end
+
+      // MERGE 5.6
+      // understand if what we are doing here
+      // stubbing mget instead of swapping SavedObjectsClientProvider is OK
+      // Private.swap(SavedObjectsClientProvider, () => {
+      //   return {
+      //     get: sinon.stub().returns(Promise.resolve(mockDocResponse))
+      //   };
+      // });
+      // sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
+      //   '.kibana': {
+      //     mappings: {
+      //       visualization: {}
+      //     }
+      //   }
+      // }));
 
       parentScope = $rootScope.$new();
       parentScope.saveState = sinon.stub();
@@ -77,7 +88,7 @@ describe('dashboard panel', function () {
   });
 
   it('should try to visualize the visualization if found', function () {
-    init({ found: true, _source: {} });
+    init({ id: 'foo1', type: 'visualization', _version: 2, attributes: {} });
     return $scope.loadedPanel.then(() => {
       expect($scope.error).not.to.be.ok();
       parentScope.$digest();

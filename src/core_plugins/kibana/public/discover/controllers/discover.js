@@ -27,8 +27,8 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { getDefaultQuery } from 'ui/parse_query';
-
 // kibi: imports
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import { IndexPatternAuthorizationError } from 'ui/errors';
@@ -51,8 +51,14 @@ uiRoutes
     // kibi: added createNotifier, kbnUrl, kibiDefaultIndexPattern
     ip: function (Promise, courier, config, $location, Private, createNotifier, kbnUrl, kibiDefaultIndexPattern) {
       const State = Private(StateProvider);
-      return courier.indexPatterns.getIds()
-      .then(function (list) {
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
+
+      return savedObjectsClient.find({
+        type: 'index-pattern',
+        fields: ['title'],
+        perPage: 10000
+      })
+      .then(({ savedObjects }) => {
         /**
          *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
          *  the load order of AppState conflicts with the load order of many other things
@@ -65,14 +71,15 @@ uiRoutes
         const state = new State('_a', {});
 
         const specified = !!state.index;
-        const exists = _.contains(list, state.index);
+
+        const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
 
         // kibi: use our service in case we need default indexPattern
         let idPromise;
         if (exists) {
           idPromise = Promise.resolve(state.index);
         } else {
-          idPromise = kibiDefaultIndexPattern.getDefaultIndexPattern(list).then(indexPattern => indexPattern.id);
+          idPromise = kibiDefaultIndexPattern.getDefaultIndexPattern(savedObjects).then(indexPattern => indexPattern.id);
         }
         // kibi: end
 
@@ -81,7 +88,7 @@ uiRoutes
         // kibi: added this extra promise to handle default index fetching when exists === false
         return idPromise.then(id => {
           return Promise.props({
-            list: list,
+            list: savedObjects,
             loaded: courier.indexPatterns.get(id),
             stateVal: state.index,
             stateValFound: specified && exists
@@ -192,6 +199,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
     dirty: !savedSearch.id
   };
   const $state = $scope.state = new AppState(getStateDefaults());
+
   $scope.uiState = $state.makeStateful('uiState');
 
   function getStateDefaults() {
@@ -215,8 +223,6 @@ function discoverController($scope, config, courier, $route, $window, createNoti
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    // Index to match
-    index: $scope.indexPattern.id,
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
@@ -625,7 +631,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
 
     if (own && !stateVal) return own;
     if (stateVal && !stateValFound) {
-      const err = '"' + stateVal + '" is not a configured pattern. ';
+      const err = '"' + stateVal + '" is not a configured pattern ID. ';
       if (own) {
         notify.warning(err + ' Using the saved index pattern: "' + own.id + '"');
         return own;

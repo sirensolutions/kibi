@@ -283,6 +283,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+    async clearSearchValue() {
+      log.debug(`clearSearchValue`);
+
+      await this.gotoDashboardLandingPage();
+
+      await retry.try(async () => {
+        const searchFilter = await testSubjects.find('searchFilter');
+        await searchFilter.clearValue();
+      });
+    }
+
     async searchForDashboardWithName(dashName) {
       log.debug(`searchForDashboardWithName: ${dashName}`);
 
@@ -297,6 +308,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getCountOfDashboardsInListingTable() {
+      const dashboardTitles = await testSubjects.findAll('dashboardListingTitleLink');
+      return dashboardTitles.length;
     }
 
     async getDashboardCountWithName(dashName) {

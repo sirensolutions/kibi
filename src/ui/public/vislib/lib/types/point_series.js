@@ -186,7 +186,7 @@ export function VislibTypesPointSeries() {
         rangePadding: 0,
         rangeOuterPadding: 0
       };
-      defaults.valueAxes.push({
+      defaults.categoryAxes.push({
         id: 'CategoryAxis-2',
         type: 'category',
         position: 'left',
@@ -196,7 +196,7 @@ export function VislibTypesPointSeries() {
         },
         labels: {
           filter: false,
-          axisFormatter: data.get('zAxisFormatter') || function () { return ''; }
+          axisFormatter:  function (val) { return val; }
         },
         style: {
           rangePadding: 0,

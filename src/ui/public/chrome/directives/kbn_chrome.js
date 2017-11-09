@@ -9,6 +9,7 @@ import {
   unhashUrl,
 } from 'ui/state_management/state_hashing';
 import { notify } from 'ui/notify';
+import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
 
@@ -43,17 +44,24 @@ export function kbnChromeProvider(chrome, internals) {
         }
         // kibi: end
 
-        // listen for route changes, propagate to tabs
-        const onRouteChange = function () {
-          // kibi: set URLs with hashes otherwise they might overflow
+        const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
+
+        function updateSubUrls() {
           const urlWithHashes = window.location.href;
+          // kibi: set URLs with hashes otherwise they might overflow
           internals.trackPossibleSubUrl(urlWithHashes);
           // kibi: end
-        };
+        }
+
+        function onRouteChange($event) {
+          if (subUrlRouteFilter($event)) {
+            updateSubUrls();
+          }
+        }
 
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
         $rootScope.$on('$routeUpdate', onRouteChange);
-        onRouteChange();
+        updateSubUrls(); // initialize sub urls
 
         const allPendingHttpRequests = () => $http.pendingRequests;
         const removeSystemApiRequests = (pendingHttpRequests = []) => remove(pendingHttpRequests, isSystemApiRequest);

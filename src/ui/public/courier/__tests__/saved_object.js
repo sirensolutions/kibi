@@ -5,6 +5,7 @@ import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object/saved_object';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 
 // kibi: imports
@@ -20,9 +21,10 @@ describe('Saved Object', function () {
   let IndexPattern;
   let esAdminStub;
   let esDataStub;
-  let DocSource;
+  let savedObjectsClientStub;
   let window;
 
+  let DocSource; // kibi: added
   let savedObjectsAPIStub; // kibi: stub our saved objects service
   let SavedObjectSource; // kibi: we don't use DocSource for some object types
   const sandbox = sinon.sandbox.create();
@@ -53,6 +55,7 @@ describe('Saved Object', function () {
     sandbox.stub(savedObjectsAPIStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
     sandbox.stub(savedObjectsAPIStub.indices, 'refresh').returns(BluebirdPromise.resolve());
     // kibi: end
+    sinon.stub(esAdminStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
   }
 
   /**
@@ -60,16 +63,15 @@ describe('Saved Object', function () {
    * that can be used to stub es calls.
    * @param indexPatternId
    * @param additionalOptions - object that will be assigned to the mocked doc response.
-   * @returns {{_source: {}, _index: *, _type: string, _id: *, found: boolean}}
+   * @returns {{attributes: {}, type: string, id: *, _version: integer}}
    */
   function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
     return Object.assign(
       {
-        _source: {},
-        _index: indexPatternId,
-        _type: 'dashboard',
-        _id: indexPatternId,
-        found: true
+        type: 'dashboard',
+        id: indexPatternId,
+        _version: 2,
+        attributes: {}
       },
       additionalOptions);
   }
@@ -126,6 +128,7 @@ describe('Saved Object', function () {
     esDataStub = es;
     DocSource = Private(AdminDocSourceProvider);
     SavedObjectSource = Private(SavedObjectSourceFactory);
+    savedObjectsClientStub = Private(SavedObjectsClientProvider);
     window = $window;
 
     savedObjectsAPIStub = savedObjectsAPI;
@@ -139,7 +142,6 @@ describe('Saved Object', function () {
 
   describe('save', function () {
     describe('with confirmOverwrite', function () {
-
       function stubConfirmOverwrite() {
         window.confirm = sandbox.stub().returns(true);
         sandbox.stub(esAdminStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
@@ -151,6 +153,10 @@ describe('Saved Object', function () {
         it('requests confirmation and updates on yes response', function () {
           stubESResponse(getMockedDocResponse('myId'));
           return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
+            const createStub = sinon.stub(savedObjectsClientStub, 'create');
+            createStub.onFirstCall().returns(BluebirdPromise.reject({ statusCode: 409 }));
+            createStub.onSecondCall().returns(BluebirdPromise.resolve({ id: 'myId' }));
+
             stubConfirmOverwrite();
 
             savedObject.lastSavedTitle = 'original title';
@@ -173,7 +179,6 @@ describe('Saved Object', function () {
             sandbox.stub(esAdminStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
             sandbox.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
             sandbox.stub(savedObjectsAPIStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
-
             savedObject.lastSavedTitle = 'original title';
             savedObject.title = 'new title';
             return savedObject.save({ confirmOverwrite : true })
@@ -186,7 +191,7 @@ describe('Saved Object', function () {
           });
         });
 
-        it('handles doIndex failures', function () {
+        it('handles create failures', function () {
           stubESResponse(getMockedDocResponse('myId'));
           return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
             stubConfirmOverwrite();
@@ -198,7 +203,7 @@ describe('Saved Object', function () {
             sandbox.stub(esDataStub, 'index').returns(BluebirdPromise.reject());
             sandbox.stub(savedObjectsAPIStub, 'index').returns(BluebirdPromise.reject());
 
-            return savedObject.save({ confirmOverwrite : true })
+            return savedObject.save({ confirmOverwrite: true })
               .then(() => {
                 expect(true).to.be(false); // Force failure, the save should not succeed.
               })
@@ -220,20 +225,22 @@ describe('Saved Object', function () {
           sandbox.stub(DocSource.prototype, 'doCreate', _doCreate);
           sandbox.stub(SavedObjectSource.prototype, 'doCreate', _doCreate);
 
+        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
           stubConfirmOverwrite();
-          return savedObject.save({ confirmOverwrite : false })
-            .then(() => {
-              expect(window.confirm.called).to.be(false);
-            });
+
+          sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.resolve({ id: 'myId' }));
+
+          return savedObject.save({ confirmOverwrite : false }).then(() => {
+            expect(window.confirm.called).to.be(false);
+          });
         });
       });
     });
 
-    describe(' with copyOnSave', function () {
+    describe('with copyOnSave', function () {
       it('as true creates a copy on save success', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
-        let newUniqueId;
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
           const _doIndex = function () {
             newUniqueId = savedObject.id;
@@ -245,10 +252,9 @@ describe('Saved Object', function () {
           sandbox.stub(DocSource.prototype, 'doIndex', _doIndex);
           sandbox.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           savedObject.copyOnSave = true;
-          return savedObject.save()
-            .then((id) => {
-              expect(id).to.be(newUniqueId);
-            });
+          return savedObject.save().then((id) => {
+            expect(id).to.be('newUniqueId');
+          });
         });
       });
 
@@ -260,6 +266,8 @@ describe('Saved Object', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         const originalId = 'id1';
+        const mockDocResponse = getMockedDocResponse(originalId);
+        stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(savedObject => {
           sandbox.stub(DocSource.prototype, 'doIndex', _doIndex);
           sandbox.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
@@ -274,9 +282,10 @@ describe('Saved Object', function () {
       });
 
       it('as false does not create a copy', function () {
-        const mockDocResponse = getMockedDocResponse('myId');
-        stubESResponse(mockDocResponse);
         const id = 'myId';
+        const mockDocResponse = getMockedDocResponse(id);
+        stubESResponse(mockDocResponse);
+
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
           const _doIndex = function () {
             expect(savedObject.id).to.be(id);
@@ -286,10 +295,9 @@ describe('Saved Object', function () {
           sandbox.stub(DocSource.prototype, 'doIndex', _doIndex);
           sandbox.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           savedObject.copyOnSave = false;
-          return savedObject.save()
-            .then((id) => {
-              expect(id).to.be(id);
-            });
+          return savedObject.save().then((id) => {
+            expect(id).to.be(id);
+          });
         });
       });
     });
@@ -297,11 +305,14 @@ describe('Saved Object', function () {
     it('returns id from server on success', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
+        sinon.stub(savedObjectsClientStub, 'create', function () {
+          return BluebirdPromise.resolve({ type: 'dashboard', id: 'myId', _version: 2 });
+        });
+
         stubESResponse(mockDocResponse);
-        return savedObject.save()
-          .then((id) => {
-            expect(id).to.be('myId');
-          });
+        return savedObject.save().then(id => {
+          expect(id).to.be('myId');
+        });
       });
     });
 
@@ -309,6 +320,7 @@ describe('Saved Object', function () {
       it('on success', function () {
         const id = 'id';
         stubESResponse(getMockedDocResponse(id));
+
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
           const _doIndex = function () {
             expect(savedObject.isSaving).to.be(true);
@@ -318,10 +330,9 @@ describe('Saved Object', function () {
           sandbox.stub(DocSource.prototype, 'doIndex', _doIndex);
           sandbox.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           expect(savedObject.isSaving).to.be(false);
-          return savedObject.save()
-            .then(() => {
-              expect(savedObject.isSaving).to.be(false);
-            });
+          return savedObject.save().then(() => {
+            expect(savedObject.isSaving).to.be(false);
+          });
         });
       });
 
@@ -336,10 +347,9 @@ describe('Saved Object', function () {
           sandbox.stub(DocSource.prototype, 'doIndex', _doIndex);
           sandbox.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           expect(savedObject.isSaving).to.be(false);
-          return savedObject.save()
-            .catch(() => {
-              expect(savedObject.isSaving).to.be(false);
-            });
+          return savedObject.save().catch(() => {
+            expect(savedObject.isSaving).to.be(false);
+          });
         });
       });
     });
@@ -348,7 +358,7 @@ describe('Saved Object', function () {
   describe('applyESResp', function () {
     it('throws error if not found', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
-        const response = { found: false };
+        const response = {};
         try {
           savedObject.applyESResp(response);
           expect(true).to.be(false);
@@ -426,9 +436,8 @@ describe('Saved Object', function () {
 
       const mockDocResponse = getMockedDocResponse(
         id,
-        { _source: { dinosaurs: { tRex: 'is not so bad' }, } });
+        { attributes: { dinosaurs: { tRex: 'is not so bad' }, } });
       stubESResponse(mockDocResponse);
-
 
       const savedObject = new SavedObject(config);
       return savedObject.init()
@@ -474,7 +483,6 @@ describe('Saved Object', function () {
     });
 
     describe('searchSource', function () {
-
       it('when true, creates index', function () {
         const indexPatternId = 'testIndexPattern';
         const afterESRespCallback = sinon.spy();
@@ -486,7 +494,14 @@ describe('Saved Object', function () {
           indexPattern: indexPatternId
         };
 
-        stubESResponse(getMockedDocResponse(indexPatternId));
+        stubESResponse({
+          id: indexPatternId,
+          type: 'dashboard',
+          attributes: {
+            title: 'testIndexPattern'
+          },
+          _version: 2
+        });
 
         const savedObject = new SavedObject(config);
         expect(!!savedObject.searchSource.get('index')).to.be(false);
@@ -605,7 +620,8 @@ describe('Saved Object', function () {
 
         const mockDocResponse = getMockedDocResponse(
           myId,
-          { _source: { overwriteMe: serverValue } });
+          { attributes: { overwriteMe: serverValue } }
+        );
 
         stubESResponse(mockDocResponse);
 
@@ -616,6 +632,10 @@ describe('Saved Object', function () {
           expect(savedObject._source.customDefault).to.be(customDefault);
         });
       });
+
     });
+
+
   });
 });
+

@@ -40,7 +40,8 @@ to this Kibi instance.
 dashboards. Kibi creates a new index if the index does not already exist.
 `kibana.defaultAppId:`:: *Default: "discover"* - The default application to load.
 [[tilemap-settings]]`tilemap.url:`:: The URL to the tile
-service that Kibi uses to display map tiles in tilemap visualizations. By default, Kibi reads this url from an external metadata service, but users can still override this parameter to use their own Tile Map Service. For example: `https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana`
+service that Kibi uses to display map tiles in tilemap visualizations. By default, Kibi reads this url from an external metadata
+service, but users can still override this parameter to use their own Tile Map Service. For example: `https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana`
 `tilemap.options.minZoom:`:: *Default: 1* - The minimum zoom level.
 `tilemap.options.maxZoom:`:: *Default: 10* - The maximum zoom level.
 `tilemap.options.attribution:`:: *Default: `"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"`* - The map attribution string.

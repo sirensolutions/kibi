@@ -1,99 +1,13 @@
 [[kibi-guide]]
 = Kibi User Guide
-:toc: right
-:docinfo: shared
 
-:java-version: 1.8
-:vanguard-version: 5.5.2-SNAPSHOT
-:vanguard-website: https://docs.support.siren.io/5.4.3/vanguard/
-:version: 5.5.2-SNAPSHOT
-:kibana-version: 5.4.3
-:kibana-announcement: https://www.elastic.co/blog/kibana-5-4-3-released
-:kibana-ref: https://www.elastic.co/guide/en/kibana/5.5
-:kibi-version: {version}
-:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.5/
-:logstash-ref: https://www.elastic.co/guide/en/logstash/
-:es-ref: {elastic-ref}
-:elasticsearch-version: 5.5.2
-:es-default-port: 9220
-:searchguard-ref: http://floragunncom.github.io/search-guard-docs/
-:searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
-:searchguard-dlsfls-ref: https://github.com/floragunncom/search-guard-module-dlsfls/wiki
-:searchguard-ldap-ref: https://github.com/floragunncom/search-guard-authbackend-ldap/wiki
-:searchguard-kerberos-ref: https://github.com/floragunncom/search-guard-auth-http-kerberos/wiki
-:searchguard-jwt-ref: https://github.com/floragunncom/search-guard-authbackend-jwt
-:searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
-:searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
-:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-5.4.0
-:searchguard-tls-certificate-ref: https://floragunn.com/tls-certificate-generator/
-:kibi-ref: http://siren.solutions/kibi/docs/current/
-:dockerhub-ref: https://hub.docker.com/u/sirensolutions/
-:docker-image-name: siren-platform
-:start-url: http://localhost:5606
-:download-ref: https://support.siren.io
-:kibi-default-port: 5606
-
-:k4issue: https://github.com/elastic/kibana/issues/
-:k4pull: https://github.com/elastic/kibana/pull/
-//////////
-release-state can be: released | prerelease | unreleased
-//////////
-:release-state:  released
-:version: 5.4.3
-:compatible-es-versions: 5.4.x
-:es-compability-table-ref: https://github.com/sirensolutions/kibi/blob/master/README.md#compatibility-table-kibi--elasticsearch
-
-:repo: https://github.com/elastic/kibana/
-:issue:          {repo}issues/
-:pull:           {repo}pull/
-:commit:         {repo}commit/
-:security:       https://www.elastic.co/community/security/
-:branch: 5.4.3-SNAPSHOT
-
-include::introduction.asciidoc[]
-
-include::setup.asciidoc[]
-
-include::migration.asciidoc[]
-
-include::getting-started.asciidoc[]
-
-include::logstash.asciidoc[]
-
-include::discover.asciidoc[]
-
-include::visualize.asciidoc[]
-
-include::relational_filter.asciidoc[]
-
-include::dashboard.asciidoc[]
-
-include::timelion.asciidoc[]
-
-include::console.asciidoc[]
-
-include::management.asciidoc[]
-
-include::access_control.asciidoc[]
-
-include::searchguard_integration.asciidoc[]
-
-include::kerberos.asciidoc[]
-
-include::jwt.asciidoc[]
-
-include::external_datasources.asciidoc[]
-
-include::kibi_gremlin_server.asciidoc[]
-
-include::sentinl_joinquery.asciidoc[]
-
-include::cross_frame_communication.asciidoc[]
-
-include::plugins.asciidoc[]
-
-include::development.asciidoc[]
-
-include::release-notes.asciidoc[]
-
-include::acknowledgements.asciidoc[]
+include::index-shared-kibi.asciidoc[]
+include::index-shared1.asciidoc[]
+include::index-shared2.asciidoc[]
+include::index-shared3.asciidoc[]
+include::index-shared4.asciidoc[]
+include::index-shared5.asciidoc[]
+include::index-shared-kibi-access-control.asciidoc[]
+include::index-shared-kibi-components.asciidoc[]
+include::index-shared-kibi-data-ingestion.asciidoc[]
+include::index-shared-kibi-acknowledgements.asciidoc[]

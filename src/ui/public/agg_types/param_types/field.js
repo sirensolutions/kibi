@@ -74,15 +74,16 @@ export function AggTypesParamTypesFieldProvider(Private, $filter) {
     let field;
 
     // kibi: check if byName method exists before using it
-    if (aggConfig.getIndexPattern().fields.byName) {
-      field = aggConfig.getIndexPattern().fields.byName[fieldName];
+    const indexPattern = aggConfig.getIndexPattern();
+    if (indexPattern.fields.byName) {
+      field = indexPattern.fields.byName[fieldName];
     }
     // kibi: end
 
     if (!field) {
       throw new SavedObjectNotFound(
         // kibi: improved the error message
-        'index-pattern-field', 'Could not found field: ' + fieldName + ' in ' + aggConfig.getIndexPattern().id + ' index pattern'
+        'index-pattern-field', 'Could not found field: ' + fieldName + ' in ' + indexPattern.id + ' index pattern'
       );
     }
 

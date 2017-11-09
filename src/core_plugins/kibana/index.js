@@ -5,13 +5,13 @@ import { mkdirp as mkdirpNode } from 'mkdirp';
 
 import manageUuid from './server/lib/manage_uuid';
 import search from './server/routes/api/search';
-import settings from './server/routes/api/settings';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import scripts from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
+import { getUiSettingDefaults } from './ui_setting_defaults';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
@@ -132,8 +132,9 @@ module.exports = function (kibana) {
 
       translations: [
         resolve(__dirname, './translations/en.json')
-      ]
+      ],
       // kibi: removed the kibana original mappings as our one are done by saved_objec_api
+      uiSettingDefaults: getUiSettingDefaults(),
     },
 
     preInit: async function (server) {
@@ -153,7 +154,6 @@ module.exports = function (kibana) {
       manageUuid(server);
       // routes
       search(server);
-      settings(server);
       scripts(server);
       importApi(server);
       exportApi(server);

@@ -11,6 +11,19 @@ uiRoutes
 .when('/management/siren/indices/:indexPatternId/create-field/', { mode: 'create' })
 .defaults(/management\/siren\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
   template,
+  mapBreadcrumbs($route, breadcrumbs) {
+    const { indexPattern } = $route.current.locals;
+    return breadcrumbs.map(crumb => {
+      if (crumb.id !== indexPattern.id) {
+        return crumb;
+      }
+
+      return {
+        ...crumb,
+        display: indexPattern.title
+      };
+    });
+  },
   resolve: {
     indexPattern: function ($route, courier) {
       return courier.indexPatterns.get($route.current.params.indexPatternId)
@@ -48,7 +61,7 @@ uiRoutes
       throw new Error('unknown fieldSettings mode ' + this.mode);
     }
 
-    docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.id]);
+    docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.title]);
     this.goBack = function () {
       kbnUrl.changeToRoute(this.indexPattern, 'edit');
     };

@@ -8,7 +8,6 @@ define(function (require) {
   // bring in the factory
   require('./_saved_sheet.js');
 
-
   // Register this service with the saved object registry so it can be
   // edited by the object editor.
   savedObjectManagementRegistry.register({
@@ -17,8 +16,8 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedSheets', function (savedObjectsAPI, savedObjectsAPITypes, Private, SavedSheet,
-                                          kbnIndex, esAdmin, kbnUrl) {
+  module.service('savedSheets', function (SavedSheet, kbnIndex, esAdmin, kbnUrl,
+                                          savedObjectsAPI, savedObjectsAPITypes, Private) {
     // kibi: timelion-sheet is saved through the savedObjectsAPI
     savedObjectsAPITypes.add('timelion-sheet');
 
@@ -34,6 +33,7 @@ define(function (require) {
     savedSheetLoader.urlFor = function (id) {
       return kbnUrl.eval('#/{{id}}', { id: id });
     };
+
     savedSheetLoader.loaderProperties = {
       name: 'timelion-sheet',
       noun: 'Saved Sheets',

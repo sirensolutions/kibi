@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { SavedObjectsClient } from '../saved_objects_client';
+import { createIdQuery } from '../lib/create_id_query';
 
 describe('SavedObjectsClient', () => {
   let callAdminCluster;
@@ -41,9 +42,19 @@ describe('SavedObjectsClient', () => {
     }
   };
 
+  const mappings = {
+    'index-pattern': {
+      properties: {
+        someField: {
+          type: 'keyword'
+        }
+      }
+    }
+  };
+
   beforeEach(() => {
     callAdminCluster = sinon.mock();
-    savedObjectsClient = new SavedObjectsClient('.kibana-test', callAdminCluster);
+    savedObjectsClient = new SavedObjectsClient('.kibana-test', mappings, callAdminCluster);
   });
 
   afterEach(() => {
@@ -69,7 +80,7 @@ describe('SavedObjectsClient', () => {
       });
     });
 
-    it('should use ES create action', async () => {
+    it('should use ES index action', async () => {
       callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
 
       await savedObjectsClient.create('index-pattern', {
@@ -81,6 +92,35 @@ describe('SavedObjectsClient', () => {
 
       const args = callAdminCluster.getCall(0).args;
       expect(args[0]).to.be('index');
+    });
+
+    it('should use create action if ID defined and overwrite=false', async () => {
+      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
+
+      await savedObjectsClient.create('index-pattern', {
+        title: 'Logstash'
+      }, {
+        id: 'logstash-*',
+      });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const args = callAdminCluster.getCall(0).args;
+      expect(args[0]).to.be('create');
+    });
+
+    it('allows for id to be provided', async () => {
+      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
+
+      await savedObjectsClient.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash'
+      }, { id: 'myId' });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const args = callAdminCluster.getCall(0).args;
+      expect(args[1].id).to.be('myId');
     });
   });
 
@@ -104,11 +144,11 @@ describe('SavedObjectsClient', () => {
       ]);
     });
 
-    it('should overwrite objects if force is truthy', async () => {
+    it('should overwrite objects if overwrite is truthy', async () => {
       await savedObjectsClient.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
-      ], { force: true });
+      ], { overwrite: true });
 
       expect(callAdminCluster.calledOnce).to.be(true);
 
@@ -128,7 +168,7 @@ describe('SavedObjectsClient', () => {
         errors: false,
         items: [{
           create: {
-            _type: 'foo',
+            _type: 'config',
             _id: 'one',
             error: {
               reason: 'type[config] missing'
@@ -136,8 +176,8 @@ describe('SavedObjectsClient', () => {
           }
         }, {
           create: {
-            _type: 'config',
-            _id: 'one',
+            _type: 'index-pattern',
+            _id: 'two',
             _version: 2
           }
         }]
@@ -151,13 +191,13 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql([
         {
           id: 'one',
-          type: 'foo',
+          type: 'config',
           version: undefined,
           attributes: { title: 'Test One' },
           error: { message: 'type[config] missing' }
         }, {
-          id: 'one',
-          type: 'config',
+          id: 'two',
+          type: 'index-pattern',
           version: 2,
           attributes: { title: 'Test Two' },
           error: undefined
@@ -176,8 +216,8 @@ describe('SavedObjectsClient', () => {
           }
         }, {
           create: {
-            _type: 'config',
-            _id: 'one',
+            _type: 'index-pattern',
+            _id: 'two',
             _version: 2
           }
         }]
@@ -196,8 +236,8 @@ describe('SavedObjectsClient', () => {
           attributes: { title: 'Test One' },
           error: undefined
         }, {
-          id: 'one',
-          type: 'config',
+          id: 'two',
+          type: 'index-pattern',
           version: 2,
           attributes: { title: 'Test Two' },
           error: undefined
@@ -208,7 +248,9 @@ describe('SavedObjectsClient', () => {
 
   describe('#delete', () => {
     it('throws notFound when ES is unable to find the document', (done) => {
-      callAdminCluster.returns(Promise.resolve({ found: false }));
+      callAdminCluster.returns(Promise.resolve({
+        deleted: 0
+      }));
 
       savedObjectsClient.delete('index-pattern', 'logstash-*').then(() => {
         done('failed');
@@ -224,10 +266,9 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('delete');
+      expect(args[0]).to.be('deleteByQuery');
       expect(args[1]).to.eql({
-        type: 'index-pattern',
-        id: 'logstash-*',
+        body: createIdQuery({ type: 'index-pattern', id: 'logstash-*' }),
         refresh: 'wait_for',
         index: '.kibana-test'
       });
@@ -272,7 +313,23 @@ describe('SavedObjectsClient', () => {
       const expectedQuery = {
         bool: {
           must: [{ match_all: {} }],
-          filter: [{ term: { _type: 'index-pattern' } }]
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      _type: 'index-pattern'
+                    }
+                  }, {
+                    term: {
+                      type: 'index-pattern'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
         }
       };
 
@@ -281,24 +338,70 @@ describe('SavedObjectsClient', () => {
       });
     });
 
+    it('throws error when providing sortField but no type', (done) => {
+      savedObjectsClient.find({
+        sortField: 'someField'
+      }).then(() => {
+        done('failed');
+      }).catch(e => {
+        expect(e).to.be.an(Error);
+        done();
+      });
+    });
+
+    it('accepts sort with type', async () => {
+      await savedObjectsClient.find({
+        type: 'index-pattern',
+        sortField: 'someField',
+        sortOrder: 'desc',
+      });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const options = callAdminCluster.getCall(0).args[1];
+      const expectedQuerySort = [
+        {
+          someField: {
+            order: 'desc',
+            unmapped_type: 'keyword'
+          },
+        }, {
+          'index-pattern.someField': {
+            order: 'desc',
+            unmapped_type: 'keyword'
+          },
+        },
+      ];
+
+      expect(options.body.sort).to.eql(expectedQuerySort);
+    });
+
     it('can filter by fields', async () => {
       await savedObjectsClient.find({ fields: 'title' });
 
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const options = callAdminCluster.getCall(0).args[1];
-      expect(options._source).to.eql('title');
+      expect(options._source).to.eql([
+        '*.title', 'type', 'title'
+      ]);
     });
   });
 
   describe('#get', () => {
     it('formats Elasticsearch response', async () => {
       callAdminCluster.returns(Promise.resolve({
-        _id: 'logstash-*',
-        _type: 'index-pattern',
-        _version: 2,
-        _source: {
-          title: 'Testing'
+        hits: {
+          hits: [
+            {
+              _id: 'logstash-*',
+              _type: 'index-pattern',
+              _version: 2,
+              _source: {
+                title: 'Testing'
+              }
+            }
+          ]
         }
       }));
 
@@ -315,48 +418,59 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#bulkGet', () => {
-    it('accepts a array of mixed type and ids', async () => {
+    it('accepts an array of mixed type and ids', async () => {
       await savedObjectsClient.bulkGet([
         { id: 'one', type: 'config' },
-        { id: 'two', type: 'index-pattern' },
-        { id: 'three' }
+        { id: 'two', type: 'index-pattern' }
       ]);
 
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const options = callAdminCluster.getCall(0).args[1];
-      expect(options.body.docs).to.eql([
-        { _type: 'config', _id: 'one' },
-        { _type: 'index-pattern', _id: 'two' },
-        { _type: undefined, _id: 'three' }
+      expect(options.body).to.eql([
+        {},
+        createIdQuery({ type: 'config', id: 'one' }),
+        {},
+        createIdQuery({ type: 'index-pattern', id: 'two' })
       ]);
     });
 
     it('returns early for empty objects argument', async () => {
       const response = await savedObjectsClient.bulkGet([]);
 
-      expect(response).to.have.length(0);
+      expect(response.saved_objects).to.have.length(0);
       expect(callAdminCluster.notCalled).to.be(true);
     });
 
-    it('omits missed objects', async () => {
+    it('reports error on missed objects', async () => {
       callAdminCluster.returns(Promise.resolve({
-        docs:[{
-          _type: 'config',
-          _id: 'bad',
-          found: false
-        }, {
-          _type: 'config',
-          _id: 'good',
-          found: true,
-          _version: 2,
-          _source: { title: 'Test' }
-        }]
+        responses: [
+          {
+            hits: {
+              hits: [
+                {
+                  _id: 'good',
+                  _type: 'doc',
+                  _version: 2,
+                  _source: {
+                    type: 'config',
+                    config: {
+                      title: 'Test'
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
       }));
 
-      const response = await savedObjectsClient.bulkGet(['good', 'bad', 'config']);
-      expect(response).to.have.length(1);
-      expect(response[0]).to.eql({
+      const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(
+        [{ id: 'good', type: 'config' }, { id: 'bad', type: 'config' }]
+      );
+
+      expect(savedObjects).to.have.length(1);
+      expect(savedObjects[0]).to.eql({
         id: 'good',
         type: 'config',
         version: 2,

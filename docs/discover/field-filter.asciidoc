@@ -92,11 +92,11 @@ persist when you switch contexts in Kibi. For example, you can pin a filter
 in Discover and it remains in place when you switch to Visualize.
 Note that a filter is based on a particular index field--if the indices being
 searched don't contain the field in a pinned filter, it has no effect.
-image:images/filter-toggle.png[] Toggle Filter :: Switch from a positive
+image:images/filter-toggle.png[] Invert Filter :: Switch from a positive
 filter to a negative filter and vice-versa.
 image:images/filter-delete.png[] Remove Filter :: Remove the filter.
 image:images/filter-custom.png[] Edit Filter :: <<filter-edit, Edit the
-filter>> definition.  Enables you to manually update the filter query and
+filter>> definition.  Enables you to manually update the filter and
 specify a label for the filter.
 
 To apply a filter action to all of the applied filters,

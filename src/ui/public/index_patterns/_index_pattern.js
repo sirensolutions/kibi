@@ -88,7 +88,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
       throw new SavedObjectNotFound(
         type,
         indexPattern.id,
-        kbnUrl.eval('#/management/kibana/index?id={{id}}&name=', { id: markdownSaveId })
+        kbnUrl.eval('#/management/siren/index?id={{id}}&name=', { id: markdownSaveId }) // kibi: changed link to siren
       );
     }
 
@@ -102,6 +102,13 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     // give index pattern all of the values in _source
     _.assign(indexPattern, response._source);
 
+    // older kibana indices reference the index pattern by _id and may not have the pattern
+    // saved in title
+    // if the title doesn't exist, it's an old format and we can use the id instead
+    if (!indexPattern.title) {
+      indexPattern.title = indexPattern.id;
+    }
+
     const promise = indexFields(indexPattern);
 
     // any time index pattern in ES is updated, update index pattern object
@@ -114,6 +121,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     return promise;
+    // kibi: end
   }
 
   function isFieldRefreshRequired(indexPattern) {
@@ -144,7 +152,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     return promise.then(() => {
-      initFields(indexPattern);
+      return initFields(indexPattern);
     });
   }
 

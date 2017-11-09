@@ -270,7 +270,11 @@ uiModules
     const promises = [];
     _.each(filters, function (f) {
       if (f.join_sequence) {
-        promises.push(explainJoinSequence(f.join_sequence, f.meta.isPruned));
+        if (f.meta && f.meta.isPruned) {
+          promises.push(explainJoinSequence(f.join_sequence, f.meta.isPruned));
+        } else {
+          promises.push(explainJoinSequence(f.join_sequence));
+        }
       } else {
         promises.push(explainFilter(f));
       }

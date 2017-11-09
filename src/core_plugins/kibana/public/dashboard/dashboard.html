@@ -40,7 +40,10 @@
             >
               (<kibi-human-readable-number value="dash.count" format="0,000"></kibi-human-readable-number>)
             </span>
-            <span ng-show="dash.isPruned" class="dashboard-stats">(*)</span>
+            <span ng-show="dash.isPruned" class="dashboard-stats" data-toggle="tooltip"
+              data-placement="bottom"
+              title="Notice: This is a sample of the results because join operation was pruned">(*)
+            </span>
           </div>
         </div>
       </div>

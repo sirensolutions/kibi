@@ -73,7 +73,7 @@ describe('Kibi Components', function () {
       ];
     };
 
-    const expectedJoinSequenceHTML = function (relations) {
+    const expectedJoinSequenceHTML = function (relations, isPruned) {
       const SPACING = 'fjskfkkkfa';
 
       const queriesToHtml = function (queries) {
@@ -132,11 +132,58 @@ describe('Kibi Components', function () {
         _.each(relations, relation => {
           html += relation.group ? groupToHtml(relation.group) : relationToHtml(relation);
         });
+
+        if(isPruned) {
+          html += '<tr><td><b>Notice:</b> This is a sample of the results because join operation was pruned</td></tr>';
+        }
         html += '</table>';
         return html.replace(/>[\n <]*</g, '><');
       };
       return joinSequenceToHtml(relations).replace(new RegExp(SPACING, 'g'), ' ').trim();
     };
+    it('notify user if join is pruned', function (done) {
+
+      const joinFilter = {
+        meta: {
+          isPruned: true
+        },
+        join_sequence: [
+          {
+            relation: [
+              {
+                pattern: 'article',
+                path: 'companies',
+                indices: [
+                  'article'
+                ],
+                termsEncoding: 'long',
+              },
+              {
+                pattern: 'company',
+                path: 'id',
+                indices: [
+                  'company'
+                ],
+                termsEncoding: 'long'
+              }
+            ],
+          }
+        ]
+      };
+
+      const expected = expectedJoinSequenceHTML([
+        {
+          from: { index: [ 'article' ], path: 'companies' },
+          to: { index: [ 'company' ], path: 'id' }
+        },
+      ], true);
+
+      joinExplanation.getFilterExplanations([ joinFilter ]).then(function (exp) {
+        expect(exp.length).to.equal(1);
+        expect(exp[0]).to.be(expected);
+        done();
+      }).catch(done);
+    });
 
     it('prints a nice label for a grouped join_sequence', function (done) {
       const joinSequenceGroup = {

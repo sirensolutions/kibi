@@ -241,6 +241,55 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     delete this[this._properties.test_selected_entity];
   };
 
+  KibiState.prototype._removeUnwantedProperties = function (filters) {
+    const result = [];
+    _.each(filters, filter => {
+      const element = _.omit(_.flattenWith('.', _.omit(filter, ['$state', '$$hashKey']), true), ['meta.type']);
+      result.push(element);
+    });
+    return result;
+  };
+
+  KibiState.prototype.dashboardHasModifiedFilters = function (dashboard) {
+    if (dashboard && dashboard.kibanaSavedObjectMeta && dashboard.kibanaSavedObjectMeta.searchSourceJSON) {
+      const appState = getAppState();
+      const meta = JSON.parse(dashboard.kibanaSavedObjectMeta.searchSourceJSON);
+      const filters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
+      const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
+      let modified = false;
+      if (appState && dashboard.id === appState.id) {
+        // query
+        const origQuery = query && query.query || decorateQuery({ query_string: { query: '*' } });
+        modified = !angular.equals(origQuery, appState.query);
+        if (modified) {
+          return true;
+        }
+        // filters
+        modified = !angular.equals(this._removeUnwantedProperties(filters), this._removeUnwantedProperties(appState.filters));
+        return modified;
+      }
+
+      if (this[this._properties.dashboards] && this[this._properties.dashboards][dashboard.id]) {
+        // query
+        if (!query || this._isDefaultQuery(query.query)) {
+          if (this._getDashboardProperty(dashboard.id, this._properties.query)) {
+            modified = true;
+          }
+        } else {
+          modified = !angular.equals(query.query, this._getDashboardProperty(dashboard.id, this._properties.query));
+        }
+        if (modified) {
+          return true;
+        }
+        // filters
+        modified = !angular.equals(this._removeUnwantedProperties(filters),
+        this._removeUnwantedProperties(this._getDashboardProperty(dashboard.id, this._properties.filters)));
+      }
+      return modified;
+    }
+    return false;
+  };
+
   /**
    * Reset the filters, queries, and time for each dashboard to their saved state.
    * Added dashId to allow reset only one dashboard.

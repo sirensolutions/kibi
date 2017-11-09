@@ -10,6 +10,7 @@ import { MockState } from 'fixtures/mock_state';
 import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import noDigestPromises from 'test_utils/no_digest_promises';
+import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
 
 import 'ui/kibi/state_management/kibi_state';
 
@@ -21,6 +22,7 @@ describe('State Management', function () {
   let appState;
   let globalState;
   let indexPatternsService;
+  let mockDecorateQuery;
 
   let disableFiltersIfOutdatedSpy;
 
@@ -104,6 +106,10 @@ describe('State Management', function () {
       config.set('query:queryString:options', { analyze_wildcard: true });
       config.set('timepicker:timeDefaults', defaultTime);
       timefilter.time = defaultTime;
+    });
+
+    ngMock.inject(function (Private) {
+      mockDecorateQuery = Private(DecorateQueryProvider);
     });
   };
 
@@ -1478,6 +1484,313 @@ describe('State Management', function () {
           }).catch(done);
         });
       });
+    });
+
+    describe('Dashboard has modified filters', function () {
+      beforeEach(() => {
+        init();
+        appState = new MockState({
+          id: 'dashboard1',
+          query: mockDecorateQuery({ query_string: { query: '*' } }),
+          filters: [{
+            meta: {
+              index: 'article',
+              formattedValue: '2,010',
+              key: 'pyear',
+              value: '2,010 to 2,011',
+              disabled: false,
+              negate: true,
+              alias: null,
+              dependsOnSelectedEntities: false,
+              dependsOnSelectedEntitiesDisabled: false,
+              markDependOnSelectedEntities: false,
+              type: 'range'
+            },
+            range: {
+              pyear: {
+                gte: 2010,
+                lt: 2011
+              }
+            },
+            $state: {
+              store: 'appState'
+            }
+          }]
+        });
+      });
+
+      it('should say filters are not modified (filters against appState)', function (done) {
+        const dashboard = {
+          id: 'dashboard1',
+          title: 'dashboard1',
+          savedSearchId: 'search1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              filter: [{
+                meta: {
+                  index: 'article',
+                  formattedValue: '2,010',
+                  key: 'pyear',
+                  value: '2,010 to 2,011',
+                  disabled: false,
+                  negate: true,
+                  alias: null,
+                  dependsOnSelectedEntities: false,
+                  dependsOnSelectedEntitiesDisabled: false,
+                  markDependOnSelectedEntities: false
+                },
+                range: {
+                  pyear: {
+                    gte: 2010,
+                    lt: 2011
+                  }
+                }
+              }]
+            })
+          }
+        };
+
+        expect(kibiState.dashboardHasModifiedFilters(dashboard)).to.be(false);
+        done();
+      });
+
+      it('should say filters are modified (filters against appState)', function (done) {
+        const dashboard = {
+          id: 'dashboard1',
+          title: 'dashboard1',
+          savedSearchId: 'search1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              filter: [{
+                meta: {
+                  index: 'article',
+                  formattedValue: '2,010',
+                  key: 'pyear',
+                  value: '2,010 to 2,011',
+                  disabled: false,
+                  negate: false,
+                  alias: null,
+                  dependsOnSelectedEntities: false,
+                  dependsOnSelectedEntitiesDisabled: false,
+                  markDependOnSelectedEntities: false
+                },
+                range: {
+                  pyear: {
+                    gte: 2010,
+                    lt: 2011
+                  }
+                }
+              }]
+            })
+          }
+        };
+
+        expect(kibiState.dashboardHasModifiedFilters(dashboard)).to.be(true);
+        done();
+      });
+
+      it('should say query is not modified (filters against appState)', function (done) {
+        appState = new MockState({
+          id: 'dashboard1',
+          query: mockDecorateQuery({ query_string: { query: '*' } })
+        });
+
+        const dashboard = {
+          id: 'dashboard1',
+          title: 'dashboard1',
+          savedSearchId: 'search1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              filter: [{
+                query: mockDecorateQuery({ query_string: { query: '*' } })
+              }]
+            })
+          }
+        };
+
+        expect(kibiState.dashboardHasModifiedFilters(dashboard)).to.be(false);
+        done();
+      });
+
+      it('should say query is not modified - default query (filters against appState)', function (done) {
+        appState = new MockState({
+          id: 'dashboard1',
+          query: mockDecorateQuery({ query_string: { query: '*' } })
+        });
+
+        const dashboard = {
+          id: 'dashboard1',
+          title: 'dashboard1',
+          savedSearchId: 'search1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              filter: [ ]
+            })
+          }
+        };
+
+        expect(kibiState.dashboardHasModifiedFilters(dashboard)).to.be(false);
+        done();
+      });
+
+      it('should say query is modified (filters against appState)', function (done) {
+        appState = new MockState({
+          id: 'dashboard1',
+          query: mockDecorateQuery({ query_string: { query: '*' } })
+        });
+
+        const dashboard = {
+          id: 'dashboard1',
+          title: 'dashboard1',
+          savedSearchId: 'search1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              filter: [{
+                query: mockDecorateQuery({ query_string: { query: 'countrycode:USA' } })
+              }]
+            })
+          }
+        };
+
+        expect(kibiState.dashboardHasModifiedFilters(dashboard)).to.be(true);
+        done();
+      });
+
+      it('should say filters are modified because they were removed (filters against appState)', function (done) {
+        const dashboard = {
+          id: 'dashboard1',
+          title: 'dashboard1',
+          savedSearchId: 'search1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              filter: []
+            })
+          }
+        };
+
+        expect(kibiState.dashboardHasModifiedFilters(dashboard)).to.be(true);
+        done();
+      });
+
+      it('should say filters are not modified (filters against kibiState)', function (done) {
+        appState = new MockState({ });
+        kibiState._setDashboardProperty('dashboard1', kibiState._properties.filters, [{
+          meta: {
+            index: 'article',
+            formattedValue: '2,010',
+            key: 'pyear',
+            value: '2,010 to 2,011',
+            disabled: false,
+            negate: true,
+            alias: null,
+            dependsOnSelectedEntities: false,
+            dependsOnSelectedEntitiesDisabled: false,
+            markDependOnSelectedEntities: false
+          },
+          range: {
+            pyear: {
+              gte: 2010,
+              lt: 2011
+            }
+          }
+        }]);
+
+        const dashboard = {
+          id: 'dashboard1',
+          title: 'dashboard1',
+          savedSearchId: 'search1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              filter: [{
+                meta: {
+                  index: 'article',
+                  formattedValue: '2,010',
+                  key: 'pyear',
+                  value: '2,010 to 2,011',
+                  disabled: false,
+                  negate: true,
+                  alias: null,
+                  dependsOnSelectedEntities: false,
+                  dependsOnSelectedEntitiesDisabled: false,
+                  markDependOnSelectedEntities: false
+                },
+                range: {
+                  pyear: {
+                    gte: 2010,
+                    lt: 2011
+                  }
+                }
+              }]
+            })
+          }
+        };
+
+        expect(kibiState.dashboardHasModifiedFilters(dashboard)).to.be(false);
+        done();
+      });
+
+      it('should say filters are modified (filters against kibiState)', function (done) {
+        appState = new MockState({ });
+        kibiState._setDashboardProperty('dashboard1', kibiState._properties.filters, [{
+          meta: {
+            index: 'article',
+            formattedValue: '2,010',
+            key: 'pyear',
+            value: '2,010 to 2,011',
+            disabled: false,
+            negate: true,
+            alias: null,
+            dependsOnSelectedEntities: false,
+            dependsOnSelectedEntitiesDisabled: false,
+            markDependOnSelectedEntities: false
+          },
+          range: {
+            pyear: {
+              gte: 2010,
+              lt: 2011
+            }
+          }
+        }, {
+          term: { field1: 'ddd' },
+          meta: {
+            disabled: true
+          }
+        }]);
+
+        const dashboard = {
+          id: 'dashboard1',
+          title: 'dashboard1',
+          savedSearchId: 'search1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              filter: [{
+                meta: {
+                  index: 'article',
+                  formattedValue: '2,010',
+                  key: 'pyear',
+                  value: '2,010 to 2,011',
+                  disabled: false,
+                  negate: true,
+                  alias: null,
+                  dependsOnSelectedEntities: false,
+                  dependsOnSelectedEntitiesDisabled: false,
+                  markDependOnSelectedEntities: false
+                },
+                range: {
+                  pyear: {
+                    gte: 2010,
+                    lt: 2011
+                  }
+                }
+              }]
+            })
+          }
+        };
+
+        expect(kibiState.dashboardHasModifiedFilters(dashboard)).to.be(true);
+        done();
+      });
+
     });
 
     describe('Reset dashboards state', function () {

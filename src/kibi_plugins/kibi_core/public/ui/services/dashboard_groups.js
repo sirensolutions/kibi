@@ -38,6 +38,7 @@ uiModules
     delete dashboard.count;
     delete dashboard.isPruned;
     delete dashboard.filterIconMessage;
+    delete dashboard.dirty;
   };
 
   class DashboardGroups extends SimpleEmitter {
@@ -96,7 +97,7 @@ uiModules
       return this._initialized;
     }
 
-    _dashboardMetadataCallback(dashboard, meta, filters, queries) {
+    _dashboardMetadataCallback(dashboard, meta, filters, queries, dirty) {
       if (dashboard.error) {
         dashboard.count = 'Error';
       } else if (dashboard.forbidden) {
@@ -111,6 +112,7 @@ uiModules
         dashboard.count = 'Error';
       }
       dashboard.isPruned = isJoinPruned(meta);
+      dashboard.dirty = dirty;
       return joinExplanation.constructFilterIconMessage(filters, queries)
       .then(filterIconMessage => {
         dashboard.filterIconMessage = filterIconMessage;
@@ -235,6 +237,9 @@ uiModules
                 const queries = results[dashboardId].queries;
                 const time = results[dashboardId].time;
                 const query = queryBuilder(filters, queries, time);
+                const dashboard = _(resp.hits)
+                  .filter(dashboard => dashboard.savedSearchId && dashboardId === dashboard.id).value() [0];
+                const dirty = kibiState.dashboardHasModifiedFilters(dashboard);
                 query.size = 0; // we do not need hits just a count
                 p =  kibiState.timeBasedIndices(index, dashboardId)
                 .then(indices => {
@@ -245,7 +250,8 @@ uiModules
                     indexPattern: index,
                     filters,
                     queries,
-                    indices
+                    indices,
+                    dirty
                   };
                 })
                 .catch((error) => {
@@ -316,9 +322,10 @@ uiModules
                   if (error) {
                     notify.error('Could not update metadata for dashboard ' + d.id);
                   }
-                  self._dashboardMetadataCallback(d, meta, foundDashboardMetadata.filters, foundDashboardMetadata.queries).then(() => {
-                    self.emit('dashboardsMetadataUpdated', [d.id]);
-                  });
+                  self._dashboardMetadataCallback(d, meta,
+                    foundDashboardMetadata.filters, foundDashboardMetadata.queries, foundDashboardMetadata.dirty).then(() => {
+                      self.emit('dashboardsMetadataUpdated', [d.id]);
+                    });
                 }
               });
             }
@@ -427,6 +434,7 @@ uiModules
           _.assign(dash, {
             count: fromDash.count,
             isPruned: fromDash.isPruned,
+            dirty: fromDash.dirty,
             filterIconMessage: fromDash.filterIconMessage
           });
         }

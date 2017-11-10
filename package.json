@@ -16,10 +16,10 @@
     "SPARQL"
   ],
   "private": false,
-  "version": "5.5.0",
+  "version": "5.6.0",
   "branch": "5.6",
   "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-6-3-released",
-  "kibi_version": "5.5.3-SNAPSHOT",
+  "kibi_version": "5.6.0-SNAPSHOT",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9",
@@ -30,14 +30,20 @@
     "url": "https://github.com/sirensolutions/kibi/issues"
   },
   "license": "Apache-2.0",
-  "author": "SIREn Solutions <info@siren.solutions>",
+  "author": "SIREn Solutions <info@siren.io>",
   "contributors": [
-    "Stéphane Campinas <stephane@siren.solutions>",
-    "Fabio Corneti <fabio@siren.solutions>",
-    "Szymon Danielczyk <szydan@siren.solutions>",
-    "Renaud Delbru <renaud@siren.solutions>",
-    "Fabio Tacchelli <fabio.tacchelli@siren.solutions>",
-    "Giovanni Tummarello <giovanni@siren.solutions>"
+    "Mehmet Furkan Aydın <mehmet.furkan.aydin@siren.io>",
+    "Nicola Bertolin <nicola.bertolin@siren.io>",
+    "Sergey Bondarenko <sergey.bondarenko@siren.io>",
+    "Stéphane Campinas <stephane@siren.io>",
+    "Fabio Corneti <fabio@siren.io>",
+    "Szymon Danielczyk <szydan@siren.io>",
+    "Renaud Delbru <renaud@siren.io>",
+    "Alfredo Milani Comparetti <almico@siren.io>",
+    "Colm O'Shea <colm.oshea@siren.io>",
+    "Sergio Scarnatto <sergio.scarnatto@siren.io>",
+    "Fabio Tacchelli <fabio.tacchelli@siren.io>",
+    "Giovanni Tummarello <giovanni@siren.io>"
   ],
   "scripts": {
     "test": "grunt test",

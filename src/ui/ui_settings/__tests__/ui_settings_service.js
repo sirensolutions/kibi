@@ -10,12 +10,22 @@ import {
   savedObjectsClientErrors,
 } from './lib';
 
+// kibi: imports
+import sinon from 'sinon';
+import requirefrom from 'requirefrom';
+// kibi: end
+
 const TYPE = 'config';
 const ID = 'kibana-version';
 const chance = new Chance();
 
 function setup(options = {}) {
   const {
+    // kibi: added
+    getResult,
+    settingsStatusOverrides,
+    callWithRequest,
+    // kibi: end
     readInterceptor,
     getDefaults,
     defaults = {},
@@ -23,18 +33,133 @@ function setup(options = {}) {
     savedObjectsClient = createObjectsClientStub(TYPE, ID, esDocSource)
   } = options;
 
+  // kibi: added by
+  const adminCluster = {
+    errors: esErrors,
+    callWithInternalUser: sinon.stub(),
+    callWithRequest: sinon.spy((withReq, method, params) => {
+      if (callWithRequest) {
+        return callWithRequest(withReq, method, params);
+      }
+
+      // kibi: handled by the saved_objects_api
+      //expect(withReq).to.be(req);
+      switch (method) {
+        case 'get':
+          return Promise.resolve({ _source: getResult, found: true });
+        case 'update':
+          return Promise.resolve();
+        default:
+          throw new Error(`callWithRequest() is using unexpected method "${method}"`);
+      }
+    })
+  };
+
+  adminCluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: getResult }));
+  adminCluster.callWithInternalUser.withArgs('update', sinon.match.any).returns(Promise.resolve());
+
+  const configGet = sinon.stub();
+  configGet.withArgs('kibana.index').returns('.kibana');
+  configGet.withArgs('pkg.version').returns('1.2.3-test');
+  // kibi: configuration id is taken from kibi_version
+  configGet.withArgs('pkg.kibiVersion').returns('1.2.3-test');
+
+  configGet.withArgs('uiSettings.enabled').returns(true);
+  const config = {
+    get: configGet
+  };
+
+  const server = {
+    config() {
+      return config;
+    },
+    decorate: (_, key, value) => server[key] = value,
+    plugins: {
+      saved_objects_api: {
+        status: {
+          state: 'green'
+        },
+        getMiddlewares: () => []
+      },
+      elasticsearch: {
+        getCluster: sinon.stub().withArgs('admin').returns(adminCluster)
+      }
+    }
+  };
+
+  const ConfigModel = requirefrom('src/kibi_plugins/saved_objects_api/lib/model/builtin/')('config');
+  server.plugins.saved_objects_api.getModel = sinon.stub().withArgs('config').returns(new ConfigModel(server));
+
+  const req = { __stubHapiRequest: true, path: '', headers: {} };
+
+  const esStatus = {
+    state: 'green',
+    on: sinon.spy()
+  };
+
+  const settingsStatus = {
+    state: 'green',
+    red: sinon.spy(),
+    yellow: sinon.spy(),
+    green: sinon.spy(),
+    ...settingsStatusOverrides
+  };
+
+  const status = {
+      create: sinon.stub().withArgs('ui settings').returns(settingsStatus),
+      getForPluginId: sinon.stub().withArgs('elasticsearch').returns(esStatus)
+  };
+
+  const expectElasticsearchGetQuery = function () {
+    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+    sinon.assert.calledOnce(callWithRequest);
+    const [reqPassed, method, params] = callWithRequest.args[0];
+    // kibi: handled by the saved_objects_api
+    //expect(reqPassed).to.be(req);
+    expect(method).to.be('get');
+    expect(params).to.eql({
+      index: configGet('kibana.index'),
+      id: 'kibi',
+      type: 'config'
+    });
+  }
+
+  const expectElasticsearchUpdateQuery = function (doc) {
+    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+    sinon.assert.calledOnce(callWithRequest);
+    const [reqPassed, method, params] = callWithRequest.args[0];
+    // kibi: handled by the saved_objects_api
+    //expect(reqPassed).to.be(req);
+    expect(method).to.be('update');
+    expect(params).to.eql({
+      index: configGet('kibana.index'),
+      id: 'kibi',
+      type: 'config',
+      body: { doc },
+      refresh: true
+    });
+  }
+  // kibi: end
+
   const uiSettings = new UiSettingsService({
     type: TYPE,
     id: ID,
     getDefaults: getDefaults || (() => defaults),
     readInterceptor,
     savedObjectsClient,
+    server,
+    status
   });
 
   return {
     uiSettings,
-    assertGetQuery: savedObjectsClient.assertGetQuery,
-    assertUpdateQuery: savedObjectsClient.assertUpdateQuery,
+    // kibi: added
+    req,
+    configGet,
+    server,
+    // kibi: modified
+    assertGetQuery: expectElasticsearchGetQuery, // kibi: changed before was savedObjectsClient.assertGetQuery
+    assertUpdateQuery: expectElasticsearchUpdateQuery, // kibi: changed before was savedObjectsClient.assertUpdateQuery
   };
 }
 
@@ -54,66 +179,100 @@ describe('ui settings', () => {
     });
   });
 
+  // kibi:
+  // all methods invokation modified as they all require a hapi "req" object now
+
   describe('#setMany()', () => {
     it('returns a promise', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.setMany({ a: 'b' })).to.be.a(Promise);
+      const { uiSettings, req } = setup();
+      expect(uiSettings.setMany(req, { a: 'b' })).to.be.a(Promise);
     });
 
     it('updates a single value in one operation', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
-      await uiSettings.setMany({ one: 'value' });
+      const { uiSettings, assertUpdateQuery, req } = setup();
+      await uiSettings.setMany(req, { one: 'value' });
       assertUpdateQuery({ one: 'value' });
     });
 
     it('updates several values in one operation', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
-      await uiSettings.setMany({ one: 'value', another: 'val' });
+      const { uiSettings, assertUpdateQuery, req } = setup();
+      await uiSettings.setMany(req, { one: 'value', another: 'val' });
       assertUpdateQuery({ one: 'value', another: 'val' });
     });
+
+    // kibi: added tests
+    describe('kibi', function () {
+      it('should create the config singleton if it does not exist yet', async function () {
+        const { server, uiSettings, configGet, req } = setup({
+          async callWithRequest(req, method, params) {
+            switch (method) {
+              case 'update':
+                // config object does not exist yet
+                throw { status: 404 };
+              case 'create':
+                expect(params.index).to.eql(configGet('kibana.index'));
+                expect(params.type).to.eql('config');
+                expect(params.id).to.eql('kibi');
+                expect(params.body).to.eql({ one: 'value' });
+                break;
+              default:
+                throw new Error(`callWithRequest() is using unexpected method "${method}"`);
+            }
+          }
+        });
+
+        await uiSettings.setMany(req, { one: 'value' });
+
+        const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+        sinon.assert.calledTwice(callWithRequest);
+        sinon.assert.calledWith(callWithRequest.getCall(0), sinon.match.any, 'update');
+        sinon.assert.calledWith(callWithRequest.getCall(1), sinon.match.any, 'create');
+      });
+    });
+    // kibi: end
   });
 
   describe('#set()', () => {
     it('returns a promise', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.set('a', 'b')).to.be.a(Promise);
+      const { uiSettings, req } = setup();
+      expect(uiSettings.set(req, 'a', 'b')).to.be.a(Promise);
     });
 
     it('updates single values by (key, value)', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
-      await uiSettings.set('one', 'value');
+      const { uiSettings, assertUpdateQuery, req } = setup();
+      await uiSettings.set(req, 'one', 'value');
       assertUpdateQuery({ one: 'value' });
     });
   });
 
   describe('#remove()', () => {
     it('returns a promise', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.remove('one')).to.be.a(Promise);
+      const { uiSettings, req } = setup();
+      expect(uiSettings.remove(req, 'one')).to.be.a(Promise);
     });
 
     it('removes single values by key', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
-      await uiSettings.remove('one');
+      const { uiSettings, assertUpdateQuery, req } = setup();
+      await uiSettings.remove(req, 'one');
       assertUpdateQuery({ one: null });
     });
   });
 
   describe('#removeMany()', () => {
     it('returns a promise', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.removeMany(['one'])).to.be.a(Promise);
+      const { uiSettings, req } = setup();
+      expect(uiSettings.removeMany(req, ['one'])).to.be.a(Promise);
     });
 
     it('removes a single value', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
-      await uiSettings.removeMany(['one']);
+      const { uiSettings, assertUpdateQuery, req } = setup();
+      await uiSettings.removeMany(req, ['one']);
       assertUpdateQuery({ one: null });
     });
 
     it('updates several values in one operation', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
-      await uiSettings.removeMany(['one', 'two', 'three']);
+      const { uiSettings, assertUpdateQuery, req } = setup();
+      await uiSettings.removeMany(req, ['one', 'two', 'three']);
       assertUpdateQuery({ one: null, two: null, three: null });
     });
   });
@@ -145,15 +304,15 @@ describe('ui settings', () => {
 
   describe('#getUserProvided()', () => {
     it('pulls user configuration from ES', async () => {
-      const { uiSettings, assertGetQuery } = setup();
-      await uiSettings.getUserProvided();
+      const { uiSettings, assertGetQuery, req } = setup();
+      await uiSettings.getUserProvided(req);
       assertGetQuery();
     });
 
     it('returns user configuration', async () => {
       const esDocSource = { user: 'customized' };
-      const { uiSettings } = setup({ esDocSource });
-      const result = await uiSettings.getUserProvided();
+      const { uiSettings, req } = setup({ esDocSource });
+      const result = await uiSettings.getUserProvided(req);
       expect(isEqual(result, {
         user: { userValue: 'customized' }
       })).to.equal(true);
@@ -161,45 +320,45 @@ describe('ui settings', () => {
 
     it('ignores null user configuration (because default values)', async () => {
       const esDocSource = { user: 'customized', usingDefault: null, something: 'else' };
-      const { uiSettings } = setup({ esDocSource });
-      const result = await uiSettings.getUserProvided();
+      const { uiSettings, req } = setup({ esDocSource });
+      const result = await uiSettings.getUserProvided(req);
       expect(isEqual(result, {
         user: { userValue: 'customized' }, something: { userValue: 'else' }
       })).to.equal(true);
     });
 
     it('returns an empty object on 404 responses', async () => {
-      const { uiSettings } = setup({
+      const { uiSettings, req } = setup({
         async callCluster() {
           throw new esErrors[404]();
         }
       });
 
-      expect(await uiSettings.getUserProvided()).to.eql({});
+      expect(await uiSettings.getUserProvided(req)).to.eql({});
     });
 
     it('returns an empty object on 403 responses', async () => {
-      const { uiSettings } = setup({
+      const { uiSettings, req } = setup({
         async callCluster() {
           throw new esErrors[403]();
         }
       });
 
-      expect(await uiSettings.getUserProvided()).to.eql({});
+      expect(await uiSettings.getUserProvided(req)).to.eql({});
     });
 
     it('returns an empty object on NoConnections responses', async () => {
-      const { uiSettings } = setup({
+      const { uiSettings, req } = setup({
         async callCluster() {
           throw new esErrors.NoConnections();
         }
       });
 
-      expect(await uiSettings.getUserProvided()).to.eql({});
+      expect(await uiSettings.getUserProvided(req)).to.eql({});
     });
 
     it('throws 401 errors', async () => {
-      const { uiSettings } = setup({
+      const { uiSettings, req } = setup({
         savedObjectsClient: {
           errors: savedObjectsClientErrors,
           async get() {
@@ -209,7 +368,7 @@ describe('ui settings', () => {
       });
 
       try {
-        await uiSettings.getUserProvided();
+        await uiSettings.getUserProvided(req);
         throw new Error('expect getUserProvided() to throw');
       } catch (err) {
         expect(err).to.be.a(esErrors[401]);
@@ -219,7 +378,7 @@ describe('ui settings', () => {
     it('throw when callCluster fails in some unexpected way', async () => {
       const expectedUnexpectedError = new Error('unexpected');
 
-      const { uiSettings } = setup({
+      const { uiSettings, req } = setup({
         savedObjectsClient: {
           errors: savedObjectsClientErrors,
           async get() {
@@ -229,7 +388,7 @@ describe('ui settings', () => {
       });
 
       try {
-        await uiSettings.getUserProvided();
+        await uiSettings.getUserProvided(req);
         throw new Error('expect getUserProvided() to throw');
       } catch (err) {
         expect(err).to.be(expectedUnexpectedError);
@@ -240,24 +399,24 @@ describe('ui settings', () => {
   describe('#getRaw()', () => {
     it('pulls user configuration from ES', async () => {
       const esDocSource = {};
-      const { uiSettings, assertGetQuery } = setup({ esDocSource });
-      await uiSettings.getRaw();
+      const { uiSettings, assertGetQuery, req } = setup({ esDocSource });
+      await uiSettings.getRaw(req);
       assertGetQuery();
     });
 
     it(`without user configuration it's equal to the defaults`, async () => {
       const esDocSource = {};
       const defaults = { key: { value: chance.word() } };
-      const { uiSettings } = setup({ esDocSource, defaults });
-      const result = await uiSettings.getRaw();
+      const { uiSettings, req } = setup({ esDocSource, defaults });
+      const result = await uiSettings.getRaw(req);
       expect(result).to.eql(defaults);
     });
 
     it(`user configuration gets merged with defaults`, async () => {
       const esDocSource = { foo: 'bar' };
       const defaults = { key: { value: chance.word() } };
-      const { uiSettings } = setup({ esDocSource, defaults });
-      const result = await uiSettings.getRaw();
+      const { uiSettings, req } = setup({ esDocSource, defaults });
+      const result = await uiSettings.getRaw(req);
 
       expect(result).to.eql({
         foo: {
@@ -273,18 +432,18 @@ describe('ui settings', () => {
   describe('#getAll()', () => {
     it('pulls user configuration from ES', async () => {
       const esDocSource = {};
-      const { uiSettings, assertGetQuery } = setup({ esDocSource });
+      const { uiSettings, assertGetQuery, req } = setup({ esDocSource });
       // MERGE 5.6 have to pass request object ot getAll()
-      await uiSettings.getAll();
+      await uiSettings.getAll(req);
       assertGetQuery();
     });
 
     it(`returns defaults when es doc is empty`, async () => {
       const esDocSource = { };
       const defaults = { foo: { value: 'bar' } };
-      const { uiSettings } = setup({ esDocSource, defaults });
+      const { uiSettings, req } = setup({ esDocSource, defaults });
       // MERGE 5.6 have to pass request object ot getAll()
-      expect(await uiSettings.getAll()).to.eql({
+      expect(await uiSettings.getAll(req)).to.eql({
         foo: 'bar'
       });
     });
@@ -301,9 +460,9 @@ describe('ui settings', () => {
         },
       };
 
-      const { uiSettings } = setup({ esDocSource, defaults });
+      const { uiSettings, req } = setup({ esDocSource, defaults });
       // MERGE 5.6 have to pass request object ot getAll()
-      expect(await uiSettings.getAll()).to.eql({
+      expect(await uiSettings.getAll(req)).to.eql({
         foo: 'user-override',
         bar: 'user-provided',
       });
@@ -313,30 +472,30 @@ describe('ui settings', () => {
   describe('#get()', () => {
     it('pulls user configuration from ES', async () => {
       const esDocSource = {};
-      const { uiSettings, assertGetQuery } = setup({ esDocSource });
-      await uiSettings.get();
+      const { uiSettings, assertGetQuery, req } = setup({ esDocSource });
+      await uiSettings.get(req);
       assertGetQuery();
     });
 
     it(`returns the promised value for a key`, async () => {
       const esDocSource = {};
       const defaults = { dateFormat: { value: chance.word() } };
-      const { uiSettings } = setup({ esDocSource, defaults });
-      const result = await uiSettings.get('dateFormat');
+      const { uiSettings, req } = setup({ esDocSource, defaults });
+      const result = await uiSettings.get(req, 'dateFormat');
       expect(result).to.equal(defaults.dateFormat.value);
     });
 
     it(`returns the user-configured value for a custom key`, async () => {
       const esDocSource = { custom: 'value' };
-      const { uiSettings } = setup({ esDocSource });
-      const result = await uiSettings.get('custom');
+      const { uiSettings, req } = setup({ esDocSource });
+      const result = await uiSettings.get(req, 'custom');
       expect(result).to.equal('value');
     });
 
     it(`returns the user-configured value for a modified key`, async () => {
       const esDocSource = { dateFormat: 'YYYY-MM-DD' };
-      const { uiSettings } = setup({ esDocSource });
-      const result = await uiSettings.get('dateFormat');
+      const { uiSettings, req } = setup({ esDocSource });
+      const result = await uiSettings.get(req, 'dateFormat');
       expect(result).to.equal('YYYY-MM-DD');
     });
   });
@@ -344,18 +503,18 @@ describe('ui settings', () => {
   describe('readInterceptor() argument', () => {
     describe('#getUserProvided()', () => {
       it('returns a promise when interceptValue doesn\'t', () => {
-        const { uiSettings } = setup({ readInterceptor: () => ({}) });
-        expect(uiSettings.getUserProvided()).to.be.a(Promise);
+        const { uiSettings, req } = setup({ readInterceptor: () => ({}) });
+        expect(uiSettings.getUserProvided(req)).to.be.a(Promise);
       });
 
       it('returns intercept values', async () => {
-        const { uiSettings } = setup({
+        const { uiSettings, req } = setup({
           readInterceptor: () => ({
             foo: 'bar'
           })
         });
 
-        expect(await uiSettings.getUserProvided()).to.eql({
+        expect(await uiSettings.getUserProvided(req)).to.eql({
           foo: {
             userValue: 'bar'
           }
@@ -365,7 +524,7 @@ describe('ui settings', () => {
 
     describe('#getAll()', () => {
       it('merges intercept value with defaults', async () => {
-        const { uiSettings } = setup({
+        const { uiSettings, req } = setup({
           defaults: {
             foo: { value: 'foo' },
             bar: { value: 'bar' },
@@ -377,7 +536,7 @@ describe('ui settings', () => {
         });
 
         // MERGE 5.6 have to pass request object ot getAll()
-        expect(await uiSettings.getAll()).to.eql({
+        expect(await uiSettings.getAll(req)).to.eql({
           foo: 'not foo',
           bar: 'bar'
         });

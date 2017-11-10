@@ -146,7 +146,7 @@ export class UiSettingsService {
     keys.forEach(key => {
       changes[key] = null;
     });
-    await this.setMany(changes);
+    await this.setMany(req, changes);
   }
 
   async _write(req, changes) {

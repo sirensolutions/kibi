@@ -10,8 +10,8 @@ import { startupKibana } from '../lib';
 const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
 const CONFIG = resolve(__dirname, '../fixtures/with_es_archiver/config.js');
 
-describe('single test that uses esArchiver', () => {
-  this.timeout(180 * 1000); // kibi: on the current 5.4 branch startup pegs the CPU, so we need to increase the timeout.
+describe('single test that uses esArchiver', function () {
+  this.timeout(180 * 1000); // kibi: on some branches startup pegs the CPU, so we need to increase the timeout.
   let log;
   const cleanupWork = [];
 

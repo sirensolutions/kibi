@@ -106,8 +106,8 @@ function setup(options = {}) {
   };
 
   const status = {
-      create: sinon.stub().withArgs('ui settings').returns(settingsStatus),
-      getForPluginId: sinon.stub().withArgs('elasticsearch').returns(esStatus)
+    create: sinon.stub().withArgs('ui settings').returns(settingsStatus),
+    getForPluginId: sinon.stub().withArgs('elasticsearch').returns(esStatus)
   };
 
   const expectElasticsearchGetQuery = function () {
@@ -122,7 +122,7 @@ function setup(options = {}) {
       id: 'kibi',
       type: 'config'
     });
-  }
+  };
 
   const expectElasticsearchUpdateQuery = function (doc) {
     const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
@@ -138,7 +138,7 @@ function setup(options = {}) {
       body: { doc },
       refresh: true
     });
-  }
+  };
   // kibi: end
 
   const uiSettings = new UiSettingsService({

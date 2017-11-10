@@ -146,7 +146,7 @@ export function SavedObjectProvider(
      *
      * @return {Promise<IndexPattern | null>}
      */
-    const hydrateIndexPattern = () => {
+    this.hydrateIndexPattern = (id) => {
       if (!this.searchSource) {
         return Promise.resolve(null);
       }
@@ -156,7 +156,7 @@ export function SavedObjectProvider(
         return Promise.resolve(null);
       }
 
-      let index = config.indexPattern || this.searchSource.getOwn('index');
+      let index = id || config.indexPattern || this.searchSource.getOwn('index');
 
       if (!index) {
         return Promise.resolve(null);
@@ -187,9 +187,9 @@ export function SavedObjectProvider(
 
       // kibi: tell the docSource where to find the doc
       docSource
-        .index(kbnIndex)
-        .type(esType)
-        .id(this.id);
+      .index(kbnIndex)
+      .type(esType)
+      .id(this.id);
       // kibi: end
 
       return Promise.resolve()
@@ -198,7 +198,7 @@ export function SavedObjectProvider(
         if (!this.id) {
           // just assign the defaults and be done
           _.assign(this, this.defaults);
-          return hydrateIndexPattern().then(() => {
+          return this.hydrateIndexPattern().then(() => {
             return afterESResp.call(this);
           });
         }
@@ -242,7 +242,7 @@ export function SavedObjectProvider(
 
       return Promise.try(() => {
         parseSearchSource(meta.searchSourceJSON);
-        return hydrateIndexPattern();
+        return this.hydrateIndexPattern();
       }).then(() => {
         return Promise.cast(afterESResp.call(this, resp));
       });

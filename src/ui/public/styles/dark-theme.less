@@ -142,9 +142,11 @@
     }
   }
 
-  .panel-default {
+  .panel--edit-mode {
     border-color: @panel-default-border;
+  }
 
+  .panel-default {
     & > .panel-heading {
       color: @panel-default-text;
       background-color: @panel-default-heading-bg;
@@ -254,10 +256,19 @@
     }
   }
 
+  .discover-table-row {
+    .docTableRowFilterButton {
+      background-color: @panel-bg;
+    }
+  }
 
 // /src/ui/public/visualize/visualize.less
   .visualize-show-spy {
     border-top-color: @visualize-show-spy-border;
+  }
+
+  visualize-spy {
+    background-color: @visualize-spy-container-pre-bg;
   }
 
   .visualize-spy-container {
@@ -575,15 +586,6 @@
       dt {
         background: #5f5f5f;
         color: #ffffff;
-      }
-    }
-  }
-
-// /src/ui/public/doc_table/doc_table.less
-  .discover-table-row {
-    td {
-      .table-cell-filter {
-        background-color: @panel-bg;
       }
     }
   }

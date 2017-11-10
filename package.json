@@ -16,10 +16,10 @@
     "SPARQL"
   ],
   "private": false,
-  "version": "5.6.0",
+  "version": "5.6.4",
   "branch": "5.6",
-  "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-6-3-released",
-  "kibi_version": "5.6.0-SNAPSHOT",
+  "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-6-4-released",
+  "kibi_version": "5.6.4-SNAPSHOT",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9",
@@ -238,11 +238,12 @@
     "@elastic/eslint-plugin-kibana-custom": "1.0.3",
     "angular-mocks": "1.4.7",
     "babel-eslint": "7.2.3",
+    "backport": "1.0.1",
     "chai": "3.5.0",
     "chance": "1.0.6",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
-    "chromedriver": "2.29.0",
+    "chromedriver": "2.32.3",
     "classnames": "2.2.5",
     "enzyme": "2.7.0",
     "enzyme-to-json": "1.4.5",
@@ -311,7 +312,7 @@
     "mockery": "1.4.0"
   },
   "engines": {
-    "node": "6.11.1",
+    "node": "6.11.5",
     "npm": "3.10.10"
   },
   "pre-commit": [

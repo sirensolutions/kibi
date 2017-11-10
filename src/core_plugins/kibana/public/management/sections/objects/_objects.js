@@ -7,6 +7,20 @@ import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
+import { showChangeIndexModal } from './show_change_index_modal';
+import { SavedObjectNotFound } from 'ui/errors';
+
+const indexPatternsResolutions = {
+  indexPatterns: function (Private) {
+    const savedObjectsClient = Private(SavedObjectsClientProvider);
+
+    return savedObjectsClient.find({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000
+    }).then(response => response.savedObjects);
+  }
+};
 
 // kibi: imports
 import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
@@ -17,9 +31,9 @@ import 'plugins/kibana/management/sections/objects/_objects.less';
 // kibi: end
 
 uiRoutes
-// kibi: route is changed
 .when('/management/siren/objects', {
-  template: objectIndexHTML
+  template: objectIndexHTML,
+  resolve: indexPatternsResolutions
 });
 
 uiRoutes
@@ -29,7 +43,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function (kbnIndex, createNotifier, Private, kbnUrl, Promise, confirmModal) {
+.directive('kbnManagementObjects', function ($route, kbnIndex, createNotifier, Private, kbnUrl, Promise, confirmModal) {
 
   // kibi: all below dependencies added by kibi to improve import/export and delete operations
   const cache = Private(CacheProvider);

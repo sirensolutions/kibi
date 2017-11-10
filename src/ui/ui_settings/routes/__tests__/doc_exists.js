@@ -15,8 +15,11 @@ export function docExistsSuite() {
 
     const { kbnServer, uiSettings } = getServices();
 
+    // kibi: added as we need to pass it to setMany
+    const req = { __stubHapiRequest: true, path: '', headers: {} };
+    // kibi: end
     if (initialSettings) {
-      await uiSettings.setMany(initialSettings);
+      await uiSettings.setMany(req, initialSettings); // kibi: pass req
     }
 
     return { kbnServer, uiSettings };

@@ -1,7 +1,7 @@
 async function handleRequest(request) {
   const uiSettings = request.getUiSettingsService();
   return {
-    settings: await uiSettings.getUserProvided()
+    settings: await uiSettings.getUserProvided(request) // kibi: pass request
   };
 }
 

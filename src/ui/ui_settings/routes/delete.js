@@ -2,9 +2,9 @@ async function handleRequest(request) {
   const { key } = request.params;
   const uiSettings = request.getUiSettingsService();
 
-  await uiSettings.remove(key);
+  await uiSettings.remove(request, key); // kibi: pass request
   return {
-    settings: await uiSettings.getUserProvided()
+    settings: await uiSettings.getUserProvided(request) // kibi: pass request
   };
 }
 

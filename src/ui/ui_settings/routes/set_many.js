@@ -4,9 +4,9 @@ async function handleRequest(request) {
   const { changes } = request.payload;
   const uiSettings = request.getUiSettingsService();
 
-  await uiSettings.setMany(changes);
+  await uiSettings.setMany(request, changes); // kibi: pass request
   return {
-    settings: await uiSettings.getUserProvided()
+    settings: await uiSettings.getUserProvided(request) // kibi: pass request
   };
 }
 

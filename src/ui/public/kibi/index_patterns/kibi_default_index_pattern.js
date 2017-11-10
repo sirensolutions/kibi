@@ -1,6 +1,7 @@
 import { IndexPatternAuthorizationError, NoDefaultIndexPattern } from 'ui/errors';
 import { IndexPatternsGetProvider } from 'ui/index_patterns/_get';
 import { uiModules } from 'ui/modules';
+import { map } from 'lodash';
 
 function KibiDefaultIndexPatternProvider(Private, indexPatterns) {
 
@@ -30,7 +31,9 @@ function KibiDefaultIndexPatternProvider(Private, indexPatterns) {
       let promise;
       // use the patterns if passed
       if (patterns instanceof Array) {
-        promise = Promise.resolve(patterns);
+        promise = Promise.resolve(patterns).then(patterns => {
+          return map(patterns, p => p.id);
+        });
       } else if (patterns === undefined) {
         promise = getIds();
       }

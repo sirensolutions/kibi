@@ -1,6 +1,6 @@
 {
-  "UI-WELCOME_MESSAGE": "Loading Kibana",
-  "UI-WELCOME_ERROR": "Kibana did not load properly. Check the server output for more information.",
+  "UI-WELCOME_MESSAGE": "Loading Kibi",
+  "UI-WELCOME_ERROR": "Kibi did not load properly. Check the server output for more information.",
 
   "KIBI-VIRTUAL_INDEX_PATTERN_CREATE_BUTTON": "Add Virtual Index Pattern",
   "KIBI-VIRTUAL_INDEX_PATTERN_RESOURCE": "Resource name (table name)",

@@ -6,7 +6,6 @@ import Promise from 'bluebird';
 import { DuplicateField } from 'ui/errors';
 import { IndexedArray } from 'ui/indexed_array';
 import { stubbedLogstashFields } from 'fixtures/logstash_fields';
-import { stubbedDocSourceResponse } from 'fixtures/stubbed_doc_source_response';
 import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import { SavedObjectSourceFactory } from 'ui/courier/data_source/savedobject_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';

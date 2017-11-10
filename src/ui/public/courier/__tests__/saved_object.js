@@ -225,9 +225,7 @@ describe('Saved Object', function () {
           sandbox.stub(DocSource.prototype, 'doCreate', _doCreate);
           sandbox.stub(SavedObjectSource.prototype, 'doCreate', _doCreate);
 
-        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
           stubConfirmOverwrite();
-
           sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.resolve({ id: 'myId' }));
 
           return savedObject.save({ confirmOverwrite : false }).then(() => {
@@ -241,6 +239,7 @@ describe('Saved Object', function () {
       it('as true creates a copy on save success', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
+        let newUniqueId;
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
           const _doIndex = function () {
             newUniqueId = savedObject.id;
@@ -266,8 +265,6 @@ describe('Saved Object', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         const originalId = 'id1';
-        const mockDocResponse = getMockedDocResponse(originalId);
-        stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(savedObject => {
           sandbox.stub(DocSource.prototype, 'doIndex', _doIndex);
           sandbox.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);

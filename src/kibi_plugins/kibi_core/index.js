@@ -295,6 +295,36 @@ module.exports = function (kibana) {
       });
 
       /*
+       * Handles query to the ontology schema backend (in the gremlin server).
+       */
+      server.route({
+        method: 'POST',
+        path:'/schema',
+        handler: function (req, reply) {
+          const config = server.config();
+          const opts = {
+            method: req.payload.method ? req.payload.method : 'POST',
+            data: req.payload.data,
+            url: config.get('kibi_core.gremlin_server.url')
+          };
+          queryEngine.schema(req.payload.path, opts)
+          .then(reply)
+          .catch(errors.StatusCodeError, function (err) {
+            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
+          })
+          .catch(errors.RequestError, function (err) {
+            if (err.error.code === 'ETIMEDOUT') {
+              reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}` });
+            } else {
+              reply({ error: `An error occurred while sending a schema query: ${err.message}` });
+            }
+          });
+        }
+      });
+
+      /*
        * Translate a query containing kibi-specific DSL into an Elasticsearch query
        */
       server.route({

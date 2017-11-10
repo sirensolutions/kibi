@@ -142,6 +142,20 @@ QueryEngine.prototype._refreshKibiIndex = function () {
   });
 };
 
+QueryEngine.prototype.schema = function (path, options) {
+  const opts = {
+    method: options.method ? options.method : 'POST',
+    uri: options.url + path,
+    body: options.data ? options.data : '{}',
+    json: true
+  };
+
+  if (this.sslCA) {
+    opts.ca = this.sslCA;
+  }
+  return rp(opts);
+};
+
 QueryEngine.prototype.gremlin = function (datasourceParams, options) {
   // TODO: remove when https://github.com/sirensolutions/kibi-internal/issues/906 is fixed
   const parsedTimeout = parseInt(datasourceParams.timeout);

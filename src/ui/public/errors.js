@@ -183,7 +183,8 @@ export class IndexPatternAlreadyExists extends KbnError {
 export class SavedObjectNotFound extends KbnError {
   constructor(type, id, link) {
     const idMsg = id ? ` (id: ${id})` : '';
-    let message = `Could not locate that ${type}${idMsg}`;
+    // kibi: message changed
+    let message = `Could not locate object of type: ${type}.${idMsg}`;
 
     if (link) {
       message += `, [click here to re-create it](${link})`;

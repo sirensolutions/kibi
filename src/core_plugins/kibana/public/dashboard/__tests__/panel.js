@@ -88,7 +88,7 @@ describe('dashboard panel', function () {
   });
 
   it('should try to visualize the visualization if found', function () {
-    init({ id: 'foo1', type: 'visualization', _version: 2, attributes: {} });
+    init({ found: true, _source: {} }); // kibi: changed the response to contain _source
     return $scope.loadedPanel.then(() => {
       expect($scope.error).not.to.be.ok();
       parentScope.$digest();

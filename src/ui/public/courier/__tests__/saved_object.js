@@ -156,10 +156,6 @@ describe('Saved Object', function () {
         it('requests confirmation and updates on yes response', function () {
           stubESResponse(getMockedDocResponse('myId'));
           return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-            const createStub = sinon.stub(savedObjectsClientStub, 'create');
-            createStub.onFirstCall().returns(BluebirdPromise.reject({ statusCode: 409 }));
-            createStub.onSecondCall().returns(BluebirdPromise.resolve({ id: 'myId' }));
-
             stubConfirmOverwrite();
 
             savedObject.lastSavedTitle = 'original title';
@@ -255,7 +251,7 @@ describe('Saved Object', function () {
           sandbox.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           savedObject.copyOnSave = true;
           return savedObject.save().then((id) => {
-            expect(id).to.be('newUniqueId');
+            expect(id).to.be(newUniqueId);
           });
         });
       });
@@ -490,14 +486,9 @@ describe('Saved Object', function () {
           indexPattern: indexPatternId
         };
 
-        stubESResponse({
-          id: indexPatternId,
-          type: 'dashboard',
-          attributes: {
-            title: 'testIndexPattern'
-          },
-          _version: 2
-        });
+        // kibi: use getMockedDocResponse
+        stubESResponse(getMockedDocResponse(indexPatternId));
+        // kibi: end
 
         const savedObject = new SavedObject(config);
         expect(!!savedObject.searchSource.get('index')).to.be(false);

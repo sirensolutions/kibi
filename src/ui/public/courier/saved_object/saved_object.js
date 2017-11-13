@@ -17,9 +17,9 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 import { SearchSourceProvider } from '../data_source/search_source';
-import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 
-// kibi: use getTitleAlreadyExists instead of findObjectByTitle
+// kibi: use getTitleAlreadyExists instead of findObjectByTitle and do not use SavedObjectsClientProvider
+// import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 import { getTitleAlreadyExists } from './get_title_already_exists';
 // kibi: end
 
@@ -55,7 +55,7 @@ export function SavedObjectProvider(
   savedObjectsAPI, savedObjectsAPITypes, esAdmin, kbnIndex
   ) {
 
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
+  // const savedObjectsClient = Private(SavedObjectsClientProvider);
   const DocSource = Private(AdminDocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
@@ -322,14 +322,15 @@ export function SavedObjectProvider(
      * @resolved {SavedObject}
      */
     const createSource = (source) => {
-      return savedObjectsClient.create(esType, source, { id: this.id })
-        .catch(err => {
+      return docSource.doCreate(source) // kibi: use docSource instead of savedObjectsClient
+        .catch((err) => {
           // record exists, confirm overwriting
-          if (_.get(err, 'statusCode') === 409) {
+          if (_.get(err, 'origError.status') === 409) {
             const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
             return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
-              .then(() => savedObjectsClient.create(esType, source, { id: this.id, overwrite: true }))
+              .then(() => docSource.doIndex(source))  // kibi: use docSource instead of savedObjectsClient
+
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }
           return Promise.reject(err);
@@ -399,18 +400,16 @@ export function SavedObjectProvider(
       return warnIfDuplicateTitle()
         .then(() => {
           if (confirmOverwrite) {
-            return createSource(source)
-            .then((resp) => {
-              this.id = resp.id;
-            });
+            return createSource(source);
           } else {
              // kibi: use docSource instead of savedObjectClient
-            return docSource.doIndex(source)
-            .then((id) => {
-              this.id = id;
-            });
+            return docSource.doIndex(source);
             // kibi: end
           }
+        })
+        // kibi: here in both cases we return id and not resp object
+        .then((id) => {
+          this.id = id;
         })
         .then(() => {
           cache.invalidate(); // kibi: invalidate the cache after object was saved

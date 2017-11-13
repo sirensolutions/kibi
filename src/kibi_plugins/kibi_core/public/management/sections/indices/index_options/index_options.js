@@ -3,7 +3,7 @@ import { uiModules } from 'ui/modules';
 import indexOptionsTemplate from './index_options.html';
 
 uiModules.get('apps/management')
-.directive('indexOptions', function (ontologyClient) {
+.directive('indexOptions', function (ontologyClient, kbnUrl) {
 
   return {
     restrict: 'E',
@@ -14,8 +14,9 @@ uiModules.get('apps/management')
     },
     link: function ($scope) {
       $scope.save = function () {
+        let promise;
         if ($scope.entity.type === 'VIRTUAL_ENTITY') {
-          return ontologyClient.updateEntity($scope.entity);
+          promise = ontologyClient.updateEntity($scope.entity);
         } else {
           const entity = {
             id: $scope.entity.id
@@ -38,8 +39,13 @@ uiModules.get('apps/management')
           if ($scope.entity.longDescription) {
             entity.longDescription = $scope.entity.longDescription;
           }
-          return ontologyClient.updateEntity(entity);
+          promise = ontologyClient.updateEntity(entity);
         }
+
+        return Promise.resolve(promise)
+        .then(() => {
+          kbnUrl.change('/management/siren/entities/' + $scope.entity.id);
+        })
       }
     }
   };

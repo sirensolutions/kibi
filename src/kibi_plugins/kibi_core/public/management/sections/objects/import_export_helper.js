@@ -40,13 +40,7 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
           });
           promises.push(promise);
         });
-        // MERGE 5.6 check if it is needed as there is a different implementation
-        // og clearCache now in src/ui/public/index_patterns/_get.js
-        return Promise.all(promises).then(() => {
-          // very important !!! to clear the cached promise
-          // which returns list of index patterns
-          getIds.clearCache();
-        });
+        return Promise.all(promises);
       } else {
         return Promise.resolve(true);
       }

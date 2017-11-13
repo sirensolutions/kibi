@@ -302,12 +302,11 @@ module.exports = function (kibana) {
         path:'/translateToES',
         handler: function (req, reply) {
           const serverConfig = server.config();
-
-          // kibi: if payload is a JSON, convert it to string format
-          if (!_.isString(req.payload.query)) {
-            req.payload = { query: JSON.stringify(req.payload) };
+          // kibi: if query is a JSON, parse it to string
+          if(req.payload.query) {
+            req.payload.query = JSON.stringify(req.payload.query);
           }
-          server.plugins.elasticsearch.getQueriesAsPromise(req.payload.query)
+          server.plugins.elasticsearch.getQueriesAsPromise(req.payload.query || req.payload.bulkQuery)
           .map((query) => {
             // Remove the custom queries from the body
             server.plugins.elasticsearch.inject.save(query);

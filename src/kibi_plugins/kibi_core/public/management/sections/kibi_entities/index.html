@@ -50,24 +50,21 @@
             entity="indexPattern"
             set-default="setDefaultPattern()"
             refresh-fields="refreshFields()"
-            delete="removePattern('/management/siren/entities')"
-            toggle-graph="toggleRelationalGraph()"
+            delete="removeEntity()"
           ></kbn-management-index-header>
 
           <kbn-management-index-header
             ng-if="state.tab === 'entityRelations'"
             entity="indexPattern"
             save="saveRelations()"
-            delete="removePattern('/management/siren/entities')"
-            toggle-graph="toggleRelationalGraph()"
+            delete="removeEntity()"
           ></kbn-management-index-header>
 
           <kbn-management-index-header
             ng-if="state.tab === 'indexOptions'"
             entity="indexPattern"
             save="saveEntityOptions()"
-            delete="removePattern('/management/siren/entities')"
-            toggle-graph="toggleRelationalGraph()"
+            delete="removeEntity()"
           ></kbn-management-index-header>
 
           <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">

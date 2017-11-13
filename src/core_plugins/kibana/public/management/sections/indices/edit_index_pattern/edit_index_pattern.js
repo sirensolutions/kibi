@@ -81,7 +81,11 @@ uiModules.get('apps/management')
   };
 
   $scope.removeEntity = function () {
-
+    if ($route.current.locals.selectedEntity.type === 'INDEX_PATTERN') {
+      $scope.removePattern();
+    } else {
+      $scope.removeEid();
+    }
   };
 
   $scope.removePattern = function () {
@@ -109,16 +113,24 @@ uiModules.get('apps/management')
       });
     }
 
-    let removeLabel = 'entity identifier';
-    if ($scope.indexPattern.type === 'INDEX_PATTERN') {
-      removeLabel = 'index pattern';
-    }
-
     const confirmModalOptions = {
-      confirmButtonText: 'Remove ' + removeLabel,
+      confirmButtonText: 'Remove index pattern',
       onConfirm: doRemove
     };
     confirmModal('Are you sure you want to remove this index pattern?', confirmModalOptions);
+  };
+
+  $scope.removeEid = function () {
+    function doRemove() {
+      return ontologyClient.deleteEntity($route.current.locals.selectedEntity.id)
+      .then(() => { kbnUrl.change('/management/siren/entities'); });
+    }
+
+    const confirmModalOptions = {
+      confirmButtonText: 'Remove entity identifier',
+      onConfirm: doRemove
+    };
+    confirmModal('Are you sure you want to remove this entity identifier?', confirmModalOptions);
   };
 
   $scope.setDefaultPattern = function () {

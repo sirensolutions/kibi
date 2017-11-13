@@ -23,6 +23,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 // kibi: kibi imports
 import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
+import { stubbedDocSourceResponse } from 'fixtures/kibi/stubbed_doc_source_response';
 // kibi: end
 
 describe('index pattern', function () {
@@ -42,6 +43,9 @@ describe('index pattern', function () {
 
   // kibi: mapper added
   let mapper;
+  let DocSource;
+  let docSourceResponse;
+  let mappingSetup;
 
   beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule, (PrivateProvider) => {
     PrivateProvider.swap(IndexPatternsCalculateIndicesProvider, () => {
@@ -60,12 +64,25 @@ describe('index pattern', function () {
     defaultTimeField = mockLogstashFields.find(f => f.type === 'date');
     savedObjectsResponse = Private(FixturesStubbedSavedObjectIndexPatternProvider);
 
-    savedObjectsClient = Private(SavedObjectsClientProvider);
-    sinon.stub(savedObjectsClient, 'create');
-    sinon.stub(savedObjectsClient, 'get');
-    sinon.stub(savedObjectsClient, 'update');
+    //savedObjectsClient = Private(SavedObjectsClientProvider);
+    //sinon.stub(savedObjectsClient, 'create');
+    //sinon.stub(savedObjectsClient, 'get');
+    //sinon.stub(savedObjectsClient, 'update');
 
     // kibi: needed to support dotted field names
+    DocSource = Private(SavedObjectSourceFactory);
+    sinon.stub(DocSource.prototype, 'doIndex');
+    sinon.stub(DocSource.prototype, 'fetch');
+
+    docSourceResponse = Private(stubbedDocSourceResponse);
+
+    // stub mappingSetup
+    mappingSetup = Private(UtilsMappingSetupProvider);
+    sinon.stub(mappingSetup, 'isDefined', function () {
+      return Promise.resolve(true);
+    });
+
+    mapper = Private(IndexPatternsMapperProvider);
     sinon.stub(mapper, 'getPathsSequenceForIndexPattern', function () {
       const paths = _(mockLogstashFields)
        .filter({ scripted: false })
@@ -99,17 +116,22 @@ describe('index pattern', function () {
   // helper function to create index patterns
   function create(id, payload) {
     const indexPattern = new IndexPattern(id);
-    payload = _.defaults(payload || {}, savedObjectsResponse(id));
-
-    savedObjectsClient.create.returns(Promise.resolve(payload));
+    // kibi: use DocSource ans changed response to docSourceResponse
+    payload = _.defaults(payload || {}, docSourceResponse(id));
+    DocSource.prototype.doIndex.returns(Promise.resolve(id));
+    // kibi: end
+    //savedObjectsClient.create.returns(Promise.resolve(payload));
     setDocsourcePayload(payload);
-
     return indexPattern.init();
   }
 
   function setDocsourcePayload(payload) {
-    savedObjectsClient.get.returns(Promise.resolve(payload));
-    savedObjectsClient.update.returns(Promise.resolve(payload));
+    // kibi: we use docSeource instead of
+    // savedObjectsClient
+    DocSource.prototype.fetch.returns(Promise.resolve(payload));
+    // kibi: end
+    //savedObjectsClient.get.returns(Promise.resolve(payload));
+    //savedObjectsClient.update.returns(Promise.resolve(payload));
   }
 
   describe('api', function () {
@@ -144,7 +166,9 @@ describe('index pattern', function () {
 
   describe('init', function () {
     it('should append the found fields', function () {
-      expect(savedObjectsClient.get.callCount).to.be(1);
+      // kibi: test DocSource instead of savedObjectsClient
+      expect(DocSource.prototype.fetch.callCount).to.be(1);
+      // kibi: end
       expect(indexPattern.fields).to.have.length(mockLogstashFields.length);
       expect(indexPattern.fields).to.be.an(IndexedArray);
     });

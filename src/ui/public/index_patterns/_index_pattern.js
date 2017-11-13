@@ -231,25 +231,35 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     init() {
+      // kibi: we use docSource
+      docSources
+      .get(this)
+      .index(kbnIndex)
+      .type(type)
+      .id(this.id);
+      // kibi: end
+
       watch(this);
 
       if (!this.id) {
         return Promise.resolve(this); // no id === no elasticsearch document
       }
 
-      return savedObjectsClient.get(type, this.id)
-        .then(resp => {
-          // temporary compatability for savedObjectsClient
-
-          return {
-            _id: resp.id,
-            _type: resp.type,
-            _source: _.cloneDeep(resp.attributes),
-            found: resp._version ? true : false
-          };
-        })
-        .then(response => updateFromElasticSearch(this, response))
-        .then(() => this);
+      // kibi: use docSource instead of savedObjectsClient.get
+      return mappingSetup
+      .isDefined(type)
+      .then(defined => {
+        if (defined) {
+          return true;
+        }
+        return mappingSetup.setup(type, mapping);
+      })
+      .then(() => {
+        return docSources.get(this).fetch();
+      })
+      // kibi: end
+      .then(response => updateFromElasticSearch(this, response))
+      .then(() => this);
     }
 
     // Get the source filtering configuration for that index.

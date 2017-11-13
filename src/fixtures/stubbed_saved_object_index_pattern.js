@@ -1,8 +1,8 @@
-import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
+import { stubbedLogstashFields } from 'fixtures/logstash_fields';
 import { SavedObject } from 'ui/saved_objects';
 
 export function FixturesStubbedSavedObjectIndexPatternProvider(Private) {
-  const mockLogstashFields = Private(FixturesLogstashFieldsProvider);
+  const mockLogstashFields = Private(stubbedLogstashFields);
 
   return function (id) {
     return new SavedObject(undefined, {

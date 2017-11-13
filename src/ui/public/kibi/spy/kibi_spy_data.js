@@ -48,7 +48,7 @@ export default function KibiSpyDataFactory(Promise, $http) {
 
     getDebugData() {
       const translations = _.map(this.data, (item) => {
-        return $http.post(chrome.getBasePath() + '/translateToES', { query: toJson(item.query, angular.toJson) });
+        return $http.post(chrome.getBasePath() + '/translateToES', { bulkQuery: toJson(item.query, angular.toJson) });
       });
       const debugActions = _.map(this.data, (item) => {
         const debugQuery = item.query;

@@ -1,13 +1,12 @@
-<div
-  class="typeahead-items-list"
-  >
-  <div
-    ng-repeat="item in items"
-    ng-class="{active: item === typeahead.active}"
-    ng-click="typeahead.selectItem(item, $event)"
-    ng-mouseenter="typeahead.activateItem(item);"
-    class="typeahead-item"
-    >
-    {{item}}
-  </div>
-</div>
+<table class="typeahead-items-list">
+  <tbody>
+    <tr
+      ng-repeat="item in items track by item.text"
+      ng-class="{active: item.text === typeahead.active}"
+      ng-click="typeahead.selectItem(item.text, $event)"
+      ng-mouseenter="typeahead.activateItem(item);"
+      ng-bind-html="item.html"
+      class="typeahead-item"
+      />
+  </tbody>
+</table>

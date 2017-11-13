@@ -1,32 +1,66 @@
 import _ from 'lodash';
 
 
-function filteredItems(items, query) {
-  const beginningMatches = items.filter(item => item.indexOf(query) === 0);
-  const otherMatches = items.filter(item => item.indexOf(query) > 0);
+function toItem(query, text) {
+  let index = text.indexOf(query);
+  let html;
 
-  return beginningMatches.concat(otherMatches);
+  if(index >= 0) {
+    html = `
+<span>${text.substr(0, index)}</span>
+<b>${text.substr(index, query.length)}</b>
+<span>${text.substr(index + query.length)}</span>`;
+  } else {
+    index = Infinity;
+    html = text;
+  }
+
+  return {
+    text,
+    index,
+    html: `<td class="typeahead-item-text">${html}</td>`
+  };
+}
+
+function withFieldDecoration(field, item) {
+  item.html = `
+<td class="typeahead-item-field-type">
+  <span>${field.type}</span>
+</td>` + item.html;
+
+  return item;
+}
+
+function filteredItems($sce, toItem, sources) {
+  return _(sources)
+    .map(toItem)
+    .map(item => {
+      item.html = $sce.trustAsHtml(item.html);
+      return item;
+    })
+    .sortBy('index')
+    .value();
 }
 
 
-export default function tabsFactory(typeahead) {
+export function tabsFactory(typeahead, { $rootScope, $sce }) {
   // NOTE - typeahead is empty at this point
   return [{
     name: 'history',
     text: 'Previous Searches',
     iconClass: 'fa-clock-o',
 
-    init() { return true },
+    init() { return true; },
 
     items: null,
 
     filterItemsByQuery(query) {
-      // History already caches items
-      return this.items = filteredItems(typeahead.history.get(), query);
+      this.items = filteredItems($sce, text => toItem(query, text),
+        typeahead.history.get());         // NOTE: History already caches items
     },
 
     selectItem(item, e) {
-      typeahead.selectFilter(item, e);
+      typeahead.applyQueryFilter(item, e);
     }
   }, {
     name: 'filter',
@@ -45,14 +79,13 @@ export default function tabsFactory(typeahead) {
       this.indexPatterns = this.rawIndexPatterns
         .map(idxPattern => ({
           title: idxPattern.title,
-          fields: filteredItems(
+          fields: filteredItems($sce,
+            field => withFieldDecoration(field, toItem(query, field.name)),
             idxPattern.fields
-              .filter(field => field.filterable)
-              .map(field => field.name),
-            query)
+              .filter(field => field.filterable))
         }));
 
-      return this.items = this.indexPatterns
+      this.items = this.indexPatterns
         .reduce((fields, idxPattern) => [...fields, ...idxPattern.fields], []);
     },
 
@@ -65,8 +98,8 @@ export default function tabsFactory(typeahead) {
 
       if(!field) { return; }
 
-      typeahead.services.$rootScope.$broadcast('NewFilterEditor', { field });
-      typeahead.setHidden(true);
+      typeahead.applyText(item);
+      $rootScope.$broadcast('NewFilterEditor', { field });
     }
   }];
 }

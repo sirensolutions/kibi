@@ -34,6 +34,7 @@
     }
 
     .typeahead-items-list {
+      width: 100%;
       border: 1px solid @typeahead-item-border;
       background-color: @typeahead-item-bg;
     }
@@ -58,6 +59,25 @@
       border: 1px solid @typeahead-item-border;
       border-bottom: 0px;
       background-color: @gray13;
+    }
+
+    .typeahead-item-field-type {
+      /* As tight as possible for a table cell */
+      width: 1px;
+      white-space: nowrap;
+
+      span {
+        color: hotpink;
+        background-color: @gray14;
+        border-radius: 4px;
+        padding: 0 .3em;
+        margin-left: 15px;
+      }
+    }
+
+    .typeahead-item-text {
+      display: flex;
+      padding: 5px 15px;
     }
   }
 }

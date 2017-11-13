@@ -3,7 +3,7 @@ import 'ui/typeahead/typeahead.less';
 import 'ui/typeahead/_input';
 import 'ui/typeahead/_items';
 import 'ui/typeahead/_items_list';
-import tabsFactory from 'ui/typeahead/_tabs';
+import { tabsFactory } from 'ui/typeahead/_tabs';
 import { uiModules } from 'ui/modules';
 
 const typeahead = uiModules.get('kibana/typeahead');
@@ -14,8 +14,6 @@ typeahead.directive('kbnTypeahead', function () {
     TAB: 9,
     ENTER: 13,
     ESC: 27,
-    PAGEUP: 33,
-    PAGEDOWN: 34,
     UP: 38,
     DOWN: 40
   };
@@ -29,12 +27,11 @@ typeahead.directive('kbnTypeahead', function () {
     },
     controllerAs: 'typeahead',
 
-    controller: function ($scope, $element, $rootScope, PersistedLog, config) {
+    controller: function ($scope, $element, $rootScope, $sce, PersistedLog, config) {
       const self = this;
-      const tabs = tabsFactory(self);
+      const tabs = tabsFactory(self, { $rootScope, $sce });
 
       self.scope = $scope;
-      self.services = { $rootScope };
 
       self.tabs = null;
       self.tabName = '';
@@ -56,7 +53,7 @@ typeahead.directive('kbnTypeahead', function () {
 
       self.tabIndex = function () {
         return _.findIndex(self.tabs, tab => tab.name === self.tabName);
-      }
+      };
 
       self.initTabs = function () {
         self.tabs = tabs.filter(tab => tab.init());
@@ -65,7 +62,7 @@ typeahead.directive('kbnTypeahead', function () {
           // Tabs can be unavailable - in case, switch back to history
           self.setTabName('history');
         }
-      }
+      };
 
       self.setTabName = function (tabName) {
         const tab = self.tabs.find(tab => tab.name === tabName);
@@ -105,20 +102,16 @@ typeahead.directive('kbnTypeahead', function () {
 
       // activation methods
       self.activateItem = function (item) {
-        self.active = item;
+        self.active = item.text;
       };
 
       self.getActiveIndex = function () {
-        if (!self.active) {
-          return;
-        }
-
-        return self.tab.items.indexOf(self.active);
+        return self.tab.items.findIndex(item => item.text === self.active);
       };
 
       self.activateNext = function () {
         let index = self.getActiveIndex();
-        if (index == null) {
+        if (index < 0) {
           index = 0;
         } else if (index < self.tab.items.length - 1) {
           ++index;
@@ -131,9 +124,9 @@ typeahead.directive('kbnTypeahead', function () {
       self.activatePrev = function () {
         let index = self.getActiveIndex();
 
-        if (index > 0 && index != null) {
+        if (index > 0) {
           --index;
-        } else if (index === 0) {
+        } else {
           self.active = false;
           return;
         }
@@ -151,11 +144,16 @@ typeahead.directive('kbnTypeahead', function () {
         self.tab.selectItem(filter, ev);
       };
 
-      self.selectFilter = function (filter, ev) {
-        self.setHidden(true);
-        self.active = false;
-        $scope.inputModel.$setViewValue(filter);
+      self.applyText = function (text) {
+        $scope.inputModel.$setViewValue(text);
         $scope.inputModel.$render();
+
+        self.active = false;
+        self.setHidden(true);
+      };
+
+      self.applyQueryFilter = function (text, ev) {
+        self.applyText(text);
         self.persistEntry();
 
         if (ev && ev.type === 'click') {
@@ -170,8 +168,8 @@ typeahead.directive('kbnTypeahead', function () {
         }
       };
 
-      self.selectActive = function (ev) {
-        if (self.active) { self.tab.selectItem(self.active, ev); }
+      self.select = function (ev) {
+        self.tab.selectItem(self.active || self.query, ev);
       };
 
       self.keypressHandler = function (ev) {
@@ -184,15 +182,14 @@ typeahead.directive('kbnTypeahead', function () {
         // hide on escape
         if (_.contains([keyMap.ESC], keyCode)) {
           self.setHidden(true);
-          self.active = false;
         }
 
-        // change tab on arrow left/right
-        if (_.contains([keyMap.PAGEUP], keyCode)) {
+        // change tab on TAB key
+        if (_.contains([keyMap.TAB] && ev.shiftKey, keyCode)) {
           ev.preventDefault();
           self.changeTab(-1);
         }
-        if (_.contains([keyMap.PAGEDOWN], keyCode)) {
+        if (_.contains([keyMap.TAB], keyCode)) {
           ev.preventDefault();
           self.changeTab(+1);
         }
@@ -215,18 +212,15 @@ typeahead.directive('kbnTypeahead', function () {
         }
 
         // select on enter or tab
-        if (_.contains([keyMap.ENTER, keyMap.TAB], keyCode)) {
-          self.selectActive(ev);
+        if (_.contains([keyMap.ENTER], keyCode)) {
+          self.select(ev);
         }
       };
 
       self.filterItemsByQuery = function (query = self.query) {
         self.query = query;
         self.tabs.forEach(tab => tab.filterItemsByQuery(query));
-
-        if(self.active && !self.tab.items.indexOf(self.active)) {
-          self.active = false;
-        }
+        self.active = false;
       };
 
       self.isVisible = function () {
@@ -244,7 +238,7 @@ typeahead.directive('kbnTypeahead', function () {
 
         self.lastVisible = visible;
         return visible;
-      }
+      };
 
       self.scrollActiveIntoView = function () {
         if(!self.active) { return; }

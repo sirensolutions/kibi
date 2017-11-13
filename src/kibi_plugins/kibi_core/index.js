@@ -304,7 +304,16 @@ module.exports = function (kibana) {
           const serverConfig = server.config();
           // kibi: if query is a JSON, parse it to string
           if(req.payload.query) {
+            try {
+              JSON.parse(req.payload.query);
+            } catch (e) {
+              return reply(Boom.wrap(new Error('Expected query to be a JSON object containing single query', 400)));
+            }
             req.payload.query = JSON.stringify(req.payload.query);
+          } else if (req.payload.bulkQuery) {
+            if (!_.isString(req.payload.bulkQuery)) {
+              return reply(Boom.wrap(new Error('Expected bulkQuery to be a String containing a bulk elasticsearch query', 400)));
+            }
           }
           server.plugins.elasticsearch.getQueriesAsPromise(req.payload.query || req.payload.bulkQuery)
           .map((query) => {
@@ -323,7 +332,11 @@ module.exports = function (kibana) {
           }).map((query) => server.plugins.elasticsearch.sirenJoinSet(query))
           .map((query) => server.plugins.elasticsearch.sirenJoinSequence(query))
           .then((data) => {
-            reply({ translatedQuery: data[0] });
+            if (req.payload.query) {
+              reply({ translatedQuery: JSON.parse(data[0]) });
+            } else if(req.payload.bulkQuery) {
+              reply({ translatedQuery: data[0] });
+            }
           }).catch((err) => {
             let errStr;
             if (typeof err === 'object' && err.stack) {

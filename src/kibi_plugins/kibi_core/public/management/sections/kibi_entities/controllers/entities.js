@@ -103,9 +103,4 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
       }
     }
   });
-
-  $scope.$watch($scope.fieldFilter, (filter) => {
-    console.log('fieldfilter entities');
-    console.log(filter);
-  });
 });

@@ -7,7 +7,7 @@ import $ from 'jquery';
 import 'ui/private';
 import 'plugins/kibana/discover/components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { stubbedLogstashIndexPatternService } from 'fixtures/stubbed_logstash_index_pattern';
 import { SavedObject } from 'ui/saved_objects';
 
 // Load the kibana app dependencies.
@@ -70,7 +70,7 @@ describe('discover field chooser directives', function () {
 
   beforeEach(ngMock.inject(function (Private) {
     hits = Private(FixturesHitsProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(stubbedLogstashIndexPatternService);
     indexPatternList = [
       new SavedObject(undefined, { id: '0', attributes: { title: 'b' } }),
       new SavedObject(undefined, { id: '1', attributes: { title: 'a' } }),

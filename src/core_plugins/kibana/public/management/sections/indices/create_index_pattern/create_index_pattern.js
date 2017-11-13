@@ -262,9 +262,7 @@ uiModules.get('apps/management')
       });
   };
 
-  this.createIndexPattern = (overrideUrl) => {
-    console.log('overrideUrl');
-    console.log(overrideUrl);
+  this.createIndexPattern = () => {
     const {
       name,
       timeFieldOption,
@@ -310,11 +308,7 @@ uiModules.get('apps/management')
 
       return ontologyClient.insertEntity(id, id, 'INDEX_PATTERN', icon, color, shortDescription, longDescription)
       .then(() => {
-        if (overrideUrl) {
-          kbnUrl.change(overrideUrl + id);
-        } else {
-          kbnUrl.change(`/management/siren/indices/${id}`);
-        }
+        kbnUrl.change(`/management/siren/entities/${id}`);
         // force loading while kbnUrl.change takes effect
         loadingCount = Infinity;
       });

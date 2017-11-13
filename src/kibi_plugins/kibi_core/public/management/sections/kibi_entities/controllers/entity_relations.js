@@ -69,8 +69,6 @@ uiModules.get('apps/management')
           return check;
         };
 
-        console.log('SAVE RELATIONS!!!');
-        console.log($scope.relations);
         const id = $scope.selectedMenuItem.id;
 
         if (areValidRelations($scope.selectedMenuItem, $scope.relations)) {

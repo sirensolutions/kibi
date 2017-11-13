@@ -26,7 +26,6 @@ uiRoutes
   resolve: {
     selectedEntity: function ($route, courier, Promise, createNotifier, kbnUrl, ontologyClient) {
       const objectId = $route.current.params.entityId;
-      console.log('look for: ' + objectId);
       return courier.indexPatterns
       .getIds()
       .then((indexPattenrIds) => {
@@ -90,8 +89,6 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
   // Needed until we migrate the panels to use the new generic "entity"
   $scope.$watch('selectedMenuItem', (item) => {
     let entityPromise = Promise.resolve();
-    console.log('selectedMenuItem Entities');
-    console.log(item);
 
     if (item && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== item.id)) {
       kbnUrl.change(`/management/siren/entities/${item.id}`);

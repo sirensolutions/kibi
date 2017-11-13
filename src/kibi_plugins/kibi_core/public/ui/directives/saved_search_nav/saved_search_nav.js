@@ -48,8 +48,6 @@ uiModules
             sub: _.sortBy(virtualEntityItems, (e) => { return e.label; })
           };
           $scope.treeModel.push(rootEntityIdentifiersMenuITem);
-          console.log('$scope.treeModel');
-          console.log($scope.treeModel);
         });
       };
 
@@ -60,15 +58,12 @@ uiModules
         beforeDrag: _.throttle(function (sourceNodeScope) {
           if (sourceNodeScope.subItem) {
             $scope.selected = sourceNodeScope.subItem;
-            console.log('changed selected');
-            console.log(sourceNodeScope.subItem);
           }
 
           // for now we disable drag and drop for every item
           return false;
         }, 50,  { trailing: false }),
         dragStart: function (event) {
-          console.log('DRAGSTART');
         }
       };
 

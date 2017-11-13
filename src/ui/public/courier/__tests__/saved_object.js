@@ -67,12 +67,15 @@ describe('Saved Object', function () {
    */
   function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
     return Object.assign(
+      // kibi: changed
       {
-        type: 'dashboard',
-        id: indexPatternId,
-        _version: 2,
-        attributes: {}
+        _source: {},
+        _index: indexPatternId,
+        _type: 'dashboard',
+        _id: indexPatternId,
+        found: true
       },
+      // kibi: end
       additionalOptions);
   }
 
@@ -302,10 +305,6 @@ describe('Saved Object', function () {
     it('returns id from server on success', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
-        sinon.stub(savedObjectsClientStub, 'create', function () {
-          return BluebirdPromise.resolve({ type: 'dashboard', id: 'myId', _version: 2 });
-        });
-
         stubESResponse(mockDocResponse);
         return savedObject.save().then(id => {
           expect(id).to.be('myId');

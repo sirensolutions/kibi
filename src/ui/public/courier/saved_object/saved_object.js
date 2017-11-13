@@ -19,6 +19,10 @@ import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 import { SearchSourceProvider } from '../data_source/search_source';
 import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 
+// kibi: use getTitleAlreadyExists instead of findObjectByTitle
+import { getTitleAlreadyExists } from './get_title_already_exists';
+// kibi: end
+
 /**
  * An error message to be used when the user rejects a confirm overwrite.
  * @type {string}
@@ -245,6 +249,10 @@ export function SavedObjectProvider(
         return this.hydrateIndexPattern();
       }).then(() => {
         return Promise.cast(afterESResp.call(this, resp));
+      }).then(() => {
+        //kibi:  Any time obj is updated, re-call applyESResp
+        docSource.onUpdate().then(this.applyESResp, notify.fatal);
+        // kibi: end
       });
     };
 
@@ -346,7 +354,10 @@ export function SavedObjectProvider(
       } else {
         client = esAdmin;
       }
-      return findObjectByTitle(savedObjectsClient, this.getEsType(), this.title)
+      // kibi: end
+
+      // kibi: use our way of finding duplicate
+      return getTitleAlreadyExists(this, client)
         .then(duplicate => {
           if (!duplicate) return true;
           if (duplicate.id === this.id) return true;
@@ -388,13 +399,18 @@ export function SavedObjectProvider(
       return warnIfDuplicateTitle()
         .then(() => {
           if (confirmOverwrite) {
-            return createSource(source);
+            return createSource(source)
+            .then((resp) => {
+              this.id = resp.id;
+            });
           } else {
-            return savedObjectsClient.create(esType, source, { id: this.id, overwrite: true });
+             // kibi: use docSource instead of savedObjectClient
+            return docSource.doIndex(source)
+            .then((id) => {
+              this.id = id;
+            });
+            // kibi: end
           }
-        })
-        .then((resp) => {
-          this.id = resp.id;
         })
         .then(() => {
           cache.invalidate(); // kibi: invalidate the cache after object was saved

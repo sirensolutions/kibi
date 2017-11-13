@@ -18,7 +18,7 @@ app.directive('translateJoinQuery', function ($http) {
 
       $scope.translate = function () {
         $http.post(chrome.getBasePath() + '/translateToES',  {
-          query: JSON.parse($scope.rawQuery)
+          query: $scope.rawQuery
         })
         .then(result => {
           $scope.editor.setValue(JSON.stringify(result.data.translatedQuery, null, 2));

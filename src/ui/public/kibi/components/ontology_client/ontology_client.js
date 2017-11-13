@@ -259,9 +259,11 @@ uiModules
       type: type,
       icon: icon,
       color: color,
-      shortDescription: shortDescription,
-      longDescription: this._encodeUrl(longDescription)
+      shortDescription: shortDescription
     };
+    if (longDescription) {
+      entity.longDescription = this._encodeUrl(entity.longDescription);
+    }
     return this.insertEncodedEntity(entity);
   };
 
@@ -273,9 +275,8 @@ uiModules
     if (!entity.id) {
       return Promise.reject('Missing entity id');
     } else {
-      const encodedId = this._encodeUrl(entity.id);
       return this._executeSchemaAndClearCache({
-        path: '/schema/entity/' + encodedId,
+        path: '/schema/entity/' + entity.id,
         method: 'POST',
         data: entity
       });
@@ -338,8 +339,8 @@ uiModules
       path: options.path,
       method: options.method
     };
-    if (options.entity) {
-      params.entity = options.enity;
+    if (options.data) {
+      params.data = options.data;
     }
 
     return queryEngineClient.schema(params)

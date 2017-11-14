@@ -225,7 +225,8 @@ typeahead.directive('kbnTypeahead', function () {
 
       self.isVisible = function () {
         return !self.hidden &&
-          (self.explicit || self.query) &&
+          (self.explicit ||
+            (!!self.query && self.tab.items.length > 0)) &&
           (self.focused || self.mousedOver);
       };
 

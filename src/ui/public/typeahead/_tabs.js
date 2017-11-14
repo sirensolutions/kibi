@@ -2,24 +2,19 @@ import _ from 'lodash';
 
 
 function toItem(query, text) {
-  let index = text.indexOf(query);
+  const index = text.indexOf(query);
   let html;
 
   if(index >= 0) {
     html = `
-<span>${text.substr(0, index)}</span>
-<b>${text.substr(index, query.length)}</b>
-<span>${text.substr(index + query.length)}</span>`;
-  } else {
-    index = Infinity;
-    html = text;
+<td class="typeahead-item-text">
+  <span>${text.substr(0, index)}</span>
+  <b>${text.substr(index, query.length)}</b>
+  <span>${text.substr(index + query.length)}</span>
+</td>`;
   }
 
-  return {
-    text,
-    index,
-    html: `<td class="typeahead-item-text">${html}</td>`
-  };
+  return { text, index, html };
 }
 
 function withFieldDecoration(field, item) {
@@ -34,6 +29,7 @@ function withFieldDecoration(field, item) {
 function filteredItems($sce, toItem, sources) {
   return _(sources)
     .map(toItem)
+    .filter(item => item.index >= 0)
     .map(item => {
       item.html = $sce.trustAsHtml(item.html);
       return item;
@@ -45,6 +41,7 @@ function filteredItems($sce, toItem, sources) {
 
 export function tabsFactory(typeahead, { $rootScope, $sce }) {
   // NOTE - typeahead is empty at this point
+
   return [{
     name: 'history',
     text: 'Previous Searches',

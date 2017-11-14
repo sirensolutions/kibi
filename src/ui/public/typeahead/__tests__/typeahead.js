@@ -113,7 +113,7 @@ describe('typeahead directive', function () {
       });
 
       it('should read data when directive is instantiated', function () {
-        expect(typeaheadCtrl.history.get.callCount).to.be(1);
+        expect(typeaheadCtrl.history.get.callCount).to.be.greaterThan(0);
       });
 
       it('should not save empty entries', function () {
@@ -134,51 +134,31 @@ describe('typeahead directive', function () {
         expect($typeaheadScope.inputModel).to.have.keys(['$viewValue', '$modelValue', '$setViewValue']);
       });
 
-      it('should save data to the scope', function () {
-        // $scope.items is set via history.add, so mock the output
-        typeaheadCtrl.history.add.returns(typeaheadItems);
-
-        // a single call will call history.add, which will respond with the mocked data
-        $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
-        typeaheadCtrl.persistEntry();
-
-        expect($typeaheadScope.items).to.be.an('array');
-        expect($typeaheadScope.items.length).to.be(typeaheadItems.length);
-      });
-
       it('should order filtered results', function () {
         const entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
         const allEntries = typeaheadItems.concat(entries);
         const startMatches = allEntries.filter(function (item) {
           return /^a/.test(item);
         });
-        typeaheadCtrl.history.add.returns(allEntries);
 
-        for (let i = 0; i < entries.length; i++) {
-          $typeaheadScope.inputModel.$setViewValue(entries[i]);
-          typeaheadCtrl.persistEntry();
-        }
-
+        typeaheadCtrl.history.get.returns(allEntries);
         typeaheadCtrl.filterItemsByQuery('a');
 
-        expect($typeaheadScope.filteredItems).to.contain('phantogram');
-        const nonStarterIndex = $typeaheadScope.filteredItems.indexOf('phantogram');
+        const filteredItems = typeaheadCtrl.tab.items.map(item => item.text);
+
+        expect(filteredItems).to.contain('phantogram');
+        const nonStarterIndex = filteredItems.indexOf('phantogram');
 
         startMatches.forEach(function (item) {
-          expect($typeaheadScope.filteredItems).to.contain(item);
-          expect($typeaheadScope.filteredItems.indexOf(item)).to.be.below(nonStarterIndex);
+          expect(filteredItems).to.contain(item);
+          expect(filteredItems.indexOf(item)).to.be.below(nonStarterIndex);
         });
 
-        expect($typeaheadScope.filteredItems).not.to.contain('skrillex');
+        expect(filteredItems).not.to.contain('skrillex');
       });
 
       it('should call the on-select method on mouse click of an item', function () {
-        // $scope.items is set via history.add, so mock the output
-        typeaheadCtrl.history.add.returns(typeaheadItems);
-
-        // a single call will call history.add, which will respond with the mocked data
         $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
-        typeaheadCtrl.persistEntry();
 
         $parentScope.$digest();
 
@@ -189,12 +169,8 @@ describe('typeahead directive', function () {
 
     describe('list appearance', function () {
       beforeEach(function () {
-        typeaheadCtrl.history.add.returns(typeaheadItems);
-        $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
-        typeaheadCtrl.persistEntry();
-
         // make sure the data looks how we expect
-        expect($typeaheadScope.items.length).to.be(3);
+        expect(typeaheadCtrl.tab.items.length).to.be(3);
       });
 
       it('should default to hidden', function () {

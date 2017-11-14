@@ -196,20 +196,40 @@ export function SavedObjectProvider(
       .id(this.id);
       // kibi: end
 
-      return Promise.resolve()
+      // kibi: added
+      return mappingSetup.isDefined(esType)
+      .then((defined) => {
+        // if it is already defined skip this step
+        if (defined) return true;
+
+        mapping.kibanaSavedObjectMeta = {
+          properties: {
+            // setup the searchSource mapping, even if it is not used but this type yet
+            searchSourceJSON: {
+              type: 'string'
+            }
+          }
+        };
+
+        // tell mappingSetup to set esType
+        return mappingSetup.setup(esType, mapping);
+      })
+      // kibi: end
       .then(() => {
         // If there is not id, then there is no document to fetch from elasticsearch
         if (!this.id) {
           // just assign the defaults and be done
           _.assign(this, this.defaults);
-          return this.hydrateIndexPattern().then(() => {
-            return afterESResp.call(this);
+          return this.hydrateIndexPattern().then((resp) => {
+            return afterESResp.call(this, resp);
           });
         }
 
         // fetch the object from ES
         // kibi: we use docSource instead of savedObjectsClient
-        return docSource.fetch().then(this.applyESResp);
+        return docSource.fetch().then((resp) => {
+          return afterESResp.call(this, resp);
+        });
         // kibi: end
       })
       .then(() => customInit.call(this))
@@ -431,6 +451,9 @@ export function SavedObjectProvider(
     };
 
     this.destroy = () => {
+      // kibi: added
+      docSource.cancelQueued();
+      // kibi: end
       if (this.searchSource) {
         this.searchSource.cancelQueued();
       }

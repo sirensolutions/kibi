@@ -39,7 +39,7 @@ uiModules
   }
 
   const initQtip = function (explanations) {
-    jQuery('.qtip').qtip('destroy', true);
+    jQuery('.qtip-join').qtip('destroy', true);
     $timeout(function () {
 
       jQuery('.filter').each(function (index) {
@@ -56,7 +56,7 @@ uiModules
               at: 'bottom center'
             },
             style: {
-              classes: 'qtip-light qtip-rounded qtip-shadow'
+              classes: 'qtip-join qtip-light qtip-rounded qtip-shadow'
             }
           });
         }

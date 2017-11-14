@@ -7,6 +7,8 @@ import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
+import 'ui/filter_bar/join_explanation';
+import 'ui/kibi/meta/kibi_meta';
 
 uiRoutes
 .addSetupWork($injector => {

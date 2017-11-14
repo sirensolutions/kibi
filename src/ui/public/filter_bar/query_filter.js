@@ -7,6 +7,8 @@ import { EventsProvider } from 'ui/events';
 import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
 // kibi: imports
 import angular from 'angular';
+import 'ui/kibi/state_management/kibi_state';
+// kibi: ends
 
 export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config, kibiState) {
   const EventEmitter = Private(EventsProvider);

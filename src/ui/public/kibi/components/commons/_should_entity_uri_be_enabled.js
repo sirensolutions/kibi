@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { doesQueryDependOnEntity } from 'kibiutils';
+import 'plugins/kibi_core/management/sections/kibi_queries/services/saved_queries';
 
 export function ShouldEntityURIBeEnabledFactory(savedQueries, Promise) {
   return function (queryIds) {

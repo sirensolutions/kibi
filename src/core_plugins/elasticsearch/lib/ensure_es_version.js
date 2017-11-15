@@ -71,7 +71,7 @@ export function ensureEsVersion(server, kibanaVersion) {
         server.log(['warning'], {
           tmpl: (
             `You're running Kibi ${kibanaVersion} with some different versions of ` +
-            'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
+            'Elasticsearch. Update Kibi or Elasticsearch to the same ' +
             `version to prevent compatibility issues: ${warningNodeNames}`
           ), // kibi: replaced Kibana with Kibi
           kibanaVersion,

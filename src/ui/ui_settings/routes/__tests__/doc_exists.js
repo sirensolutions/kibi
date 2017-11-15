@@ -42,9 +42,7 @@ export function docExistsSuite() {
       expect(statusCode).to.be(200);
       assertSinonMatch(result, {
         settings: {
-          buildNum: {
-            userValue: sinon.match.number
-          },
+          // kibi: no build numers
           defaultIndex: {
             userValue: defaultIndex
           }
@@ -69,9 +67,7 @@ export function docExistsSuite() {
       expect(statusCode).to.be(200);
       assertSinonMatch(result, {
         settings: {
-          buildNum: {
-            userValue: sinon.match.number
-          },
+          // kibi: no build numers
           defaultIndex: {
             userValue: defaultIndex
           }
@@ -98,9 +94,7 @@ export function docExistsSuite() {
       expect(statusCode).to.be(200);
       assertSinonMatch(result, {
         settings: {
-          buildNum: {
-            userValue: sinon.match.number
-          },
+          // kibi: no build numers
           defaultIndex: {
             userValue: defaultIndex
           }
@@ -117,7 +111,11 @@ export function docExistsSuite() {
         initialSettings: { defaultIndex }
       });
 
-      expect(await uiSettings.get('defaultIndex')).to.be(defaultIndex);
+      // kibi: every uiSettings method requires a request object
+      const req = { __stubHapiRequest: true, path: '', headers: {} };
+      // kibi: end
+
+      expect(await uiSettings.get(req, 'defaultIndex')).to.be(defaultIndex);
 
       const { statusCode, result } = await kbnServer.inject({
         method: 'DELETE',
@@ -127,9 +125,7 @@ export function docExistsSuite() {
       expect(statusCode).to.be(200);
       assertSinonMatch(result, {
         settings: {
-          buildNum: {
-            userValue: sinon.match.number
-          }
+          // kibi: no build numers
         }
       });
     });

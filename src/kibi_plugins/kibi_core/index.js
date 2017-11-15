@@ -300,19 +300,19 @@ module.exports = function (kibana) {
         handler: function (req, reply) {
           const serverConfig = server.config();
           // kibi: if query is a JSON, parse it to string
-          let q;
-          if(req.payload.query ) {
+          let query;
+          if(req.payload.query) {
             if (typeof req.payload.query !== 'object') {
               return reply(Boom.wrap(new Error('Expected query to be a JSON object containing single query', 400)));
             }
-            q = JSON.stringify(req.payload.query);
+            query = JSON.stringify(req.payload.query);
           } else if (req.payload.bulkQuery) {
             if (!_.isString(req.payload.bulkQuery)) {
               return reply(Boom.wrap(new Error('Expected bulkQuery to be a String containing a bulk elasticsearch query', 400)));
             }
-            q = req.payload.bulkQuery
+            query = req.payload.bulkQuery;
           }
-          server.plugins.elasticsearch.getQueriesAsPromise(new buffer.Buffer(q))
+          server.plugins.elasticsearch.getQueriesAsPromise(new buffer.Buffer(query))
           .map((query) => {
             // Remove the custom queries from the body
             server.plugins.elasticsearch.inject.save(query);

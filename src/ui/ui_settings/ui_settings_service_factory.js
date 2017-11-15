@@ -26,7 +26,7 @@ export function uiSettingsServiceFactory(server, status, options) { // kibi: pas
 
   return new UiSettingsService({
     type: 'config',
-    id: config.get('pkg.version'),
+    id: 'kibi', // kibi: in kibi there is only one config with id = kibi
     savedObjectsClient,
     readInterceptor,
     getDefaults,

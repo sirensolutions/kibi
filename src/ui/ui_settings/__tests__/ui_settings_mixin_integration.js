@@ -130,7 +130,7 @@ describe('uiSettingsMixin()', () => {
     });
 
     it('passes `server` and `options` argument to factory', () => {
-      const { decorations, server } = setup();
+      const { decorations, server, status } = setup();
       expect(decorations.server).to.have.property('uiSettingsServiceFactory').a('function');
 
       sandbox.stub(uiSettingsServiceFactoryNS, 'uiSettingsServiceFactory');
@@ -139,7 +139,7 @@ describe('uiSettingsMixin()', () => {
         foo: 'bar'
       });
       sinon.assert.calledOnce(uiSettingsServiceFactory);
-      sinon.assert.calledWithExactly(uiSettingsServiceFactory, server, {
+      sinon.assert.calledWithExactly(uiSettingsServiceFactory, server, status, { // kibi: pass status
         foo: 'bar',
         getDefaults: sinon.match.func,
       });
@@ -158,14 +158,14 @@ describe('uiSettingsMixin()', () => {
     });
 
     it('passes request to getUiSettingsServiceForRequest', () => {
-      const { server, decorations } = setup();
+      const { server, decorations, status } = setup();
       expect(decorations.request).to.have.property('getUiSettingsService').a('function');
 
       sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
       sinon.assert.notCalled(getUiSettingsServiceForRequest);
       const request = {};
       decorations.request.getUiSettingsService.call(request);
-      sinon.assert.calledWith(getUiSettingsServiceForRequest, server, request);
+      sinon.assert.calledWith(getUiSettingsServiceForRequest, server, status, request); // kibi: pass status
     });
 
     it('defines read interceptor that intercepts when status is not green', () => {
@@ -175,7 +175,7 @@ describe('uiSettingsMixin()', () => {
       sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
       decorations.request.getUiSettingsService();
 
-      const options = getUiSettingsServiceForRequest.firstCall.args[2];
+      const options = getUiSettingsServiceForRequest.firstCall.args[3]; // kibi: changed 2->3 as method signature was changed
       expect(options).to.have.property('readInterceptor');
 
       const { readInterceptor } = options;

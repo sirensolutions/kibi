@@ -97,7 +97,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
 
-          expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
+          expect(plugin.status.green.args[0][0]).to.be('Kibi index ready');
         });
     });
 
@@ -124,7 +124,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
-          expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
+          expect(plugin.status.green.args[0][0]).to.be('Kibi index ready');
         });
     });
 
@@ -141,13 +141,13 @@ describe('plugins/elasticsearch', () => {
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           sinon.assert.calledOnce(plugin.status.red);
           expect(plugin.status.red.args[0][0]).to.be(
-            'Elasticsearch is still initializing the kibana index.'
+            'Elasticsearch is still initializing the Kibi index.'
           );
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
-          expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
+          expect(plugin.status.green.args[0][0]).to.be('Kibi index ready');
         });
     });
 
@@ -164,7 +164,7 @@ describe('plugins/elasticsearch', () => {
         .then(function () {
           sinon.assert.calledTwice(plugin.status.yellow);
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
-          expect(plugin.status.yellow.args[1][0]).to.be('No existing Kibana index found');
+          expect(plugin.status.yellow.args[1][0]).to.be('No existing Kibi index found');
 
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('indices.create', sinon.match.any));

@@ -3,6 +3,7 @@ import http from 'http';
 import path from 'path';
 import Boom from 'boom';
 import errors from 'request-promise/errors';
+import buffer from 'buffer';
 
 import cryptoHelper from './lib/crypto_helper';
 import datasourcesSchema from './lib/datasources_schema';
@@ -299,19 +300,19 @@ module.exports = function (kibana) {
         handler: function (req, reply) {
           const serverConfig = server.config();
           // kibi: if query is a JSON, parse it to string
-          if(req.payload.query) {
-            try {
-              JSON.parse(req.payload.query);
-            } catch (e) {
+          let q;
+          if(req.payload.query ) {
+            if (typeof req.payload.query !== 'object') {
               return reply(Boom.wrap(new Error('Expected query to be a JSON object containing single query', 400)));
             }
-            req.payload.query = JSON.stringify(req.payload.query);
+            q = JSON.stringify(req.payload.query);
           } else if (req.payload.bulkQuery) {
             if (!_.isString(req.payload.bulkQuery)) {
               return reply(Boom.wrap(new Error('Expected bulkQuery to be a String containing a bulk elasticsearch query', 400)));
             }
+            q = req.payload.bulkQuery
           }
-          server.plugins.elasticsearch.getQueriesAsPromise(req.payload.query || req.payload.bulkQuery)
+          server.plugins.elasticsearch.getQueriesAsPromise(new buffer.Buffer(q))
           .map((query) => {
             // Remove the custom queries from the body
             server.plugins.elasticsearch.inject.save(query);
@@ -328,11 +329,7 @@ module.exports = function (kibana) {
           }).map((query) => server.plugins.elasticsearch.sirenJoinSet(query))
           .map((query) => server.plugins.elasticsearch.sirenJoinSequence(query))
           .then((data) => {
-            if (req.payload.query) {
-              reply({ translatedQuery: JSON.parse(data[0]) });
-            } else if(req.payload.bulkQuery) {
-              reply({ translatedQuery: data[0] });
-            }
+            reply({ translatedQuery: data[0] });
           }).catch((err) => {
             let errStr;
             if (typeof err === 'object' && err.stack) {

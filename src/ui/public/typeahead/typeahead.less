@@ -5,12 +5,29 @@
   position: relative;
 
   .typeahead-items {
+    // kibi: moved borders and background coloration to items list
     color: @typeahead-item-color;
     position: absolute;
     top: 32px;
     z-index: @zindex-typeahead;
     width: 100%;
 
+    .typeahead-item {
+      border-bottom: 1px solid;
+      border-bottom-color: @typeahead-item-border;
+      padding: @padding-base-vertical @padding-base-horizontal;
+    }
+
+    .typeahead-item:last-child {
+      border-bottom: 0px;
+    }
+
+    .typeahead-item.active {
+      background-color: @typeahead-item-active-bg;
+    }
+
+
+    // kibi: Tabs-related styling
     .typeahead-tab {
       display: inline-block;
       background-color: @gray11;
@@ -39,20 +56,6 @@
       background-color: @typeahead-item-bg;
     }
 
-    .typeahead-item {
-      border-bottom: 1px solid;
-      border-bottom-color: @typeahead-item-border;
-      padding: @padding-base-vertical @padding-base-horizontal;
-    }
-
-    .typeahead-item:last-child {
-      border-bottom: 0px;
-    }
-
-    .typeahead-item.active {
-      background-color: @typeahead-item-active-bg;
-    }
-
 
     .typeahead-filter-index-name {
       padding: @padding-xs-vertical @padding-small-horizontal;
@@ -79,10 +82,10 @@
       display: flex;
       padding: 5px 15px;
     }
+    // kibi: end
   }
 }
 
-.button-group .typeahead.visible .input-group,
 .inline-form .typeahead.visible .input-group {
   > :first-child {
     .border-bottom-radius(0);

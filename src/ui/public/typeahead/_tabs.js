@@ -1,5 +1,9 @@
 import _ from 'lodash';
 
+/*
+ * kibi: Tab-specific controller behaviors
+ */
+
 
 function toItem(query, text) {
   const index = text.indexOf(query);

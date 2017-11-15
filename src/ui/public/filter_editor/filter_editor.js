@@ -41,6 +41,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         this.isEditingQueryDsl = false;
         this.queryDsl = getQueryDslFromFilter(filter);
         if (filter.meta.isNew) {
+          // kibi: Reading new filter requests with some data already filled in
           const isNew = filter.meta.isNew;
           let focus = 'field';
 
@@ -58,6 +59,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
           }
 
           if(focus) { this.setFocus(focus); }
+          // kibi: end
         } else {
           getFieldFromFilter(filter, indexPatterns)
             .then((field) => {

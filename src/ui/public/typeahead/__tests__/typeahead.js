@@ -113,6 +113,7 @@ describe('typeahead directive', function () {
       });
 
       it('should read data when directive is instantiated', function () {
+        // kibi: History can be retrieved multiple times (it's cached)
         expect(typeaheadCtrl.history.get.callCount).to.be.greaterThan(0);
       });
 
@@ -134,6 +135,9 @@ describe('typeahead directive', function () {
         expect($typeaheadScope.inputModel).to.have.keys(['$viewValue', '$modelValue', '$setViewValue']);
       });
 
+      // kibi: Removed 'should save data to the scope' - saving history to the scope is
+      //       a duplicated caching mechanism (PersistedLog already caches)
+
       it('should order filtered results', function () {
         const entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
         const allEntries = typeaheadItems.concat(entries);
@@ -141,9 +145,12 @@ describe('typeahead directive', function () {
           return /^a/.test(item);
         });
 
+        // kibi: Setting history get, removed 'save data to scope' update
         typeaheadCtrl.history.get.returns(allEntries);
+
         typeaheadCtrl.filterItemsByQuery('a');
 
+        // kibi: Filtered items are tab-specific and promoted to objects
         const filteredItems = typeaheadCtrl.tab.items.map(item => item.text);
 
         expect(filteredItems).to.contain('phantogram');
@@ -155,9 +162,11 @@ describe('typeahead directive', function () {
         });
 
         expect(filteredItems).not.to.contain('skrillex');
+        // kibi: end
       });
 
       it('should call the on-select method on mouse click of an item', function () {
+        // kibi: Removed 'save data to scope' update
         $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
 
         $parentScope.$digest();
@@ -169,6 +178,7 @@ describe('typeahead directive', function () {
 
     describe('list appearance', function () {
       beforeEach(function () {
+        // kibi: Removed 'save data to scope' update and made item tab-specific
         // make sure the data looks how we expect
         expect(typeaheadCtrl.tab.items.length).to.be(3);
       });

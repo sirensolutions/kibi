@@ -3,7 +3,7 @@
     <tr
       ng-repeat="item in items track by item.text"
       ng-class="{active: item.text === typeahead.active}"
-      ng-click="typeahead.selectItem(item.text, $event)"
+      ng-click="typeahead.tab.selectItem(item.text, $event)"
       ng-mouseenter="typeahead.activateItem(item);"
       ng-bind-html="item.html"
       class="typeahead-item"

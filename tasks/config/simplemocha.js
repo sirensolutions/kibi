@@ -18,7 +18,20 @@ module.exports = grunt => ({
       '!src/**/public/**',
       '!**/_*.js',
       '!plugins/**/public/**', // kibi: Support execution of mocha tests in plugins
-      '!plugins/**/node_modules/**' // kibi: Support execution of mocha tests in plugins
+      '!plugins/**/node_modules/**', // kibi: Support execution of mocha tests in plugins
+
+      // NOTE: there should be a convention where to put tests which require start of es cluster
+      '!**/migrations/__tests__/functional/*',
+      '!**/acl/__tests__/functional/*',
+      '!**/saved_objects_api/__test__/functional/*'
+    ]
+  },
+  migrations: {
+    src: [
+      // NOTE: there should be a convention where to put tests which require start of es cluster
+      '**/migrations/__tests__/functional/*',
+      '**/acl/__tests__/functional/*',
+      '**/saved_objects_api/__test__/functional/*'
     ]
   }
 });

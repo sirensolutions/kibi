@@ -85,7 +85,31 @@ module.exports = function (grunt) {
         }]
       },
     },
-
+    // kibi: needed for the migration tests
+    test: {
+      options: {
+        directory: esTestConfig.getDirectoryForEsvm('test'),
+        purge: true,
+        config: {
+          http: {
+            port: esTestConfig.getPort()
+          },
+          cluster: {
+            name: 'esvm-test'
+          },
+          discovery: {
+            zen: {
+              ping: {
+                unicast: {
+                  hosts: [ `localhost:${esTestConfig.getPort()}` ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    // kibi:end
     ui: {
       options: {
         directory: esTestConfig.getDirectoryForEsvm('test'),

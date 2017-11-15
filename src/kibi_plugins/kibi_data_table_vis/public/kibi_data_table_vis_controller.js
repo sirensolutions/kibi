@@ -237,6 +237,60 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
       $scope.uiState.setSilent('sort', sorting);
     }
   });
+  $scope.onAddColumn = function (columnName) {
+    columnsActions.addColumn($scope.vis.params, columnName);
+    $rootScope.$emit('kibi:column:add', columnName);
+  };
+
+  $scope.onRemoveColumn = function (columnName) {
+    const _doRemove = function () {
+      columnsActions.removeColumn($scope.vis.params, columnName);
+      $rootScope.$emit('kibi:column:remove', columnName);
+    };
+
+    // check if there is any click actions / relational column definition
+    // before removing a column of the table
+    if ($scope.vis.params.enableQueryFields && columnName === $scope.vis.params.queryFieldName) {
+      confirmModal(
+        `Are you sure you want to remove the relational column "${columnName}" ?`, {
+          confirmButtonText: 'Yes, remove the column',
+          onConfirm: () => {
+            $rootScope.$emit('disableQueryFields');
+            _doRemove();
+          }
+        }
+      );
+      return;
+    }
+
+    const clicks = _.sum($scope.vis.params.clickOptions, 'columnField', columnName);
+    if (clicks > 0) {
+      const plural = clicks > 1;
+      confirmModal(
+        `There ${plural ? 'are' : 'is'} ${clicks} click action${plural ? 's' : ''} configured with the ${columnName} column.`, {
+          confirmButtonText: 'Yes, remove the column',
+          onConfirm: () => {
+            $rootScope.$emit('removeClickOptions', columnName);
+            _doRemove();
+          }
+        }
+      );
+      return;
+    }
+
+    _doRemove();
+  };
+
+  $scope.onMoveColumn = function (columnName, newIndex) {
+    columnsActions.moveColumn($scope.vis.params, columnName, newIndex);
+    $rootScope.$emit('kibi:column:move', columnName, newIndex);
+  };
+
+  $scope.$watch('vis.params.templateId', function (templateId) {
+    $scope.customViewerMode = 'record';
+    $scope.customView = Boolean(templateId);
+    $scope.showCustomView = Boolean(templateId);
+  });
 
   if (configMode) {
     $scope.$watch('vis.params.clickOptions', () => {
@@ -245,61 +299,6 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
 
     $scope.$watchMulti([ 'vis.params.queryFieldName', 'vis.params.joinElasticsearchField', '[]vis.params.queryDefinitions' ], () => {
       _addRelationalColumn();
-    });
-
-    $scope.onAddColumn = function (columnName) {
-      columnsActions.addColumn($scope.vis.params, columnName);
-      $rootScope.$emit('kibi:column:add', columnName);
-    };
-
-    $scope.onRemoveColumn = function (columnName) {
-      const _doRemove = function () {
-        columnsActions.removeColumn($scope.vis.params, columnName);
-        $rootScope.$emit('kibi:column:remove', columnName);
-      };
-
-      // check if there is any click actions / relational column definition
-      // before removing a column of the table
-      if ($scope.vis.params.enableQueryFields && columnName === $scope.vis.params.queryFieldName) {
-        confirmModal(
-          `Are you sure you want to remove the relational column "${columnName}" ?`, {
-            confirmButtonText: 'Yes, remove the column',
-            onConfirm: () => {
-              $rootScope.$emit('disableQueryFields');
-              _doRemove();
-            }
-          }
-        );
-        return;
-      }
-
-      const clicks = _.sum($scope.vis.params.clickOptions, 'columnField', columnName);
-      if (clicks > 0) {
-        const plural = clicks > 1;
-        confirmModal(
-          `There ${plural ? 'are' : 'is'} ${clicks} click action${plural ? 's' : ''} configured with the ${columnName} column.`, {
-            confirmButtonText: 'Yes, remove the column',
-            onConfirm: () => {
-              $rootScope.$emit('removeClickOptions', columnName);
-              _doRemove();
-            }
-          }
-        );
-        return;
-      }
-
-      _doRemove();
-    };
-
-    $scope.onMoveColumn = function (columnName, newIndex) {
-      columnsActions.moveColumn($scope.vis.params, columnName, newIndex);
-      $rootScope.$emit('kibi:column:move', columnName, newIndex);
-    };
-
-    $scope.$watch('vis.params.templateId', function (templateId) {
-      $scope.customViewerMode = 'record';
-      $scope.customView = Boolean(templateId);
-      $scope.showCustomView = Boolean(templateId);
     });
   }
 }

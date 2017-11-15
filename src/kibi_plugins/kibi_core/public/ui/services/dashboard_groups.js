@@ -7,8 +7,10 @@ import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
+// kibi: these imports are needed for any third party plugin
 import 'ui/filter_bar/join_explanation';
 import 'ui/kibi/meta/kibi_meta';
+// kibi: end
 
 uiRoutes
 .addSetupWork($injector => {

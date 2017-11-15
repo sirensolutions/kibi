@@ -18,7 +18,8 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate, ontologyClient) {
+.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns,
+  es, config, Promise, $translate, ontologyClient) {
   const notify = new Notifier();
   // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
   const intervals = indexPatterns.intervals;

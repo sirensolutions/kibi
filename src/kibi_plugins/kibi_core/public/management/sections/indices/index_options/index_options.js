@@ -45,8 +45,8 @@ uiModules.get('apps/management')
         return Promise.resolve(promise)
         .then(() => {
           kbnUrl.change('/management/siren/entities/' + $scope.entity.id);
-        })
-      }
+        });
+      };
     }
   };
 });

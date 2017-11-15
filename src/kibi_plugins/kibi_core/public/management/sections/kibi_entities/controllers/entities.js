@@ -84,12 +84,10 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
 
   $scope.createNewVirtualEntity = function () {
     $scope.state.section = 'create_eid';
-  }
+  };
 
   // Needed until we migrate the panels to use the new generic "entity"
   $scope.$watch('selectedMenuItem', (item) => {
-    let entityPromise = Promise.resolve();
-
     if (item && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== item.id)) {
       kbnUrl.change(`/management/siren/entities/${item.id}`);
     } else {

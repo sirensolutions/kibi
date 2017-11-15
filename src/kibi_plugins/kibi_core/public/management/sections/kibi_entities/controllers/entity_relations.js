@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import EntityRelationsTemplate from './entity_relations.html';
 import 'plugins/kibi_core/ui/directives/entity_select/entity_select';

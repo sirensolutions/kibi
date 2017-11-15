@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import './saved_search_nav.less';
 import 'ui/kibi/components/ontology_client/ontology_client';

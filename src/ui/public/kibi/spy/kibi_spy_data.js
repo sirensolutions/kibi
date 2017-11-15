@@ -36,6 +36,10 @@ export default function KibiSpyDataFactory(Promise, $http) {
       * @param pruned true if the filterjoin query got pruned
       */
     add({ index, type, query, meta, response, pruned }) {
+      if (typeof query !== 'object') {
+        throw Error('Query should be an object: ' + query);
+      }
+
       this.data.push({ index, type, query, response, meta, pruned });
     }
 

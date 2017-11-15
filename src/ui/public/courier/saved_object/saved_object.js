@@ -227,9 +227,7 @@ export function SavedObjectProvider(
 
         // fetch the object from ES
         // kibi: we use docSource instead of savedObjectsClient
-        return docSource.fetch().then((resp) => {
-          return afterESResp.call(this, resp);
-        });
+        return docSource.fetch().then(this.applyESResp);
         // kibi: end
       })
       .then(() => customInit.call(this))

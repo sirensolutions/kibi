@@ -66,7 +66,7 @@ export function KibiSpyDataFactory(Promise, $http) {
       .then(results => {
         _.each(results, (result, i) => {
           if (i >= this.data.length) {
-            this.data[i - this.data.length].actions = result.data.actions;
+            this.data[i - this.data.length].actions = result.data;
           } else {
             this.data[i].translatedQuery = result.data.translatedQuery;
           }

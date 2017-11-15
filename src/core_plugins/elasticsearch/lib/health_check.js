@@ -69,12 +69,12 @@ module.exports = function (plugin, server) {
     return getHealth()
     .then(function (health) {
       if (health === NO_INDEX) {
-        plugin.status.yellow('No existing Kibana index found');
+        plugin.status.yellow('No existing Kibi index found'); // kibi: replaced Kibana with Kibi
         return createKibanaIndex(server);
       }
 
       if (health === INITIALIZING) {
-        plugin.status.red('Elasticsearch is still initializing the kibana index.');
+        plugin.status.red('Elasticsearch is still initializing the Kibi index.'); // kibi: replaced Kibana with Kibi
         return Promise.delay(REQUEST_DELAY).then(waitForShards);
       }
     });
@@ -88,7 +88,7 @@ module.exports = function (plugin, server) {
   }
 
   function setGreenStatus() {
-    return plugin.status.green('Kibana index ready');
+    return plugin.status.green('Kibi index ready'); // kibi: replaced Kibana with Kibi
   }
 
   function check() {

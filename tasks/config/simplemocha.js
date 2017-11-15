@@ -23,7 +23,7 @@ module.exports = grunt => ({
       // NOTE: there should be a convention where to put tests which require start of es cluster
       '!**/migrations/__tests__/functional/**/*.js',
       '!**/acl/__tests__/functional/**/*.js',
-      '!**/saved_objects_api/__test__/functional/**/*.js'
+      '!**/saved_objects_api/__tests__/functional/**/*.js'
     ]
   },
   migrations: {
@@ -31,7 +31,7 @@ module.exports = grunt => ({
       // NOTE: there should be a convention where to put tests which require start of es cluster
       '**/migrations/__tests__/functional/**/*.js',
       '**/acl/__tests__/functional/**/*.js',
-      '**/saved_objects_api/__test__/functional/**/*.js'
+      '**/saved_objects_api/__tests__/functional/**/*.js'
     ]
   }
 });

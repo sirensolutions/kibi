@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import uiModules from 'ui/modules';
 import chrome from 'ui/chrome';
 import angular from 'angular';
 import { toJson } from 'ui/utils/aggressive_parse';

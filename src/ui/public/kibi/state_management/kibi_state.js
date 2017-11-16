@@ -12,6 +12,9 @@ import StateManagementStateProvider from 'ui/state_management/state';
 import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import { getAppUrl, getBasePath } from 'ui/chrome';
 import { IndexPatternMissingIndices } from 'ui/errors';
+// kibi: this import is needed for any third party plugin
+import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
+// kibi: end
 
 function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns, globalState,
     elasticsearchPlugins, $location, config, Private, createNotifier) {

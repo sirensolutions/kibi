@@ -1,0 +1,24 @@
+<div class="translate-join-query">
+
+  <label class="kuiFormLabel">
+    Raw Query
+  </label>
+
+  <div
+    ui-ace="{ onLoad: aceLoaded, mode: 'json' }"
+    class="raw-query"
+    ng-model="rawQuery"
+  ></div>
+
+  <button class="kuiButton kuiButton--primary translate-button" ng-click="translate()">Translate</button>
+
+  <label class="kuiFormLabel">
+      Translated Query
+  </label>
+
+  <div
+    ui-ace="{ onLoad: aceLoaded, mode: 'json' }"
+    class="translated-query"
+    ng-model="translatedQuery"
+  ></div>
+</div>

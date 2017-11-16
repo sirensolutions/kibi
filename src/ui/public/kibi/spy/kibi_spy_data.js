@@ -36,6 +36,10 @@ export default function KibiSpyDataFactory(Promise, $http) {
       * @param pruned true if the filterjoin query got pruned
       */
     add({ index, type, query, meta, response, pruned }) {
+      if (typeof query !== 'object') {
+        throw Error('Query should be an object: ' + query);
+      }
+
       this.data.push({ index, type, query, response, meta, pruned });
     }
 
@@ -48,7 +52,7 @@ export default function KibiSpyDataFactory(Promise, $http) {
 
     getDebugData() {
       const translations = _.map(this.data, (item) => {
-        return $http.post(chrome.getBasePath() + '/translateToES', { query: toJson(item.query, angular.toJson) });
+        return $http.post(chrome.getBasePath() + '/translateToES', { bulkQuery: toJson(item.query, angular.toJson) });
       });
       const debugActions = _.map(this.data, (item) => {
         const debugQuery = item.query;
@@ -66,7 +70,7 @@ export default function KibiSpyDataFactory(Promise, $http) {
       .then(results => {
         _.each(results, (result, i) => {
           if (i >= this.data.length) {
-            this.data[i - this.data.length].actions = result.data.actions;
+            this.data[i - this.data.length].actions = result.data;
           } else {
             this.data[i].translatedQuery = result.data.translatedQuery;
           }

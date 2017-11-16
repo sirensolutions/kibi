@@ -3,6 +3,7 @@ import http from 'http';
 import path from 'path';
 import Boom from 'boom';
 import errors from 'request-promise/errors';
+import buffer from 'buffer';
 
 import cryptoHelper from './lib/crypto_helper';
 import datasourcesSchema from './lib/datasources_schema';
@@ -298,7 +299,20 @@ module.exports = function (kibana) {
         path:'/translateToES',
         handler: function (req, reply) {
           const serverConfig = server.config();
-          server.plugins.elasticsearch.getQueriesAsPromise(req.payload.query)
+          // kibi: if query is a JSON, parse it to string
+          let query;
+          if(req.payload.query) {
+            if (typeof req.payload.query !== 'object') {
+              return reply(Boom.wrap(new Error('Expected query to be a JSON object containing single query', 400)));
+            }
+            query = JSON.stringify(req.payload.query);
+          } else if (req.payload.bulkQuery) {
+            if (!_.isString(req.payload.bulkQuery)) {
+              return reply(Boom.wrap(new Error('Expected bulkQuery to be a String containing a bulk elasticsearch query', 400)));
+            }
+            query = req.payload.bulkQuery;
+          }
+          server.plugins.elasticsearch.getQueriesAsPromise(new buffer.Buffer(query))
           .map((query) => {
             // Remove the custom queries from the body
             server.plugins.elasticsearch.inject.save(query);

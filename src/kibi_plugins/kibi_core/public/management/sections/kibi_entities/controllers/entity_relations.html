@@ -2,7 +2,9 @@
   <div class="row entity-header"
        ng-if="relations.length"
   >
-    <div class="col-lg-3">
+    <div class="col-lg-3"
+         ng-if="entity.type === 'INDEX_PATTERN'"
+    >
       <p>Field</p>
     </div>
      <div ng-class="{ 'col-lg-3': entity.type === 'INDEX_PATTERN', 'col-lg-4': entity.type === 'VIRTUAL_ENTITY' }">

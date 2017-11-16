@@ -7,7 +7,7 @@ import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import kibiUtils from 'kibiutils';
 
 export function KibiSelectHelperFactory(config, indexPatterns, Private, Promise, kibiState, es, savedSearches, savedTemplates,
-  savedDashboards, savedQueries, savedDatasources, mappings, kibiDefaultIndexPattern) {
+  savedDashboards, savedQueries, savedDatasources, mappings, kibiDefaultIndexPattern, ontologyClient) {
 
   function KibiSelectHelper() {
   }
@@ -292,45 +292,48 @@ export function KibiSelectHelperFactory(config, indexPatterns, Private, Promise,
         });
       }
 
-      const indexRelation = _.find(config.get('kibi:relations').relationsIndices, (rel) => {
-        return rel.id === indexRelationId;
-      });
-
-      if (!indexRelation) {
-        return [];
-      }
-
-      // in case the otherDashboardId was present, find it
-      if (otherDashboardId) {
-        // find the meta and indexPatternId of the other dashboard
-        const otherDashboardMeta = _.find(filteredMetas, (meta) => {
-          return meta.savedDash.id === otherDashboardId;
+      return ontologyClient.getRelations()
+      .then((relations) => {
+        const indexRelation = _.find(relations, (rel) => {
+          return rel.id === indexRelationId;
         });
-        const otherIndexPattern = otherDashboardMeta.savedSearchMeta.index;
 
-        // and filter out dashboard matched by index pattern
-        // but only if it is not self join relation
-        if (indexRelation.indices[0].indexPatternId !== indexRelation.indices[1].indexPatternId) {
-          filteredMetas = _.filter(filteredMetas, (meta) => {
-            return meta.savedSearchMeta.index !== otherIndexPattern;
-          });
+        if (!indexRelation) {
+          return [];
         }
-      }
 
-      return _(filteredMetas)
-      .filter(meta => {
-        // check if indexPattern belongs to either side of the indexRelation
-        const indexPattern = meta.savedSearchMeta.index;
-        return indexPattern === indexRelation.indices[0].indexPatternId || indexPattern === indexRelation.indices[1].indexPatternId;
-      })
-      .unique(meta => meta.savedDash.id)
-      .map(meta => {
-        return {
-          label: meta.savedDash.title,
-          value: meta.savedDash.id
-        };
-      })
-      .value();
+        // in case the otherDashboardId was present, find it
+        if (otherDashboardId) {
+          // find the meta and indexPatternId of the other dashboard
+          const otherDashboardMeta = _.find(filteredMetas, (meta) => {
+            return meta.savedDash.id === otherDashboardId;
+          });
+          const otherIndexPattern = otherDashboardMeta.savedSearchMeta.index;
+
+          // and filter out dashboard matched by index pattern
+          // but only if it is not self join relation
+          if (indexRelation.domain.id !== indexRelation.range.id) {
+            filteredMetas = _.filter(filteredMetas, (meta) => {
+              return meta.savedSearchMeta.index !== otherIndexPattern;
+            });
+          }
+        }
+
+        return _(filteredMetas)
+        .filter(meta => {
+          // check if indexPattern belongs to either side of the indexRelation
+          const indexPattern = meta.savedSearchMeta.index;
+          return indexPattern === indexRelation.domain.id || indexPattern === indexRelation.range.id;
+        })
+        .unique(meta => meta.savedDash.id)
+        .map(meta => {
+          return {
+            label: meta.savedDash.title,
+            value: meta.savedDash.id
+          };
+        })
+        .value();
+      });
     });
   };
 

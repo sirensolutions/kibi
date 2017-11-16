@@ -11,6 +11,7 @@ import Promise from 'bluebird';
 
 describe('Kibi Directives', function () {
   describe('KibiSelect Helper', function () {
+    let returnEmptyRelations = false;
     let kibiSelectHelper;
     let config;
     let indexPatterns;
@@ -26,6 +27,7 @@ describe('Kibi Directives', function () {
         savedQueries = [],
         savedTemplates = [],
         savedDashboards = [],
+        stubRelations = [],
         stubIndexPatterns = false,
         stubConfig = false,
         stubKibiDefaultIndexPattern = false
@@ -90,6 +92,22 @@ describe('Kibi Directives', function () {
                 return Promise.resolve([ 'aaa', 'bbb' ]);
               }
             };
+          });
+        });
+      }
+
+      if (stubRelations) {
+        ngMock.module('kibana/ontology_client', function ($provide) {
+          $provide.service('ontologyClient', function (Promise, Private) {
+            return {
+              getRelations: function () {
+                if (returnEmptyRelations) {
+                  return Promise.resolve([]);
+                } else {
+                  return Promise.resolve(stubRelations);
+                }
+              }
+            }
           });
         });
       }
@@ -716,60 +734,50 @@ describe('Kibi Directives', function () {
           }
         }
       ];
-      const relations = {
-        relationsIndices: [
-          {
-            indices: [
-              {
-                indexPatternId: 'art*',
-                path: 'path-a'
-              },
-              {
-                indexPatternId: 'comp*',
-                path: 'path-c'
-              }
-            ],
-            label: 'label-a-c',
-            id: 'art*//path-a/comp*//path-c'
+      const relations = [
+        {
+          id: 'art*//path-a/comp*//path-c',
+          domain:  {
+            id: 'art*',
+            field: 'path-a'
           },
-          {
-            indices: [
-              {
-                indexPatternId: 'comp*',
-                path: 'path-c'
-              },
-              {
-                indexPatternId: 'invest*',
-                path: 'path-i'
-              }
-            ],
-            label: 'label-c-i',
-            id: 'comp*//path-c/invest*//path-i'
-          },
-          {
-            indices: [
-              {
-                indexPatternId: 'comp*',
-                path: 'path-c1'
-              },
-              {
-                indexPatternId: 'comp*',
-                path: 'path-c2'
-              }
-            ],
-            label: 'label-c-c',
-            id: 'comp*//path-c1/comp*//path-c2'
+          range: {
+            id: 'comp*',
+            field: 'path-c'
           }
-        ]
-      };
+        },
+        {
+          id: 'comp*//path-c/invest*//path-i',
+          domain:  {
+            id: 'comp*',
+            field: 'path-c'
+          },
+          range: {
+            id: 'invest*',
+            field: 'path-i'
+          }
+        },
+        {
+          id: 'comp*//path-c1/comp*//path-c2',
+          domain:  {
+            id: 'comp*',
+            field: 'path-c1'
+          },
+          range: {
+            id: 'comp*',
+            field: 'path-c2'
+          }
+        }
+      ];
 
       beforeEach(function () {
+        returnEmptyRelations = false;
         init({
           savedDashboards: fakeSavedDashboards,
           savedSearches: fakeSavedSearches,
-          stubConfig: true
+          stubConfig: true,
+          stubRelations: relations
         });
-        config.set('kibi:relations', relations);
       });
 
       afterEach(() => {
@@ -808,27 +816,23 @@ describe('Kibi Directives', function () {
       });
 
       it('should not propose any dashboard if the relation does not exist', function () {
+        returnEmptyRelations = true;
         const options = {
           indexRelationId: 'art*//path-a/comp*//path-c'
         };
 
-        config.set('kibi:relations', {
-          relationsIndices: []
-        });
         return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
           expect(dashboards).to.have.length(0);
         });
       });
 
       it('should not propose any dashboard if the relation does not exist even if the paired dashboard is set', function () {
+        returnEmptyRelations = true;
         const options = {
           indexRelationId: 'art*//path-a/comp*//path-c',
           otherDashboardId: 'Companies'
         };
 
-        config.set('kibi:relations', {
-          relationsIndices: []
-        });
         return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
           expect(dashboards).to.have.length(0);
         });

@@ -10,6 +10,7 @@ import CacheProvider from 'ui/kibi/helpers/cache_helper';
 // kibi: these imports are needed for any third party plugin
 import 'ui/filter_bar/join_explanation';
 import 'ui/kibi/meta/kibi_meta';
+import 'ui/kibi/state_management/kibi_state';
 // kibi: end
 
 uiRoutes

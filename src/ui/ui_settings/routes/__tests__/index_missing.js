@@ -3,7 +3,8 @@ import expect from 'expect.js';
 import {
   getServices,
   chance,
-  assertDocMissingResponse
+  assertSinonMatch
+  //assertDocMissingResponse
 } from './lib';
 
 export function indexMissingSuite() {
@@ -68,49 +69,82 @@ export function indexMissingSuite() {
   });
 
   describe('set route', () => {
-    it('creates an invalid Kibana index and returns a 404 document missing error', async () => {
+    // kibi: title changed
+    // from: "creates an invalid Kibana index and returns a 404 document missing error"
+    // to:   "creates a valid Kibi index and returns a 200"
+    it('creates a valid Kibi index and returns a 200', async () => {
       const { kbnServer, assertInvalidKibanaIndex } = await setup();
-
-      assertDocMissingResponse(await kbnServer.inject({
+      // kibi: in kibi if config does not exists it gets created and we return 200
+      // so we use assertSinonMatch instead of assertInvalidKibanaIndex
+      const word =  chance.word();
+      const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings/defaultIndex',
         payload: {
-          value: chance.word()
+          value: word
         }
-      }));
-
-      await assertInvalidKibanaIndex();
+      });
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          defaultIndex: {
+            userValue: word
+          }
+        }
+      });
+      // kibi: end
     });
   });
 
   describe('setMany route', () => {
-    it('creates an invalid Kibana index and returns a 404 document missing error', async () => {
+    // kibi: title changed
+    // from: "creates an invalid Kibana index and returns a 404 document missing error"
+    // to:   "creates a valid Kibi index and returns a 200"
+    it('creates a valid Kibi index and returns a 200', async () => {
       const { kbnServer, assertInvalidKibanaIndex } = await setup();
-
-      assertDocMissingResponse(await kbnServer.inject({
+      // kibi: in kibi if config does not exists it gets created and we return 200
+      // so we use assertSinonMatch instead of assertInvalidKibanaIndex
+      const word =  chance.word();
+      const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings',
         payload: {
           changes: {
-            defaultIndex: chance.word()
+            defaultIndex: word
           }
         }
-      }));
-
-      await assertInvalidKibanaIndex();
+      });
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          defaultIndex: {
+            userValue: word
+          }
+        }
+      });
+      // kibi: end
     });
   });
 
   describe('delete route', () => {
-    it('creates an invalid Kibana index and returns a 404 document missing error', async () => {
+    // kibi: title changed
+    // from: "creates an invalid Kibana index and returns a 404 document missing error"
+    // to:   "creates a valid Kibi index and returns a 200"
+    it('creates a valid Kibi index and returns a 200', async () => {
       const { kbnServer, assertInvalidKibanaIndex } = await setup();
-
-      assertDocMissingResponse(await kbnServer.inject({
+      // kibi: in kibi if config does not exists it gets created and we return 200
+      // so we use assertSinonMatch instead of assertInvalidKibanaIndex
+      const word =  chance.word();
+      const { statusCode, result } = await kbnServer.inject({
         method: 'DELETE',
         url: '/api/kibana/settings/defaultIndex'
-      }));
+      });
 
-      await assertInvalidKibanaIndex();
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {}
+      });
+      // kibi: end
     });
   });
 }

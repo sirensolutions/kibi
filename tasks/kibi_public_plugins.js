@@ -10,11 +10,11 @@ module.exports = function (grunt) {
 
   const archives = [
     {
-      url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.5.2/kibi_radar_vis-5.5.2.zip',
+      url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.5.3/kibi_radar_vis-5.5.3.zip',
       dest: `${tempFolder}/kibi_radar_vis.zip` // siren: Add temp folder location to filepath
     },
     {
-      url: 'https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.5.2/kibi_timeline_vis-5.5.2.zip',
+      url: 'https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.5.3/kibi_timeline_vis-5.5.3.zip',
       dest: `${tempFolder}/kibi_timeline_vis.zip` //siren: Add temp folder location to filepath
     }
   ];

@@ -60,7 +60,8 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     button.targetCount = meta.hits.total;
     button.warning = '';
     if (isJoinPruned(meta)) {
-      button.warning = 'Results from this filter are pruned';
+      button.isPruned = true;
+      button.warning = 'Notice: This is a sample of the results because join operation was pruned';
     }
   };
 
@@ -87,6 +88,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
             notify.error(error);
           }
           if (scope && scope.multiSearchData) {
+            const queryParts = result.button.query.split('\n');
             const stats = {
               index: result.button.targetIndexPatternId,
               type: result.button.targetIndexPatternType,
@@ -94,7 +96,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
                 label: result.button.label
               },
               response: meta,
-              query: result.button.query
+              query: JSON.parse(queryParts[1])
             };
             if (isJoinPruned(meta)) {
               stats.pruned = true;

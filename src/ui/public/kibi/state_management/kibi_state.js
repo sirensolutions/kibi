@@ -12,6 +12,9 @@ import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import { getAppUrl, getBasePath } from 'ui/chrome';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
+// kibi: this import is needed for any third party plugin
+import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
+// kibi: end
 
 function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns, globalState,
     elasticsearchPlugins, $location, config, Private, createNotifier) {

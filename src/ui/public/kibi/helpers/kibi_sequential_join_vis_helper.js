@@ -111,7 +111,12 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
                         notify.error(error);
                         return reject(error);
                       }
-                      this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total);
+                      if (this.isPruned) {
+                        this.joinSeqFilter.meta.isPruned = true;
+                        this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total + '(*)');
+                      } else {
+                        this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total);
+                      }
                       switchToDashboard.apply(this);
                       fulfill(meta.hits.total);
                     }

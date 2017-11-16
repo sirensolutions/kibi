@@ -41,6 +41,10 @@ uiModules
     return $http.post(chrome.getBasePath() + '/gremlin/ping', { url: url });
   };
 
+  QueryEngineClient.prototype.schema = function (options) {
+    return $http.post(chrome.getBasePath() + '/schema', options);
+  };
+
   QueryEngineClient.prototype.clearCache = function (service) {
     // kibi: if service is passed and service is different from 'query','template' and 'script' do nothing
     if (service) {

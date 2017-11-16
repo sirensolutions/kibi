@@ -89,7 +89,7 @@ export class UiSettingsService {
     return defaultsDeep(userProvided, await this.getDefaults());
   }
 
-  async getUserProvided(req, { ignore401Errors = false } = {}) {
+  async getUserProvided(req, options = {}) {
     assertRequest(req); // kibi: added
 
     // kibi: replace original code and adds savedObjectsAPI logic
@@ -101,20 +101,27 @@ export class UiSettingsService {
     // user settings, since we can't be sure that all the necessary conditions
     // (e.g. elasticsearch being available) are met.
     if (this._status.state !== 'green' || savedObjetsAPI.status.state !== 'green') { // kibi: added savedObjectsAPI
-      return hydrateUserSettings(await this._read(req, {}));
+      return hydrateUserSettings({});
+    }
+
+    // kibi: moved interceptor bit from removed _read
+    const interceptValue = await this._readInterceptor(options);
+    if (interceptValue && interceptValue !== null ) {
+      return hydrateUserSettings(interceptValue);
     }
 
     // kibi: adds savedObjetsAPI logic
     const configModel = savedObjetsAPI.getModel('config');
 
     let userSettings = {};
+    const wrap401Errors = options.ignore401Errors !== undefined ? !options.ignore401Errors : false;
     try {
-      const resp = await configModel.get('kibi', req, { wrap401Errors: !ignore401Errors });
+      const resp = await configModel.get('kibi', req, { wrap401Errors });
       if (resp.found) {
         userSettings = resp._source;
       }
     } catch (err) {
-      if (err.status === 401 && !ignore401Errors) {
+      if (err.status === 401 && wrap401Errors) {
         throw err;
       }
       if (!(err instanceof errors.NoConnections) && err.status !== 403 && err.status !== 404) {
@@ -166,43 +173,6 @@ export class UiSettingsService {
     // kibi: end
   }
 
-  // MERGE 5.6
-  // this method is still using _savedObjectsClient
-  // it was not present in src/ui/ui_settings/ui_settings.js
-  // review and merge any missing changes from this deleted file
-  async _read(req, options = {}) {
-    const interceptValue = await this._readInterceptor(options);
-    if (interceptValue != null) {
-      return interceptValue;
-    }
-
-    const {
-      ignore401Errors = false
-    } = options;
-
-    const {
-      isNotFoundError,
-      isForbiddenError,
-      isEsUnavailableError,
-      isNotAuthorizedError
-    } = this._savedObjectsClient.errors;
-
-    const isIgnorableError = error => (
-      isNotFoundError(error) ||
-      isForbiddenError(error) ||
-      isEsUnavailableError(error) ||
-      (ignore401Errors && isNotAuthorizedError(error))
-    );
-
-    try {
-      const resp = await this._savedObjectsClient.get(this._type, this._id);
-      return resp.attributes;
-    } catch (error) {
-      if (isIgnorableError(error)) {
-        return {};
-      }
-
-      throw error;
-    }
-  }
+  // kibi: removed the _read method
+  // and moved just the interceptor bit inside getUserProvided
 }

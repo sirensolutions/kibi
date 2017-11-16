@@ -22,7 +22,6 @@ const chance = new Chance();
 function setup(options = {}) {
   const {
     // kibi: added
-    getResult,
     settingsStatusOverrides,
     callWithRequest,
     // kibi: end
@@ -30,6 +29,10 @@ function setup(options = {}) {
     getDefaults,
     defaults = {},
     esDocSource = {},
+    // MERGE 5.6.4
+    // savedObjectsClient is still used in some tests
+    // have to review and either change the tests or refactor the code to use
+    // our version of savedObjectsClient
     savedObjectsClient = createObjectsClientStub(TYPE, ID, esDocSource)
   } = options;
 
@@ -46,7 +49,7 @@ function setup(options = {}) {
       //expect(withReq).to.be(req);
       switch (method) {
         case 'get':
-          return Promise.resolve({ _source: getResult, found: true });
+          return Promise.resolve({ _source: esDocSource, found: true });
         case 'update':
           return Promise.resolve();
         default:
@@ -55,7 +58,7 @@ function setup(options = {}) {
     })
   };
 
-  adminCluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: getResult }));
+  adminCluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: esDocSource }));
   adminCluster.callWithInternalUser.withArgs('update', sinon.match.any).returns(Promise.resolve());
 
   const configGet = sinon.stub();
@@ -105,11 +108,6 @@ function setup(options = {}) {
     ...settingsStatusOverrides
   };
 
-  const status = {
-    create: sinon.stub().withArgs('ui settings').returns(settingsStatus),
-    getForPluginId: sinon.stub().withArgs('elasticsearch').returns(esStatus)
-  };
-
   const expectElasticsearchGetQuery = function () {
     const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
     sinon.assert.calledOnce(callWithRequest);
@@ -148,7 +146,7 @@ function setup(options = {}) {
     readInterceptor,
     savedObjectsClient,
     server,
-    status
+    status: settingsStatus
   });
 
   return {
@@ -304,7 +302,8 @@ describe('ui settings', () => {
 
   describe('#getUserProvided()', () => {
     it('pulls user configuration from ES', async () => {
-      const { uiSettings, assertGetQuery, req } = setup();
+      const esDocSource = {};
+      const { uiSettings, assertGetQuery, req } = setup({ esDocSource });
       await uiSettings.getUserProvided(req);
       assertGetQuery();
     });
@@ -359,19 +358,19 @@ describe('ui settings', () => {
 
     it('throws 401 errors', async () => {
       const { uiSettings, req } = setup({
-        savedObjectsClient: {
-          errors: savedObjectsClientErrors,
-          async get() {
-            throw new esErrors[401]();
-          }
+        // kibi: use callWithRequest instead of savedObjectsClient
+        async callWithRequest() {
+          throw new esErrors[401]();
         }
+        // kibi: end
       });
 
       try {
         await uiSettings.getUserProvided(req);
         throw new Error('expect getUserProvided() to throw');
       } catch (err) {
-        expect(err).to.be.a(esErrors[401]);
+        // kibi: the error is wrapped by the savedObjetsAPI plugin
+        expect(err.inner).to.be.a(esErrors[401]);
       }
     });
 
@@ -379,12 +378,11 @@ describe('ui settings', () => {
       const expectedUnexpectedError = new Error('unexpected');
 
       const { uiSettings, req } = setup({
-        savedObjectsClient: {
-          errors: savedObjectsClientErrors,
-          async get() {
-            throw expectedUnexpectedError;
-          }
+        // kibi: use callWithRequest instead of savedObjectsClient
+        async callWithRequest() {
+          throw expectedUnexpectedError;
         }
+        // kibi: end
       });
 
       try {
@@ -433,7 +431,7 @@ describe('ui settings', () => {
     it('pulls user configuration from ES', async () => {
       const esDocSource = {};
       const { uiSettings, assertGetQuery, req } = setup({ esDocSource });
-      // MERGE 5.6 have to pass request object ot getAll()
+      // kibi: have to pass request object ot getAll()
       await uiSettings.getAll(req);
       assertGetQuery();
     });

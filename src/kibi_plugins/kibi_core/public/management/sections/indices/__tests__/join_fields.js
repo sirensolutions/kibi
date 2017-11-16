@@ -11,30 +11,26 @@ describe('Settings', function () {
       it('should return index bbb with join on field2 regardless of the order', function () {
         const relations1 = [
           {
-            indices: [
-              {
-                indexPatternId: 'aaa',
-                path: 'field1'
-              },
-              {
-                indexPatternId: 'bbb',
-                path: 'field2'
-              }
-            ]
+            domain: {
+              id: 'aaa',
+              field: 'field1'
+            },
+            range: {
+              id: 'bbb',
+              field: 'field2'
+            }
           }
         ];
         const relations2 = [
           {
-            indices: [
-              {
-                indexPatternId: 'bbb',
-                path: 'field2'
-              },
-              {
-                indexPatternId: 'aaa',
-                path: 'field1'
-              }
-            ]
+            domain: {
+              id: 'bbb',
+              field: 'field2'
+            },
+            range: {
+              id: 'aaa',
+              field: 'field1'
+            }
           }
         ];
         const indexId = 'aaa';
@@ -53,16 +49,14 @@ describe('Settings', function () {
       it('should return index aaa with join on field2', function () {
         const relations = [
           {
-            indices: [
-              {
-                indexPatternId: 'aaa',
-                path: 'field1'
-              },
-              {
-                indexPatternId: 'aaa',
-                path: 'field2'
-              }
-            ]
+            domain: {
+              id: 'aaa',
+              field: 'field1'
+            },
+            range: {
+              id: 'aaa',
+              field: 'field2'
+            }
           }
         ];
         const indexId = 'aaa';
@@ -80,28 +74,24 @@ describe('Settings', function () {
       it('should not return undefined for elements that are not connected', function () {
         const relations = [
           {
-            indices: [
-              {
-                indexPatternId: 'aaa',
-                path: 'field1'
-              },
-              {
-                indexPatternId: 'bbb',
-                path: 'field2'
-              }
-            ]
+            domain: {
+              id: 'aaa',
+              field: 'field1'
+            },
+            range: {
+              id: 'bbb',
+              field: 'field2'
+            }
           },
           {
-            indices: [
-              {
-                indexPatternId: 'bbb',
-                path: 'field1'
-              },
-              {
-                indexPatternId: 'ccc',
-                path: 'field2'
-              }
-            ]
+            domain: {
+              id: 'bbb',
+              field: 'field1'
+            },
+            range: {
+              id: 'ccc',
+              field: 'field2'
+            }
           }
         ];
         const indexId = 'aaa';

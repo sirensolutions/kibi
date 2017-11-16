@@ -123,7 +123,7 @@ uiModules.get('apps/management')
   $scope.removeEid = function () {
     function doRemove() {
       return ontologyClient.deleteEntity($route.current.locals.selectedEntity.id)
-      .then(() => { kbnUrl.change('/management/siren/entities'); });
+      .then(kbnUrl.change('/management/siren/entities'));
     }
 
     const confirmModalOptions = {

@@ -63,7 +63,7 @@ uiModules.get('apps/management')
             }
 
             if (!check) {
-              // breack the _.each loop
+              // break the _.each loop
               return false;
             }
           });

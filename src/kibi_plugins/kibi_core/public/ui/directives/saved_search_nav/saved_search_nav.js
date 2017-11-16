@@ -63,9 +63,7 @@ uiModules
 
           // for now we disable drag and drop for every item
           return false;
-        }, 50,  { trailing: false }),
-        dragStart: function (event) {
-        }
+        }, 50,  { trailing: false })
       };
 
       $scope.toggleItem = function (item) {

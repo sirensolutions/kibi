@@ -8,7 +8,10 @@
     <i class="caret"></i>
   </div>
   <div ng-show="showNav" class="nav-container">
-    <saved-search-nav show-if="showNav" selected="selectedEntity"></saved-search-nav>
+    <saved-search-nav show-if="showNav"
+                      selected="selectedEntity"
+                      entity-type="{{ entityType }}">
+    </saved-search-nav>
   </div>
 
 </div>

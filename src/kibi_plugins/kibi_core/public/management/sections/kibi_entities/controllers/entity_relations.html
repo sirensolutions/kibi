@@ -59,6 +59,7 @@
         <div class="col-lg-9">
           <entity-select required
                          selected="relation.range.id"
+                         entity-type="{{ entity.type === 'INDEX_PATTERN' ? 'ALL' : 'INDEX_PATTERN' }}"
           ></entity-select>
         </div>
       </div>

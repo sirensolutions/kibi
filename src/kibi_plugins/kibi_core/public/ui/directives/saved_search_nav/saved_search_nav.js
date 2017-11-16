@@ -11,7 +11,8 @@ uiModules
     restrict: 'E',
     scope: {
       selected: '=',
-      showIf: '='
+      showIf: '=',
+      entityType: '@' // INDEX_PATTERN/VIRTUAL_ENTITY/ALL
     },
     link($scope, $element, attrs) {
       $scope.defaultIndex = config.get('defaultIndex');
@@ -38,17 +39,21 @@ uiModules
             }
           });
 
-          const rootIndexPatternMenuItem = {
-            id: 'Index Patterns',
-            sub: _.sortBy(indexPatternItems, (e) => { return e.label; })
-          };
-          $scope.treeModel.push(rootIndexPatternMenuItem);
+          if ($scope.entityType === 'INDEX_PATTERN' || $scope.entityType === 'ALL') {
+            const rootIndexPatternMenuItem = {
+              id: 'Index Patterns',
+              sub: _.sortBy(indexPatternItems, (e) => { return e.label; })
+            };
+            $scope.treeModel.push(rootIndexPatternMenuItem);
+          }
 
-          const rootEntityIdentifiersMenuITem = {
-            id: 'Entity Identifiers',
-            sub: _.sortBy(virtualEntityItems, (e) => { return e.label; })
-          };
-          $scope.treeModel.push(rootEntityIdentifiersMenuITem);
+          if ($scope.entityType === 'VIRTUAL_ENTITY' || $scope.entityType === 'ALL') {
+            const rootEntityIdentifiersMenuITem = {
+              id: 'Entity Identifiers',
+              sub: _.sortBy(virtualEntityItems, (e) => { return e.label; })
+            };
+            $scope.treeModel.push(rootEntityIdentifiersMenuITem);
+          }
         });
       };
 

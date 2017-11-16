@@ -20,8 +20,8 @@
         </div>
 
         <!-- index-pattern/eid tree -->
-        <saved-search-nav tree-model="menuItems"
-                          selected="selectedMenuItem">
+        <saved-search-nav selected="selectedMenuItem"
+                          entity-type="ALL">
         </saved-search-nav>
       </div>
     </div>
@@ -158,7 +158,8 @@
           ></index-options>
 
           <indexed-fields-table
-            ng-show="entity.type === 'INDEX_PATTERN' && state.tab === 'indexedFields'"
+            ng-if="entity.type === 'INDEX_PATTERN'"
+            ng-show="state.tab === 'indexedFields'"
             class="fields indexed-fields"
           ></indexed-fields-table>
 

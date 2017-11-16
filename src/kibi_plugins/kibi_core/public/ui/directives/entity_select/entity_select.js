@@ -11,7 +11,8 @@ uiModules.get('kibana')
     template: EntitySelectTemplate,
     restrict: 'E',
     scope: {
-      selected: '='
+      selected: '=',
+      entityType: '@' // INDEX_PATTERN/VIRTUAL_ENTITY/ALL
     },
     link($scope, $element, attrs) {
       $scope.showNav = false;

@@ -607,7 +607,7 @@ describe('Saved Object', function () {
 
         const mockDocResponse = getMockedDocResponse(
           myId,
-          { attributes: { overwriteMe: serverValue } }
+          { _source: { overwriteMe: serverValue } }
         );
 
         stubESResponse(mockDocResponse);

@@ -16,11 +16,15 @@ const join = (...uriComponents) => (
 const BATCH_INTERVAL = 100;
 
 export class SavedObjectsClient {
-  constructor($http, basePath = chrome.getBasePath(), PromiseCtor = Promise) {
+  // kibi: ui SavedObjectsClient
+  constructor($http, basePath = chrome.getBasePath(), PromiseCtor = Promise, savedObjectsAPI, kbnIndex) {
     this._$http = $http;
     this._apiBaseUrl = `${basePath}/api/saved_objects/`;
     this._PromiseCtor = PromiseCtor;
     this.batchQueue = [];
+    // kibi:
+    this._savedObjectsAPI = savedObjectsAPI;
+    this._kbnIndex = kbnIndex;
   }
 
   /**
@@ -74,13 +78,45 @@ export class SavedObjectsClient {
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
   find(options = {}) {
-    const url = this._getUrl([], keysToSnakeCaseShallow(options));
-
-    return this._request('GET', url).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    // kibi: use our SavedObjectAPI
+    const kibiSavedObjectAPIOptions = this._toSavedObjectAPIOptions(keysToSnakeCaseShallow(options));
+    return this._savedObjectsAPI.search(kibiSavedObjectAPIOptions)
+    .then((resp) => {
+      resp.saved_objects = _.map(resp.hits.hits, hit => {
+        const o = this._toSavedObjectOptions(hit);
+        return this.createSavedObject(o)
+      });
       return keysToCamelCaseShallow(resp);
     });
+    // kibi: end
   }
+
+  // kibi: methods to translate the options
+  _toSavedObjectOptions(hit) {
+    return {
+      id: hit._id,
+      type: hit._type,
+      version: null, // kibi: no version
+      attributes: hit._source
+    }
+  }
+
+  _toSavedObjectAPIOptions(options) {
+    const opt = _.clone(options);
+
+    // TODO: allow fields in our savedObjectsAPI
+    delete opt.fields;
+
+    if (opt.per_page) {
+      opt.size = options.per_page;
+      delete opt.per_page;
+    }
+    if (!opt.index) {
+      opt.index = this._kbnIndex
+    }
+    return opt;
+  }
+  // kibi: end
 
   /**
    * Fetches a single object

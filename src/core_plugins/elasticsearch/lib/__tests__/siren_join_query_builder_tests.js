@@ -67,24 +67,14 @@ describe('Join query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  // NOTE: enable after version with join type option
-  xit('should set the type of join', function () {
-    const builder = new JoinBuilder();
-    builder.addJoin({
-      type: 'INNER_JOIN',
-      sourceTypes: 't1',
-      sourcePath: 'id1',
-      targetIndices: [ 'i2' ],
-      targetTypes: 't2',
-      targetPath: 'id2'
-    });
+  describe('should set the type of join', function () {
     const expected = [
       {
         bool: {
           must: [
             {
               join: {
-                type: 'INNER_JOIN',
+                type: null,
                 indices: [ 'i2' ],
                 types: [ 't2' ],
                 on: [ 'id1', 'id2' ],
@@ -115,7 +105,51 @@ describe('Join query builder', function () {
         }
       }
     ];
-    expect(expected).to.eql(builder.toObject());
+
+    it('MERGE_JOIN', function () {
+      const builder = new JoinBuilder();
+      builder.addJoin({
+        type: 'MERGE_JOIN',
+        sourceTypes: 't1',
+        sourcePath: 'id1',
+        targetIndices: [ 'i2' ],
+        targetTypes: 't2',
+        targetPath: 'id2'
+      });
+
+      expected[0].bool.must[0].join.type = 'MERGE_JOIN'
+      expect(expected).to.eql(builder.toObject());
+    });
+
+    it('HASH_JOIN', function () {
+      const builder = new JoinBuilder();
+      builder.addJoin({
+        type: 'HASH_JOIN',
+        sourceTypes: 't1',
+        sourcePath: 'id1',
+        targetIndices: [ 'i2' ],
+        targetTypes: 't2',
+        targetPath: 'id2'
+      });
+
+      expected[0].bool.must[0].join.type = 'HASH_JOIN'
+      expect(expected).to.eql(builder.toObject());
+    });
+
+    it('BROADCAST_JOIN', function () {
+      const builder = new JoinBuilder();
+      builder.addJoin({
+        type: 'BROADCAST_JOIN',
+        sourceTypes: 't1',
+        sourcePath: 'id1',
+        targetIndices: [ 'i2' ],
+        targetTypes: 't2',
+        targetPath: 'id2'
+      });
+
+      expected[0].bool.must[0].join.type = 'BROADCAST_JOIN'
+      expect(expected).to.eql(builder.toObject());
+    });
   });
 
   it('should create a query with a join and a query', function () {

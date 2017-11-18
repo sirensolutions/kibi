@@ -21,6 +21,7 @@ import { SearchSourceProvider } from '../data_source/search_source';
 // kibi: use getTitleAlreadyExists instead of findObjectByTitle and do not use SavedObjectsClientProvider
 // import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 import { getTitleAlreadyExists } from './get_title_already_exists';
+import uuid from 'uuid';
 // kibi: end
 
 /**
@@ -411,6 +412,11 @@ export function SavedObjectProvider(
       if (this.copyOnSave) {
         this.id = null;
       }
+
+      // Create a unique id for this object if it doesn't have one already.
+      this.id = this.id || uuid.v1();
+      // ensure that the docSource has the current id
+      docSource.id(this.id);
 
       const source = this.serialize();
 

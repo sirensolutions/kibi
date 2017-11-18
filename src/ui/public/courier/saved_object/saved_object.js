@@ -81,6 +81,7 @@ export function SavedObjectProvider(
     } else {
       docSource = new DocSource();
     }
+    this.index = kbnIndex;
     // kibi: end
 
     // type name for this object, used as the ES-type

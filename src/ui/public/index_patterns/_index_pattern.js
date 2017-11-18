@@ -398,6 +398,10 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         }
       });
 
+      // kibi: ensure that the docSource has the current this.id
+      docSources.get(this).id(this.id);
+      // kibi: end
+
       // clear the indexPattern list cache
       getIds.clearCache();
       return body;

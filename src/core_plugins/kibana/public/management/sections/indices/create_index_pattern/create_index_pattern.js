@@ -289,12 +289,13 @@ uiModules.get('apps/management')
 
   this.createIndexPattern = () => {
     const {
-      id,
       name,
       timeFieldOption,
       nameIsPattern,
       nameInterval,
     } = this.formValues;
+
+    const id = name;
 
     const timeFieldName = timeFieldOption
       ? timeFieldOption.fieldName

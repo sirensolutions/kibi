@@ -3,7 +3,7 @@
 
 A tile map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
 
-NOTE: By default, Kibana uses the https://www.elastic.co/elastic-tile-service[Elastic Tile Service]
+NOTE: By default, Kibana uses the http://www.openstreetmap.org/[Open Street Maps service]
 to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
 in `kibana.yml`.
 

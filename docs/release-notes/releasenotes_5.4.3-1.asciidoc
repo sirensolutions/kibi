@@ -1,4 +1,4 @@
-== Kibi 5.4.3-1 and Kibana 5.4.3
+== Kibi 5.4.3-1
 
 [float]
 === Kibi Changes

@@ -14,6 +14,7 @@ import { IndexPatternMissingIndices } from 'ui/errors';
 import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
 // kibi: this import is needed for any third party plugin
 import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
+import 'plugins/kibana/discover/saved_searches/saved_searches';
 // kibi: end
 
 function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns, globalState,

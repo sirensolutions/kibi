@@ -48,3 +48,4 @@ build-gradle/
 /pki
 /gremlin_server
 docs/index.html
+.vscode/

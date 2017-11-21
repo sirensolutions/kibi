@@ -18,7 +18,16 @@ module.exports = function (grunt) {
       colors: true,
       logLevel: grunt.option('debug') || grunt.option('verbose') ? 'DEBUG' : 'INFO',
       autoWatch: false,
-      browsers: ['<%= karmaBrowser %>'],
+      browsers: [
+        'BrowserWithDebuggingEnable'
+      ],
+
+      customLaunchers: {
+        BrowserWithDebuggingEnable: {
+          base: '<%= karmaBrowser %>',
+          flags: [ '--remote-debugging-port=9333' ]
+        }
+      },
 
       // available reporters: https://npmjs.org/browse/keyword/karma-reporter
       reporters: process.env.CI ? ['dots'] : ['progress'],

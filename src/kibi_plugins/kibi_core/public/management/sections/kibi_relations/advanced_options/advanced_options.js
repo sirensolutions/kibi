@@ -18,19 +18,20 @@ uiModules
 
   $scope.joinTypes = [
     {
-      value: 'INNER_JOIN',
-      label: 'distributed join'
+      value: 'MERGE_JOIN',
+      label: 'Distributed join using merge join algorithm'
     },
     {
-      value: 'SEARCH_JOIN',
-      label: 'broadcast join'
-    }
+      value: 'HASH_JOIN',
+      label: 'Distributed join using hash join algorithm'
+    },
+    {
+      value: 'BROADCAST_JOIN',
+      label: 'Broadcast join'
+    },
   ];
 
   $scope.relation = relations.relationsIndices[$routeParams.id];
-  if (!$scope.relation.type) {
-    $scope.relation.type = 'SEARCH_JOIN'; // default join type
-  }
 
   // check if the limit property is present
   if (typeof $scope.relation.limit === 'undefined') {

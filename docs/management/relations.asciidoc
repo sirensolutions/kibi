@@ -60,15 +60,15 @@ and setting the limit to 0 here disables the limit entirely.
 
 [[kibi-join-type]]
 ==== Join Type
-There are three types of joins algorithms available in Kibi/Vanguard.
-By default (if not set) the backend will try to choose the best algorithm for particular join 
-User can force it using one of the three available options
+There are three types of join algorithms available in Kibi/Vanguard.
+By default (if not set) the backend will try to choose the best algorithm for a particular join. 
+The user can force it using one of the three available options
 
 * MERGE_JOIN - Distributed join using merge join algorithm
 * HASH_JOIN - Distributed join using hash join algorithm
 * BROADCAST_JOIN - Broadcast join
 
-The details description of each algorithm can be found in Vanguard plugin documentation  
+The detailed description of each algorithm can be found in Vanguard plugin documentation.  
 
 ==== Index Patterns Management Icon
 A relation is also indicated on the <<index-patterns,Index Patterns>> Management application thanks

@@ -5,6 +5,10 @@ import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { ReqStatusProvider } from './req_status';
 import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
 
+// kibi: import
+import { extractHighestTaskTimeout } from 'ui/kibi/helpers/extract_highest_task_timeout'
+// kibi: end
+
 export function CallClientProvider(Private, Promise, esAdmin, es) {
 
   const isRequest = Private(IsRequestProvider);
@@ -144,11 +148,27 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
         throw ABORTED;
       }
 
-      // kibi: if the strategy provides a client use it instead of the default one.
       const id = strategy.id;
       let client = (id && id.includes('admin')) ? esAdmin : es;
       client = strategy.client ? strategy.client : client;
-      return (esPromise = client[strategy.clientMethod]({ body }));
+
+
+      // kibi:
+      // if strategy.clientMethod == 'msearch' and task_timeout detected
+      // add a task_timeout parameter to the msearch
+      const params = {
+        body
+      };
+
+      if (strategy.clientMethod === 'msearch') {
+        const o = extractHighestTaskTimeout(body);
+        if (o.taskTimeout !== 0) {
+          params.task_timeout = o.taskTimeout;
+          params.body = o.body;
+        }
+      }
+      // kibi: if the strategy provides a client use it instead of the default one.
+      return (esPromise = client[strategy.clientMethod](params));
       // kibi: end
 
     })

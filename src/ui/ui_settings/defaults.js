@@ -371,12 +371,12 @@ export function getDefaultSettings() {
       value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
       description: 'Relations between index patterns and dashboards'
     },
-    'kibi:joinLimit': {
+    'kibi:joinTaskTimeout': {
       type: 'number',
-      value: 5000000,
+      value: 0,
       description:
-      'Global upper limit on the unique values returned from source index used to filter target index. ' +
-      'Set to 0 to disable the global upper limit. ' +
+      'Default timeout for join task. ' +
+      'Set to 0 to disable the global timeout. ' +
       'Can be overwritten per relation in each relation\'s advanced options in the relational panel.'
     },
     'kibi:panel_vertical_size': {

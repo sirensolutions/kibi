@@ -318,7 +318,8 @@ uiModules
                 },
                 callback: function (error, meta) {
                   if (error) {
-                    notify.error('Could not update metadata for dashboard ' + d.id);
+                    notify.error('Could not update metadata for dashboard ' + d.id, error);
+                    return;
                   }
                   self._dashboardMetadataCallback(d, meta, foundDashboardMetadata.filters, foundDashboardMetadata.queries).then(() => {
                     self.emit('dashboardsMetadataUpdated', [d.id]);

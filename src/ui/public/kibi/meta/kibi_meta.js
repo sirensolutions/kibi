@@ -2,6 +2,7 @@ import lru from 'lru-cache';
 import { each, map, cloneDeep } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { countStrategyValidator } from 'ui/kibi/meta/strategy_validator';
+import { extractHighestTaskTimeout } from 'ui/kibi/helpers/extract_highest_task_timeout'
 
 function KibiMetaProvider(createNotifier, kibiState, es, config) {
 
@@ -257,6 +258,13 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
         // the getMeta=default__dashboard__button
         getMeta: queueName + '__' + debugInfo
       };
+
+      // add biggest task_timeout when detected in the body
+      const o = extractHighestTaskTimeout(payload.body);
+      if (o.taskTimeout !== 0) {
+        payload.task_timeout = o.taskTimeout;
+        payload.body = o.body;
+      }
 
       es
       .msearch(payload)

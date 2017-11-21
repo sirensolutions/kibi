@@ -117,7 +117,7 @@ describe('Join query builder', function () {
         targetPath: 'id2'
       });
 
-      expected[0].bool.must[0].join.type = 'MERGE_JOIN'
+      expected[0].bool.must[0].join.type = 'MERGE_JOIN';
       expect(expected).to.eql(builder.toObject());
     });
 
@@ -132,7 +132,7 @@ describe('Join query builder', function () {
         targetPath: 'id2'
       });
 
-      expected[0].bool.must[0].join.type = 'HASH_JOIN'
+      expected[0].bool.must[0].join.type = 'HASH_JOIN';
       expect(expected).to.eql(builder.toObject());
     });
 
@@ -147,7 +147,7 @@ describe('Join query builder', function () {
         targetPath: 'id2'
       });
 
-      expected[0].bool.must[0].join.type = 'BROADCAST_JOIN'
+      expected[0].bool.must[0].join.type = 'BROADCAST_JOIN';
       expect(expected).to.eql(builder.toObject());
     });
   });

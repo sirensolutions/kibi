@@ -19,15 +19,15 @@ uiModules
   $scope.joinTypes = [
     {
       value: 'MERGE_JOIN',
-      label: 'distributed join use merge join alghorithm'
+      label: 'Distributed join using merge join algorithm'
     },
     {
       value: 'HASH_JOIN',
-      label: 'distributed join use hash join alghorithm'
+      label: 'Distributed join using hash join algorithm'
     },
     {
       value: 'BROADCAST_JOIN',
-      label: 'broadcast join'
+      label: 'Broadcast join'
     },
   ];
 

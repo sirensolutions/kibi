@@ -106,6 +106,6 @@
 tilemap:
   url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
   options:
-    attribution: '&copy; [OpenStreetMap]("http://www.openstreetmap.org/copyright")'
+    attribution: '&copy; [OpenStreetMap](http://www.openstreetmap.org/copyright)'
     subdomains: ['a']
 

@@ -9,7 +9,7 @@ export function findPath(obj, keyName, path) {
     return path === '' ?  keyName : path + '.' + keyName;
   }
   for(const key in obj) {
-    if(obj.hasOwnProperty(key)){
+    if(obj.hasOwnProperty(key)) {
       const found = findPath(obj[key], keyName, path === '' ? key : path + '.' + key);
       if (found) {
         return found;
@@ -32,15 +32,16 @@ export function extractHighestTaskTimeout(body) {
       if (taskTimeoutCandidatePath) {
         const taskTimeoutCandidate = get(query, taskTimeoutCandidatePath);
         if (taskTimeoutCandidate > taskTimeout) {
-          console.log('got value ' + taskTimeoutCandidate)
-          taskTimeout = taskTimeoutCandidate
+          taskTimeout = taskTimeoutCandidate;
         }
         unset(query, taskTimeoutCandidatePath);
         lines[i] = JSON.stringify(query);
       }
     } catch(e) {
-      console.log('Could not parse line: ')
-      console.log(line);
+      if (console) {
+        console.log('Could not parse line: '); // eslint-disable-line no-console
+        console.log(line); // eslint-disable-line no-console
+      }
     }
   }
   return {

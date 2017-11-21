@@ -2,7 +2,7 @@ import lru from 'lru-cache';
 import { each, map, cloneDeep } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { countStrategyValidator } from 'ui/kibi/meta/strategy_validator';
-import { extractHighestTaskTimeout } from 'ui/kibi/helpers/extract_highest_task_timeout'
+import { extractHighestTaskTimeout } from 'ui/kibi/helpers/extract_highest_task_timeout';
 
 function KibiMetaProvider(createNotifier, kibiState, es, config) {
 

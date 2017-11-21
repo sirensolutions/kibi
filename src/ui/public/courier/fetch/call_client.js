@@ -6,7 +6,7 @@ import { ReqStatusProvider } from './req_status';
 import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
 
 // kibi: import
-import { extractHighestTaskTimeout } from 'ui/kibi/helpers/extract_highest_task_timeout'
+import { extractHighestTaskTimeout } from 'ui/kibi/helpers/extract_highest_task_timeout';
 // kibi: end
 
 export function CallClientProvider(Private, Promise, esAdmin, es) {

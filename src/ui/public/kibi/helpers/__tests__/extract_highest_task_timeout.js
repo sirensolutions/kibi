@@ -17,7 +17,7 @@ describe('Kibi Components', function () {
             }
           }
         ]
-      }
+      };
       const path = findPath(o, 'task_timeout', '');
       expect(path).to.equal('a.0.b.task_timeout');
     });
@@ -33,15 +33,15 @@ describe('Kibi Components', function () {
             }
           }
         ]
-       };
-       const o2 = {
-         c: [
-           {
-             d: {
+      };
+      const o2 = {
+        c: [
+          {
+            d: {
               task_timeout: 321
-             }
-           }
-         ]
+            }
+          }
+        ]
       };
 
       const msearch = JSON.stringify(o1) + '\n' + JSON.stringify(o2) + '\n';
@@ -68,6 +68,6 @@ describe('Kibi Components', function () {
       expect(res.body).to.equal(expectedMsearch);
 
 
-    })
+    });
   });
 });

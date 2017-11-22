@@ -1,8 +1,12 @@
 import 'plugins/kibana/discover/saved_searches/_saved_search';
 import 'ui/notify';
+// kibi: import needed to prevent crash when plugins loaded
+import 'ui/courier';
+// kibi: end
 import uiModules from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
+
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify'
 ]);

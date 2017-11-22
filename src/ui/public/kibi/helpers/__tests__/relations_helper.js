@@ -1,6 +1,7 @@
 import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import sinon from 'sinon';
 
 let relationsHelper;
 let $rootScope;
@@ -762,7 +763,7 @@ describe('Kibi Components', function () {
             sinon.stub(config, 'get', function (key) {
               if (key === 'kibi:joinTaskTimeout') {
                 return 123;
-              } else if (key === 'truncate:maxHeight'){
+              } else if (key === 'truncate:maxHeight') {
                 return 20;
               } else {
                 throw new Error('Stub the key: ' + key);

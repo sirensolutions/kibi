@@ -257,7 +257,7 @@ QueryEngine.prototype._loadTemplates = function () {
         })
         .catch((err) => {
           if (err.statusCode === 409) {
-            self.log.warn('Template [' + templateId + '] already exists');
+            self.log.debug('Template [' + templateId + '] already exists');
           } else {
             self.log.error('Could not load template [' + templateId + ']', err);
           }

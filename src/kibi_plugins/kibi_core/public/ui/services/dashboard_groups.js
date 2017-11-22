@@ -374,7 +374,7 @@ uiModules
       // do a little delay when switching to a different one
       // to avoid "multiple fast clicking issue"
       const currentDashboardId = kibiState._getCurrentDashboardId();
-      const delay = currentDashboardId === dashboardId ? 0 : 250;
+      const delay = currentDashboardId === dashboardId ? 0 : 750;
       // only update meta if we stay on the same dashboard
       // in other cases the meta will be triggered by a watcher kibiState._getCurrentDashboardId
       const updateMeta = currentDashboardId === dashboardId ? true : false;

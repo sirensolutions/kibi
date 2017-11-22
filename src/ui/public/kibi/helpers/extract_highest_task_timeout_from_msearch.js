@@ -20,10 +20,13 @@ export function findPath(obj, keyName, path) {
 };
 
 
-export function extractHighestTaskTimeout(body) {
+export function extractHighestTaskTimeoutFromMsearch(body) {
   const lines = body.split('\n');
   let taskTimeout = 0;
-  for (let i = 0; i < lines.length; i++) {
+  // we iterate every second line as the body should be valid msearch in format of
+  // meta \n
+  // query \n
+  for (let i = 1; i < lines.length; i = i + 2) {
     // parse line
     const line = lines[i];
     try {

@@ -6,7 +6,7 @@ import { ReqStatusProvider } from './req_status';
 import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
 
 // kibi: import
-import { extractHighestTaskTimeout } from 'ui/kibi/helpers/extract_highest_task_timeout';
+import { extractHighestTaskTimeoutFromMsearch } from 'ui/kibi/helpers/extract_highest_task_timeout_from_msearch';
 // kibi: end
 
 export function CallClientProvider(Private, Promise, esAdmin, es) {
@@ -161,13 +161,13 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
       };
 
       if (strategy.clientMethod === 'msearch') {
-        const o = extractHighestTaskTimeout(body);
-        if (o.taskTimeout !== 0) {
-          params.task_timeout = o.taskTimeout;
-          params.body = o.body;
+        const results = extractHighestTaskTimeoutFromMsearch(body);
+        if (results.taskTimeout !== 0) {
+          params.task_timeout = results.taskTimeout;
+          params.body = results.body;
         }
       }
-      // kibi: if the strategy provides a client use it instead of the default one.
+      // if the strategy provides a client use it instead of the default one.
       return (esPromise = client[strategy.clientMethod](params));
       // kibi: end
 

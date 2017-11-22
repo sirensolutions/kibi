@@ -273,8 +273,8 @@ export function RelationsHelperFactory(config) {
         // ignore parsing error they should be handled when user is saving the value
       }
 
-      if (indexRelation.limit === 0) {
-        // allow to disable limit for single relation when set to exactly zero
+      if (indexRelation.task_timeout === 0) {
+        // allow to disable task_timeout for single relation when set to exactly zero
         return;
       }
 

@@ -17,7 +17,7 @@ import SetupError from './setup_error';
  */
 const lastWarnedNodesForServer = new WeakMap();
 
-export function ensureEsVersion(server, kibanaVersion) {
+export function ensureEsVersion(server, kibiVersion, kibanaVersion) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
 
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
@@ -70,11 +70,11 @@ export function ensureEsVersion(server, kibanaVersion) {
         lastWarnedNodesForServer.set(server, warningNodeNames);
         server.log(['warning'], {
           tmpl: (
-            `You're running Kibi ${kibanaVersion} with some different versions of ` +
+            `You're running Kibi ${kibiVersion} with some different versions of ` +
             'Elasticsearch. Update Kibi or Elasticsearch to the same ' +
             `version to prevent compatibility issues: ${warningNodeNames}`
           ), // kibi: replaced Kibana with Kibi
-          kibanaVersion,
+          kibiVersion,
           nodes: simplifiedNodes,
         });
       }

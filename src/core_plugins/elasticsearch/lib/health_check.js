@@ -2,6 +2,7 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import createKibanaIndex from './create_kibana_index';
+import kibiVersion from './kibi_version';
 import kibanaVersion from './kibana_version';
 import pluginList from './wait_for_plugin_list';
 import { ensureEsVersion } from './ensure_es_version';
@@ -81,7 +82,7 @@ module.exports = function (plugin, server) {
   }
 
   function waitForEsVersion() {
-    return ensureEsVersion(server, kibanaVersion.get()).catch(err => {
+    return ensureEsVersion(server, kibiVersion.get(), kibanaVersion.get()).catch(err => {
       plugin.status.red(err);
       return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
     });
@@ -103,7 +104,7 @@ module.exports = function (plugin, server) {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {
           return waitForPong(callDataAsKibanaUser, tribeUrl)
-          .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
+          .then(() => ensureEsVersion(server, kibiVersion.get(), kibanaVersion.get(), callDataAsKibanaUser));
         }
       });
 

@@ -41,12 +41,16 @@ export class SavedObjectsClient {
     if (!type || !attributes) {
       return this._PromiseCtor.reject(new Error('requires type and attributes'));
     }
-
-    const url = this._getUrl([type, options.id], _.pick(options, ['overwrite']));
-
-    return this._request('POST', url, { attributes }).then(resp => {
+    // kibi: use our SavedObjectAPI
+    return this._savedObjectsAPI.index({
+      index: this.kbnIndex,
+      type: type,
+      id: options.id,
+      body: attributes
+    }).then(resp => {
       return this.createSavedObject(resp);
     });
+    // kibi:end
   }
 
   /**
@@ -84,7 +88,7 @@ export class SavedObjectsClient {
     .then((resp) => {
       resp.saved_objects = _.map(resp.hits.hits, hit => {
         const o = this._toSavedObjectOptions(hit);
-        return this.createSavedObject(o)
+        return this.createSavedObject(o);
       });
       return keysToCamelCaseShallow(resp);
     });
@@ -98,7 +102,7 @@ export class SavedObjectsClient {
       type: hit._type,
       version: null, // kibi: no version
       attributes: hit._source
-    }
+    };
   }
 
   _toSavedObjectAPIOptions(options) {
@@ -112,7 +116,7 @@ export class SavedObjectsClient {
       delete opt.per_page;
     }
     if (!opt.index) {
-      opt.index = this._kbnIndex
+      opt.index = this._kbnIndex;
     }
     return opt;
   }
@@ -130,10 +134,13 @@ export class SavedObjectsClient {
       return this._PromiseCtor.reject(new Error('requires type and id'));
     }
 
-    return new this._PromiseCtor((resolve, reject) => {
-      this.batchQueue.push({ type, id, resolve, reject });
-      this.processBatchQueue();
+    // kibi: use our SavedObjectAPI
+    return this._savedObjectsAPI.get({
+      index: this.kbnIndex,
+      type: type,
+      id: id
     });
+    // kibi: end
   }
 
   /**
@@ -177,9 +184,17 @@ export class SavedObjectsClient {
       version
     };
 
-    return this._request('PUT', this._getUrl([type, id]), body).then(resp => {
+    // kibi: use our SavedObjectAPI
+    return this._savedObjectsAPI.update({
+      index: this._kbnIndex,
+      type: type,
+      id: id,
+      body: body
+    })
+    .then((resp) => {
       return this.createSavedObject(resp);
     });
+    // kibi: end
   }
 
   /**

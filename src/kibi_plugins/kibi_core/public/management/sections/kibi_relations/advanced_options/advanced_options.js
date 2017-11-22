@@ -34,8 +34,8 @@ uiModules
   $scope.relation = relations.relationsIndices[$routeParams.id];
 
   // check if the limit property is present
-  if (typeof $scope.relation.limit === 'undefined') {
-    $scope.relation.limit = -1; // -1 to take the global one from kibi:joinLimit
+  if (typeof $scope.relation.task_timeout === 'undefined') {
+    $scope.relation.task_timeout = -1; // -1 to take the global one from kibi:joinTaskTimeout
   }
 
   // cancel button

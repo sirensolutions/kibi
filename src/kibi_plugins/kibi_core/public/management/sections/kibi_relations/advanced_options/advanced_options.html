@@ -22,16 +22,16 @@
             </div>
 
             <div class="form-group">
-              <label>Relation join limit
-                <a href="https://docs.support.siren.io/latest/platform/#kibi_join_limit" target="_blank">
+              <label>Relation join task timeout
+                <a href="https://docs.support.siren.io/latest/platform/#kibi_join_task_timeout" target="_blank">
                   <kbn-info info="Learn more"></kbn-info>
                 </a>
               </label>
-              <input type="number" min="-1" step="100000" ng-model="relation.limit" class="form-control small-input"/>
+              <input type="number" min="-1" step="100000" ng-model="relation.task_timeout" class="form-control small-input"/>
               <p class="field-description">
-                Maximum number of joined, unique values used for filtering during join operation.
+                Join task timeout in milliseconds
                 <br/>
-                Set to -1 to use the global limit from Advanced Settings -> kibi:joinLimit, set to 0 to disable limit for this relation.
+                Set to -1 to use the global timeout from Advanced Settings -> kibi:joinTaskTimeout, set to 0 to disable timeout for this relation.
               </p>
             </div>
 

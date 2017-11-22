@@ -1,15 +1,18 @@
 import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import sinon from 'sinon';
 
 let relationsHelper;
 let $rootScope;
+let config;
 
 function init() {
   ngMock.module('kibana');
-  ngMock.inject(function (_$rootScope_, Private) {
+  ngMock.inject(function (_$rootScope_, Private, _config_) {
     $rootScope = _$rootScope_;
     relationsHelper = Private(RelationsHelperFactory);
+    config = _config_;
   });
 }
 
@@ -588,163 +591,317 @@ describe('Kibi Components', function () {
       });
 
 
-      it('should set limit to default Advanced Setting -> kibi:joinLimit if not present', function () {
-        const relations = {
-          relationsIndices: [
-            {
-              indices: [
-                {
-                  indexPatternId: 'investor',
-                  path: 'id'
-                },
-                {
-                  indexPatternId: 'investment',
-                  path: 'investorid'
-                }
-              ],
-              label: 'by',
-              id: 'investment//investorid/investor//id'
-            }
-          ]
-        };
-        const relation1 = {
-          relation: [
-            {
-              indices: [ 'investment' ],
-              path: 'investorid'
-            },
-            {
-              indices: [ 'investor' ],
-              path: 'id'
-            }
-          ]
-        };
+      describe('task_timeout', function () {
+        describe('set to 0 in Advanced Setting -> kibi:joinTaskTimeout', function () {
+          describe('should NOT set it if', function () {
+            it('not present in relation', function () {
+              const relations = {
+                relationsIndices: [
+                  {
+                    indices: [
+                      {
+                        indexPatternId: 'investor',
+                        path: 'id'
+                      },
+                      {
+                        indexPatternId: 'investment',
+                        path: 'investorid'
+                      }
+                    ],
+                    label: 'by',
+                    id: 'investment//investorid/investor//id'
+                  }
+                ]
+              };
+              const relation1 = {
+                relation: [
+                  {
+                    indices: [ 'investment' ],
+                    path: 'investorid'
+                  },
+                  {
+                    indices: [ 'investor' ],
+                    path: 'id'
+                  }
+                ]
+              };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
-        $rootScope.$digest();
+              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$digest();
 
-        relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1.limit).to.be(5000000);
-      });
+              relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
+              expect(relation1.task_timeout).to.be(undefined);
+            });
 
-      it('should set limit to default Advanced Setting -> kibi:joinLimit if present but equal -1', function () {
-        const relations = {
-          relationsIndices: [
-            {
-              limit: -1,
-              indices: [
-                {
-                  indexPatternId: 'investor',
-                  path: 'id'
-                },
-                {
-                  indexPatternId: 'investment',
-                  path: 'investorid'
-                }
-              ],
-              label: 'by',
-              id: 'investment//investorid/investor//id'
-            }
-          ]
-        };
-        const relation1 = {
-          relation: [
-            {
-              indices: [ 'investment' ],
-              path: 'investorid'
-            },
-            {
-              indices: [ 'investor' ],
-              path: 'id'
-            }
-          ]
-        };
+            it('present and equal -1 in relation', function () {
+              const relations = {
+                relationsIndices: [
+                  {
+                    task_timeout: -1,
+                    indices: [
+                      {
+                        indexPatternId: 'investor',
+                        path: 'id'
+                      },
+                      {
+                        indexPatternId: 'investment',
+                        path: 'investorid'
+                      }
+                    ],
+                    label: 'by',
+                    id: 'investment//investorid/investor//id'
+                  }
+                ]
+              };
+              const relation1 = {
+                relation: [
+                  {
+                    indices: [ 'investment' ],
+                    path: 'investorid'
+                  },
+                  {
+                    indices: [ 'investor' ],
+                    path: 'id'
+                  }
+                ]
+              };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
-        $rootScope.$digest();
+              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$digest();
 
-        relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1.limit).to.be(5000000);
-      });
+              relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
+              expect(relation1.task_timeout).to.be(undefined);
+            });
 
-      it('should NOT set limit to default Advanced Setting -> kibi:joinLimit if present but equal zero', function () {
-        const relations = {
-          relationsIndices: [
-            {
-              limit: 0,
-              indices: [
-                {
-                  indexPatternId: 'investor',
-                  path: 'id'
-                },
-                {
-                  indexPatternId: 'investment',
-                  path: 'investorid'
-                }
-              ],
-              label: 'by',
-              id: 'investment//investorid/investor//id'
-            }
-          ]
-        };
-        const relation1 = {
-          relation: [
-            {
-              indices: [ 'investment' ],
-              path: 'investorid'
-            },
-            {
-              indices: [ 'investor' ],
-              path: 'id'
-            }
-          ]
-        };
+            it('present and equal to 0 in relation', function () {
+              const relations = {
+                relationsIndices: [
+                  {
+                    task_timeout: 0,
+                    indices: [
+                      {
+                        indexPatternId: 'investor',
+                        path: 'id'
+                      },
+                      {
+                        indexPatternId: 'investment',
+                        path: 'investorid'
+                      }
+                    ],
+                    label: 'by',
+                    id: 'investment//investorid/investor//id'
+                  }
+                ]
+              };
+              const relation1 = {
+                relation: [
+                  {
+                    indices: [ 'investment' ],
+                    path: 'investorid'
+                  },
+                  {
+                    indices: [ 'investor' ],
+                    path: 'id'
+                  }
+                ]
+              };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
-        $rootScope.$digest();
+              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$digest();
 
-        relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1.limit).to.be(undefined);
-      });
+              relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
+              expect(relation1.task_timeout).to.be(undefined);
+            });
+          });
 
-      it('should set limit to the correct value if it is a valid positive integer', function () {
-        const relations = {
-          relationsIndices: [
-            {
-              limit: 123456,
-              indices: [
-                {
-                  indexPatternId: 'investor',
-                  path: 'id'
-                },
-                {
-                  indexPatternId: 'investment',
-                  path: 'investorid'
-                }
-              ],
-              label: 'by',
-              id: 'investment//investorid/investor//id'
-            }
-          ]
-        };
-        const relation1 = {
-          relation: [
-            {
-              indices: [ 'investment' ],
-              path: 'investorid'
-            },
-            {
-              indices: [ 'investor' ],
-              path: 'id'
-            }
-          ]
-        };
+          describe('should set it if ', function () {
+            it('if it is set in the relation and is a valid positive integer', function () {
+              const relations = {
+                relationsIndices: [
+                  {
+                    task_timeout: 123456,
+                    indices: [
+                      {
+                        indexPatternId: 'investor',
+                        path: 'id'
+                      },
+                      {
+                        indexPatternId: 'investment',
+                        path: 'investorid'
+                      }
+                    ],
+                    label: 'by',
+                    id: 'investment//investorid/investor//id'
+                  }
+                ]
+              };
+              const relation1 = {
+                relation: [
+                  {
+                    indices: [ 'investment' ],
+                    path: 'investorid'
+                  },
+                  {
+                    indices: [ 'investor' ],
+                    path: 'id'
+                  }
+                ]
+              };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
-        $rootScope.$digest();
+              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$digest();
 
-        relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1.limit).to.be(123456);
+              relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
+              expect(relation1.task_timeout).to.be(123456);
+            });
+          });
+        });
+
+        describe('set to a valid positive integer in Advanced Setting -> kibi:joinTaskTimeout', function () {
+
+          beforeEach(function () {
+            sinon.stub(config, 'get', function (key) {
+              if (key === 'kibi:joinTaskTimeout') {
+                return 123;
+              } else if (key === 'truncate:maxHeight') {
+                return 20;
+              } else {
+                throw new Error('Stub the key: ' + key);
+              }
+            });
+          });
+
+          afterEach(function () {
+            config.get.restore();
+          });
+
+          describe('should NOT set it if ', function () {
+            it('present and equal to 0 in relation', function () {
+              const relations = {
+                relationsIndices: [
+                  {
+                    task_timeout: 0, // zero means disable
+                    indices: [
+                      {
+                        indexPatternId: 'investor',
+                        path: 'id'
+                      },
+                      {
+                        indexPatternId: 'investment',
+                        path: 'investorid'
+                      }
+                    ],
+                    label: 'by',
+                    id: 'investment//investorid/investor//id'
+                  }
+                ]
+              };
+              const relation1 = {
+                relation: [
+                  {
+                    indices: [ 'investment' ],
+                    path: 'investorid'
+                  },
+                  {
+                    indices: [ 'investor' ],
+                    path: 'id'
+                  }
+                ]
+              };
+
+              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$digest();
+
+              relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
+              expect(relation1.task_timeout).to.be(undefined);
+            });
+          });
+
+          describe('should set it if ', function () {
+
+            it('not present in the relation', function () {
+              const relations = {
+                relationsIndices: [
+                  {
+                    indices: [
+                      {
+                        indexPatternId: 'investor',
+                        path: 'id'
+                      },
+                      {
+                        indexPatternId: 'investment',
+                        path: 'investorid'
+                      }
+                    ],
+                    label: 'by',
+                    id: 'investment//investorid/investor//id'
+                  }
+                ]
+              };
+              const relation1 = {
+                relation: [
+                  {
+                    indices: [ 'investment' ],
+                    path: 'investorid'
+                  },
+                  {
+                    indices: [ 'investor' ],
+                    path: 'id'
+                  }
+                ]
+              };
+
+              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$digest();
+
+              relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
+              expect(relation1.task_timeout).to.be(123);
+
+            });
+
+            it('present in the relation and set to -1', function () {
+              const relations = {
+                relationsIndices: [
+                  {
+                    task_timeout: -1,
+                    indices: [
+                      {
+                        indexPatternId: 'investor',
+                        path: 'id'
+                      },
+                      {
+                        indexPatternId: 'investment',
+                        path: 'investorid'
+                      }
+                    ],
+                    label: 'by',
+                    id: 'investment//investorid/investor//id'
+                  }
+                ]
+              };
+              const relation1 = {
+                relation: [
+                  {
+                    indices: [ 'investment' ],
+                    path: 'investorid'
+                  },
+                  {
+                    indices: [ 'investor' ],
+                    path: 'id'
+                  }
+                ]
+              };
+
+              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$digest();
+
+              relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
+              expect(relation1.task_timeout).to.be(123);
+
+            });
+
+          });
+        });
       });
 
     });

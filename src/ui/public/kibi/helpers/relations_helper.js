@@ -266,22 +266,22 @@ export function RelationsHelperFactory(config) {
         rel.type = indexRelation.type;
       }
 
-      let defaultJoinLimit = -1;
+      let defaultJoinTaskTimeout = -1;
       try {
-        defaultJoinLimit = parseInt(config.get('kibi:joinLimit'), 10);
+        defaultJoinTaskTimeout = parseInt(config.get('kibi:joinTaskTimeout'), 10);
       } catch (e) {
         // ignore parsing error they should be handled when user is saving the value
       }
 
-      if (indexRelation.limit === 0) {
-        // allow to disable limit for single relation when set to exactly zero
+      if (indexRelation.task_timeout === 0) {
+        // allow to disable task_timeout for single relation when set to exactly zero
         return;
       }
 
-      if (indexRelation.limit && indexRelation.limit > 0) {
-        rel.limit = indexRelation.limit;
-      } else if (defaultJoinLimit > 0) {
-        rel.limit = defaultJoinLimit;
+      if (indexRelation.task_timeout && indexRelation.task_timeout > 0) {
+        rel.task_timeout = indexRelation.task_timeout;
+      } else if (defaultJoinTaskTimeout > 0) {
+        rel.task_timeout = defaultJoinTaskTimeout;
       }
 
     }

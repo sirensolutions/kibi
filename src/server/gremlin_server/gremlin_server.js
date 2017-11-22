@@ -194,11 +194,11 @@ function isJavaVersionOk(self) {
     const spawn = require('child_process').spawn('java', ['-version']);
     spawn.on('error', function (err) {
       if (err.code === 'ENOENT') {
-       self.server.log(['gremlin', 'error'], 'Java not found, please ensure that '
-         + 'JAVA_HOME is set correctly and the Java binaries are in the application path');
-       self.javaChecked = true;
-       reject(new Error('Java not found'));
-     }
+        self.server.log(['gremlin', 'error'], 'Java not found, please ensure that '
+          + 'JAVA_HOME is set correctly and the Java binaries are in the application path');
+        self.javaChecked = true;
+        reject(new Error('Java not found'));
+      }
     });
     spawn.stderr.on('data', function (data) {
       const result = self._checkJavaVersionString(data);

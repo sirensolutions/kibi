@@ -3,16 +3,40 @@ import sinon from 'sinon';
 import shortUrlLookupProvider from '../short_url_lookup';
 import { SavedObjectsClient } from '../../saved_objects/client';
 
+import { createEsTestCluster } from '../../../../src/test_utils/es';
+import * as kbnTestServer from '../../../../src/test_utils/kbn_server';
+
 describe('shortUrlLookupProvider', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
   const TYPE = 'url';
   const URL = 'http://elastic.co';
-  const server = { log: sinon.stub() };
   const sandbox = sinon.sandbox.create();
 
   let savedObjectsClient;
   let req;
   let shortUrl;
+
+  let kbnServer;
+
+  const es = createEsTestCluster({
+    name: 'short_url_lookup',
+  });
+
+  before(async function () {
+    this.timeout(es.getStartTimeout());
+    await es.start();
+
+    const client = es.getClient();
+
+    kbnServer = kbnTestServer.createServerWithCorePlugins();
+    await kbnServer.ready();
+    await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+  });
+
+  after(async function () {
+    await kbnServer.close();
+    await es.stop();
+  });
 
   beforeEach(() => {
     savedObjectsClient = {
@@ -23,7 +47,7 @@ describe('shortUrlLookupProvider', () => {
     };
 
     req = { getSavedObjectsClient: () => savedObjectsClient };
-    shortUrl = shortUrlLookupProvider(server);
+    shortUrl = shortUrlLookupProvider(kbnServer.server);
   });
 
   afterEach(() => {
@@ -43,7 +67,7 @@ describe('shortUrlLookupProvider', () => {
       const [type, attributes, options] = savedObjectsClient.create.getCall(0).args;
 
       expect(type).to.eql(TYPE);
-      expect(attributes).to.only.have.keys('url', 'accessCount', 'createDate', 'accessDate');
+      expect(attributes).to.only.have.keys('url', 'accessCount', 'createDate', 'accessDate', 'sirenSession');
       expect(attributes.url).to.eql(URL);
       expect(options.id).to.eql(ID);
     });
@@ -55,7 +79,7 @@ describe('shortUrlLookupProvider', () => {
       const [type, attributes] = savedObjectsClient.create.getCall(0).args;
 
       expect(type).to.eql(TYPE);
-      expect(attributes).to.only.have.keys('url', 'accessCount', 'createDate', 'accessDate');
+      expect(attributes).to.only.have.keys('url', 'accessCount', 'createDate', 'accessDate', 'sirenSession');
       expect(attributes.url).to.eql(URL);
     });
 

@@ -194,10 +194,10 @@ function isJavaVersionOk(self) {
     const spawn = require('child_process').spawn('java', ['-version']);
     spawn.on('error', function (err) {
       if (err.code === 'ENOENT') {
-        self.server.log(['gremlin', 'error'], 'JAVA not found, please ensure that '
+        self.server.log(['gremlin', 'error'], 'Java not found, please ensure that '
           + 'JAVA_HOME is set correctly and the Java binaries are in the application path');
         self.javaChecked = true;
-        reject(new Error('JAVA not found'));
+        reject(new Error('Java not found'));
       }
     });
     spawn.stderr.on('data', function (data) {
@@ -223,11 +223,11 @@ GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
         ret.v = true;
       } else {
         ret.v = false;
-        ret.e = 'JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run';
+        ret.e = 'Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run';
       }
     } else {
       ret.v = false;
-      ret.e = 'An error occurred while checking the installed JAVA version';
+      ret.e = 'An error occurred while checking the installed Java version';
     }
     this.javaChecked = true;
     return ret;

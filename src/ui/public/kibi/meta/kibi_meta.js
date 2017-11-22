@@ -260,10 +260,10 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       };
 
       // add biggest task_timeout when detected in the body
-      const o = extractHighestTaskTimeoutFromMsearch(payload.body);
-      if (o.taskTimeout !== 0) {
-        payload.task_timeout = o.taskTimeout;
-        payload.body = o.body;
+      const result = extractHighestTaskTimeoutFromMsearch(payload.body);
+      if (result.taskTimeout !== 0) {
+        payload.task_timeout = result.taskTimeout;
+        payload.body = result.body;
       }
 
       es

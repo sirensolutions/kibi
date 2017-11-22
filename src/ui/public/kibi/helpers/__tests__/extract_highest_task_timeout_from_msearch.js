@@ -57,7 +57,7 @@ describe('Kibi Components', function () {
         JSON.stringify(o1) + '\n' +
         JSON.stringify(meta2) + '\n' +
         JSON.stringify(o2) + '\n';
-      const res = extractHighestTaskTimeoutFromMsearch(msearch);
+      const result = extractHighestTaskTimeoutFromMsearch(msearch);
 
       const expected1 = {
         a: [
@@ -79,8 +79,8 @@ describe('Kibi Components', function () {
         JSON.stringify(meta2) + '\n' +
         JSON.stringify(expected2) + '\n';
 
-      expect(res.taskTimeout).to.equal(321);
-      expect(res.body).to.equal(expectedMsearch);
+      expect(result.taskTimeout).to.equal(321);
+      expect(result.body).to.equal(expectedMsearch);
     });
   });
 });

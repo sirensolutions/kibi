@@ -44,7 +44,7 @@ service that Kibi uses to display map tiles in tilemap visualizations. By defaul
 service, but users can still override this parameter to use their own Tile Map Service. For example: `https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana`
 `tilemap.options.minZoom:`:: *Default: 1* - The minimum zoom level.
 `tilemap.options.maxZoom:`:: *Default: 10* - The maximum zoom level.
-`tilemap.options.attribution:`:: *Default: `"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"`* - The map attribution string.
+`tilemap.options.attribution:`:: *Default: `"© [OpenStreetMap]("http://www.openstreetmap.org/copyright")"`* - The map attribution string.
 `tilemap.options.subdomains:`:: An array of subdomains used by the tile service.
 Specify the position of the subdomain the URL with the token `{s}`.
 

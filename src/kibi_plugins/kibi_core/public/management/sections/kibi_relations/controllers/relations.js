@@ -24,8 +24,8 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
 
   $scope.unique = _.unique;
   $scope.defaults = {
-    limit: -1, // -1 mean use the global one from kibi:joinLimit
-    type: 'SEARCH_JOIN'
+    task_timeout: -1, // -1 mean use the global one from kibi:joinTaskTimeout
+    type: ''
   };
 
   // advanced options

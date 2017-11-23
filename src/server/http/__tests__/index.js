@@ -166,7 +166,7 @@ describe('routes', () => {
               url: '/app/kibana#/dashboard/dashA'
             }
           };
-  
+
           kbnTestServer.makeRequest(kbnServer, optionsDashboard, (res) => {
             const payload = res.payload;
             const gotoOptions = {

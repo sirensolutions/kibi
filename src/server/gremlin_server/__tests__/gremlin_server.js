@@ -83,7 +83,7 @@ describe('Kibi Gremlin Server', function () {
     const ret = gremlin._checkJavaVersionString(javaVersion);
 
     expect(ret.v).to.be(false);
-    expect(ret.e).to.be('JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run');
+    expect(ret.e).to.be('Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run');
   });
 
   it('should not pass the Java 8 check - multiple strings', async function () {
@@ -95,7 +95,7 @@ describe('Kibi Gremlin Server', function () {
 
     let ret = gremlin._checkJavaVersionString(javaVersion[0]);
     expect(ret.v).to.be(false);
-    expect(ret.e).to.be('JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run');
+    expect(ret.e).to.be('Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run');
     ret = gremlin._checkJavaVersionString(javaVersion[1]);
     expect(ret).to.be(null);
     ret = gremlin._checkJavaVersionString(javaVersion[2]);
@@ -107,6 +107,6 @@ describe('Kibi Gremlin Server', function () {
 
     const ret = gremlin._checkJavaVersionString(javaVersion);
     expect(ret.v).to.be(false);
-    expect(ret.e).to.be('JAVA not found. Please install JAVA 8 and restart Kibi');
+    expect(ret.e).to.be('An error occurred while checking the installed Java version');
   });
 });

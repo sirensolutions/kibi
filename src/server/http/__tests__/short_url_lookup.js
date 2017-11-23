@@ -109,7 +109,7 @@ describe('shortUrlLookupProvider', () => {
 
     it('returns the url', async () => {
       const response = await shortUrl.getUrl(ID, req);
-      expect(response).to.eql(URL);
+      expect(response.url).to.eql(URL);
     });
 
     it('increments accessCount', async () => {

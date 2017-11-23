@@ -16,10 +16,12 @@ import {
 export const V6_TYPE = 'doc';
 
 export class SavedObjectsClient {
-  constructor(kibanaIndex, mappings, callAdminCluster) {
+  constructor(kibanaIndex, mappings, callAdminCluster, savedObjectsApi) {
     this._kibanaIndex = kibanaIndex;
     this._mappings = mappings;
     this._callAdminCluster = callAdminCluster;
+    // kibi: added by kibi
+    this._savedObjectsApi = savedObjectsApi;
   }
 
   static errors = errors
@@ -207,14 +209,17 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
-    const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
-    const [hit] = get(response, 'hits.hits', []);
+    const model = this._savedObjectsApi.getModel(type);
+    const response = await model.get(id);
+    console.log("RESPONSE");
+    console.log(response);
 
-    if (!hit) {
-      throw errors.decorateNotFoundError(Boom.notFound());
-    }
-
-    return normalizeEsDoc(hit);
+    return Object.assign({}, {
+      id,
+      type,
+      version: response._version,
+      attributes: get(response, '_source')
+    });
   }
 
   /**
@@ -272,10 +277,23 @@ export class SavedObjectsClient {
 
   async _withKibanaIndex(method, params) {
     try {
-      return await this._callAdminCluster(method, {
-        ...params,
-        index: this._kibanaIndex,
-      });
+
+      const model = this._savedObjectsApi.getModel(params.type);
+      switch (method) {
+        case 'index':
+          return await this._callAdminCluster(method, {
+            ...params,
+            index: this._kibanaIndex,
+          });
+          break;
+        case 'create':
+          return await model.create(params.id, params.body);
+          break;
+        case 'update':
+          return await model.update(params.id, params.body);
+          break;
+      }
+
     } catch (err) {
       throw decorateEsError(err);
     }

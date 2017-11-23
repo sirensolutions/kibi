@@ -6,15 +6,42 @@ import { SavedObjectsClient } from '../saved_objects_client';
 import { decorateEsError } from '../lib';
 const { BadRequest } = elasticsearch.errors;
 
+// kibi: added by kibi
+import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import { createEsTestCluster } from '../../../../test_utils/es';
+// kibi: end
+
 describe('SavedObjectsClient', () => {
   let callAdminCluster;
   let savedObjectsClient;
   const illegalArgumentException = { type: 'type_missing_exception' };
 
+  // kibi: added by kibi
+  let kbnServer;
+  const es = createEsTestCluster({
+    name: 'server/http',
+  });
+
+  before(async function () {
+    this.timeout(es.getStartTimeout());
+    await es.start();
+    kbnServer = kbnTestServer.createServerWithCorePlugins();
+    await kbnServer.ready();
+    await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+  });
+
+  after(async () => {
+    await kbnServer.close();
+    await es.stop();
+  });
+  // kibi: end
+
+
   describe('mapping', () => {
     beforeEach(() => {
       callAdminCluster = sinon.stub();
-      savedObjectsClient = new SavedObjectsClient('.kibana-test', {}, callAdminCluster);
+      // kibi: saved_objects_api is added
+      savedObjectsClient = new SavedObjectsClient('.kibana-test', {}, callAdminCluster, kbnServer.server.plugins.saved_objects_api);
     });
 
     afterEach(() => {

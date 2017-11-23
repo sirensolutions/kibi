@@ -172,7 +172,7 @@ module.exports = async function (kbnServer, server, config) {
       try {
         shortUrlAssertValid(request.payload.url);
         // kibi:'request.payload.sirenSession' is added
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request.payload.sirenSession, request);
+        const urlId = await shortUrlLookup.generateUrlId(request.payload.url,  request, request.payload.sirenSession);
         reply(urlId);
       } catch (err) {
         reply(handleShortUrlError(err));

@@ -44,7 +44,7 @@ export default function (server) {
         const doc = await req.getSavedObjectsClient().get('url', id);
         updateMetadata(doc, req);
 
-        return doc.attributes.url;
+        return doc.attributes;
       } catch (err) {
         return '/';
       }

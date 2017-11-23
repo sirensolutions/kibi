@@ -2,6 +2,10 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import { SavedObjectsClient } from '../saved_objects_client';
 import { createIdQuery } from '../lib/create_id_query';
+// kibi: added by kibi
+import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import { createEsTestCluster } from '../../../../test_utils/es';
+// kibi: end
 
 describe('SavedObjectsClient', () => {
   let callAdminCluster;
@@ -52,9 +56,30 @@ describe('SavedObjectsClient', () => {
     }
   };
 
+  // kibi: added by kibi
+  let kbnServer;
+  const es = createEsTestCluster({
+    name: 'server/http',
+  });
+
+  before(async function () {
+    this.timeout(es.getStartTimeout());
+    await es.start();
+    kbnServer = kbnTestServer.createServerWithCorePlugins();
+    await kbnServer.ready();
+    await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+  });
+
+  after(async () => {
+    await kbnServer.close();
+    await es.stop();
+  });
+  // kibi: end
+
   beforeEach(() => {
     callAdminCluster = sinon.mock();
-    savedObjectsClient = new SavedObjectsClient('.kibana-test', mappings, callAdminCluster);
+    // kibi: saved_objects_api is added
+    savedObjectsClient = new SavedObjectsClient('.kibana-test', mappings, callAdminCluster, kbnServer.server.plugins.saved_objects_api);
   });
 
   afterEach(() => {

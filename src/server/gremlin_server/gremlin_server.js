@@ -19,8 +19,8 @@ function GremlinServerHandler(server) {
 function startServer(self, fulfill, reject) {
   const config = self.server.config();
   self.url = config.get('kibi_core.gremlin_server.url');
-  self._isAnotherGremlinRunning(self).
-  then(() => {
+  self._isAnotherGremlinRunning()
+  .then(() => {
     const msg = 'Another gremlin server was found running. Won\'t start another instance.';
     self.server.log(['gremlin', 'warning'], msg);
     fulfill({ message: msg });
@@ -230,7 +230,8 @@ GremlinServerHandler.prototype._isAnotherGremlinRunning = function () {
       } else {
         reject();
       }
-    });
+    })
+    .catch(reject);
   });
 };
 

@@ -375,17 +375,47 @@ module.exports = function (kibana) {
       });
 
       // Adding a route to return the list of installed Elasticsearch plugins
+      // Route takes an optional parameter of the string "version"
+      // If "version" is present, the plugins are returned as an array of objects
+      // containing 'component' (plugin name) and 'version'
+      // If version is absent, an array of the plugin names are returned
       server.route({
         method: 'GET',
-        path:'/getElasticsearchPlugins',
+        path:'/getElasticsearchPlugins/{version?}',
+        handler: function (request, reply) {
+          const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
+          const h = `component${request.params.version && request.params.version === 'versions' ? ',version' : ''}`;
+          return callWithInternalUser('cat.plugins', {
+            h,
+            format: 'json'
+          })
+          .then(components => {
+            if (!(request.params.version && request.params.version === 'versions')) {
+              components = components.map(component => component.component);
+            }
+
+            return reply(components);
+          });
+        }
+      });
+
+      server.route({
+        method: 'GET',
+        path:'/elasticsearchVersion',
         handler: function (request, reply) {
           const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
 
-          return callWithInternalUser('cat.plugins', {
-            h: 'component',
-            format: 'json'
+          return callWithInternalUser('nodes.info', {
+            filterPath: [
+              'nodes.*.version'
+            ]
           })
-          .then(components => reply(_.pluck(components, 'component')));
+          .then(info => {
+            const versions = Object.keys(info.nodes)
+              .map(nodeKey => info.nodes[nodeKey].version);
+
+            return reply(versions);
+          });
         }
       });
     }

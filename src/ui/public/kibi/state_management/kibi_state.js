@@ -952,22 +952,53 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
 uiRoutes
 .addSetupWork(kibiState => kibiState.init())
+.addSetupWork(elasticsearchVersion => elasticsearchVersion.init())
 .addSetupWork(elasticsearchPlugins => elasticsearchPlugins.init());
 
 uiModules
 .get('kibana/kibi_state')
 .service('elasticsearchPlugins', (Promise, $http) => {
   let plugins;
+  let pluginsWithVersions;
 
   return {
     init: _.once(function () {
-      return $http.get(`${getBasePath()}/getElasticsearchPlugins`)
+      const requestPluginListFromES = $http.get(`${getBasePath()}/getElasticsearchPlugins`)
       .then(res => {
         plugins = res.data;
       });
+
+      const requestPluginListFromESWithVersions = $http.get(`${getBasePath()}/getElasticsearchPlugins/versions`)
+      .then(res => {
+        pluginsWithVersions = res.data;
+      });
+
+      return Promise.all([
+        requestPluginListFromES,
+        requestPluginListFromESWithVersions
+      ]);
+    }),
+    get(options) {
+      if (options && options.version) {
+        return pluginsWithVersions;
+      } else {
+        return plugins;
+      }
+    }
+  };
+})
+.service('elasticsearchVersion', (Promise, $http) => {
+  let version;
+
+  return {
+    init: _.once(function () {
+      return $http.get(`${getBasePath()}/elasticsearchVersion`)
+      .then(res => {
+        version = res.data[0];
+      });
     }),
     get() {
-      return plugins;
+      return version;
     }
   };
 })

@@ -18,12 +18,27 @@ describe('State Management', function () {
     afterEach(() => $httpBackend.verifyNoOutstandingExpectation());
     afterEach(() => $httpBackend.verifyNoOutstandingRequest());
 
-    it('should use the getElasticsearchPlugins route to retrive the list of installed plugins', function (done) {
-      $httpBackend.expectGET('/getElasticsearchPlugins').respond([ 'some es plugin' ]);
+    const fakeComponent = { component: 'some es plugin', version: '1.2.3' };
 
+    it('should use the getElasticsearchPlugins route to retrieve the list of installed plugin names', function (done) {
+      $httpBackend.expectGET('/getElasticsearchPlugins').respond([ 'some es plugin' ]);
+      $httpBackend.expectGET('/getElasticsearchPlugins/versions').respond([]);
       elasticsearchPlugins.init()
       .then(() => {
         expect(elasticsearchPlugins.get()).to.eql([ 'some es plugin' ]);
+        done();
+      }).catch(done);
+
+      $httpBackend.flush();
+    });
+
+
+    it('should use the getElasticsearchPlugins/versions route to retrieve the list of plugin names and versions', function (done) {
+      $httpBackend.expectGET('/getElasticsearchPlugins').respond([]);
+      $httpBackend.expectGET('/getElasticsearchPlugins/versions').respond([fakeComponent]);
+      elasticsearchPlugins.init()
+      .then(() => {
+        expect(elasticsearchPlugins.get({ version: true })).to.eql([fakeComponent]);
         done();
       }).catch(done);
 

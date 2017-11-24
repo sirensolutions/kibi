@@ -60,7 +60,18 @@
                         <td>Version</td>
                         <td>{{::section.info.kibiVersion}}</td>
                       </tr>
-
+                      <tr>
+                        <td>Elasticsearch Version</td>
+                        <td>{{::section.info.esVersion}}</td>
+                      </tr>
+                      <tr ng-if="section.info.vanguardVersion">
+                        <td>Vanguard Version</td>
+                        <td>{{::section.info.vanguardVersion}}</td>
+                      </tr>
+                      <tr ng-if="section.info.kibiIndex">
+                        <td>Kibi Index</td>
+                        <td>{{::section.info.kibiIndex}}</td>
+                      </tr>
                       <tr>
                         <td>Build</td>
                         <td>{{::section.info.build}}</td>

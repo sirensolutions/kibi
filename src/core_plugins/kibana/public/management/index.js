@@ -13,6 +13,7 @@ import 'ui/kbn_top_nav';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import loadDefault from 'ui/index_patterns/route_setup/load_default';
+import chrome from 'ui/chrome';
 // kibi: end
 
 uiRoutes
@@ -33,7 +34,8 @@ loadDefault({
 uiModules
 .get('apps/management')
 .directive('kbnManagementApp', function (Private, $location, timefilter,
-  buildNum, buildSha, buildTimestamp, kibiVersion, kibiKibanaAnnouncement, $injector, config, Promise) {
+  buildNum, buildSha, buildTimestamp, kibiVersion, kibiKibanaAnnouncement,
+  $injector, config, Promise, elasticsearchPlugins, elasticsearchVersion) {
   return {
     restrict: 'E',
     template: appTemplate,
@@ -44,6 +46,22 @@ uiModules
     },
 
     link: function ($scope) {
+      //kibi: Gets the vanguard version from the elasticsearchPlugins list
+      // for display on the management landing page
+      const plugins = elasticsearchPlugins.get({ version: true });
+
+      const getVanguardVersion = function (plugins) {
+        if (plugins) {
+          return plugins.filter(plugin => plugin.component === 'siren-vanguard')
+                        .map(plugin => plugin.version)
+                        .pop();
+        }
+      };
+
+      const vanguardVersion = getVanguardVersion(plugins);
+      const kibiIndex = chrome.getInjected('kbnIndex');
+      // kibi: end
+
       timefilter.enabled = false;
       $scope.sections = management.items.inOrder;
       $scope.section = management.getSection($scope.sectionName) || management;
@@ -59,6 +77,9 @@ uiModules
         kibiVersion: kibiVersion,
         kibiKibanaAnnouncement: kibiKibanaAnnouncement,
         buildTimestamp: buildTimestamp,
+        vanguardVersion: vanguardVersion,
+        kibiIndex: kibiIndex,
+        esVersion: elasticsearchVersion.get(),
         build: buildNum,
         sha: buildSha,
         currentYear: new Date().getFullYear()

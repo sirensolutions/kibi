@@ -13,10 +13,11 @@ const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) :
 const program = new Command('bin/kibi'); // kibi: renamed kibana to kibi
 
 program
-.version(pkg.version)
+.version(pkg.kibi_version)
 .description(
-  'Kibana is an open source (Apache Licensed), browser ' +
-  'based analytics and search dashboard for Elasticsearch.'
+  'Kibi extends Kibana with data intelligence features. ' +
+  'At the core, kibi can join and filter data live from multiple indexes (elasticsearch) or from SQL/NOSQL sources. ' +
+  'Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.'
 );
 
 // attach commands

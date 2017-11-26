@@ -49,7 +49,7 @@ export class SavedObjectsClient {
       id: `${type}:${options.id || uuid.v1()}`,
       body: {
         type,
-        [type]: attributes
+        attributes: attributes
       }
     });
 
@@ -107,8 +107,9 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    const response = await this._withKibanaIndex('deleteByQuery', {
-      body: createIdQuery({ type, id }),
+    const response = await this._withKibanaIndex('delete', {
+      id: id,
+      type: type,
       refresh: 'wait_for'
     });
 
@@ -144,6 +145,7 @@ export class SavedObjectsClient {
 
     const esOptions = {
       _source: includedFields(type, fields),
+      type: options.type,
       size: perPage,
       from: perPage * (page - 1),
       body: createFindQuery(this._mappings, { search, searchFields, type, sortField, sortOrder })
@@ -209,16 +211,18 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
-    const model = this._savedObjectsApi.getModel(type);
-    const response = await model.get(id);
-    console.log("RESPONSE");
-    console.log(response);
+    const params = {
+      type: type,
+      id: id
+    };
 
+    const response = await this._withKibanaIndex('get', params);
+    const obj = response.hits.hits[0];
     return Object.assign({}, {
       id,
       type,
-      version: response._version,
-      attributes: get(response, '_source')
+      version: obj._version,
+      attributes: get(obj, '_source')
     });
   }
 
@@ -237,9 +241,7 @@ export class SavedObjectsClient {
       type,
       version: options.version,
       refresh: 'wait_for',
-      body: {
-        doc: attributes
-      }
+      body: attributes
     }, {
       type: V6_TYPE,
       id: `${type}:${id}`,
@@ -254,21 +256,19 @@ export class SavedObjectsClient {
   }
 
   _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
+    // kibi: savedObject error messages are different
     const fallbacks = {
-      'create': ['type_missing_exception'],
-      'index': ['type_missing_exception'],
-      'update': ['document_missing_exception']
+      'create': ['Type ' + params.type + ' not found.'],
+      'index': ['Type ' + params.type + ' not found.'],
+      'update': ['Type ' + params.type + ' not found.']
     };
+    // kibi: end
 
     return this._withKibanaIndex(method, params).catch(err => {
       const fallbackWhen = get(fallbacks, method, []);
-      const type = get(err, 'body.error.type');
 
-      if (type && fallbackWhen.includes(type)) {
-        return this._withKibanaIndex(method, {
-          ...params,
-          ...fallbackParams
-        });
+      if (err.message && fallbackWhen.includes(err.message)) {
+        return this._withKibanaIndex(method, fallbackParams);
       }
 
       throw err;
@@ -277,20 +277,44 @@ export class SavedObjectsClient {
 
   async _withKibanaIndex(method, params) {
     try {
+      let model;
 
-      const model = this._savedObjectsApi.getModel(params.type);
       switch (method) {
         case 'index':
-          return await this._callAdminCluster(method, {
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.index(params.body);
+          break;
+        case 'create':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.create(params.id, params.body);
+          break;
+        case 'update':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.update(params.id, params.body);
+          break;
+        case 'bulk':
+          return await this._callAdminCluster('bulk', {
             ...params,
             index: this._kibanaIndex,
           });
           break;
-        case 'create':
-          return await model.create(params.id, params.body);
+        case 'delete':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.delete(params.id);
           break;
-        case 'update':
-          return await model.update(params.id, params.body);
+        case 'search':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.search(params.size, params.body);
+          break;
+        case 'msearch':
+          return await this._callAdminCluster('msearch', {
+            ...params,
+            index: this._kibanaIndex,
+          });
+          break;
+        case 'get':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.get(params.id);
           break;
       }
 

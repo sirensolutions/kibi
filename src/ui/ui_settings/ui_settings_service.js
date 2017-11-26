@@ -106,7 +106,7 @@ export class UiSettingsService {
 
     // kibi: moved interceptor bit from removed _read
     const interceptValue = await this._readInterceptor(options);
-    if (interceptValue && interceptValue !== null ) {
+    if (interceptValue && interceptValue !== null) {
       return hydrateUserSettings(interceptValue);
     }
 

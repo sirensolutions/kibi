@@ -217,12 +217,11 @@ export class SavedObjectsClient {
     };
 
     const response = await this._withKibanaIndex('get', params);
-    const obj = response.hits.hits[0];
     return Object.assign({}, {
       id,
       type,
-      version: obj._version,
-      attributes: get(obj, '_source')
+      version: response._version,
+      attributes: get(response, '_source')
     });
   }
 

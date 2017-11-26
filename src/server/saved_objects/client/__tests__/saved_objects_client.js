@@ -454,17 +454,11 @@ describe('SavedObjectsClient', () => {
   describe('#get', () => {
     it('formats Elasticsearch response', async () => {
       getStub = sinon.stub().returns(Promise.resolve({
-        hits: {
-          hits: [
-            {
-              _id: 'logstash-*',
-              _type: 'index-pattern',
-              _version: 2,
-              _source: {
-                title: 'Testing'
-              }
-            }
-          ]
+        _id: 'logstash-*',
+        _type: 'index-pattern',
+        _version: 2,
+        _source: {
+          title: 'Testing'
         }
       }));
       modelStub = sinon.stub(savedObjectsClient._savedObjectsApi, 'getModel').returns({ get: getStub });

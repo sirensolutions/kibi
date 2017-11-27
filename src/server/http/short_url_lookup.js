@@ -27,7 +27,7 @@ export default function (server) {
           createDate: new Date(),
           accessDate: new Date(),
           sirenSession: sirenSession
-        }, { id });
+        }, { id }, req);
 
         return doc.id;
       } catch (error) {
@@ -41,7 +41,7 @@ export default function (server) {
 
     async getUrl(id, req) {
       try {
-        const doc = await req.getSavedObjectsClient().get('url', id);
+        const doc = await req.getSavedObjectsClient().get('url', id, req);
         updateMetadata(doc, req);
 
         return doc.attributes;

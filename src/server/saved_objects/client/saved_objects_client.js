@@ -37,7 +37,7 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - { id, type, version, attributes }
   */
-  async create(type, attributes = {}, options = {}) {
+  async create(type, attributes = {}, options = {}, req) {
     const method = options.id && !options.overwrite ? 'create' : 'index';
     const response = await this._withKibanaIndexAndMappingFallback(method, {
       type,
@@ -51,7 +51,7 @@ export class SavedObjectsClient {
         type,
         attributes: attributes
       }
-    });
+    }, req);
 
     return normalizeEsDoc(response, { type, attributes });
   }
@@ -65,6 +65,7 @@ export class SavedObjectsClient {
    * @property {string} [options.format=v5]
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
+  // TODO: use our one
   async bulkCreate(objects, options = {}) {
     const { format = 'v5' } = options;
 
@@ -106,12 +107,12 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise}
    */
-  async delete(type, id) {
+  async delete(type, id, req) {
     const response = await this._withKibanaIndex('delete', {
       id: id,
       type: type,
       refresh: 'wait_for'
-    });
+    }, req);
 
     if (get(response, 'deleted') === 0) {
       throw errors.decorateNotFoundError(Boom.notFound());
@@ -131,7 +132,7 @@ export class SavedObjectsClient {
    * @property {array|string} options.fields
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find(options = {}) {
+  async find(options = {}, req) {
     const {
       type,
       search,
@@ -151,7 +152,7 @@ export class SavedObjectsClient {
       body: createFindQuery(this._mappings, { search, searchFields, type, sortField, sortOrder })
     };
 
-    const response = await this._withKibanaIndex('search', esOptions);
+    const response = await this._withKibanaIndex('search', esOptions, req);
 
     return {
       saved_objects: get(response, 'hits.hits', []).map(hit => {
@@ -176,6 +177,7 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
+  // TODO: use our one
   async bulkGet(objects = []) {
     if (objects.length === 0) {
       return { saved_objects: [] };
@@ -210,13 +212,13 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id) {
+  async get(type, id, req) {
     const params = {
       type: type,
       id: id
     };
 
-    const response = await this._withKibanaIndex('get', params);
+    const response = await this._withKibanaIndex('get', params, req);
     return Object.assign({}, {
       id,
       type,
@@ -234,7 +236,7 @@ export class SavedObjectsClient {
    * @property {integer} options.version - ensures version matches that of persisted object
    * @returns {promise}
    */
-  async update(type, id, attributes, options = {}) {
+  async update(type, id, attributes, options = {}, req) {
     const response = await this._withKibanaIndexAndMappingFallback('update', {
       id,
       type,
@@ -249,12 +251,12 @@ export class SavedObjectsClient {
           [type]: attributes
         }
       }
-    });
+    }, req);
 
     return normalizeEsDoc(response, { id, type, attributes });
   }
 
-  _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
+  _withKibanaIndexAndMappingFallback(method, params, fallbackParams, req) {
     // kibi: savedObject error messages are different
     const fallbacks = {
       'create': ['Type ' + params.type + ' not found.'],
@@ -263,35 +265,36 @@ export class SavedObjectsClient {
     };
     // kibi: end
 
-    return this._withKibanaIndex(method, params).catch(err => {
+    return this._withKibanaIndex(method, params, req).catch(err => {
       const fallbackWhen = get(fallbacks, method, []);
 
       if (err.message && fallbackWhen.includes(err.message)) {
-        return this._withKibanaIndex(method, fallbackParams);
+        return this._withKibanaIndex(method, fallbackParams, req);
       }
 
       throw err;
     });
   }
 
-  async _withKibanaIndex(method, params) {
+  async _withKibanaIndex(method, params, req) {
     try {
       let model;
 
       switch (method) {
         case 'index':
           model = this._savedObjectsApi.getModel(params.type);
-          return await model.index(params.body);
+          return await model.index(params.body, req);
           break;
         case 'create':
           model = this._savedObjectsApi.getModel(params.type);
-          return await model.create(params.id, params.body);
+          return await model.create(params.id, params.body, req);
           break;
         case 'update':
           model = this._savedObjectsApi.getModel(params.type);
-          return await model.update(params.id, params.body);
+          return await model.update(params.id, params.body, req);
           break;
         case 'bulk':
+          // TODO implement in our model and call our model
           return await this._callAdminCluster('bulk', {
             ...params,
             index: this._kibanaIndex,
@@ -299,13 +302,14 @@ export class SavedObjectsClient {
           break;
         case 'delete':
           model = this._savedObjectsApi.getModel(params.type);
-          return await model.delete(params.id);
+          return await model.delete(params.id, req);
           break;
         case 'search':
           model = this._savedObjectsApi.getModel(params.type);
-          return await model.search(params.size, params.body);
+          return await model.search(params.size, params.body, req);
           break;
         case 'msearch':
+          // TODO implement in our model and call our model
           return await this._callAdminCluster('msearch', {
             ...params,
             index: this._kibanaIndex,
@@ -313,7 +317,7 @@ export class SavedObjectsClient {
           break;
         case 'get':
           model = this._savedObjectsApi.getModel(params.type);
-          return await model.get(params.id);
+          return await model.get(params.id, req);
           break;
       }
 

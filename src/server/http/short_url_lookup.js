@@ -21,6 +21,7 @@ export default function (server) {
       const { isConflictError } = savedObjectsClient.errors;
 
       try {
+        // kibi: pass request object to method
         const doc = await savedObjectsClient.create('url', {
           url,
           accessCount: 0,
@@ -41,6 +42,7 @@ export default function (server) {
 
     async getUrl(id, req) {
       try {
+        // kibi: pass request object to method
         const doc = await req.getSavedObjectsClient().get('url', id, req);
         updateMetadata(doc, req);
 

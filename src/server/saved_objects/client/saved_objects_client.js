@@ -1,3 +1,7 @@
+// kibi: we modify this SavedObjectsClient to make it use kibi savedObjectApi,
+// we passed request to every method
+// TODO: modify 'bulkCreate', 'bulkGet' to use our model
+
 import Boom from 'boom';
 import uuid from 'uuid';
 import { get } from 'lodash';
@@ -65,7 +69,6 @@ export class SavedObjectsClient {
    * @property {string} [options.format=v5]
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
-  // TODO: use our one
   async bulkCreate(objects, options = {}) {
     const { format = 'v5' } = options;
 
@@ -177,7 +180,6 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  // TODO: use our one
   async bulkGet(objects = []) {
     if (objects.length === 0) {
       return { saved_objects: [] };

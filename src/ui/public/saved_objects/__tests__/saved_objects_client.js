@@ -15,19 +15,20 @@ describe('SavedObjectsClient', () => {
 
   let savedObjectsClient;
   let $http;
+  let savedObjectApi;
 
   const object = { id: 'logstash-*', type: 'index-pattern', title: 'Test' };
-  // kibi: added by kibi
-  const savedObjectApi = {
-    get:  sinon.stub().returns(Promise.resolve(doc)),
-    delete: sinon.stub().returns(Promise.resolve({ data: 'api-response' })),
-    update: sinon.stub().returns(Promise.resolve({ data: 'api-response' })),
-    index: sinon.stub().returns(Promise.resolve({ data: 'api-response' })),
-    search: sinon.stub().returns(Promise.resolve({ data: { saved_objects: [object] } }))
-  };
-  // kibi: end
 
   beforeEach(() => {
+    // kibi: added by kibi
+    savedObjectApi = {
+      get:  sinon.stub().returns(Promise.resolve(doc)),
+      delete: sinon.stub().returns(Promise.resolve({ data: 'api-response' })),
+      update: sinon.stub().returns(Promise.resolve({ data: 'api-response' })),
+      index: sinon.stub().returns(Promise.resolve({ data: 'api-response' })),
+      search: sinon.stub().returns(Promise.resolve({ data: { saved_objects: [object] } }))
+    };
+    // kibi: end
     $http = sandbox.stub();
     // kibi: pass savedObjectApi
     savedObjectsClient = new SavedObjectsClient($http, basePath, Promise, savedObjectApi);
@@ -139,7 +140,7 @@ describe('SavedObjectsClient', () => {
 
     it('makes HTTP call', async () => {
       await savedObjectsClient.get(doc.type, doc.id);
-      sinon.assert.calledThrice(savedObjectApi.get);
+      sinon.assert.calledOnce(savedObjectApi.get);
     });
   });
 
@@ -169,7 +170,7 @@ describe('SavedObjectsClient', () => {
 
     it('makes HTTP call', () => {
       savedObjectsClient.delete('index-pattern', 'logstash-*');
-      sinon.assert.calledTwice(savedObjectApi.delete);
+      sinon.assert.calledOnce(savedObjectApi.delete);
     });
   });
 
@@ -213,9 +214,9 @@ describe('SavedObjectsClient', () => {
       const options = { version: 2 };
 
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);
-      sinon.assert.calledTwice(savedObjectApi.update);
+      sinon.assert.calledOnce(savedObjectApi.update);
 
-      expect(savedObjectApi.update.getCall(1).args[0].body).to.eql(body);
+      expect(savedObjectApi.update.getCall(0).args[0].body).to.eql(body);
     });
   });
 
@@ -241,16 +242,16 @@ describe('SavedObjectsClient', () => {
 
       savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
 
-      sinon.assert.calledTwice(savedObjectApi.index);
-      expect(savedObjectApi.index.getCall(1).args[0].body.url).to.eql(url);
+      sinon.assert.calledOnce(savedObjectApi.index);
+      expect(savedObjectApi.index.getCall(0).args[0].body.url).to.eql(url);
     });
 
     it('makes HTTP call', () => {
       const attributes = { foo: 'Foo', bar: 'Bar' };
       savedObjectsClient.create('index-pattern', attributes);
 
-      sinon.assert.calledThrice(savedObjectApi.index);
-      expect(savedObjectApi.index.getCall(2).args[0].body).to.eql(attributes);
+      sinon.assert.calledOnce(savedObjectApi.index);
+      expect(savedObjectApi.index.getCall(0).args[0].body).to.eql(attributes);
     });
   });
 
@@ -263,8 +264,8 @@ describe('SavedObjectsClient', () => {
       const body = { type: 'index-pattern', invalid: true };
 
       savedObjectsClient.find(body);
-      expect(savedObjectApi.search.calledTwice).to.be(true);
-      const options = savedObjectApi.search.getCall(1).args[0];
+      expect(savedObjectApi.search.calledOnce).to.be(true);
+      const options = savedObjectApi.search.getCall(0).args[0];
       expect(options.type).to.eql('index-pattern');
     });
 
@@ -272,8 +273,8 @@ describe('SavedObjectsClient', () => {
       const body = { index: '.kibi' };
 
       savedObjectsClient.find(body);
-      expect(savedObjectApi.search.calledThrice).to.be(true);
-      const options = savedObjectApi.search.getCall(2).args[0];
+      expect(savedObjectApi.search.calledOnce).to.be(true);
+      const options = savedObjectApi.search.getCall(0).args[0];
       expect(options.index).to.eql('.kibi');
     });
   });

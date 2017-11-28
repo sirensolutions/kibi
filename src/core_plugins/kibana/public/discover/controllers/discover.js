@@ -529,9 +529,10 @@ function discoverController($scope, config, courier, $route, $window, createNoti
   };
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
-  $scope.filterQuery = function (field, values, operation) {
+  // kibi: added options parameter to support more like this queries
+  $scope.filterQuery = function (field, values, operation, options) {
     $scope.indexPattern.popularizeField(field, 1);
-    filterManager.add(field, values, operation, $state.index);
+    filterManager.add(field, values, operation, $state.index, options);
   };
 
   $scope.addColumn = function addColumn(columnName) {

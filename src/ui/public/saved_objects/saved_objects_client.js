@@ -65,7 +65,11 @@ export class SavedObjectsClient {
       return this._PromiseCtor.reject(new Error('requires type and id'));
     }
 
-    return this._request('DELETE', this._getUrl([type, id]));
+    return this._savedObjectsAPI.delete({
+      index: this.kbnIndex,
+      type: type,
+      id: id
+    });
   }
 
   /**

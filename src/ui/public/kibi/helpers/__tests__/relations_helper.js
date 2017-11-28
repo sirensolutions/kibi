@@ -765,6 +765,8 @@ describe('Kibi Components', function () {
                 return 123;
               } else if (key === 'truncate:maxHeight') {
                 return 20;
+              } else if(key === 'state:storeInSessionStorage') {
+                return false;
               } else {
                 throw new Error('Stub the key: ' + key);
               }

@@ -1,3 +1,7 @@
+// kibi: we modify this SavedObjectsClient to make it use kibi savedObjectApi,
+// we passed request to every method
+// TODO: modify 'bulkCreate', 'bulkGet' to use our model
+
 import Boom from 'boom';
 import uuid from 'uuid';
 import { get } from 'lodash';
@@ -16,10 +20,12 @@ import {
 export const V6_TYPE = 'doc';
 
 export class SavedObjectsClient {
-  constructor(kibanaIndex, mappings, callAdminCluster) {
+  constructor(kibanaIndex, mappings, callAdminCluster, savedObjectsApi) {
     this._kibanaIndex = kibanaIndex;
     this._mappings = mappings;
     this._callAdminCluster = callAdminCluster;
+    // kibi: added by kibi
+    this._savedObjectsApi = savedObjectsApi;
   }
 
   static errors = errors
@@ -35,7 +41,7 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - { id, type, version, attributes }
   */
-  async create(type, attributes = {}, options = {}) {
+  async create(type, attributes = {}, options = {}, req) {
     const method = options.id && !options.overwrite ? 'create' : 'index';
     const response = await this._withKibanaIndexAndMappingFallback(method, {
       type,
@@ -47,9 +53,9 @@ export class SavedObjectsClient {
       id: `${type}:${options.id || uuid.v1()}`,
       body: {
         type,
-        [type]: attributes
+        attributes: attributes
       }
-    });
+    }, req);
 
     return normalizeEsDoc(response, { type, attributes });
   }
@@ -104,11 +110,12 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise}
    */
-  async delete(type, id) {
-    const response = await this._withKibanaIndex('deleteByQuery', {
-      body: createIdQuery({ type, id }),
+  async delete(type, id, req) {
+    const response = await this._withKibanaIndex('delete', {
+      id: id,
+      type: type,
       refresh: 'wait_for'
-    });
+    }, req);
 
     if (get(response, 'deleted') === 0) {
       throw errors.decorateNotFoundError(Boom.notFound());
@@ -128,7 +135,7 @@ export class SavedObjectsClient {
    * @property {array|string} options.fields
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find(options = {}) {
+  async find(options = {}, req) {
     const {
       type,
       search,
@@ -142,12 +149,13 @@ export class SavedObjectsClient {
 
     const esOptions = {
       _source: includedFields(type, fields),
+      type: options.type,
       size: perPage,
       from: perPage * (page - 1),
       body: createFindQuery(this._mappings, { search, searchFields, type, sortField, sortOrder })
     };
 
-    const response = await this._withKibanaIndex('search', esOptions);
+    const response = await this._withKibanaIndex('search', esOptions, req);
 
     return {
       saved_objects: get(response, 'hits.hits', []).map(hit => {
@@ -206,15 +214,19 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id) {
-    const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
-    const [hit] = get(response, 'hits.hits', []);
+  async get(type, id, req) {
+    const params = {
+      type: type,
+      id: id
+    };
 
-    if (!hit) {
-      throw errors.decorateNotFoundError(Boom.notFound());
-    }
-
-    return normalizeEsDoc(hit);
+    const response = await this._withKibanaIndex('get', params, req);
+    return Object.assign({}, {
+      id,
+      type,
+      version: response._version,
+      attributes: get(response, '_source')
+    });
   }
 
   /**
@@ -226,15 +238,13 @@ export class SavedObjectsClient {
    * @property {integer} options.version - ensures version matches that of persisted object
    * @returns {promise}
    */
-  async update(type, id, attributes, options = {}) {
+  async update(type, id, attributes, options = {}, req) {
     const response = await this._withKibanaIndexAndMappingFallback('update', {
       id,
       type,
       version: options.version,
       refresh: 'wait_for',
-      body: {
-        doc: attributes
-      }
+      body: attributes
     }, {
       type: V6_TYPE,
       id: `${type}:${id}`,
@@ -243,39 +253,76 @@ export class SavedObjectsClient {
           [type]: attributes
         }
       }
-    });
+    }, req);
 
     return normalizeEsDoc(response, { id, type, attributes });
   }
 
-  _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
+  _withKibanaIndexAndMappingFallback(method, params, fallbackParams, req) {
+    // kibi: savedObject error messages are different
     const fallbacks = {
-      'create': ['type_missing_exception'],
-      'index': ['type_missing_exception'],
-      'update': ['document_missing_exception']
+      'create': ['Type ' + params.type + ' not found.'],
+      'index': ['Type ' + params.type + ' not found.'],
+      'update': ['Type ' + params.type + ' not found.']
     };
+    // kibi: end
 
-    return this._withKibanaIndex(method, params).catch(err => {
+    return this._withKibanaIndex(method, params, req).catch(err => {
       const fallbackWhen = get(fallbacks, method, []);
-      const type = get(err, 'body.error.type');
 
-      if (type && fallbackWhen.includes(type)) {
-        return this._withKibanaIndex(method, {
-          ...params,
-          ...fallbackParams
-        });
+      if (err.message && fallbackWhen.includes(err.message)) {
+        return this._withKibanaIndex(method, fallbackParams, req);
       }
 
       throw err;
     });
   }
 
-  async _withKibanaIndex(method, params) {
+  async _withKibanaIndex(method, params, req) {
     try {
-      return await this._callAdminCluster(method, {
-        ...params,
-        index: this._kibanaIndex,
-      });
+      let model;
+
+      switch (method) {
+        case 'index':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.index(params.body, req);
+          break;
+        case 'create':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.create(params.id, params.body, req);
+          break;
+        case 'update':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.update(params.id, params.body, req);
+          break;
+        case 'bulk':
+          // TODO implement in our model and call our model
+          return await this._callAdminCluster('bulk', {
+            ...params,
+            index: this._kibanaIndex,
+          });
+          break;
+        case 'delete':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.delete(params.id, req);
+          break;
+        case 'search':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.search(params.size, params.body, req);
+          break;
+        case 'msearch':
+          // TODO implement in our model and call our model
+          return await this._callAdminCluster('msearch', {
+            ...params,
+            index: this._kibanaIndex,
+          });
+          break;
+        case 'get':
+          model = this._savedObjectsApi.getModel(params.type);
+          return await model.get(params.id, req);
+          break;
+      }
+
     } catch (err) {
       throw decorateEsError(err);
     }

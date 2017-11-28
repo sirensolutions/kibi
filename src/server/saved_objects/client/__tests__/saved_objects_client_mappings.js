@@ -6,19 +6,50 @@ import { SavedObjectsClient } from '../saved_objects_client';
 import { decorateEsError } from '../lib';
 const { BadRequest } = elasticsearch.errors;
 
+// kibi: added by kibi
+import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import { createEsTestCluster } from '../../../../test_utils/es';
+// kibi: end
+
 describe('SavedObjectsClient', () => {
   let callAdminCluster;
   let savedObjectsClient;
   const illegalArgumentException = { type: 'type_missing_exception' };
 
+  // kibi: added by kibi
+  let modelStub;
+  let indexStub;
+  let updateStub;
+  let kbnServer;
+  const es = createEsTestCluster({
+    name: 'server/http',
+  });
+
+  before(async function () {
+    this.timeout(es.getStartTimeout());
+    await es.start();
+    kbnServer = kbnTestServer.createServerWithCorePlugins();
+    await kbnServer.ready();
+    await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+  });
+
+  after(async () => {
+    await kbnServer.close();
+    await es.stop();
+  });
+  // kibi: end
+
+
   describe('mapping', () => {
     beforeEach(() => {
       callAdminCluster = sinon.stub();
-      savedObjectsClient = new SavedObjectsClient('.kibana-test', {}, callAdminCluster);
+      // kibi: saved_objects_api is added
+      savedObjectsClient = new SavedObjectsClient('.kibana-test', {}, callAdminCluster, kbnServer.server.plugins.saved_objects_api);
     });
 
     afterEach(() => {
       callAdminCluster.reset();
+      modelStub.restore();
     });
 
 
@@ -30,9 +61,10 @@ describe('SavedObjectsClient', () => {
           }
         }));
 
-        callAdminCluster
-          .onFirstCall().throws(error)
-          .onSecondCall().returns(Promise.resolve({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 }));
+        // kibi: kibi uses savedObjectApi
+        indexStub = sinon.stub().returns(Promise.resolve({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 }));
+        modelStub = sinon.stub(savedObjectsClient._savedObjectsApi, 'getModel').returns({ index: indexStub });
+        // kibi: end
 
         const response = await savedObjectsClient.create('index-pattern', {
           title: 'Logstash'
@@ -56,14 +88,10 @@ describe('SavedObjectsClient', () => {
           }
         }));
 
-        callAdminCluster
-          .onFirstCall().throws(error)
-          .onSecondCall().returns(Promise.resolve());
+        const withKibanaIndexSpy = sinon.spy(savedObjectsClient, '_withKibanaIndex');
+        const response = await savedObjectsClient.create('test-type', { title: 'test-title' }, { id });
 
-        await savedObjectsClient.create('index-pattern', {}, { id });
-
-        const [, args] = callAdminCluster.getCall(1).args;
-        expect(args.id).to.eql('index-pattern:foo');
+        expect(withKibanaIndexSpy.getCall(1).args[1].id).to.eql('test-type:foo');
       });
     });
 
@@ -163,19 +191,16 @@ describe('SavedObjectsClient', () => {
         }
       }));
 
-      beforeEach(() => {
-        callAdminCluster
-          .onFirstCall().throws(error)
-          .onSecondCall().returns(Promise.resolve({
-            _id: id,
-            _type: type,
-            _version: version,
-            result: 'updated'
-          }));
-      });
-
 
       it('falls back to single-type mappings', async () => {
+        updateStub = sinon.stub().returns(Promise.resolve({
+          _id: id,
+          _type: type,
+          _version: version,
+          result: 'updated'
+        }));
+        modelStub = sinon.stub(savedObjectsClient._savedObjectsApi, 'getModel').returns({ update: updateStub });
+
         const response = await savedObjectsClient.update('index-pattern', 'logstash-*', attributes);
         expect(response).to.eql({
           id,
@@ -186,10 +211,10 @@ describe('SavedObjectsClient', () => {
       });
 
       it('prepends id for single-type', async () => {
-        await savedObjectsClient.update('index-pattern', 'logstash-*', attributes);
+        const withKibanaIndexSpy = sinon.spy(savedObjectsClient, '_withKibanaIndex');
+        const response = await savedObjectsClient.update('test-type', 'logstash-*', attributes);
 
-        const [, args] = callAdminCluster.getCall(1).args;
-        expect(args.id).to.eql('index-pattern:logstash-*');
+        expect(withKibanaIndexSpy.getCall(1).args[1].id).to.eql('test-type:logstash-*');
       });
     });
   });

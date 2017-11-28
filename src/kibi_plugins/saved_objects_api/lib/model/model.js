@@ -111,9 +111,16 @@ export default class Model {
       return;
     }
     const body = {};
-    body[this._type] = {
-      properties: joiToMapping(this.schema)
-    };
+    if (this._type === 'doc') {
+      body[this._type] = {
+        dynamic: true
+      };
+    } else {
+      body[this._type] = {
+        properties: joiToMapping(this.schema)
+      };
+    }
+
     const parameters = {
       index: this._config.get('kibana.index'),
       type: this._type,
@@ -206,6 +213,35 @@ export default class Model {
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware[responseMiddlewareMethod](this, id, body, request, response);
       }
+      return response;
+    } catch (error) {
+      this._wrapError(error);
+    }
+  }
+
+ /**
+   * Index a new object instance.
+   *
+   *
+   * @param {Object} body - The object body.
+   * @param {Object} request - An optional HAPI request.
+   */
+  async index(body, request) {
+    try {
+      const parameters = {
+        index: this._config.get('kibana.index'),
+        type: this._type,
+        body: body,
+        refresh: true
+      };
+      this._setCredentials(parameters, request);
+
+      this._prepare(body);
+
+      await this.createMappings(parameters);
+
+      const response = await this._cluster.callWithInternalUser('index', parameters);
+
       return response;
     } catch (error) {
       this._wrapError(error);

@@ -30,7 +30,9 @@ export function savedObjectsMixin(kbnServer, server) {
     return new SavedObjectsClient(
       server.config().get('kibana.index'),
       kbnServer.uiExports.mappings.getCombined(),
-      callCluster
+      callCluster,
+      // kibi: added by kibi
+      kbnServer.server.plugins.saved_objects_api
     );
   });
 

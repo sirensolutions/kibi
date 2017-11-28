@@ -49,7 +49,7 @@ export function docMissingSuite() {
       const { kbnServer } = await setup();
       // kibi: in kibi if config does not exists it gets created and we return 200
       // so we use assertSinonMatch instead of assertDocMissingResponse
-      const word = chance.word()
+      const word = chance.word();
       const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings/defaultIndex',
@@ -76,7 +76,7 @@ export function docMissingSuite() {
       const { kbnServer } = await setup();
       // kibi: in kibi if config does not exists it gets created
       // so we use assertSinonMatch instead of assertDocMissingResponse
-      const word = chance.word()
+      const word = chance.word();
       const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings',

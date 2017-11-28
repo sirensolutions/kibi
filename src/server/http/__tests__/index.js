@@ -52,17 +52,15 @@ describe('routes', () => {
   });
 
   describe('url shortener', () => {
-    // kibi: renamed to optionsDiscover
-    const optionsDiscover = {
-      method: 'POST',
-      url: '/shorten',
-      payload: {
-        url: '/app/kibana#/discover'
-      }
-    };
-
     it('generates shortened urls', (done) => {
       // kibi: use optionsDiscover instead of shortenOptions
+      const optionsDiscover = {
+        method: 'POST',
+        url: '/shorten',
+        payload: {
+          url: '/app/kibana#/'
+        }
+      };
       kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
         expect(typeof res.payload).to.be('string');
         expect(res.payload.length > 0).to.be(true);
@@ -71,6 +69,14 @@ describe('routes', () => {
     });
 
     it('redirects shortened urls', (done) => {
+      // kibi: renamed to optionsDiscover
+      const optionsDiscover = {
+        method: 'POST',
+        url: '/shorten',
+        payload: {
+          url: '/app/kibana#/management'
+        }
+      };
       // kibi: use optionsDiscover instead of shortenOptions
       kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
         const payload = res.payload; // kibi: store payload
@@ -99,6 +105,13 @@ describe('routes', () => {
       describe('discover page', () => {
 
         it('includes embed parameter in redirect from shortened url', (done) => {
+          const optionsDiscover = {
+            method: 'POST',
+            url: '/shorten',
+            payload: {
+              url: '/app/kibana#/discover/'
+            }
+          };
           kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
             const payload = res.payload;
             const gotoOptions = {
@@ -118,6 +131,13 @@ describe('routes', () => {
         });
 
         it('includes kibiNavbarVisible parameters in redirect from shortened url', (done) => {
+          const optionsDiscover = {
+            method: 'POST',
+            url: '/shorten',
+            payload: {
+              url: '/app/kibana#/discoverTest/'
+            }
+          };
           kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
             const payload = res.payload;
             const gotoOptions = {
@@ -138,16 +158,15 @@ describe('routes', () => {
       });
 
       describe('dashboard page', () => {
-
-        const optionsDashboard = {
-          method: 'POST',
-          url: '/shorten',
-          payload: {
-            url: '/app/kibana#/dashboard/dashA'
-          }
-        };
-
         it('includes embed parameter in redirect from shortened url', (done) => {
+          const optionsDashboard = {
+            method: 'POST',
+            url: '/shorten',
+            payload: {
+              url: '/app/kibana#/dashboard/dashA'
+            }
+          };
+
           kbnTestServer.makeRequest(kbnServer, optionsDashboard, (res) => {
             const payload = res.payload;
             const gotoOptions = {
@@ -167,6 +186,13 @@ describe('routes', () => {
         });
 
         it('includes kibiNavbarVisible parameters in redirect from shortened url', (done) => {
+          const optionsDashboard = {
+            method: 'POST',
+            url: '/shorten',
+            payload: {
+              url: '/app/kibana#/dashboard/dashB'
+            }
+          };
           kbnTestServer.makeRequest(kbnServer, optionsDashboard, (res) => {
             const payload = res.payload;
             const gotoOptions = {
@@ -188,16 +214,14 @@ describe('routes', () => {
       });
 
       describe('visualize page', () => {
-
-        const optionsVisualize = {
-          method: 'POST',
-          url: '/shorten',
-          payload: {
-            url: '/app/kibana#/visualize/visA'
-          }
-        };
-
         it('includes embed parameter in redirect from shortened url', (done) => {
+          const optionsVisualize = {
+            method: 'POST',
+            url: '/shorten',
+            payload: {
+              url: '/app/kibana#/visualize/visA'
+            }
+          };
           kbnTestServer.makeRequest(kbnServer, optionsVisualize, (res) => {
             const payload = res.payload;
             const gotoOptions = {
@@ -217,6 +241,13 @@ describe('routes', () => {
         });
 
         it('includes kibiNavbarVisible parameters in redirect from shortened url', (done) => {
+          const optionsVisualize = {
+            method: 'POST',
+            url: '/shorten',
+            payload: {
+              url: '/app/kibana#/visualize/visB'
+            }
+          };
           kbnTestServer.makeRequest(kbnServer, optionsVisualize, (res) => {
             const payload = res.payload;
             const gotoOptions = {

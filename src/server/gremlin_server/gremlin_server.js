@@ -220,7 +220,6 @@ function isJavaVersionOk(self) {
 }
 
 GremlinServerHandler.prototype._isAnotherGremlinRunning = function () {
-  console.log('check if there is another gremlin server running @ ' + this.url + '/ping');
   return new Promise((fulfill, reject) => {
     this._ping()
     .then(function (resp) {

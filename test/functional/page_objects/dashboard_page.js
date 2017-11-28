@@ -60,7 +60,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       if (!onPage) {
         await retry.try(async () => {
           await this.clickDashboardBreadcrumbLink();
-          await testSubjects.find('searchFilter');
+          const onDashboardLandingPage = await this.onDashboardLandingPage();
+          if (!onDashboardLandingPage) throw new Error('Not on the landing page.');
         });
       }
     }
@@ -283,6 +284,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+    async clearSearchValue() {
+      log.debug(`clearSearchValue`);
+
+      await this.gotoDashboardLandingPage();
+
+      await retry.try(async () => {
+        const searchFilter = await testSubjects.find('searchFilter');
+        await searchFilter.clearValue();
+      });
+    }
+
     async searchForDashboardWithName(dashName) {
       log.debug(`searchForDashboardWithName: ${dashName}`);
 
@@ -297,6 +309,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getCountOfDashboardsInListingTable() {
+      const dashboardTitles = await testSubjects.findAll('dashboardListingTitleLink');
+      return dashboardTitles.length;
     }
 
     async getDashboardCountWithName(dashName) {

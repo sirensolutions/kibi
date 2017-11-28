@@ -53,27 +53,28 @@ function lowerThan(version, packageVersion) {
   return semver.lt(version, packageVersion);
 }
 
-module.exports = function (server, doc) {
+export default function (server, configSavedObject) {
   const config = server.config();
-  if (/snapshot/i.test(doc._id)) return false;
-  if (!doc._id) return false;
-  // kibi: use kibi version instead of kibana's
-  if (doc._id === config.get('pkg.kibiVersion')) return false;
+  if (/snapshot/i.test(configSavedObject.id)) return false; // kibi: removed alpha,beta from reges
+  if (!configSavedObject.id) return false;
+  if (configSavedObject.id === config.get('pkg.kibiVersion')) return false;
 
-  let preReleaseIndex = Infinity;
-  let packagePreReleaseIndex = Infinity;
+  let rcRelease = Infinity;
+  let packageRcRelease = Infinity;
   let packageVersion = config.get('pkg.kibiVersion'); // kibi: use kibi version instead of kibana's
-  let version = doc._id;
-  const preReleaseMatches = doc._id.match(preReleaseRegex);
-  const packagePreReleaseMatches = config.get('pkg.kibiVersion').match(preReleaseRegex); // kibi: use kibi version instead of kibana's
+  let version = configSavedObject.id;
+  const matches = configSavedObject.id.match(preReleaseRegex);
+  const packageMatches = config.get('pkg.kibiVersion').match(preReleaseRegex); // kibi: use kibi version instead of kibana's
 
-  if (preReleaseMatches) {
-    [version, preReleaseIndex] = computePreReleaseIndex(preReleaseMatches);
+  // kibi: compute prerelease index
+  if (matches) {
+    [version, rcRelease] = computePreReleaseIndex(matches);
   }
 
-  if (packagePreReleaseMatches) {
-    [packageVersion, packagePreReleaseIndex] = computePreReleaseIndex(packagePreReleaseMatches);
+  if (packageMatches) {
+    [packageVersion, packageRcRelease] = computePreReleaseIndex(packageMatches);
   }
+  //kibi: end
 
   // kibi: allow upgrade from a release to a snapshot
   let isSnapshot = false;
@@ -84,7 +85,7 @@ module.exports = function (server, doc) {
 
   try {
     if (semver.eq(version, packageVersion)) {
-      return isSnapshot || preReleaseIndex < packagePreReleaseIndex;
+      return isSnapshot || rcRelease < packageRcRelease;
     }
     // kibi: handle dash versions
     return lowerThan(version, packageVersion);
@@ -92,4 +93,4 @@ module.exports = function (server, doc) {
     return false;
   }
   return true;
-};
+}

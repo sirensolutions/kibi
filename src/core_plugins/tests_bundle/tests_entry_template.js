@@ -1,4 +1,6 @@
-module.exports = function ({ env, bundle }) {
+import { esTestConfig } from '../../test_utils/es';
+
+export default function ({ env, bundle }) {
 
   const pluginSlug = env.pluginInfo.sort()
     .map(p => ' *  - ' + p)
@@ -26,7 +28,7 @@ window.__KBN__ = {
   vars: {
     kbnIndex: '.kibi', // kibi: sets kbnIndex to the .kibi index
     esShardTimeout: 1500,
-    esApiVersion: '5.x',
+    esApiVersion: ${JSON.stringify(esTestConfig.getBranch())},
     esRequestTimeout: '300000',
     tilemapsConfig: {
       deprecated: {
@@ -55,4 +57,4 @@ ${requires}
 require('ui/test_harness').bootstrap(/* go! */);
 `;
 
-};
+}

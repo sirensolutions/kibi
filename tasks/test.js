@@ -14,9 +14,12 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:server', [
     'checkPlugins',
-    'esvm:test',
     'simplemocha:all',
-    'esvm_shutdown:test',
+    // kibi: we are starting the es for migration tests
+    'esvm:test',
+    'simplemocha:migrations',
+    'esvm_shutdown:test'
+    // kibi: end
   ]);
 
   grunt.registerTask('test:browser', [

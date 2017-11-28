@@ -13,6 +13,7 @@ module.exports = function (grunt) {
         version,
         kibi_version: pkg.kibi_version, // kibi: added to manage kibi version
         kibi_kibana_announcement: pkg.kibi_kibana_announcement, // kibi: added by kibi
+        branch: pkg.branch,
         build: {
           number,
           sha,

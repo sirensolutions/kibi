@@ -8,6 +8,7 @@ import { uiModules } from 'ui/modules';
 // kibi: import 'DeleteHelperFactory'
 import { DeleteHelperFactory } from 'ui/kibi/helpers/delete_helper';
 import { castEsToKbnFieldTypeName } from '../../../../../../utils';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 uiRoutes
 .when('/management/siren/objects/:service/:id', {
@@ -19,10 +20,12 @@ uiModules.get('apps/management')
   return {
     restrict: 'E',
     // kibi: replaces esAdmin with savedObjectsAPI
-    controller: function (queryEngineClient, $scope, $injector, $routeParams, $location, $window, $rootScope, Private, savedObjectsAPI) {
+    // kibi: added savedObjectsAPI and queryEngineClient
+    controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, savedObjectsAPI, queryEngineClient) {
       const notify = createNotifier({ location: 'SavedObject view' });
       const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
       const service = $injector.get(serviceObj.service);
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
 
       const deleteHelper = Private(DeleteHelperFactory); // kibi: run some checks before deleting an object
 
@@ -116,9 +119,9 @@ uiModules.get('apps/management')
       })
       .then(function (obj) {
         $scope.obj = obj;
-        $scope.link = service.urlFor(obj._id);
+        $scope.link = service.urlFor(obj.id);
 
-        const fields =  _.reduce(obj._source, createField, []);
+        const fields =  _.reduce(obj.attributes, createField, []);
         if (service.Class) readObjectClass(fields, service.Class);
 
         // sorts twice since we want numerical sort to prioritize over name,
@@ -160,7 +163,7 @@ uiModules.get('apps/management')
             $scope.aceInvalidEditors = _.without($scope.aceInvalidEditors, fieldName);
           }
 
-          if ($rootScope.$$phase) $scope.$apply();
+          if (!$rootScope.$$phase) $scope.$apply();
         });
       };
 
@@ -208,7 +211,7 @@ uiModules.get('apps/management')
       };
 
       $scope.submit = function () {
-        const source = _.cloneDeep($scope.obj._source);
+        const source = _.cloneDeep($scope.obj.attributes);
 
         _.each($scope.fields, function (field) {
           let value = field.value;
@@ -249,7 +252,6 @@ uiModules.get('apps/management')
       function redirectHandler(action) {
         // kibi: removed esAdmin.indices.refresh
         const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
-
         $location.path('/management/siren/objects').search({
           _a: rison.encode({
             tab: serviceObj.title

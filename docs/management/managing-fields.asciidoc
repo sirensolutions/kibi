@@ -72,10 +72,10 @@ WARNING: Computing data on the fly with scripted fields can be very resource int
 Kibi's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-When you define a scripted field in Kibi, you have a choice of scripting languages. Starting with 5.0, the default 
-options are {es-ref}modules-scripting-expression.html[Lucene expressions] and {es-ref}modules-scripting-painless.html[Painless].
+When you define a scripted field in Kibi, you have a choice of scripting languages. Starting with 5.0, the default
+options are {ref}/modules-scripting-expression.html[Lucene expressions] and {ref}/modules-scripting-painless.html[Painless].
 While you can use other scripting languages if you enable dynamic scripting for them in Elasticsearch, this is not recommended
-because they cannot be sufficiently {es-ref}modules-scripting-security.html[sandboxed].
+because they cannot be sufficiently {ref}/modules-scripting-security.html[sandboxed].
 
 WARNING: Use of Groovy, Javascript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those
 scripting languages will be removed in the future.

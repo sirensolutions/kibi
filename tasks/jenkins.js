@@ -36,7 +36,7 @@ module.exports = function (grunt) {
   grunt.registerTask('jenkins:selenium', [
     'jenkins:env',
     'rejectRejFiles'
-    //'test:uiRelease'
+    //'test:uiRelease' // kibi: commented out by kibi
   ]);
 
 };

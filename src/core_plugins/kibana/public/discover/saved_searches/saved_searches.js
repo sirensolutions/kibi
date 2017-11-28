@@ -19,8 +19,8 @@ savedObjectManagementRegistry.register({
   title: 'searches'
 });
 
-// kibi: savedObjectsAPI is added
-module.service('savedSearches', function (Private, savedObjectsAPI, kbnIndex, esAdmin, SavedSearch, kbnUrl) {
+// kibi: Private and savedObjectsAPI is added
+module.service('savedSearches', function (kbnIndex, esAdmin, SavedSearch, kbnUrl, Private, savedObjectsAPI) {
   const options = {
     caching: {
       find: true,

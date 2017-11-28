@@ -13,8 +13,9 @@ savedObjectManagementRegistry.register({
   title: 'visualizations'
 });
 
-// kibi: 'savedObjectsAPI' is added
-app.service('savedVisualizations', function (savedObjectsAPI, Promise, esAdmin, kbnIndex, SavedVis, Private, createNotifier, kbnUrl) {
+// kibi: savedObjectsAPI, $http is added
+app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVis, Private, createNotifier, kbnUrl,
+  $http, savedObjectsAPI) {
   const visTypes = Private(VisTypesRegistryProvider);
   const notify = createNotifier({
     location: 'Saved Visualization Service'
@@ -34,8 +35,8 @@ app.service('savedVisualizations', function (savedObjectsAPI, Promise, esAdmin, 
     }
 
     if (!typeName || !visTypes.byName[typeName]) {
-      if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
-      else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
+      if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', source);
+      else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', source);
       return kbnUrl.redirect('/management/siren/objects/savedVisualizations/{{id}}', { id: source.id });
     }
 
@@ -47,6 +48,5 @@ app.service('savedVisualizations', function (savedObjectsAPI, Promise, esAdmin, 
   saveVisualizationLoader.urlFor = function (id) {
     return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
   };
-
   return saveVisualizationLoader;
 });

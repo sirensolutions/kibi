@@ -13,18 +13,23 @@ import angular from 'angular';
 import _ from 'lodash';
 
 import { SavedObjectNotFound } from 'ui/errors';
-import uuid from 'uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 import { SearchSourceProvider } from '../data_source/search_source';
+
+// kibi: use getTitleAlreadyExists instead of findObjectByTitle and do not use SavedObjectsClientProvider
+// import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 import { getTitleAlreadyExists } from './get_title_already_exists';
+import uuid from 'uuid';
+// kibi: end
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
  * @type {string}
  */
 const OVERWRITE_REJECTED = 'Overwrite confirmation was rejected';
+
 /**
  * An error message to be used when the user rejects a confirm save with duplicate title.
  * @type {string}
@@ -47,10 +52,11 @@ import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 
 // kibi: include savedObjectsAPI dependencies
 export function SavedObjectProvider(
-  esAdmin, kbnIndex, Promise, Private, createNotifier, confirmModalPromise, indexPatterns,
-  savedObjectsAPI, savedObjectsAPITypes
+  Promise, Private, createNotifier, confirmModalPromise, indexPatterns,
+  savedObjectsAPI, savedObjectsAPITypes, esAdmin, kbnIndex
   ) {
 
+  // const savedObjectsClient = Private(SavedObjectsClientProvider);
   const DocSource = Private(AdminDocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
@@ -66,6 +72,7 @@ export function SavedObjectProvider(
     /************
      * Initialize config vars
      ************/
+
     // the doc which is used to store this object
 
     // kibi: set source based on type
@@ -75,11 +82,11 @@ export function SavedObjectProvider(
     } else {
       docSource = new DocSource();
     }
+    this.index = kbnIndex;
     // kibi: end
 
     // type name for this object, used as the ES-type
     const esType = config.type;
-    this.index = kbnIndex;
 
     this.getDisplayName = function () {
       return esType;
@@ -145,7 +152,7 @@ export function SavedObjectProvider(
      *
      * @return {Promise<IndexPattern | null>}
      */
-    const hydrateIndexPattern = () => {
+    this.hydrateIndexPattern = (id) => {
       if (!this.searchSource) {
         return Promise.resolve(null);
       }
@@ -155,7 +162,7 @@ export function SavedObjectProvider(
         return Promise.resolve(null);
       }
 
-      let index = config.indexPattern || this.searchSource.getOwn('index');
+      let index = id || config.indexPattern || this.searchSource.getOwn('index');
 
       if (!index) {
         return Promise.resolve(null);
@@ -168,10 +175,9 @@ export function SavedObjectProvider(
 
       // At this point index will either be an IndexPattern, if cached, or a promise that
       // will return an IndexPattern, if not cached.
-      return Promise.resolve(index)
-        .then((indexPattern) => {
-          this.searchSource.set('index', indexPattern);
-        });
+      return Promise.resolve(index).then(indexPattern => {
+        this.searchSource.set('index', indexPattern);
+      });
     };
 
     /**
@@ -185,50 +191,51 @@ export function SavedObjectProvider(
       // ensure that the esType is defined
       if (!esType) throw new Error('You must define a type name to use SavedObject objects.');
 
-      // tell the docSource where to find the doc
+      // kibi: tell the docSource where to find the doc
       docSource
-        .index(kbnIndex)
-        .type(esType)
-        .id(this.id);
-      // check that the mapping for this esType is defined
+      .index(kbnIndex)
+      .type(esType)
+      .id(this.id);
+      // kibi: end
+
+      // kibi: added
       return mappingSetup.isDefined(esType)
-        .then((defined) => {
-          // if it is already defined skip this step
-          if (defined) return true;
+      .then((defined) => {
+        // if it is already defined skip this step
+        if (defined) return true;
 
-          mapping.kibanaSavedObjectMeta = {
-            properties: {
-              // setup the searchSource mapping, even if it is not used but this type yet
-              searchSourceJSON: {
-                type: 'string'
-              }
+        mapping.kibanaSavedObjectMeta = {
+          properties: {
+            // setup the searchSource mapping, even if it is not used but this type yet
+            searchSourceJSON: {
+              type: 'string'
             }
-          };
-
-          // tell mappingSetup to set esType
-          return mappingSetup.setup(esType, mapping);
-        })
-        .then(() => {
-          // If there is not id, then there is no document to fetch from elasticsearch
-          if (!this.id) {
-            // just assign the defaults and be done
-            _.assign(this, this.defaults);
-            return hydrateIndexPattern().then(() => {
-              return afterESResp.call(this);
-            });
           }
+        };
 
-          // fetch the object from ES
-          return docSource.fetch().then(this.applyESResp);
-        })
-        .then(() => {
-          return customInit.call(this);
-        })
-        .then(() => {
-          // return our obj as the result of init()
-          return this;
-        });
+        // tell mappingSetup to set esType
+        return mappingSetup.setup(esType, mapping);
+      })
+      // kibi: end
+      .then(() => {
+        // If there is not id, then there is no document to fetch from elasticsearch
+        if (!this.id) {
+          // just assign the defaults and be done
+          _.assign(this, this.defaults);
+          return this.hydrateIndexPattern().then((resp) => {
+            return afterESResp.call(this, resp);
+          });
+        }
+
+        // fetch the object from ES
+        // kibi: we use docSource instead of savedObjectsClient
+        return docSource.fetch().then(this.applyESResp);
+        // kibi: end
+      })
+      .then(() => customInit.call(this))
+      .then(() => this);
     });
+
 
     this.applyESResp = (resp) => {
       this._source = _.cloneDeep(resp._source);
@@ -259,15 +266,14 @@ export function SavedObjectProvider(
 
       return Promise.try(() => {
         parseSearchSource(meta.searchSourceJSON);
-        return hydrateIndexPattern();
-      })
-        .then(() => {
-          return Promise.cast(afterESResp.call(this, resp));
-        })
-        .then(() => {
-          // Any time obj is updated, re-call applyESResp
-          docSource.onUpdate().then(this.applyESResp, notify.fatal);
-        });
+        return this.hydrateIndexPattern();
+      }).then(() => {
+        return Promise.cast(afterESResp.call(this, resp));
+      }).then(() => {
+        //kibi:  Any time obj is updated, re-call applyESResp
+        docSource.onUpdate().then(this.applyESResp, notify.fatal);
+        // kibi: end
+      });
     };
 
     /**
@@ -333,17 +339,18 @@ export function SavedObjectProvider(
      * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
      * a confirmRejected = true parameter so that case can be handled differently than
      * a create or index error.
-     * @resolved {String} - The id of the doc
+     * @resolved {SavedObject}
      */
     const createSource = (source) => {
-      return docSource.doCreate(source)
+      return docSource.doCreate(source) // kibi: use docSource instead of savedObjectsClient
         .catch((err) => {
           // record exists, confirm overwriting
           if (_.get(err, 'origError.status') === 409) {
             const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
             return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
-              .then(() => docSource.doIndex(source))
+              .then(() => docSource.doIndex(source))  // kibi: use docSource instead of savedObjectsClient
+
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }
           return Promise.reject(err);
@@ -368,12 +375,16 @@ export function SavedObjectProvider(
       } else {
         client = esAdmin;
       }
-      return getTitleAlreadyExists(this, client)
       // kibi: end
-        .then((duplicateTitle) => {
-          if (!duplicateTitle) return true;
+
+      // kibi: use our way of finding duplicate
+      return getTitleAlreadyExists(this, client)
+        .then(duplicate => {
+          if (!duplicate) return true;
+          if (duplicate.id === this.id) return true;
+
           const confirmMessage =
-            `A ${this.getDisplayName()} with the title '${duplicateTitle}' already exists. Would you like to save anyway?`;
+            `A ${this.getDisplayName()} with the title '${this.title}' already exists. Would you like to save anyway?`;
 
           return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
             .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
@@ -381,19 +392,15 @@ export function SavedObjectProvider(
     };
 
     /**
-     * @typedef {Object} SaveOptions
-     * @property {boolean} confirmOverwrite - If true, attempts to create the source so it
-     * can confirm an overwrite if a document with the id already exists.
-     */
-
-    /**
      * Saves this object.
      *
-     * @param {SaveOptions} saveOptions?
+     * @param {object} [options={}]
+     * @property {boolean} [options.confirmOverwrite=false] - If true, attempts to create the source so it
+     * can confirm an overwrite if a document with the id already exists.
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = (saveOptions = {}) => {
+    this.save = ({ confirmOverwrite } = {}) => {
       // Save the original id in case the save fails.
       const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
@@ -417,8 +424,15 @@ export function SavedObjectProvider(
 
       return warnIfDuplicateTitle()
         .then(() => {
-          return saveOptions.confirmOverwrite ? createSource(source) : docSource.doIndex(source);
+          if (confirmOverwrite) {
+            return createSource(source);
+          } else {
+             // kibi: use docSource instead of savedObjectClient
+            return docSource.doIndex(source);
+            // kibi: end
+          }
         })
+        // kibi: here in both cases we return id and not resp object
         .then((id) => {
           this.id = id;
         })
@@ -442,7 +456,9 @@ export function SavedObjectProvider(
     };
 
     this.destroy = () => {
+      // kibi: added
       docSource.cancelQueued();
+      // kibi: end
       if (this.searchSource) {
         this.searchSource.cancelQueued();
       }

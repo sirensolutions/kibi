@@ -73,12 +73,21 @@ module.exports = async function (kbnServer, server, config) {
   server.ext('onPreResponse', function (req, reply) {
     const response = req.response;
 
+    const customHeaders = {
+      ...config.get('server.customResponseHeaders'),
+      'kbn-name': kbnServer.name,
+      'kbn-version': kbnServer.version,
+    };
+
     if (response.isBoom) {
-      response.output.headers['kbn-name'] = kbnServer.name;
-      response.output.headers['kbn-version'] = kbnServer.version;
+      response.output.headers = {
+        ...response.output.headers,
+        ...customHeaders
+      };
     } else {
-      response.header('kbn-name', kbnServer.name);
-      response.header('kbn-version', kbnServer.version);
+      Object.keys(customHeaders).forEach(name => {
+        response.header(name, customHeaders[name]);
+      });
     }
 
     return reply.continue();
@@ -117,10 +126,10 @@ module.exports = async function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const urlParts = parse(request.url, true);
         const data = await shortUrlLookup.getUrl(request.params.urlId, request);
         shortUrlAssertValid(data.url);
         // kibi: if embedding parameters are set they must be included in the initial URL
+        const urlParts = parse(request.url, true);
         let embeddingParameters = '';
         if (urlParts.query.embed === 'true') {
           embeddingParameters += 'embed=true&';
@@ -163,7 +172,7 @@ module.exports = async function (kbnServer, server, config) {
       try {
         shortUrlAssertValid(request.payload.url);
         // kibi:'request.payload.sirenSession' is added
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request.payload.sirenSession, request);
+        const urlId = await shortUrlLookup.generateUrlId(request.payload.url,  request, request.payload.sirenSession);
         reply(urlId);
       } catch (err) {
         reply(handleShortUrlError(err));

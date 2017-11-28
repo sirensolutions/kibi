@@ -4,9 +4,8 @@ import Bluebird from 'bluebird';
 import 'elasticsearch-browser';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
-import url from 'url';
 
-import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
+import { esTestConfig } from 'test_utils/es_test_config';
 
 describe('Scanner', function () {
   let es;
@@ -14,7 +13,7 @@ describe('Scanner', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (esFactory) {
     es = esFactory({
-      host: url.format(esTestServerUrlParts),
+      host: esTestConfig.getUrl(),
       defer: function () {
         return Bluebird.defer();
       }
@@ -42,7 +41,16 @@ describe('Scanner', function () {
     let scroll;
     let scanner;
     const mockSearch = { '_scroll_id':'abc','took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':[] } }; // eslint-disable-line max-len
-    const mockScroll = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':['one', 'two'] } }; // eslint-disable-line max-len
+    const hits = [{
+      _id: 'one',
+      _type: 'config',
+      _source: { title: 'First title' }
+    }, {
+      _id: 'two',
+      _type: 'config',
+      _source: { title: 'Second title' }
+    }];
+    const mockScroll = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':hits } }; // eslint-disable-line max-len
 
     beforeEach(function () {
       scanner = new Scanner(es, {
@@ -75,7 +83,7 @@ describe('Scanner', function () {
 
     it('should map results if a function is provided', function () {
       return scanner.scanAndMap(null, null, function (hit) {
-        return hit.toUpperCase();
+        return hit._id.toUpperCase();
       })
       .then(function (response) {
         expect(response.hits[0]).to.be('ONE');
@@ -85,7 +93,7 @@ describe('Scanner', function () {
 
     it('should only return the requested number of documents', function () {
       return scanner.scanAndMap(null, { docCount: 1 }, function (hit) {
-        return hit.toUpperCase();
+        return hit._id.toUpperCase();
       })
       .then(function (response) {
         expect(response.hits[0]).to.be('ONE');

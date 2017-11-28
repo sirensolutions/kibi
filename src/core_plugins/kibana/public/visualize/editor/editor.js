@@ -423,7 +423,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
           kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
         }
       }
-    }, notify.error); // kibi: changed from fatal to error
+    }, notify.error);
   };
 
   $scope.unlink = function () {

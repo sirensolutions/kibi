@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { Notifier } from 'ui/notify/notifier';
 // kibi: IndexPatternAuthorizationError is added
 import { IndexPatternAuthorizationError, NoDefaultIndexPattern } from 'ui/errors';
-import { IndexPatternsGetIdsProvider } from '../_get_ids';
+import { IndexPatternsGetProvider } from '../_get';
 import uiRoutes from 'ui/routes';
 
 // kibi: imports
@@ -18,11 +18,11 @@ module.exports = function (opts) {
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
   let defaultRequiredToasts = null;
 
-  // kibi: indexPatterns is added
+  // kibi: indexPatterns and kibiDefaultIndexPattern are added
   uiRoutes
-  .addSetupWork(function loadDefaultIndexPattern(indexPatterns, Private, Promise, $route, config, kibiDefaultIndexPattern) {
+  .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config, kibiDefaultIndexPattern, indexPatterns) {
     const rootSearchSource = Private(RootSearchSourceProvider);
-    const getIds = Private(IndexPatternsGetIdsProvider);
+    const getIds = Private(IndexPatternsGetProvider)('id');
     const route = _.get($route, 'current.$$route');
 
     return getIds()

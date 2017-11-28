@@ -251,6 +251,7 @@ uiModules
           const service = _.find(services, { type: type });
           if (!service) return;
 
+          // kibi: changed url to siren
           $scope.editUrl = '#management/siren/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
         });
 

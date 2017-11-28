@@ -23,7 +23,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:unit', [
     'jenkins:env',
-    'eslint:source',
+    'rejectRejFiles',
+    'run:eslint',
     'licenses',
     'test:server',
     'test:jest',

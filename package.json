@@ -63,8 +63,8 @@
     "precommit": "grunt precommit",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
-    "lint": "grunt eslint:source",
-    "lintroller": "grunt eslint:fixSource",
+    "lint": "echo 'use `node scripts/eslint`' && false",
+    "lintroller": "echo 'use `node scripts/eslint --fix`' && false",
     "makelogs": "echo 'use `node scripts/makelogs`' && false",
     "mocha": "echo 'use `node scripts/mocha`' && false",
     "sterilize": "grunt sterilize",
@@ -243,7 +243,7 @@
     "chance": "1.0.6",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
-    "chromedriver": "2.32.3",
+    "chromedriver": "2.33.2",
     "classnames": "2.2.5",
     "enzyme": "2.7.0",
     "enzyme-to-json": "1.4.5",
@@ -308,7 +308,6 @@
     "supertest-as-promised": "2.0.2",
     "tree-kill": "1.1.0",
     "webpack-dev-server": "1.14.1",
-
     "mockery": "1.4.0"
   },
   "engines": {

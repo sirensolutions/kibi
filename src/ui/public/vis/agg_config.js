@@ -262,7 +262,7 @@ export function VisAggConfigProvider(Private, fieldTypeFilter) {
       schema: self.schema && self.schema.name,
       params: outParams,
       // kibi: aggregation type versioning
-      version: self.type.version
+      version: self.type && self.type.version
     };
   };
 

@@ -356,6 +356,25 @@ describe('AggConfig', function () {
       expect(state.params).to.be.an('object');
       expect(state).to.have.property('type', 'date_histogram');
       expect(state).to.have.property('schema', 'segment');
+      expect(state.version).to.be(undefined);
+    });
+
+    it('if there is no type, type and version should be returned undefined', function () {
+      const vis = new Vis(indexPattern, {
+        type: 'histogram',
+        aggs: [
+          {
+            type: 'date_histogram',
+            schema: 'segment'
+          }
+        ]
+      });
+      const testConfig = vis.aggs.byTypeName.date_histogram[0];
+      testConfig.type = undefined;
+
+      const state = testConfig.toJSON();
+      expect(state.type).to.be(undefined);
+      expect(state.version).to.be(undefined);
     });
 
 

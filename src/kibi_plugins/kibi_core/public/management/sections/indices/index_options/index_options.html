@@ -1,0 +1,127 @@
+<div
+  data-test-subj="indexOptionsContainer"
+  class="kuiViewContent"
+>
+  <h1
+    class="kuiTitle kuiVerticalRhythm"
+  >
+    {{ entity.type === 'INDEX_PATTERN' ? 'Index options' : 'Entity Identifier options' }}
+  </h1>
+
+  <div class="kuiVerticalRhythm">
+    <div class="kuiVerticalRhythm">
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+      >
+        {{ entity.type === 'INDEX_PATTERN' ? 'Index pattern id' : 'Entity Identifier id' }}
+      </label>
+
+      <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+        <input
+          readonly
+          class="kuiTextInput kuiTextInput--large"
+          data-test-subj="indexOptionsIdInput"
+          ng-model="::entity.id"
+          name="id"
+          type="text"
+        />
+      </div>
+    </div>
+    <div class="kuiVerticalRhythm">
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+      >
+        Label
+      </label>
+
+      <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+        <input
+          class="kuiTextInput kuiTextInput--large"
+          data-test-subj="indexOptionsLabelInput"
+          ng-model="entity.label"
+          ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+          name="label"
+          type="text"
+        />
+      </div>
+    </div>
+    <div class="kuiVerticalRhythm">
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+      >
+        Short description
+      </label>
+
+      <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+        <input
+          class="kuiTextInput kuiTextInput--large"
+          data-test-subj="indexOptionsShortDescriptionInput"
+          ng-model="entity.shortDescription"
+          ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+          name="shortDescription"
+          type="text"
+        />
+      </div>
+    </div>
+    <div class="kuiVerticalRhythm">
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+      >
+        Long description
+      </label>
+
+      <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+        <textarea
+          class="kuiTextInput kuiTextInput--large"
+          data-test-subj="indexOptionsLongDescriptionInput"
+          ng-model="entity.longDescription"
+          ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+          name="longDescription"
+          type="text"
+        >
+        </textarea>
+      </div>
+    </div>
+    <div class="kuiVerticalRhythm">
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+      >
+        Icon
+      </label>
+
+      <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+        <input
+          icon-picker
+          class="kuiTextInput kuiTextInput--large"
+          data-test-subj="createIndexPatternIconInput"
+          ng-model="entity.icon"
+          ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+          name="icon"
+          type="text"
+        />
+        <div class="entity-icon kuiIcon {{entity.icon}}"></div>
+      </div>
+    </div>
+    <div class="kuiVerticalRhythm">
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+      >
+        Color
+      </label>
+
+      <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+        <input
+          colorpicker
+          class="kuiTextInput kuiTextInput--large"
+          data-test-subj="createIndexPatternColorInput"
+          ng-model="entity.color"
+          ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+          name="color"
+          type="text"
+        />
+        <div class="entity-color"
+             ng-style="{ 'background-color': entity.color }"></div>
+      </div>
+    </div>
+  </div>
+</div>

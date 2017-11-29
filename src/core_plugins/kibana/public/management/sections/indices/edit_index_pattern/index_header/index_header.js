@@ -8,13 +8,17 @@ uiModules
     template,
     replace: true,
     scope: {
-      indexPattern: '=',
       setDefault: '&',
       refreshFields: '&',
       delete: '&',
+      // kibi: indexPattern property replaced by entity, added save function
+      entity: '=',
+      save: '&'
     },
     link: function ($scope, $el, attrs) {
       $scope.delete = attrs.delete ? $scope.delete : null;
+      // kibi: added save to enable saving of changes
+      $scope.save = attrs.save ? $scope.save : null;
       $scope.setDefault = attrs.setDefault ? $scope.setDefault : null;
       $scope.refreshFields = attrs.refreshFields ? $scope.refreshFields : null;
       config.bindToScope($scope, 'defaultIndex');

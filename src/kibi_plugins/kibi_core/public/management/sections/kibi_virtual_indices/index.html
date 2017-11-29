@@ -2,7 +2,7 @@
   <div ng-controller="VirtualIndicesController" class="app-container virtual_indices_editor kibi-config-section">
 
     <div class="container">
-      <h2 translate="KIBI-VIRTUAL_INDEX_PATTERN_ADD_NEW"></h2>
+      <h2>Add new virtual index</h2>
       <div class="kuiVerticalRhythm">
         <form
           name="form"
@@ -14,8 +14,9 @@
           <div class="kuiVerticalRhythm">
             <label
               class="kuiLabel kuiVerticalRhythmSmall"
-              translate="KIBI-JDBC_DATASOURCE"
-            ></label>
+            >
+              Jdbc datasource name
+            </label>
 
             <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
               <select
@@ -33,8 +34,9 @@
           <div class="kuiVerticalRhythm">
             <label
               class="kuiLabel kuiVerticalRhythmSmall"
-              translate="KIBI-VIRTUAL_INDEX_PATTERN_RESOURCE"
-            ></label>
+            >
+              Resource name (table name)
+            </label>
 
             <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
               <input
@@ -52,8 +54,9 @@
           <div class="kuiVerticalRhythm">
             <label
               class="kuiLabel kuiVerticalRhythmSmall"
-              translate="KIBI-VIRTUAL_INDEX_PATTERN_RESOURCE_PRIMARY_KEY"
-            ></label>
+            >
+              Primary key (primary key for the table)
+            </label>
 
             <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
               <input
@@ -70,8 +73,9 @@
           <div class="kuiVerticalRhythm">
             <label
               class="kuiLabel kuiVerticalRhythmSmall"
-              translate="KIBI-VIRTUAL_INDEX_PATTERN_NAME"
-            ></label>
+            >
+              Index pattern name
+            </label>
 
             <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
               <input
@@ -90,14 +94,15 @@
             data-test-subj="createVirtualIndexPatternCreateButton"
             class="kuiButton kuiButton--primary kuiVerticalRhythm"
             type="submit"
-            translate="KIBI-VIRTUAL_INDEX_PATTERN_CREATE_BUTTON"
-          ></button>
+          >
+            Add Virtual Index Pattern
+          </button>
         </form>
       </div>
     </div>
 
     <div class="container">
-      <h2 translate="KIBI-VIRTUAL_INDEX_LIST_OF_INDICES"></h2>
+      <h2>List of virtual indices</h2>
 
 
       <table class="table table-condensed">

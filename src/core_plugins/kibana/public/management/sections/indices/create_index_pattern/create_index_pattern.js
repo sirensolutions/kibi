@@ -18,18 +18,8 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function (
-  $scope,
-  $routeParams,
-  kbnUrl,
-  Private,
-  Notifier,
-  indexPatterns,
-  es,
-  config,
-  Promise,
-  $translate
-) {
+.controller('managementIndicesCreate', function ($scope, $routeParams, kbnUrl, Private, Notifier, indexPatterns,
+  es, config, Promise, $translate, ontologyClient) {
   const notify = new Notifier();
   // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
   const intervals = indexPatterns.intervals;
@@ -293,6 +283,11 @@ uiModules.get('apps/management')
       timeFieldOption,
       nameIsPattern,
       nameInterval,
+      // kibi: added following new properties
+      shortDescription,
+      longDescription,
+      icon,
+      color
     } = this.formValues;
 
     const id = name;
@@ -327,11 +322,14 @@ uiModules.get('apps/management')
       // as user might not have permissions to do it
 
       indexPatterns.cache.clear(id);
-      kbnUrl.change(`/management/siren/indices/${id}`);
 
-      // force loading while kbnUrl.change takes effect
-      loadingCount = Infinity;
-
+      // kibi: added entity creation in the ontology model
+      return ontologyClient.insertEntity(id, id, 'INDEX_PATTERN', icon, color, shortDescription, longDescription)
+      .then(() => {
+        kbnUrl.change(`/management/siren/entities/${id}`);
+        // force loading while kbnUrl.change takes effect
+        loadingCount = Infinity;
+      });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
         return notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');

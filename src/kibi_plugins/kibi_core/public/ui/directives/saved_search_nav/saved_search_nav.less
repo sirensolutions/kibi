@@ -1,0 +1,46 @@
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/variables";
+
+.kibi-saved-search-nav {
+
+  .angular-ui-tree-nodes {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    a.btn {
+      min-width: 22px;
+      min-height: 22px;
+    }
+
+    .angular-ui-tree-nodes {
+      padding-left: 20px;
+    }
+  }
+
+  .angular-ui-tree-handle.active {
+    background-color: @sidebar-active-bg !important;
+  }
+
+  .angular-ui-tree-handle:hover {
+    background-color: #EEE;
+  }
+
+  .angular-ui-tree-handle {
+    cursor: initial;
+    font-weight: 500;
+    padding: 5px 10px;
+    font-size: 12px;
+
+    span {
+      cursor: default;
+    }
+
+    .item-type {
+      float: right;
+      margin-top: 4px;
+    }
+  }
+
+}

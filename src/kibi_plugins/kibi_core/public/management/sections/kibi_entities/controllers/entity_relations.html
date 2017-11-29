@@ -1,0 +1,92 @@
+<div class="col-lg-12">
+  <div class="row entity-header"
+       ng-if="relations.length"
+  >
+    <div class="col-lg-3"
+         ng-if="entity.type === 'INDEX_PATTERN'"
+    >
+      <p>Field</p>
+    </div>
+     <div ng-class="{ 'col-lg-3': entity.type === 'INDEX_PATTERN', 'col-lg-4': entity.type === 'VIRTUAL_ENTITY' }">
+      <p>Labels</p>
+    </div>
+    <div ng-class="{ 'col-lg-5': entity.type === 'INDEX_PATTERN', 'col-lg-6': entity.type === 'VIRTUAL_ENTITY' }">
+      <p>Target Entity</p>
+    </div>
+    <div ng-class="{ 'col-lg-1': entity.type === 'INDEX_PATTERN', 'col-lg-2': entity.type === 'VIRTUAL_ENTITY' }">
+    </div>
+  </div>
+
+  <div class="row relation vertical-center"
+       ng-repeat="relation in relations"
+  >
+    <div class="col-lg-3 "
+         ng-if="entity.type === 'INDEX_PATTERN'"
+    >
+      <kibi-select required
+                   data-test-subj="index-relation-left-field"
+                   object-type="field"
+                   analyzed-warning="true"
+                   index-pattern-id="entity.id"
+                   ng-model="relation.domain.field"
+      ></kibi-select>
+    </div>
+
+    <div ng-class="{ 'col-lg-3': entity.type === 'INDEX_PATTERN', 'col-lg-4': entity.type === 'VIRTUAL_ENTITY' }">
+      <p class="fa fa-long-arrow-right fa-2x relation-direction col-lg-12" />
+      <input required
+             ng-model="relation.directLabel"
+             data-test-subj="index-relation-directLabel"
+             class="form-control small-input"
+             type="text"
+             placeholder="Direct label"
+             class="form-control small-input"/>
+      <input required
+             ng-model="relation.inverseLabel"
+             data-test-subj="index-relation-inverseLabel"
+             class="form-control small-input"
+             type="text"
+             placeholder="Inverse label"
+             autofocus
+             class="form-control small-input"/>
+      <p class="fa fa-long-arrow-left fa-2x relation-direction col-lg-12" />
+    </div>
+
+    <div ng-class="{ 'col-lg-5': entity.type === 'INDEX_PATTERN', 'col-lg-6': entity.type === 'VIRTUAL_ENTITY' }">
+      <div class="col-lg-12">
+        <label class="col-lg-2">
+        </label>
+        <div class="col-lg-9">
+          <entity-select required
+                         selected="relation.range.id"
+                         entity-type="{{ entity.type === 'INDEX_PATTERN' ? 'ALL' : 'INDEX_PATTERN' }}"
+          ></entity-select>
+        </div>
+      </div>
+      <div class="col-lg-12"
+           ng-if="typeMap[relation.range.id] === 'INDEX_PATTERN'"
+      >
+        <label class="col-lg-2">
+          Field
+        </label>
+        <div class="col-lg-9">
+          <kibi-select required
+                       data-test-subj="index-relation-right-field"
+                       object-type="field"
+                       analyzed-warning="true"
+                       index-pattern-id="relation.range.id"
+                       ng-model="relation.range.field"
+          ></kibi-select>
+        </div>
+      </div>
+    </div>
+    <div ng-class="{ 'col-lg-1': entity.type === 'INDEX_PATTERN', 'col-lg-2': entity.type === 'VIRTUAL_ENTITY' }" class="horizontal-align">
+      <kibi-array-param-remove index="{{ $index }}"
+                               model="relations">
+      </kibi-array-param-remove>
+    </div>
+</div>
+<kibi-array-param-add label="relation"
+                        ng-if="relations"
+                        model="relations"
+                        default="{{ { domain: { id: entity.id }, range: {} } }}"></kibi-array-param-add>

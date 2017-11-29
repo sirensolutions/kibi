@@ -1,0 +1,83 @@
+@import (reference) "~ui/styles/variables";
+@import "~ui/kibi/styles/kibi_config_sections.less";
+
+.entities {
+
+  .vertical-center {
+    display: flex;
+    align-items: center;
+    min-height: 100%
+  }
+
+  .index-options {
+
+    .iconpicker-element, .colorpicker-element{
+      float: left;
+    }
+
+    .entity-icon {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      margin-left: 5px;
+      margin-top: 4px;
+      font-size: 24px;
+    }
+
+    .entity-color {
+      display: inline-block;
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      margin-left: 4px;
+      margin-top: 2px;
+      border-radius: 4px;
+    }
+  }
+
+  entity-relations {
+    padding: 0 20px;
+
+    .entity-header {
+      text-align: center;
+      font-weight: 700;
+      padding-top: 15px;
+    }
+
+    .row.relation {
+      padding: 10px 0;
+      border-top: 2px solid #EEE;
+
+      .horizontal-align {
+        text-align: center;
+      }
+
+      .relation-direction {
+        text-align: center;
+        margin: 0;
+        line-height: 0.6em;
+      }
+
+      label {
+        padding: 6px 0;
+        margin: 0;
+        text-align: right;
+        font-weight: 500;
+      }
+
+      .field-description {
+        label {
+          text-align: left;
+        }
+
+        .col-lg-9 {
+          padding: 0;
+        }
+      }
+
+      select.kibi-select {
+        max-width: inherit;
+      }
+    }
+  }
+}

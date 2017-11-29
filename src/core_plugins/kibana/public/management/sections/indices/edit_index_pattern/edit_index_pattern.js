@@ -9,63 +9,25 @@ import UrlProvider from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import editTemplate from './edit_index_pattern.html';
 
 // kibi: import authorization error
 import { IndexPatternAuthorizationError } from 'ui/errors';
 // kibi: end
 
-uiRoutes
-// kibi: change route from '/management/kibana/indices/:indexPatternId'
-// to '/management/siren/indices/:indexPatternId'
-.when('/management/siren/indices/:indexPatternId', {
-  template: editTemplate,
-  resolve: {
-    indexPattern: function ($route, courier, Promise, createNotifier, kbnUrl) { // kibi: added Promise, createNotifier, kbnUrl
-      return courier.indexPatterns
-      .get($route.current.params.indexPatternId)
-      // kibi: handle authorization errors
-      .catch((error) => {
-        if (error instanceof IndexPatternAuthorizationError) {
-          createNotifier().warning(`Access to index pattern ${$route.current.params.indexPatternId} is forbidden`);
-          kbnUrl.redirect('/management/siren/indices');
-          return Promise.halt();
-        } else {
-          return courier.redirectWhenMissing('/management/siren/indices')(error);
-        }
-      });
-      // kibi: end
-    }
-  }
-});
-
-uiRoutes
-.when('/management/siren/indices', {
-  resolve: {
-    redirect: function ($location, config, kibiDefaultIndexPattern) {
-      // kibi: use our service to get default indexPattern
-      return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
-        const path = `/management/siren/indices/${defaultIndex.id}`;
-        $location.path(path).replace();
-      }).catch(err => {
-        const path = '/management/siren/index';
-        $location.path(path).replace();
-      });
-    }
-  }
-});
-
+// kibi: removed routes. They're replaced by the ones in
+// src/kibi_plugins/kibi_core/public/management/sections/kibi_entities/controllers/entities.js
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
-    $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal) {
+    $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal, ontologyClient, kbnUrl) {
 
   const notify = createNotifier();
   const $state = $scope.state = new AppState();
   // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
 
   $scope.kbnUrl = Private(UrlProvider);
-  $scope.indexPattern = $route.current.locals.indexPattern;
-  docTitle.change($scope.indexPattern.title);
+  $scope.indexPattern = $route.current.locals.selectedEntity;
+  docTitle.change($scope.indexPattern.id);
+  const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
   const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
     return pattern.id !== $scope.indexPattern.id;
@@ -79,13 +41,15 @@ uiModules.get('apps/management')
   $scope.refreshFilters = function () {
     const indexedFieldTypes = [];
     const scriptedFieldLanguages = [];
-    $scope.indexPattern.fields.forEach(field => {
-      if (field.scripted) {
-        scriptedFieldLanguages.push(field.lang);
-      } else {
-        indexedFieldTypes.push(field.type);
-      }
-    });
+    if ($scope.indexPattern.fields) {
+      $scope.indexPattern.fields.forEach(field => {
+        if (field.scripted) {
+          scriptedFieldLanguages.push(field.lang);
+        } else {
+          indexedFieldTypes.push(field.type);
+        }
+      });
+    }
 
     $scope.indexedFieldTypes = _.unique(indexedFieldTypes);
     $scope.scriptedFieldLanguages = _.unique(scriptedFieldLanguages);
@@ -101,12 +65,14 @@ uiModules.get('apps/management')
   };
 
   $scope.$watch('state.tab', function (tab) {
-    if (!tab) $scope.changeTab($scope.editSections[0]);
+    if (!tab && $scope.editSections) $scope.changeTab($scope.editSections[0]);
   });
 
   $scope.$watchCollection('indexPattern.fields', function () {
-    $scope.conflictFields = $scope.indexPattern.fields
-      .filter(field => field.type === 'conflict');
+    if ($scope.indexPattern.fields) {
+      $scope.conflictFields = $scope.indexPattern.fields
+        .filter(field => field.type === 'conflict');
+    }
   });
 
   $scope.refreshFields = function () {
@@ -132,15 +98,18 @@ uiModules.get('apps/management')
         }
       }
 
-      // kibi: change '$location.url('/management/kibana/index')'
-      // to '$location.url('/management/siren/index')'
-      // changed notify.fatal to notify.error
-      courier.indexPatterns.delete($scope.indexPattern)
+      return courier.indexPatterns.get($scope.indexPattern.id)
+      .then((indexPatternObj) => {
+        // kibi: change '$location.url('/management/kibana/index')'
+        // to '$location.url('/management/siren/entities')'
+        return courier.indexPatterns.delete(indexPatternObj)
         // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
         .then(function () {
-          $location.url('/management/siren/index');
+          return ontologyClient.deleteEntity(indexPatternObj.id)
+          .then(kbnUrl.change('/management/siren/entities'));
         })
         .catch(notify.error);
+      });
     }
 
     const confirmModalOptions = {
@@ -148,6 +117,29 @@ uiModules.get('apps/management')
       onConfirm: doRemove
     };
     confirmModal('Are you sure you want to remove this index pattern?', confirmModalOptions);
+  };
+
+  // kibi: added function to remove an entity
+  $scope.removeEntity = function () {
+    if ($route.current.locals.selectedEntity.type === 'INDEX_PATTERN') {
+      $scope.removePattern();
+    } else {
+      $scope.removeEid();
+    }
+  };
+
+  // kibi: added method to remove an entity identifier.
+  $scope.removeEid = function () {
+    function doRemove() {
+      return ontologyClient.deleteEntity($route.current.locals.selectedEntity.id)
+      .then(kbnUrl.change('/management/siren/entities'));
+    }
+
+    const confirmModalOptions = {
+      confirmButtonText: 'Remove entity identifier',
+      onConfirm: doRemove
+    };
+    confirmModal('Are you sure you want to remove this entity identifier?', confirmModalOptions);
   };
 
   $scope.setDefaultPattern = function () {

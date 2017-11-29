@@ -1,0 +1,17 @@
+<div class="kibi-entity-select">
+
+  <div class="overlay" ng-show="showNav" ng-click="showNav = false"></div>
+  <div class="btn dropdown-toggle"
+       ng-click="toggleDropDown()"
+       ng-class="{ focused: showNav }">
+    {{ selectedEntity ? selectedEntity.id : '' }}
+    <i class="caret"></i>
+  </div>
+  <div ng-show="showNav" class="nav-container">
+    <saved-search-nav show-if="showNav"
+                      selected="selectedEntity"
+                      entity-type="{{ entityType }}">
+    </saved-search-nav>
+  </div>
+
+</div>

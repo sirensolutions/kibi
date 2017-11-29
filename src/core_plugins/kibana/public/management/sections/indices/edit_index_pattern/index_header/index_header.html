@@ -8,14 +8,28 @@
     >
       <span
         aria-hidden="true"
-        ng-if="defaultIndex === indexPattern.id"
+        ng-if="defaultIndex === entity.id"
         class="kuiIcon fa-star"
       ></span>
-      {{indexPattern.title}}
+      {{ entity.id }}
     </h1>
   </div>
 
   <div class="kuiBarSection">
+    <button
+      ng-if="save"
+      ng-click="save()"
+      aria-label="Save"
+      tooltip="Save"
+      class="kuiButton kuiButton--basic"
+      data-test-subj="saveButton"
+    >
+      <span class="sr-only">Save</span>
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-floppy-o"
+      ></span>
+    </button>
     <button
       ng-if="setDefault"
       ng-click="setDefault()"
@@ -42,7 +56,7 @@
       ></span>
     </button>
     <button
-      ng-if="delete"
+      ng-if="delete && entity.type === 'INDEX_PATTERN'"
       ng-click="delete()"
       aria-label="Remove index pattern"
       tooltip="Remove index pattern"
@@ -50,6 +64,20 @@
       data-test-subj="deleteIndexPatternButton"
     >
       <span class="sr-only">Remove index pattern</span>
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-trash"
+      ></span>
+    </button>
+    <button
+      ng-if="delete && entity.type === 'VIRTUAL_ENTITY'"
+      ng-click="delete()"
+      aria-label="Remove entity identifier"
+      tooltip="Remove entity identifier"
+      class="kuiButton kuiButton--danger"
+      data-test-subj="deleteIndexPatternButton"
+    >
+      <span class="sr-only">Remove entity identifier</span>
       <span
         aria-hidden="true"
         class="kuiIcon fa-trash"

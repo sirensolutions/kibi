@@ -1,3 +1,40 @@
+<!-- kibi: added empty div and filterbar -->
+<!-- this empty div triggers the following kuiVerticalRhythm css rule -->
+<div class="kuiVerticalRhythm" />
+<!-- Field Filters -->
+<form role="form"
+      class="kuiFieldGroup kuiVerticalRhythm"
+>
+  <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+    <div class="kuiSearchInput">
+      <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+      <input
+        class="kuiSearchInput__input"
+        type="text"
+        aria-label="Filter"
+        ng-model="fieldFilter"
+        placeholder="Filter"
+      />
+    </div>
+  </div>
+
+  <div
+    class="kuiFieldGroupSection"
+    ng-if="indexedFieldTypes.length > 0"
+  >
+    <select
+      data-test-subj="indexedFieldTypeFilterDropdown"
+      class="kuiSelect"
+      ng-model="indexedFieldTypeFilter"
+      ng-change="changeFilter('indexedFieldTypeFilter', indexedFieldTypeFilter)"
+      ng-options="o for o in indexedFieldTypes"
+    >
+      <option value="">All field types</option>
+    </select>
+  </div>
+</form>
+<!-- kibi: end -->
+
 <paginated-table
   columns="columns"
   rows="rows"

@@ -115,7 +115,7 @@ uiModules
     return this.getRelations()
     .then((relations) => {
       const filteredRelations = _.filter(relations, (rel) => {
-        return rel.domain.indexPattern === domainId;
+        return rel.domain.id === domainId;
       });
       return filteredRelations;
     });
@@ -172,7 +172,12 @@ uiModules
         } else if (res.data) {
           const entities = _.reduce(res.data, (total, entity) => {
             entity.id = this._removeNsDecode(entity.id);
-            entity.longDescr = this._removeNsDecode(entity.longDescr);
+            if (entity.longDescription) {
+              entity.longDescription = this._removeNsDecode(entity.longDescription);
+            }
+            if (entity.label) {
+              entity.label = entity.label.substring(0, entity.label.lastIndexOf('@'));
+            }
 
             total.push(entity);
             return total;
@@ -244,14 +249,34 @@ uiModules
 
   /*
    * Inserts an entity into the relational model.
+   * The passed fields must not be already encoded. If this is the case use <insertEncodedEntity> instead.
+   * Supported types: INDEX_PATTERN or VIRTUAL_ENTITY
    */
-  OntologyClient.prototype.insertEntity = function (entity) {
+  OntologyClient.prototype.insertEntity = function (id, label, type, icon, color, shortDescription, longDescription) {
+    const entity = {
+      id: this._encodeUrl(id),
+      label: label,
+      type: type,
+      icon: icon,
+      color: color,
+      shortDescription: shortDescription
+    };
+    if (longDescription) {
+      entity.longDescription = this._encodeUrl(entity.longDescription);
+    }
+    return this.insertEncodedEntity(entity);
+  };
+
+  /*
+   * Inserts an entity into the relational model. This entity object should have the relevant fields already encoded.
+   * Look at the <insertEntity> function to see the fields that need encoding.
+   */
+  OntologyClient.prototype.insertEncodedEntity = function (entity) {
     if (!entity.id) {
       return Promise.reject('Missing entity id');
     } else {
-      const encodedId = this._encodeUrl(entity.id);
       return this._executeSchemaAndClearCache({
-        path: '/schema/entity/' + encodedId,
+        path: '/schema/entity/' + entity.id,
         method: 'POST',
         data: entity
       });
@@ -278,6 +303,10 @@ uiModules
    */
   OntologyClient.prototype.updateEntity = function (entity) {
     const encodedId = this._encodeUrl(entity.id);
+    entity.id = encodedId;
+    if (entity.longDescription) {
+      entity.longDescription = this._encodeUrl(entity.longDescription);
+    }
     return this._executeSchemaAndClearCache({
       path: '/schema/entity/' + encodedId,
       method: 'PUT',
@@ -310,8 +339,8 @@ uiModules
       path: options.path,
       method: options.method
     };
-    if (options.entity) {
-      params.entity = options.enity;
+    if (options.data) {
+      params.data = options.data;
     }
 
     return queryEngineClient.schema(params)

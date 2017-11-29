@@ -1,0 +1,141 @@
+<div
+  data-test-subj="createEidContainer"
+  class="kuiViewContent"
+>
+  <h1
+    class="kuiTitle kuiVerticalRhythm"
+  >
+    Configure an entity identifier
+  </h1>
+
+  <p
+    class="kuiText kuiVerticalRhythm"
+  >
+    Virtual entities are used to identify entities not represented by documents.
+  </p>
+
+  <div class="kuiVerticalRhythm">
+    <!-- Form -->
+    <form
+      name="form"
+      role="form"
+      class="kuiVerticalRhythm"
+      ng-submit="createEntityIdentifier('/management/siren/entities/')"
+    >
+      <!-- entity identifier name -->
+      <div class="kuiVerticalRhythm">
+        <label
+          class="kuiLabel kuiVerticalRhythmSmall"
+        >
+          Entity identifier name
+        </label>
+
+        <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+          <input
+            class="kuiTextInput kuiTextInput--large"
+            data-test-subj="createIndexPatternNameInput"
+            ng-model="formValues.name"
+            ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+            validate-index-name
+            allow-wildcard
+            name="name"
+            required
+            type="text"
+          />
+        </div>
+      </div>
+
+      <!-- Short description input field -->
+      <div class="kuiVerticalRhythm">
+        <label
+          class="kuiLabel kuiVerticalRhythmSmall"
+        >
+          Short Description
+        </label>
+
+        <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+          <input
+            class="kuiTextInput kuiTextInput--large"
+            data-test-subj="createIndexPatternShortDescriptionInput"
+            ng-model="formValues.shortDescription"
+            ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+            name="shortDescription"
+            type="text"
+          />
+        </div>
+      </div>
+
+      <!-- long description input field -->
+      <div class="kuiVerticalRhythm">
+        <label
+          class="kuiLabel kuiVerticalRhythmSmall"
+        >
+          Long Description
+        </label>
+
+        <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+          <textarea
+            class="kuiTextInput kuiTextInput--large"
+            data-test-subj="createIndexPatternLongDescriptionInput"
+            ng-model="formValues.longDescription"
+            ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+            name="longDescription"
+          >
+          </textarea>
+        </div>
+      </div>
+
+      <!-- Icon input field -->
+      <div class="kuiVerticalRhythm">
+        <label
+          class="kuiLabel kuiVerticalRhythmSmall"
+        >
+          Icon
+        </label>
+
+        <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+          <input
+            icon-picker
+            class="kuiTextInput kuiTextInput--large"
+            data-test-subj="createIndexPatternIconInput"
+            ng-model="formValues.icon"
+            ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+            name="icon"
+            type="text"
+          />
+        </div>
+      </div>
+
+      <!-- color input field -->
+      <div class="kuiVerticalRhythm">
+        <label
+          class="kuiLabel kuiVerticalRhythmSmall"
+        >
+          Color
+        </label>
+
+        <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+          <input
+            colorpicker
+            class="kuiTextInput kuiTextInput--large"
+            data-test-subj="createIndexPatternColorInput"
+            ng-model="formValues.color"
+            ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+            name="color"
+            type="text"
+          />
+        </div>
+      </div>
+
+      <!-- Form actions -->
+      <button
+        data-test-subj="createIndexPatternCreateButton"
+        ng-disabled="form.$invalid"
+        class="kuiButton kuiButton--primary kuiVerticalRhythm"
+        type="submit"
+      >
+        Create
+      </button>
+    </form>
+  </div>
+</div>

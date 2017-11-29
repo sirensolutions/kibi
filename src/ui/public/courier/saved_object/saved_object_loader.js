@@ -86,10 +86,10 @@ export class SavedObjectLoader {
   }
 
   // kibi: alias to mapHitSource so we do not have to update all plugins
-  // We would have to rename the methiod in our plugins
+  // We would have to rename the method in our plugins
   // as mapHitSource is public and could be used from outside
   mapHits(hit) {
-    this.mapHitSource(hit);
+    return this.mapHitSource(hit);
   }
   // kibi: end
 
@@ -101,7 +101,7 @@ export class SavedObjectLoader {
    * @returns {source} The modified source object, with an id and url field.
    */
   mapHitSource(hit) {
-    // kibi: changed this methof to take hit instead of source and id
+    // kibi: changed this method to take hit instead of source and id
     const source = hit._source;
     source.id = hit._id;
     source.url = this.urlFor(hit._id);

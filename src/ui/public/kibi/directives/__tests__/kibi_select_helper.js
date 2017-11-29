@@ -26,6 +26,7 @@ describe('Kibi Directives', function () {
         savedQueries = [],
         savedTemplates = [],
         savedDashboards = [],
+        stubRelations = [],
         stubIndexPatterns = false,
         stubConfig = false,
         stubKibiDefaultIndexPattern = false
@@ -88,6 +89,18 @@ describe('Kibi Directives', function () {
               },
               getIds: function () {
                 return Promise.resolve([ 'aaa', 'bbb' ]);
+              }
+            };
+          });
+        });
+      }
+
+      if (stubRelations) {
+        ngMock.module('kibana/ontology_client', function ($provide) {
+          $provide.service('ontologyClient', function (Promise, Private) {
+            return {
+              getRelations: function () {
+                return Promise.resolve(stubRelations);
               }
             };
           });
@@ -716,209 +729,205 @@ describe('Kibi Directives', function () {
           }
         }
       ];
-      const relations = {
-        relationsIndices: [
-          {
-            indices: [
-              {
-                indexPatternId: 'art*',
-                path: 'path-a'
-              },
-              {
-                indexPatternId: 'comp*',
-                path: 'path-c'
-              }
-            ],
-            label: 'label-a-c',
-            id: 'art*//path-a/comp*//path-c'
+      const relations = [
+        {
+          id: 'art*//path-a/comp*//path-c',
+          domain:  {
+            id: 'art*',
+            field: 'path-a'
           },
-          {
-            indices: [
-              {
-                indexPatternId: 'comp*',
-                path: 'path-c'
-              },
-              {
-                indexPatternId: 'invest*',
-                path: 'path-i'
-              }
-            ],
-            label: 'label-c-i',
-            id: 'comp*//path-c/invest*//path-i'
-          },
-          {
-            indices: [
-              {
-                indexPatternId: 'comp*',
-                path: 'path-c1'
-              },
-              {
-                indexPatternId: 'comp*',
-                path: 'path-c2'
-              }
-            ],
-            label: 'label-c-c',
-            id: 'comp*//path-c1/comp*//path-c2'
+          range: {
+            id: 'comp*',
+            field: 'path-c'
           }
-        ]
-      };
-
-      beforeEach(function () {
-        init({
-          savedDashboards: fakeSavedDashboards,
-          savedSearches: fakeSavedSearches,
-          stubConfig: true
-        });
-        config.set('kibi:relations', relations);
-      });
+        },
+        {
+          id: 'comp*//path-c/invest*//path-i',
+          domain:  {
+            id: 'comp*',
+            field: 'path-c'
+          },
+          range: {
+            id: 'invest*',
+            field: 'path-i'
+          }
+        },
+        {
+          id: 'comp*//path-c1/comp*//path-c2',
+          domain:  {
+            id: 'comp*',
+            field: 'path-c1'
+          },
+          range: {
+            id: 'comp*',
+            field: 'path-c2'
+          }
+        }
+      ];
 
       afterEach(() => {
         Notifier.prototype._notifs.length = 0;
       });
 
-      it('should notify if the saved search associated to a dashboard is missing', function () {
-        const expectedDashboards = [
-          {
-            label: 'Articles',
-            value: 'Articles'
-          },
-          {
-            label: 'Companies',
-            value: 'Companies'
-          },
-          {
-            label: 'Companies Timeline',
-            value: 'Companies-Timeline'
-          },
-          {
-            label: 'Investments',
-            value: 'Investments'
-          }
-        ];
-        const options = {
-          otherDashboardId: 'Companies'
-        };
+      describe('with configured relations', function () {
+        beforeEach(function () {
+          init({
+            savedDashboards: fakeSavedDashboards,
+            savedSearches: fakeSavedSearches,
+            stubConfig: true,
+            stubRelations: relations
+          });
+        });
 
-        return kibiSelectHelper.getDashboardsForButton(options)
-        .then(function () {
-          expect(Notifier.prototype._notifs).to.have.length(1);
-          expect(Notifier.prototype._notifs[0].type).to.be('warning');
-          expect(Notifier.prototype._notifs[0].content).to.contain('The dashboard [Test] is associated with an unknown saved search.');
+        it('should notify if the saved search associated to a dashboard is missing', function () {
+          const expectedDashboards = [
+            {
+              label: 'Articles',
+              value: 'Articles'
+            },
+            {
+              label: 'Companies',
+              value: 'Companies'
+            },
+            {
+              label: 'Companies Timeline',
+              value: 'Companies-Timeline'
+            },
+            {
+              label: 'Investments',
+              value: 'Investments'
+            }
+          ];
+          const options = {
+            otherDashboardId: 'Companies'
+          };
+
+          return kibiSelectHelper.getDashboardsForButton(options)
+          .then(function () {
+            expect(Notifier.prototype._notifs).to.have.length(1);
+            expect(Notifier.prototype._notifs[0].type).to.be('warning');
+            expect(Notifier.prototype._notifs[0].content).to.contain('The dashboard [Test] is associated with an unknown saved search.');
+          });
+        });
+
+        it('no options should return all dashboards with savedSearchId set', function () {
+          const expectedDashboards = [
+            {
+              label: 'Articles',
+              value: 'Articles'
+            },
+            {
+              label: 'Companies',
+              value: 'Companies'
+            },
+            {
+              label: 'Companies Timeline',
+              value: 'Companies-Timeline'
+            },
+            {
+              label: 'Investments',
+              value: 'Investments'
+            }
+          ];
+          return kibiSelectHelper.getDashboardsForButton({})
+          .then(function (dashboards) {
+            expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
+          });
+        });
+
+        it('pass only the otherDashboardId and NO indexRelationId should return all dashboards with savedSearchId set', function () {
+          const expectedDashboards = [
+            {
+              label: 'Articles',
+              value: 'Articles'
+            },
+            {
+              label: 'Companies',
+              value: 'Companies'
+            },
+            {
+              label: 'Companies Timeline',
+              value: 'Companies-Timeline'
+            },
+            {
+              label: 'Investments',
+              value: 'Investments'
+            }
+          ];
+          const options = {
+            otherDashboardId: 'Companies'
+          };
+          return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+            expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
+          });
+        });
+
+        it('pass indexRelationId and otherDashboardId in the option should filter the dashboards', function () {
+          const expectedDashboards = [
+            {
+              label: 'Articles',
+              value: 'Articles'
+            }
+          ];
+          const options = {
+            otherDashboardId: 'Companies',
+            indexRelationId: 'art*//path-a/comp*//path-c'
+          };
+          return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+            expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
+          });
+        });
+
+        it('pass self join indexRelationId and otherDashboardId in the option should filter the dashboards', function () {
+          const expectedDashboards = [
+            {
+              label: 'Companies',
+              value: 'Companies'
+            },
+            {
+              label: 'Companies Timeline',
+              value: 'Companies-Timeline'
+            }
+          ];
+          const options = {
+            otherDashboardId: 'Companies',
+            indexRelationId: 'comp*//path-c1/comp*//path-c2'
+          };
+          return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+            expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
+          });
         });
       });
 
-      it('should not propose any dashboard if the relation does not exist', function () {
-        const options = {
-          indexRelationId: 'art*//path-a/comp*//path-c'
-        };
-
-        config.set('kibi:relations', {
-          relationsIndices: []
+      describe('with no relations available', function () {
+        beforeEach(function () {
+          init({
+            savedDashboards: fakeSavedDashboards,
+            savedSearches: fakeSavedSearches,
+            stubConfig: true,
+            stubRelations: []
+          });
         });
-        return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          expect(dashboards).to.have.length(0);
-        });
-      });
 
-      it('should not propose any dashboard if the relation does not exist even if the paired dashboard is set', function () {
-        const options = {
-          indexRelationId: 'art*//path-a/comp*//path-c',
-          otherDashboardId: 'Companies'
-        };
+        it('should not propose any dashboard if the relation does not exist', function () {
+          const options = {
+            indexRelationId: 'art*//path-a/comp*//path-c'
+          };
 
-        config.set('kibi:relations', {
-          relationsIndices: []
+          return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+            expect(dashboards).to.have.length(0);
+          });
         });
-        return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          expect(dashboards).to.have.length(0);
-        });
-      });
 
-      it('no options should return all dashboards with savedSearchId set', function () {
-        const expectedDashboards = [
-          {
-            label: 'Articles',
-            value: 'Articles'
-          },
-          {
-            label: 'Companies',
-            value: 'Companies'
-          },
-          {
-            label: 'Companies Timeline',
-            value: 'Companies-Timeline'
-          },
-          {
-            label: 'Investments',
-            value: 'Investments'
-          }
-        ];
-        return kibiSelectHelper.getDashboardsForButton({})
-        .then(function (dashboards) {
-          expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
-        });
-      });
+        it('should not propose any dashboard if the relation does not exist even if the paired dashboard is set', function () {
+          const options = {
+            indexRelationId: 'art*//path-a/comp*//path-c',
+            otherDashboardId: 'Companies'
+          };
 
-      it('pass only the otherDashboardId and NO indexRelationId should return all dashboards with savedSearchId set', function () {
-        const expectedDashboards = [
-          {
-            label: 'Articles',
-            value: 'Articles'
-          },
-          {
-            label: 'Companies',
-            value: 'Companies'
-          },
-          {
-            label: 'Companies Timeline',
-            value: 'Companies-Timeline'
-          },
-          {
-            label: 'Investments',
-            value: 'Investments'
-          }
-        ];
-        const options = {
-          otherDashboardId: 'Companies'
-        };
-        return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
-        });
-      });
-
-      it('pass indexRelationId and otherDashboardId in the option should filter the dashboards', function () {
-        const expectedDashboards = [
-          {
-            label: 'Articles',
-            value: 'Articles'
-          }
-        ];
-        const options = {
-          otherDashboardId: 'Companies',
-          indexRelationId: 'art*//path-a/comp*//path-c'
-        };
-        return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
-        });
-      });
-
-      it('pass self join indexRelationId and otherDashboardId in the option should filter the dashboards', function () {
-        const expectedDashboards = [
-          {
-            label: 'Companies',
-            value: 'Companies'
-          },
-          {
-            label: 'Companies Timeline',
-            value: 'Companies-Timeline'
-          }
-        ];
-        const options = {
-          otherDashboardId: 'Companies',
-          indexRelationId: 'comp*//path-c1/comp*//path-c2'
-        };
-        return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
+          return kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+            expect(dashboards).to.have.length(0);
+          });
         });
       });
     });

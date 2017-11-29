@@ -1,20 +1,23 @@
 import _ from 'lodash';
 
 export default function joinFields(relations, indexPatternId, fieldName) {
-  return _(relations).map(function (relation) {
-    const indices = relation.indices;
-
-    if (indices[0].indexPatternId === indexPatternId && indices[0].path === fieldName) {
+  const joinFields = _(relations).map(function (relation) {
+    if (relation.domain.id === indexPatternId && relation.domain.field === fieldName) {
       return {
-        indexPatternId: indices[1].indexPatternId,
-        path: indices[1].path
+        indexPatternId: relation.range.id,
+        path: relation.range.field
       };
     }
-    if (indices[1].indexPatternId === indexPatternId && indices[1].path === fieldName) {
+    if (relation.range.id === indexPatternId && relation.range.field === fieldName) {
       return {
-        indexPatternId: indices[0].indexPatternId,
-        path: indices[0].path
+        indexPatternId: relation.domain.id,
+        path: relation.domain.field
       };
     }
   }).compact().value();
+
+  // Dedupe the values, as there are 2 directed relations per field.
+  return _.uniq(joinFields, (value) => {
+    return JSON.stringify(value);
+  });
 };

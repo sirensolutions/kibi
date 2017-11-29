@@ -12,7 +12,7 @@ import joinFields from 'plugins/kibi_core/management/sections/indices/join_field
 // kibi: end
 
 uiModules.get('apps/management')
-.directive('indexedFieldsTable', function (config, Private, $filter) {
+.directive('indexedFieldsTable', function (Private, $filter, ontologyClient) {
   const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
   const noTemplate = '';
   const filter = $filter('filter');
@@ -48,53 +48,55 @@ uiModules.get('apps/management')
         const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters);
         _.find($scope.editSections, { index: 'indexedFields' }).count = fields.length; // Update the tab count
 
-        // kibi: get 'relations' from config
-        const relations = config.get('kibi:relations');
-        $scope.rows = fields.map(function (field) {
-          const childScope = _.assign($scope.$new(), {
-            field: field,
-            // kibi: add information about joined fields
-            join: joinFields(relations.relationsIndices, $scope.indexPattern.id, field.name)
+        // kibi: get 'relations' from ontology
+        ontologyClient.getRelations('kibi:relations')
+        .then((relations) => {
+          $scope.rows = fields.map(function (field) {
+            const childScope = _.assign($scope.$new(), {
+              field: field,
+              // kibi: add information about joined fields
+              join: joinFields(relations, $scope.indexPattern.id, field.name)
+            });
+            rowScopes.push(childScope);
+
+            const excluded = fieldWildcardMatch(field.name);
+
+            return [
+              {
+                markup: fieldNameHtml,
+                scope: childScope,
+                value: field.displayName,
+                attr: {
+                  'data-test-subj': 'indexedFieldName'
+                }
+              },
+              {
+                markup: fieldTypeHtml,
+                scope: childScope,
+                value: field.type,
+                attr: {
+                  'data-test-subj': 'indexedFieldType'
+                }
+              },
+              _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
+              {
+                markup: field.searchable ? yesTemplate : noTemplate,
+                value: field.searchable
+              },
+              {
+                markup: field.aggregatable ? yesTemplate : noTemplate,
+                value: field.aggregatable
+              },
+              {
+                markup: excluded ? yesTemplate : noTemplate,
+                value: excluded
+              },
+              {
+                markup: fieldControlsHtml,
+                scope: childScope
+              }
+            ];
           });
-          rowScopes.push(childScope);
-
-          const excluded = fieldWildcardMatch(field.name);
-
-          return [
-            {
-              markup: fieldNameHtml,
-              scope: childScope,
-              value: field.displayName,
-              attr: {
-                'data-test-subj': 'indexedFieldName'
-              }
-            },
-            {
-              markup: fieldTypeHtml,
-              scope: childScope,
-              value: field.type,
-              attr: {
-                'data-test-subj': 'indexedFieldType'
-              }
-            },
-            _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
-            {
-              markup: field.searchable ? yesTemplate : noTemplate,
-              value: field.searchable
-            },
-            {
-              markup: field.aggregatable ? yesTemplate : noTemplate,
-              value: field.aggregatable
-            },
-            {
-              markup: excluded ? yesTemplate : noTemplate,
-              value: excluded
-            },
-            {
-              markup: fieldControlsHtml,
-              scope: childScope
-            }
-          ];
         });
       }
     }

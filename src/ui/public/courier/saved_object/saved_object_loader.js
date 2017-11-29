@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import chrome from 'ui/chrome';
 import { Scanner } from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
-//import { SavedObjectsClient } from 'ui/saved_objects'; // kibi: commented
+import { SavedObjectsClient } from 'ui/saved_objects';
 
 // kibi: imports
 import { jdbcDatasourceTranslate } from 'plugins/kibi_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
@@ -10,7 +11,7 @@ import { jdbcDatasourceTranslate } from 'plugins/kibi_core/management/sections/k
 export class SavedObjectLoader {
   constructor(
     SavedObjectClass, kbnIndex, esAdmin, kbnUrl,
-    { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit, exclude, jdbcDatasources } = {}
+    { savedObjectsAPI, $http, caching: { cache, find, get } = {}, mapHit, exclude, jdbcDatasources } = {},
   ) {
     // kibi: kibi properties
     this.savedObjectsAPI = savedObjectsAPI;
@@ -29,11 +30,7 @@ export class SavedObjectLoader {
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
 
-    let scannerClient = esAdmin;
-    if (this.savedObjectsAPI) {
-      scannerClient = savedObjectsAPI;
-    }
-    this.scanner = new Scanner(scannerClient, {
+    this.scanner = new Scanner(esAdmin, {
       index: kbnIndex,
       type: this.lowercaseType
     });
@@ -44,7 +41,7 @@ export class SavedObjectLoader {
       nouns: `${ this.lowercaseType }s`,
     };
 
-    //this.savedObjectsClient = new SavedObjectsClient($http); // kibi: we do not use it for the moment
+    this.savedObjectsClient = new SavedObjectsClient($http, chrome.getBasePath(), Promise, this.savedObjectsAPI, kbnIndex);
   }
 
   /**
@@ -166,17 +163,16 @@ export class SavedObjectLoader {
       });
     };
 
-    return this.savedObjectsAPI.search({
-      index: this.kbnIndex,
+    return this.savedObjectsClient.find({
       type: this.lowercaseType,
-      q: safeQuery || searchString,
-      exclude: this.exclude,
-      size
+      search: safeQuery || searchString,
+      perPage: size,
+      exclude: this.exclude
     })
     .then((resp) => {
       const result = {
         total: resp.hits.total,
-        hits: resp.hits.hits.map((hit) => this.mapSavedObjectApiHits(hit))
+        hits: resp.hits.hits.map((hit) => this.mapHits(hit))
       };
 
       if (this.type === 'datasource') {

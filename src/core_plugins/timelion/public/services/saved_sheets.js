@@ -17,7 +17,7 @@ define(function (require) {
 
   // This is the only thing that gets injected into controllers
   module.service('savedSheets', function (SavedSheet, kbnIndex, esAdmin, kbnUrl,
-                                          savedObjectsAPI, savedObjectsAPITypes, Private) {
+                                          savedObjectsAPI, savedObjectsAPITypes, Private, $http) {
     // kibi: timelion-sheet is saved through the savedObjectsAPI
     savedObjectsAPITypes.add('timelion-sheet');
 
@@ -27,7 +27,8 @@ define(function (require) {
         get: true,
         cache: Private(CacheProvider)
       },
-      savedObjectsAPI
+      savedObjectsAPI,
+      $http
     };
     const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, esAdmin, kbnUrl, options);
     savedSheetLoader.urlFor = function (id) {

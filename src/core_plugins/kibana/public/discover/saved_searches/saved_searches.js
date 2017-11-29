@@ -20,14 +20,15 @@ savedObjectManagementRegistry.register({
 });
 
 // kibi: Private and savedObjectsAPI is added
-module.service('savedSearches', function (kbnIndex, esAdmin, SavedSearch, kbnUrl, Private, savedObjectsAPI) {
+module.service('savedSearches', function (kbnIndex, esAdmin, SavedSearch, kbnUrl, Private, savedObjectsAPI, $http) {
   const options = {
     caching: {
       find: true,
       get: true,
       cache: Private(CacheProvider)
     },
-    savedObjectsAPI
+    savedObjectsAPI,
+    $http
   };
   const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnIndex, esAdmin, kbnUrl, options);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .

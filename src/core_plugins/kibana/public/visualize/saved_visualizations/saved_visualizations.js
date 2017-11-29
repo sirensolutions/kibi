@@ -22,7 +22,7 @@ app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVi
   });
 
   // kibi: 'savedObjectsAPI' is added
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI });
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI, $http });
   saveVisualizationLoader.mapHits = function (hit) {
     const source = hit._source;
     source.id = hit._id;
@@ -35,8 +35,8 @@ app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVi
     }
 
     if (!typeName || !visTypes.byName[typeName]) {
-      if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', source);
-      else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', source);
+      if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
+      else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
       return kbnUrl.redirect('/management/siren/objects/savedVisualizations/{{id}}', { id: source.id });
     }
 

@@ -17,14 +17,15 @@ savedObjectManagementRegistry.register({
 // This is the only thing that gets injected into controllers
 uiModules
 .get('queries_editor/services/saved_queries')
-.service('savedQueries', function (savedObjectsAPI, Private, SavedQuery, kbnIndex, esAdmin, kbnUrl) {
+.service('savedQueries', function (savedObjectsAPI, Private, SavedQuery, kbnIndex, esAdmin, kbnUrl, $http) {
   const options = {
     caching: {
       find: true,
       get: true,
       cache: Private(CacheProvider)
     },
-    savedObjectsAPI
+    savedObjectsAPI,
+    $http
   };
   const savedQueryLoader = new SavedObjectLoader(SavedQuery, kbnIndex, esAdmin, kbnUrl, options);
 

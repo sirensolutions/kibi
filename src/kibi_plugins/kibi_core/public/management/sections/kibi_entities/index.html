@@ -55,6 +55,7 @@
 
           <kbn-management-index-header
             ng-if="state.tab === 'entityRelations'"
+            set-default="setDefaultPattern()"
             entity="indexPattern"
             save="saveRelations()"
             delete="removeEntity()"
@@ -62,6 +63,7 @@
 
           <kbn-management-index-header
             ng-if="state.tab === 'indexOptions'"
+            set-default="setDefaultPattern()"
             entity="indexPattern"
             save="saveEntityOptions()"
             delete="removeEntity()"

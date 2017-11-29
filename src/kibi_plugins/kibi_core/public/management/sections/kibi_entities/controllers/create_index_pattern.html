@@ -45,7 +45,7 @@
             name="name"
             required
             type="text"
-          >
+          />
         </div>
 
         <!-- Input error text -->
@@ -92,8 +92,7 @@
             ng-show="controller.formValues.nameInterval.name == 'weeks'"
           >
             <strong>Note:</strong>&nbsp;
-            <span>I noticed you are using weekly indices. Kibana requires ISO weeks be used in your index creation.</span>
-            <span>See</span>
+            <span>I noticed you are using weekly indices. Kibana requires ISO weeks be used in your index creation.See</span>
             <a
               class="kuiLink"
               href="https://en.wikipedia.org/wiki/ISO_week_date"
@@ -121,7 +120,7 @@
             allow-wildcard
             name="id"
             type="text"
-          >
+          />
         </div>
 
         <!-- ID help text -->
@@ -167,7 +166,7 @@
             type="checkbox"
             data-test-subj="createIndexPatternEnableExpand"
             ng-model="controller.formValues.expandWildcard"
-          >
+          />
           <span class="kuiCheckBoxLabel__text">
             <span>Expand index pattern when searching</span>
             <span>[DEPRECATED]</span>
@@ -206,7 +205,7 @@
             type="checkbox"
             data-test-subj="createIndexPatternNameIsPatternCheckBox"
             ng-model="controller.formValues.nameIsPattern"
-          >
+          />
 
           <span class="kuiCheckBoxLabel__text">
             Use event times to create index names
@@ -270,7 +269,7 @@
             ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
             name="shortDescription"
             type="text"
-          >
+          />
         </div>
       </div>
 
@@ -311,7 +310,7 @@
             ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
             name="icon"
             type="text"
-          >
+          />
         </div>
       </div>
 

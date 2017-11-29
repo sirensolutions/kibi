@@ -14,13 +14,6 @@ import './create_eid';
 import 'angular-ui-tree';
 
 uiRoutes
-.when('/management/siren/entities', {
-  template,
-  reloadOnSearch: false,
-  resolve: {}
-});
-
-uiRoutes
 .when('/management/siren/entities/:entityId', {
   template: template,
   resolve: {
@@ -56,6 +49,8 @@ uiRoutes
 
 uiRoutes
 .when('/management/siren/entities', {
+  template,
+  reloadOnSearch: false,
   resolve: {
     redirect: function ($location, config, kibiDefaultIndexPattern) {
       // kibi: use our service to get default indexPattern

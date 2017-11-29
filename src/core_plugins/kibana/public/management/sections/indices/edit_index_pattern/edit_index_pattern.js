@@ -86,15 +86,6 @@ uiModules.get('apps/management')
     );
   };
 
-  // kibi: added function to remove an entity
-  $scope.removeEntity = function () {
-    if ($route.current.locals.selectedEntity.type === 'INDEX_PATTERN') {
-      $scope.removePattern();
-    } else {
-      $scope.removeEid();
-    }
-  };
-
   $scope.removePattern = function () {
     function doRemove() {
       // kibi: here is fine to use config.get('defaultIndex')
@@ -126,6 +117,15 @@ uiModules.get('apps/management')
       onConfirm: doRemove
     };
     confirmModal('Are you sure you want to remove this index pattern?', confirmModalOptions);
+  };
+
+  // kibi: added function to remove an entity
+  $scope.removeEntity = function () {
+    if ($route.current.locals.selectedEntity.type === 'INDEX_PATTERN') {
+      $scope.removePattern();
+    } else {
+      $scope.removeEid();
+    }
   };
 
   // kibi: added method to remove an entity identifier.

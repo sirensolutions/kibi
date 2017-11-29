@@ -15,6 +15,11 @@ much more.
 * Reinstall plugins
 * Start or restart Kibi
 
+## Releases 
+
+Starting from Kibi version 5.4.3, all releases are done as part of Siren Platform, 
+and can be downloaded from [https://support.siren.io](https://support.siren.io)
+
 ## Quick start
 
 * Download the Kibi demo distribution: [http://siren.solutions/kibi](http://siren.solutions/kibi)

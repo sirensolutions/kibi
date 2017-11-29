@@ -55,7 +55,7 @@
             </span>
             </span>
             <!--filters indicator-->
-            <span ng-if="group.selected.filterIconMessage" aria-hidden="true">
+            <span ng-if="group.selected.filterIconMessage && group.selected.dirty" aria-hidden="true">
               <i class="fa fa-filter"
                  ng-mouseenter="refreshFilterTooltip($event, group)"
                  ng-mouseleave="hideFilterTooltip()"/>
@@ -104,7 +104,7 @@
                 </div>
               </span>
               <!--filters indicator-->
-              <span ng-if="dashboard.filterIconMessage" aria-hidden="true">
+              <span ng-if="dashboard.filterIconMessage && dashboard.dirty" aria-hidden="true">
                  <i class="fa fa-filter"
                    ng-mouseenter="refreshFilterTooltip($event, $index, true)"
                    ng-mouseleave="hideFilterTooltip()"/>

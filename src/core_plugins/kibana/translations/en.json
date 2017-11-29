@@ -1,19 +1,4 @@
 {
   "UI-WELCOME_MESSAGE": "Loading Kibi",
-  "UI-WELCOME_ERROR": "Kibi did not load properly. Check the server output for more information.",
-
-  "KIBI-CONFIGURE_VIRTUAL_ENTITY": "Configure an entity identifier",
-  "KIBI-SUB_CONFIGURE_VIRTUAL_ENTITY": "Virtual entities are used to identify entities not represented by documents.",
-  "KIBI-ENTITY_IDENTIFIER": "Entity identifier name",
-  "KIBI-INDEX_NAME_OR_PATTERN_SHORT_DESCRIPTION": "Short Description",
-  "KIBI-INDEX_NAME_OR_PATTERN_LONG_DESCRIPTION": "Long Description",
-  "KIBI-INDEX_NAME_OR_PATTERN_ICON": "Icon",
-  "KIBI-INDEX_NAME_OR_PATTERN_COLOR": "Color",
-  "KIBI-VIRTUAL_INDEX_PATTERN_CREATE_BUTTON": "Add Virtual Index Pattern",
-  "KIBI-VIRTUAL_INDEX_PATTERN_RESOURCE": "Resource name (table name)",
-  "KIBI-VIRTUAL_INDEX_PATTERN_RESOURCE_PRIMARY_KEY": "Primary key (primary key for the table)",
-  "KIBI-VIRTUAL_INDEX_PATTERN_NAME": "Index pattern name",
-  "KIBI-VIRTUAL_INDEX_LIST_OF_INDICES": "List of virtual indices",
-  "KIBI-VIRTUAL_INDEX_PATTERN_ADD_NEW": "Add new virtual index",
-  "KIBI-JDBC_DATASOURCE": "Jdbc datasource name"
+  "UI-WELCOME_ERROR": "Kibi did not load properly. Check the server output for more information."
 }

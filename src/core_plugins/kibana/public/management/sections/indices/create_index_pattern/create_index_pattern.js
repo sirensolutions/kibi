@@ -283,6 +283,7 @@ uiModules.get('apps/management')
       timeFieldOption,
       nameIsPattern,
       nameInterval,
+      // kibi: added following new properties
       shortDescription,
       longDescription,
       icon,

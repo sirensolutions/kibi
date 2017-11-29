@@ -14,6 +14,8 @@ import { uiModules } from 'ui/modules';
 import { IndexPatternAuthorizationError } from 'ui/errors';
 // kibi: end
 
+// kibi: removed routes. They're replaced by the ones in
+// src/kibi_plugins/kibi_core/public/management/sections/kibi_entities/controllers/entities.js
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
     $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal, ontologyClient, kbnUrl) {
@@ -84,6 +86,7 @@ uiModules.get('apps/management')
     );
   };
 
+  // kibi: added function to remove an entity
   $scope.removeEntity = function () {
     if ($route.current.locals.selectedEntity.type === 'INDEX_PATTERN') {
       $scope.removePattern();
@@ -114,7 +117,7 @@ uiModules.get('apps/management')
           return ontologyClient.deleteEntity(indexPatternObj.id)
           .then(kbnUrl.change('/management/siren/entities'));
         })
-        .catch(notify.fatal);
+        .catch(notify.error);
       });
     }
 
@@ -125,6 +128,7 @@ uiModules.get('apps/management')
     confirmModal('Are you sure you want to remove this index pattern?', confirmModalOptions);
   };
 
+  // kibi: added method to remove an entity identifier.
   $scope.removeEid = function () {
     function doRemove() {
       return ontologyClient.deleteEntity($route.current.locals.selectedEntity.id)

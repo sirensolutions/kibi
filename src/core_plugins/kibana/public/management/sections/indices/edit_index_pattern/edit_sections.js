@@ -4,6 +4,7 @@ export function IndicesEditSectionsProvider() {
 
   return function (entity) {
     let fieldCount = {};
+    // Kibi: different sections depending on the entity type
     if (entity.type === 'INDEX_PATTERN') {
       fieldCount = _.countBy(entity.fields, function (field) {
         return (field.scripted) ? 'scripted' : 'indexed';
@@ -42,7 +43,7 @@ export function IndicesEditSectionsProvider() {
         }
       ];
     } else {
-      // Eid
+      // kibi: added sections for entiy identifier
       _.defaults(fieldCount, {
         relations: 0
       });

@@ -60,7 +60,7 @@ uiModules.get('apps/management')
   };
 });
 
-// We hide this section as it is replaced by the new Entities one.
+// kibi: We hide this section as it is replaced by the new Entities one.
 // kibi: url is changed to '#/management/siren/indices/'
 // management.getSection('kibana').register('indices', {
 //   display: 'Index Patterns',

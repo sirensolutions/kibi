@@ -11,7 +11,7 @@ uiModules
       setDefault: '&',
       refreshFields: '&',
       delete: '&',
-      // kibi: changed indexpattern to entity and added save function
+      // kibi: indexPattern property replaced by entity, added save function
       entity: '=',
       save: '&'
     },

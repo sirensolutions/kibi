@@ -107,7 +107,7 @@ describe('Kibi Directives', function () {
                   return Promise.resolve(stubRelations);
                 }
               }
-            }
+            };
           });
         });
       }

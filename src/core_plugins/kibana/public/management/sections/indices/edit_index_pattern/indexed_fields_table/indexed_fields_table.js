@@ -57,8 +57,6 @@ uiModules.get('apps/management')
               // kibi: add information about joined fields
               join: joinFields(relations, $scope.indexPattern.id, field.name)
             });
-            console.log('join fields');
-            console.log(childScope.join);
             rowScopes.push(childScope);
 
             const excluded = fieldWildcardMatch(field.name);

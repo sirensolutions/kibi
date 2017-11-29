@@ -20,6 +20,10 @@ src/fixtures/stubbed_search_source.js
 
 src/optimize/BaseOptimizer.js
 
+src/core_plugins/kibana/public/dashboard/dashboard.html
+src/core_plugins/kibana/public/discover/index.html
+src/core_plugins/kibana/public/visualize/editor/editor.html
+
 src/plugins/elasticsearch/index.js
 src/plugins/elasticsearch/lib/__tests__/health_check.js
 src/plugins/elasticsearch/lib/__tests__/is_upgradeable.js
@@ -189,7 +193,13 @@ src/ui/public/timepicker/toggle.html
 src/ui/public/tooltip/tooltip.js
 
 src/ui/public/typeahead/_input.js
+src/ui/public/typeahead/_items.js
++src/ui/public/typeahead/_items_list.js
++src/ui/public/typeahead/_tabs.js
++src/ui/public/typeahead/partials/typeahead-items-list.html
+src/ui/public/typeahead/partials/typeahead-items.html
 src/ui/public/typeahead/typeahead.js
+src/ui/public/typeahead/typeahead.less
 
 src/ui/public/utils/__tests__/datemath.js
 src/ui/public/utils/dateMath.js

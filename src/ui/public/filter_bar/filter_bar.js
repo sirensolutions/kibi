@@ -81,11 +81,13 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
         }
       };
 
-      $scope.addFilter = () => {
+      // kibi: added newFilter parameter to spawn a filter editor with given data
+      $scope.addFilter = (newFilter = true) => {
         $scope.editingFilter = {
-          meta: { isNew: true }
+          meta: { isNew: newFilter }
         };
       };
+      // kibi: end
 
       $scope.deleteFilter = (filter) => {
         $scope.removeFilter(filter);
@@ -120,6 +122,9 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
       $scope.$watch(getAppState, function (appState) {
         $scope.state = appState;
       });
+
+      // kibi: Added custom event to open a new filter with given filter data
+      $scope.$on('NewFilterEditor', (e, filter) => $scope.addFilter(filter));
 
       /**
        * kibi: replace '$COUNT' to '...' in filters

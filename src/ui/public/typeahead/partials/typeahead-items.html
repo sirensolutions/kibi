@@ -1,17 +1,37 @@
 <div
-  ng-show="typeahead.isVisible()"
+  ng-show="typeahead.trackVisibility()"
   ng-mouseenter="typeahead.setMouseover(true);"
   ng-mouseleave="typeahead.setMouseover(false);"
   class="typeahead-items"
   >
 
   <div
-    ng-repeat="item in typeahead.getItems()"
-    ng-class="{active: item === typeahead.active}"
-    ng-click="typeahead.selectItem(item, $event);"
-    ng-mouseenter="typeahead.activateItem(item);"
-    class="typeahead-item"
+    ng-show="typeahead.tabs.length > 1"
+    ng-repeat="tab in typeahead.tabs"
+    ng-class="{active: typeahead.tabName === tab.name}"
+    ng-mousedown="$event.preventDefault()"
+    ng-click="typeahead.setTabName(tab.name)"
+    class="typeahead-tab"
     >
-    {{item}}
+    <i
+      ng-if="tab.iconClass"
+      class="fa {{tab.iconClass}}"
+    ></i>
+    {{tab.text}}&nbsp;({{tab.items.length}})
+  </div>
+
+  <div class="typeahead-history-tab typeahead-tab-content"
+    ng-if="typeahead.tabName === 'history'"
+    >
+    <kbn-typeahead-items-list items="typeahead.tab.items" />
+  </div>
+
+  <div class="typeahead-filter-tab typeahead-tab-content"
+    ng-if="typeahead.tabName === 'filter'"
+    >
+    <div ng-repeat="idxPattern in typeahead.tab.indexPatterns">
+      <div class="typeahead-filter-index-name">{{idxPattern.title}}</div>
+      <kbn-typeahead-items-list items="idxPattern.fields" />
+    </div>
   </div>
 </div>

@@ -57,7 +57,8 @@
         name="queryInput"
         ng-submit="filterResults()"
       >
-        <div class="typeahead" kbn-typeahead="dashboard" on-select="filterResults()">
+        <div class="typeahead" kbn-typeahead="dashboard" on-select="filterResults()"
+          index-patterns="indexPatterns">
           <div class="kuiLocalSearch">
             <div class="kuiLocalSearchAssistedInput">
               <input

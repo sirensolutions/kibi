@@ -2,6 +2,8 @@ import _ from 'lodash';
 import 'ui/typeahead/typeahead.less';
 import 'ui/typeahead/_input';
 import 'ui/typeahead/_items';
+import 'ui/typeahead/_items_list';
+import { tabsFactory } from 'ui/typeahead/_tabs';
 import { uiModules } from 'ui/modules';
 const typeahead = uiModules.get('kibana/typeahead');
 
@@ -19,16 +21,32 @@ typeahead.directive('kbnTypeahead', function () {
     restrict: 'A',
     scope: {
       historyKey: '@kbnTypeahead',
-      onSelect: '&'
+      onSelect: '&',
+
+      // kibi: Index patterns passed in for field filters typeahead
+      indexPatterns: '=',
     },
     controllerAs: 'typeahead',
 
-    controller: function ($scope, PersistedLog, config) {
+    controller: function ($scope, PersistedLog, config, $element, $rootScope, $sce) {
       const self = this;
       self.query = '';
       self.hidden = true;
       self.focused = false;
       self.mousedOver = false;
+
+      // kibi: More state vars
+      const tabs = tabsFactory(self, { $rootScope, $sce });
+
+      self.scope = $scope;
+
+      self.tabs = null;
+      self.tabName = '';
+      self.tab = null;
+
+      self.lastVisible = false;
+      self.explicit = false;
+      // kibi: end
 
       // instantiate history and add items to the scope
       self.history = new PersistedLog('typeahead:' + $scope.historyKey, {
@@ -36,8 +54,8 @@ typeahead.directive('kbnTypeahead', function () {
         filterDuplicates: true
       });
 
-      $scope.items = self.history.get();
-      $scope.filteredItems = [];
+      // kibi: Removed cached history (already cached) and made filtered items
+      //       tab-specific
 
       self.setInputModel = function (model) {
         $scope.inputModel = model;
@@ -48,6 +66,9 @@ typeahead.directive('kbnTypeahead', function () {
 
       self.setHidden = function (hidden) {
         self.hidden = !!(hidden);
+
+        // kibi: Disable explicit mode on hide
+        self.explicit = !self.hidden && self.explicit;
       };
 
       self.setFocused = function (focused) {
@@ -60,7 +81,8 @@ typeahead.directive('kbnTypeahead', function () {
 
       // activation methods
       self.activateItem = function (item) {
-        self.active = item;
+        // kibi: Items are objects that include html + text now
+        self.active = item.text;
       };
 
       self.getActiveIndex = function () {
@@ -68,22 +90,29 @@ typeahead.directive('kbnTypeahead', function () {
           return;
         }
 
-        return $scope.filteredItems.indexOf(self.active);
+        // kibi: Items are object with text compoment
+        return self.tab.items.findIndex(item => item.text === self.active);
       };
 
       self.getItems = function () {
-        return $scope.filteredItems;
+        // kibi: Items are tab-specific
+        return self.tab.items;
       };
 
       self.activateNext = function () {
+        // kibi: filtered items located in each tab
         let index = self.getActiveIndex();
         if (index == null) {
           index = 0;
-        } else if (index < $scope.filteredItems.length - 1) {
+        } else if (index < self.tab.items.length - 1) {
           ++index;
         }
 
-        self.activateItem($scope.filteredItems[index]);
+        self.activateItem(self.tab.items[index]);
+        // kibi: end
+
+        // kibi: Included scrollbar for long item lists, so scroll to item if required
+        self.scrollActiveIntoView();
       };
 
       self.activatePrev = function () {
@@ -96,7 +125,9 @@ typeahead.directive('kbnTypeahead', function () {
           return;
         }
 
-        self.activateItem($scope.filteredItems[index]);
+        // kibi: filtered items located in each tab + scroll to item if necessary
+        self.activateItem(self.tab.items[index]);
+        self.scrollActiveIntoView();
       };
 
       self.isActive = function (item) {
@@ -104,51 +135,71 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       // selection methods
-      self.selectItem = function (item, ev) {
-        self.hidden = true;
-        self.active = false;
-        $scope.inputModel.$setViewValue(item);
+
+      // kibi: Delegated the effect of item selection to tabs, added callbacks
+      //       for tabs to invoke as they see fit
+      self.applyText = function (text) {
+        $scope.inputModel.$setViewValue(text);
         $scope.inputModel.$render();
+
+        self.active = false;
+        self.setHidden(true);
+      };
+
+      self.applyQueryFilter = function (text, ev) {
+        self.applyText(text);
         self.persistEntry();
 
         if (ev && ev.type === 'click') {
           $scope.onSelect();
         }
       };
+      // kibi: end
 
       self.persistEntry = function () {
         if ($scope.inputModel.$viewValue.length) {
           // push selection into the history
-          $scope.items = self.history.add($scope.inputModel.$viewValue);
+          // kibi: removed duplicated history cache
+          self.history.add($scope.inputModel.$viewValue);
         }
       };
 
-      self.selectActive = function () {
-        if (self.active) {
-          self.selectItem(self.active);
-        }
-      };
+      // kibi: Removed selectActive(), not needed
 
       self.keypressHandler = function (ev) {
         const keyCode = ev.which || ev.keyCode;
 
+        // kibi: Using setHidden() to change self.hidden
         if (self.focused) {
-          self.hidden = false;
+          self.setHidden(false);
         }
 
         // hide on escape
         if (_.contains([keyMap.ESC], keyCode)) {
-          self.hidden = true;
-          self.active = false;
+          self.setHidden(true);
         }
+        // kibi: end
+
+        // kibi: Using TAB/Shift+TAB to change tab
+        if (_.contains([keyMap.TAB] && ev.shiftKey, keyCode)) {
+          ev.preventDefault();
+          self.changeTab(-1);
+        }
+        if (_.contains([keyMap.TAB], keyCode)) {
+          ev.preventDefault();
+          self.changeTab(+1);
+        }
+        // kibi: end
 
         // change selection with arrow up/down
         // on down key, attempt to load all items if none are loaded
-        if (_.contains([keyMap.DOWN], keyCode) && $scope.filteredItems.length === 0) {
-          $scope.filteredItems = $scope.items;
+        if (_.contains([keyMap.DOWN], keyCode) && !self.isVisible()) {
+          // kibi: Made this 'explicit' mode
+          self.explicit = true;
           $scope.$digest();
         } else if (_.contains([keyMap.UP, keyMap.DOWN], keyCode)) {
-          if (self.isVisible() && $scope.filteredItems.length) {
+          // kibi: Filtered items moved to tabs
+          if (self.isVisible() && self.tab.items.length) {
             ev.preventDefault();
 
             if (keyCode === keyMap.DOWN) {
@@ -159,63 +210,102 @@ typeahead.directive('kbnTypeahead', function () {
           }
         }
 
-        // persist selection on enter, when not selecting from the list
+        // kibi: Selection and eventual persistence is delegated to tabs
+
+        // select on enter
         if (_.contains([keyMap.ENTER], keyCode)) {
-          if (!self.active) {
-            self.persistEntry();
-          }
+          self.tab.selectItem(self.active || self.query, ev);
         }
-
-        // select on enter or tab
-        if (_.contains([keyMap.ENTER, keyMap.TAB], keyCode)) {
-          self.selectActive();
-          self.hidden = true;
-        }
+        // kibi: end
       };
 
-      self.filterItemsByQuery = function (query) {
-        // cache query so we can call it again if needed
-        if (query) {
-          self.query = query;
-        }
-
-        // if the query is empty, clear the list items
-        if (!self.query.length) {
-          $scope.filteredItems = [];
-          return;
-        }
-
-        // update the filteredItems using the query
-        const beginningMatches = $scope.items.filter(function (item) {
-          return item.indexOf(query) === 0;
-        });
-
-        const otherMatches = $scope.items.filter(function (item) {
-          return item.indexOf(query) > 0;
-        });
-
-        $scope.filteredItems = beginningMatches.concat(otherMatches);
+      // kibi: Items filtering is delegated to tabs
+      self.filterItemsByQuery = function (query = self.query) {
+        self.query = query;
+        self.tabs.forEach(tab => tab.filterItemsByQuery(query));
+        self.active = false;
       };
+      // kibi: end
 
+      // kibi: Updated visibility requirements wrt 'explicit' mode and tabs
       self.isVisible = function () {
-        return !self.hidden && ($scope.filteredItems.length > 0) && (self.focused || self.mousedOver);
+        return !self.hidden &&
+          (self.explicit ||
+            (!!self.query && self.tab.items.length > 0)) &&
+          (self.focused || self.mousedOver);
+      };
+      // kibi: end
+
+      // kibi: Additional functions
+
+      self.tabIndex = function () {
+        return _.findIndex(self.tabs, tab => tab.name === self.tabName);
       };
 
-      // handle updates to parent scope history
-      $scope.$watch('items', function () {
-        if (self.query) {
-          self.filterItemsByQuery(self.query);
-        }
-      });
+      self.initTabs = function () {
+        self.tabs = tabs.filter(tab => tab.init());
 
-      // watch for changes to the filtered item list
-      $scope.$watch('filteredItems', function (filteredItems) {
-
-        // if list is empty, or active item is missing, unset active item
-        if (!filteredItems.length || !_.contains(filteredItems, self.active)) {
-          self.active = false;
+        if(!self.setTabName(self.tabName)) {
+          // Tabs can be unavailable - in case, switch back to history
+          self.setTabName('history');
         }
-      });
+      };
+
+      self.setTabName = function (tabName) {
+        const tab = self.tabs.find(tab => tab.name === tabName);
+        if(!tab) { return false; }
+
+        self.tabName = tabName;
+        self.tab = tab;
+
+        self.filterItemsByQuery();
+        return true;
+      };
+
+      self.changeTab = function (dx) {
+        const newTabIndex = (self.tabIndex() + self.tabs.length + dx) % self.tabs.length;
+        self.setTabName(self.tabs[newTabIndex].name);
+      };
+
+
+      self.trackVisibility = function () {
+        const visible = self.isVisible();
+
+        if(visible && !self.lastVisible) {
+          self.initTabs();
+        }
+
+        self.lastVisible = visible;
+        return visible;
+      };
+
+      self.scrollActiveIntoView = function () {
+        if(!self.active) { return; }
+
+        const tabContent = $element.find('.typeahead-tab-content');
+        const items = tabContent.find('.typeahead-item');
+
+        const tabContentEl = tabContent.get()[0];
+        const activeEl = items.get()[self.getActiveIndex()];
+
+        if(!activeEl) { return; }
+
+        const tabContentRect = tabContentEl.getBoundingClientRect();
+        const activeRect = activeEl.getBoundingClientRect();
+
+        // Using scrollTop rather than scrollIntoView because the latter does not
+        // affect just the parent scrollbar - page is scrolled too
+
+        if(activeRect.top < tabContentRect.top) {
+          tabContentEl.scrollTop -= tabContentRect.top - activeRect.top;
+        } else if(tabContentRect.bottom < activeRect.bottom) {
+          tabContentEl.scrollTop += activeRect.bottom - tabContentRect.bottom;
+        }
+      };
+      // kibi: end
+
+      // kibi: Explicit tabs startup
+      self.initTabs();
     },
 
     link: function ($scope, $el, attrs) {

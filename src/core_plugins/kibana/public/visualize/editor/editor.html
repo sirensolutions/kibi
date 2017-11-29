@@ -38,7 +38,8 @@
           ng-submit="fetch()"
           class="fullWidth"
         >
-          <div class="typeahead" kbn-typeahead="visualize" on-select="fetch()">
+          <div class="typeahead" kbn-typeahead="visualize" on-select="fetch()"
+            index-patterns="[indexPattern]">
             <div class="kuiLocalSearch">
               <div class="kuiLocalSearchAssistedInput">
                 <input

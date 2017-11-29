@@ -1,9 +1,13 @@
 import 'plugins/kibana/discover/saved_searches/_saved_search';
 import 'ui/notify';
+// kibi: import needed to prevent crash when plugins loaded
+import 'ui/courier';
+// kibi: end
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
+
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify'
 ]);
@@ -15,8 +19,8 @@ savedObjectManagementRegistry.register({
   title: 'searches'
 });
 
-// kibi: savedObjectsAPI is added
-module.service('savedSearches', function (Private, savedObjectsAPI, kbnIndex, esAdmin, SavedSearch, kbnUrl) {
+// kibi: Private and savedObjectsAPI is added
+module.service('savedSearches', function (kbnIndex, esAdmin, SavedSearch, kbnUrl, Private, savedObjectsAPI) {
   const options = {
     caching: {
       find: true,

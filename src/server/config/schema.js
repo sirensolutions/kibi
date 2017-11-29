@@ -74,6 +74,7 @@ module.exports = () => Joi.object({
     autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
+    customResponseHeaders: Joi.object().unknown(true).default({}),
     ssl: Joi.object({
       enabled: Joi.boolean().default(false),
       certificate: Joi.string().when('enabled', {
@@ -189,7 +190,7 @@ module.exports = () => Joi.object({
   map: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,
-      then: Joi.string().default('https://catalogue.maps.elastic.co/v1/manifest'),
+      then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'),
       otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v1/manifest')
     })
   }).default(),

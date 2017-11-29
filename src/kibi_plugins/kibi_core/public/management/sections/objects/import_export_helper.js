@@ -1,11 +1,11 @@
-import { IndexPatternsGetIdsProvider }  from 'ui/index_patterns/_get_ids';
+import { IndexPatternsGetProvider }  from 'ui/index_patterns/_get';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import _ from 'lodash';
 
 export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVersion, kbnIndex,
   queryEngineClient, Private, Promise, indexPatterns) {
 
-  const getIds = Private(IndexPatternsGetIdsProvider);
+  const getIds = Private(IndexPatternsGetProvider);
   const visTypes = Private(VisTypesRegistryProvider);
 
   class ImportExportHelper {
@@ -40,11 +40,7 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
           });
           promises.push(promise);
         });
-        return Promise.all(promises).then(() => {
-          // very important !!! to clear the cached promise
-          // which returns list of index patterns
-          getIds.clearCache();
-        });
+        return Promise.all(promises);
       } else {
         return Promise.resolve(true);
       }

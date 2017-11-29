@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { Scanner } from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
+//import { SavedObjectsClient } from 'ui/saved_objects'; // kibi: commented
 
 // kibi: imports
 import { jdbcDatasourceTranslate } from 'plugins/kibi_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
@@ -42,6 +43,8 @@ export class SavedObjectLoader {
       noun: StringUtils.upperFirst(this.type),
       nouns: `${ this.lowercaseType }s`,
     };
+
+    //this.savedObjectsClient = new SavedObjectsClient($http); // kibi: we do not use it for the moment
   }
 
   /**
@@ -82,13 +85,23 @@ export class SavedObjectLoader {
     return Promise.all(deletions);
   }
 
-  /**
-   * Updates hit._source to contain an id and url field, and returns the updated
-   * source object.
-   * @param hit
-   * @returns {hit._source} The modified hit._source object, with an id and url field.
-   */
+  // kibi: alias to mapHitSource so we do not have to update all plugins
+  // We would have to rename the methiod in our plugins
+  // as mapHitSource is public and could be used from outside
   mapHits(hit) {
+    this.mapHitSource(hit);
+  }
+  // kibi: end
+
+  /**
+   * Updates source to contain an id and url field, and returns the updated
+   * source object.
+   * @param source
+   * @param id
+   * @returns {source} The modified source object, with an id and url field.
+   */
+  mapHitSource(hit) {
+    // kibi: changed this methof to take hit instead of source and id
     const source = hit._source;
     source.id = hit._id;
     source.url = this.urlFor(hit._id);
@@ -103,7 +116,17 @@ export class SavedObjectLoader {
     return this.scanner.scanAndMap(queryString, {
       pageSize,
       docCount: Infinity
-    }, (hit) => this.mapHits(hit));
+    });
+  }
+
+  /**
+   * Updates hit.attributes to contain an id and url field, and returns the updated
+   * attributes object.
+   * @param hit
+   * @returns {hit.attributes} The modified hit.attributes object, with an id and url field.
+   */
+  mapSavedObjectApiHits(hit) {
+    return this.mapHitSource(hit);
   }
 
   /**
@@ -117,6 +140,7 @@ export class SavedObjectLoader {
    * @param exclude - A list of fields to exclude
    * @returns {Promise}
    */
+
   find(searchString, removeReservedChars = true, size = 100) {
     if (!searchString) {
       searchString = null;
@@ -152,7 +176,7 @@ export class SavedObjectLoader {
     .then((resp) => {
       const result = {
         total: resp.hits.total,
-        hits: resp.hits.hits.map((hit) => this.mapHits(hit))
+        hits: resp.hits.hits.map((hit) => this.mapSavedObjectApiHits(hit))
       };
 
       if (this.type === 'datasource') {

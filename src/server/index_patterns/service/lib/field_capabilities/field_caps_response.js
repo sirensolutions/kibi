@@ -83,7 +83,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
       return {
         name: fieldName,
         type: 'conflict',
-        esType: 'conflict',
+        esType: 'conflict', // kibi: added by Kibi
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: false,
@@ -98,7 +98,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
     return {
       name: fieldName,
       type: castEsToKbnFieldTypeName(esType),
-      esType: esType,
+      esType: esType, // kibi: added by Kibi
       searchable: isSearchable,
       aggregatable: isAggregatable,
       readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),

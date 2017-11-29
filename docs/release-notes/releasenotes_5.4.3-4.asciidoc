@@ -1,0 +1,25 @@
+== Kibi 5.4.3-4
+
+[float]
+=== Kibi Changes
+
+Fixed: 
+
+* Fixed issue where tooltips for pruned joins were missing in some parts of the dashboard
+* Fixed issue in the graph browser where the add menu could not be opened after adding a filter
+* Returned the ability to add columns from fields to the enhanced data table in a dashboard
+* Fixed a bug in timelion that prevented opening the dashboard timepicker
+* Fixed bug where Translated Request and Debug sections of spy panel didn't show anything
+
+Changed:
+
+* Update Siren Platform distributions to use Elasticsearch version 5.6.4
+* Update Siren Platform distributions to use Vanguard version 5.6.4
+* Update Siren Platform distributions to use Searchguard version 5.6.4-16
+
+Plugins
+
+Graph Browser
+
+* Live filters can now be "unlinked" from the graph selection and kept as a normal filter
+* Links are now filterable with the timebar if they have a temporal field and a type configured

@@ -7,6 +7,10 @@ import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
+// kibi: these imports are needed for any third party plugin
+import 'ui/filter_bar/join_explanation';
+import 'ui/kibi/meta/kibi_meta';
+// kibi: end
 
 uiRoutes
 .addSetupWork($injector => {
@@ -314,7 +318,8 @@ uiModules
                 },
                 callback: function (error, meta) {
                   if (error) {
-                    notify.error('Could not update metadata for dashboard ' + d.id);
+                    notify.error('Could not update metadata for dashboard ' + d.id, error);
+                    return;
                   }
                   self._dashboardMetadataCallback(d, meta, foundDashboardMetadata.filters, foundDashboardMetadata.queries).then(() => {
                     self.emit('dashboardsMetadataUpdated', [d.id]);

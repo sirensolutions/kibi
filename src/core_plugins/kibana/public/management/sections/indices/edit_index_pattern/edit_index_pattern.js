@@ -27,6 +27,10 @@ uiModules.get('apps/management')
   docTitle.change($scope.indexPattern.id);
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
+  const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
+    return pattern.id !== $scope.indexPattern.id;
+  });
+
   $scope.$watch('indexPattern.fields', function () {
     $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
     $scope.refreshFilters();
@@ -94,8 +98,9 @@ uiModules.get('apps/management')
       // if user do not have rights s/he will get an authorisation error
       if ($scope.indexPattern.id === config.get('defaultIndex')) {
         config.remove('defaultIndex');
-        if (otherIds.length) {
-          config.set('defaultIndex', otherIds[0]);
+
+        if (otherPatterns.length) {
+          config.set('defaultIndex', otherPatterns[0].id);
         }
       }
 

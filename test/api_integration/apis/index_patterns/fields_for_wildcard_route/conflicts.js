@@ -19,7 +19,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
-                esType: 'date',
+                esType: 'date', // kibi: added
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -27,7 +27,7 @@ export default function ({ getService }) {
               {
                 name: 'number_conflict',
                 type: 'number',
-                esType: 'integer',
+                esType: 'integer', // kibi: added
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -35,7 +35,7 @@ export default function ({ getService }) {
               {
                 name: 'string_conflict',
                 type: 'string',
-                esType: 'text',
+                esType: 'text', // kibi: added
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
@@ -43,7 +43,7 @@ export default function ({ getService }) {
               {
                 name: 'success',
                 type: 'conflict',
-                esType: 'conflict',
+                esType: 'conflict', // kibi: added
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,

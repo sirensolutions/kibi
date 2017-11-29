@@ -19,12 +19,12 @@ describe('plugins/elasticsearch', function () {
       })
     };
 
-    function upgradeDoc(_id, _version, bool) {
+    function upgradeDoc(id, _version, bool) {
       describe('', function () {
         before(function () { version = _version; });
 
-        it(`should return ${bool} for ${_id} <= ${_version}`, function () {
-          expect(isUpgradeable(server, { _id: _id })).to.be(bool);
+        it(`should return ${bool} for ${id} <= ${version}`, function () {
+          expect(isUpgradeable(server, { id: id })).to.be(bool);
         });
 
         after(function () { version = pkg.kibi_version; });
@@ -71,32 +71,28 @@ describe('plugins/elasticsearch', function () {
     upgradeDoc('4.5.3-1', '4.5.3-6', true);
     upgradeDoc('4.5.3', '4.5.3-6', true);
 
-    it('should handle missing _id field', function () {
-      const doc = {
-        '_index': '.kibi',
-        '_type': 'config',
-        '_score': 1,
-        '_source': {
+    it('should handle missing id field', function () {
+      const configSavedObject = {
+        'type': 'config',
+        'attributes': {
           'buildNum': 1.7976931348623157e+308,
           'defaultIndex': '[logstash-]YYYY.MM.DD'
         }
       };
 
-      expect(isUpgradeable(server, doc)).to.be(false);
+      expect(isUpgradeable(server, configSavedObject)).to.be(false);
     });
 
-    it('should handle _id of @@version', function () {
-      const doc = {
-        '_index': '.kibi',
-        '_type': 'config',
-        '_id': '@@version',
-        '_score': 1,
-        '_source': {
+    it('should handle id of @@version', function () {
+      const configSavedObject = {
+        'type': 'config',
+        'id': '@@version',
+        'attributes': {
           'buildNum': 1.7976931348623157e+308,
           'defaultIndex': '[logstash-]YYYY.MM.DD'
         }
       };
-      expect(isUpgradeable(server, doc)).to.be(false);
+      expect(isUpgradeable(server, configSavedObject)).to.be(false);
     });
 
   });

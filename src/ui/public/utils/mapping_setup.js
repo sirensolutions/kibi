@@ -124,5 +124,4 @@ define(function () {
       return prom;
     };
   };
-
 });

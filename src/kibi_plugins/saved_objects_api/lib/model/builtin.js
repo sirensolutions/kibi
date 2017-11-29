@@ -11,7 +11,8 @@ const builtin = [
   'template',
   'datasource',
   'search',
-  'url'
+  'url',
+  'doc'
 ];
 
 export default builtin;

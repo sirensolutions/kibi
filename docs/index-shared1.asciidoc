@@ -1,5 +1,5 @@
 
-include::{asciidoc-dir}/../../shared/versions55.asciidoc[]
+include::{asciidoc-dir}/../../shared/versions56.asciidoc[]
 
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
 :repo:           https://github.com/elastic/kibana/

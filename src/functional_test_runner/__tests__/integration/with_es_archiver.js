@@ -4,30 +4,37 @@ import { format as formatUrl } from 'url';
 
 import { readConfigFile } from '../../lib';
 import { createToolingLog, createReduceStream } from '../../../utils';
-import { startupEs, startupKibana } from '../lib';
+import { createEsTestCluster } from '../../../test_utils/es';
+import { startupKibana } from '../lib';
 
 const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
 const CONFIG = resolve(__dirname, '../fixtures/with_es_archiver/config.js');
 
 describe('single test that uses esArchiver', function () {
-  this.timeout(180 * 1000); // kibi: on the current 5.4 branch startup pegs the CPU, so we need to increase the timeout.
-
+  this.timeout(180 * 1000); // kibi: on some branches startup pegs the CPU, so we need to increase the timeout.
   let log;
   const cleanupWork = [];
 
-  before(async () => {
-    log = createToolingLog('verbose', process.stdout);
+  before(async function () {
+    log = createToolingLog('debug');
+    log.pipe(process.stdout);
     log.indent(6);
 
     const config = await readConfigFile(log, CONFIG);
 
     log.info('starting elasticsearch');
     log.indent(2);
-    const es = await startupEs({
-      log,
-      port: config.get('servers.elasticsearch.port'),
-      fresh: false
+
+    const es = createEsTestCluster({
+      log: msg => log.debug(msg),
+      name: 'ftr/withEsArchiver',
+      port: config.get('servers.elasticsearch.port')
     });
+    cleanupWork.unshift(() => es.stop());
+
+    this.timeout(es.getStartTimeout());
+    await es.start();
+
     log.indent(-2);
 
     log.info('starting kibana');
@@ -38,8 +45,7 @@ describe('single test that uses esArchiver', function () {
     });
     log.indent(-2);
 
-    cleanupWork.push(() => es.shutdown());
-    cleanupWork.push(() => kibana.close());
+    cleanupWork.unshift(() => kibana.close());
   });
 
   it('test', async () => {
@@ -63,7 +69,9 @@ describe('single test that uses esArchiver', function () {
     ]);
   });
 
-  after(() => {
-    return Promise.all(cleanupWork.splice(0).map(fn => fn()));
+  after(async () => {
+    for (const work of cleanupWork.splice(0)) {
+      await work();
+    }
   });
 });

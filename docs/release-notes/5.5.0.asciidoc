@@ -163,3 +163,5 @@ Visualize::
 * [Fix for #12490] fixes gauge chart width calculation {pull}12499[#12499]
 * [Fix for #12535] fixing labels in heatmap {pull}12537[#12537]
 * [Fix for #12601] goal-type should be discoverable {pull}12603[#12603]
+
+

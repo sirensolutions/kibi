@@ -4,6 +4,7 @@ module.exports = function () {
       licenses: [
         '(BSD-2-Clause OR MIT OR Apache-2.0)',
         '(BSD-2-Clause OR MIT)',
+        '(GPL-2.0 OR MIT)',
         '(MIT AND CC-BY-3.0)',
         '(MIT OR Apache-2.0)',
         'AFLv2.1',
@@ -20,6 +21,7 @@ module.exports = function () {
         'BSD-3-Clause AND MIT',
         'BSD-3-Clause OR MIT',
         'BSD-3-Clause',
+        'BSD 3-Clause',
         'BSD-like',
         'CC-BY',
         'CC-BY-4.0',
@@ -33,8 +35,7 @@ module.exports = function () {
         'Unlicense',
         'WTFPL OR ISC',
         'WTFPL',
-        // kibi: license for node-forge
-        '(BSD-3-Clause OR GPL-2.0)',
+        '(BSD-3-Clause OR GPL-2.0)' // kibi: license for node-forge
       ],
       overrides: {
         'assert-plus@0.1.5': ['MIT'],
@@ -52,7 +53,6 @@ module.exports = function () {
         'jsonify@0.0.0': ['Public domain'],
         'ripemd160@0.2.0': ['MIT'],
         'select@1.0.6': ['MIT'],
-        'ua-parser-js@0.7.17': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
         // kibi: add our licenses
         'JSONSelect@0.4.0': ['MIT'],
@@ -62,6 +62,7 @@ module.exports = function () {
         'nomnom@1.5.2': ['MIT'],
         'jsonify@0.0.0': ['MIT'],
         'js-base64@2.3.1': ['BSD-3-Clause']
+        // kibi: end
       }
     }
   };

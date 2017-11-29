@@ -22,7 +22,7 @@ and can be stopped by pressing `Ctrl-C`.
 [[windows-configuring]]
 ==== Configuring Kibi via Config File
 
-Kibi loads its configuration from the `config/kibi.yml`
+Kibi loads its configuration from the `$KIBI_HOME/config/kibi.yml`
 file by default. The format of this config file is explained in
 <<settings>>.
 

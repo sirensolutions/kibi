@@ -47,6 +47,7 @@ To use a local client node to load balance Kibi requests:
 #
 node.master: false
 node.data: false
+node.ingest: false
 --------
 . Configure the client node to join your Elasticsearch cluster. In `elasticsearch.yml`, set the `cluster.name` to the
 name of your cluster.

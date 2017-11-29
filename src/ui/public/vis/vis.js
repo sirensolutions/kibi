@@ -103,10 +103,12 @@ export function VisProvider(createNotifier, Private) {
       _.cloneDeep(state.params || {}),
       _.cloneDeep(this.type.params.defaults || {})
     );
+    if (!this.params.type) this.params.type = this.type.name;
 
     // kibi: aditional visualization settings
     this.kibiSettings = _.defaults({}, state.kibiSettings);
     // kibi: end
+
     updateVisualizationConfig(state.params, this.params);
 
     this.aggs = new AggConfigs(this, state.aggs);

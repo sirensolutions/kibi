@@ -597,3 +597,4 @@ function getAttributionArray(attribution) {
   }
   return attributions;
 }
+

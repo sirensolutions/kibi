@@ -19,6 +19,10 @@ Kibi Docker images are available at {dockerhub-ref}.
 +
 {kibana-ref}/docker.html[Running Kibana on Docker]
 
+IMPORTANT: If your Elasticsearch installation is protected by {xpack-ref}/xpack-security.html[X-Pack Security]
+see {xpack-ref}/kibana.html[Using Kibana with X-Pack Security] for additional setup
+instructions.
+
 include::docker.asciidoc[]
 
 include::install/targz.asciidoc[]

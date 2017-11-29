@@ -1,14 +1,12 @@
-import { esTestServerUrlParts } from '../../test/es_test_server_url_parts';
+import { esTestConfig } from '../../src/test_utils/es';
 
 module.exports = function (grunt) {
-  const resolve = require('path').resolve;
-  const directory = resolve(__dirname, '../../esvm');
-  const dataDir = resolve(directory, 'data_dir');
-  const pkgBranch = grunt.config.get('pkg.branch');
+  const branch = esTestConfig.getBranch();
+  const dataDir = esTestConfig.getDirectoryForEsvm('data_dir');
 
   return {
     options: {
-      binary: 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.2.tar.gz',
+      binary: 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.4.tar.gz',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         http: {
@@ -23,7 +21,7 @@ module.exports = function (grunt) {
 
     dev: {
       options: {
-        directory: resolve(directory, 'dev'),
+        directory: esTestConfig.getDirectoryForEsvm('dev'),
         config: {
           path: {
             data: dataDir
@@ -37,7 +35,7 @@ module.exports = function (grunt) {
 
     tribe: {
       options: {
-        directory: resolve(directory, 'tribe'),
+        directory: esTestConfig.getDirectoryForEsvm('tribe'),
         config: {
           path: {
             data: dataDir
@@ -87,14 +85,14 @@ module.exports = function (grunt) {
         }]
       },
     },
-
+    // kibi: needed for the migration tests
     test: {
       options: {
-        directory: resolve(directory, 'test'),
+        directory: esTestConfig.getDirectoryForEsvm('test'),
         purge: true,
         config: {
           http: {
-            port: esTestServerUrlParts.port
+            port: esTestConfig.getPort()
           },
           cluster: {
             name: 'esvm-test'
@@ -103,7 +101,7 @@ module.exports = function (grunt) {
             zen: {
               ping: {
                 unicast: {
-                  hosts: [ `localhost:${esTestServerUrlParts.port}` ]
+                  hosts: [ `localhost:${esTestConfig.getPort()}` ]
                 }
               }
             }
@@ -111,14 +109,14 @@ module.exports = function (grunt) {
         }
       }
     },
-
+    // kibi:end
     ui: {
       options: {
-        directory: resolve(directory, 'test'),
+        directory: esTestConfig.getDirectoryForEsvm('test'),
         purge: true,
         config: {
           http: {
-            port: esTestServerUrlParts.port
+            port: esTestConfig.getPort()
           },
           cluster: {
             name: 'esvm-ui'
@@ -127,7 +125,7 @@ module.exports = function (grunt) {
             zen: {
               ping: {
                 unicast: {
-                  hosts: [ `localhost:${esTestServerUrlParts.port}` ]
+                  hosts: [ `localhost:${esTestConfig.getPort()}` ]
                 }
               }
             }

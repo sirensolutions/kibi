@@ -4,12 +4,17 @@
      ng-if="savedObj || error"
      data-test-subj="{{::savedObj.title}}"
 >
-  <!--kibi: color the panel if there are selected entities, added panel-border for panel heading border style if enabled -->
   <div class="panel-heading"
     ng-class="{ selectedEntitiesDependent: markDependOnSelectedEntities && dependsOnSelectedEntities,
                 disabled: selectedEntitiesDisabled && dependsOnSelectedEntities, 'panel-border': border }"
   >
-    <span class="panel-title" title="{{::savedObj.title}}">
+    <!--kibi: color the panel if there are selected entities, added panel-border for panel heading border style if enabled -->
+    <span
+      data-test-subj="dashboardPanelTitle"
+      class="panel-title"
+      tooltip="{{::savedObj.title}}"
+      aria-label="{{:: 'Dashboard panel: ' + savedObj.title }}"
+    >
       {{::savedObj.title}}
     </span>
     <div class="kuiMicroButtonGroup">
@@ -77,8 +82,8 @@
 
   <!-- kibi: added extra condition to check for savedObj.vis.error and savedObj.searchSource.error -->
   <div ng-if="savedObj.vis.error || error || savedObj.searchSource.error" class="load-error">
-    <i aria-hidden="true" class="fa fa-exclamation-triangle"></i>
-    <span ng-if="error" ng-bind="error"></span>
+    <span aria-hidden="true" class="kuiIcon fa-exclamation-triangle"></span>
+    <span ng-if="error" ng-bind-html="error | markdown"></span>
     <!--kibi: added error reporting by a visualization or searchSource -->
     <span ng-if="savedObj.vis.error" ng-bind="savedObj.vis.error"></span>
     <span ng-if="savedObj.searchSource.error" ng-bind="savedObj.searchSource.error"></span>

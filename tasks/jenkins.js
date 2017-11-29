@@ -23,7 +23,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:unit', [
     'jenkins:env',
-    'eslint:source',
+    'rejectRejFiles',
+    'run:eslint',
     'licenses',
     'test:server',
     'test:jest',
@@ -36,7 +37,7 @@ module.exports = function (grunt) {
   grunt.registerTask('jenkins:selenium', [
     'jenkins:env',
     'rejectRejFiles'
-    //'test:uiRelease'
+    //'test:uiRelease' // kibi: commented out by kibi
   ]);
 
 };

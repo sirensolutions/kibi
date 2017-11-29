@@ -2,7 +2,8 @@ import { format } from 'url';
 // kibi: imports
 import { resolve } from 'path';
 // kibi: end
-import { esTestServerUrlParts } from '../../test/es_test_server_url_parts';
+
+import { esTestConfig } from '../../src/test_utils/es';
 import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
 
 module.exports = function (grunt) {
@@ -13,6 +14,8 @@ module.exports = function (grunt) {
   const binScript =  /^win/.test(platform) ? '.\\bin\\kibi.bat' : './bin/kibi';
   const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibi.bat' : './build/kibana/bin/kibi';
   // kibi: end
+  const pkgVersion = grunt.config.get('pkg.version');
+  const releaseBinScript = `./build/kibi-${pkgVersion}-linux-x86_64/bin/kibana`;
 
   const uiConfig = require(root('test/server_config'));
 
@@ -36,6 +39,22 @@ module.exports = function (grunt) {
   }, []);
 
   return {
+    eslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/eslint'),
+        '--no-cache'
+      ]
+    },
+
+    eslintStaged: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/eslint'),
+        // staged paths are written here by lintStagedFiles task
+      ]
+    },
+
     testServer: {
       options: {
         wait: false,
@@ -62,7 +81,7 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--optimize.enabled=false',
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--server.xsrf.disableProtection=true',
         ...kbnServerFlags,
@@ -83,7 +102,7 @@ module.exports = function (grunt) {
         '--no-base-path',
         '--no-ssl',
         '--optimize.enabled=false',
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--server.xsrf.disableProtection=true',
         ...kbnServerFlags,
@@ -100,10 +119,25 @@ module.exports = function (grunt) {
       cmd: binScript,
       args: [
         ...stdDevArgs,
-        '--server.port=' + uiConfig.servers.kibana.port,
-        // kibi: use index from config
-        '--kibana.index=' + uiConfig.servers.kibana.index,
-        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--kibana.index=' + uiConfig.servers.kibana.index, // kibi: use index from config
+        '--server.port=' + kibanaTestServerUrlParts.port,
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
+        ...kbnServerFlags,
+      ]
+    },
+
+    testUIReleaseServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: releaseBinScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + kibanaTestServerUrlParts.port,
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         ...kbnServerFlags,
       ]
     },
@@ -118,10 +152,9 @@ module.exports = function (grunt) {
       cmd: binScript,
       args: [
         ...stdDevArgs,
-        '--server.port=' + uiConfig.servers.kibana.port,
-        // kibi: use index from config
-        '--kibana.index=' + uiConfig.servers.kibana.index,
-        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--kibana.index=' + uiConfig.servers.kibana.index, // kibi: use index from config
+        '--server.port=' + kibanaTestServerUrlParts.port,
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--dev',
         '--no-base-path',
         '--no-ssl',

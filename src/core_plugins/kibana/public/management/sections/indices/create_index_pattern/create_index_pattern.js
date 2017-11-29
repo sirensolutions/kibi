@@ -18,7 +18,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns,
+.controller('managementIndicesCreate', function ($scope, $routeParams, kbnUrl, Private, Notifier, indexPatterns,
   es, config, Promise, $translate, ontologyClient) {
   const notify = new Notifier();
   // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
@@ -43,6 +43,16 @@ uiModules.get('apps/management')
   this.nameIntervalOptions = intervals;
   this.patternErrors = [];
 
+  this.showAdvancedOptions = false;
+
+  // fills index-pattern ID based on query param.
+  if ($routeParams.id) {
+    this.formValues.id = decodeURIComponent($routeParams.id);
+    this.formValues.name = '';
+
+    this.showAdvancedOptions = true;
+  }
+
   const getTimeFieldOptions = () => {
     loadingCount += 1;
     return Promise.resolve()
@@ -66,7 +76,7 @@ uiModules.get('apps/management')
         return {
           options: [
             {
-              display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
+              display: `The indices which match this index pattern don't contain any time fields.`
             }
           ]
         };
@@ -75,7 +85,7 @@ uiModules.get('apps/management')
       return {
         options: [
           {
-            display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+            display: `I don't want to use the Time Filter`
           },
           ...dateFields.map(field => ({
             display: field.name,
@@ -87,7 +97,7 @@ uiModules.get('apps/management')
     .catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
         return {
-          error: $translate.instant('KIBANA-INDICES_MATCH_PATTERN')
+          error: 'Unable to fetch mapping. Do you have indices matching the pattern?'
         };
       }
 
@@ -157,12 +167,12 @@ uiModules.get('apps/management')
           };
         }
 
-        patternErrors.push($translate.instant('KIBANA-PATTERN_DOES_NOT_MATCH_EXIST_INDICES'));
+        patternErrors.push('Pattern does not match any existing indices');
         const radius = Math.round(this.sampleCount / 2);
         const samples = intervals.toIndexList(this.formValues.name, this.formValues.nameInterval, -radius, radius);
 
         if (_.uniq(samples).length !== samples.length) {
-          patternErrors.push($translate.instant('KIBANA-INVALID_NON_UNIQUE_INDEX_NAME_CREATED'));
+          patternErrors.push('Invalid pattern, interval does not create unique index names');
         } else {
           this.samples = samples;
         }
@@ -263,6 +273,10 @@ uiModules.get('apps/management')
       });
   };
 
+  this.toggleAdvancedIndexOptions = () => {
+    this.showAdvancedOptions = !!!this.showAdvancedOptions;
+  };
+
   this.createIndexPattern = () => {
     const {
       name,
@@ -293,6 +307,7 @@ uiModules.get('apps/management')
     loadingCount += 1;
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
+      name,
       timeFieldName,
       intervalName,
       notExpandable,
@@ -315,7 +330,7 @@ uiModules.get('apps/management')
       });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
-        return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
+        return notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
       }
 
       notify.fatal(err);

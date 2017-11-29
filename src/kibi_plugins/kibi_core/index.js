@@ -3,6 +3,7 @@ import http from 'http';
 import path from 'path';
 import Boom from 'boom';
 import errors from 'request-promise/errors';
+import buffer from 'buffer';
 
 import cryptoHelper from './lib/crypto_helper';
 import datasourcesSchema from './lib/datasources_schema';
@@ -334,19 +335,19 @@ module.exports = function (kibana) {
         handler: function (req, reply) {
           const serverConfig = server.config();
           // kibi: if query is a JSON, parse it to string
+          let query;
           if(req.payload.query) {
-            try {
-              JSON.parse(req.payload.query);
-            } catch (e) {
+            if (typeof req.payload.query !== 'object') {
               return reply(Boom.wrap(new Error('Expected query to be a JSON object containing single query', 400)));
             }
-            req.payload.query = JSON.stringify(req.payload.query);
+            query = JSON.stringify(req.payload.query);
           } else if (req.payload.bulkQuery) {
             if (!_.isString(req.payload.bulkQuery)) {
               return reply(Boom.wrap(new Error('Expected bulkQuery to be a String containing a bulk elasticsearch query', 400)));
             }
+            query = req.payload.bulkQuery;
           }
-          server.plugins.elasticsearch.getQueriesAsPromise(req.payload.query || req.payload.bulkQuery)
+          server.plugins.elasticsearch.getQueriesAsPromise(new buffer.Buffer(query))
           .map((query) => {
             // Remove the custom queries from the body
             server.plugins.elasticsearch.inject.save(query);
@@ -363,11 +364,7 @@ module.exports = function (kibana) {
           }).map((query) => server.plugins.elasticsearch.sirenJoinSet(query))
           .map((query) => server.plugins.elasticsearch.sirenJoinSequence(query))
           .then((data) => {
-            if (req.payload.query) {
-              reply({ translatedQuery: JSON.parse(data[0]) });
-            } else if(req.payload.bulkQuery) {
-              reply({ translatedQuery: data[0] });
-            }
+            reply({ translatedQuery: data[0] });
           }).catch((err) => {
             let errStr;
             if (typeof err === 'object' && err.stack) {
@@ -413,17 +410,47 @@ module.exports = function (kibana) {
       });
 
       // Adding a route to return the list of installed Elasticsearch plugins
+      // Route takes an optional parameter of the string "version"
+      // If "version" is present, the plugins are returned as an array of objects
+      // containing 'component' (plugin name) and 'version'
+      // If version is absent, an array of the plugin names are returned
       server.route({
         method: 'GET',
-        path:'/getElasticsearchPlugins',
+        path:'/getElasticsearchPlugins/{version?}',
+        handler: function (request, reply) {
+          const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
+          const h = `component${request.params.version && request.params.version === 'versions' ? ',version' : ''}`;
+          return callWithInternalUser('cat.plugins', {
+            h,
+            format: 'json'
+          })
+          .then(components => {
+            if (!(request.params.version && request.params.version === 'versions')) {
+              components = components.map(component => component.component);
+            }
+
+            return reply(components);
+          });
+        }
+      });
+
+      server.route({
+        method: 'GET',
+        path:'/elasticsearchVersion',
         handler: function (request, reply) {
           const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
 
-          return callWithInternalUser('cat.plugins', {
-            h: 'component',
-            format: 'json'
+          return callWithInternalUser('nodes.info', {
+            filterPath: [
+              'nodes.*.version'
+            ]
           })
-          .then(components => reply(_.pluck(components, 'component')));
+          .then(info => {
+            const versions = Object.keys(info.nodes)
+              .map(nodeKey => info.nodes[nodeKey].version);
+
+            return reply(versions);
+          });
         }
       });
     }

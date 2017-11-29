@@ -109,4 +109,29 @@ describe('Kibi Gremlin Server', function () {
     expect(ret.v).to.be(false);
     expect(ret.e).to.be('An error occurred while checking the installed Java version');
   });
+
+  it('should find no other running gremlin server ', async function () {
+    gremlin._ping = () => { return Promise.resolve(JSON.stringify({ status: 'ok' })); };
+
+    gremlin._isAnotherGremlinRunning()
+    .then(() => { expect(true).to.be(true); })
+    .catch(() => { expect().fail('should fail'); });
+  });
+
+  it('should find another running gremlin server - unexpected response', async function () {
+    gremlin._ping = () => { return Promise.resolve(JSON.stringify({ test: false })); };
+
+    gremlin._isAnotherGremlinRunning()
+    .then(() => { expect().fail('should fail');})
+    .catch(() => { expect(true).to.be(true); });
+
+  });
+
+  it('should find another running gremlin server - exception', async function () {
+    gremlin._ping = () => { throw new Error('some error'); };
+
+    gremlin._isAnotherGremlinRunning()
+    .then(() => { expect().fail('should fail'); })
+    .catch(() => { expect(true).to.be(true); });
+  });
 });

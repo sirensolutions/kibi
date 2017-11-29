@@ -119,9 +119,9 @@ uiModules.get('apps/management')
       })
       .then(function (obj) {
         $scope.obj = obj;
-        $scope.link = service.urlFor(obj.id);
+        $scope.link = service.urlFor(obj._id); // kibi: use "_id" instead of "id"
 
-        const fields =  _.reduce(obj.attributes, createField, []);
+        const fields =  _.reduce(obj._source, createField, []); // kibi: use _source instead of attributes
         if (service.Class) readObjectClass(fields, service.Class);
 
         // sorts twice since we want numerical sort to prioritize over name,

@@ -18,13 +18,14 @@ savedObjectManagementRegistry.register({
 
 // This is the only thing that gets injected into controllers
 // kibi: added savedObjectsAPI and Private
-module.service('savedDashboards', function (SavedDashboard, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, Private) {
+module.service('savedDashboards', function (SavedDashboard, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, Private, $http) {
   const options = {
     caching: {
       find: true,
       cache: Private(CacheProvider)
     },
-    savedObjectsAPI
+    savedObjectsAPI,
+    $http
   };
   return new SavedObjectLoader(SavedDashboard, kbnIndex, esAdmin, kbnUrl, options);
 });

@@ -17,14 +17,15 @@ savedObjectManagementRegistry.register({
 // This is the only thing that gets injected into controllers
 uiModules
 .get('templates_editor/services/saved_templates')
-.service('savedTemplates', function (savedObjectsAPI, Private, SavedTemplate, kbnIndex, esAdmin, kbnUrl) {
+.service('savedTemplates', function (savedObjectsAPI, Private, SavedTemplate, kbnIndex, esAdmin, kbnUrl, $http) {
   const options = {
     caching: {
       find: true,
       get: true,
       cache: Private(CacheProvider)
     },
-    savedObjectsAPI
+    savedObjectsAPI,
+    $http
   };
   const savedTemplateLoader = new SavedObjectLoader(SavedTemplate, kbnIndex, esAdmin, kbnUrl, options);
 

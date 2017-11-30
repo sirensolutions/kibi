@@ -18,7 +18,7 @@ savedObjectManagementRegistry.register({
 // This is the only thing that gets injected into controllers
 uiModules
 .get('kibi_datasources/services/saved_datasources')
-.service('savedDatasources', function (savedObjectsAPI, Private, SavedDatasource, kbnIndex, esAdmin, kbnUrl, jdbcDatasources) {
+.service('savedDatasources', function (savedObjectsAPI, Private, SavedDatasource, kbnIndex, esAdmin, kbnUrl, jdbcDatasources, $http) {
   const options = {
     caching: {
       find: true,
@@ -26,7 +26,8 @@ uiModules
       cache: Private(CacheProvider)
     },
     savedObjectsAPI,
-    jdbcDatasources
+    jdbcDatasources,
+    $http
   };
   const SavedDatasourceLoader = new SavedObjectLoader(SavedDatasource, kbnIndex, esAdmin, kbnUrl, options);
 

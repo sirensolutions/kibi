@@ -18,7 +18,7 @@ savedObjectManagementRegistry.register({
 // This is the only thing that gets injected into controllers
 uiModules
 .get('kibi_core/saved_objects/dashboard_groups')
-.service('savedDashboardGroups', function (savedObjectsAPI, Private, SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl) {
+.service('savedDashboardGroups', function (savedObjectsAPI, Private, SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl, $http) {
   const options = {
     caching: {
       find: true,
@@ -28,7 +28,8 @@ uiModules
     savedObjectsAPI,
     mapHit(source) {
       source.dashboards = JSON.parse(source.dashboards);
-    }
+    },
+    $http
   };
   const savedDashboardGroupLoader = new SavedObjectLoader(SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl, options);
 

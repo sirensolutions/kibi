@@ -35,7 +35,8 @@ function getEditConfig(action) {
     key: 'edit',
     description: 'Switch to edit mode',
     testId: 'dashboardEditMode',
-    run: action
+    run: action,
+    dataUiAcl: 'ui:kibi@dashboard_edit' // kibi: added to control button via UI ACL rules
   };
 }
 
@@ -71,7 +72,8 @@ function getCloneConfig(action) {
     key: 'clone',
     description: 'Create a copy of your dashboard',
     testId: 'dashboardClone',
-    run: action
+    run: action,
+    dataUiAcl: 'ui:kibi@dashboard_clone' // kibi: added to control button via UI ACL rules
   };
 }
 
@@ -95,7 +97,8 @@ function getShareConfig() {
     key: TopNavIds.SHARE,
     description: 'Share Dashboard',
     testId: 'dashboardShareButton',
-    template: require('plugins/kibana/dashboard/top_nav/share.html')
+    template: require('plugins/kibana/dashboard/top_nav/share.html'),
+    dataUiAcl: 'ui:kibi@dashboard_share' // kibi: added to control button via UI ACL rules
   };
 }
 

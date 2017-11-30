@@ -3,13 +3,18 @@ import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import createKibanaIndex from './create_kibana_index';
 import kibanaVersion from './kibana_version';
-// kibi: added by kibi to know the list of installed plugins
-import pluginList from './wait_for_plugin_list';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
 import { ensureAllowExplicitIndex } from './ensure_allow_explicit_index';
 import { determineEnabledScriptingLangs } from './determine_enabled_scripting_langs';
 import { ensureTypesExist } from './ensure_types_exist';
+
+
+// kibi: added imports
+import kibiVersion from './kibi_version';
+//added by kibi to know the list of installed plugins
+import pluginList from './wait_for_plugin_list';
+// kibi: end
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -84,7 +89,7 @@ module.exports = function (plugin, server, { mappings }) {
   }
 
   function waitForEsVersion() {
-    return ensureEsVersion(server, kibanaVersion.get()).catch(err => {
+    return ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get()).catch(err => {
       plugin.status.red(err);
       return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
     });
@@ -122,7 +127,7 @@ module.exports = function (plugin, server, { mappings }) {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {
           return waitForPong(callDataAsKibanaUser, tribeUrl)
-          .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
+          .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get()));
         }
       });
 

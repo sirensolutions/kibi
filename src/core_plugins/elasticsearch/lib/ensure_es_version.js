@@ -70,10 +70,11 @@ export function ensureEsVersion(server, kibanaVersion, kibiVersion) { // kibi: k
         lastWarnedNodesForServer.set(server, warningNodeNames);
         server.log(['warning'], {
           tmpl: (
-            `You're running Kibi v${kibiVersion} with some different version of ` +
-            'Elasticsearch. Check the compability table on htttp://support.siren.io to make sure your your Elasticsearch is compatible with Kibi.' +
-            `Detected on following Elsaticsearch nodes: ${warningNodeNames}`
-          ), // kibi: replaced Kibana with Kibi
+            // kibi: changed the message
+            `You're running Kibi v${kibiVersion} with some different version of Elasticsearch. ` +
+            'Check the compability table on htttp://support.siren.io to make sure your Elasticsearch and Kibi versions are compatible.' +
+            `Detected on following Elasticsearch nodes: ${warningNodeNames}`
+          ), // kibi: end
           kibanaVersion,
           nodes: simplifiedNodes,
         });
@@ -83,7 +84,7 @@ export function ensureEsVersion(server, kibanaVersion, kibiVersion) { // kibi: k
     if (incompatibleNodes.length) {
       const incompatibleNodeNames = getHumanizedNodeNames(incompatibleNodes);
 
-      //kibi: replaced Kibana with Kibi
+      //kibi: changed the messsage
       const errorMessage =
         `Kibi v${kibiVersion} requires Elasticsearch v` +
         `${kibanaVersion} on all nodes. I found ` +

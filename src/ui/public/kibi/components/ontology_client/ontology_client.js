@@ -4,7 +4,9 @@ import { uiModules } from 'ui/modules';
 uiModules
 .get('kibana/ontology_client')
 .service('ontologyClient', function (Private, queryEngineClient, createNotifier, savedDashboards, savedSearches) {
-  const notify = createNotifier();
+  const notify = createNotifier({
+    location: 'Kibi Ontology Client'
+  });
 
   const defaultKibiNs = 'http://siren.io/model#';
 
@@ -78,7 +80,8 @@ uiModules
           return relations;
         }
         Promise.reject(new Error('Failed to retrieve relations from the schema. No data retrieved.'));
-      });
+      })
+      .catch(notify.error);
     }
   };
 
@@ -186,7 +189,8 @@ uiModules
           return entities;
         }
         Promise.reject(new Error('Failed to retrieve entities from the schema. No data retrieved.'));
-      });
+      })
+      .catch(notify.error);
     }
   };
 
@@ -346,7 +350,8 @@ uiModules
     return queryEngineClient.schema(params)
     .then(() => {
       this.clearCache();
-    });
+    })
+    .catch(notify.error);
   };
 
   OntologyClient.prototype.clearCache = function () {

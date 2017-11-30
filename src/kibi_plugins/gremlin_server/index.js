@@ -31,7 +31,7 @@ module.exports = function (kibana) {
             this.status.red(error.message);
           });
         } else {
-          this.status.green('Gremlin server configuration not found in kibi.yml, server was not started.');
+          this.status.red('Gremlin server configuration not found in kibi.yml, please configure it.');
         }
       };
 

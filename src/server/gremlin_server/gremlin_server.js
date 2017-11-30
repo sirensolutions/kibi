@@ -26,12 +26,9 @@ function startServer(self, fulfill, reject) {
     fulfill({ message: msg });
   })
   .catch(() => {
-    let gremlinServerPath;
     if (config.has('kibi_core.gremlin_server.path')) {
-      gremlinServerPath = config.get('kibi_core.gremlin_server.path');
-    }
+      let gremlinServerPath = config.get('kibi_core.gremlin_server.path');
 
-    if (gremlinServerPath) {
       isJavaVersionOk(self).then(function () {
 
         if (config.has('kibi_core.gremlin_server.ssl.ca')) {

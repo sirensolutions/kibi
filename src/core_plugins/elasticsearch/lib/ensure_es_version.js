@@ -17,7 +17,7 @@ import SetupError from './setup_error';
  */
 const lastWarnedNodesForServer = new WeakMap();
 
-export function ensureEsVersion(server, kibanaVersion) {
+export function ensureEsVersion(server, kibanaVersion, kibiVersion) { // kibi: kibiVersion added to properly report Kibi version
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
 
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
@@ -70,10 +70,11 @@ export function ensureEsVersion(server, kibanaVersion) {
         lastWarnedNodesForServer.set(server, warningNodeNames);
         server.log(['warning'], {
           tmpl: (
-            `You're running Kibi ${kibanaVersion} with some different versions of ` +
-            'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
-            `version to prevent compatibility issues: ${warningNodeNames}`
-          ), // kibi: replaced Kibana with Kibi
+            // kibi: changed the message
+            `You're running Kibi v${kibiVersion} with some different version of Elasticsearch. ` +
+            'Check the compability table on htttp://support.siren.io to make sure your Elasticsearch and Kibi versions are compatible.' +
+            `Detected on following Elasticsearch nodes: ${warningNodeNames}`
+          ), // kibi: end
           kibanaVersion,
           nodes: simplifiedNodes,
         });
@@ -83,9 +84,9 @@ export function ensureEsVersion(server, kibanaVersion) {
     if (incompatibleNodes.length) {
       const incompatibleNodeNames = getHumanizedNodeNames(incompatibleNodes);
 
-      //kibi: replaced Kibana with Kibi
+      //kibi: changed the messsage
       const errorMessage =
-        `This version of Kibi requires Elasticsearch v` +
+        `Kibi v${kibiVersion} requires Elasticsearch v` +
         `${kibanaVersion} on all nodes. I found ` +
         `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(', ')}`;
 

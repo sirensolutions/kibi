@@ -133,6 +133,20 @@ function startServer(self, fulfill, reject) {
               reject(new Error(msg));
             }
 
+            if (config.has('elasticsearch.username')) {
+              const esUsername = config.get('elasticsearch.username');
+              if (esUsername) {
+                args.push('--elasticsearch.username=' + esUsername);
+              }
+            }
+
+            if (config.has('elasticsearch.password')) {
+              const esUsername = config.get('elasticsearch.password');
+              if (esUsername) {
+                args.push('--elasticsearch.password=' + esUsername);
+              }
+            }
+
             self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
             self.gremlinServer = childProcess.spawn('java', args);
             self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin', 'error'], ('' + data).trim()));

@@ -246,7 +246,7 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
         );
       }).then(function (resp) {
         if (resp && resp.data && resp.data.error) {
-          notify.warning(resp.data.error);
+          notify.warning(resp.data.error.message);
           $scope.holder.jsonPreview = JSON.stringify(resp.data.error, null, ' ');
           $scope.holder.jsonPreviewActive = true;
           $scope.holder.htmlPreviewActive = false;

@@ -102,9 +102,17 @@ module.exports = function (kibana) {
     }
     queryEngine[method](queryDefs, options)
     .then(function (queries) {
+      // check if error is returned, reply with error property
+      let queryError = '';
+      const errors = _.each(queries, query => {
+        if (query.error) {
+          queryError = query.error;
+        }
+      });
       return reply({
         query: params,
-        snippets: queries
+        snippets: queries,
+        error: queryError
       });
     }).catch(function (error) {
       let err;

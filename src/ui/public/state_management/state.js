@@ -35,17 +35,30 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
     this._urlParam = urlParam || '_s';
     this._notifier = notifier;
     this._hashedItemStore = hashedItemStore;
+    // kibi: Prevents undesired update events before the route change completion.
+    this._readyForUpdate = true;
+    // kibi: end
 
     // When the URL updates we need to fetch the values from the URL
     this._cleanUpListeners = _.partial(_.callEach, [
       // partial route update, no app reload
       $rootScope.$on('$routeUpdate', () => {
+        // kibi: Prevents undesired update events before the route change completion.
+        //       After the route change start and before its completion
+        //       we don't need/want any updates on the state.
+        if (!this._readyForUpdate) {
+          return;
+        }
+        // kibi: end
         this.fetch();
       }),
 
       // beginning of full route update, new app will be initialized before
       // $routeChangeSuccess or $routeChangeError
       $rootScope.$on('$routeChangeStart', () => {
+        // kibi: Prevents undesired update events before the route change completion.
+        this._readyForUpdate = false;
+        // kibi: end
         if (!this._persistAcrossApps) {
           this.destroy();
         }
@@ -55,6 +68,9 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
         if (this._persistAcrossApps) {
           this.fetch();
         }
+        // kibi: Prevents undesired update events before the route change completion.
+        this._readyForUpdate = true;
+        // kibi: end
       })
     ]);
 
@@ -118,6 +134,17 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
         stash = {};
       }
     }
+
+    // kibi: Prevents undesired update events before the route change completion.
+    //       If the descendent object is an AppState, any fetch after the route sucess event
+    //       must be checked to ensure correct defaults on the state.
+    if (this._urlParam === '_a' && this._readyForUpdate &&
+        stash && stash.id &&
+        this._defaults && this._defaults.id &&
+        stash.id !== this._defaults.id) {
+      stash = {};
+    }
+    // kibi: end
 
     _.defaults(stash, this._defaults);
     // apply diff to state from stash, will change state in place via side effect

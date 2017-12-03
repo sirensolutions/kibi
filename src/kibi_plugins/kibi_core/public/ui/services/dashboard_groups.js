@@ -377,15 +377,13 @@ uiModules
 
     selectDashboard(dashboardId) {
       $timeout.cancel(lastSelectDashboardEventTimer);
-      // do not delay the switch if we are switching to the same dashboard
-      // do a little delay when switching to a different one
-      // to avoid "multiple fast clicking issue"
+
       const currentDashboardId = kibiState._getCurrentDashboardId();
-      const delay = currentDashboardId === dashboardId ? 0 : 250;
       // only update meta if we stay on the same dashboard
       // in other cases the meta will be triggered by a watcher kibiState._getCurrentDashboardId
       const updateMeta = currentDashboardId === dashboardId ? true : false;
 
+      // we need this timeout to allow ui event handler take place.
       lastSelectDashboardEventTimer = $timeout(() => {
         // save which one was selected for:
         // - iterate over dashboard groups remove the active group
@@ -407,7 +405,7 @@ uiModules
             this.updateMetadataOfDashboardIds([ dashboardId ], true);
           }
         });
-      }, delay);
+      }, 0);
       return lastSelectDashboardEventTimer;
     }
 

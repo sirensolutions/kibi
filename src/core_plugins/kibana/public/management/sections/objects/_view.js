@@ -19,9 +19,8 @@ uiModules.get('apps/management')
 .directive('kbnManagementObjectsView', function (kbnIndex, createNotifier, confirmModal) {
   return {
     restrict: 'E',
-    // kibi: replaces esAdmin with savedObjectsAPI
-    // kibi: added savedObjectsAPI and queryEngineClient
-    controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, savedObjectsAPI, queryEngineClient) {
+    // kibi: added  queryEngineClient
+    controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, queryEngineClient) {
       const notify = createNotifier({ location: 'SavedObject view' });
       const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
       const service = $injector.get(serviceObj.service);
@@ -111,12 +110,7 @@ uiModules.get('apps/management')
 
       $scope.title = service.type;
 
-      // kibi: use `savedObjectsAPI` instead of `esAdmin`
-      savedObjectsAPI.get({
-        index: kbnIndex,
-        type: service.type,
-        id: $routeParams.id
-      })
+      savedObjectsClient.get(service.type, $routeParams.id)
       .then(function (obj) {
         $scope.obj = obj;
         $scope.link = service.urlFor(obj._id); // kibi: use "_id" instead of "id"
@@ -182,11 +176,7 @@ uiModules.get('apps/management')
           // kibi: wrapped the original function
           // as we need to do our checks before
           const _delete = function (filteredIds) {
-            return savedObjectsAPI.delete({
-              index: kbnIndex,
-              type: service.type,
-              id: $routeParams.id
-            })
+            return savedObjectsClient.delete(service.type, $routeParams.id)
             .then(function (resp) {
               // this should be emited also from other places
               $rootScope.$emit('kibi:' + service.type + ':changed', resp); // kibi: kibi event
@@ -211,7 +201,7 @@ uiModules.get('apps/management')
       };
 
       $scope.submit = function () {
-        const source = _.cloneDeep($scope.obj.attributes);
+        const source = _.cloneDeep($scope.obj._source);
 
         _.each($scope.fields, function (field) {
           let value = field.value;
@@ -227,12 +217,7 @@ uiModules.get('apps/management')
           _.set(source, field.name, value);
         });
 
-        savedObjectsAPI.index({
-          index: kbnIndex,
-          type: service.type,
-          id: $routeParams.id,
-          body: source
-        })
+        savedObjectsClient.create(service.type, source, { id: $routeParams.id })
         .then(function (resp) {
           // kibi: flush the cache on the server side
           queryEngineClient.clearCache(service);

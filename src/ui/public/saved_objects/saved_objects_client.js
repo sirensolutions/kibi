@@ -43,7 +43,7 @@ export class SavedObjectsClient {
     }
     // kibi: use our SavedObjectAPI
     return this._savedObjectsAPI.index({
-      index: this.kbnIndex,
+      index: this._kbnIndex,
       type: type,
       id: options.id,
       body: attributes
@@ -66,7 +66,7 @@ export class SavedObjectsClient {
     }
 
     return this._savedObjectsAPI.delete({
-      index: this.kbnIndex,
+      index: this._kbnIndex,
       type: type,
       id: id
     });
@@ -140,7 +140,7 @@ export class SavedObjectsClient {
 
     // kibi: use our SavedObjectAPI
     return this._savedObjectsAPI.get({
-      index: this.kbnIndex,
+      index: this._kbnIndex,
       type: type,
       id: id
     });

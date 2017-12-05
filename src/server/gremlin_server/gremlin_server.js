@@ -149,7 +149,7 @@ function startServer(self, fulfill, reject) {
 
             if (config.has('kibana.index')) {
               const kibanaIndex = config.get('kibana.index');
-              if (esUsername) {
+              if (kibanaIndex) {
                 args.push('--kibi.index=' + kibanaIndex);
               }
             }

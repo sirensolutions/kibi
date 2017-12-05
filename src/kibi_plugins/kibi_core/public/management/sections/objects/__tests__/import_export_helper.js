@@ -44,14 +44,17 @@ describe('Kibi Components', function () {
       sinon.stub(indexPatterns, 'getIds').returns(Promise.resolve(['index-pattern-1']));
       importExportHelper.addExtraObjectForExportAll(objectToExport).then((results) => {
         expect(results.length).to.equal(2);
+        // kibi: kibi uses _id:'kibi'
+        // and '_' is added to id and type
         expect(results[0][0]).to.eql({
-          id: 'x.x.x-x',
-          type: 'config'
+          _id: 'kibi',
+          _type: 'config'
         });
         expect(results[1][0]).to.eql({
-          id: 'index-pattern-1',
-          type: 'index-pattern'
+          _id: 'index-pattern-1',
+          _type: 'index-pattern'
         });
+        // kibi: end
         done();
       }).catch(done);
     });
@@ -64,19 +67,21 @@ describe('Kibi Components', function () {
       importExportHelper.loadConfig(configToLoad, notify).then(() => {
         sinon.assert.notCalled(notifyWarningSpy);
         sinon.assert.calledOnce(notifyErrorSpy);
+        // kibi: message changed, kibi uses 'kibi' config
         sinon.assert.calledWith(
           notifyErrorSpy,
           'Config object version [y.y.y-y] in the import ' +
-          'does not match current version [x.x.x-x]\n' +
+          'does not match current version [ kibi ]\n' +
           'Non of the advanced settings parameters were imported'
         );
         done();
       }).catch(done);
     });
 
-    it('loadConfig should set the correct config values if config version === kibiVersion', (done) => {
+    it('loadConfig should set the correct config values if config version === kibi', (done) => {
+      // kibi: kibi uses _id:'kibi'
       const configToLoad = {
-        _id: 'x.x.x-x',
+        _id: 'kibi',
         _source: {
           key1: 'value1'
         }

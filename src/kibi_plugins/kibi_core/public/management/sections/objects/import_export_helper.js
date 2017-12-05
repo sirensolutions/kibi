@@ -48,7 +48,8 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
 
     loadConfig(configDocument, notify) {
       if (configDocument) {
-        if (configDocument._id === kibiVersion) {
+        // kibi: kibi uses 'kibi' config
+        if (configDocument._id === 'kibi') {
           // override existing config values
           const promises = [];
           _.each(configDocument._source, function (value, key) {
@@ -58,7 +59,7 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
         } else {
           notify.error(
             'Config object version [' + configDocument._id + '] in the import ' +
-            'does not match current version [' + kibiVersion + ']\n' +
+            'does not match current version [ kibi ]\n' +
             'Non of the advanced settings parameters were imported'
           );
           return Promise.resolve(true);
@@ -138,11 +139,13 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
      * Add config and index patterns to the list of exported objects
      */
     addExtraObjectForExportAll(objectsToExport) {
-      objectsToExport.push([{ id: kibiVersion, type: 'config' }]);
+      // kibi: '_' is added to id and type
+      objectsToExport.push([{ _id: 'kibi', _type: 'config' }]);
 
       return indexPatterns.getIds().then(function (list) {
         _.each(list, (id) => {
-          objectsToExport.push([{ id: id, type: 'index-pattern' }]);
+          // kibi: '_' is added to id and type
+          objectsToExport.push([{ _id: id, _type: 'index-pattern' }]);
         });
         return objectsToExport;
       });

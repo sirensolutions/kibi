@@ -164,13 +164,14 @@ export class SavedObjectsClient {
    * ])
    */
   bulkGet(objects = []) {
-    const url = this._getUrl(['bulk_get']);
-    const filteredObjects = objects.map(obj => _.pick(obj, ['id', 'type']));
-
-    return this._request('POST', url, filteredObjects).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp);
+    return this._savedObjectsAPI.mget({
+      body: { docs: objects.map(obj => this._transformToMget(this._kbnIndex, obj)) }
     });
+  }
+
+  // kibi: Takes an object and returns the associated data needed for an mget API request
+  _transformToMget(kbnIndex, obj) {
+    return { index: kbnIndex, _id: obj._id, _type: obj._type };
   }
 
   /**

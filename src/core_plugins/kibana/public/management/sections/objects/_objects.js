@@ -56,9 +56,8 @@ uiModules.get('apps/management')
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
-    // kibi: replaces esAdmin with savedObjectsAPI
-    // kibi: added savedObjectsAPI, kbnVersion, queryEngineClient
-    controller: function ($scope, $injector, $q, AppState, savedObjectsAPI, kbnVersion, queryEngineClient) {
+    // kibi: added kbnVersion, queryEngineClient
+    controller: function ($scope, $injector, $q, AppState, kbnVersion, queryEngineClient) {
       const notify = createNotifier({ location: 'Saved Objects' });
       // TODO: Migrate all scope variables to the controller.
       const $state = $scope.state = new AppState();
@@ -202,10 +201,7 @@ uiModules.get('apps/management')
 
       function retrieveAndExportDocs(objs) {
         if (!objs.length) return notify.error('No saved objects to export.');
-        // kibi: use savedObjectsAPI instead of es
-        savedObjectsAPI.mget({
-          body: { docs: objs.map(transformToMget) }
-        })
+        savedObjectsClient.bulkGet(objs)
         .then(function (response) {
           // kibi: sort the docs so the config is on the top
           const docs = response.docs.map(partialRight(pick, '_id', '_type', '_source'));
@@ -213,12 +209,6 @@ uiModules.get('apps/management')
           // kibi: end
           saveToFile(docs);
         });
-      }
-
-      // Takes an object and returns the associated data needed for an mget API request
-      function transformToMget(obj) {
-        // kibi: added index
-        return { index: kbnIndex, _id: obj.id, _type: obj.type };
       }
 
       function saveToFile(results) {

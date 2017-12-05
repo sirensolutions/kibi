@@ -3,7 +3,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import _ from 'lodash';
 
 export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVersion, kbnIndex,
-  queryEngineClient, Private, Promise, indexPatterns) {
+  queryEngineClient, Private, Promise, indexPatterns, dashboardGroups) {
 
   const getIds = Private(IndexPatternsGetProvider);
   const visTypes = Private(VisTypesRegistryProvider);
@@ -206,7 +206,10 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
 
       return this.loadIndexPatterns(indexPatternDocuments, notify).then(() => {
         return this.loadConfig(configDocument, notify).then(() => {
-          return this.executeSequentially(docs, services, notify, overwriteAll);
+          return this.executeSequentially(docs, services, notify, overwriteAll).then(() => {
+            // kibi: dashboard groups should be recomputed after import
+            return dashboardGroups.computeGroups('new objects are imported');
+          });
         });
       });
     }

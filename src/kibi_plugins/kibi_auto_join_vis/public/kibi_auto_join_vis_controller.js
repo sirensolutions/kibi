@@ -391,7 +391,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                               const relevantSavedSearchIds = new Set();
                               _.each(savedSearches.hits, (savedSearch) => {
                                 const json = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
-                                if (json.index === relByDomain.range.indexPattern) {
+                                if (json.index === relByDomain.range.id) {
                                   relevantSavedSearchIds.add(savedSearch.id);
                                 }
                               });
@@ -412,39 +412,14 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                                   const subButton = kibiSequentialJoinVisHelper.constructSubButton(button,
                                     availableDashboard, relByDomain);
 
-                                  const updateSourceCount = function (currentDashboardId, callback) {
-                                    const virtualButton = {
-                                      sourceField: subButton.targetField,
-                                      sourceIndexPatternId: subButton.targetIndexPatternId,
-                                      sourceIndexPatternType: subButton.targetIndexPatternType,
-                                      targetField: subButton.sourceField,
-                                      targetIndexPatternId: subButton.sourceIndexPatternId,
-                                      targetIndexPatternType: subButton.sourceIndexPatternType,
-                                      targetDashboardId: currentDashboardId,
-                                      type: 'INDEX_PATTERN'
-                                    };
-
-                                    return _addButtonQuery.call(self, [ virtualButton ], this.targetDashboardId)
-                                    .then(results => {
-                                      updateCounts(results, $scope);
-                                      return results;
-                                    })
-                                    .catch(notify.error);
-                                  };
-                                  subButton.updateSourceCount = updateSourceCount;
-
                                   kibiSequentialJoinVisHelper.addClickHandlerToButton(subButton);
 
-                                  let key = rel.directLabel;
+                                  let key = relByDomain.directLabel;
                                   if (!button.sub[key]) {
                                     button.sub[key] = [];
                                   }
                                   button.sub[key].push(subButton);
                                 });
-
-
-
-
                               });
                             })
                           );
@@ -522,9 +497,16 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       };
 
       for (let i = 0; i < buttons.length; i++) {
-        buttons[i].updateSourceCount = updateSourceCount;
+        const button = buttons[i];
+        if (button.type === 'INDEX_PATTERN') {
+          button.updateSourceCount = updateSourceCount;
+        } else {
+          _.each(button.sub, (subButton) => {
+            subButton.updateSourceCount = updateSourceCount;
+          });
+        }
         // Returns the count of documents involved in the join
-        $scope.buttons[buttons[i].btnIndex] = buttons[i];
+        $scope.buttons[button.btnIndex] = button;
       }
     })
     .catch(notify.error);

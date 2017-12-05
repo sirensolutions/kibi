@@ -23,20 +23,18 @@ uiModules
     restrict: 'E',
     scope: {
       filter: '=',
+      isSaving: '='
     },
     template,
     controller($scope, $element) {
-      $scope.$on('kibi-dashboard-nav-saving', (event, value) => {
+      $scope.updateSavingState = value => {
         $scope.isSaving = value;
         if ($scope.isSaving) {
           $timeout(() => {
             $scope.isSaving = false;
           }, 5000);
         }
-        if (event && event.stopPropagation) {
-          event.stopPropagation();
-        }
-      });
+      };
 
       $scope.persistCollapsedGroupState = () => {
         const collapsedGroups = [];

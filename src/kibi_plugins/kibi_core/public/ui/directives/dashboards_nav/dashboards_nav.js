@@ -47,6 +47,7 @@ uiModules
       $scope.dashApp = $document.find('.app-container.dashboard-container');
       $scope.links = $element.find('.links');
       $scope.groupEditor = $element.find('.group-editor');
+      $scope.isSaving = false;
 
       $scope.resizeParts = (count) => {
         $scope.bar.css('visibility', 'visible');
@@ -135,7 +136,7 @@ uiModules
         newDashboardConfirmPromise(title, options)
         .then(resp => {
           let dash;
-          $scope.$broadcast('kibi-dashboard-nav-saving', true);
+          $scope.isSaving = true;
           savedDashboards.get('')
           .then(savedDash => {
             dash = savedDash;
@@ -157,14 +158,14 @@ uiModules
               }
             };
             HashedItemStoreSingleton.setItem('kibi_appstate_param', JSON.stringify(state));
-            $scope.$broadcast('kibi-dashboard-nav-saving', false);
+            $scope.isSaving = false;
             notify.info('Dashboard was successfuly created');
             $rootScope.$broadcast('kibi:dashboardgroup:changed');
             globalNavState.setOpen(false);
             dashboardGroups.selectDashboard(dash.id);
           })
           .catch (reason => {
-            $scope.$broadcast('kibi-dashboard-nav-saving', false);
+            $scope.isSaving = false;
             notify.error(reason);
           });
         });
@@ -217,12 +218,12 @@ uiModules
 
       $scope.newDashboardGroup = event => {
         event.preventDefault();
-        $scope.$broadcast('kibi-dashboard-nav-saving', true);
+        $scope.isSaving = true;
         const baseName = 'New Group';
         const lastCopy = $scope.getLastNewDashboardGroupName(baseName);
         const title = lastCopy < 0 ? baseName : baseName + ' #' + (lastCopy + 1);
         dashboardGroups.newGroup(title).then((groupId) => {
-          $scope.$broadcast('kibi-dashboard-nav-saving', false);
+          $scope.isSaving = false;
           if (groupId) {
             notify.info('New dashboard group was successfuly created');
             $rootScope.$broadcast('kibi:dashboardgroup:changed', groupId);
@@ -237,7 +238,7 @@ uiModules
           }
         })
         .catch (reason => {
-          $scope.$broadcast('kibi-dashboard-nav-saving', false);
+          $scope.isSaving = false;
           notify.error(reason);
         });
       };

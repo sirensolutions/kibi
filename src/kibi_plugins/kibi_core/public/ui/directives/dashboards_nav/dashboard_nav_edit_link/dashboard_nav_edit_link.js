@@ -26,7 +26,8 @@ uiModules
     scope: {
       filter: '=',
       group: '=',
-      isFirst: '='
+      isFirst: '=',
+      updateSavingState: '&'
     },
     template: dashboardNavEditLinkTemplate,
     link: function ($scope, $element) {
@@ -119,7 +120,7 @@ uiModules
           } else {
             id = $scope.group.id;
           }
-          $scope.$emit('kibi-dashboard-nav-saving', true);
+          $scope.updateSavingState({ value: true });
           globalNavState.setOpen(false);
           dashboardGroups.selectDashboard(id);
           return;
@@ -136,11 +137,10 @@ uiModules
       };
 
       $scope.dashboardLoaded = kibiState._getCurrentDashboardId();
-      $scope.$watch(kibiState._getCurrentDashboardId, id => {
-        $scope.dashboardLoaded = id;
-        $timeout(() => {
-          $scope.$emit('kibi-dashboard-nav-saving', false);
-        }, 1000);
+
+      $rootScope.$on('$routeChangeSuccess', () => {
+        $scope.dashboardLoaded = kibiState._getCurrentDashboardId();
+        $scope.updateSavingState({ value: false });
       });
 
       $scope.getLastClonedDashboardName = (title) => {
@@ -168,7 +168,7 @@ uiModules
 
       $scope.cloneDashboard = (id) => {
         let title;
-        $scope.$emit('kibi-dashboard-nav-saving', true);
+        $scope.updateSavingState({ value: true });
         savedDashboards.get(id)
         .then(savedDash => {
           savedDash.copyOnSave = true;
@@ -180,12 +180,12 @@ uiModules
         })
         .then(cache.invalidate)
         .then(() => {
-          $scope.$emit('kibi-dashboard-nav-saving', false);
+          $scope.updateSavingState({ value: false });
           notify.info('Dashboard ' + title + ' was successfuly cloned');
           $scope.$emit('kibi:dashboardgroup:changed', id);
         })
         .catch (reason => {
-          $scope.$emit('kibi-dashboard-nav-saving', false);
+          $scope.updateSavingState({ value: false });
           notify.error(reason);
         });
       };
@@ -195,7 +195,7 @@ uiModules
         if (id === dash.id) {
           $rootScope.$broadcast('kibi:dashboardviewmode:change', DashboardViewMode.EDIT, item.topNavKey);
         } else {
-          $scope.$emit('kibi-dashboard-nav-saving', true);
+          $scope.updateSavingState({ value: true });
           const state = {
             appState: {
               viewMode: DashboardViewMode.EDIT
@@ -239,7 +239,7 @@ uiModules
         const confirmMessage = `Are you sure you want to delete '${title}'?`;
         confirmModalPromise(confirmMessage, { confirmButtonText: `Delete dashboard` })
         .then(() => {
-          $scope.$emit('kibi-dashboard-nav-saving', true);
+          $scope.updateSavingState({ value: true });
           savedDashboards.delete(id)
           .then($scope.removeDashboardFromGroup(id))
           .then(cache.invalidate)
@@ -250,11 +250,11 @@ uiModules
             } else {
               $scope.$emit('kibi:dashboardgroup:changed');
             }
-            $scope.$emit('kibi-dashboard-nav-saving', false);
+            $scope.updateSavingState({ value: false });
             notify.info('Dashboard ' + title + ' was successfuly deleted');
           })
           .catch(reason => {
-            $scope.$emit('kibi-dashboard-nav-saving', false);
+            $scope.updateSavingState({ value: false });
             notify.error(reason);
           });
         });
@@ -264,17 +264,17 @@ uiModules
         const confirmMessage = `Are you sure you want to delete '${$scope.group.title}'?`;
         confirmModalPromise(confirmMessage, { confirmButtonText: `Delete dashboard group` })
         .then(() => {
-          $scope.$emit('kibi-dashboard-nav-saving', true);
+          $scope.updateSavingState({ value: true });
           const group = $scope.group;
           savedDashboardGroups.delete(group.id)
           .then(cache.invalidate)
           .then(() => {
-            $scope.$emit('kibi-dashboard-nav-saving', false);
+            $scope.updateSavingState({ value: false });
             notify.info('Dashboard Group ' + group.title + ' was successfuly deleted');
             $scope.$emit('kibi:dashboardgroup:changed', group.id);
           })
           .catch(reason => {
-            $scope.$emit('kibi-dashboard-nav-saving', false);
+            $scope.updateSavingState({ value: false });
             notify.error(reason);
           });
         });

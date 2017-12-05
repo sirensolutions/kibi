@@ -161,12 +161,12 @@ export class SavedObjectsClient {
    */
   bulkGet(objects = []) {
     return this._savedObjectsAPI.mget({
-      body: { docs: objects.map(obj => this.transformToMget(this._kbnIndex, obj)) }
+      body: { docs: objects.map(obj => this._transformToMget(this._kbnIndex, obj)) }
     });
   }
 
   // kibi: Takes an object and returns the associated data needed for an mget API request
-  transformToMget(kbnIndex, obj) {
+  _transformToMget(kbnIndex, obj) {
     return { index: kbnIndex, _id: obj._id, _type: obj._type };
   }
 

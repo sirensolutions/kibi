@@ -44,6 +44,8 @@ describe('Kibi Components', function () {
       sinon.stub(indexPatterns, 'getIds').returns(Promise.resolve(['index-pattern-1']));
       importExportHelper.addExtraObjectForExportAll(objectToExport).then((results) => {
         expect(results.length).to.equal(2);
+        // kibi: kibi uses _id:'kibi'
+        // and '_' is added to id and type
         expect(results[0][0]).to.eql({
           _id: 'kibi',
           _type: 'config'
@@ -52,6 +54,7 @@ describe('Kibi Components', function () {
           _id: 'index-pattern-1',
           _type: 'index-pattern'
         });
+        // kibi: end
         done();
       }).catch(done);
     });
@@ -64,6 +67,7 @@ describe('Kibi Components', function () {
       importExportHelper.loadConfig(configToLoad, notify).then(() => {
         sinon.assert.notCalled(notifyWarningSpy);
         sinon.assert.calledOnce(notifyErrorSpy);
+        // kibi: message changed, kibi uses 'kibi' config
         sinon.assert.calledWith(
           notifyErrorSpy,
           'Config object version [y.y.y-y] in the import ' +
@@ -74,7 +78,8 @@ describe('Kibi Components', function () {
       }).catch(done);
     });
 
-    it('loadConfig should set the correct config values if config version === kibiVersion', (done) => {
+    it('loadConfig should set the correct config values if config version === kibi', (done) => {
+      // kibi: kibi uses _id:'kibi'
       const configToLoad = {
         _id: 'kibi',
         _source: {

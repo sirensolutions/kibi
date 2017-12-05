@@ -67,6 +67,66 @@ export function RelationsHelperFactory(config) {
     }
 
     /**
+     * validateRelationIdWithRelations validates the given ID of a relation between indices
+     * against the provided relations.
+     *
+     * @param relationId the ID of the relation
+     * @param relations the relations array
+     * @returns true if the relation exists and is ok
+     */
+    validateRelationIdWithRelations(relationId, relations) {
+      if (!relationId) {
+        throw new Error('relationId cannot be undefined');
+      }
+
+      const relation = _.find(relations, 'id', relationId);
+      return Boolean(relation && this.validateEntitiesRelation(relation));
+    };
+
+    /**
+     * validateEntitiesRelation validates the given relation between two entity sets.
+     *
+     * @param relation the relation between indices
+     * @returns true if the relation is ok
+     */
+    validateEntitiesRelation(relation) {
+      // the id should have 6 parts
+      if (!relation.id) {
+        return false;
+      }
+      const parts = relation.id.split(SEPARATOR);
+      if (!checkIdFormat.call(this, parts)) {
+        return false;
+      }
+      // label (which is the straight field) should be defined
+      if (!relation.directLabel) {
+        return false;
+      }
+      // check we have the domain and range of the relation
+      if (!relation.domain || !relation.range || !relation.range.id) {
+        return false;
+      }
+
+      /**
+       * @retval true if @a and @b are strictly equal or are both empty
+       * @retval false if not.
+       */
+      const areEqual = (a, b) => {
+        return a === b || _.isEmpty(a) && _.isEmpty(b) || _.isNull(a) && b === 'null' || a === 'null' && _.isNull(b);
+      };
+
+      // test if the ID is correct
+      const isSyntacticallyCorrectId = function (relation, parts) {
+        return areEqual(relation.domain.id, parts[0]) && areEqual(relation.domain.field, parts[2])
+          && areEqual(relation.range.id, parts[3]) && areEqual(relation.range.field, parts[5])
+      };
+      if (!isSyntacticallyCorrectId(relation, parts)) {
+        return false;
+      }
+      return true;
+    };
+
+    /**
      * validateIndicesRelation validates the given relation between two indices
      *
      * @param relation the relation between indices

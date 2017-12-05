@@ -115,6 +115,10 @@ export class SavedObjectsClient {
     // TODO: allow fields in our savedObjectsAPI
     delete opt.fields;
 
+    if (opt.search) {
+      opt.q = options.search;
+      delete opt.search;
+    }
     if (opt.per_page) {
       opt.size = options.per_page;
       delete opt.per_page;

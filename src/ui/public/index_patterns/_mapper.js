@@ -5,16 +5,18 @@ import { EnhanceFieldsWithCapabilitiesProvider } from 'ui/index_patterns/_enhanc
 import { TransformMappingIntoFields } from 'ui/kibi/components/commons/_transform_mapping_into_fields';
 import { PatternToWildcardFn } from 'ui/kibi/components/commons/_pattern_to_wildcard';
 import { LocalCacheFactory } from 'ui/kibi/components/commons/_local_cache';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 // kibi: imports
 import { getPathsForIndexPattern } from 'ui/kibi/index_patterns/_get_paths_for_index_pattern';
 
-// kibi: require savedObjecsAPI service instead of esAdmin, added mappings
-export function IndexPatternsMapperProvider(Private, Promise, es, savedObjectsAPI, config, kbnIndex, mappings) {
+// kibi: added mappings
+export function IndexPatternsMapperProvider(Private, Promise, es, config, kbnIndex, mappings) {
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   const transformMappingIntoFields = Private(TransformMappingIntoFields);
   const patternToWildcard = Private(PatternToWildcardFn);
   const LocalCache = Private(LocalCacheFactory);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   // kibi: support dots in field name
   const _getPathsForIndexPattern = Private(getPathsForIndexPattern);
@@ -67,11 +69,10 @@ export function IndexPatternsMapperProvider(Private, Promise, es, savedObjectsAP
 
       if (!opts.skipIndexPatternCache) {
         // kibi: retrieve index pattern using the saved objects API.
-        return savedObjectsAPI.get({
-          index: kbnIndex,
-          type: 'index-pattern',
-          id: id
-        })
+        return savedObjectsClient.get(
+          'index-pattern',
+          id
+        )
         // kibi: end
         .then(function (resp) {
           if (resp.found && resp._source.fields) {

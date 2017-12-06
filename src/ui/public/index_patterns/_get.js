@@ -16,13 +16,11 @@ export function IndexPatternsGetProvider(Private, savedObjectsAPI, kbnIndex) {
       });
     }
 
-    // kibi: use the savedObjectsAPI
-    const promise = savedObjectsAPI.search({
-      index: kbnIndex,
+    const promise = savedObjectsClient.find({
       type: 'index-pattern',
-      size: 10000
+      fields: [],
+      perPage: 10000
     })
-    // kibi: end
     .then(function (resp) {
       return _.pluck(resp.hits.hits, '_id');
     });

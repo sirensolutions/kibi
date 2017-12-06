@@ -1,22 +1,19 @@
 import { IndexPatternsGetProvider }  from 'ui/index_patterns/_get';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import _ from 'lodash';
 
-export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVersion, kbnIndex,
+export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
   queryEngineClient, Private, Promise, indexPatterns, dashboardGroups) {
 
   const getIds = Private(IndexPatternsGetProvider);
   const visTypes = Private(VisTypesRegistryProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   class ImportExportHelper {
 
     createIndexPattern(doc) {
-      return savedObjectsAPI.index({
-        index: kbnIndex,
-        type: 'index-pattern',
-        id: doc._id,
-        body: doc._source
-      });
+      return savedObjectsClient.create('index-pattern', doc._source, { id: doc._id });
     }
 
     loadIndexPatterns(indexPatternDocuments, notify) {

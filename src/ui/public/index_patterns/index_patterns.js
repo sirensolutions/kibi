@@ -9,14 +9,19 @@ import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
+// kibi: import savedObjectsClient
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
+
 export { IndexPatternsApiClientProvider } from './index_patterns_api_client_provider';
 
-export function IndexPatternsProvider(Notifier, Private, kbnIndex, savedObjectsAPI) {
+export function IndexPatternsProvider(Notifier, Private, kbnIndex) {
   const self = this;
 
   const IndexPattern = Private(IndexPatternProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
   const getProvider = Private(IndexPatternsGetProvider);
+  // kibi: added by kibi
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   self.get = function (id) {
     if (!id) return self.make();
@@ -33,13 +38,11 @@ export function IndexPatternsProvider(Notifier, Private, kbnIndex, savedObjectsA
     self.getIds.clearCache();
     pattern.destroy();
 
-    // kibi: use the Saved Objects API client
-    return savedObjectsAPI.delete({
-    // kibi: end
-      index: kbnIndex,
-      type: 'index-pattern',
-      id: pattern.id
-    });
+    // kibi: use Saved Objects Client client
+    return savedObjectsClient.delete(
+      'index-pattern',
+      pattern.id
+    );
   };
 
   self.errors = {

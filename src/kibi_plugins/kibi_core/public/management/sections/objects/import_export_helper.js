@@ -208,7 +208,7 @@ export default function ImportHelperFactory(config, es, savedObjectsAPI, kibiVer
         return this.loadConfig(configDocument, notify).then(() => {
           return this.executeSequentially(docs, services, notify, overwriteAll).then(() => {
             // kibi: dashboard groups should be recomputed after import
-            return dashboardGroups.computeGroups('new objects are imported');
+            return dashboardGroups.computeGroups('new objects were imported');
           });
         });
       });

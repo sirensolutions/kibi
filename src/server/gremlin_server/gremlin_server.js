@@ -147,6 +147,13 @@ function startServer(self, fulfill, reject) {
               }
             }
 
+            if (config.has('kibana.index')) {
+              const kibanaIndex = config.get('kibana.index');
+              if (kibanaIndex) {
+                args.push('--kibi.index=' + kibanaIndex);
+              }
+            }
+
             self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
             self.gremlinServer = childProcess.spawn('java', args);
             self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin', 'error'], ('' + data).trim()));

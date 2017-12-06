@@ -1,6 +1,8 @@
+import _ from 'lodash';
+
 import template from 'plugins/kibi_auto_join_vis/kibi_auto_join_vis_params.html';
 import { uiModules } from 'ui/modules';
-import 'ui/kibi/components/ontology_client/ontology_client'
+import 'ui/kibi/components/ontology_client/ontology_client';
 
 uiModules
 .get('kibana/kibi_auto_join_vis')
@@ -18,7 +20,7 @@ uiModules
       // Updates the buttons to show according to the selected indexpattern.
       const updateFilteredButtons = function () {
         $scope.filteredButtons = _.filter($scope.buttons, (button) => {
-           return button.domainIndexPattern === $scope.filterIndexPattern.id || !button.domainIndexPattern;
+          return button.domainIndexPattern === $scope.filterIndexPattern.id || !button.domainIndexPattern;
         });
       };
 
@@ -41,10 +43,10 @@ uiModules
                 button.domainIndexPattern = rel.domain.indexPattern;
                 button.type = rel.range.type;
 
-                if (button.type === 'virtual-entity') {
-                  ontologyModelClient.getClasses()
+                if (button.type === 'VIRTUAL_ENTITY') {
+                  ontologyClient.getEntities()
                   .then((entities) => {
-                    const virtualEntity = _.find(entities, (entity) => { return entity.id === rel.range.indexPattern });
+                    const virtualEntity = _.find(entities, (entity) => { return entity.id === rel.range.id; });
                     button.label = rel.directLabel + ' (' + virtualEntity.label + ')';
                   });
                 }

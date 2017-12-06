@@ -118,7 +118,7 @@ export function RelationsHelperFactory(config) {
       // test if the ID is correct
       const isSyntacticallyCorrectId = function (relation, parts) {
         return areEqual(relation.domain.id, parts[0]) && areEqual(relation.domain.field, parts[2])
-          && areEqual(relation.range.id, parts[3]) && areEqual(relation.range.field, parts[5])
+          && areEqual(relation.range.id, parts[3]) && areEqual(relation.range.field, parts[5]);
       };
       if (!isSyntacticallyCorrectId(relation, parts)) {
         return false;

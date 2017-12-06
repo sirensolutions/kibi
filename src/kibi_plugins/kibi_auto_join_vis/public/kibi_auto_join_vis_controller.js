@@ -14,7 +14,7 @@ import { SearchHelper } from 'ui/kibi/helpers/search_helper';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
 
 function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, getAppState, globalState, createNotifier,
-  savedDashboards, savedSearches, dashboardGroups, kibiMeta, es, ontologyClient) {
+  savedDashboards, savedSearches, dashboardGroups, kibiMeta, timefilter, es, ontologyClient) {
   const DelayExecutionHelper = Private(DelayExecutionHelperFactory);
   const searchHelper = new SearchHelper(kbnIndex);
   const edit = onVisualizePage();
@@ -39,7 +39,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   $scope.getButtonLabel = function (button) {
     const count = button.targetCount ? button.targetCount : 0;
     return button.label.replace('{0}', count);
-  }
+  };
 
   const buttonMetaCallback = function (button, meta) {
     if (button.forbidden) {
@@ -71,10 +71,11 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   const updateCounts = function (results, scope) {
     const metaDefinitions = _.map(results, result => {
       const definition = result.button;
+      const sourceDash = result.button.sourceDashboardId ? result.button.sourceDashboardId : '';
+      const targetDash = result.button.targetDashboardId ? result.button.targetDashboardId : '';
       // adding unique id as required by kibiMeta
       definition.id =
-        result.button.sourceDashboardId ? result.button.sourceDashboardId : '' +
-        result.button.targetDashboardId ? result.button.targetDashboardId : '' +
+        sourceDash + targetDash +
         relationsHelper.getJoinIndicesUniqueID(
           result.button.sourceIndexPatternId,
           result.button.sourceIndexPatternType,
@@ -216,7 +217,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         button.type = 'VIRTUAL_ENTITY';
         promises.push(ontologyClient.getEntities()
           .then((entities) => {
-            const virtualEntity = _.find(entities, (entity) => { return entity.id === rel.range.id });
+            const virtualEntity = _.find(entities, (entity) => { return entity.id === rel.range.id; });
             button.id = rel.id + '-ve-' + rel.range.id;
             button.label = rel.directLabel + ' (~{0} ' + virtualEntity.label + ')';
             newButtons.push(button);
@@ -359,10 +360,10 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                 const cardinalityQuery = {
                   index: button.sourceIndexPatternId,
                   body: {
-                      size : 0,
-                      aggs : {
-                        distinct_field : { cardinality : { field : button.sourceField } }
-                      }
+                    size : 0,
+                    aggs : {
+                      distinct_field : { cardinality : { field : button.sourceField } }
+                    }
                   }
                 };
 
@@ -392,7 +393,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                                 const availableDashboards = [];
                                 _.each(savedDashboards.hits, (savedDashboard) => {
                                   if (relevantSavedSearchIds.has(savedDashboard.savedSearchId)) {
-                                    availableDashboards.push( {
+                                    availableDashboards.push({
                                       id: savedDashboard.id,
                                       title: savedDashboard.title
                                     });
@@ -405,7 +406,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
                                   kibiSequentialJoinVisHelper.addClickHandlerToButton(subButton);
 
-                                  let key = relByDomain.directLabel;
+                                  const key = relByDomain.directLabel;
                                   if (!button.sub[key]) {
                                     button.sub[key] = [];
                                   }
@@ -541,33 +542,34 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
   $scope.$watch('visibility', (newVal, oldVal) => {
     if (newVal && !_.isEqual(newVal, oldVal)) {
-      for (var prop in newVal) {
+      const visibleRelations = new Set();
+      for (const prop in newVal) {
         if (newVal.hasOwnProperty(prop)) {
           if (newVal[prop] === true) {
-            console.log('opened relation: ' + prop);
-            // gathering buttons that have to computed
-            const computeButtons = [];
-            _.each($scope.buttons, (button) => {
-              if (button.type === 'VIRTUAL_ENTITY') {
-                _.each(button.sub, (subButtons, rel) => {
-                  if (rel === prop) {
-                    _.each(subButtons, (subButton) => {
-                      if (!subButton.joinExecuted) {
-                        computeButtons.push(subButton);
-                      }
-                    });
-                  }
-                });
-              }
-            });
-
-            _addButtonQuery(computeButtons, currentDashboardId)
-            .then(results => {
-              updateCounts(results, $scope);
-            });
+            visibleRelations.add(prop);
           }
         }
       }
+      // gathering buttons that have to computed
+      const computeButtons = _.reduce($scope.buttons, (acc, button) => {
+        if (button.type === 'VIRTUAL_ENTITY') {
+          _.each(button.sub, (subButtons, rel) => {
+            if (visibleRelations.has(rel)) {
+              _.each(subButtons, (subButton) => {
+                if (!subButton.joinExecuted) {
+                  acc.push(subButton);
+                }
+              });
+            }
+          });
+        }
+        return acc;
+      }, []);
+
+      _addButtonQuery(computeButtons, currentDashboardId)
+      .then(results => {
+        updateCounts(results, $scope);
+      });
     }
   }, true);
 

@@ -30,6 +30,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
+  $scope.visibility = {};
+
   $scope.btnCountsEnabled = function () {
     return config.get('kibi:enableAllRelBtnCounts');
   };
@@ -547,6 +549,38 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       updateButtons.call(this, 'GlobalState refreshInterval changed');
     }
   });
+
+  $scope.$watch('visibility', (newVal, oldVal) => {
+    if (newVal && !_.isEqual(newVal, oldVal)) {
+      for (var prop in newVal) {
+        if (newVal.hasOwnProperty(prop)) {
+          if (newVal[prop] === true) {
+            console.log('opened relation: ' + prop);
+            // gathering buttons that have to computed
+            const computeButtons = [];
+            _.each($scope.buttons, (button) => {
+              if (button.type === 'VIRTUAL_ENTITY') {
+                _.each(button.sub, (subButtons, rel) => {
+                  if (rel === prop) {
+                    _.each(subButtons, (subButton) => {
+                      if (!subButton.joinExecuted) {
+                        computeButtons.push(subButton);
+                      }
+                    });
+                  }
+                });
+              }
+            });
+
+            _addButtonQuery(computeButtons, currentDashboardId)
+            .then(results => {
+              updateCounts(results, $scope);
+            });
+          }
+        }
+      }
+    }
+  }, true);
 
   // when autoupdate is on we detect the refresh here
   const removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', (event) => {

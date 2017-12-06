@@ -72,6 +72,9 @@ uiModules
         updateFilteredRelations();
       };
 
+      /**
+       * This functions show the available target dashboards for a given EID relation
+       */
       $scope.toggleTargetDashboards = function (button) {
         if (!button.compatibleDashboard) {
           ontologyClient.getRelations()
@@ -85,7 +88,7 @@ uiModules
             }
             return ontologyClient.getDashboardsByEntity(entity)
             .then((dashboards) => {
-              return ontologyClient.getRelationsByDomain(entity.indexPattern)
+              return ontologyClient.getRelationsByDomain(entity.id)
               .then((targetRelations) => {
                 const compatibleDashboards = _.map(dashboards, (dashboard) => {
                   return dashboard.title;

@@ -228,9 +228,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           .then((savedDashboards) => {
             return savedSearches.find()
             .then((savedSearches) => {
-              // console.log('savedSearches');
-              // console.log(savedSearches.hits);
-
               const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
                 const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
                 return searchSource.index === rel.range.id;
@@ -240,8 +237,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                 const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
                   return savedDashboard.savedSearchId === compatibleSavedSearch.id;
                 });
-                // console.log('compatibleDashboards');
-                // console.log(compatibleDashboards);
                 _.each(compatibleDashboards, (compatibleDashboard) => {
                   const clonedButton = _.clone(button);
                   clonedButton.targetDashboardId = compatibleDashboard.id;
@@ -259,8 +254,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       }
     });
     return Promise.all(promises).then(() => {
-      console.log('newButtons');
-      console.log(newButtons);
       return newButtons;
     });
   };
@@ -381,9 +374,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                     button.sub = {};
 
                     return ontologyClient.getRelationsByDomain(button.targetIndexPatternId).then((relationsByDomain) => {
-                      console.log('button');
-                      console.log(button);
-                      console.log(relationsByDomain);
                       const dashboardPromises = [];
                       _.each(relationsByDomain, (relByDomain) => {
                         if (relByDomain.range.id !== button.sourceIndexPatternId) {
@@ -400,7 +390,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
                               return savedDashboards.find().then((savedDashboards) => {
                                 const availableDashboards = [];
-                                // console.log(savedDashboards);
                                 _.each(savedDashboards.hits, (savedDashboard) => {
                                   if (relevantSavedSearchIds.has(savedDashboard.savedSearchId)) {
                                     availableDashboards.push( {

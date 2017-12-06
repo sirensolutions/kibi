@@ -106,35 +106,9 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
 
           // create the alias for the filter
           alias = alias.replace(/\$DASHBOARD/g, title);
+          alias = alias.replace(/\$COUNT/g, button.targetCount);
           button.joinSeqFilter.meta.alias = alias;
-          if (alias.indexOf('$COUNT') !== -1) {
-            button.joinSeqFilter.meta.alias_tmpl = alias;
-            return button.updateSourceCount(currentDashboardId).then(results => {
-              return new Promise((fulfill, reject) => {
-              // here we expect only 1 result
-                const metaDefinitions = [{
-                  definition: results[0].button,
-                  callback: (error, meta) => {
-                    if (error) {
-                      notify.error(error);
-                      return reject(error);
-                    }
-                    if (button.isPruned) {
-                      button.joinSeqFilter.meta.isPruned = true;
-                      button.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total + '(*)');
-                    } else {
-                      button.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total);
-                    }
-                    switchToDashboard.apply(button);
-                    fulfill(meta.hits.total);
-                  }
-                }];
-                kibiMeta.getMetaForRelationalButtons(metaDefinitions);
-              });
-            });
-          } else {
-            switchToDashboard.apply(button);
-          }
+          switchToDashboard.apply(button);
         } else {
           button.joinSeqFilter.meta.alias_tmpl = '';
           // just redirect to the target dashboard
@@ -340,7 +314,7 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       sourceIndexPatternType: parentButton.sourceIndexPatternType,
       targetDashboardId: dashboard.id,
       targetField: relation.range.field,
-      targetIndexPatternId: relation.range.indexPattern,
+      targetIndexPatternId: relation.range.id,
       targetIndexPatternType: parentButton.targetIndexPatternType,
       type: 'INDEX_PATTERN'
     };

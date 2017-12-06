@@ -116,8 +116,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     if ($scope.multiSearchData) {
       $scope.multiSearchData.clear();
     }
-
-    return Promise.all(_.map(buttons, (button) => {
+    const indexPatternButtons = _.filter(buttons, 'type', 'INDEX_PATTERN');
+    return Promise.all(_.map(indexPatternButtons, (button) => {
       return Promise.all([
         kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
         kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)

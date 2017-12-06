@@ -248,8 +248,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
               });
             });
-
-
           })
         );
       }
@@ -265,13 +263,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         const originalButtonDefs = _.filter(newButtons,
           btn => relationsHelper.validateRelationIdWithRelations(btn.indexRelationId, relations));
 
-        // $scope.vis.error = '';
-        // if (originalButtonDefs.length !== newButtons.length) {
-        //   $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
-        //   if (!edit) {
-        //     return Promise.reject($scope.vis.error);
-        //   }
-        // }
         const difference = newButtons.length - originalButtonDefs.length;
         if (!edit && difference === 1) {
           notify.warning(difference + ' button refers to a non existing relation');

@@ -37,8 +37,6 @@ uiModules
           .each((rel) => {
             if (!rel.onSelect) {
               rel.onSelect = function (button) {
-                // console.log('select relation');
-                // console.log(rel);
                 button.indexRelationId = rel.id;
                 button.domainIndexPattern = rel.domain.indexPattern;
                 button.type = rel.range.type;
@@ -50,12 +48,6 @@ uiModules
                     button.label = rel.directLabel + ' (' + virtualEntity.label + ')';
                   });
                 }
-              };
-              rel.isSelected = function (button) {
-                if (button.indexRelationId === rel.id) {
-                  return rel;
-                }
-                return button.indexRelationId === rel.id;
               };
             }
           })
@@ -137,26 +129,23 @@ uiModules
               $scope.buttons.push(button);
             } else if (rel.range.type === 'INDEX_PATTERN') {
               button.type = 'INDEX_PATTERN';
-              savedDashboards.find()
-              .then((savedDashboards) => {
-                return savedSearches.find()
-                .then((savedSearches) => {
-                  const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
-                    const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
-                    return searchSource.index === rel.range.id;
+
+              return Promise.all([savedDashboards.find(),savedSearches.find()])
+              .then(([savedDashboards, savedSearches]) => {
+                const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
+                  const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
+                  return searchSource.index === rel.range.id;
+                });
+
+                _.each(compatibleSavedSearches, (compatibleSavedSearch) => {
+                  const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
+                    return savedDashboard.savedSearchId === compatibleSavedSearch.id;
                   });
-
-                  _.each(compatibleSavedSearches, (compatibleSavedSearch) => {
-                    const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
-                      return savedDashboard.savedSearchId === compatibleSavedSearch.id;
-                    });
-                    _.each(compatibleDashboards, (compatibleDashboard) => {
-                      const clonedButton = _.clone(button);
-                      clonedButton.label = rel.directLabel + ' (' + compatibleDashboard.title + ')';
-                      clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
-                      $scope.buttons.push(clonedButton);
-                    });
-
+                  _.each(compatibleDashboards, (compatibleDashboard) => {
+                    const clonedButton = _.clone(button);
+                    clonedButton.label = rel.directLabel + ' (' + compatibleDashboard.title + ')';
+                    clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
+                    $scope.buttons.push(clonedButton);
                   });
                 });
               });

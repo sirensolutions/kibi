@@ -14,7 +14,6 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
 
   KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId,
                                                                           currentDashboardId, dashboardIdIndexPair) {
-    const self = this;
     return _.chain(buttonDefs)
     .filter(function (buttonDef) {
       // if sourceDashboardId is defined keep only the one which match
@@ -65,10 +64,10 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       }
       return button;
     })
-    .map(function (buttonDef) {
+    .map((buttonDef) => {
       const button = _.clone(buttonDef);
 
-      self.addClickHandlerToButton(button);
+      this.addClickHandlerToButton(button);
       return button;
     }).value();
   };

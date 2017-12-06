@@ -289,9 +289,9 @@ describe('Kibi Components', function () {
               alias: ''
             }
           };
+          button.targetCount = 123;
 
           return button.click().then(() => {
-            sinon.assert.calledOnce(buttonDefs[0].updateSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('... related to (123) from dashboard 1');
           });
         });
@@ -311,10 +311,10 @@ describe('Kibi Components', function () {
               alias: ''
             }
           };
+          button.targetCount = 123;
 
 
           return button.click().then(() => {
-            sinon.assert.calledOnce(buttonDefs[0].updateSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label with placeholders 123 dashboard 1');
           });
         });
@@ -356,9 +356,9 @@ describe('Kibi Components', function () {
               alias: ''
             }
           };
+          button.targetCount = 123;
 
           return button.click().then(() => {
-            sinon.assert.calledOnce(buttonDefs[0].updateSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label 123');
           });
         });

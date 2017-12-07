@@ -244,11 +244,23 @@ uiModules
    * Inserts a list of relations into the relational model.
    */
   OntologyClient.prototype.insertRelations = function (relations) {
-    return this._executeSchemaAndClearCache({
-      path: '/schema/relations',
-      method: 'POST',
-      data: relations
-    });
+    const encodeRelationIds = (relation) => {
+      // very simple test to check if a relation id has already been encoded.
+      if (relation.id && !_.includes(relation.id, '%2F')) {
+        relation.id = this._encodeUrl(relation.id);
+      };
+    };
+
+    if (relations.length) {
+      _.each(relations, encodeRelationIds);
+      return this._executeSchemaAndClearCache({
+        path: '/schema/relations',
+        method: 'POST',
+        data: relations
+      });
+    } else {
+      return Promise.resolve();
+    }
   };
 
   /*

@@ -1,4 +1,5 @@
 import ngMock from 'ng_mock';
+import sinon from 'sinon';
 
 let $httpBackend;
 let ontologyClient;
@@ -112,6 +113,20 @@ describe('Kibi Components', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
       ontologyClient.deleteByDomainOrRange('id');
       $httpBackend.flush();
+    });
+
+    it('should encode relations id if needed', function () {
+      const _executeSchemaAndClearCacheStub = sinon.stub(ontologyClient, '_executeSchemaAndClearCache').returns(Promise.resolve());
+      const expectedArg = {
+        path: '/schema/relations',
+        method: 'POST',
+        data: [{ id: 'company%2F%2Fid%2Finvetment%2F%2Fcompanies' }]
+      };
+
+      ontologyClient.insertRelations([{ id: 'company%2F%2Fid%2Finvetment%2F%2Fcompanies' }]);
+      sinon.assert.calledWith(_executeSchemaAndClearCacheStub, expectedArg);
+      ontologyClient.insertRelations([{ id: 'company//id/invetment//companies' }]);
+      sinon.assert.calledWith(_executeSchemaAndClearCacheStub, expectedArg);
     });
   });
 });

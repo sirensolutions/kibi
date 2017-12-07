@@ -69,6 +69,10 @@ function readServerSettings(opts, extraCliOptions) {
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
 
+  // kibi: let's disable selected plugins. This is done for ui testing
+  if (opts.sirenDisablePlugins) {set('siren.disabledPlugins', ['gremlin_server','siren_federate']);};
+  // kibi: end
+
   set('plugins.scanDirs', _.compact([].concat(
     get('plugins.scanDirs'),
     opts.pluginDir
@@ -136,7 +140,8 @@ module.exports = function (program) {
     .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
     // kibi: extra option adde to be able to ignore kibi.dev.yml when running tests
     .option('--ignoreDevYml', 'Allow to ignore kibi.dev.yml file when running in dev mode. ' +
-                              'Useful for running tests like: grunt test:dev --kbnServer.ignoreDevYml');
+                              'Useful for running tests like: grunt test:dev --kbnServer.ignoreDevYml')
+      .option('--sirenDisablePlugins', 'Tell kibi not to look for some plugins so we can run UI tests without them');
   }
 
   command

@@ -1,4 +1,5 @@
 import toPath from 'lodash/internal/toPath';
+import { get } from 'lodash';
 
 export default async function (kbnServer, server, config) {
   const forcedOverride = {
@@ -15,6 +16,13 @@ export default async function (kbnServer, server, config) {
       plugins.disable(plugin);
       // Delete gremlin config to avoid a warning message about unused configuration.
       delete kbnServer.settings.gremlin;
+      continue;
+    }
+    // kibi: end
+
+    // kibi: let's disable selected plugins. This is done for ui testing
+    if (get(kbnServer, 'settings.siren.disabledPlugins') && (kbnServer.settings.siren.disabledPlugins.indexOf(plugin.pkg.name) > -1)) {
+      plugins.disable(plugin);
       continue;
     }
     // kibi: end

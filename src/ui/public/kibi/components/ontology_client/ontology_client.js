@@ -217,12 +217,14 @@ uiModules
    * Returns a list of dashboards that can be the target of a join for the given entity id.
    */
   OntologyClient.prototype.getDashboardsByEntity = function (entity) {
-    return this.getRangesForEntityId(entity.indexPattern)
+    return this.getRangesForEntityId(entity.id)
     .then((ranges) => {
-      const indexPatterns = new Set(_.map(ranges, 'indexPattern'));
-      return savedDashboards.find().then(function (dashboards) {
+      const indexPatterns = new Set(_.map(ranges, 'id'));
+      return savedDashboards.find()
+      .then(function (dashboards) {
         const promises = _.map(dashboards.hits, (dashboard) => {
-          savedSearches.get(dashboard.savedSearchId).then((savedSearch) => {
+          return savedSearches.get(dashboard.savedSearchId)
+          .then((savedSearch) => {
             if (savedSearch.kibanaSavedObjectMeta && savedSearch.kibanaSavedObjectMeta.searchSourceJSON) {
               const index = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON).index;
               if (indexPatterns.has(index)) {
@@ -231,7 +233,8 @@ uiModules
             }
           });
         });
-        return Promise.all(promises).then((dashboards) => {
+        return Promise.all(promises)
+        .then((dashboards) => {
           return _.filter(dashboards, (dashboard) => {
             return !!dashboard;
           });

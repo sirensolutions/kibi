@@ -1,0 +1,57 @@
+<div class="kibi-auto-join-vis-params" id="kibi-auto-join-vis-params">
+  <section>
+    <h4>Relations</h4>
+    <div class="form-group">
+      <label>Filter by index-pattern:</label></br>
+      <select ng-model="filterIndexPattern"
+              ng-model-options="{ debounce: 350 }"
+              ng-options="option.name for option in availableIndexPatterns track by option.id"
+              ng-change="updateFilteredButtonsAndRelations()"
+              class="form-control">
+      </select>
+    </div>
+    <ul>
+      <li ng-repeat="button in filteredButtons"
+          class="queryOptionArea"
+      >
+        <div class="header" ng-if="button.type === 'INDEX_PATTERN'">
+          <h2>
+            {{ button.label }}
+          </h2>
+        </div>
+        <accordion ng-if="button.type === 'VIRTUAL_ENTITY'">
+          <accordion-group is-open="button.isOpen">
+            <accordion-heading>
+              <div class="accordion-header">
+                <h2>
+                  <i ng-class="{'fa fa-caret-down': button.isOpen, 'fa fa-caret-right': !button.isOpen}"></i>
+                  {{ button.label }}
+                </h2>
+              </div>
+            </accordion-heading>
+            <accordion>
+              <div class="kibi-content">
+                <div class="form-group target-dashboards">
+                  <a ng-click="toggleTargetDashboards(button)">
+                    With this relation you can go to:
+                  </a>
+                  <ul ng-if="button.showTargetDashboards"
+                      class="relations">
+                    <li ng-repeat="(relName, dashboards) in button.compatibleDashboard">
+                      {{ relName }}
+                      <ul class="dashboards">
+                        <li ng-repeat="dashboardName in dashboards">
+                          {{ dashboardName }}
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </accordion>
+          </accordion-group>
+        </accordion>
+      </li>
+    </ul>
+  </section>
+</div>

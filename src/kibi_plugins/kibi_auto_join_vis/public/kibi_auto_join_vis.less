@@ -1,0 +1,252 @@
+@import (reference) "~ui/kibi/styles/kibi";
+
+.kibi-auto-join-vis {
+  width: 100%;
+
+  button {
+    margin: 1.5px;
+    position: relative;
+    background-color: #048CC8 !important;
+  }
+
+  .btn-get-current-dashb-btn-counts {
+    position: absolute;
+    top: 4px;
+    right: 20px;
+  }
+
+  h4 {
+    font-size: 14px;
+  }
+
+  .panel-buttons {
+    a .panel-title {
+
+      .go-to-dashboard {
+        float: right;
+
+        i {
+          font-size: 14px;
+        }
+      }
+
+      display: block;
+      color: #FFF;
+      background-color: #048cc8;
+      margin-bottom: 1px;
+      padding: 4px 10px;
+    }
+  }
+
+  .panel-group {
+    margin-bottom: 0;
+
+    .panel {
+      margin: 0;
+      border-radius: 0;
+      border: 0;
+
+      .panel .panel-heading {
+        border-left: 5px solid #b6dbef;
+        margin-bottom: 1px;
+      }
+
+      .panel-heading {
+        padding: 0;
+        margin-bottom: 1px;
+
+        .panel-title {
+          margin-top: 0px;
+          margin-bottom: 0px;
+
+          .dashboard-switcher {
+            float: right;
+          }
+
+          a  {
+            display: block;
+            color: #222;
+            background-color: #e1eff7;
+            padding: 3px 5px 3px 10px;
+
+            .dashboard-enabled, .dashboard-disabled {
+              width: 20px;
+              float: right;
+            }
+
+            .dashboard-enabled svg {
+              fill: #048cc8; // blue
+              width: 17px;
+              height: 17px;
+            }
+
+            .dashboard-disabled svg {
+              fill: #93b3c1; //graysh
+              width: 17px;
+              height: 17px;
+            }
+          }
+        }
+
+      }
+
+      .panel-collapse {
+        .panel-body {
+          border-top: 0;
+          padding: 0 0 0 12px;
+        }
+      }
+    }
+  }
+
+}
+
+.kibi-auto-join-vis-params {
+
+  .queryOptionArea {
+    display: inline-block;
+    width: 100%;
+
+    .header {
+      color: #616c6c;
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin: 3px 10px 3px 20px;
+    }
+
+    .accordion-header {
+      color: #616c6c;
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+
+    .panel-heading {
+      padding: 4px 6px;
+      background-color: #ecf0f1;
+
+      .panel-title {
+        width: 100%;
+        padding-left: 20px;
+      }
+    }
+
+    .panel {
+      border: 0;
+    }
+
+    .panel-group {
+      margin-bottom: 0;
+      border-radius: 0;
+
+      .panel-body {
+        padding: 0;
+        border-top: 0 !important;
+        padding-left: 20px;
+        background-color: #ecf0f1;
+      }
+    }
+  }
+
+  .kibi-content {
+    ul.relations {
+      list-style: none;
+      margin-left: 10px;
+
+      ul.dashboards {
+        list-style: none;
+        margin-left: 10px;
+      }
+    }
+  }
+
+  ul {
+    margin: 0;
+    padding: 0 0 10px 0;
+
+    li {
+
+      &.queryOptionArea {
+        margin: 12px 0 0 0;
+        background-color: #ecf0f1;
+        border-radius: 3px;
+        position: relative;
+
+        div.rightCorner {
+          position: absolute;
+          right: 0;
+          top: -9px;
+        }
+
+        .header, .accordion-header {
+          background-color: #fff;
+        }
+        .header h2, .accordion-header h2 {
+          font-size: 14px;
+          margin: 0;
+          font-weight: bold;
+          padding: 0;
+        }
+
+      }
+
+      .kibi-content {
+        background-color: #ecf0f1;
+        padding: 0 4px;
+
+        input[type='text'] {
+          border-color: #B4BCC2;
+
+        border-color: @st-darkgray-blured;
+        padding-right: 4px;
+        transition: none;
+        height: 100%;
+
+        select {
+          border-color: #B4BCC2;
+
+          &:focus {
+            border-color: #444;
+          }
+        }
+
+        .relation-select {
+          .unselectable();
+
+          border-color: @st-darkgray-blured;
+          padding-right: 4px;
+          transition: none;
+
+          &.invalid {
+            border-color: @brand-danger;
+          }
+
+          &.focused {
+            border-color: #444;
+          }
+
+          i.fa {
+            float: right;
+            margin-top: 2px;
+            transform: scale(0.7, 1);
+          }
+        }
+
+        .form-group {
+          label {
+            overflow: visible;
+          }
+
+
+        }
+
+        .relation-label {
+          word-wrap: break-word;
+        }
+      }
+
+      }
+
+    }
+
+  }
+}

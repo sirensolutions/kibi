@@ -1,0 +1,109 @@
+<div ng-controller="KibiAutoJoinVisController"
+     class="kibi-auto-join-vis"
+     ng-class="{loading: holder.activeFetch}"
+     ng-if="vis.params">
+  <div class="panel-buttons">
+    <a ng-repeat="button in buttons"
+       ng-if="button.type === 'INDEX_PATTERN'"
+       ng-click="button.click(true)"
+       ng-disabled="button.disabled"
+       ng-mouseover="hoverIn(button)"
+       ng-mouseleave="hoverOut()"
+    >
+      <h4 class="panel-title">
+        {{ getButtonLabel(button) }}
+        <span
+          class="warning"
+          ng-if="!!button.warning"
+          title="{{button.warning}}">(*)</span>
+        <span class="go-to-dashboard">
+          <i class="fa fa-arrow-right"></i>
+        </span>
+      </h4>
+    </a>
+  </div>
+
+  <accordion close-others="true"
+             ng-if="vis.params.layout !== 'compressed'"
+  >
+    <accordion-group ng-repeat="button in buttons"
+                     ng-if="button.type === 'VIRTUAL_ENTITY'"
+                     is-open="button.isOpen"
+                     >
+      <accordion-heading>
+        {{ getButtonLabel(button) }}
+        <div ng-if="button.isOpen && !button.checkBox"
+             class="dashboard-disabled"
+             ng-click="toggleLayout(button, $event)"
+             ng-include src="dashboardIcon"
+             title="Order by Dashboard">
+        </div>
+        <div ng-if="button.isOpen && button.checkBox"
+             class="dashboard-enabled"
+             ng-click="toggleLayout(button, $event)"
+             ng-include src="dashboardIcon"
+             title="Order by Relation">
+        </div>
+      </accordion-heading>
+      <!-- normal view -->
+      <accordion close-others="true"
+                 ng-if="!button.checkBox"
+      >
+        <accordion-group heading="{{key}}"
+                         ng-repeat="(key, subButtons) in button.sub"
+                         is-open="visibility[key]"
+        >
+          <div class="panel-buttons">
+            <a ng-repeat="subButton in subButtons"
+               ng-if="subButton.type === 'INDEX_PATTERN'"
+               ng-click="subButton.click(true)"
+               ng-disabled="subButton.disabled"
+               ng-mouseover="hoverIn(subButton)"
+               ng-mouseleave="hoverOut()"
+            >
+              <h4 class="panel-title">
+                {{subButton.label}}
+                <span ng-show="subButton.targetCount !== undefined"> ({{subButton.targetCount}})</span>
+                <span
+                  class="warning"
+                  ng-if="!!subButton.warning"
+                  title="{{subButton.warning}}">(*)</span>
+                <span class="go-to-dashboard">
+                  <i class="fa fa-arrow-right"></i>
+                </span>
+              </h4>
+            </a>
+          </div>
+        </accordion-group>
+      </accordion>
+      <accordion close-others="true"
+                 ng-if="button.checkBox"
+      >
+        <accordion-group heading="{{key}}"
+                         ng-repeat="(key, altSubButtons) in button.altSub"
+        >
+          <div class="panel-buttons">
+            <a ng-repeat="altSubButton in altSubButtons"
+               ng-if="altSubButton.type === 'INDEX_PATTERN'"
+               ng-click="altSubButton.click(true)"
+               ng-disabled="altSubButton.disabled"
+               ng-mouseover="hoverIn(altSubButton)"
+               ng-mouseleave="hoverOut()"
+            >
+              <h4 class="panel-title">
+                {{altSubButton.label}}
+                <span ng-show="altSubButton.targetCount !== undefined"> ({{altSubButton.targetCount}})</span>
+                <span
+                  class="warning"
+                  ng-if="!!altSubButton.warning"
+                  title="{{altSubButton.warning}}">(*)</span>
+              </h4>
+            </a>
+          </div>
+        </accordion-group>
+      </accordion>
+      <!-- end normal view -->
+
+    </accordion-group>
+  </accordion>
+</div>

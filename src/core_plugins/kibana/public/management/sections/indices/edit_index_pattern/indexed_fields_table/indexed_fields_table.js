@@ -49,7 +49,7 @@ uiModules.get('apps/management')
         _.find($scope.editSections, { index: 'indexedFields' }).count = fields.length; // Update the tab count
 
         // kibi: get 'relations' from ontology
-        ontologyClient.getRelations('kibi:relations')
+        ontologyClient.getRelations()
         .then((relations) => {
           $scope.rows = fields.map(function (field) {
             const childScope = _.assign($scope.$new(), {

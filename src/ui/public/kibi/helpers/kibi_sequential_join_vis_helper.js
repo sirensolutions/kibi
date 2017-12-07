@@ -32,7 +32,8 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       if (currentDashboardId && currentDashboardId === buttonDef.targetDashboardId) {
         return relationInfo.source.index === relationInfo.target.index;
       }
-      if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.source.index &&
+      if (buttonDef.type !== 'VIRTUAL_ENTITY' &&
+          dashboardIdIndexPair && currentDashboardIndexId === relationInfo.source.index &&
           dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.target.index) {
         return false;
       }
@@ -63,81 +64,59 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       }
       return button;
     })
-    .map(function (buttonDef) {
+    .map((buttonDef) => {
       const button = _.clone(buttonDef);
 
-      button.click = function (updateOnClick = false) {
-        let alias = button.filterLabel || '... related to ($COUNT) from $DASHBOARD';
-        const currentDashboardId = kibiState._getCurrentDashboardId();
-
-        if (!currentDashboardId) {
-          return Promise.resolve();
-        }
-        let dashboardTitle = Promise.resolve();
-        if (_.contains(alias, '$DASHBOARD')) {
-          dashboardTitle = savedDashboards.find().then(dashboards => _.get(_.find(dashboards.hits, 'id', currentDashboardId), 'title'));
-        }
-        return Promise.all([
-          dashboardTitle,
-          kibiState.saveAppState()
-        ]).then(([ title ]) => {
-          if (this.joinSeqFilter) {
-            const switchToDashboard = function () {
-              // add join_seq Filter
-              kibiState.addFilter(this.targetDashboardId, this.joinSeqFilter);
-              // switch to target dashboard
-              if (this.targetDashboardId && this.targetDashboardId !== currentDashboardId) {
-                // do not emit an event on save when switching to a different dashboard
-                // since this would trigger unwanted listeners
-                kibiState.save(false, true);
-                kbnUrl.change('/dashboard/{{id}}', { id: this.targetDashboardId });
-              } else {
-                kibiState.save();
-              }
-            };
-
-            // create the alias for the filter
-            alias = alias.replace(/\$DASHBOARD/g, title);
-            this.joinSeqFilter.meta.alias = alias;
-            if (alias.indexOf('$COUNT') !== -1) {
-              this.joinSeqFilter.meta.alias_tmpl = alias;
-              return this.updateSourceCount(currentDashboardId).then(results => {
-                return new Promise((fulfill, reject) => {
-                // here we expect only 1 result
-                  const metaDefinitions = [{
-                    definition: results[0].button,
-                    callback: (error, meta) => {
-                      if (error) {
-                        notify.error(error);
-                        return reject(error);
-                      }
-                      if (this.isPruned) {
-                        this.joinSeqFilter.meta.isPruned = true;
-                        this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total + '(*)');
-                      } else {
-                        this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total);
-                      }
-                      switchToDashboard.apply(this);
-                      fulfill(meta.hits.total);
-                    }
-                  }];
-                  kibiMeta.getMetaForRelationalButtons(metaDefinitions);
-                });
-              });
-            } else {
-              switchToDashboard.apply(this);
-            }
-          } else {
-            this.joinSeqFilter.meta.alias_tmpl = '';
-            // just redirect to the target dashboard
-            if (this.targetDashboardId) {
-              kbnUrl.change('/dashboard/{{id}}', { id: this.targetDashboardId });
-            }
-          }
-        });
-      };
+      this.addClickHandlerToButton(button);
       return button;
     }).value();
+  };
+
+  KibiSequentialJoinVisHelper.prototype.addClickHandlerToButton = function (button) {
+    button.click = function (updateOnClick = false) {
+      let alias = button.filterLabel || '... related to ($COUNT) from $DASHBOARD';
+      const currentDashboardId = kibiState._getCurrentDashboardId();
+
+      if (!currentDashboardId) {
+        return Promise.resolve();
+      }
+      let dashboardTitle = Promise.resolve();
+      if (_.contains(alias, '$DASHBOARD')) {
+        dashboardTitle = savedDashboards.find().then(dashboards => _.get(_.find(dashboards.hits, 'id', currentDashboardId), 'title'));
+      }
+      return Promise.all([
+        dashboardTitle,
+        kibiState.saveAppState()
+      ]).then(([ title ]) => {
+        if (button.joinSeqFilter) {
+          const switchToDashboard = function () {
+            // add join_seq Filter
+            kibiState.addFilter(button.targetDashboardId, button.joinSeqFilter);
+            // switch to target dashboard
+            if (button.targetDashboardId && button.targetDashboardId !== currentDashboardId) {
+              // do not emit an event on save when switching to a different dashboard
+              // since this would trigger unwanted listeners
+              kibiState.save(false, true);
+              kbnUrl.change('/dashboard/{{id}}', { id: button.targetDashboardId });
+            } else {
+              kibiState.save();
+            }
+          };
+
+          // create the alias for the filter
+          alias = alias.replace(/\$DASHBOARD/g, title);
+          alias = alias.replace(/\$COUNT/g, button.targetCount);
+          button.joinSeqFilter.meta.alias = alias;
+          switchToDashboard.apply(button);
+        } else {
+          button.joinSeqFilter.meta.alias_tmpl = '';
+          // just redirect to the target dashboard
+          if (button.targetDashboardId) {
+            kbnUrl.change('/dashboard/{{id}}', { id: button.targetDashboardId });
+          }
+        }
+      });
+    };
   };
 
   KibiSequentialJoinVisHelper.prototype.getJoinSequenceFilter = function (dashboardId, button) {
@@ -321,6 +300,23 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       query.size = 0; // we do not need hits just a count
       return query;
     });
+  };
+
+  KibiSequentialJoinVisHelper.prototype.constructSubButton = function (parentButton, dashboard, relation) {
+    return {
+      id: relation.id + '-ip-' + dashboard.title,
+      indexRelationId: parentButton.indexRelationId,
+      label: dashboard.title,
+      sourceDashboardId: parentButton.sourceDashboardId,
+      sourceField: parentButton.sourceField,
+      sourceIndexPatternId: parentButton.sourceIndexPatternId,
+      sourceIndexPatternType: parentButton.sourceIndexPatternType,
+      targetDashboardId: dashboard.id,
+      targetField: relation.range.field,
+      targetIndexPatternId: relation.range.id,
+      targetIndexPatternType: parentButton.targetIndexPatternType,
+      type: 'INDEX_PATTERN'
+    };
   };
 
   return new KibiSequentialJoinVisHelper();

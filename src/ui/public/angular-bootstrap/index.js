@@ -16,6 +16,7 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.tpls',
   'ui.bootstrap.transition',
   'ui.bootstrap.collapse',
+  'ui.bootstrap.accordion',
   'ui.bootstrap.alert',
   'ui.bootstrap.bindHtml',
   'ui.bootstrap.buttons',
@@ -35,6 +36,8 @@ angular.module('ui.bootstrap', [
 ]);
 
 angular.module('ui.bootstrap.tpls', [
+  'template/accordion/accordion.html',
+  'template/accordion/accordion-group.html',
   'template/alert/alert.html',
   'template/datepicker/datepicker.html',
   'template/datepicker/day.html',
@@ -78,6 +81,19 @@ import './timepicker';
 import './tooltip';
 import './transition';
 import './typeahead';
+
+import accordion from './accordion/accordion.html';
+
+angular.module('template/accordion/accordion.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/accordion/accordion.html', accordion);
+}]);
+
+import accordionGroup from './accordion/accordion-group.html';
+
+angular.module('template/accordion/accordion-group.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/accordion/accordion-group.html', accordionGroup);
+}]);
+
 
 import alert from './alert/alert.html';
 

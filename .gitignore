@@ -49,3 +49,4 @@ build-gradle/
 /gremlin_server
 docs/index.html
 .vscode/
+package-lock.json

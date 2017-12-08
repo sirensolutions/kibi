@@ -12,20 +12,10 @@ plugins {
 apply plugin: 'distribution'
 apply plugin: 'maven-publish'
 apply plugin: 'groovy'
+apply from: "$rootDir/gradle/utils/repository.gradle"
+apply from: "$rootDir/gradle/utils/loadPackageJson.gradle"
 
-import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
-
-///////////////////////////////////////////////////
-//                                               //
-//                Package Json                   //
-//                                               //
-///////////////////////////////////////////////////
-
-def loadPackageJson() {
-  File packageJson = new File(projectDir, "package.json")
-  return new JsonSlurper().parseText(packageJson.text)
-}
 
 def packageJson = loadPackageJson()
 
@@ -131,6 +121,7 @@ distributions {
 ///////////////////////////////////////////////////
 
 publishing {
+  repositories getArtifactoryRepository()
   publications {
 
     /**

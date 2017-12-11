@@ -16,7 +16,7 @@ import migration2 from './lib/migrations/migration_2';
 import migration3 from './lib/migrations/migration_3';
 import migration4 from './lib/migrations/migration_4';
 import migration5 from './lib/migrations/migration_5';
-import migration6 from './lib/migrations/migration_6';
+// migration 6 removed as no longer needed as we added a build-in model of url object to savedObjectsAPI
 import migration7 from './lib/migrations/migration_7';
 import migration8 from './lib/migrations/migration_8';
 import migration9 from './lib/migrations/migration_9';
@@ -46,7 +46,6 @@ module.exports = function (kibana) {
     migration3,
     migration4,
     migration5,
-    migration6,
     migration7,
     migration8,
     migration9,

@@ -46,7 +46,6 @@ module.exports = function (kibana) {
     migration3,
     migration4,
     migration5,
-    migration6,
     migration7,
     migration8,
     migration9,

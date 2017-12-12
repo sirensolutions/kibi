@@ -16,7 +16,7 @@
     "SPARQL"
   ],
   "private": false,
-  "version": "5.6.5",
+  "version": "5.6.4",
   "branch": "5.6",
   "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-6-5-and-6-0-1-released",
   "kibi_version": "5.6.5-SNAPSHOT",

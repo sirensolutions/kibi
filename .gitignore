@@ -50,3 +50,4 @@ build-gradle/
 docs/index.html
 .vscode/
 package-lock.json
+src/test_utils/esvm

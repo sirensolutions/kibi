@@ -1,6 +1,6 @@
 import { createAutoJunitReporter } from '../../src/dev';
 
-export default {
+module.exports = grunt => ({
   options: {
     timeout: 60000, // kibi: increased default timeout for jenkins build
     grep: grunt.option('grep'), // kibi: support grep for mocha tests
@@ -40,4 +40,4 @@ export default {
       '**/saved_objects_api/lib/model/__tests__/functional/**/*js'
     ]
   }
-};
+});

@@ -50,14 +50,13 @@ module.exports = function (opts) {
         // set the default indexPattern as it is required by the route
         // handle authorization errors
         notify.event('loading default index pattern');
-        kibiDefaultIndexPattern.getDefaultIndexPattern(patterns, undefined, defaultId)
+        return kibiDefaultIndexPattern.getDefaultIndexPattern(patterns, undefined, defaultId)
         .then(indexPattern => {
           rootSearchSource.getGlobalSource().set('index', indexPattern);
           notify.log('index pattern set to', indexPattern.id);
         });
       }
-
-    });
+    }).catch(notify.error);
   })
   .afterWork(
     // success

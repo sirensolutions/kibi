@@ -134,6 +134,7 @@ export function SimpleGaugeProvider() {
     drawGauge(svg, data, width) {
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
+      const isDisplayWarning = this.gaugeChart.handler.visConfig.get('isDisplayWarning', false);
       const fontSize = this.gaugeChart.handler.visConfig.get('gauge.style.fontSize');
 
       const labelColor = this.gaugeConfig.style.labelColor;
@@ -217,8 +218,9 @@ export function SimpleGaugeProvider() {
             const percentage = Math.round(100 * (d.y - min) / (max - min));
             return `${percentage}%`;
           }
-          if (d.aggConfig) {
-            return d.aggConfig.fieldFormatter('text')(d.y);
+          if (_.has(d, 'aggConfigResult.aggConfig')) {
+            const fieldFormatter = d.aggConfigResult.aggConfig.fieldFormatter('text');
+            return fieldFormatter(d.y);
           }
           return d.y;
         })
@@ -237,7 +239,7 @@ export function SimpleGaugeProvider() {
         });
       }
 
-      if (hiddenLabels) {
+      if (hiddenLabels && isDisplayWarning) {
         this.gaugeChart.handler.alerts.show('Some labels were hidden due to size constraints');
       }
 

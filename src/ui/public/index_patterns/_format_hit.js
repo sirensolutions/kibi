@@ -1,4 +1,6 @@
 import _ from 'lodash';
+import chrome from 'ui/chrome';
+
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
 
@@ -8,7 +10,12 @@ export function formatHit(indexPattern, defaultFormat) {
     // kibi: added extera check if the fields are there
     const field = indexPattern.fields.length ? indexPattern.fields.byName[fieldName] : null;
     if (!field) return defaultFormat.convert(val, 'html');
-    return field.format.getConverterFor('html')(val, field, hit);
+    const parsedUrl = {
+      origin: window.location.origin,
+      pathname: window.location.pathname,
+      basePath: chrome.getBasePath(),
+    };
+    return field.format.getConverterFor('html')(val, field, hit, parsedUrl);
   }
 
   function formatHit(hit) {

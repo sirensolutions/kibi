@@ -127,6 +127,10 @@ export function formatMsg(err, from) {
       }
     }
   }
+
+  if (err.path) {
+    rtn += ' Triggered while making request to: ' + err.path;
+  }
   // siren: end
   return rtn;
 }

@@ -933,7 +933,7 @@ image::images/access_control/login.png["Authentication dialog",align="center"]
 
 === Search Guard management UI
 
-{kibi-name} Enterprise include an optional user interface for the
+{kibi-name} includes an optional user interface for the
 {searchguard-management-api-ref}[Search Guard REST Management API add-on] ; in
 order to use it, the {kibi-name} backend has to connect to the Elasticsearch cluster
 using a PEM client certificate with administrative privileges.
@@ -1034,7 +1034,7 @@ image::images/access_control/sgroles_5.png["Browsing Search Guard roles",align="
 
 === Saved objects access control
 
-{kibi-name} Enterprise features an access control system on saved objects that allows
+{kibi-name} features an access control system on saved objects that allows
 to filter dashboards and visualizations visible to end users.
 
 ==== Setup

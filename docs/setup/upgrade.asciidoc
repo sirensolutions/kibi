@@ -7,7 +7,7 @@ An existing {kibi-name} installation can be upgraded as follows:
 
 - backup the `.siren` index.
 - backup the {kibi-name} configuration file (`config/siren.yml`)
-- backup the `.kibiaccess` if ACL (Access Control Layer) is enabled.
+- backup the `.sirenaccess` if ACL (Access Control Layer) is enabled.
 - {es-ref}setup-upgrade.html[upgrade Elasticsearch];
 - before restarting each Elasticsearch node, make sure to install a compatible version of the
   {federate-website}#compatibility[Siren Federate] plugin and access control plugins if required.
@@ -24,7 +24,7 @@ An existing {kibi-name} installation can be upgraded as follows:
 Before upgrading it is strongly recommended to have a backup of the `.siren` index; the recommended way to perform regular backups of
 Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapshot and restore modules].
 
-{kibi-name} ships with a command line interface for creating dumps of the `.siren` index and, in case the `ACL` is enabled, the `.kibiaccess` index as well.
+{kibi-name} ships with a command line interface for creating dumps of the `.siren` index and, in case the `ACL` is enabled, the `.sirenaccess` index as well.
 An index dump is composed of two parts: its mappings and its data.
 
 [float]
@@ -39,7 +39,7 @@ You can know more about its options by executing the following:
 $ ./bin/investigate backup --help
 ----
 
-For example, the following line will dump in `<MY_FOLDER>` the `.siren` index and the `.kibiaccess` index if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
+For example, the following line will dump in `<MY_FOLDER>` the `.siren` index and the `.sirenaccess` index if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
 
 [source,shell]
 ----
@@ -58,7 +58,7 @@ You can know more about its options by executing the following:
 $ ./bin/investigate restore --help
 ----
 
-For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.kibiaccess` as well if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
+For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.sirenaccess` as well if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
 
 [source,shell]
 ----

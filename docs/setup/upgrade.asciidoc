@@ -36,14 +36,14 @@ You can know more about its options by executing the following:
 
 [source,shell]
 ----
-$ ./bin/kibi backup --help
+$ ./bin/investigate backup --help
 ----
 
 For example, the following line will dump in `<MY_FOLDER>` the `.kibi` index and the `.kibiaccess` index if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
 
 [source,shell]
 ----
-$ ./bin/kibi backup --backup-dir <MY_FOLDER>
+$ ./bin/investigate backup --backup-dir <MY_FOLDER>
 ----
 
 [float]
@@ -55,14 +55,14 @@ You can know more about its options by executing the following:
 
 [source,shell]
 ----
-$ ./bin/kibi restore --help
+$ ./bin/investigate restore --help
 ----
 
 For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.kibiaccess` as well if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
 
 [source,shell]
 ----
-$ ./bin/kibi restore --backup-dir <MY_FOLDER>
+$ ./bin/investigate restore --backup-dir <MY_FOLDER>
 ----
 
 In addition, an <<kibi-upgrade-command,upgrade>> of the {kibi-name} indices is also executed after a successful restore.
@@ -76,14 +76,14 @@ execute the following command:
 
 [source,shell]
 ----
-bin/kibi upgrade
+bin/investigate upgrade
 ----
 
 The command will look for out of date objects and upgrade them, e.g.:
 
 [source,shell]
 ----
-$ bin/kibi upgrade
+$ bin/investigate upgrade
   log   [17:58:33.494] [info][status][plugin:elasticsearch] Status changed from uninitialized to yellow - Waiting for Elasticsearch
   log   [17:58:36.127] [info][migrations] Executing migration "Upgrade scripts from version 1 to version 2"
   log   [17:58:36.141] [info][migrations] Executed migration "Upgrade scripts from version 1 to version 2"

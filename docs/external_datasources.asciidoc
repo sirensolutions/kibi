@@ -61,7 +61,7 @@ a custom encryption key by running the `replace_encryption_key` command:
 
 [source,bash]
 ----
-bin/kibi replace_encryption_key [options] <current_key> <new_key> <new_cipher>
+bin/investigate replace_encryption_key [options] <current_key> <new_key> <new_cipher>
 ----
 
 * **<current_key>** a base64 encoded string containing the current encryption key.

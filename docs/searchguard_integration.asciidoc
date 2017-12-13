@@ -1180,7 +1180,7 @@ image::images/access_control/blocked_timelion_error.png["Blocked timelion error"
 When the user tries to access **/app/kibana#/management**, the error below is shown.
 
 ._Blocked {kibi-name} management section error_
-image::images/access_control/blocked_managemnent_error.png["Blocked {kibi-name} management section error",align="center", width="800"]
+image::images/access_control/blocked_management_error.png["Blocked {kibi-name} management section error",align="center", width="800"]
 
 For most setups it makes sense to grant **view** permissions on visualizations
 as well, then set specific permissions on dashboards and dashboard groups for

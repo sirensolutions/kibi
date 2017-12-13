@@ -1,7 +1,7 @@
 [[cross_frame_communication]]
 = Cross Frame Communication
 
-To allow cross frame communication, {kibi-name} exposes an object at **window.kibi**;
+To allow cross frame communication, {kibi-name} exposes an object at **window.sireninvestigate**;
 the object can be called only if both {kibi-name} and the container page are in the same domain.
 
 [float]
@@ -26,7 +26,7 @@ the ID of the frame in which {kibi-name} is embedded:
 ```
 document.getElementById('kibiframe')
 .contentWindow
-.kibi
+.sireninvestigate
 .generateShortUrl(true, true)
 .then(function(url) {
   console.log("Generated URL: " + url);
@@ -59,7 +59,7 @@ of the frame in which {kibi-name} is embedded:
 ```
 document.getElementById('kibiframe')
 .contentWindow
-.kibi
+.sireninvestigate
 .setJWTToken(`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraWJpdXNlciJ9.kZhLu15FwxrX4hPE1ciyzw_NufZ_oH7aSGpLZHachPg`)
 .then(function() {
   console.log('JWT token set.');

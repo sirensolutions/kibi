@@ -110,7 +110,7 @@ standard output (`stdout`), and can be stopped by pressing `Ctrl-C`.
 [[targz-configuring]]
 ==== Configuring {kibi-name} via Config File
 
-{kibi-name} loads its configuration from the `$KIBI_HOME/config/kibi.yml`
+{kibi-name} loads its configuration from the `$KIBI_HOME/config/siren.yml`
 file by default. The format of this config file is explained in
 <<settings>>.
 
@@ -141,7 +141,7 @@ directories so that you do not delete important data later on.
  d|
 
 | config
-  | Configuration files including `kibi.yml`
+  | Configuration files including `siren.yml`
   | $KIBI\config
  d|
 

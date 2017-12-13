@@ -391,7 +391,7 @@ temporarily in `sg_config.yml` and upload it to the cluster using `sgadmin`.
 
 To enable SPNEGO support in {kibi-name}, set the
 `kibi_access_control.backends.searchguard.authenticator` option to
-`http-negotiate`, in `kibi.yml` e.g.:
+`http-negotiate`, in `siren.yml` e.g.:
 
 [source,yaml]
 ----

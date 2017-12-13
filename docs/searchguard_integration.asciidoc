@@ -1308,7 +1308,7 @@ running one or more beats.
 === Console configuration
 
 In order to successfully submit queries from console to a cluster secured by
-Search Guard set the following parameters in `config/kibi.yml`:
+Search Guard set the following parameters in `config/siren.yml`:
 
 [source,yaml]
 ----
@@ -1414,7 +1414,7 @@ image::images/authorization-visualization-empty.png["A visualization that refers
 If you have an existing Elasticsearch instance with X-Pack installed and wish to integrate with {kibi-name},
 there are a few short steps to take:
 
-First, set the backend parameter of the `kibi_access_control` section of the `kibi.yml` to `xpack`:
+First, set the backend parameter of the `kibi_access_control` section of the `siren.yml` to `xpack`:
 
 [source,yaml]
 ----
@@ -1494,7 +1494,7 @@ can be added to the existing permissions in the `cluster` section of the role.
 
 See the <<access_control_configuration, Access control configuration>> section for more information.
 
-If you do not need Kibana monitoring, you can add the following lines to `kibi.yml` to disable it:
+If you do not need Kibana monitoring, you can add the following lines to `siren.yml` to disable it:
 
 [source,yaml]
 ----

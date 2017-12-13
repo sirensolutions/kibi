@@ -184,7 +184,7 @@ on the {kibi-name} server itself - for example, when the reverse proxy is an app
 
 Native SSL support can be enabled by copying the certificate and key files to a
 location readable by the {kibi-name} process and setting the following parameters
-in `config/kibi.yml`:
+in `config/siren.yml`:
 
 - `server.ssl.enabled`: set to `true` to enable SSL.
 - `server.ssl.certificate`: path to a certificate.
@@ -214,7 +214,7 @@ HTTPS must be enabled in Gremlin Server to secure requests from {kibi-name}, eve
 if {kibi-name} is configured behind a reverse SSL proxy.
 
 To enable HTTPS in the Gremlin Server, set the following parameters in the
-`kibi_core.gremlin_server` section of the `config/kibi.yml` file:
+`kibi_core.gremlin_server` section of the `config/siren.yml` file:
 
 - **url**: the URL of the Gremlin Server endpoint; make sure that the protocol is set to `https`.
 - **ssl.key_store**: the path to the Gremlin Server certificate in Java KeyStore format.
@@ -239,7 +239,7 @@ kibi_core:
 
 After restarting {kibi-name}, click on **Settings**, then click on **Datasources**,
 and make sure that the URL of the `{kibi-name} Gremlin Server` datasource is equal
-to the url set in `kibi.yml`.
+to the url set in `siren.yml`.
 
 The {kibi-name}  demo distribution includes a sample keystore and CA bundle
 in the `pki` directory.

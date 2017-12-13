@@ -55,7 +55,7 @@ name of your cluster.
 --------
 cluster.name: "my_cluster"
 --------
-. Make sure {kibi-name} is configured to point to your local client node. In `kibi.yml`, the `elasticsearch.url` should be set to
+. Make sure {kibi-name} is configured to point to your local client node. In `siren.yml`, the `elasticsearch.url` should be set to
 `localhost:{es-default-port}`.
 +
 --------

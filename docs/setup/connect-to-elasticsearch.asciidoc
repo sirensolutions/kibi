@@ -7,7 +7,7 @@ one or more of your indices. That's it. That's all you need to configure to star
 add index patterns at any time from the <<settings-create-pattern,Management tab>>.
 
 TIP: By default, {kibi-name} connects to the Elasticsearch instance running on `localhost`. To connect to a
-different Elasticsearch instance, modify the Elasticsearch URL in the `kibi.yml` configuration file and
+different Elasticsearch instance, modify the Elasticsearch URL in the `siren.yml` configuration file and
 restart {kibi-name}. For information about using {kibi-name} with your production nodes, see <<production>>.
 
 To configure the Elasticsearch indices you want to access with {kibi-name}:

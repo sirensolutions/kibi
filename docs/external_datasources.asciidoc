@@ -26,10 +26,10 @@ Below is a list of additional mandatory parameters for each datasource type:
 * cache_enabled - enable server side cache for this datasource
 * max_age - the max age of an object in the cache, in milliseconds
 
-To control the maximum number of query results kept in cache, set the `kibi_core.datasource_cache_size` parameter in kibi.yml.
+To control the maximum number of query results kept in cache, set the `kibi_core.datasource_cache_size` parameter in siren.yml.
 
 [NOTE]
-A {kibi-name} restart is required to apply changes to kibi.yml configuration file.
+A {kibi-name} restart is required to apply changes to siren.yml configuration file.
 
 *REST*
 
@@ -68,7 +68,7 @@ bin/kibi replace_encryption_key [options] <current_key> <new_key> <new_cipher>
 * **<new_key>** a base64 encoded string containing the new encryption key.
 * **<new_cipher>** the cipher algorithm to use (currently only AES-GCM is supported).
 
-The current encryption key can be read from the `kibi.yml` file in the
+The current encryption key can be read from the `siren.yml` file in the
 `datasource_encryption_key` parameter.
 
 Keys can have a length of 16, 24 or 32 bytes; a quick way to encode a plaintext

@@ -500,7 +500,7 @@ sentinl:
         - CREATE_INDEX
 
 # Permissions for the {kibi-name} server process.
-kibiserver:
+sirenserver:
   cluster:
     - cluster:admin/xpack/monitoring/bulk
     - cluster:monitor/nodes/info
@@ -600,7 +600,7 @@ The file defines the following roles:
 - **sentinl**: defines the permission for a Sentinl user; the role is
   not required if the Sentinl plugin is not installed.
 - **monitoring**: defines the permissions for an X-Pack monitoring agent.
-- **kibiserver**: defines the permissions for the {kibi-name} server process.
+- **sirenserver**: defines the permissions for the {kibi-name} server process.
 - **sirenadmin**: defines the permissions for a {kibi-name} user with read/write
   access to the .siren index.
 - **sirenuser**: defines the permissions for a {kibi-name} user with readonly access
@@ -633,7 +633,7 @@ documentation].
 # The hash value is a bcrypt hash and can be generated with plugins/search-guard-5/tools/hash.sh
 admin:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-kibiserver:
+sirenserver:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 sirenadmin:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
@@ -676,9 +676,9 @@ sg_all_access:
   users:
     - admin
 
-kibiserver:
+sirenserver:
   users:
-    - kibiserver
+    - sirenserver
 
 sirenadmin:
   users:
@@ -796,7 +796,7 @@ authenticated request with wget, e.g.:
 
 [source,shell]
 ----
-$ wget --ca-certificate=../kibi/pki/searchguard/ca.pem --http-user=kibiserver --http-password=password -qO - https://localhost:9220
+$ wget --ca-certificate=../kibi/pki/searchguard/ca.pem --http-user=sirenserver --http-password=password -qO - https://localhost:9220
 ----
 
 To display information about the certificate as seen by a client you can
@@ -809,12 +809,12 @@ $ echo | openssl s_client -servername localhost -connect localhost:9220 -showcer
 
 === {kibi-name} configuration
 
-Edit _config/kibi.yml_ and specify the credentials of the **kibiserver**
+Edit _config/kibi.yml_ and specify the credentials of the **sirenserver**
 user, e.g.:
 
 [source,yaml]
 ----
-elasticsearch.username: 'kibiserver'
+elasticsearch.username: 'sirenserver'
 elasticsearch.password: 'password'
 ----
 
@@ -1057,16 +1057,16 @@ kibi_access_control:
     enabled: true
 ----
 
-Before restarting {kibi-name}, it is required to allow the backend user (`.kibiserver`
+Before restarting {kibi-name}, it is required to allow the backend user (`.sirenserver`
 by default) all permissions on the index set in
 `kibi_access_control.acl.index`; for example, the following snippet from
-`sg_roles.yml` grants all privileges to the `kibiserver` user on the
+`sg_roles.yml` grants all privileges to the `sirenserver` user on the
 `.sirenaccess` index.
 
 [source,yaml,subs="attributes"]
 ----
 # Permissions for the {kibi-name} server process.
-kibiserver:
+sirenserver:
   cluster:
       - cluster:monitor/nodes/info
       - cluster:monitor/health
@@ -1423,7 +1423,7 @@ kibi_access_control:
   backend: xpack
 ----
 
-Next, replace the kibiserver role with the following settings; If using a custom configuration, replace the kibi (default: .siren) and access control (default: .sirenaccess) indices with your index names
+Next, replace the sirenserver role with the following settings; If using a custom configuration, replace the kibi (default: .siren) and access control (default: .sirenaccess) indices with your index names
 
 [source, json]
 {
@@ -1489,7 +1489,7 @@ See the <<access_control_app, Access Control>> section for more information.
 }
 
 To enable Kibana monitoring in X-Pack, you'll need to grant the
-`cluster:admin/xpack/monitoring/bulk` permission to the `kibiserver` role; the permission
+`cluster:admin/xpack/monitoring/bulk` permission to the `sirenserver` role; the permission
 can be added to the existing permissions in the `cluster` section of the role. 
 
 See the <<access_control_configuration, Access control configuration>> section for more information.

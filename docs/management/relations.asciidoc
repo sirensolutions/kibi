@@ -3,9 +3,15 @@
 
 In this panel, you can define relationships between index patterns. These
 relationships ultimately form a **graph** of index patterns. This graph is used
+<<<<<<< HEAD
 in conjunction with the Siren Federate plugin, allowing to perform join operations
 between **dashboards**, i.e. filtering the documents in a dashboard that have one or more relationships with documents
 in another dashboard.
+=======
+in conjunction with the Siren Federate Plugin For Elasticsearch, allowing to perform join operations
+between **dashboards**, i.e., filtering a dashboard's documents with regards to
+an other.
+>>>>>>> 2e91569... Rename Vanguard to Siren Federate Plugin for Elasticsearch
 
 [float]
 === Graph of Index Patterns

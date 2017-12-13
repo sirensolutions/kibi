@@ -3,7 +3,7 @@
 
 {kibi-name} is an open source data intelligence platform built upon
 {kibana-announcement}[Kibana {kibana-version}].
-Kibi {version} supports Elasticsearch {elasticsearch-version}
+{kibi-name} {version} supports Elasticsearch {elasticsearch-version}
 and the Federate plugin version {federate-version}. The Siren Federate plugin replaces the Siren Join plugin for
 distributions based on Elasticsearch 5.x.
 
@@ -68,8 +68,12 @@ templates.
 selected Elasticsearch documents as a node of a graph and allows the user to visually
 explore the connection between vertices.
 
+<<<<<<< HEAD
 The Relational Filter visualization requires the {federate-website}[Siren Federate plugin {federate-version}]
 for Elasticsearch.
+=======
+The Relational Filter visualization requires the {vanguard-website}[Siren Federate Plugin For Elasticsearch {vanguard-version}].
+>>>>>>> 2e91569... Rename Vanguard to Siren Federate Plugin for Elasticsearch
 
 [float]
 === How does {kibi-name} compare to Kibana?

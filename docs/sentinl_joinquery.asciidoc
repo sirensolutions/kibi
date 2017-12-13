@@ -6,7 +6,7 @@ programmable validators and a variety of configurable actions.
 
 Siren Alert is also designed to simplify the process of creating and managing alerts and reports in {kibi-name}/Kibana via its integrated App and Spy integration.
 
-{kibi-name}  extends Siren Alert with support for Vanguard join features.
+{kibi-name}  extends Siren Alert with support for Siren Federate Plugin For Elasticsearch join features.
 
 [float]
 == Documentation

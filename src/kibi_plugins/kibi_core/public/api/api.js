@@ -49,5 +49,5 @@ uiModules
   return new KibiEmbeddingAPI();
 })
 .run((kibiEmbeddingAPI, $window) => {
-  $window.kibi = kibiEmbeddingAPI;
+  $window.sireninvestigate = kibiEmbeddingAPI;
 });

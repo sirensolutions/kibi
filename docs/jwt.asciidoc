@@ -1,11 +1,11 @@
 [[jwt-authentication]]
 == JWT authentication support
 
-This section offers an overview of how to integrate Kibi  with the Search
-Guard JWT authenticator when Kibi is embedded into an iframe by another
+This section offers an overview of how to integrate {kibi-name}  with the Search
+Guard JWT authenticator when {kibi-name} is embedded into an iframe by another
 application.
 
-Before enabling JWT support you should setup Kibi and Search Guard as described
+Before enabling JWT support you should setup {kibi-name} and Search Guard as described
 in the <<searchguard_integration,Search Guard integration>> chapter and ensure
 that it works as expected.
 
@@ -20,15 +20,15 @@ and copy it to the `plugins/search-guard-5` directory on each node, then
 perform a rolling restart of the cluster.
 
 [float]
-==== Kibi proxy
-It is required that Kibi and the container application are published on the
+==== {kibi-name} proxy
+It is required that {kibi-name} and the container application are published on the
 same domain to allow cross frame communication; this can be achieved by
-implementing a proxy to Kibi in the container application routes or configuring
+implementing a proxy to {kibi-name} in the container application routes or configuring
 a reverse proxy on a path in the application server configuration.
 
 [float]
 ==== JWT token issuance
-The application that embeds Kibi is responsible for generating JWT tokens;
+The application that embeds {kibi-name} is responsible for generating JWT tokens;
 https://jwt.io/[jwt.io] provides a good overview of the technology, a browser
 based debugging tool and a list of libraries for several platforms.
 
@@ -103,7 +103,7 @@ Subject claim (`sub`), assign role mappings and evaluate role permissions.
 
 If an HTTP request to the cluster contains an HTTP Basic authorization header
 it will be authenticated by the HTTP authenticator defined in
-`basic_internal_auth_domain`; it is necessary to leave this enabled as the Kibi
+`basic_internal_auth_domain`; it is necessary to leave this enabled as the {kibi-name}
 backend uses this method to authenticate with the cluster.
 
 [float]
@@ -164,9 +164,9 @@ To test if it is working correctly before the application is ready,
 you can use the https://jwt.io/#debugger[jwt.io debugger] to generate
 tokens using the signing key defined in `sg_config.yml`.
 
-=== Kibi configuration
+=== {kibi-name} configuration
 
-To enable JWT support in Kibi, set the
+To enable JWT support in {kibi-name}, set the
 `kibi_access_control.backends.searchguard.authenticator` option to
 `http-jwt`, in `kibi.yml` e.g.:
 
@@ -180,7 +180,7 @@ kibi_access_control:
       authenticator: 'http-jwt'
 ----
 
-Then restart Kibi and open it in a browser; you should get a blank page and the
+Then restart {kibi-name} and open it in a browser; you should get a blank page and the
 URL should end with `login`.
 
 To test JWT authentication, open your browser console (`CTRL+SHITF+I` on Chrome
@@ -198,11 +198,11 @@ and Firefox) and call `setJWTToken` of the `kibi` object, e.g.:
 });
 ----
 
-Once the token is set, Kibi will store it in an encrypted cookie and send
+Once the token is set, {kibi-name} will store it in an encrypted cookie and send
 it in every request to the backend; the backend will then forward the
 JWT token to Search Guard to authenticate the user.
 
-After the token is set, you can switch to the desired Kibi URL by
+After the token is set, you can switch to the desired {kibi-name} URL by
 simply changing `location.href`.
 
 When the user is logged out from the main application, sessionStorage and

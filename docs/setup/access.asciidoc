@@ -1,20 +1,20 @@
 [[access]]
-== Accessing Kibi
+== Accessing {kibi-name}
 
-Kibi is a web application that you access through port {kibi-default-port}. All you need to do is point your web browser at the
-machine where Kibi is running and specify the port number. For example, `{start-url}` or
+{kibi-name} is a web application that you access through port {kibi-default-port}. All you need to do is point your web browser at the
+machine where {kibi-name} is running and specify the port number. For example, `{start-url}` or
 `http://YOURDOMAIN.com:{kibi-default-port}`.
 
-When you access Kibi, the <<discover,Discover>> page loads by default with the default index pattern selected. The
+When you access {kibi-name}, the <<discover,Discover>> page loads by default with the default index pattern selected. The
 time filter is set to the last 15 minutes and the search query is set to match-all (`*`).
 
 If you do not see any documents, try <<set-time-filter, setting the time filter>> to a wider time range.
 If you still do not see any results, it is possible that you do not *have* any documents.
 
 [[status]]
-=== Checking Kibi Status
+=== Checking {kibi-name} Status
 
-You can reach the Kibi server's status page by navigating to `{start-url}/status`. The status page displays
+You can reach the {kibi-name} server's status page by navigating to `{start-url}/status`. The status page displays
 information about the server's resource usage and lists the installed plugins.
 
 image::images/kibi-status-page.png[]

@@ -88,7 +88,7 @@ image:images/filter-enable.png[] Enable Filter :: Disable the filter without
 removing it. Click again to reenable the filter. Diagonal stripes indicate
 that a filter is disabled.
 image:images/filter-pin.png[] Pin Filter :: Pin the filter. Pinned filters
-persist when you switch contexts in Kibi. For example, you can pin a filter
+persist when you switch contexts in {kibi-name}. For example, you can pin a filter
 in Discover and it remains in place when you switch to Visualize.
 Note that a filter is based on a particular index field--if the indices being
 searched don't contain the field in a pinned filter, it has no effect.

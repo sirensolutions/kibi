@@ -1,14 +1,14 @@
 [[searchguard_integration]]
 
-== Search Guard Integration and Kibi access control
+== Search Guard Integration and {kibi-name} access control
 
-This section offers an overview of how to integrate Search Guard with Kibi; for
+This section offers an overview of how to integrate Search Guard with {kibi-name}; for
 further reference and detailed options please consult the
 {searchguard-ref}[Search Guard documentation].
 
 Before proceeding, make sure that:
 
-- Kibi is either running with HTTPS enabled or behind a reverse SSL proxy.
+- {kibi-name} is either running with HTTPS enabled or behind a reverse SSL proxy.
 - The Gremlin Server is running with HTTPS enabled.
 
 Please refer to the <<access_control,Authentication and access control>>
@@ -37,7 +37,7 @@ These files can be either Java KeyStore files or PKCS12 bundles.
 
 ==== Sample certificates
 
-The Kibi  demo distribution includes the following sample certificates in the
+The {kibi-name}  demo distribution includes the following sample certificates in the
 _elasticsearch/config_ directory:
 
 - **truststore.jks**: a sample CA certificate chain.
@@ -411,13 +411,13 @@ KIBI_READWRITE:
 
 This file contains named groups of permissions which can be used in the roles
 configuration file; the above configuration includes Search Guard default
-groups plus three Kibi specific groups:
+groups plus three {kibi-name} specific groups:
 
 - **KIBI_READWRITE**: groups all the permissions needed to search and update
-  the main Kibi index (_.kibi_); the group has to be assigned on the main index
-  to all roles that can modify the Kibi configuration.
+  the main {kibi-name} index (_.kibi_); the group has to be assigned on the main index
+  to all roles that can modify the {kibi-name} configuration.
 - **KIBI_READONLY**: groups all the permissions needed to search any
-  Elasticsearch index from Kibi. The group has to be assigned on all indices
+  Elasticsearch index from {kibi-name}. The group has to be assigned on all indices
   that a role has access to.
 - **KIBI_CLUSTER**: sets the permission to read results from scrolling
   searches and send composite requests.
@@ -427,7 +427,7 @@ groups plus three Kibi specific groups:
 
 **Roles (sg_roles.yml)**
 
-[source,yaml]
+[source,yaml,subs="attributes"]
 ----
 # Allows any action on the cluster.
 sg_all_access:
@@ -499,7 +499,7 @@ sentinl:
         - KIBI_READWRITE
         - CREATE_INDEX
 
-# Permissions for the Kibi server process.
+# Permissions for the {kibi-name} server process.
 kibiserver:
   cluster:
     - cluster:admin/xpack/monitoring/bulk
@@ -522,7 +522,7 @@ kibiserver:
       '*':
         - ALL
 
-# Permissions for a Kibi administrator (read-write access to the .kibi index).
+# Permissions for a {kibi-name} administrator (read-write access to the .kibi index).
 kibiadmin:
   cluster:
     - KIBI_CLUSTER
@@ -538,7 +538,7 @@ kibiadmin:
       '*':
         - KIBI_READWRITE
 
-# Permissions for a Kibi user (read only access to the .kibi index).
+# Permissions for a {kibi-name} user (read only access to the .kibi index).
 kibiuser:
   cluster:
     - KIBI_CLUSTER
@@ -568,7 +568,7 @@ kibiuser:
       '*':
         - KIBI_COMPOSITE
 
-# Permissions for a Kibi user (read only), with no access to the investor index.
+# Permissions for a {kibi-name} user (read only), with no access to the investor index.
 kibinoinvestor:
   cluster:
     - KIBI_CLUSTER
@@ -600,12 +600,12 @@ The file defines the following roles:
 - **sentinl**: defines the permission for a Sentinl user; the role is
   not required if the Sentinl plugin is not installed.
 - **monitoring**: defines the permissions for an X-Pack monitoring agent.
-- **kibiserver**: defines the permissions for the Kibi server process.
-- **kibiadmin**: defines the permissions for a Kibi user with read/write
+- **kibiserver**: defines the permissions for the {kibi-name} server process.
+- **kibiadmin**: defines the permissions for a {kibi-name} user with read/write
   access to the .kibi index.
-- **kibiuser**: defines the permissions for a Kibi user with readonly access
+- **kibiuser**: defines the permissions for a {kibi-name} user with readonly access
   to all indices.
-- **kibinoinvestor**: defines the permissions for a Kibi user with readonly
+- **kibinoinvestor**: defines the permissions for a {kibi-name} user with readonly
   access to all the indices excluding _investor_.
 
 A permission is defined by the following syntax:
@@ -807,7 +807,7 @@ execute the following command:
 $ echo | openssl s_client -servername localhost -connect localhost:9220 -showcerts | openssl x509 -text -inform pem -text -noout
 ----
 
-=== Kibi configuration
+=== {kibi-name} configuration
 
 Edit _config/kibi.yml_ and specify the credentials of the **kibiserver**
 user, e.g.:
@@ -864,10 +864,10 @@ kibi_core:
     auth_plugin: 'searchguard'
 ----
 
-To enable the Kibi access control plugin, specify the following configuration
+To enable the {kibi-name} access control plugin, specify the following configuration
 values in the **kibi_access_control** section:
 
-- **enabled**: set to **true** to enable the Kibi access control plugin.
+- **enabled**: set to **true** to enable the {kibi-name} access control plugin.
   Defaults to **false**.
 - **backend**: backend type of authentication. Currently available backends are **searchguard** and **xpack**.
   Defaults to **searchguard**.
@@ -881,14 +881,14 @@ values in the **kibi_access_control** section:
   the key used to encrypt and sign cookies.
 - **cookie.secure**: if set to **true**, the cookie will be transmitted
   only if the request is being served over HTTPS. It is possible to set this
-  to false if Kibi is behind an SSL proxy. Defaults to **true**.
+  to false if {kibi-name} is behind an SSL proxy. Defaults to **true**.
 - **cookie.ttl**: the lifetime of the session cookie in milliseconds.  If not
   set, the cookie will expire when the browser is closed, which is the
   recommended setting. Please note that browsers might not remove session
   cookies when a tab is closed or even across restarts, so it is recommended to
   set **session.ttl** for additional protection. Defaults to **null**.
 - **cookie.name**: the name of the session cookie. Defaults to **kac**.
-- **admin_role**: the Search Guard role authorized to use the Kibi Access
+- **admin_role**: the Search Guard role authorized to use the {kibi-name} Access
   Control application. Defaults to **kibiadmin**.
 
 E.g.:
@@ -901,7 +901,7 @@ kibi_access_control:
     password: '12345678123456781234567812345678'
 ----
 
-If Kibi is running behind a reverse SSL proxy like Nginx, remember to set
+If {kibi-name} is running behind a reverse SSL proxy like Nginx, remember to set
 **cookie.secure** to **false** otherwise the cookie will not be sent, e.g.:
 
 [source,yaml]
@@ -925,20 +925,20 @@ kibi_access_control:
       password: password
 ----
 
-Restart Kibi after changing the configuration file; if the configuration is
-correct, you should see an authentication dialog when browsing to Kibi.
+Restart {kibi-name} after changing the configuration file; if the configuration is
+correct, you should see an authentication dialog when browsing to {kibi-name}.
 
 ._Authentication dialog_
 image::images/access_control/login.png["Authentication dialog",align="center"]
 
 === Search Guard management UI
 
-Kibi Enterprise include an optional user interface for the
+{kibi-name} Enterprise include an optional user interface for the
 {searchguard-management-api-ref}[Search Guard REST Management API add-on] ; in
-order to use it, the Kibi backend has to connect to the Elasticsearch cluster
+order to use it, the {kibi-name} backend has to connect to the Elasticsearch cluster
 using a PEM client certificate with administrative privileges.
 
-It is strongly suggested to setup a dedicated Kibi instance to use the
+It is strongly suggested to setup a dedicated {kibi-name} instance to use the
 Search Guard management UI and allow access to it only to authorized
 users.
 
@@ -968,9 +968,9 @@ contains only the `sg_config.yml` file, otherwise sgadmin will replace users,
 roles, action groups and mappings that might have been modified through the
 API.
 
-==== Kibi configuration
+==== {kibi-name} configuration
 
-Copy the client certificate and its key to a directory readable by Kibi (e.g. `pki`); then
+Copy the client certificate and its key to a directory readable by {kibi-name} (e.g. `pki`); then
 add the following parameters to the `kibi_access_control` configuration section:
 
 - **admin_role**: the Search Guard role that has access to the Search Guard
@@ -1004,7 +1004,7 @@ $ cat user.crt.pem ca-chain.pem > user.crtfull.pem
 
 [[access_control_app]]
 
-Once the certificate is setup, restart Kibi, login with a user having an
+Once the certificate is setup, restart {kibi-name}, login with a user having an
 administrative role, click on the apps button, then click on **Access control**
 and finally on **Authentication**.
 
@@ -1014,7 +1014,7 @@ image::images/access_control/acl_app_5.png["The Access control app",align="cente
 If you get an error upon opening the Authentication app,
 most probably the client certificate does not contain
 the full CA chain or the add-on has not been installed correctly; please
-check Elasticsearch and Kibi logs for related errors.
+check Elasticsearch and {kibi-name} logs for related errors.
 
 The Authentication section allows to browse, edit and create the following
 Search Guard resources:
@@ -1034,7 +1034,7 @@ image::images/access_control/sgroles_5.png["Browsing Search Guard roles",align="
 
 === Saved objects access control
 
-Kibi Enterprise features an access control system on saved objects that allows
+{kibi-name} Enterprise features an access control system on saved objects that allows
 to filter dashboards and visualizations visible to end users.
 
 ==== Setup
@@ -1057,15 +1057,15 @@ kibi_access_control:
     enabled: true
 ----
 
-Before restarting Kibi, it is required to allow the backend user (`.kibiserver`
+Before restarting {kibi-name}, it is required to allow the backend user (`.kibiserver`
 by default) all permissions on the index set in
 `kibi_access_control.acl.index`; for example, the following snippet from
 `sg_roles.yml` grants all privileges to the `kibiserver` user on the
 `.kibiaccess` index.
 
-[source,yaml]
+[source,yaml,subs="attributes"]
 ----
-# Permissions for the Kibi server process.
+# Permissions for the {kibi-name} server process.
 kibiserver:
   cluster:
       - cluster:monitor/nodes/info
@@ -1085,7 +1085,7 @@ kibiserver:
         - ALL
 ----
 
-In addition, it is recommended to block access on the Kibi index (`.kibi` by
+In addition, it is recommended to block access on the {kibi-name} index (`.kibi` by
 default) to users by adding the following permissions on the `null` type in
 each user role:
 
@@ -1117,29 +1117,29 @@ kibiuser:
         - 'indices:data/read/coordinate-search'
 ----
 
-In this way, users will be able to include the Kibi index in msearch requests
+In this way, users will be able to include the {kibi-name} index in msearch requests
 (which is a performance requirement to avoid querying all indices when time based
 index patterns are configured) but won't be able to read saved objects from it.
 
 Roles can be updated either by modifying `sg_roles.yml` and uploading it
 through `sgadmin` or by using the Search Guard management application; make
-sure to set these rules on all Search Guard roles assigned to Kibi users.
+sure to set these rules on all Search Guard roles assigned to {kibi-name} users.
 
-Once roles are configured, restart Kibi; if permissions are configured correctly,
+Once roles are configured, restart {kibi-name}; if permissions are configured correctly,
 you will be see an **ACL** section in the **Access control** application.
 
 ._The ACL section_
 image::images/access_control/acl_section_5.png["The ACL section",align="center"]
 
-==== Kibi roles and rules
+==== {kibi-name} roles and rules
 
-The ACL Roles panel in the ACL section allows to define Kibi roles, which
+The ACL Roles panel in the ACL section allows to define {kibi-name} roles, which
 are collections of permissions on saved objects and UI elements.
 The main purpose of this system is to hide and block access to:
 
  * UI elements - applications, e.g.: **Timelion**, **Access control**, **Sentinl**
  * UI elements - specific functionalities e.g.: **export CSV feature**
- * UI elements - Kibi sections, e.g.: **discover**, **management**
+ * UI elements - {kibi-name} sections, e.g.: **discover**, **management**
  * Saved objects on unauthorized indices, e.g.: **dashboards**, **searches**
 
 to end users and avoid unauthorized changes to configuration objects or use
@@ -1151,8 +1151,8 @@ There are two kinds of rules:
  * ui rules - to set permissions to view different UI elements
 
 The `everyone` role defines permissions for all the users in the system, and is
-mapped by default to any user logged in Kibi; by default it grants all users
-read only access to the Kibi configuration (**Advanced settings**), saved
+mapped by default to any user logged in {kibi-name}; by default it grants all users
+read only access to the {kibi-name} configuration (**Advanced settings**), saved
 searches and index patterns as well as permission to view all applications and UI elements.
 
 ._The everyone role_
@@ -1160,17 +1160,17 @@ image::images/access_control/everyone_role.png["The everyone role",align="center
 
 Denying access to certain saved objects like **saved search** using the first sets
 of rules is usually transparent to the user which means that he will simply
-not see the objects anywhere in Kibi.
+not see the objects anywhere in {kibi-name}.
 
 Usually it is not required to create explicit UI rules for the **dashboard** application
 as access to specific dashboards can be restricted through saved object rules.
 
 Denying access to an application like **Timelion**
-or a Kibi section like **management** will hide the navigation menu elements,
+or a {kibi-name} section like **management** will hide the navigation menu elements,
 block access at the route level and display an error.
 
-._Blocked Timelion application and Kibi management section_
-image::images/access_control/blocked_timelion_and_management_uirules.png["Blocked Timelion application and Kibi management section",align="center"]
+._Blocked Timelion application and {kibi-name} management section_
+image::images/access_control/blocked_timelion_and_management_uirules.png["Blocked Timelion application and {kibi-name} management section",align="center"]
 
 When the user tries to access **app/timelion**, the error below is shown.
 
@@ -1179,8 +1179,8 @@ image::images/access_control/blocked_timelion_error.png["Blocked timelion error"
 
 When the user tries to access **/app/kibana#/management**, the error below is shown.
 
-._Blocked Kibi management section error_
-image::images/access_control/blocked_managemnent_error.png["Blocked Kibi management section error",align="center", width="800"]
+._Blocked {kibi-name} management section error_
+image::images/access_control/blocked_managemnent_error.png["Blocked {kibi-name} management section error",align="center", width="800"]
 
 For most setups it makes sense to grant **view** permissions on visualizations
 as well, then set specific permissions on dashboards and dashboard groups for
@@ -1192,7 +1192,7 @@ following parameters:
 - **Role ID**: the ID of the role (e.g. `kibiuser`); must be a lowercase
   alphanumeric string.
 - **Backend roles**: a list of Search Guard roles that will be mapped to this
-  Kibi role (e.g. `kibiuser`)
+  {kibi-name} role (e.g. `kibiuser`)
 - **Rules**: a list of rules on saved object types.
 
 Each rule is defined by three parameters:
@@ -1362,12 +1362,12 @@ xpack.monitoring.exporters:
 
 === Handling of authorization errors
 
-Kibi  parses generic authorization errors from Elasticsearch to report them
+{kibi-name}  parses generic authorization errors from Elasticsearch to report them
 in a more understandable way.
 
-While using Kibi  on a secured cluster, you might see the following errors:
+While using {kibi-name}  on a secured cluster, you might see the following errors:
 
-* _"Kibi Relational Filter: Could not load filter Relational visualization: one
+* _"{kibi-name} Relational Filter: Could not load filter Relational visualization: one
 or more join relations refers to unauthorized data"_: displayed when a search
 query contains relations between unauthorized indices.
 * _"One or more visualizations Refers to unauthorized data"_: displayed when a
@@ -1376,7 +1376,7 @@ indices.
 * _"Enhanced search results: Refers to unauthorized data"_: displayed
 when an "Enhanced search results" visualization tries to load data from
 unauthorized indices.
-* _"Kibi Relational Filter: there are relations with unauthorized data"_:
+* _"{kibi-name} Relational Filter: there are relations with unauthorized data"_:
 displayed when there are relationships between unauthorized indices.
 * _"One or more saved search refers to unauthorized data"_: displayed when a
 saved search is executed on an unauthorized index.
@@ -1409,9 +1409,9 @@ image::images/authorization-visualization-error.png["A visualization that loads 
 image::images/authorization-visualization-empty.png["A visualization that refers to an unauthorized index.",align="left"]
 
 
-== X-Pack integration and Kibi access control
+== X-Pack integration and {kibi-name} access control
 
-If you have an existing Elasticsearch instance with X-Pack installed and wish to integrate with Kibi,
+If you have an existing Elasticsearch instance with X-Pack installed and wish to integrate with {kibi-name},
 there are a few short steps to take:
 
 First, set the backend parameter of the `kibi_access_control` section of the `kibi.yml` to `xpack`:
@@ -1447,7 +1447,7 @@ Next, replace the kibiserver role with the following settings; If using a custom
   ]
 }
 
-Once you log into Kibi, you can configure roles as needed from Kibi's Access Control section. You can find an example role below.
+Once you log into {kibi-name}, you can configure roles as needed from {kibi-name}'s Access Control section. You can find an example role below.
 See the <<access_control_app, Access Control>> section for more information.
 
 [source, json]

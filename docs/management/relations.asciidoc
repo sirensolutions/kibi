@@ -42,7 +42,7 @@ The index pattern in question is then filtered by the values returned.
 
 These are used for displaying counts on relational buttons, for the content displayed on the current dashboard, etc.
 
-Setting the limit here to -1 here sets the limit to the default `kibi:joinLimit` set in the Kibi Advanced Settings 
+Setting the limit here to -1 here sets the limit to the default `kibi:joinLimit` set in the {kibi-name} Advanced Settings 
 and setting the limit to 0 here disables the limit entirely.
 
 ===== Example

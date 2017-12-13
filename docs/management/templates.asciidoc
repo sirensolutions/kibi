@@ -6,7 +6,7 @@ You can define templates to format the results of a query on an
 Elasticsearch query in a <<enhanced_search_results, Enhanced search results
 visualization>>.
 
-Kibi supports three template engines:
+{kibi-name} supports three template engines:
 
 * http://jade-lang.com/[jade]
 * http://handlebarsjs.com/[handlebars]

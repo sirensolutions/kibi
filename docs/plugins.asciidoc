@@ -1,13 +1,13 @@
 [[kibi-plugins]]
-= Kibi Plugins
+= {kibi-name} Plugins
 
 [partintro]
 --
-Add-on functionality for Kibi/Kibana is implemented with plug-in modules. You can use the `bin/kibi-plugin`
+Add-on functionality for {kibi-name}/Kibana is implemented with plug-in modules. You can use the `bin/kibi-plugin`
 command to manage these modules. You can also install a plugin manually by moving the plugin file to the
 `plugins` directory and unpacking the plugin files into a new directory.
 
-Generally Kibana plugins are compatible with Kibi provided that you are using the same baseline version (e.g. Kibi 5.2.2-1 with a plugin designed for Kibana 5.2.2).
+Generally Kibana plugins are compatible with {kibi-name} provided that you are using the same baseline version (e.g. {kibi-name} 5.2.2-1 with a plugin designed for Kibana 5.2.2).
 
 [IMPORTANT]
 .Plugin compatibility
@@ -57,7 +57,7 @@ NOTE: This command creates the specified directory if it does not already exist.
 [float]
 === Installing Plugins with Linux packages
 
-The Kibi server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
+The {kibi-name} server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
 want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
 
 [source,shell]
@@ -79,7 +79,7 @@ $ bin/kibi-plugin remove
 
 You can also remove a plugin manually by deleting the plugin's subdirectory under the `plugins/` directory.
 
-NOTE: Removing a plugin will result in an "optimize" run which will delay the next start of Kibi.
+NOTE: Removing a plugin will result in an "optimize" run which will delay the next start of {kibi-name}.
 
 == Disabling Plugins
 
@@ -90,7 +90,7 @@ Use the following command to disable a plugin:
 ./bin/kibi --<plugin ID>.enabled=false <1>
 -----------
 
-NOTE: Disabling or enabling a plugin will result in an "optimize" run which will delay the start of Kibi.
+NOTE: Disabling or enabling a plugin will result in an "optimize" run which will delay the start of {kibi-name}.
 
 <1> You can find a plugin's plugin ID as the value of the `name` property in the plugin's `package.json` file.
 
@@ -112,11 +112,11 @@ bin/kibi plugin --install username/sample-plugin --timeout 30s
 bin/kibi plugin --install username/sample-plugin --timeout 1m
 
 [float]
-==== Plugins and Custom Kibi Configurations
+==== Plugins and Custom {kibi-name} Configurations
 
-Use the `-c` or `--config` options to specify the path to the configuration file used to start Kibi. By default, Kibi
+Use the `-c` or `--config` options to specify the path to the configuration file used to start {kibi-name}. By default, {kibi-name}
 uses the configuration file `config/kibi.yml`. When you change your installed plugins, the `bin/kibi plugin` command
-restarts the Kibi server. When you are using a customized configuration file, you must specify the
+restarts the {kibi-name} server. When you are using a customized configuration file, you must specify the
 path to that configuration file each time you use the `bin/kibi plugin` command.
 
 [float]

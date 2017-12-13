@@ -1,5 +1,5 @@
 [[kibi_multi_chart]]
-== Kibi Multi Chart
+== {kibi-name} Multi Chart
 
 This visualization displays a multiple types of chart according to the current selection of multiple configurations.
 

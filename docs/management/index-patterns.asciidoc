@@ -1,19 +1,19 @@
 [[index-patterns]]
 == Index Patterns
 
-To use Kibi, you have to tell it about the Elasticsearch indices that you want to explore by configuring one or more
+To use {kibi-name}, you have to tell it about the Elasticsearch indices that you want to explore by configuring one or more
 index patterns. You can also:
 
 * Create scripted fields that are computed on the fly from your data. You can browse and visualize scripted fields, but
 you cannot search them.
 * Set advanced options such as the number of rows to show in a table and how many of the most popular fields to show.
 Use caution when modifying advanced options, as it's possible to set values that are incompatible with one another.
-* Configure Kibi for a production environment
+* Configure {kibi-name} for a production environment
 
 [float]
 [[settings-create-pattern]]
 == Creating an Index Pattern to Connect to Elasticsearch
-An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibi. Kibi looks for
+An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with {kibi-name}. {kibi-name} looks for
 index names that match the specified pattern.
 An asterisk (*) in the pattern matches zero or more characters. For example, the pattern `myindex-*` matches all
 indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`.
@@ -23,19 +23,19 @@ An index pattern can also simply be the name of a single index.
 To create an index pattern to connect to Elasticsearch:
 
 . Go to the *Settings > Indices* tab.
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibi
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, {kibi-name}
 guesses that you're working with log data being fed into Elasticsearch by Logstash.
 +
-NOTE: When you switch between top-level tabs, Kibi remembers where you were. For example, if you view a particular
-index pattern from the Settings tab, switch to the Discover tab, and then go back to the Settings tab, Kibi displays
+NOTE: When you switch between top-level tabs, {kibi-name} remembers where you were. For example, if you view a particular
+index pattern from the Settings tab, switch to the Discover tab, and then go back to the Settings tab, {kibi-name} displays
 the index pattern you last looked at. To get to the create pattern form, click the *Add* button in the Index Patterns
 list.
 
 . If your index contains a timestamp field that you want to use to perform time-based comparisons, select the *Index
-contains time-based events* option and select the index field that contains the timestamp. Kibi reads the index
+contains time-based events* option and select the index field that contains the timestamp. {kibi-name} reads the index
 mapping to list all of the fields that contain a timestamp.
 
-. By default, Kibi restricts wildcard expansion of time-based index patterns to indices with data within the currently
+. By default, {kibi-name} restricts wildcard expansion of time-based index patterns to indices with data within the currently
 selected time range. Click *Do not expand index pattern when search* to disable this behavior.
 
 . Click *Create* to add the index pattern.
@@ -108,7 +108,7 @@ to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-0
 [float]
 [[set-default-pattern]]
 == Setting the Default Index Pattern
-The default index pattern is loaded automatically when you view the *Discover* tab. Kibi displays a star to the
+The default index pattern is loaded automatically when you view the *Discover* tab. {kibi-name} displays a star to the
 left of the name of the default pattern in the Index Patterns list on the *Settings > Indices* tab. The first pattern
 you create is automatically designated as the default pattern.
 
@@ -123,11 +123,11 @@ NOTE: You can also manually set the default index pattern in *Advanced > Setting
 [float]
 [[reload-fields]]
 == Reloading the Index Fields List
-When you add an index mapping, Kibi automatically scans the indices that match the pattern to display a list of the
+When you add an index mapping, {kibi-name} automatically scans the indices that match the pattern to display a list of the
 index fields. You can reload the index fields list to pick up any newly-added fields.
 
-Reloading the index fields list also resets Kibi's popularity counters for the fields. The popularity counters keep
-track of the fields you've used most often within Kibi and are used to sort fields within lists.
+Reloading the index fields list also resets {kibi-name}'s popularity counters for the fields. The popularity counters keep
+track of the fields you've used most often within {kibi-name} and are used to sort fields within lists.
 
 To reload the index fields list:
 

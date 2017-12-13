@@ -1,7 +1,7 @@
 [[timeline]]
-== Kibi Timeline
+== {kibi-name} Timeline
 
-The Kibi Timeline visualization displays series of data coming from different
+The {kibi-name} Timeline visualization displays series of data coming from different
 saved searches on a single timeline component. Events are color coded
 to distinguish between different groups.
 

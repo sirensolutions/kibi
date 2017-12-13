@@ -1,7 +1,7 @@
 [[external_datasources]]
 = External Datasources
 
-Kibi provides visualizations and aggregations to integrate data from external
+{kibi-name} provides visualizations and aggregations to integrate data from external
 datasources. This section explains how to setup datasources and configure
 <<datasource-queries, queries>> and <<datasource-templates, query templates>>.
 
@@ -10,7 +10,7 @@ datasources. This section explains how to setup datasources and configure
 
 To create a new external datasource navigate to "Settings/Datasources"
 First fill the datasource title and name then pick one of the types
-Kibi supports:
+{kibi-name} supports:
 
 * REST
 * SQLite
@@ -29,12 +29,12 @@ Below is a list of additional mandatory parameters for each datasource type:
 To control the maximum number of query results kept in cache, set the `kibi_core.datasource_cache_size` parameter in kibi.yml.
 
 [NOTE]
-A Kibi restart is required to apply changes to kibi.yml configuration file.
+A {kibi-name} restart is required to apply changes to kibi.yml configuration file.
 
 *REST*
 
 * url - an URL of rest API endpoint
-* response_type - API results format, currently Kibi supports only *JSON*
+* response_type - API results format, currently {kibi-name} supports only *JSON*
 * username (optional) - username with access to the API
 * password (optional) - corresponding password
 * auth_token (optional) - token used in Token Authentication
@@ -81,7 +81,7 @@ Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=
 ----
 
 NOTE: Make sure to set the configuration file as readable only by the user
-running the Kibi process.
+running the {kibi-name} process.
 
 [float]
 [[entity_selection]]

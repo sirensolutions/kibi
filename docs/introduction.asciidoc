@@ -1,13 +1,13 @@
 [[introduction]]
 = Introduction
 
-Kibi is an open source data intelligence platform built upon
+{kibi-name} is an open source data intelligence platform built upon
 {kibana-announcement}[Kibana {kibana-version}].
 Kibi {version} supports Elasticsearch {elasticsearch-version}
 and the Federate plugin version {federate-version}. The Siren Federate plugin replaces the Siren Join plugin for
 distributions based on Elasticsearch 5.x.
 
-Kibi allows you to perform complex analytics on large volumes of data by providing
+{kibi-name} allows you to perform complex analytics on large volumes of data by providing
 customizable visualizations (charts, maps, metrics and tables) on Elasticsearch
 searches. Visualizations can be organized into multiple dashboards.
 
@@ -21,13 +21,13 @@ In addition, search results can be filtered and augmented by queries on multiple
 external datasources such as SQL databases and REST APIs; queries on external
 datasources can also be used as aggregations in visualizations.
 
-In addition to visualizations provided by Kibana, Kibi provides:
+In addition to visualizations provided by Kibana, {kibi-name} provides:
 
 - The <<relational_filter, Relational Filter>> visualization, which allows you
 to configure relations between fields in different indices and to apply
 cross-dashboard filters (pivoting).
 
-- The <<timeline,Kibi Timeline>> visualization, which displays a timeline
+- The <<timeline,{kibi-name} Timeline>> visualization, which displays a timeline
 with multiple groups of data coming from different indices.
 
 - The <<radar_chart,Radar Chart>> visualization, which is a
@@ -43,7 +43,14 @@ with multiple groups of data coming from different indices.
 - The <<kibi_box_plot,Box Plot>> visualization, which displays a box plot chart
   from the data.
 
+<<<<<<< HEAD
 - The <<kibi_horizontal_bar_chart,Kibi Horizontal Bar Chart>> visualization,
+=======
+- The <<kibi_vector_map,{kibi-name} Vector Map>> visualization (Deprecated), which displays a
+  vector map where countries are colored based on aggregated field values.
+
+- The <<kibi_horizontal_bar_chart,{kibi-name} Horizontal Bar Chart>> visualization,
+>>>>>>> a690273... Blanket update of all 'Kibi' references to 'Siren Investigate'
   which displays a horizontal bar chart.
 
 - The <<kibi_multi_chart,Multi Chart>> visualization, which displays
@@ -53,11 +60,11 @@ with multiple groups of data coming from different indices.
 - The <<enhanced_search_results,Enhanced Search Results>> visualization, which
   displays query results in a table.
 
-- The <<kibi_query_viewer,Kibi Query Viewer>>, which enables the
+- The <<kibi_query_viewer,{kibi-name} Query Viewer>>, which enables the
 visualization of queries on external datasource through Jade or Handlebars
 templates.
 
-- The <<graph_browser,Kibi Graph Browser>>, which displays the currently
+- The <<graph_browser,{kibi-name} Graph Browser>>, which displays the currently
 selected Elasticsearch documents as a node of a graph and allows the user to visually
 explore the connection between vertices.
 
@@ -65,13 +72,13 @@ The Relational Filter visualization requires the {federate-website}[Siren Federa
 for Elasticsearch.
 
 [float]
-=== How does Kibi compare to Kibana?
+=== How does {kibi-name} compare to Kibana?
 
-Kibi is currently developed as a fork of Kibana {kibana-version}. Although
-configuration objects are mostly the same, it is recommended to keep Kibi and
+{kibi-name} is currently developed as a fork of Kibana {kibana-version}. Although
+configuration objects are mostly the same, it is recommended to keep {kibi-name} and
 Kibana in separate indices.
 
 [float]
-=== What's new in Kibi v{kibi-version}
+=== What's new in {kibi-name} v{kibi-version}
 
 To see all the changes, please check the <<releasenotes,full release notes>>.

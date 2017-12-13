@@ -33,7 +33,7 @@ add another filter. Click the image:images/labelbutton.png[Label button icon] *l
 you can type in a name to display on the visualization.
 *Significant Terms*:: Displays the results of the experimental
 {ref}/search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation.
-*External query terms filter*:: a Kibi aggregator where one can define one or
+*External query terms filter*:: a {kibi-name} aggregator where one can define one or
 more buckets based on some record value (typically a primary key) matching the
 results of an external query. Multiple such buckets, corresponding to multiple
 queries, can be defined. For more information see the _query_ menu in the

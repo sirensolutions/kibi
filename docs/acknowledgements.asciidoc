@@ -14,4 +14,4 @@ CrunchBase and CrunchBase Dataset are trademarks of AOL Inc, registered in the
 U.S. and in other countries.
 
 All the trademarks, registered trademarks and copyrighted terms in the
-Kibi demo dataset are the property of their respective owners.
+{kibi-name} demo dataset are the property of their respective owners.

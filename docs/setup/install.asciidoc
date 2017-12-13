@@ -1,13 +1,13 @@
 [[install]]
-== Installing Kibi
+== Installing {kibi-name}
 
-Kibi is provided in the following package formats:
+{kibi-name} is provided in the following package formats:
 
 [horizontal]
 `tar.gz`/`zip`::
 
 The `tar.gz` packages are provided for installation on Linux and Darwin and are
-the easiest choice for getting started with Kibi.
+the easiest choice for getting started with {kibi-name}.
 +
 The `zip` package is the only supported package for Windows.
 +
@@ -15,7 +15,7 @@ The `zip` package is the only supported package for Windows.
 
 `docker`::
 
-Kibi Docker images are available at {dockerhub-ref}.
+{kibi-name} Docker images are available at {dockerhub-ref}.
 +
 {kibana-ref}/docker.html[Running Kibana on Docker]
 

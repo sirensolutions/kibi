@@ -83,6 +83,16 @@ describe('plugins/elasticsearch', function () {
           });
         });
 
+        it('should add siren to the search action if path starts with _siren', function () {
+          const func = mapUri(stubCluster(), '/elasticsearch', serverWithSirenPlugin, true);
+
+          request.path = '/elasticsearch/_siren/connector/index/_search';
+          func(request, (err, upstreamUri, upstreamHeaders) => {
+            expect(err).to.be(null);
+            expect(upstreamUri).to.not.contain('/siren/');
+          });
+        });
+
         it('should not add siren to the action 1', function () {
           const func = mapUri(stubCluster(), '/elasticsearch', serverWithSirenPlugin, false);
 

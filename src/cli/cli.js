@@ -10,7 +10,7 @@ import backupCommand from './kibi/backup';
 import restoreCommand from './kibi/restore';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
-const program = new Command('bin/kibi'); // kibi: renamed kibana to kibi
+const program = new Command('bin/investigate'); // kibi: renamed kibana to kibi
 
 program
 .version(pkg.kibi_version)

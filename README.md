@@ -24,7 +24,7 @@ and can be downloaded from [https://support.siren.io](https://support.siren.io)
 
 * Download the Kibi demo distribution: [http://siren.solutions/kibi](http://siren.solutions/kibi)
 * Start Elasticsearch by running `elasticsearch\bin\elasticsearch` on Linux/OS X or `elasticsearch\bin\elasticsearch.bat` on Windows.
-* Go to the `kibi` directory and run `bin/kibi` on Linux/OS X or `bin\kibi.bat` on Windows.
+* Go to the `kibi` directory and run `bin/investigate` on Linux/OS X or `bin\investigate.bat` on Windows.
 
 A pre-configured Kibi is now running at [http://localhost:5606](http://localhost:5606);
 a complete description of the demo is [available](https://docs.siren.solutions/#getting_started) in the Kibi documentation.

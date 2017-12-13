@@ -59,7 +59,7 @@
     "checkLicenses": "grunt licenses",
     "build": "grunt build --skip-os-packages=true",
     "release": "grunt release",
-    "start": "sh ./bin/kibi --dev",
+    "start": "sh ./bin/investigate --dev",
     "precommit": "grunt precommit",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",

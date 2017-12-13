@@ -7,7 +7,7 @@ import removeCommand from './remove';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 // kibi: updates plugin executable name to kibi
-const program = new Command('bin/kibi-plugin');
+const program = new Command('bin/investigate-plugin');
 
 program
 .version(pkg.version)

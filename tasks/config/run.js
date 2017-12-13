@@ -10,9 +10,9 @@ module.exports = function (grunt) {
   const platform = require('os').platform();
   const root = p => resolve(__dirname, '../../', p);
 
-  // kibi: replaced scrpit name with kibi
-  const binScript =  /^win/.test(platform) ? '.\\bin\\kibi.bat' : './bin/kibi';
-  const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibi.bat' : './build/kibana/bin/kibi';
+  // kibi: replaced script name with investigate
+  const binScript =  /^win/.test(platform) ? '.\\bin\\investigate.bat' : './bin/investigate';
+  const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\investigate.bat' : './build/kibana/bin/investigate';
   // kibi: end
   const pkgVersion = grunt.config.get('pkg.version');
   const releaseBinScript = `./build/kibi-${pkgVersion}-linux-x86_64/bin/kibana`;

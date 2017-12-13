@@ -1,5 +1,5 @@
-bin/kibi
-bin/kibi.bat
+bin/investigate
+bin/investigate.bat
 
 package.json
 

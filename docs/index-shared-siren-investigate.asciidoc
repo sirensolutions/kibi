@@ -27,7 +27,7 @@
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
 :es-ref: {elastic-ref}
 :xpack-ref:            https://www.elastic.co/guide/en/x-pack/{branch}
-
+:icons: font
 :es-default-port: 9220
 
 :searchguard-ref: http://floragunncom.github.io/search-guard-docs/

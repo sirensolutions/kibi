@@ -23,7 +23,7 @@ ifeval::["{release-state}"!="unreleased"]
 
 The 64-bit Linux archive for Kibana v{version} can be downloaded and installed as follows:
 
-["source","sh",subs="attributes"]
+["source",sh,subs="attributes+"]
 --------------------------------------------
 wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz
 sha1sum kibana-{version}-linux-x86_64.tar.gz <1>
@@ -50,7 +50,7 @@ ifeval::["{release-state}"!="unreleased"]
 
 The 32-bit Linux archive for Kibana v{version} can be downloaded and installed as follows:
 
-["source","sh",subs="attributes"]
+["source","sh",subs="attributes+"]
 --------------------------------------------
 wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86.tar.gz
 sha1sum kibana-{version}-linux-x86.tar.gz <1>
@@ -77,7 +77,7 @@ ifeval::["{release-state}"!="unreleased"]
 
 The Darwin archive for Kibana v{version} can be downloaded and installed as follows:
 
-["source","sh",subs="attributes"]
+["source","sh",subs="attributes+"]
 --------------------------------------------
 curl -O https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz
 shasum kibana-{version}-darwin-x86_64.tar.gz <1>

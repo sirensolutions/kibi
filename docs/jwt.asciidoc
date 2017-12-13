@@ -136,7 +136,7 @@ assign backend roles to the user by setting the claim defined in
 [source,json]
 ----
 {
-  "sub": "kibiuser",
+  "sub": "sirenuser",
   "exp": 1495711765,
   "roles": "sales,marketing"
 }

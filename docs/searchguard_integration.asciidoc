@@ -423,7 +423,7 @@ groups plus three {kibi-name} specific groups:
   searches and send composite requests.
 - **KIBI_COMPOSITE**: groups all the permissions to execute composite requests
   not recognized by Search Guard; the group has to be granted on all indices
-  to roles that have access only to a subset of indices (e.g. kibinoinvestor).
+  to roles that have access only to a subset of indices (e.g. sirennoinvestor).
 
 **Roles (sg_roles.yml)**
 
@@ -523,7 +523,7 @@ kibiserver:
         - ALL
 
 # Permissions for a {kibi-name} administrator (read-write access to the .kibi index).
-kibiadmin:
+sirenadmin:
   cluster:
     - KIBI_CLUSTER
     - cluster:admin/plugin/siren/license/put
@@ -539,7 +539,7 @@ kibiadmin:
         - KIBI_READWRITE
 
 # Permissions for a {kibi-name} user (read only access to the .kibi index).
-kibiuser:
+sirenuser:
   cluster:
     - KIBI_CLUSTER
   indices:
@@ -569,7 +569,7 @@ kibiuser:
         - KIBI_COMPOSITE
 
 # Permissions for a {kibi-name} user (read only), with no access to the investor index.
-kibinoinvestor:
+sirennoinvestor:
   cluster:
     - KIBI_CLUSTER
   indices:
@@ -601,11 +601,11 @@ The file defines the following roles:
   not required if the Sentinl plugin is not installed.
 - **monitoring**: defines the permissions for an X-Pack monitoring agent.
 - **kibiserver**: defines the permissions for the {kibi-name} server process.
-- **kibiadmin**: defines the permissions for a {kibi-name} user with read/write
+- **sirenadmin**: defines the permissions for a {kibi-name} user with read/write
   access to the .kibi index.
-- **kibiuser**: defines the permissions for a {kibi-name} user with readonly access
+- **sirenuser**: defines the permissions for a {kibi-name} user with readonly access
   to all indices.
-- **kibinoinvestor**: defines the permissions for a {kibi-name} user with readonly
+- **sirennoinvestor**: defines the permissions for a {kibi-name} user with readonly
   access to all the indices excluding _investor_.
 
 A permission is defined by the following syntax:
@@ -635,11 +635,11 @@ admin:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 kibiserver:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-kibiadmin:
+sirenadmin:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-kibiuser:
+sirenuser:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-kibinoinvestor:
+sirennoinvestor:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 logstash:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
@@ -680,17 +680,17 @@ kibiserver:
   users:
     - kibiserver
 
-kibiadmin:
+sirenadmin:
   users:
-    - kibiadmin
+    - sirenadmin
 
-kibiuser:
+sirenuser:
   users:
-    - kibiuser
+    - sirenuser
 
-kibinoinvestor:
+sirennoinvestor:
   users:
-    - kibinoinvestor
+    - sirennoinvestor
 
 logstash:
   users:
@@ -889,7 +889,7 @@ values in the **kibi_access_control** section:
   set **session.ttl** for additional protection. Defaults to **null**.
 - **cookie.name**: the name of the session cookie. Defaults to **kac**.
 - **admin_role**: the Search Guard role authorized to use the {kibi-name} Access
-  Control application. Defaults to **kibiadmin**.
+  Control application. Defaults to **sirenadmin**.
 
 E.g.:
 
@@ -974,7 +974,7 @@ Copy the client certificate and its key to a directory readable by {kibi-name} (
 add the following parameters to the `kibi_access_control` configuration section:
 
 - **admin_role**: the Search Guard role that has access to the Search Guard
-  management UI (**kibiadmin** by default).
+  management UI (**sirenadmin** by default).
 - **backends.searchguard.admin.ssl.cert**: the path to the administrative
   client certificate bundle in PEM format.
 - **backends.searchguard.admin.ssl.key**: the path to the administrative client
@@ -985,7 +985,7 @@ E.g.:
 [source,yaml]
 ----
 kibi_access_control:
-  admin_role: kibiadmin
+  admin_role: sirenadmin
   backends:
     searchguard:
       admin.ssl.cert: pki/searchguard/CN=sgadmin.crtfull.pem
@@ -1043,7 +1043,7 @@ To enable this feature, set the following parameters in the `kibi_access_control
 configuration section:
 
 - **admin_role**: the Search Guard role that can use the saved objects access
-  control management UI (**kibiadmin** by default).
+  control management UI (**sirenadmin** by default).
 - **acl.enabled**: set to true to enable access control on saved objects.
 - **acl.index**: the Elasticsearch index in which access control rules and
   saved objects metadata will be stored (**.kibiaccess** by default).
@@ -1095,7 +1095,7 @@ E.g.:
 
 [source, yaml]
 ----
-kibiuser:
+sirenuser:
   cluster:
     - KIBI_CLUSTER
   indices:
@@ -1189,10 +1189,10 @@ each role.
 To define a new role, click on the **Create role** button, then set the
 following parameters:
 
-- **Role ID**: the ID of the role (e.g. `kibiuser`); must be a lowercase
+- **Role ID**: the ID of the role (e.g. `sirenuser`); must be a lowercase
   alphanumeric string.
 - **Backend roles**: a list of Search Guard roles that will be mapped to this
-  {kibi-name} role (e.g. `kibiuser`)
+  {kibi-name} role (e.g. `sirenuser`)
 - **Rules**: a list of rules on saved object types.
 
 Each rule is defined by three parameters:

@@ -26,9 +26,9 @@ the CrunchBase 2013 Snapshot, which is copyright (C) 2013 AOL Inc.
 
 You can access the demo as three different users:
 
-- `kibiadmin`: has read access to all data indices and can modify the {kibi-name} configuration.
-- `kibiuser`: has read access to all data indices but cannot modify the {kibi-name} configuration.
-- `kibinoinvestor`: has read access to all data indices except `investor`; the user has no access to the `Investors` dashboard.
+- `sirenadmin`: has read access to all data indices and can modify the {kibi-name} configuration.
+- `sirenuser`: has read access to all data indices but cannot modify the {kibi-name} configuration.
+- `sirennoinvestor`: has read access to all data indices except `investor`; the user has no access to the `Investors` dashboard.
 
 The password for all users is `password`.
 

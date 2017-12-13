@@ -323,9 +323,9 @@ Search Guard role mapping, e.g.:
 
 [source,yaml]
 ----
-kibiuser:
+sirenuser:
   users:
-    - kibiuser
+    - sirenuser
     - domainuser
 ----
 

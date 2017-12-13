@@ -480,8 +480,8 @@ monitoring:
       '*':
         - ALL
 
-# Permissions for a Sentinl user.
-sentinl:
+# Permissions for a Siren Alert user.
+sirenalert:
   cluster:
     - KIBI_CLUSTER
     - 'indices:data/write/bulk*'
@@ -597,8 +597,8 @@ The file defines the following roles:
 - **logstash**: defines the permission for a Logstash client with all write and
   creation privileges enabled on Logstash and Elastic Beats templates and
   indices.
-- **sentinl**: defines the permission for a Sentinl user; the role is
-  not required if the Sentinl plugin is not installed.
+- **sirenalert**: defines the permission for a Siren Alert user; the role is
+  not required if the Siren Alert plugin is not installed.
 - **monitoring**: defines the permissions for an X-Pack monitoring agent.
 - **sirenserver**: defines the permissions for the {kibi-name} server process.
 - **sirenadmin**: defines the permissions for a {kibi-name} user with read/write
@@ -645,7 +645,7 @@ logstash:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 CN=demouser:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-sentinl:
+sirenalert:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 monitoring:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
@@ -696,9 +696,9 @@ logstash:
   users:
     - logstash
 
-sentinl:
+sirenalert:
   users:
-    - sentinl
+    - sirenalert
 
 monitoring:
   users:
@@ -913,15 +913,15 @@ kibi_access_control:
     secure: false
 ----
 
-If you are using the Sentinl plugin, you can specify the Sentinl user
-credentials in the `kibi_access_control.sentinl` section, e.g.:
+If you are using the Siren Alert plugin, you can specify the Siren Alert user
+credentials in the `kibi_access_control.sirenalert` section, e.g.:
 
 [source,yaml]
 ----
 kibi_access_control:
-  sentinl:
+  sirenalert:
     elasticsearch:
-      username: sentinl
+      username: sirenalert
       password: password
 ----
 
@@ -1137,7 +1137,7 @@ The ACL Roles panel in the ACL section allows to define {kibi-name} roles, which
 are collections of permissions on saved objects and UI elements.
 The main purpose of this system is to hide and block access to:
 
- * UI elements - applications, e.g.: **Timelion**, **Access control**, **Sentinl**
+ * UI elements - applications, e.g.: **Timelion**, **Access control**, **Siren Alert**
  * UI elements - specific functionalities e.g.: **export CSV feature**
  * UI elements - {kibi-name} sections, e.g.: **discover**, **management**
  * Saved objects on unauthorized indices, e.g.: **dashboards**, **searches**

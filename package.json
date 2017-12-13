@@ -18,8 +18,8 @@
   "private": false,
   "version": "5.6.4",
   "branch": "5.6",
-  "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-6-4-released",
-  "kibi_version": "5.6.4-SNAPSHOT",
+  "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-6-5-and-6-0-1-released",
+  "kibi_version": "5.6.5-SNAPSHOT",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9",
@@ -82,7 +82,7 @@
     "@elastic/httpolyglot": "0.1.2-elasticpatch1",
     "@elastic/leaflet-draw": "0.2.3",
     "@elastic/leaflet-heat": "0.1.3",
-    "@elastic/numeral": "2.2.1",
+    "@elastic/numeral": "2.2.2",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",
     "@elastic/webpack-directory-name-as-main": "2.0.2",
@@ -239,7 +239,7 @@
     "@elastic/eslint-plugin-kibana-custom": "1.0.3",
     "angular-mocks": "1.4.7",
     "babel-eslint": "7.2.3",
-    "backport": "1.0.1",
+    "backport": "2.2.0",
     "chai": "3.5.0",
     "chance": "1.0.6",
     "cheerio": "0.22.0",
@@ -286,6 +286,7 @@
     "karma-ie-launcher": "1.0.0",
     "karma-mocha": "1.3.0",
     "karma-safari-launcher": "1.0.0",
+    "karma-junit-reporter": "1.2.0",
     "keymirror": "0.1.1",
     "leadfoot": "1.7.1",
     "license-checker": "5.1.2",
@@ -309,7 +310,8 @@
     "supertest-as-promised": "2.0.2",
     "tree-kill": "1.1.0",
     "webpack-dev-server": "1.14.1",
-    "mockery": "1.4.0"
+    "mockery": "1.4.0",
+    "xmlbuilder": "9.0.4"
   },
   "engines": {
     "node": "6.11.5",

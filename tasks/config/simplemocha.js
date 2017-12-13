@@ -1,15 +1,19 @@
+import { createAutoJunitReporter } from '../../src/dev';
+
 module.exports = grunt => ({
   options: {
     timeout: 60000, // kibi: increased default timeout for jenkins build
+    grep: grunt.option('grep'), // kibi: support grep for mocha tests
     slow: 5000,
     ignoreLeaks: false,
     reporter: 'spec',
-    grep: grunt.option('grep'), // kibi: support grep for mocha tests
-    globals: ['nil']
+    reporter: createAutoJunitReporter({
+      reportName: 'Server Mocha Tests'
+    }),
+    globals: ['nil'],
   },
   all: {
     src: [
-      'test/mocha_setup.js',
       'test/**/__tests__/**/*.js',
       'src/**/__tests__/**/*.js',
       'plugins/**/lib/**/__tests__/**/*.js', // kibi: Support execution of mocha tests in plugins

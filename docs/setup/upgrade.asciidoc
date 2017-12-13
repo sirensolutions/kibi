@@ -5,7 +5,7 @@ NOTE: Before upgrading make sure to check the <<breaking-changes>> section.
 
 An existing {kibi-name} installation can be upgraded as follows:
 
-- backup the `.kibi` index.
+- backup the `.siren` index.
 - backup the {kibi-name} configuration file (`config/siren.yml`)
 - backup the `.kibiaccess` if ACL (Access Control Layer) is enabled.
 - {es-ref}setup-upgrade.html[upgrade Elasticsearch];
@@ -21,10 +21,10 @@ An existing {kibi-name} installation can be upgraded as follows:
 [float]
 === Backing up and Restoring the {kibi-name} Indices.
 
-Before upgrading it is strongly recommended to have a backup of the `.kibi` index; the recommended way to perform regular backups of
+Before upgrading it is strongly recommended to have a backup of the `.siren` index; the recommended way to perform regular backups of
 Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapshot and restore modules].
 
-{kibi-name} ships with a command line interface for creating dumps of the `.kibi` index and, in case the `ACL` is enabled, the `.kibiaccess` index as well.
+{kibi-name} ships with a command line interface for creating dumps of the `.siren` index and, in case the `ACL` is enabled, the `.kibiaccess` index as well.
 An index dump is composed of two parts: its mappings and its data.
 
 [float]
@@ -39,7 +39,7 @@ You can know more about its options by executing the following:
 $ ./bin/investigate backup --help
 ----
 
-For example, the following line will dump in `<MY_FOLDER>` the `.kibi` index and the `.kibiaccess` index if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
+For example, the following line will dump in `<MY_FOLDER>` the `.siren` index and the `.kibiaccess` index if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
 
 [source,shell]
 ----
@@ -69,9 +69,9 @@ In addition, an <<kibi-upgrade-command,upgrade>> of the {kibi-name} indices is a
 
 [float]
 [[kibi-upgrade-command]]
-=== Upgrading the .kibi index.
+=== Upgrading the .siren index.
 
-To upgrade the objects in the `.kibi` index (dashboards, visualizations, etc.), move to the directory in which {kibi-name} is installed and
+To upgrade the objects in the `.siren` index (dashboards, visualizations, etc.), move to the directory in which {kibi-name} is installed and
 execute the following command:
 
 [source,shell]

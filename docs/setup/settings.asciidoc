@@ -36,7 +36,7 @@ queries.
 `elasticsearch.preserveHost:`:: *Default: true* - When this setting’s value is true {kibi-name} uses the hostname specified in
 the `server.host` setting. When the value of this setting is `false`, {kibi-name} uses the hostname of the host that connects
 to this {kibi-name} instance.
-`kibana.index:`:: *Default: ".kibi"* - {kibi-name} uses an index in Elasticsearch to store saved searches, visualizations and
+`kibana.index:`:: *Default: ".siren"* - {kibi-name} uses an index in Elasticsearch to store saved searches, visualizations and
 dashboards. {kibi-name} creates a new index if the index does not already exist.
 `kibana.defaultAppId:`:: *Default: "discover"* - The default application to load.
 [[tilemap-settings]]`tilemap.url:`:: The URL to the tile

@@ -54,7 +54,7 @@ A {kibi-name} restart is required to apply changes to siren.yml configuration fi
 == Parameters encryption
 
 Sensitive datasource parameters like passwords are encrypted before being
-stored in the `.kibi` index.
+stored in the `.siren` index.
 
 Before creating datasources containing sensitive parameters, make sure to set
 a custom encryption key by running the `replace_encryption_key` command:

@@ -35,7 +35,7 @@ All done! {kibi-name} is now connected to your Elasticsearch data. {kibi-name} d
 configured for the matching index.
 
 NOTE: {kibi-name} relies on dynamic mapping to use fields in visualizations and manage the
-`.kibi` index. If you have disabled dynamic mapping, you need to manually provide
+`.siren` index. If you have disabled dynamic mapping, you need to manually provide
 mappings for the fields that {kibi-name} uses to create visualizations. For more information, see
 <<kibana-dynamic-mapping, {kibi-name} and Elasticsearch Dynamic Mapping>>.
 
@@ -55,21 +55,21 @@ Getting Started>> tutorial.
 [[kibana-dynamic-mapping]]
 === {kibi-name} and Elasticsearch Dynamic Mapping
 By default, Elasticsearch enables {es-ref}dynamic-mapping.html[dynamic mapping] for fields. {kibi-name} needs
-dynamic mapping to use fields in visualizations correctly, as well as to manage the `.kibi` index
+dynamic mapping to use fields in visualizations correctly, as well as to manage the `.siren` index
 where saved searches, visualizations, and dashboards are stored.
 
 If your Elasticsearch use case requires you to disable dynamic mapping, you need to manually provide
 mappings for fields that {kibi-name} uses to create visualizations. You also need to manually enable dynamic
-mapping for the `.kibi` index.
+mapping for the `.siren` index.
 
-The following procedure assumes that the `.kibi` index does not already exist in Elasticsearch and
+The following procedure assumes that the `.siren` index does not already exist in Elasticsearch and
 that the `index.mapper.dynamic` setting in `elasticsearch.yml` is set to `false`:
 
 . Start Elasticsearch.
-. Create the `.kibi` index with dynamic mapping enabled just for that index:
+. Create the `.siren` index with dynamic mapping enabled just for that index:
 +
 [source,shell]
-PUT .kibi
+PUT .siren
 {
   "index.mapper.dynamic": true
 }

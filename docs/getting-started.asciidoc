@@ -13,7 +13,7 @@ the `elasticsearch` directory; the cluster contains five indices:
 `article`:: a collection of articles about companies
 `investment`:: a collection of investments in companies
 `investor`:: a collection of investors
-`.kibi`:: {kibi-name} configuration
+`.siren`:: {kibi-name} configuration
 
 The indices have been populated through https://www.elastic.co/products/logstash[Logstash]
 from the SQLite database in `siren-investigate/crunchbase.db`, as described in the <<logstash>> chapter.

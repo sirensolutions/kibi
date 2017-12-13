@@ -414,7 +414,7 @@ configuration file; the above configuration includes Search Guard default
 groups plus three {kibi-name} specific groups:
 
 - **KIBI_READWRITE**: groups all the permissions needed to search and update
-  the main {kibi-name} index (_.kibi_); the group has to be assigned on the main index
+  the main {kibi-name} index (_.siren_); the group has to be assigned on the main index
   to all roles that can modify the {kibi-name} configuration.
 - **KIBI_READONLY**: groups all the permissions needed to search any
   Elasticsearch index from {kibi-name}. The group has to be assigned on all indices
@@ -522,7 +522,7 @@ kibiserver:
       '*':
         - ALL
 
-# Permissions for a {kibi-name} administrator (read-write access to the .kibi index).
+# Permissions for a {kibi-name} administrator (read-write access to the .siren index).
 sirenadmin:
   cluster:
     - KIBI_CLUSTER
@@ -538,7 +538,7 @@ sirenadmin:
       '*':
         - KIBI_READWRITE
 
-# Permissions for a {kibi-name} user (read only access to the .kibi index).
+# Permissions for a {kibi-name} user (read only access to the .siren index).
 sirenuser:
   cluster:
     - KIBI_CLUSTER
@@ -602,7 +602,7 @@ The file defines the following roles:
 - **monitoring**: defines the permissions for an X-Pack monitoring agent.
 - **kibiserver**: defines the permissions for the {kibi-name} server process.
 - **sirenadmin**: defines the permissions for a {kibi-name} user with read/write
-  access to the .kibi index.
+  access to the .siren index.
 - **sirenuser**: defines the permissions for a {kibi-name} user with readonly access
   to all indices.
 - **sirennoinvestor**: defines the permissions for a {kibi-name} user with readonly
@@ -1085,7 +1085,7 @@ kibiserver:
         - ALL
 ----
 
-In addition, it is recommended to block access on the {kibi-name} index (`.kibi` by
+In addition, it is recommended to block access on the {kibi-name} index (`.siren` by
 default) to users by adding the following permissions on the `null` type in
 each user role:
 
@@ -1423,7 +1423,7 @@ kibi_access_control:
   backend: xpack
 ----
 
-Next, replace the kibiserver role with the following settings; If using a custom configuration, replace the kibi (default: .kibi) and access control (default: .kibiaccess) indices with your index names
+Next, replace the kibiserver role with the following settings; If using a custom configuration, replace the kibi (default: .siren) and access control (default: .kibiaccess) indices with your index names
 
 [source, json]
 {
@@ -1437,7 +1437,7 @@ Next, replace the kibiserver role with the following settings; If using a custom
       "privileges" : [ "indices:admin/get" ]
     },
     {
-      "names" : [ ".kibi*" ],
+      "names" : [ ".siren*" ],
       "privileges" : [ "all" ]
     },
     {
@@ -1482,7 +1482,7 @@ See the <<access_control_app, Access Control>> section for more information.
       "privileges" : [ "read", "view_index_metadata", "indices:siren", "indices:admin/version/get" ]
     },
     {
-      "names" : [ ".kibi*" ],
+      "names" : [ ".siren*" ],
       "privileges" : [ "read" ]
     }
   ]

@@ -85,6 +85,6 @@ The default settings when using the `siren-kibi` image (standalone {kibi-name} i
 [horizontal]
 `elasticsearch.url`:: `http://localhost:9220`
 `server.basepath`:: `""`
-`kibi.index`:: `.kibi`
+`kibi.index`:: `.siren`
 
 endif::[]

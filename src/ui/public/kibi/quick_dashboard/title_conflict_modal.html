@@ -1,0 +1,31 @@
+<div class="kibi-quickdash-title-conflict kuiModal"
+  style="width: 450px">
+  <div class="kuiModalBody">
+    <div class="kuiModalBodyText">
+      A dashboard with the title '{{title}}' already exists.
+      What do you want to do?
+    </div>
+  </div>
+  <div class="kuiModalFooter">
+    <button class="kuiButton kuiButton--hollow"
+      ng-click="onCancel()"
+      aria-label="Cancel">
+      Cancel
+    </button>
+    <button class="kuiButton"
+      ng-class="{'kuiButton--primary': !overwrite, 'kuiButton--hollow': overwrite}"
+      ng-show="save"
+      ng-click="onConfirm('save')"
+      aria-label="Save dashboard">
+      Save dashboard
+    </button>
+    <button class="kuiButton kuiButton--primary"
+      ng-show="overwrite"
+      ng-click="onConfirm('overwrite')"
+      aria-label="Overwrite Dashboard">
+      Overwrite dashboard
+    </button>
+  </div>
+</div>
+
+

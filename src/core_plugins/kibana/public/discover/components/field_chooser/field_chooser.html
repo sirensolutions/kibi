@@ -40,6 +40,18 @@
     </discover-field>
   </ul>
 
+  <!-- kibi: Added 'Quick Dashboard' button -->
+  <div class="kuiButtonGroup">
+    <button
+      class="discover-quickdashboard kuiButton kuiButton--primary kuiButton--small kuiVerticalRhythmSmall"
+      ng-disabled="columns.length <= 0 || columns[0] === '_source'"
+      ng-click="onQuickDashboard()"
+    >
+      Quick Dashboard
+    </button>
+  </div>
+  <!-- kibi: end -->
+
   <div class="sidebar-list-header sidebar-item">
     <h3 class="sidebar-list-header-label" id="available_fields" tabindex="0">Available Fields
       <span

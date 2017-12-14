@@ -11,7 +11,7 @@ much more.
 
 ## Upgrade from previous version
 
-* Move any custom configurations in your old kibi.yml to your new one siren.yml
+* Move any custom configurations in your old kibi.yml to the new siren.yml file
 * Reinstall plugins
 * Start or restart Siren Investigate
 
@@ -47,7 +47,7 @@ Siren Investigate is Licensed under the Apache License, Version 2.0 (the "Licens
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-Please note that Siren Investigate uses the Siren Federate Plugin for elasticsearch which is licenced as AGPL version 3.0.
+Please note that Siren Investigate uses the Siren Federate Plugin for Elasticsearch which is licenced as AGPL version 3.0.
 For more information see the licensing section on siren.io website
 
   https://siren.io

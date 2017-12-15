@@ -8,7 +8,7 @@ import { uiModules } from 'ui/modules';
 
 uiModules
 .get('kibana/kibi_kibi_sequential_join_vis')
-.directive('kibiSequentialJoinVisParams', function (config, Private, createNotifier) {
+.directive('kibiSequentialJoinVisParams', function (Private, createNotifier, ontologyClient) {
   return {
     restrict: 'E',
     template,
@@ -18,61 +18,63 @@ uiModules
         location: 'Kibi Relational filter params'
       });
 
-      const relations = config.get('kibi:relations');
       $scope.focused = [];
 
-      $scope.getLabel = function (relationId) {
-        if (relationId) {
-          const rel =  _.find(relations.relationsIndices, (rel) => {
-            return rel.id === relationId;
-          });
-          if (rel) {
-            return rel.label;
+      ontologyClient.getRelations()
+      .then((relations) => {
+        $scope.getLabel = function (relationId) {
+          if (relationId) {
+            const rel =  _.find(relations, (rel) => {
+              return rel.id === relationId;
+            });
+            if (rel) {
+              return rel.directLabel;
+            }
           }
-        }
-      };
+        };
 
-      _.each($scope.vis.params.buttons, (button) => {
-        if (!button.indexRelationId) {
-          return;
-        }
-        const found = _.find(relations.relationsIndices, 'id', button.indexRelationId);
-        if (!found) {
-          notify.error('Could not find relation: ' + button.indexRelationId + '. Check relations configuration.');
-          delete button.indexRelationId;
-        }
-        $scope.focused.push(false);
+        _.each($scope.vis.params.buttons, (button) => {
+          if (!button.indexRelationId) {
+            return;
+          }
+          const found = _.find(relations, 'id', button.indexRelationId);
+          if (!found) {
+            notify.error('Could not find relation: ' + button.indexRelationId + '. Check relations configuration.');
+            delete button.indexRelationId;
+          }
+          $scope.focused.push(false);
+        });
+
+        const filteredRelations = _(relations)
+        .each((rel) => {
+          if (!rel.onSelect) {
+            rel.onSelect = function (buttonIndex) {
+              const button = $scope.vis.params.buttons[buttonIndex];
+              button.indexRelationId = rel.id;
+              button.sourceDashboardId = null;
+              button.targetDashboardId = null;
+            };
+          }
+        })
+        .sortBy(function (rel) {
+          return rel.domain.id;
+        })
+        .sortBy((rel) => rel.directLabel)
+        .value();
+
+        $scope.menu = {
+          template: menuTemplateHtml,
+          relations: filteredRelations,
+          onFocus: function (index) {
+            _.fill($scope.focused, false);
+            $scope.focused[index] = true;
+          },
+          onBlur: function (index) {
+            _.fill($scope.focused, false);
+          },
+
+        };
       });
-
-      const filteredRelations = _(relations.relationsIndices)
-      .each((rel) => {
-        if (!rel.onSelect) {
-          rel.onSelect = function (buttonIndex) {
-            const button = $scope.vis.params.buttons[buttonIndex];
-            button.indexRelationId = rel.id;
-            button.sourceDashboardId = null;
-            button.targetDashboardId = null;
-          };
-        }
-      })
-      .sortBy(function (rel) {
-        return rel.indices[0].indexPatternId;
-      })
-      .sortBy((rel) => rel.label)
-      .value();
-
-      $scope.menu = {
-        template: menuTemplateHtml,
-        relations: filteredRelations,
-        onFocus: function (index) {
-          _.fill($scope.focused, false);
-          $scope.focused[index] = true;
-        },
-        onBlur: function (index) {
-          _.fill($scope.focused, false);
-        },
-
-      };
     }
   };
 });

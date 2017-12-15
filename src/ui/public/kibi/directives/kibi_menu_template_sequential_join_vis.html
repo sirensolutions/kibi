@@ -8,15 +8,17 @@
    placeholder="Search for relation ...">
   <ul>
     <li ng-click="relation.onSelect(kibiMenuTemplateLocals.button)" ng-repeat="relation in kibiMenuTemplateLocals.relations" ng-hide="relation.$$hidden">
-      Name: <b>{{relation.label}}</b><br/>
+      Name: <b>{{relation.directLabel}}</b><br/>
 
-      index pattern: <b>{{relation.indices[0].indexPatternId}}</b>
-      <span ng-if="relation.indices[0].indexPatternType">type: <b>{{relation.indices[0].indexPatternType}}</b></span>
-      field: <b>{{relation.indices[0].path}}</b>
+      index pattern: <b>{{relation.domain.id}}</b>
+      <!-- leaving commented in case we add back the document type support
+        <span ng-if="relation.domain.docType">type: <b>{{relation.domain.docType}}</b></span> -->
+      field: <b>{{relation.domain.field}}</b>
       <i class="fa fa-arrows-h" aria-hidden="true"/>
-      index pattern: <b>{{relation.indices[1].indexPatternId}}</b>
-      <span ng-if="relation.indices[1].indexPatternType">type: <b>{{relation.indices[1].indexPatternType}}</b></span>
-      field: <b>{{relation.indices[1].path}}</b>
+      index pattern: <b>{{relation.range.id}}</b>
+      <!-- leaving commented in case we add back the document type support
+        <span ng-if="relation.range.docType">type: <b>{{relation.range.docType}}</b></span> -->
+      field: <b>{{relation.range.field}}</b>
     </li>
   </ul>
 </div>

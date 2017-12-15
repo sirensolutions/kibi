@@ -5,6 +5,7 @@ import { panelsLayout } from './panels_layout';
 import { DashboardStateProvider } from 'plugins/kibana/dashboard/dashboard_state';
 import { createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
 
+import angular from 'angular';
 import _ from 'lodash';
 
 
@@ -143,7 +144,7 @@ export function QuickDashboardProvider(
             }
           })
           .then(() => args);
-      })
+      });
   }
 
   function makeQuickSpecs(args) {
@@ -333,7 +334,7 @@ export function QuickDashboardProvider(
 
   function openDashboardPage({ dashState }) {
     const dashId = dashState.savedDashboard.id;
-    const appState = dashState.appState
+    const appState = dashState.appState;
 
     // Stores the appState in the localSession and returns a query param reference
     const appQueryParam = appState.toQueryParam(appState.toObject());

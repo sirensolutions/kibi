@@ -24,7 +24,7 @@ export function QuickDashMakeVisProvider(
 
   const defaultParamsByVisType = {
     histogram: { addLegend: false }   // No legend, would just show 'Count'
-  }
+  };
 
 
   function newDefaultVis(indexPattern, type) {
@@ -114,7 +114,7 @@ export function QuickDashMakeVisProvider(
   function evalHistoInterval(index, field) {
     return evalNumericRange(index, field)
       .then(range => {
-        let floatInterval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
+        const floatInterval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
 
         // We want to convert the pure floating point interval to a somewhat
         // readable form, rounding *up* to the nearest two-digit multiple of a power
@@ -199,12 +199,13 @@ export function QuickDashMakeVisProvider(
 
           return isCustom
             ? { interval: 'custom', customInterval: upperSpec.name }
-            : { interval: upperSpec.name }
+            : { interval: upperSpec.name };
         }
 
         // Year multiples will be 1-digit multiples of a power of 10
 
-        let multiplier = interval / intervalSpec.val;
+        const yearSpec = intervalSpecs[intervalSpecs.length - 1];
+        let multiplier = interval / yearSpec.val;
 
         const exp = Math.max(0, Math.floor(Math.log10(multiplier)));
         multiplier = _.ceil(multiplier, -exp);
@@ -215,7 +216,9 @@ export function QuickDashMakeVisProvider(
 
   function cutoffIndex(buckets, cutoffValue) {
     const bucketsCount = buckets.length;
-    let current, sofar;
+
+    let current;
+    let sofar;
 
     for(current = 0, sofar = 0; current < bucketsCount; ++current) {
       sofar += buckets[current];
@@ -453,7 +456,7 @@ export function QuickDashMakeVisProvider(
           type: sdc.vis,
           aggs: new AggConfigs(multiVis.vis, sdc.aggs),
         }))
-        .value()
+        .value();
 
       if(!fieldsData.length) { return vises; }
 
@@ -533,7 +536,7 @@ export function QuickDashMakeVisProvider(
           break;
 
         case 'boolean':
-          output = createVis(index, field, 'pie', 'terms', {size: 2});
+          output = createVis(index, field, 'pie', 'terms', { size: 2 });
           break;
 
         case 'geo_point':

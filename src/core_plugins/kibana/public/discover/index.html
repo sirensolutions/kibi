@@ -75,6 +75,7 @@
     </div>
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar">
+        <!-- kibi: Added quick dashboard callback -->
         <disc-field-chooser
           columns="state.columns"
           hits="rows"
@@ -85,6 +86,7 @@
           on-add-field="addColumn"
           on-add-filter="filterQuery"
           on-remove-field="removeColumn"
+          on-quick-dashboard="makeQuickDashboard"
         >
         </disc-field-chooser>
       </div>

@@ -32,6 +32,7 @@ import { getDefaultQuery } from 'ui/parse_query';
 // kibi: imports
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import { IndexPatternAuthorizationError } from 'ui/errors';
+import { QuickDashboardProvider } from 'ui/kibi/quick_dashboard/quick_dashboard';
 // kibi: end
 
 const app = uiModules.get('apps/discover', [
@@ -141,6 +142,9 @@ function discoverController($scope, config, courier, $route, $window, createNoti
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterManager = Private(FilterManagerProvider);
+  // kibi: Added quick dashboard maker
+  const quickDashboard = Private(QuickDashboardProvider);
+  // kibi: end
 
   const notify = createNotifier({
     location: 'Discover'
@@ -552,6 +556,25 @@ function discoverController($scope, config, courier, $route, $window, createNoti
   $scope.toTop = function () {
     $window.scrollTo(0, 0);
   };
+
+  // kibi: Added quick dashboard maker
+  $scope.makeQuickDashboard = function () {
+    return $scope.updateDataSource()
+      .then(function () {
+        savedSearch.columns = $scope.state.columns;
+        savedSearch.sort = $scope.state.sort;
+
+        return quickDashboard.create({
+          indexPattern: savedSearch.searchSource.vis.indexPattern,
+          savedSearch,
+          fieldNames: $scope.state.columns,
+          query: $scope.state.query,
+          filters: $scope.state.filters,
+          timeFilter: $scope.timefilter
+        });
+      });
+  };
+  // kibi: end
 
   let loadingVis;
   function setupVisualization() {

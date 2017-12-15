@@ -1,0 +1,76 @@
+<div class="kibi-quickdash-create kuiModal">
+  <div class="kuiModalHeader">
+    <div class="kuiModalHeader__title">
+      Create a Quick Dashboard
+    </div>
+
+    <div class="kuiModalHeaderCloseButton kuiIcon fa-times"
+      ng-click="onCancel()" />
+  </div>
+
+  <form role="form" ng-submit="onConfirm(result)">
+    <div class="form-group">
+      <div>
+        <label>Title</label>
+      </div>
+      <div>
+        <input type="text" class="kuiLocalDropdownInput"
+          ng-model="result.title" placeholder="Enter Dashboard Title"
+          input-focus="select" />
+      </div>
+      <label>
+        <input type="checkbox" ng-model="result.storeTimeWithDashboard" />
+        Store time with dashboard
+      </label>
+    </div>
+
+    <div class="form-group">
+      <div>
+        <label>
+          Saved Search
+          <a ng-click="showExplanation = !showExplanation">Why?</a>
+        </label>
+      </div>
+
+      <div ng-show="showExplanation" class="dashboard-explanation form-group">
+        <p>Add a Saved Search to a dashboard to:</p>
+        <ul>
+          <li>
+            Display a count of results (e.g. the hits on that saved search)
+          </li>
+          <li>
+            Populate the dashboard with meaningful Widgets - filtering by clicking
+            on the widget will always work coherently
+          </li>
+          <li>
+            Enable relational navigation across Dashboards (Set to Set navigation)
+          </li>
+        </ul>
+        <p>Dashboards without a Saved Search will be typically used only for cross index
+          "summary pages".</p>
+      </div>
+
+      <div>
+        <input type="radio" ng-model="result.savedSearchAction" value="new">
+          New saved search with the same title
+        </input>
+      </div>
+      <div ng-if="loadedSavedSearch">
+        <input type="radio" ng-model="result.savedSearchAction" value="save">
+          Save current and use it
+        </input>
+      </div>
+      <div>
+        <input type="radio" ng-model="result.savedSearchAction" value="none">
+          No saved search
+        </input>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" data-test-subj="confirmButton"
+      ng-disabled="!result.title" aria-label="Create Quick Dashboard">
+      Create
+    </button>
+  </form>
+</div>
+

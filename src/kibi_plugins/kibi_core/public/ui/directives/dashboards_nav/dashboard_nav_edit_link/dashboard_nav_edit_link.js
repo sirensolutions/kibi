@@ -11,6 +11,7 @@ import { HashedItemStoreSingleton } from 'ui/state_management/state_storage';
 import { uiModules } from 'ui/modules';
 import 'ui/kibi/directives/kibi_human_readable_number';
 import { KibiHumanReadableHelperProvider } from 'ui/kibi/directives/kibi_human_readable_helper';
+import { QuickDashboardProvider } from 'ui/kibi/quick_dashboard/quick_dashboard';
 
 uiModules
 .get('kibana')
@@ -19,6 +20,7 @@ uiModules
   savedDashboards, kbnUrl, confirmModalPromise, $timeout) => {
 
   const kibiHumanReadableHelper = Private(KibiHumanReadableHelperProvider);
+  const quickDashboard = Private(QuickDashboardProvider);
 
   return {
     restrict: 'E',
@@ -240,8 +242,10 @@ uiModules
         confirmModalPromise(confirmMessage, { confirmButtonText: `Delete dashboard` })
         .then(() => {
           $scope.updateSavingState({ value: true });
-          savedDashboards.delete(id)
-          .then($scope.removeDashboardFromGroup(id))
+          Promise.resolve()
+          .then(() => quickDashboard.releaseQuickComponents(id))
+          .then(() => savedDashboards.delete(id))
+          .then(() => $scope.removeDashboardFromGroup(id))
           .then(cache.invalidate)
           .then(() => {
             if ($scope.dashboardLoaded === id) {

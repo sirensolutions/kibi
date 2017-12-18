@@ -56,45 +56,25 @@ function controller($scope, jdbcDatasources, createNotifier, es, confirmModal) {
       notify.error(err);
     });
   };
-  // kibiL: end
+  // kibi: end
 
   $scope.delete = function (id) {
-    // first check if there is an underlying physical pattern
-    es.indices.get({ index: id })
-    .then(res => {
-      if (res[id]) {
-        // found a physical index lets ask user to delete it as well
-        const confirmModalOptions = {
-          confirmButtonText: 'Delete the virtual index',
-          onConfirm: () => {
-            jdbcDatasources.deleteVirtualIndex(id).then(() => {
-              notify.info(`Virtual index pattern ${id} successfully deleted`);
-              fetchVirtualIndexes();
-            }).catch(err => {
-              notify.error(err);
-            });
-          }
-        };
-        confirmModal(
-          `You are about to delete the virtual index pattern [${id}].
-           There is also an underlying physical index with the same name [${id}].`,
-          confirmModalOptions
-        );
-      }
-    })
-    .catch(err => {
-      if (err.status === 404 && err.displayName === 'NotFound') {
-        // just delete the virtual one
+    // found a physical index lets ask user to delete it as well
+    const confirmModalOptions = {
+      confirmButtonText: 'Delete the virtual index',
+      onConfirm: () => {
         jdbcDatasources.deleteVirtualIndex(id).then(() => {
-          notify.info('Virtual index pattern deleted');
-        })
-        .catch(err => {
+          notify.info(`Virtual index pattern ${id} successfully deleted`);
+          fetchVirtualIndexes();
+        }).catch(err => {
           notify.error(err);
         });
-      } else {
-        notify.error(err);
       }
-    });
+    };
+    confirmModal(
+      `Are you sure you want to delete the virtual index [${id}].`,
+      confirmModalOptions
+    );
   };
 
 }

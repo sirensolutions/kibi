@@ -87,7 +87,6 @@ uiModules.get('apps/management')
 
       // advanced options
       $scope.edit = function (relId) {
-        console.log('call relation edit on: ' + relId);
         kbnUrl.change('/management/siren/relations/{{ entity }}/{{ id }}', {
           entity: encodeURIComponent($scope.entity.id),
           id: encodeURIComponent(relId)
@@ -118,7 +117,7 @@ uiModules.get('apps/management')
           info += relation.timeout;
         }
         return info;
-      }
+      };
     }
   };
 });

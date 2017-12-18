@@ -29,8 +29,8 @@ uiModules
     }
   ];
 
-  ontologyClient.getRelations().
-  then((relations) => {
+  ontologyClient.getRelations()
+  .then((relations) => {
     const relId = decodeURIComponent($routeParams.relId);
     $scope.relation = _.find(relations, (rel) => { return rel.id === relId; });
 

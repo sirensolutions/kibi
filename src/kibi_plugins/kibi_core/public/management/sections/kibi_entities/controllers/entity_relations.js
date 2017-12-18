@@ -96,10 +96,18 @@ uiModules.get('apps/management')
 
       $scope.getAdvancedOptionsInfo = function (relation) {
         let info = 'Join Type: ';
-        if (relation.joinType && !relation.joinType === '') {
-          info += relation.joinType;
-        } else {
-          info += 'not set';
+        switch (relation.joinType) {
+          case 'MERGE_JOIN':
+            info += 'Distributed join using merge join algorithm';
+            break;
+          case 'HASH_JOIN':
+            info += 'Distributed join using hash join algorithm';
+            break;
+          case 'BROADCAST_JOIN':
+            info += 'Broadcast join';
+            break;
+          default:
+            info += 'not set';
         }
         info += '\n';
 

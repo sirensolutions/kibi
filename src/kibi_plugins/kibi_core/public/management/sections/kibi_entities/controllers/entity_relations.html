@@ -81,6 +81,16 @@
       </div>
     </div>
     <div ng-class="{ 'col-lg-1': entity.type === 'INDEX_PATTERN', 'col-lg-2': entity.type === 'VIRTUAL_ENTITY' }" class="horizontal-align">
+      <button
+         ng-click="edit(relation.id)"
+         class="btn btn-xs"
+         aria-label="Edit"
+         tooltip="{{ getAdvancedOptionsInfo(relation) }}"
+         tooltip-popup-delay="250"
+      >
+        <span class="sr-only">Edit</span>
+        <i aria-hidden="true" class="fa fa-pencil"></i>
+      </button>
       <kibi-array-param-remove index="{{ $index }}"
                                model="relations">
       </kibi-array-param-remove>

@@ -4,7 +4,7 @@ import EntityRelationsTemplate from './entity_relations.html';
 import 'plugins/kibi_core/ui/directives/entity_select/entity_select';
 
 uiModules.get('apps/management')
-.directive('entityRelations', function (createNotifier, ontologyClient) {
+.directive('entityRelations', function (createNotifier, ontologyClient, kbnUrl) {
   const notify = createNotifier();
 
   return {
@@ -84,6 +84,33 @@ uiModules.get('apps/management')
           return Promise.resolve();
         }
       };
+
+      // advanced options
+      $scope.edit = function (relId) {
+        console.log('call relation edit on: ' + relId);
+        kbnUrl.change('/management/siren/relations/{{ entity }}/{{ id }}', {
+          entity: encodeURIComponent($scope.entity.id),
+          id: encodeURIComponent(relId)
+        });
+      };
+
+      $scope.getAdvancedOptionsInfo = function (relation) {
+        let info = 'Join Type: ';
+        if (relation.joinType && !relation.joinType === '') {
+          info += relation.joinType;
+        } else {
+          info += 'not set';
+        }
+        info += '\n';
+
+        info += 'Task timeout: ';
+        if (relation.timeout === 0) {
+          info += 'not set';
+        } else {
+          info += relation.timeout;
+        }
+        return info;
+      }
     }
   };
 });

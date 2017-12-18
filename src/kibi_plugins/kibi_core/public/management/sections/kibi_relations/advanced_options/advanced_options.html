@@ -6,14 +6,18 @@
 
         <div>
           <div class="header">
-            <h2 class="title">Advanced settings for the <b>{{relation.label}}</b> relation</h2>
+            <h2 class="title">Advanced settings for the <b>{{relation.directLabel}}</b> relation</h2>
           </div>
           <form name="advancedRelationSettings" novalidate>
 
             <div class="form-group">
-              <label>Join type</label>
+              <label>Join type
+                <a href="https://docs.support.siren.io/latest/platform/#kibi_join_type" target="_blank">
+                  <kbn-info info="Learn more"></kbn-info>
+                </a>
+              </label>
               <select
-                ng-model="relation.type"
+                ng-model="relation.joinType"
                 ng-options="type.value as type.label for type in joinTypes"
                 class="form-control small-input"
               ></select>
@@ -27,7 +31,7 @@
                   <kbn-info info="Learn more"></kbn-info>
                 </a>
               </label>
-              <input type="number" min="-1" step="100000" ng-model="relation.task_timeout" class="form-control small-input"/>
+              <input type="number" min="-1" step="100000" ng-model="relation.timeout" class="form-control small-input"/>
               <p class="field-description">
                 Join task timeout in milliseconds
                 <br/>

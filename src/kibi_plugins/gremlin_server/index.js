@@ -9,6 +9,7 @@ module.exports = function (kibana) {
     id: 'gremlin_server',
 
     init: function (server, options) {
+      let gremlinServer;
       this.status.yellow('Waiting the gremlin server to start up.');
 
       const loadGremlinServer = () => {
@@ -19,13 +20,17 @@ module.exports = function (kibana) {
           const gremlin = new GremlinServerHandler(server);
 
           const clean = function (code) {
-            return gremlin.stop();
+            if (gremlinServer) {
+              return gremlin.stop();
+            } else {
+              return Promise.resolve();
+            }
           };
-
-          this.kbnServer.cleaningArray.push(clean);
 
           gremlin.start().then(() => {
             this.status.green('Gremlin server up and running.');
+            this.kbnServer.cleaningArray.push(clean);
+            gremlinServer = gremlin;
           })
           .catch((error) => {
             this.status.red(error.message);
@@ -40,8 +45,13 @@ module.exports = function (kibana) {
         loadGremlinServer();
       } else {
         status.on('change', () => {
-          if (server.plugins.elasticsearch.status.state === 'green') {
+          console.log('test status');
+          console.log(status.state);
+          if (status.state === 'green' && !gremlinServer) {
             loadGremlinServer();
+          } else if (status.state === 'red' && gremlinServer) {
+            gremlinServer.stop();
+            gremlinServer = null;
           }
         });
       }

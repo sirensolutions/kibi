@@ -159,7 +159,7 @@ describe('Jdbc Helper', function () {
       it('development', function () {
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, '_getDirName').returns(
-          'C:\\Users\\kibi\\src\\plugins\\kibi_core\\lib'
+          'C:\\Users\\kibi\\src\\plugins\\kibi_query_engine\\lib'
         );
 
         expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('C:\\Users\\kibi\\');
@@ -168,7 +168,7 @@ describe('Jdbc Helper', function () {
       it('production', function () {
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, '_getDirName').returns(
-          'C:\\Users\\kibi\\src\\plugins\\kibi_core\\lib'
+          'C:\\Users\\kibi\\src\\plugins\\kibi_query_engine\\lib'
         );
 
         expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('C:\\Users\\kibi\\');
@@ -274,7 +274,7 @@ describe('Jdbc Helper', function () {
       it('development', function () {
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, '_getDirName').returns(
-          '/opt/kibi/src/plugins/kibi_core/lib'
+          '/opt/kibi/src/plugins/kibi_query_engine/lib'
         );
 
         expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('/opt/kibi/');
@@ -283,7 +283,7 @@ describe('Jdbc Helper', function () {
       it('production', function () {
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, '_getDirName').returns(
-          '/opt/kibi/src/plugins/kibi_core/lib'
+          '/opt/kibi/src/plugins/kibi_query_engine/lib'
         );
 
         expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('/opt/kibi/');

@@ -9,14 +9,16 @@ module.exports = function (server, mappings) {
       throw new SetupError(server, message, err);
     };
   }
-
   // kibi: renamed Kibana to Kibi
   return callWithInternalUser('indices.create', {
     index: index,
     body: {
       settings: {
         number_of_shards: 1,
-        'index.mapper.dynamic': false,
+        // kibi: index.mapper.dynamic set to false breaks loading kibi mappings later on during startup
+        // with empty elasticsearch due to error https://github.com/sirensolutions/kibi-internal/issues/4095
+        // so solution is to comment this out
+        //'index.mapper.dynamic': false,
       },
       mappings
     }

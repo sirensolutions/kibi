@@ -1,14 +1,14 @@
 import expect from 'expect.js';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import QueryEngine from '../query_engine';
+import KibiQueryEngine from '../kibi_query_engine';
 import sinon from 'sinon';
 import { EventEmitter } from 'events';
 import SqliteQuery from '../queries/sqlite_query';
 
 let queryEngine;
 let stub;
-const expectedMsg = { message: 'QueryEngine initialized successfully.' };
+const expectedMsg = { message: 'KibiQueryEngine initialized successfully.' };
 
 FakeStatus.prototype = new EventEmitter(); // inherit from EventEmitter
 FakeStatus.prototype.constructor = FakeStatus;
@@ -55,7 +55,7 @@ describe('Query Engine', function () {
     it('when elasticsearch status is already green', function (done) {
       const server = fakeServer;
       server.plugins.elasticsearch.status = new FakeStatus('green');
-      queryEngine = new QueryEngine(server);
+      queryEngine = new KibiQueryEngine(server);
       stub = sinon.stub(queryEngine, '_onStatusGreen').returns(Promise.resolve(true));
 
       queryEngine._init(500, false).then(function (ret) {
@@ -69,7 +69,7 @@ describe('Query Engine', function () {
       const server = fakeServer;
       server.plugins.elasticsearch.status = new FakeStatus('red');
 
-      queryEngine = new QueryEngine(server);
+      queryEngine = new KibiQueryEngine(server);
       stub = sinon.stub(queryEngine, '_onStatusGreen').returns(Promise.resolve(true));
 
       queryEngine._init(500, false).then(function (ret) {
@@ -86,7 +86,7 @@ describe('Query Engine', function () {
       const server = fakeServer;
       server.plugins.elasticsearch.status = new FakeStatus('red');
 
-      queryEngine = new QueryEngine(server);
+      queryEngine = new KibiQueryEngine(server);
       stub = sinon.stub(queryEngine, '_onStatusGreen').returns(Promise.resolve(true));
 
       queryEngine._init(500, false).then(function (ret) {
@@ -111,8 +111,8 @@ describe('Query Engine', function () {
     let stubLoadTemplates;
 
     beforeEach(function () {
-      stubLoadPredefinedData = sinon.stub(QueryEngine.prototype, 'loadPredefinedData').returns(Promise.resolve());
-      stubLoadTemplates = sinon.stub(QueryEngine.prototype, '_loadTemplates').returns(Promise.resolve());
+      stubLoadPredefinedData = sinon.stub(KibiQueryEngine.prototype, 'loadPredefinedData').returns(Promise.resolve());
+      stubLoadTemplates = sinon.stub(KibiQueryEngine.prototype, '_loadTemplates').returns(Promise.resolve());
       callWithInternalUserStub
         .withArgs('search', { index: '.kibi', type: 'datasource', size: 100 })
         .returns(Promise.resolve({
@@ -134,7 +134,7 @@ describe('Query Engine', function () {
           }
         }));
 
-      queryEngine = new QueryEngine(fakeServer);
+      queryEngine = new KibiQueryEngine(fakeServer);
     });
 
     afterEach(() => {

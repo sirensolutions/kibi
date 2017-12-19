@@ -223,7 +223,7 @@ function isJavaVersionOk(self) {
     spawn.stderr.on('data', function (data) {
       const err = self._checkJavaVersionString(data);
       if (err) {
-        reject(new Error(result.e));
+        reject(new Error(err));
       } else {
         fulfill(true);
       }

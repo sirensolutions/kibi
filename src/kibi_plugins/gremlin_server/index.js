@@ -17,39 +17,39 @@ module.exports = function (kibana) {
 
       if (gremlinServerconfig) {
         gremlin = new GremlinServerHandler(server);
+        console.log('LOG');
+        const loadGremlinServer = () => {
+          const clean = function (code) {
+            if (gremlin) {
+              return gremlin.stop();
+            } else {
+              return Promise.resolve();
+            }
+          };
+          gremlin.start().then(() => {
+            this.status.green('Gremlin server up and running.');
+            this.kbnServer.cleaningArray.push(clean);
+          })
+          .catch((error) => {
+            this.status.red(error.message);
+          });
+        };
+
+        const status = server.plugins.elasticsearch.status;
+        if (status && status.state === 'green') {
+          loadGremlinServer();
+        } else {
+          status.on('change', () => {
+            if (status.state === 'green' && !gremlin.isInitialized()) {
+              loadGremlinServer();
+            } else if (status.state === 'red' && gremlin.isInitialized()) {
+              this.status.red('Unable to connect to ElasticSsearch.');
+              gremlin.stop();
+            }
+          });
+        }
       } else {
         this.status.red('Gremlin server configuration not found in kibi.yml, please configure it.');
-      }
-
-      const loadGremlinServer = () => {
-        const clean = function (code) {
-          if (gremlin) {
-            return gremlin.stop();
-          } else {
-            return Promise.resolve();
-          }
-        };
-        gremlin.start().then(() => {
-          this.status.green('Gremlin server up and running.');
-          this.kbnServer.cleaningArray.push(clean);
-        })
-        .catch((error) => {
-          this.status.red(error.message);
-        });
-      };
-
-      const status = server.plugins.elasticsearch.status;
-      if (status && status.state === 'green') {
-        loadGremlinServer();
-      } else {
-        status.on('change', () => {
-          if (status.state === 'green' && !gremlin.isInitialized()) {
-            loadGremlinServer();
-          } else if (status.state === 'red' && gremlin.isInitialized()) {
-            this.status.red('Unable to connect to ElasticSsearch.');
-            gremlin.stop();
-          }
-        });
       }
     }
   });

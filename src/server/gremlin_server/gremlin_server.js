@@ -326,4 +326,11 @@ GremlinServerHandler.prototype._ping = function () {
   return rp(options);
 };
 
+/*
+ * Used in tests.
+ */
+GremlinServerHandler.prototype._getJavaCheck = function () {
+  return this.javaCheck;
+};
+
 module.exports = GremlinServerHandler;

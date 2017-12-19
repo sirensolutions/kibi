@@ -17,7 +17,7 @@ module.exports = function (kibana) {
 
       if (gremlinServerconfig) {
         gremlin = new GremlinServerHandler(server);
-        console.log('LOG');
+
         const loadGremlinServer = () => {
           const clean = function (code) {
             if (gremlin) {

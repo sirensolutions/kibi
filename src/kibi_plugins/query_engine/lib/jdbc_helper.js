@@ -119,8 +119,8 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
   // however when loading jdbc libs the datasource was not created yet so there is no datasourceClazz available
   // so we would have to get the schema ourselves here
   if (conf.password) {
-    jdbcConfig.properties.password = cryptoHelper.decrypt(self.config.get('kibi_core.datasource_encryption_key'), conf.password);
-    jdbcConfig.password = cryptoHelper.decrypt(self.config.get('kibi_core.datasource_encryption_key'), conf.password);
+    jdbcConfig.properties.password = cryptoHelper.decrypt(self.config.get('investigate_core.datasource_encryption_key'), conf.password);
+    jdbcConfig.password = cryptoHelper.decrypt(self.config.get('investigate_core.datasource_encryption_key'), conf.password);
   }
   return jdbcConfig;
 };

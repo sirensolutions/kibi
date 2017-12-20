@@ -28,7 +28,7 @@ AbstractDatasourceDef.prototype._getDefinitionFromSchema = function (name) {
 };
 
 AbstractDatasourceDef.prototype._decryptValue = function (v) {
-  return cryptoHelper.decrypt(this.config.get('kibi_core.datasource_encryption_key'), v);
+  return cryptoHelper.decrypt(this.config.get('investigate_core.datasource_encryption_key'), v);
 };
 
 AbstractDatasourceDef.prototype.populateParameters = function (s) {

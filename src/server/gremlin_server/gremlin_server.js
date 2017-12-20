@@ -18,7 +18,7 @@ function GremlinServerHandler(server) {
 
 function startServer(self, fulfill, reject) {
   const config = self.server.config();
-  self.url = config.get('kibi_core.gremlin_server.url');
+  self.url = config.get('investigate_core.gremlin_server.url');
   self._isAnotherGremlinRunning()
   .then(() => {
     const msg = 'Another gremlin server was found running. Won\'t start another instance.';
@@ -27,12 +27,12 @@ function startServer(self, fulfill, reject) {
   })
   .catch(() => {
     if (config.has('kibi_core.gremlin_server.path')) {
-      let gremlinServerPath = config.get('kibi_core.gremlin_server.path');
+      let gremlinServerPath = config.get('investigate_core.gremlin_server.path');
 
       isJavaVersionOk(self).then(function () {
 
         if (config.has('kibi_core.gremlin_server.ssl.ca')) {
-          const ca = config.get('kibi_core.gremlin_server.ssl.ca');
+          const ca = config.get('investigate_core.gremlin_server.ssl.ca');
           if (ca) {
             try {
               self.ca = fs.readFileSync(ca);
@@ -72,14 +72,14 @@ function startServer(self, fulfill, reject) {
             }
 
             if (config.has('kibi_core.gremlin_server.debug_remote')) {
-              const gremlinServerRemoteDebug = config.get('kibi_core.gremlin_server.debug_remote');
+              const gremlinServerRemoteDebug = config.get('investigate_core.gremlin_server.debug_remote');
               if (gremlinServerRemoteDebug) {
                 args.unshift(gremlinServerRemoteDebug);
               }
             }
 
             if (config.has('kibi_core.gremlin_server.log_conf_path')) {
-              const logConfigPath = config.get('kibi_core.gremlin_server.log_conf_path');
+              const logConfigPath = config.get('investigate_core.gremlin_server.log_conf_path');
               if (logConfigPath) {
                 args.push('--logging.config=' + logConfigPath);
               }
@@ -110,9 +110,9 @@ function startServer(self, fulfill, reject) {
             }
 
             if (config.has('kibi_core.gremlin_server.ssl.key_store') &&
-              config.get('kibi_core.gremlin_server.ssl.key_store')) {
-              const sslKeyStore = config.get('kibi_core.gremlin_server.ssl.key_store');
-              const sslKeyStorePsw = config.get('kibi_core.gremlin_server.ssl.key_store_password');
+              config.get('investigate_core.gremlin_server.ssl.key_store')) {
+              const sslKeyStore = config.get('investigate_core.gremlin_server.ssl.key_store');
+              const sslKeyStorePsw = config.get('investigate_core.gremlin_server.ssl.key_store_password');
               if (!sslKeyStorePsw) {
                 const message = `The Gremlin Server keystore password was not specified; ` +
                                  'in kibi_core.gremlin_server.ssl.key_store_password';

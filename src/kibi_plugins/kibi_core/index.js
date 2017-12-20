@@ -131,13 +131,181 @@ module.exports = function (kibana) {
 
       patchElasticsearchClient(server);
 
-      if (config.get('kibi_core.default_dashboard_title') !== '') {
+      if (config.get('investigate_core.default_dashboard_title') !== '') {
         server.log(['warning','kibi_core'], 'kibi_core.default_dashboard_title is deprecated ' +
         'and was moved to advance settings and should be removed from kibi.yml');
       }
 
       // Expose the migrations
       server.expose('getMigrations', () => migrations);
+
+      server.route({
+        method: 'GET',
+        path:'/clearCache',
+        handler: function (req, reply) {
+          queryEngineHandler(server, 'clearCache', req, reply);
+        }
+      });
+
+      server.route({
+        method: 'GET',
+        path:'/getQueriesHtml',
+        handler: function (req, reply) {
+          queryEngineHandler(server, 'getQueriesHtml', req, reply);
+        }
+      });
+
+      server.route({
+        method: 'GET',
+        path:'/getQueriesData',
+        handler: function (req, reply) {
+          queryEngineHandler(server, 'getQueriesData', req, reply);
+        }
+      });
+
+      server.route({
+        method: 'GET',
+        path:'/getIdsFromQueries',
+        handler: function (req, reply) {
+          queryEngineHandler(server, 'getIdsFromQueries', req, reply);
+        }
+      });
+
+      server.route({
+        method: 'POST',
+        path:'/gremlin',
+        handler: function (req, reply) {
+          queryEngine._getDatasourceFromEs(req.payload.params.datasourceId)
+          .then((datasource) => {
+            const config = server.config();
+            const params = JSON.parse(datasource.datasourceParams);
+            params.credentials = null;
+            if (config.has('xpack.security.cookieName')) {
+              const { username, password } = req.state[config.get('xpack.security.cookieName')];
+              params.credentials = { username, password };
+            }
+            if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+              params.credentials = req.auth.credentials.proxyCredentials;
+            }
+            return queryEngine.gremlin(params, req.payload.params.options);
+          })
+          .then(reply)
+          .catch(errors.StatusCodeError, function (err) {
+            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
+          })
+          .catch(errors.RequestError, function (err) {
+            if (err.error.code === 'ETIMEDOUT') {
+              reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}` });
+            } else {
+              reply({ error: `An error occurred while sending a gremlin query: ${err.message}` });
+            }
+          });
+        }
+      });
+
+      /*
+       * Handles query to the ontology schema backend (in the gremlin server).
+       */
+      server.route({
+        method: 'POST',
+        path:'/schema',
+        handler: function (req, reply) {
+          const config = server.config();
+          const opts = {
+            method: req.payload.method ? req.payload.method : 'POST',
+            data: req.payload.data,
+            url: config.get('investigate_core.gremlin_server.url')
+          };
+          queryEngine.schema(req.payload.path, opts)
+          .then(reply)
+          .catch(errors.StatusCodeError, function (err) {
+            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
+          })
+          .catch(errors.RequestError, function (err) {
+            if (err.error.code === 'ETIMEDOUT') {
+              reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}` });
+            } else {
+              reply({ error: `An error occurred while sending a schema query: ${err.message}` });
+            }
+          });
+        }
+      });
+
+      /*
+       * Translate a query containing kibi-specific DSL into an Elasticsearch query
+       */
+      server.route({
+        method: 'POST',
+        path:'/translateToES',
+        handler: function (req, reply) {
+          const serverConfig = server.config();
+          // kibi: if query is a JSON, parse it to string
+          let query;
+          if(req.payload.query) {
+            if (typeof req.payload.query !== 'object') {
+              return reply(Boom.wrap(new Error('Expected query to be a JSON object containing single query', 400)));
+            }
+            query = JSON.stringify(req.payload.query);
+          } else if (req.payload.bulkQuery) {
+            if (!_.isString(req.payload.bulkQuery)) {
+              return reply(Boom.wrap(new Error('Expected bulkQuery to be a String containing a bulk elasticsearch query', 400)));
+            }
+            query = req.payload.bulkQuery;
+          }
+          server.plugins.elasticsearch.getQueriesAsPromise(new buffer.Buffer(query))
+          .map((query) => {
+            // Remove the custom queries from the body
+            server.plugins.elasticsearch.inject.save(query);
+            return query;
+          }).map((query) => {
+            let credentials = null;
+            if (serverConfig.has('xpack.security.cookieName')) {
+              credentials = req.state[serverConfig.get('xpack.security.cookieName')];
+            }
+            if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+              credentials = req.auth.credentials.proxyCredentials;
+            }
+            return server.plugins.elasticsearch.dbfilter(server.plugins.investigate_core.getQueryEngine(), query, credentials);
+          }).map((query) => server.plugins.elasticsearch.sirenJoinSet(query))
+          .map((query) => server.plugins.elasticsearch.sirenJoinSequence(query))
+          .then((data) => {
+            reply({ translatedQuery: data[0] });
+          }).catch((err) => {
+            let errStr;
+            if (typeof err === 'object' && err.stack) {
+              errStr = err.toString();
+            } else {
+              errStr = JSON.stringify(err, null, ' ');
+            }
+            reply(Boom.wrap(new Error(errStr, 400)));
+          });
+        }
+      });
+
+      server.route({
+        method: 'POST',
+        path:'/gremlin/ping',
+        handler: function (req, reply) {
+          queryEngine.gremlinPing(req.payload.url)
+          .then(reply)
+          .catch(errors.StatusCodeError, function (err) {
+            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
+          })
+          .catch(errors.RequestError, function (err) {
+            if (err.error.code === 'ETIMEDOUT') {
+              reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}` });
+            } else {
+              reply({ error: `An error occurred while sending a gremlin ping: ${err.message}` });
+            }
+          });
+        }
+      });
 
       // Adding a route to serve static content for enterprise modules.
       server.route({

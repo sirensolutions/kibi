@@ -28,7 +28,7 @@ export default function (kibana) {
 
   return new kibana.Plugin({
     name: 'saved_objects_api',
-    require: ['elasticsearch', 'kibi_core'],
+    require: ['elasticsearch', 'investigate_core'],
 
     init(server, options) {
       const config = server.config();

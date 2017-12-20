@@ -158,8 +158,8 @@ CryptoHelper.prototype.encryptDatasourceParams = function (config, query) {
     throw new Error('Could not parse datasourceParams: ' + query.datasourceParams + ' is not valid JSON.');
   }
 
-  const algorithm = config.get('kibi_core.datasource_encryption_algorithm');
-  const password = config.get('kibi_core.datasource_encryption_key');
+  const algorithm = config.get('investigate_core.datasource_encryption_algorithm');
+  const password = config.get('investigate_core.datasource_encryption_key');
 
   for (const paramName in params) {
     if (params.hasOwnProperty(paramName)) {

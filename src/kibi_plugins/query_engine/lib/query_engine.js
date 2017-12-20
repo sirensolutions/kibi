@@ -22,7 +22,7 @@ let JdbcQuery;
 function QueryEngine(server) {
   this.server = server;
   this.config = server.config();
-  const sslCA = this.config.get('kibi_core.gremlin_server.ssl.ca');
+  const sslCA = this.config.get('investigate_core.gremlin_server.ssl.ca');
   if (sslCA) {
     this.sslCA = fs.readFileSync(sslCA);
   }
@@ -299,7 +299,7 @@ QueryEngine.prototype._loadDatasources = function () {
         }
 
         if (self.config.has('kibi_core.gremlin_server.url')) {
-          const gremlinUrl = self.config.get('kibi_core.gremlin_server.url');
+          const gremlinUrl = self.config.get('investigate_core.gremlin_server.url');
           const datasourceObj = JSON.parse(data.toString());
           const datasourceObjParam = JSON.parse(datasourceObj.datasourceParams);
 
@@ -374,7 +374,7 @@ QueryEngine.prototype._loadQueries = function () {
 };
 
 QueryEngine.prototype.setupJDBC = function () {
-  if (this.config.get('kibi_core.load_jdbc') === true) {
+  if (this.config.get('investigate_core.load_jdbc') === true) {
     const JDBC = require('jdbc');
     const jinst = require('jdbc/lib/jinst');
     JdbcQuery  = require('./queries/jdbc_query');
@@ -513,7 +513,7 @@ QueryEngine.prototype.reloadQueries = function () {
           } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.mysql) {
             return new MysqlQuery(self.server, queryDef, self.cache);
           } else if (kibiUtils.isJDBC(queryDef.datasource.datasourceType)) {
-            if (self.config.get('kibi_core.load_jdbc') === false) {
+            if (self.config.get('investigate_core.load_jdbc') === false) {
               const msg = 'Please set the "kibi_core.load_jdbc" option to true in kibi.yml and restart the backend.';
               return new ErrorQuery(self.server, msg);
             }

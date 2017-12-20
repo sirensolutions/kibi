@@ -22,7 +22,7 @@ export default class Migration12 extends Migration {
     this._client = configuration.client;
     this._config =  configuration.config;
     this._index = configuration.config.get('kibana.index');
-    this._defaultDashboardTitleYml = configuration.config.get('kibi_core.default_dashboard_title');
+    this._defaultDashboardTitleYml = configuration.config.get('investigate_core.default_dashboard_title');
     this._type = 'config';
   }
 

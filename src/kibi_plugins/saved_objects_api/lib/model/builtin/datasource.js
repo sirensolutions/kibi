@@ -24,8 +24,8 @@ export default class DatasourceModel extends Model {
   _prepare(body) {
     super._prepare(body);
     // kibi: if we don't have this plugin let's not throw exception here and silently fail
-    if (this._server.plugins.kibi_query_engine) {
-      const cryptoHelper = this._server.plugins.kibi_query_engine.getCryptoHelper();
+    if (this._server.plugins.query_engine) {
+      const cryptoHelper = this._server.plugins.query_engine.getCryptoHelper();
       cryptoHelper.encryptDatasourceParams(this._config, body);
     }
   }

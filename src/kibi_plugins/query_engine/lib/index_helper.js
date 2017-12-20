@@ -9,7 +9,7 @@ export default class IndexHelper {
   constructor(server) {
     this.server = server;
     this.config = server.config();
-    this.logger = logger(server, 'kibi_query_engine/index_helper');
+    this.logger = logger(server, 'query_engine/index_helper');
     this.cluster = server.plugins.elasticsearch.getCluster('admin');
   }
 

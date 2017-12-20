@@ -7,15 +7,15 @@ import buffer from 'buffer';
 
 import cryptoHelper from './lib/crypto_helper';
 import datasourcesSchema from './lib/datasources_schema';
-import KibiQueryEngine from './lib/kibi_query_engine';
+import QueryEngine from './lib/query_engine';
 import IndexHelper from './lib/index_helper';
 
 /**
- * The Kibi query engine plugin.
+ * The Query engine plugin.
  *
  * The plugin exposes the following methods to other hapi plugins:
  *
- * - getKibiQueryEngine: returns an instance of KibiQueryEngine.
+ * - getQueryEngine: returns an instance of QueryEngine.
  * - getIndexHelper: returns an instance of IndexHelper.
  * - getCryptoHelper: returns an instance of CryptoHelper.
  */
@@ -40,7 +40,7 @@ module.exports = function (kibana) {
       try {
         options = JSON.parse(params.options);
       } catch (e) {
-        server.log(['error', 'kibi_query_engine'], 'Could not parse options [' + params.options + '] for method [' + method + '].');
+        server.log(['error', 'query_engine'], 'Could not parse options [' + params.options + '] for method [' + method + '].');
       }
     }
 
@@ -48,7 +48,7 @@ module.exports = function (kibana) {
       try {
         queryDefs = JSON.parse(params.queryDefs);
       } catch (e) {
-        server.log(['error', 'kibi_query_engine'], 'Could not parse queryDefs [' + params.queryDefs + '] for method [' + method + '].');
+        server.log(['error', 'query_engine'], 'Could not parse queryDefs [' + params.queryDefs + '] for method [' + method + '].');
       }
     }
 
@@ -97,7 +97,7 @@ module.exports = function (kibana) {
   return new kibana.Plugin({
     require: ['kibana','' +
     'kibi_core','saved_objects_api'],
-    id: 'kibi_query_engine',
+    id: 'query_engine',
 
     init: function (server, options) {
       const config = server.config();
@@ -105,16 +105,16 @@ module.exports = function (kibana) {
 
 
       this.status.yellow('Initialising the query engine');
-      queryEngine = new KibiQueryEngine(server);
+      queryEngine = new QueryEngine(server);
       queryEngine._init(datasourceCacheSize).then((data) => {
-        server.log(['info', 'kibi_query_engine'], data);
+        server.log(['info', 'query_engine'], data);
         this.status.green('Query engine initialized');
       }).catch((err) => {
-        server.log(['error', 'kibi_query_engine'], err);
+        server.log(['error', 'query_engine'], err);
         this.status.red('Query engine initialization failed');
       });
 
-      server.expose('getKibiQueryEngine', () => queryEngine);
+      server.expose('getQueryEngine', () => queryEngine);
 
       server.expose('getCryptoHelper', () => cryptoHelper);
 
@@ -250,7 +250,7 @@ module.exports = function (kibana) {
               if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
                 credentials = req.auth.credentials.proxyCredentials;
               }
-              return server.plugins.elasticsearch.dbfilter(server.plugins.kibi_query_engine.getKibiQueryEngine(), query, credentials);
+              return server.plugins.elasticsearch.dbfilter(server.plugins.query_engine.getQueryEngine(), query, credentials);
             }).map((query) => server.plugins.elasticsearch.sirenJoinSet(query))
             .map((query) => server.plugins.elasticsearch.sirenJoinSequence(query))
             .then((data) => {

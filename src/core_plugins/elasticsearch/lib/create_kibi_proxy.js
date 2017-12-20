@@ -92,7 +92,7 @@ module.exports = function createProxy(server, method, path, config) {
               }).map((query) => {
                 const credentials = getCredentials(request);
                 dataToPass.credentials = credentials;
-                return dbfilter(server.plugins.kibi_query_engine.getKibiQueryEngine(), query, credentials);
+                return dbfilter(server.plugins.query_engine.getQueryEngine(), query, credentials);
               }).map((query) => sirenJoin.set(query))
               .map((query) => sirenJoin.sequence(query))
               .then((data) => {
@@ -152,7 +152,7 @@ module.exports = function createProxy(server, method, path, config) {
           }
 
           if (data.length !== 0) {
-            inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.kibi_query_engine.getKibiQueryEngine(),
+            inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.query_engine.getQueryEngine(),
               dataPassed.savedQueries,
             dataPassed.credentials)
             .then((r) => {

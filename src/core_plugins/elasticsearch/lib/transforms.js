@@ -20,7 +20,7 @@ export default function (server) {
   async function transformSearchRequest(search) {
 
     const savedQueries = await inject.save(search);
-    search = await dbfilter(server.plugins.kibi_query_engine.getKibiQueryEngine(), search, null);
+    search = await dbfilter(server.plugins.query_engine.getQueryEngine(), search, null);
     search = await set(search);
     search = await sequence(search);
 
@@ -40,7 +40,7 @@ export default function (server) {
    * @return {object} the Elasticsearch response.
    */
   async function transformSearchResponse(response, savedQueries) {
-    await inject.runSavedQueries({ responses: [response] }, server.plugins.kibi_query_engine.getKibiQueryEngine(), savedQueries);
+    await inject.runSavedQueries({ responses: [response] }, server.plugins.query_engine.getQueryEngine(), savedQueries);
     return response;
   }
 

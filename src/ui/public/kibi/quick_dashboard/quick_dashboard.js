@@ -6,6 +6,7 @@ import { DashboardStateProvider } from 'plugins/kibana/dashboard/dashboard_state
 import { createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
 
 import angular from 'angular';
+import uuid from 'uuid';
 import _ from 'lodash';
 
 
@@ -43,13 +44,6 @@ function getLastDashboardNumber(dashboards, title) {
   return dashboards.reduce(reducer, 0);
 }
 
-function getLastQuickObjectNumber(savedObjects) {
-  const reducer = lastReducer.bind(null, /\[Quick #([0-9]*)\]$/);
-
-  return savedObjects.scanAll('Quick')
-    .then(scan => scan.hits.reduce(reducer, 0));
-}
-
 
 // Exports
 
@@ -58,7 +52,7 @@ export function QuickDashboardProvider(
     savedDashboardGroups, savedDashboards, savedSearches, savedVisualizations) {
 
   const DashboardState = Private(DashboardStateProvider);
-  const makeSavedVisualizations = Private(QuickDashMakeVisProvider);
+  const visMaker = Private(QuickDashMakeVisProvider);
   const quickDashModals = Private(QuickDashModalsProvider);
 
   const notify = createNotifier({ location: 'Quick Dashboard' });
@@ -82,6 +76,7 @@ export function QuickDashboardProvider(
     const { defaultDashTitle, savedSearch } = args;
 
     return quickDashModals.create({ title: defaultDashTitle, savedSearch })
+      .show()
       .then(userSpecs => {
         if(!userSpecs) { return Promise.reject(0); }    // Canceled
 
@@ -100,21 +95,6 @@ export function QuickDashboardProvider(
       .catch(_.noop);
   }
 
-  function removeDashboardFromGroup(groupId, dashId) {
-    return savedDashboardGroups.get(groupId)
-      .then(group => {
-        group.dashboards = group.dashboards.filter(dash => dash.id !== dashId);
-        return group.save();
-      });
-  }
-
-  function removeQuickDashboard(groupId, dashId) {
-    return Promise.resolve()
-      .then(() => releaseQuickComponents(dashId))
-      .then(() => savedDashboards.delete(dashId))
-      .then(() => groupId && removeDashboardFromGroup(groupId, dashId));
-  }
-
   function checkDuplicateTitle(args) {
     const { dashboardEntries, userSpecs } = args;
     const { title } = userSpecs;
@@ -127,59 +107,25 @@ export function QuickDashboardProvider(
         const modalOptions = { title, save: true };
         if(quickEntry) { modalOptions.overwrite = true; }
 
+        const dupTitleSpecs = { quickEntry };
+
         return quickDashModals.titleConflict(modalOptions)
+          .show()
           .then(action => {
             if(!action) { return Promise.reject(0); }
 
+            dupTitleSpecs.conflictAction = action;
+
             switch(action) {
               case 'save':
-                return;
-
               case 'overwrite':
-                const groupId = quickEntry.group && quickEntry.group.id;
-                return removeQuickDashboard(groupId, quickEntry.id);
+                args.dupTitleSpecs = dupTitleSpecs;
+                return args;
 
               default:
                 throw "Unexpected error - unknown title conflict action";
             }
-          })
-          .then(() => args);
-      });
-  }
-
-  function makeQuickSpecs(args) {
-    return Promise.all([
-      getLastQuickObjectNumber(savedVisualizations),
-      getLastQuickObjectNumber(savedSearches)
-    ])
-    .then(quickNums => {
-      const quickNumber = Math.max(...quickNums) + 1;
-      const quickSuffix = ` [Quick #${quickNumber}]`;
-
-      args.quickSpecs = { quickSuffix, quickNumber };
-      return args;
-    });
-  }
-
-  function makeEmptyDashboard(args) {
-    const { userSpecs, quickSpecs, savedSearch } = args;
-
-    return savedDashboards.get('')
-      .then(dash => {
-        // Borrowing dashboardState from the dashboard app, but we
-        // don't want its state changes to taint the discover app state,
-        // so saveState() will be overridden
-
-        const dashState = new DashboardState(dash, AppState);
-        dashState.appState.timeRestore = false;
-        dashState.saveState = () => {};
-
-        dashState.setTitle(userSpecs.title);
-
-        args.dashboard = dash;
-        args.dashState = dashState;
-
-        return args;
+          });
       });
   }
 
@@ -189,7 +135,7 @@ export function QuickDashboardProvider(
 
     let { fieldNames } = args;
 
-    if(timeFieldName) {
+    if(timeFieldName && fieldNames.indexOf(timeFieldName) < 0) {
       // The index's time field is always implicitly added. This is coherent with the
       // way the 'Discover' app shows data.
       fieldNames = fieldNames.concat([timeFieldName]);
@@ -215,23 +161,92 @@ export function QuickDashboardProvider(
     return args;
   }
 
-  function makeVisualizations(args) {
-    const { quickSpecs, indexPattern, fields } = args;
+  function progressNotified(operations) {
+    return function (args) {
+      const { fields } = args;
 
-    return makeSavedVisualizations(indexPattern, fields)
-      .then(savedVises => {
-        savedVises.forEach(sVis => sVis.title += quickSpecs.quickSuffix);
+      const progress = {
+        max: operations.length + visMaker.analysisStepsCount(fields),
+        value: -1,
+        text: '',
+        canceled: false,
+        notify: function (text) {
+          this.value += 1;
+          this.text = text;
+        },
+      };
 
-        args.savedVises = savedVises;
-      })
+      args.progress = progress;
+
+
+      const progressModal = quickDashModals.progress({ progress });
+
+      progressModal.scope.onCancel = function () {
+        // Overriding cancel - modal shall not hide until
+        // current operation finishes
+        progress.canceled = true;
+        progress.text = 'Canceling...';
+      };
+
+      progressModal.show();
+
+
+      return operations.reduce(function (chain, op) {
+        return chain.then(input => {
+          if(progress.canceled) { return Promise.reject(0); }
+
+          progress.notify(op.text);
+          return op.fn(input);
+        });
+      }, Promise.resolve(args))
+      .finally(() => progressModal.scope.onConfirm())
       .then(() => args);
+    };
+  }
+
+  function makeEmptyDashboard(args) {
+    const { userSpecs } = args;
+
+    return savedDashboards.get('')
+      .then(dash => {
+        // Borrowing dashboardState from the dashboard app, but we
+        // don't want its state changes to taint the discover app state,
+        // so saveState() will be overridden
+
+        const dashState = new DashboardState(dash, AppState);
+        dashState.appState.timeRestore = false;
+        dashState.saveState = () => {};
+
+        dashState.setTitle(userSpecs.title);
+
+        args.dashboard = dash;
+        args.dashState = dashState;
+
+        return args;
+      });
+  }
+
+  function makeVisualizations(args) {
+    const { indexPattern, fields, progress } = args;
+
+    return visMaker.makeSavedVisualizations(indexPattern, fields, progress)
+      .then(savedVises => {
+        args.savedVises = savedVises;
+        return args;
+      });
   }
 
   function saveVisualizations(args) {
     const { savedVises } = args;
 
-    return Promise.all(savedVises.map(sVis => sVis.save()))
-      .then(() => args);
+    return Promise.all(savedVises.map(sVis => {
+      // There *MUST NOT* be a 'duplicate title' popup at this stage.
+      // We'll be simulating a previous save.
+      sVis.lastSavedTitle = sVis.title;
+
+      return sVis.save();
+    }))
+    .then(() => args);
   }
 
   function fillDashboard(args) {
@@ -257,12 +272,17 @@ export function QuickDashboardProvider(
   }
 
   function saveSavedSearch(args) {
-    const { userSpecs, quickSpecs, savedSearch, dashboard } = args;
+    const { userSpecs, savedSearch, dashboard } = args;
 
     switch(userSpecs.savedSearchAction) {
       case 'new':
         savedSearch.id = undefined;
-        savedSearch.title = dashboard.title + quickSpecs.quickSuffix;
+        savedSearch.title = dashboard.title;
+
+        // There *MUST NOT* be a 'duplicate title' popup at this stage.
+        // We'll be simulating a previous save.
+        savedSearch.lastSavedTitle = savedSearch.title;
+
         // continue
 
       case 'save':
@@ -272,7 +292,8 @@ export function QuickDashboardProvider(
             return args;
           });
 
-      case 'none':
+      case 'nosave':
+        dashboard.savedSearchId = savedSearch.id;
         return args;
 
       default:
@@ -281,7 +302,7 @@ export function QuickDashboardProvider(
   }
 
   function saveDashboard(args) {
-    const { quickSpecs, userSpecs, savedVises, dashboard, dashState, timeFilter } = args;
+    const { userSpecs, savedVises, dashboard, dashState, timeFilter } = args;
 
     dashState.appState.timeRestore = userSpecs.storeTimeWithDashboard;
 
@@ -291,7 +312,7 @@ export function QuickDashboardProvider(
     //
     // NOTE: uiState.set needs to be *silent*, or the appState changes get persisted...
     dashState.uiState.setSilent('quickState', {
-      quickNumber: quickSpecs.quickNumber,
+      quickId: uuid.v4(),
 
       addedSavedSearches:
         (userSpecs.savedSearchAction === 'new') ? [dashboard.savedSearchId] : [],
@@ -299,8 +320,8 @@ export function QuickDashboardProvider(
       addedSavedVises: _.map(savedVises, 'id')
     });
 
-    // Saving the dashboard *MUST NOT* show a popup at this stage. We'll be simulating
-    // a previous save.
+    // There *MUST NOT* be a 'duplicate title' popup at this stage.
+    // We'll be simulating a previous save.
     dashboard.lastSavedTitle = dashboard.title;
 
 
@@ -315,6 +336,48 @@ export function QuickDashboardProvider(
       })
       .then(() => dashboardGroups.computeGroups('Quick Dashboard added'))
       .then(() => dashboardGroups.updateMetadataOfDashboardIds([ savedDashId ], true))
+      .then(() => args);
+  }
+
+  function removeDashboardFromInMemoryGroup(groupId, dashId) {
+    let arr = dashboardGroups.getGroups();
+    if(groupId) { arr = arr.find(group => group.id === groupId); }
+
+    if(!arr) { return; }
+
+    _.remove(arr, dash => dash.id === dashId);
+  }
+
+  function removeDashboardFromGroup(groupId, dashId) {
+    removeDashboardFromInMemoryGroup(groupId, dashId);
+    if(!groupId) { return; }
+
+    return savedDashboardGroups.get(groupId)
+      .then(group => {
+        group.dashboards = group.dashboards.filter(dash => dash.id !== dashId);
+        return group.save();
+      });
+  }
+
+  function removeQuickDashboard(groupId, dashId) {
+    return Promise.resolve()
+      .then(() => releaseQuickComponents(dashId))
+      .then(() => savedDashboards.delete(dashId))
+      .then(() => removeDashboardFromGroup(groupId, dashId));
+  }
+
+  function removeDupDashboard(args) {
+    const { dupTitleSpecs } = args;
+
+    if(!dupTitleSpecs || dupTitleSpecs.conflictAction !== 'overwrite') {
+      return args;
+    }
+
+    const { quickEntry } = dupTitleSpecs;
+    const groupId = quickEntry.group && quickEntry.group.id;
+    const dashId = quickEntry.id;
+
+    return removeQuickDashboard(groupId, dashId)
       .then(() => args);
   }
 
@@ -343,6 +406,34 @@ export function QuickDashboardProvider(
     kbnUrl.change(createDashboardEditUrl(dashId) + `?_a=${appQueryParam}`);
   }
 
+  function undoSaves(args) {
+    const { userSpecs, dashboard, savedSearch, savedVises } = args;
+
+    let promises = [];
+
+    if(dashboard && dashboard.id) {
+      promises.push(savedDashboards.delete(dashboard.id));
+
+      // New dashboards figure as 'virtual' groups. They are not really
+      // saved in savedDashboardGroups, so we just have to remove the entry from
+      // the dashboardGroups array.
+      removeDashboardFromInMemoryGroup(null, dashboard.id);
+    }
+
+    if(userSpecs && userSpecs.savedSearchAction === 'new' && savedSearch.id) {
+      promises.push(savedSearches.delete(savedSearch.id));
+    }
+
+    promises = promises.concat(_(savedVises || [])
+      .map('id')
+      .compact()
+      .map(visId => savedVisualizations.delete(visId))
+      .value());
+
+    return Promise.all(promises)
+      .catch(notify.error);
+  }
+
 
   // Exported Provider Functions
 
@@ -355,17 +446,20 @@ export function QuickDashboardProvider(
       .then(makeDefaultTitle)
       .then(askUserSpecs)
       .then(checkDuplicateTitle)
-      .then(makeQuickSpecs)
-      .then(makeEmptyDashboard)
       .then(retrieveFields)
-      .then(makeVisualizations)
-      .then(saveVisualizations)
-      .then(fillDashboard)
-      .then(saveSavedSearch)
-      .then(saveDashboard)
+      .then(progressNotified([
+        { fn: makeEmptyDashboard, text: 'Making new Dashboard' },
+        { fn: makeVisualizations, text: 'Making Visualizations' },
+        { fn: saveVisualizations, text: 'Saving Visualizations' },
+        { fn: fillDashboard,      text: 'Compiling Dashboard' },
+        { fn: saveSavedSearch,    text: 'Saving Saved Search' },
+        { fn: saveDashboard,      text: 'Saving Dashboard' }
+      ]))
+      .then(removeDupDashboard)
       .then(applyFilters)
       .then(openDashboardPage)
-      .catch(err => err && notify.error(err));
+      .catch(err => undoSaves(args)
+        .then(() => err && notify.error(err)));
   }
 
   function releaseQuickComponents(dashId) {
@@ -382,7 +476,7 @@ export function QuickDashboardProvider(
         const { quickState } = uiState;
         if(!quickState) { return; }
 
-        const { quickNumber } = quickState;
+        const { quickId } = quickState;
 
         // Get the number of dashboards referencing the same quick components.
         // This is essentially required when quick dashes are cloned.
@@ -394,7 +488,7 @@ export function QuickDashboardProvider(
               const currUiState = JSON.parse(dash.uiStateJSON);
               const currQuickState = currUiState.quickState;
 
-              if(currQuickState && currQuickState.quickNumber === quickNumber) {
+              if(currQuickState && currQuickState.quickId === quickId) {
                 ++count;
               }
 

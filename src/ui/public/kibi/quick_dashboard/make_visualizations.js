@@ -8,6 +8,14 @@ import _ from 'lodash';
  */
 
 
+function promiseSerialMap(arr, map) {
+  return arr.reduce(function (promiseChain, val, idx) {
+    return promiseChain.then(results => map(val, idx)
+      .then(res => [...results, res]));
+  }, Promise.resolve([]));
+}
+
+
 export function QuickDashMakeVisProvider(
   $injector, Private, savedVisualizations, mappings, es) {
 
@@ -93,7 +101,16 @@ export function QuickDashMakeVisProvider(
   }
 
   function evalUniqueCount(index, field) {
-    const request = { result: { cardinality: fieldSpec(field) } };
+    const request = {
+      result: {
+        cardinality: _.assign({
+          // Unique count is always checked against low values (10), and
+          // high precision values are paid in memory usage on the server.
+
+          precision_threshold: 20         // Doubling just to be sure
+        }, fieldSpec(field))
+      }
+    };
 
     return searchAgg(index, request)
       .then(resp => resp.aggregations.result.value);
@@ -516,42 +533,67 @@ export function QuickDashMakeVisProvider(
   }
 
 
-  return function (index, fields) {
-    return Promise.all(fields.map(field => {
-      let output;
+  return {
+    makeSavedVisualizations(index, fields, progress) {
+      _.defaults(progress, {
+        canceled: false,
+        notify: _.noop
+      });
 
-      switch (field.type) {
-        case 'number':
-          output = analyzeNumber(index, field);
-          break;
+      return promiseSerialMap(fields, field => {
+        if(progress.canceled) { return Promise.reject(0); }
+        progress.notify(`Analyzing field "${field.displayName}"`);
 
-        case 'string':
-        case 'text':
-          output = analyzeString(index, field);
-          break;
+        let output;
 
-        case 'date':
-          output = analyzeDate(index, fields, field);
+        switch (field.type) {
+          case 'number':
+            output = analyzeNumber(index, field);
+            break;
 
-          break;
+          case 'string':
+          case 'text':
+          case 'keyword':
+            output = analyzeString(index, field);
+            break;
 
-        case 'boolean':
-          output = createVis(index, field, 'pie', 'terms', { size: 2 });
-          break;
+          case 'date':
+            output = analyzeDate(index, fields, field);
 
-        case 'geo_point':
-          output = createVis(index, field, 'tile_map', 'geohash_grid');
-          break;
+            break;
 
-        default:
-          output = { vis: 'N/A' };
-      }
+          case 'boolean':
+            output = createVis(index, field, 'pie', 'terms', { size: 2 });
+            break;
 
-      return output;
-    }))
-    .then(vises => addKibiDataTableIfPresent(index, fields, vises))
-    .then(vises => addMultichartVisIfPresent(index, vises))
-    .then(updateVisStates);
+          case 'geo_point':
+            output = createVis(index, field, 'tile_map', 'geohash_grid');
+            break;
+
+          default:
+            output = { vis: 'N/A' };
+        }
+
+        return output;
+      })
+      .then(vises => {
+        if(progress.canceled) { return Promise.reject(0); }
+        progress.notify('Adding Kibi data table');
+
+        return addKibiDataTableIfPresent(index, fields, vises);
+      })
+      .then(vises => {
+        if(progress.canceled) { return Promise.reject(0); }
+        progress.notify('Adding Kibi Multi-Chart');
+
+        return addMultichartVisIfPresent(index, vises);
+      })
+      .then(updateVisStates);
+    },
+
+    analysisStepsCount(fields) {
+      return fields.length + 2;
+    }
   };
 }
 

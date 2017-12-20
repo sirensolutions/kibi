@@ -119,7 +119,7 @@ module.exports = function (kibana) {
         datasource_encryption_algorithm: Joi.string().default('AES-GCM'),
         datasource_encryption_key: Joi.string().default('iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='),
 
-        // kibi: datasources_schema is not used anywhere but can be brought back to life later if we descide to use this
+        // kibi: datasources_schema is not used anywhere but can be brought back to life later if we decide to use this
         // datasources_schema: Joi.any().default(datasourcesSchema.toInjectedVar()),
         datasource_cache_size: Joi.number().default(500),
 

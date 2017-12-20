@@ -42,24 +42,7 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}, req) {
-    // console.log('options.id ' + options.id + '\n\n');
-    // console.log('options.overwrite ' + options.overwrite + '\n\n');
-    //
     const method = options.id && !options.overwrite ? 'create' : 'index';
-    //
-    //
-    //
-    // console.log('create method ' + method + '\n\n');
-    // console.log('type');
-    // console.log(type);
-    // console.log('type \n\n');
-    // console.log('options');
-    // console.log(options);
-    // console.log('options \n\n');
-    // console.log('attributes');
-    // console.log(attributes);
-    // console.log('attributes \n\n');
-
     const response = await this._withKibanaIndexAndMappingFallback(method, {
       type,
       id: options.id,

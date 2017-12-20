@@ -1,6 +1,6 @@
 import { uiModules } from 'ui/modules';
-import 'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button.less';
-import template from 'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button.html';
+import 'plugins/investigate_core/ui/directives/dashboard_button/dashboard_button.less';
+import template from 'plugins/investigate_core/ui/directives/dashboard_button/dashboard_button.html';
 
 uiModules
 .get('kibana')

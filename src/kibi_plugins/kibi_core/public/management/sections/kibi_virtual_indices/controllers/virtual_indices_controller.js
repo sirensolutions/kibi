@@ -1,7 +1,7 @@
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import template from 'plugins/kibi_core/management/sections/kibi_virtual_indices/index.html';
+import template from 'plugins/investigate_core/management/sections/kibi_virtual_indices/index.html';
 import { CONFIRM_BUTTON, CANCEL_BUTTON } from 'ui_framework/components/modal/confirm_modal';
 
 uiRoutes

@@ -1,9 +1,9 @@
 import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import { VislibComponentsColorColorProvider } from 'ui/vis/components/color/color';
 import 'ui/kibi/directives/eeg';
-import 'plugins/kibi_core/management/sections/kibi_relations/styles/relations.less';
+import 'plugins/investigate_core/management/sections/kibi_relations/styles/relations.less';
 import 'ui/kibi/directives/kibi_validate';
-import template from 'plugins/kibi_core/management/sections/kibi_relations/index.html';
+import template from 'plugins/investigate_core/management/sections/kibi_relations/index.html';
 import _ from 'lodash';
 import $ from 'jquery';
 import { uiModules } from 'ui/modules';

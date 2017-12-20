@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 
 uiModules
-.get('plugins/kibi_core/saved_objects/dashboard_groups')
+.get('plugins/investigate_core/saved_objects/dashboard_groups')
 .factory('SavedDashboardGroup', function (courier) {
 
   _.class(SavedDashboardGroup).inherits(courier.SavedObject);

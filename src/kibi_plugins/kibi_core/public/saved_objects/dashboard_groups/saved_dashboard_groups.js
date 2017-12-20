@@ -2,8 +2,8 @@ import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import 'plugins/kibi_core/saved_objects/dashboard_groups/_saved_dashboard_group';
-import register from 'plugins/kibi_core/saved_objects/dashboard_groups/register';
+import 'plugins/investigate_core/saved_objects/dashboard_groups/_saved_dashboard_group';
+import register from 'plugins/investigate_core/saved_objects/dashboard_groups/register';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 
 SavedObjectRegistryProvider.register(register);

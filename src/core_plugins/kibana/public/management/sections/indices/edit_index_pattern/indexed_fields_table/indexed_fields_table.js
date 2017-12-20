@@ -8,7 +8,7 @@ import { FieldWildcardProvider } from 'ui/field_wildcard';
 import template from './indexed_fields_table.html';
 
 // kibi: imports
-import joinFields from 'plugins/kibi_core/management/sections/indices/join_fields';
+import joinFields from 'plugins/investigate_core/management/sections/indices/join_fields';
 // kibi: end
 
 uiModules.get('apps/management')

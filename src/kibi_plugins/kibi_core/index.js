@@ -54,28 +54,28 @@ module.exports = function (kibana) {
 
     uiExports: {
       hacks: [
-        'plugins/kibi_core/restore',
-        'plugins/kibi_core/ui/directives/dashboards_nav/dashboards_nav',
-        'plugins/kibi_core/ui/chrome/services/dashboards_nav_state',
-        'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups',
-        'plugins/kibi_core/ui/services/dashboard_groups',
-        'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button',
-        'plugins/kibi_core/api/api'
+        'plugins/investigate_core/restore',
+        'plugins/investigate_core/ui/directives/dashboards_nav/dashboards_nav',
+        'plugins/investigate_core/ui/chrome/services/dashboards_nav_state',
+        'plugins/investigate_core/saved_objects/dashboard_groups/saved_dashboard_groups',
+        'plugins/investigate_core/ui/services/dashboard_groups',
+        'plugins/investigate_core/ui/directives/dashboard_button/dashboard_button',
+        'plugins/investigate_core/api/api'
       ],
       managementSections: [
-        'plugins/kibi_core/management/sections/kibi_virtual_indices',
-        'plugins/kibi_core/management/sections/kibi_datasources',
-        'plugins/kibi_core/management/sections/kibi_entities',
-        'plugins/kibi_core/management/sections/kibi_queries',
-        'plugins/kibi_core/management/sections/kibi_relations',
-        'plugins/kibi_core/management/sections/kibi_templates'
+        'plugins/investigate_core/management/sections/kibi_virtual_indices',
+        'plugins/investigate_core/management/sections/kibi_datasources',
+        'plugins/investigate_core/management/sections/kibi_entities',
+        'plugins/investigate_core/management/sections/kibi_queries',
+        'plugins/investigate_core/management/sections/kibi_relations',
+        'plugins/investigate_core/management/sections/kibi_templates'
       ],
       navbarExtensions: [
-        'plugins/kibi_core/management/sections/navbar',
-        'plugins/kibi_core/dashboard/navbar'
+        'plugins/investigate_core/management/sections/navbar',
+        'plugins/investigate_core/dashboard/navbar'
       ],
       spyModes: [
-        'plugins/kibi_core/ui/spy_modes/multi_search_spy_mode'
+        'plugins/investigate_core/ui/spy_modes/multi_search_spy_mode'
       ],
       injectDefaultVars: function (server, options) {
         const vars = {};

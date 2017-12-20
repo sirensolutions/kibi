@@ -1,4 +1,4 @@
-import 'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups';
+import 'plugins/investigate_core/saved_objects/dashboard_groups/saved_dashboard_groups';
 import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import $ from 'jquery';
 import _ from 'lodash';

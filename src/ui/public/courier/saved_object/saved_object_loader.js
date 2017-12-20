@@ -5,7 +5,7 @@ import { StringUtils } from 'ui/utils/string_utils';
 import { SavedObjectsClient } from 'ui/saved_objects';
 
 // kibi: imports
-import { jdbcDatasourceTranslate } from 'plugins/kibi_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
+import { jdbcDatasourceTranslate } from 'plugins/investigate_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
 // kibi: end
 
 export class SavedObjectLoader {

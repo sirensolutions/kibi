@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { each, isString } from 'lodash';
 import http from 'http';
 import path from 'path';
 import Boom from 'boom';
@@ -70,7 +70,7 @@ module.exports = function (kibana) {
       .then(function (queries) {
         // check if error is returned, reply with error property
         let queryError = '';
-        const errors = _.each(queries, query => {
+        const errors = each(queries, query => {
           if (query.error) {
             queryError = query.error;
           }
@@ -231,7 +231,7 @@ module.exports = function (kibana) {
             }
             query = JSON.stringify(req.payload.query);
           } else if (req.payload.bulkQuery) {
-            if (!_.isString(req.payload.bulkQuery)) {
+            if (!isString(req.payload.bulkQuery)) {
               return reply(Boom.wrap(new Error('Expected bulkQuery to be a String containing a bulk elasticsearch query', 400)));
             }
             query = req.payload.bulkQuery;

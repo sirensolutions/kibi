@@ -50,7 +50,7 @@ module.exports = function (kibana) {
   return new kibana.Plugin({
     require: [ 'kibana' ],
 
-    id: 'kibi_core',
+    id: 'investigate_core',
 
     uiExports: {
       hacks: [

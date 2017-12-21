@@ -44,6 +44,9 @@ const baseEsResp = {
   }
 };
 
+let uniqueEsResp;
+let termsEsResp;
+
 const histoEsResp = _.cloneDeep(baseEsResp);
 histoEsResp.aggregations.result.buckets =
   _.times(50, _.constant({ doc_count: 100 }));
@@ -148,13 +151,11 @@ const es = {
 // mock Private - so we're scratching that and go for the easier
 // 'positional' way without ngMock.
 
+// eslint-disable-next-line new-cap
 const visBuilder = QuickDashMakeVisProvider(
   $injector, Private, savedVisualizations, mappings, es
 ).makeSavedVisualizations;
 
-
-let uniqueEsResp;
-let termsEsResp;
 
 function initTest() {
   additionalVisTypes.length = 0;
@@ -166,7 +167,7 @@ function initTest() {
 
 // Tests
 
-describe.only('QuickDashboard Visualization Tests', function () {
+describe('QuickDashboard Visualization Tests', function () {
   beforeEach(initTest);
 
   it('dummy test', function () {

@@ -157,7 +157,8 @@ describe('kibana_map tests', function () {
     it('WMS', async function () {
 
       const options = {
-        url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/ MapServer/WMSServer',
+        // kibi: Fixed this url as it had a typo so was not actually downloading the image
+        url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
         version: '1.3.0',
         layers: '0',
         format: 'image/png',
@@ -168,9 +169,12 @@ describe('kibana_map tests', function () {
         maxZoom: 18
       };
 
-
       return new Promise(function (resolve) {
         kibanaMap.on('baseLayer:loaded', () => {
+          // kibi: Added assertion below as this test was previously giving false positives.
+          // kibi adds the below css class when tiles load the downloaded image
+          // correctly and now we check this.
+          expect(domNode.querySelectorAll('.leaflet-tile-loaded')).to.not.be.empty();
           resolve();
         });
         kibanaMap.setBaseLayer({

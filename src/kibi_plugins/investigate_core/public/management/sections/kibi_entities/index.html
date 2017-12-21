@@ -135,20 +135,9 @@
           </div>
 
           <!-- Relational Graph -->
-          <div class="relational-graph-container">
-            <div class="relational-graph"
-                 ng-show="isRelationalGraphVisible">
-              <kl-components kl-options="klOptions"
-                             kl-ready="klReady"
-                             kl-base-path="{{ klBasePath }}">
-                <kl-component id="relationalGraph"
-                              kl-type="chart"
-                              kl-options="klOptions"
-                              kl-dblclick="klDblClick">
-                </kl-component>
-              </kl-components>
-            </div>
-          </div>
+          <kibi-relational-graph is-visible="isRelationalGraphVisible"
+                                 selected-item="selectedMenuItem">
+          </kibi-relational-graph>
 
           <!-- Tabs -->
           <div class="kuiTabs kuiVerticalRhythm">

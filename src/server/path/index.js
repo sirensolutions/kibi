@@ -1,10 +1,11 @@
 import { accessSync, R_OK } from 'fs';
 import { find } from 'lodash';
 import { fromRoot } from '../../utils';
+import { migrateKibiYml } from './migrate_kibi_yml.js';
 
 const CONFIG_PATHS = [
   process.env.CONFIG_PATH,
-  fromRoot('config/kibi.yml') // kibi: use kibi configuration file
+  fromRoot('config/investigate.yml') // kibi: use kibi configuration file
   //'/etc/kibana/kibana.yml' kibi: no such config location in kibi
 ].filter(Boolean);
 
@@ -14,6 +15,29 @@ const DATA_PATHS = [
   fromRoot('data'),
   '/var/lib/kibi'
 ].filter(Boolean);
+
+// kibi
+const kibiYmlPath = fromRoot('config/kibi.yml');
+function checkKibiYmlExists() {
+  try {
+    accessSync(kibiYmlPath);
+    return true;
+  } catch(e) {
+    console.log('e', e);
+  }
+}
+
+function getConfig() {
+  if(checkKibiYmlExists()) {
+    console.log('kibi.yml.exists');
+    migrateKibiYml(kibiYmlPath);
+    // return findFile(CONFIG_PATHS);
+  } else {
+    return findFile(CONFIG_PATHS);
+  }
+}
+
+// kibi:end
 
 function findFile(paths) {
   const availablePath = find(paths, configPath => {
@@ -28,6 +52,6 @@ function findFile(paths) {
 }
 
 export default {
-  getConfig: () => findFile(CONFIG_PATHS),
+  getConfig: () => getConfig(), // kibi: check if kibi.yml exists and migrate if so
   getData: () => findFile(DATA_PATHS)
 };

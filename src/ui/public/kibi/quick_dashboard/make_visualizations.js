@@ -311,7 +311,7 @@ export function QuickDashMakeVisProvider(
 
 
   function analyzeNumber(index, field) {
-    if(!field.aggregatable) { return { vis: 'N/A' }; }
+    if(!field.aggregatable) { return null; }
 
     const retVis = createVis.bind(null, index, field);
 
@@ -351,7 +351,7 @@ export function QuickDashMakeVisProvider(
   }
 
   function analyzeString(index, field) {
-    if(!field.aggregatable) { return { vis: 'N/A' }; }
+    if(!field.aggregatable) { return null; }
 
     const retVis = createVis.bind(null, index, field);
 
@@ -439,26 +439,54 @@ export function QuickDashMakeVisProvider(
     });
   }
 
-  function addMultichartVisIfPresent(index, vises) {
-    // Bail out if the Kibi-Multichart vis is not installed
-    if(!visTypes.find(visType => visType.name === 'kibi_multi_chart_vis')) {
-      return vises;
-    }
+  function hasKibiDataTable() {
+    return !!visTypes.find(visType => visType.name === 'kibi-data-table');
+  }
 
+  function addKibiDataTableIfPresent(index, fields, vises) {
+    if(!hasKibiDataTable()) { return vises; }
+
+    const fieldNames = _(fields)
+      .map('name')
+      .difference(_.compact([index.timeFieldName]))     // Time field already included
+      .value();
+
+    return newDefaultVis(index, 'kibi-data-table')
+      .then(kibiDataTable => {
+        configureVis(kibiDataTable, { displayName: 'Search Results' }, null, {
+          columns: fieldNames
+        });
+
+        return vises.concat(kibiDataTable);
+      });
+  }
+
+  function hasMultichartVis() {
+    return !!visTypes.find(visType => visType.name === 'kibi_multi_chart_vis');
+  }
+
+  function multiChartCandidateFields(index) {
+    return index.fields.filter(field =>
+      field.visualizable &&
+      !_.includes(index.metaFields, field.name) &&
+      !field.name.endsWith('.geohash'));
+  }
+
+  function addMultichartVisIfPresent(index, vises, progress) {
+    if(!hasMultichartVis()) { return vises; }
+
+    const candidateFields = multiChartCandidateFields(index);
     const kibiMultiChartSDC = $injector.get('kibiMultiChartSDC');
 
+    const analysisPromise = promiseSerialMap(candidateFields,
+      field => {
+        if(progress.canceled) { return Promise.reject(0); }
+        progress.notify(`Multi-Chart - Analyzing field "${field.displayName}"`);
 
-    const analysisPromise = Promise.all(
-      _(index.fields)
-        .filter(
-          field => field.visualizable &&
-          !_.includes(index.metaFields, field.name) &&
-          !field.name.endsWith('.geohash'))
-        .map(field => kibiMultiChartSDC(index.id, field)
+        return kibiMultiChartSDC(index.id, field)
           .then(sdc => ({ field, sdc }))
-          .catch(_.noop))                                 // Errors become undefs
-        .value()
-    );
+          .catch(_.noop);                     // Errors become undefs
+      });
 
     return Promise.all([
       newDefaultVis(index, 'kibi_multi_chart_vis'),
@@ -498,27 +526,6 @@ export function QuickDashMakeVisProvider(
     });
   }
 
-  function addKibiDataTableIfPresent(index, fields, vises) {
-    // Bail out if the Kibi DataTable vis is not installed
-    if(!visTypes.find(visType => visType.name === 'kibi-data-table')) {
-      return vises;
-    }
-
-    const fieldNames = _(fields)
-      .map('name')
-      .difference(_.compact([index.timeFieldName]))     // Time field already included
-      .value();
-
-    return newDefaultVis(index, 'kibi-data-table')
-      .then(kibiDataTable => {
-        configureVis(kibiDataTable, { displayName: 'Search Results' }, null, {
-          columns: fieldNames
-        });
-
-        return vises.concat(kibiDataTable);
-      });
-  }
-
   function updateVisStates(vises) {
     // Vis states need to be set manually
 
@@ -534,7 +541,7 @@ export function QuickDashMakeVisProvider(
 
 
   return {
-    makeSavedVisualizations(index, fields, progress) {
+    makeSavedVisualizations(index, fields, progress = {}) {
       _.defaults(progress, {
         canceled: false,
         notify: _.noop
@@ -571,7 +578,7 @@ export function QuickDashMakeVisProvider(
             break;
 
           default:
-            output = { vis: 'N/A' };
+            output = null;
         }
 
         return output;
@@ -582,17 +589,21 @@ export function QuickDashMakeVisProvider(
 
         return addKibiDataTableIfPresent(index, fields, vises);
       })
-      .then(vises => {
-        if(progress.canceled) { return Promise.reject(0); }
-        progress.notify('Adding Kibi Multi-Chart');
-
-        return addMultichartVisIfPresent(index, vises);
-      })
+      .then(vises => addMultichartVisIfPresent(index, vises, progress))
+      .then(_.filter)
       .then(updateVisStates);
     },
 
-    analysisStepsCount(fields) {
-      return fields.length + 2;
+    analysisStepsCount(index, fields) {
+      let result = fields.length;
+
+      if(hasKibiDataTable()) { result += 1; }
+
+      if(hasMultichartVis()) {
+        result += multiChartCandidateFields(index).length;
+      }
+
+      return result;
     }
   };
 }

@@ -163,10 +163,10 @@ export function QuickDashboardProvider(
 
   function progressNotified(operations) {
     return function (args) {
-      const { fields } = args;
+      const { indexPattern, fields } = args;
 
       const progress = {
-        max: operations.length + visMaker.analysisStepsCount(fields),
+        max: operations.length + visMaker.analysisStepsCount(indexPattern, fields),
         value: -1,
         text: '',
         canceled: false,

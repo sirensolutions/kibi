@@ -51,6 +51,7 @@
             set-default="setDefaultPattern()"
             refresh-fields="refreshFields()"
             delete="removeEntity()"
+            toggle-graph="toggleRelationalGraph()"
           ></kbn-management-index-header>
 
           <kbn-management-index-header
@@ -59,6 +60,7 @@
             entity="indexPattern"
             save="saveRelations()"
             delete="removeEntity()"
+            toggle-graph="toggleRelationalGraph()"
           ></kbn-management-index-header>
 
           <kbn-management-index-header
@@ -67,6 +69,7 @@
             entity="indexPattern"
             save="saveEntityOptions()"
             delete="removeEntity()"
+            toggle-graph="toggleRelationalGraph()"
           ></kbn-management-index-header>
 
           <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
@@ -128,6 +131,22 @@
               <div class="kuiInfoPanelBody__message">
                 {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.
               </div>
+            </div>
+          </div>
+
+          <!-- Relational Graph -->
+          <div class="relational-graph-container">
+            <div class="relational-graph"
+                 ng-show="isRelationalGraphVisible">
+              <kl-components kl-options="klOptions"
+                             kl-ready="klReady"
+                             kl-base-path="{{ klBasePath }}">
+                <kl-component id="relationalGraph"
+                              kl-type="chart"
+                              kl-options="klOptions"
+                              kl-dblclick="klDblClick">
+                </kl-component>
+              </kl-components>
             </div>
           </div>
 

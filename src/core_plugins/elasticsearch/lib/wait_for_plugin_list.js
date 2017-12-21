@@ -35,7 +35,7 @@ module.exports = function (plugin, server) {
         }
       });
 
-      config.set('kibi_core.clusterplugins', elasticsearchPluginNames);
+      config.set('investigate_core.clusterplugins', elasticsearchPluginNames);
 
       // 2 if siren-vanguard detected verify that it is installed on all data nodes
       if (detectedSirenJoin) {
@@ -68,7 +68,7 @@ module.exports = function (plugin, server) {
     return elasticsearchPlugins;
   })
   .catch(err => {
-    config.set('kibi_core.clusterplugins', []);
+    config.set('investigate_core.clusterplugins', []);
     plugin.status.yellow(err);
   });
 };

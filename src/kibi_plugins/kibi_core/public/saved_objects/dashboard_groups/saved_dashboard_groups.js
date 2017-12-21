@@ -17,7 +17,7 @@ savedObjectManagementRegistry.register({
 
 // This is the only thing that gets injected into controllers
 uiModules
-.get('kibi_core/saved_objects/dashboard_groups')
+.get('investigate_core/saved_objects/dashboard_groups')
 .service('savedDashboardGroups', function (savedObjectsAPI, Private, SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl, $http) {
   const options = {
     caching: {

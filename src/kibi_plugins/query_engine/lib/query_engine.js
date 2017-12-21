@@ -297,8 +297,7 @@ QueryEngine.prototype._loadDatasources = function () {
           reject(err);
           return;
         }
-
-        if (self.config.has('kibi_core.gremlin_server.url')) {
+        if (self.config.has('investigate_core.gremlin_server.url')) {
           const gremlinUrl = self.config.get('investigate_core.gremlin_server.url');
           const datasourceObj = JSON.parse(data.toString());
           const datasourceObjParam = JSON.parse(datasourceObj.datasourceParams);

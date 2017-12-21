@@ -1,5 +1,13 @@
 import http from 'http';
 import path from 'path';
+import Boom from 'boom';
+import errors from 'request-promise/errors';
+import buffer from 'buffer';
+import { name } from './package.json';
+import cryptoHelper from './lib/crypto_helper';
+import datasourcesSchema from './lib/datasources_schema';
+import QueryEngine from './lib/query_engine';
+import IndexHelper from './lib/index_helper';
 
 import { patchElasticsearchClient } from './lib/elasticsearch/patch_elasticsearch_client';
 
@@ -50,7 +58,7 @@ module.exports = function (kibana) {
   return new kibana.Plugin({
     require: [ 'kibana' ],
 
-    id: 'investigate_core',
+    id: name,
 
     uiExports: {
       hacks: [

@@ -26,12 +26,12 @@ function startServer(self, fulfill, reject) {
     fulfill({ message: msg });
   })
   .catch(() => {
-    if (config.has('kibi_core.gremlin_server.path')) {
+    if (config.has('investigate_core.gremlin_server.path')) {
       let gremlinServerPath = config.get('investigate_core.gremlin_server.path');
 
       isJavaVersionOk(self).then(function () {
 
-        if (config.has('kibi_core.gremlin_server.ssl.ca')) {
+        if (config.has('investigate_core.gremlin_server.ssl.ca')) {
           const ca = config.get('investigate_core.gremlin_server.ssl.ca');
           if (ca) {
             try {
@@ -71,14 +71,14 @@ function startServer(self, fulfill, reject) {
               args.push('--server.address=' + serverURL.hostname);
             }
 
-            if (config.has('kibi_core.gremlin_server.debug_remote')) {
+            if (config.has('investigate_core.gremlin_server.debug_remote')) {
               const gremlinServerRemoteDebug = config.get('investigate_core.gremlin_server.debug_remote');
               if (gremlinServerRemoteDebug) {
                 args.unshift(gremlinServerRemoteDebug);
               }
             }
 
-            if (config.has('kibi_core.gremlin_server.log_conf_path')) {
+            if (config.has('investigate_core.gremlin_server.log_conf_path')) {
               const logConfigPath = config.get('investigate_core.gremlin_server.log_conf_path');
               if (logConfigPath) {
                 args.push('--logging.config=' + logConfigPath);
@@ -109,7 +109,7 @@ function startServer(self, fulfill, reject) {
               }
             }
 
-            if (config.has('kibi_core.gremlin_server.ssl.key_store') &&
+            if (config.has('investigate_core.gremlin_server.ssl.key_store') &&
               config.get('investigate_core.gremlin_server.ssl.key_store')) {
               const sslKeyStore = config.get('investigate_core.gremlin_server.ssl.key_store');
               const sslKeyStorePsw = config.get('investigate_core.gremlin_server.ssl.key_store_password');

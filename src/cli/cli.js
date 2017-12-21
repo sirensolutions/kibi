@@ -8,6 +8,7 @@ import replaceEncryptionKeyCommand from './kibi/replace_encryption_key';
 import upgradeCommand from './kibi/upgrade';
 import backupCommand from './kibi/backup';
 import restoreCommand from './kibi/restore';
+import upgradeConfigCommand from './kibi/migrate_kibi_yml';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 const program = new Command('bin/investigate'); // kibi: renamed kibana to investigate
@@ -20,13 +21,20 @@ program
   'Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.'
 );
 
-// attach commands
-serveCommand(program);
-// kibi: kibi commands
-replaceEncryptionKeyCommand(program);
-upgradeCommand(program);
-backupCommand(program);
-restoreCommand(program);
+// kibi: had to check for "upgrade-config" in the list of CLI arguments
+// and only attach the config upgrade if it does
+// otherwise, the serve command is attached and throws the kibi.yml found error
+if(argv.indexOf('upgrade-config') !== -1) {
+  upgradeConfigCommand(program);
+} else {
+  // attach commands
+  serveCommand(program);
+  // kibi: kibi commands
+  replaceEncryptionKeyCommand(program);
+  upgradeCommand(program);
+  backupCommand(program);
+  restoreCommand(program);
+}
 
 program
 .command('help <command>')

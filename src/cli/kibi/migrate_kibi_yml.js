@@ -59,7 +59,7 @@ function migrateKibiYml({ config: path }) {
 
   const newYml = safeDump(contents);
   // rename kibi.yml to kibi.yml.pre10
-  // rename(path, `${path}.pre10`);
+  rename(path, `${path}.pre10`);
   // write yaml output as investigate.yml
   write(fromRoot('config/investigate_test.yml'), newYml, { encoding: 'utf8' });
 }

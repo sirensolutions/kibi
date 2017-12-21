@@ -1,7 +1,6 @@
 import { accessSync, R_OK } from 'fs';
 import { find } from 'lodash';
 import { fromRoot } from '../../utils';
-import { migrateKibiYml } from './migrate_kibi_yml.js';
 
 const CONFIG_PATHS = [
   process.env.CONFIG_PATH,
@@ -23,15 +22,15 @@ function checkKibiYmlExists() {
     accessSync(kibiYmlPath);
     return true;
   } catch(e) {
-    console.log('e', e);
+    return false;
   }
 }
 
 function getConfig() {
   if(checkKibiYmlExists()) {
-    console.log('kibi.yml.exists');
-    migrateKibiYml(kibiYmlPath);
-    // return findFile(CONFIG_PATHS);
+    throw new Error(`kibi.yml found in config folder. Please run bin/kibi upgrade-config to migrate your kibi.yml to investigate.yml
+       Please be aware that this command removes all comments in the kibi.yml
+       but the original file (with comments) is preserved as kibi.yml.pre10\n`);
   } else {
     return findFile(CONFIG_PATHS);
   }
@@ -52,6 +51,6 @@ function findFile(paths) {
 }
 
 export default {
-  getConfig: () => getConfig(), // kibi: check if kibi.yml exists and migrate if so
+  getConfig, // kibi: check if kibi.yml exists and migrate if so
   getData: () => findFile(DATA_PATHS)
 };

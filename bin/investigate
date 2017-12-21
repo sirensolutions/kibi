@@ -22,7 +22,7 @@ if [ ! -x "$NODE" ]; then
 fi
 
 # kibi: create symlink only when load_jdbc: true
-if grep  "load_jdbc:\\s\{1,\}true\\s*$" ${DIR}/config/kibi.yml
+if grep  "load_jdbc:\\s\{1,\}true\\s*$" ${DIR}/config/investigate.yml
 then
   $DIR/bin/create_symlink.sh
 fi

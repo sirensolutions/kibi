@@ -38,7 +38,10 @@ function renamePropAtSpecificPoint(obj, keyToChange, newKeyname) {
 // Take the map of old:new values and convert each config setting in place
 // including nested config options
 // retains the nesting and order of properties
-function migrateKibiYml({ config: path }) {
+function migrateKibiYml({ config: path , dev }) {
+  //check if replacing dev yamls
+  const newPath = fromRoot(`config/investigate${(dev) ? '.dev' : ''}.yml`);
+  if (dev) path = fromRoot('config/kibi.dev.yml');
   let contents = safeLoad(read(path, 'utf8'));
   Object.keys(replacementMap).map(key => {
     function _replaceKeys(obj, oldKey = '', newKey = '') {
@@ -61,7 +64,7 @@ function migrateKibiYml({ config: path }) {
   // rename kibi.yml to kibi.yml.pre10
   rename(path, `${path}.pre10`);
   // write yaml output as investigate.yml
-  write(fromRoot('config/investigate_test.yml'), newYml, { encoding: 'utf8' });
+  write(newPath, newYml, { encoding: 'utf8' });
 }
 
 export default function (program) {

@@ -7,10 +7,31 @@ import { has } from 'lodash';
 // The new keys to replace the old keys with are the values
 // if replacing a nested key and then replacing a higher level key
 // in the same nested stanza, replace the lower key first.
+// e.g. if the desired end result is to change 'foo.bar.baz' to 'bzz.bar.tah'
+// make two entries to the map:
+// {
+//   'foo.bar.baz': 'tah',
+//   'foo': 'bzz'
+// }
+
+// The right hand side of the key:value pair contains the string of
+// the key that is being replaced at the level of nesting specified on
+// the left hand side. e.g.
+// {
+//   'foo.bar.baz': 'boop'
+// }
+// converts to 'foo.bar.boop'
+
 const replacementMap = {
   'kibi_access_control.sentinl': 'sirenalert',
   kibi_access_control: 'investigate_access_control',
   kibi_core: 'investigate_core'
+};
+
+const valueReplacementMap = {
+  'investigate_access_control.admin_role':           { oldVal: 'kibiadmin', newVal: 'sirenadmin' },
+  'elasticsearch.username':                          { oldVal: 'kibiserver', newVal: 'sirenserver' },
+  'investigate_access_control.sirenalert.username' : { oldVal: 'sentinl', newVal: 'sirenalert' }
 };
 
 // remove the parent key from the string and return the child key
@@ -30,6 +51,23 @@ function renamePropAtSpecificPoint(obj, keyToChange, newKeyname) {
 
   arr.map(keyObj => {
     newObj[keyObj.key] = keyObj.value;
+  });
+
+  return newObj;
+}
+
+function renameValueAtSpecificPoint(obj, keyOfValueToChange, newKeyObj) {
+  let newObj = {};
+  const newArr = [];
+  Object.keys(obj).map(key => {
+    const keyOfValueIsInObject = (key === keyOfValueToChange);
+    const valueIsSetToOldDefault = (obj[keyOfValueToChange] === newKeyObj.oldVal);
+
+    if (keyOfValueIsInObject && valueIsSetToOldDefault) {
+      newObj[key] = newKeyObj.newVal;
+    } else {
+      newObj[key] = obj[key];
+    }
   });
 
   return newObj;
@@ -60,6 +98,22 @@ function migrateKibiYml({ config: path , dev }) {
     contents = _replaceKeys(contents, key, replacementMap[key]);
   });
 
+  Object.keys(valueReplacementMap).map(key => {
+    function _replaceValues(obj, key, keyReplacementObj) {
+      if(has(obj, key) && obj.hasOwnProperty(key)) {
+        // run replacement function
+        obj = Object.assign({}, renameValueAtSpecificPoint(obj, key, keyReplacementObj));
+      } else if (has(obj, key)) {
+        // drop down a nesting level and check again
+        const children = Object.keys(obj);
+        children.map(childKey => obj[childKey] = _replaceValues(obj[childKey], getChildKey(key), keyReplacementObj));
+      }
+      return obj;
+    }
+
+    contents = _replaceValues(contents, key, valueReplacementMap[key]);
+  });
+
   const newYml = safeDump(contents);
   // rename kibi.yml to kibi.yml.pre10
   rename(path, `${path}.pre10`);
@@ -67,20 +121,4 @@ function migrateKibiYml({ config: path , dev }) {
   write(newPath, newYml, { encoding: 'utf8' });
 }
 
-export default function (program) {
-  async function processCommand(options) {
-    await migrateKibiYml(options);
-  }
-
-  program
-      .command('upgrade-config')
-      .description(
-        'Upgrade configuration settings in the config yaml file'
-      )
-      .option('--dev', 'Run the upgrade using development mode configuration')
-      .option(
-        '-c, --config <path>',
-        'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
-        process.env.CONFIG_PATH || fromRoot('config/kibi.yml'))
-      .action(processCommand);
-};
+export default migrateKibiYml;

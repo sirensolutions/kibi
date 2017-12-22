@@ -56,7 +56,8 @@ function renamePropAtSpecificPoint(obj, keyToChange, newKeyname) {
   return newObj;
 }
 
-function renameValueAtSpecificPoint(obj, keyOfValueToChange, newKeyObj) {
+// replace a value in place
+function replaceValueAtSpecificPoint(obj, keyOfValueToChange, newKeyObj) {
   let newObj = {};
   const newArr = [];
   Object.keys(obj).map(key => {
@@ -108,7 +109,8 @@ function migrateKibiYml({ config: path , dev }) {
     function _replaceValues(obj, key, keyReplacementObj) {
       if(has(obj, key) && obj.hasOwnProperty(key)) {
         // run replacement function
-        obj = Object.assign({}, renameValueAtSpecificPoint(obj, key, keyReplacementObj));
+        obj = Object.assign({},
+        replaceValueAtSpecificPoint(obj, key, keyReplacementObj));
       } else if (has(obj, key)) {
         // drop down a nesting level and check again
         const children = Object.keys(obj);

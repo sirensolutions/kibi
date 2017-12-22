@@ -16,8 +16,9 @@ const DATA_PATHS = [
 ].filter(Boolean);
 
 // kibi
-const kibiYmlPath = fromRoot('config/kibi.yml');
-function checkKibiYmlExists() {
+
+function checkKibiYmlExists(dev) {
+  const kibiYmlPath = fromRoot(`config/kibi${(dev) ? '.dev' : ''}.yml`);
   try {
     accessSync(kibiYmlPath);
     return true;
@@ -26,8 +27,8 @@ function checkKibiYmlExists() {
   }
 }
 
-function getConfig() {
-  if(checkKibiYmlExists()) {
+function getConfig(dev) {
+  if(checkKibiYmlExists(dev)) {
     throw new Error(`kibi.yml found in config folder. Please run bin/kibi upgrade-config to migrate your kibi.yml to investigate.yml
        Please be aware that this command removes all comments in the kibi.yml
        but the original file (with comments) is preserved as kibi.yml.pre10\n`);

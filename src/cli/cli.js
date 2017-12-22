@@ -8,7 +8,7 @@ import replaceEncryptionKeyCommand from './kibi/replace_encryption_key';
 import upgradeCommand from './kibi/upgrade';
 import backupCommand from './kibi/backup';
 import restoreCommand from './kibi/restore';
-import upgradeConfigCommand from './kibi/migrate_kibi_yml';
+import upgradeConfigCommand from './kibi/upgrade_config';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 const program = new Command('bin/investigate'); // kibi: renamed kibana to investigate

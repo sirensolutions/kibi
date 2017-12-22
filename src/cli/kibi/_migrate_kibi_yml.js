@@ -73,14 +73,14 @@ function renameValueAtSpecificPoint(obj, keyOfValueToChange, newKeyObj) {
   return newObj;
 }
 
-// Take the map of old:new values and convert each config setting in place
-// including nested config options
-// retains the nesting and order of properties
 function migrateKibiYml({ config: path , dev }) {
   //check if replacing dev yamls
   const newPath = fromRoot(`config/investigate${(dev) ? '.dev' : ''}.yml`);
   if (dev) path = fromRoot('config/kibi.dev.yml');
   let contents = safeLoad(read(path, 'utf8'));
+  // Take the map of old:new keys and convert each config setting in place
+  // including nested config options
+  // retains the nesting and order of properties
   Object.keys(replacementMap).map(key => {
     function _replaceKeys(obj, oldKey = '', newKey = '') {
       // if the key (possibly nested) is in the object
@@ -97,7 +97,13 @@ function migrateKibiYml({ config: path , dev }) {
 
     contents = _replaceKeys(contents, key, replacementMap[key]);
   });
-
+  // Take the map of old:new values and convert each config setting in place
+  // including nested config options
+  // retains the nesting and order of properties
+  // if an old default has been changed locally, leave it in place.
+  // e.g. the old default for admin_role is 'kibiadmin'
+  // we want to change it to 'sirenadmin' but if the user has changed it to
+  // 'myfirstadmin', don't change to 'sirenadmin' but leave 'myfirstadmin' in place.
   Object.keys(valueReplacementMap).map(key => {
     function _replaceValues(obj, key, keyReplacementObj) {
       if(has(obj, key) && obj.hasOwnProperty(key)) {

@@ -28,6 +28,11 @@ const replacementMap = {
   kibi_core: 'investigate_core'
 };
 
+// This map holds potential value replacements.
+// If the key on the left hand side has the value stored as oldVal on the RHS,
+// then the key is replaced by the value stored as newVal.
+// If the key does not hold the oldVal (e.g. if the user has altered the setting manually
+// and diverted from our defaults), leave that value in place.
 const valueReplacementMap = {
   'investigate_access_control.admin_role':           { oldVal: 'kibiadmin', newVal: 'sirenadmin' },
   'elasticsearch.username':                          { oldVal: 'kibiserver', newVal: 'sirenserver' },

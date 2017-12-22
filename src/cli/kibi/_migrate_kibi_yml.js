@@ -34,9 +34,9 @@ const replacementMap = {
 // If the key does not hold the oldVal (e.g. if the user has altered the setting manually
 // and diverted from our defaults), leave that value in place.
 const valueReplacementMap = {
-  'investigate_access_control.admin_role':           { oldVal: 'kibiadmin', newVal: 'sirenadmin' },
-  'elasticsearch.username':                          { oldVal: 'kibiserver', newVal: 'sirenserver' },
-  'investigate_access_control.sirenalert.username' : { oldVal: 'sentinl', newVal: 'sirenalert' }
+  'investigate_access_control.admin_role':           { oldVal: 'kibiadmin' },
+  'elasticsearch.username':                          { oldVal: 'kibiserver' },
+  'investigate_access_control.sirenalert.username' : { oldVal: 'sentinl' }
 };
 
 // remove the parent key from the string and return the child key
@@ -56,24 +56,6 @@ function renamePropAtSpecificPoint(obj, keyToChange, newKeyname) {
 
   arr.map(keyObj => {
     newObj[keyObj.key] = keyObj.value;
-  });
-
-  return newObj;
-}
-
-// replace a value in place
-function replaceValueAtSpecificPoint(obj, keyOfValueToChange, newKeyObj) {
-  const newObj = {};
-  const newArr = [];
-  Object.keys(obj).map(key => {
-    const keyOfValueIsInObject = (key === keyOfValueToChange);
-    const valueIsSetToOldDefault = (obj[keyOfValueToChange] === newKeyObj.oldVal);
-
-    if (keyOfValueIsInObject && valueIsSetToOldDefault) {
-      newObj[key] = newKeyObj.newVal;
-    } else {
-      newObj[key] = obj[key];
-    }
   });
 
   return newObj;
@@ -103,28 +85,25 @@ function migrateKibiYml({ config: path , dev }) {
 
     contents = _replaceKeys(contents, key, replacementMap[key]);
   });
-  // Take the map of old:new values and convert each config setting in place
-  // including nested config options
-  // retains the nesting and order of properties
-  // if an old default has been changed locally, leave it in place.
-  // e.g. the old default for admin_role is 'kibiadmin'
-  // we want to change it to 'sirenadmin' but if the user has changed it to
-  // 'myfirstadmin', don't change to 'sirenadmin' but leave 'myfirstadmin' in place.
+  // Set the old defaults into the migrated config.
+  // if a user was depending on any old defaults that we are changing,
+  // we need to set these explicitly into the config, so the new
+  // defaults are not used
   Object.keys(valueReplacementMap).map(key => {
-    function _replaceValues(obj, key, keyReplacementObj) {
-      if(has(obj, key) && obj.hasOwnProperty(key)) {
-        // run replacement function
-        obj = Object.assign({},
-        replaceValueAtSpecificPoint(obj, key, keyReplacementObj));
-      } else if (has(obj, key)) {
-        // drop down a nesting level and check again
-        const children = Object.keys(obj);
-        children.map(childKey => obj[childKey] = _replaceValues(obj[childKey], getChildKey(key), keyReplacementObj));
+    const addOldDefaultExplicitlyIfMissing = (obj, keys, v) => {
+      if (keys.length === 1) {
+        obj[keys[0]] = v;
+      } else {
+        let key = keys.shift();
+        obj[key] = addOldDefaultExplicitlyIfMissing(typeof obj[key] === 'undefined' ? {} : obj[key], keys, v);
       }
-      return obj;
-    }
 
-    contents = _replaceValues(contents, key, valueReplacementMap[key]);
+      return obj;
+    };
+
+    if (!has(contents, key)) {
+      contents = addOldDefaultExplicitlyIfMissing(contents, key.split('.'), valueReplacementMap[key].oldVal);
+    }
   });
 
   const newYml = safeDump(contents);

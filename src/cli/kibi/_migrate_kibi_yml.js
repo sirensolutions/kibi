@@ -63,7 +63,7 @@ function renamePropAtSpecificPoint(obj, keyToChange, newKeyname) {
 
 // replace a value in place
 function replaceValueAtSpecificPoint(obj, keyOfValueToChange, newKeyObj) {
-  let newObj = {};
+  const newObj = {};
   const newArr = [];
   Object.keys(obj).map(key => {
     const keyOfValueIsInObject = (key === keyOfValueToChange);

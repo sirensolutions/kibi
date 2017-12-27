@@ -4,6 +4,7 @@
 const builtin = [
   'visualization',
   'index-pattern',
+  // 'ontology-model',
   'config',
   'dashboard',
   'dashboardgroup',

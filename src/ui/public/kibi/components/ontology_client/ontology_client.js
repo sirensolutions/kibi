@@ -56,7 +56,7 @@ uiModules
       const clonedRelations = _.cloneDeep(this._cachedRelationsList);
       return Promise.resolve(clonedRelations);
     } else {
-      return queryEngineClient.schema({
+      return queryEngineClient.schemaQuery({
         path: '/schema/relations',
         method: 'GET'
       })
@@ -165,7 +165,7 @@ uiModules
       const clonedEntities = _.cloneDeep(this._cachedEntitiesList);
       return Promise.resolve(clonedEntities);
     } else {
-      return queryEngineClient.schema({
+      return queryEngineClient.schemaQuery({
         path: '/schema/entities',
         method: 'GET'
       })
@@ -256,7 +256,7 @@ uiModules
 
     if (relations.length) {
       _.each(relations, encodeRelationIds);
-      return this._executeSchemaAndClearCache({
+      return this._executeSchemaUpdateAndClearCache({
         path: '/schema/relations',
         method: 'POST',
         data: relations
@@ -294,7 +294,7 @@ uiModules
     if (!entity.id) {
       return Promise.reject('Missing entity id');
     } else {
-      return this._executeSchemaAndClearCache({
+      return this._executeSchemaUpdateAndClearCache({
         path: '/schema/entity/' + entity.id,
         method: 'POST',
         data: entity
@@ -307,7 +307,7 @@ uiModules
    */
   OntologyClient.prototype.updateWithQuery = function (query) {
     if (query) {
-      return this._executeSchemaAndClearCache({
+      return this._executeSchemaUpdateAndClearCache({
         path: '/schema/update',
         method: 'POST',
         data: { query: query }
@@ -326,7 +326,7 @@ uiModules
     if (entity.longDescription) {
       entity.longDescription = this._encodeUrl(entity.longDescription);
     }
-    return this._executeSchemaAndClearCache({
+    return this._executeSchemaUpdateAndClearCache({
       path: '/schema/entity/' + encodedId,
       method: 'PUT',
       data: entity
@@ -337,7 +337,7 @@ uiModules
    * Delete an entity by id.
    */
   OntologyClient.prototype.deleteEntity = function (entityId) {
-    return this._executeSchemaAndClearCache({
+    return this._executeSchemaUpdateAndClearCache({
       path: '/schema/entity/' + this._encodeUrl(entityId),
       method: 'DELETE'
     });
@@ -347,13 +347,16 @@ uiModules
    * Delete all relations having the passed entity as domain or range.
    */
   OntologyClient.prototype.deleteByDomainOrRange = function (entityId) {
-    return this._executeSchemaAndClearCache({
+    return this._executeSchemaUpdateAndClearCache({
       path: '/schema/relationByDomainOrRange/' + this._encodeUrl(entityId),
       method: 'DELETE'
     });
   };
 
-  OntologyClient.prototype._executeSchemaAndClearCache = function (options) {
+  /*
+   * Executes the query. The type param can be 'QUERY' or 'UPDATE'.
+   */
+  OntologyClient.prototype._executeSchemaUpdateAndClearCache = function (options) {
     const params = {
       path: options.path,
       method: options.method
@@ -362,7 +365,7 @@ uiModules
       params.data = options.data;
     }
 
-    return queryEngineClient.schema(params)
+    return queryEngineClient.schemaUpdate(params)
     .then(() => {
       this.clearCache();
     })

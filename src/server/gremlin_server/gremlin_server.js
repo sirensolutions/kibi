@@ -37,7 +37,7 @@ function startServer(self, fulfill, reject) {
             try {
               self.ca = fs.readFileSync(ca);
             } catch (error) {
-              const message = 'The configuration property kibi_core.gremlin_server.ca ' +
+              const message = 'The configuration property investigate_core.gremlin_server.ca ' +
                                'does not point to a readable CA file.';
               reject(new Error(message));
             }
@@ -45,7 +45,7 @@ function startServer(self, fulfill, reject) {
         }
 
         if (path.parse(gremlinServerPath).ext !== '.jar') {
-          reject(new Error('The configuration property kibi_core.gremlin_server.path does not point to a jar file'));
+          reject(new Error('The configuration property investigate_core.gremlin_server.path does not point to a jar file'));
         }
 
         if (!path.isAbsolute(gremlinServerPath)) {
@@ -115,7 +115,7 @@ function startServer(self, fulfill, reject) {
               const sslKeyStorePsw = config.get('investigate_core.gremlin_server.ssl.key_store_password');
               if (!sslKeyStorePsw) {
                 const message = `The Gremlin Server keystore password was not specified; ` +
-                                 'in kibi_core.gremlin_server.ssl.key_store_password';
+                                 'in investigate_core.gremlin_server.ssl.key_store_password';
                 reject(new Error(message));
               }
               if (sslKeyStore && sslKeyStorePsw) {
@@ -127,9 +127,9 @@ function startServer(self, fulfill, reject) {
               const msg = 'Since you are using access control, you must enable HTTPS support in Gremlin Server ' +
                 'by configuring the key store in investigate.yml\n' +
                 'The following properties are required:\n' +
-                'kibi_core.gremlin_server.ssl.key_store\n' +
-                'kibi_core.gremlin_server.ssl.key_store_password\n' +
-                'kibi_core.gremlin_server.ssl.ca (optional)';
+                'investigate_core.gremlin_server.ssl.key_store\n' +
+                'investigate_core.gremlin_server.ssl.key_store_password\n' +
+                'investigate_core.gremlin_server.ssl.ca (optional)';
               reject(new Error(msg));
             }
 
@@ -203,7 +203,7 @@ function startServer(self, fulfill, reject) {
       .catch(reject);
     } else {
       const message = 'The Gremlin Server jar file was not found. Please check the ' +
-                       'value of the kibi_core.gremlin_server.path configuration property.';
+                       'value of the investigate_core.gremlin_server.path configuration property.';
       reject(new Error(message));
     }
   });

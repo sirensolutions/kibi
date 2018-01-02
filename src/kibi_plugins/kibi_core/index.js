@@ -78,7 +78,7 @@ module.exports = function (kibana) {
       injectDefaultVars: function (server, options) {
         const vars = {};
 
-        // kibi_core options
+        // investigate_core options
         if (options) {
           vars.kibiDatasourcesSchema = options.datasources_schema;
           vars.kibiWarnings = {};
@@ -130,7 +130,7 @@ module.exports = function (kibana) {
       patchElasticsearchClient(server);
 
       if (config.get('investigate_core.default_dashboard_title') !== '') {
-        server.log(['warning','kibi_core'], 'kibi_core.default_dashboard_title is deprecated ' +
+        server.log(['warning','investigate_core'], 'investigate_core.default_dashboard_title is deprecated ' +
         'and was moved to advance settings and should be removed from investigate.yml');
       }
 

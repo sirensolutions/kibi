@@ -7,7 +7,7 @@ import Migration from 'kibiutils/lib/migrations/migration';
  *
  * Looks for:
  *
- * - the kibi:default_dashboard_title in kibi.yml
+ * - the kibi:default_dashboard_title in investigate.yml
  *
  * Then:
  *
@@ -46,7 +46,7 @@ export default class Migration12 extends Migration {
     const dashboardWithTitleFromYmlFound = _.find(this._dashboards, d => d._source.title === this._defaultDashboardTitleYml);
 
     if (!dashboardWithTitleFromYmlFound) {
-      this._logger.warning('[' + this._defaultDashboardTitleYml + '] is set as kibi_core.default_dashboard_title in kibi.yml' +
+      this._logger.warning('[' + this._defaultDashboardTitleYml + '] is set as kibi_core.default_dashboard_title in investigate.yml' +
       ' but dashboard cannot be found.');
       return count;
     }

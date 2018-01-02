@@ -19,7 +19,7 @@ module.exports = function () {
         'ui_framework/services/**',
         'ui_framework/dist/**',
         'webpackShims/**',
-        'config/kibi.yml', // kibi: renamed kibana to kibi
+        'config/investigate.yml', // kibi: renamed kibana to investigate
       ],
       dest: 'build/kibana',
       expand: true

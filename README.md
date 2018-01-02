@@ -11,7 +11,7 @@ much more.
 
 ## Upgrade from previous version
 
-* Move any custom configurations in your old kibi.yml to the new siren.yml file
+* Move any custom configurations in your old kibi.yml to the new investigate.yml file
 * Reinstall plugins
 * Start or restart Siren Investigate
 

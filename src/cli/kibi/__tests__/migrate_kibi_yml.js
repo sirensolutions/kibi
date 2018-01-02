@@ -13,7 +13,6 @@ kibi_core:
 kibi_access_control:
   sentinl:
     foo: 'bar'
-    username: 'fasdf'
 `;
 
 const mockKibiDevYml = `
@@ -79,6 +78,36 @@ describe('Migrate Kibi Config', () => {
     };
 
     migrateKibiYml(options);
+
+    jsYaml.safeDump.restore();
+
+    done();
+  });
+
+  it('should insert the old defaults explicitly if not changed by the user', (done) => {
+
+    const valueReplacementMap = {
+      'investigate_access_control.admin_role':           { oldVal: 'kibiadmin' },
+      'elasticsearch.username':                          { oldVal: 'kibiserver' },
+      'investigate_access_control.sirenalert.username' : { oldVal: 'sentinl' }
+    };
+
+    const mockSafeDump = sinon.stub(jsYaml, 'safeDump', contents => {
+      // kibi_access_control should have changed to investigate_access_control
+      expect(contents).to.have.property('investigate_access_control');
+      expect(contents.investigate_access_control).to.have.property('sirenalert');
+      expect(contents.investigate_access_control.sirenalert).to.have.property('username');
+      expect(contents.investigate_access_control.sirenalert.username).to.equal('sentinl');
+    });
+
+    const options = {
+      config: `${configFolderPath}/kibi.yml`,
+      dev: false
+    };
+
+    migrateKibiYml(options);
+
+    jsYaml.safeDump.restore();
 
     done();
   });

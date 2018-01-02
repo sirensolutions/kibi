@@ -20,9 +20,9 @@ function KibiSequentialJoinVisTypeProvider(Private) {
   // Vis object of this type.
   return new TemplateVisType({
     name: 'kibi_sequential_join_vis',
-    title: 'Kibi Relational Filter',
+    title: 'Relational Filter',
     icon: 'fa-arrows-h',
-    category: VisType.CATEGORY.KIBI,
+    category: VisType.CATEGORY.SIREN,
     description: 'Relational widget displays buttons which allow user to switch between dashboards and preserve applied restrictions',
     template,
     params: {

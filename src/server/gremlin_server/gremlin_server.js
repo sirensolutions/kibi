@@ -12,7 +12,7 @@ function GremlinServerHandler(server) {
   this.gremlinServer = null;
   this.initialized = false;
   this.server = server;
-  this.javaChecked = false;
+  this.javaCheck = { checked: false, isOk: null };
   this.callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 }
 
@@ -123,7 +123,7 @@ function startServer(self, fulfill, reject) {
                 args.push('--server.ssl.key-store=' + sslKeyStore);
                 args.push('--server.ssl.key-store-password=' + sslKeyStorePsw);
               }
-            } else if (config.has('kibi_access_control.enabled') && config.get('kibi_access_control.enabled')) {
+            } else if (config.has('investigate_access_control.enabled') && config.get('investigate_access_control.enabled')) {
               const msg = 'Since you are using access control, you must enable HTTPS support in Gremlin Server ' +
                 'by configuring the key store in kibi.yml\n' +
                 'The following properties are required:\n' +
@@ -216,16 +216,15 @@ function isJavaVersionOk(self) {
       if (err.code === 'ENOENT') {
         self.server.log(['gremlin', 'error'], 'Java not found, please ensure that '
           + 'JAVA_HOME is set correctly and the Java binaries are in the application path');
-        self.javaChecked = true;
+        self.javaCheck = { checked: true, isOk: false };
         reject(new Error('Java not found'));
       }
     });
     spawn.stderr.on('data', function (data) {
-      const result = self._checkJavaVersionString(data);
-      if (result) {
-        if (!result.v) {
-          reject(new Error(result.e));
-        }
+      const err = self._checkJavaVersionString(data);
+      if (err) {
+        reject(new Error(err));
+      } else {
         fulfill(true);
       }
     });
@@ -248,24 +247,24 @@ GremlinServerHandler.prototype._isAnotherGremlinRunning = function () {
 };
 
 GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
-  if (!this.javaChecked) {
-    const ret = {};
+  if (!this.javaCheck.checked) {
+    let err;
     const versionLine = string.toString().split(os.EOL)[0];
     //[string, major, minor, patch, update, ...]
     const matches = versionLine.match(/(\d+?)\.(\d+?)\.(\d+?)(?:_(\d+))?/);
     if (matches) {
       if (matches.length >= 2 && matches[2] === '8') {
-        ret.v = true;
+        this.javaCheck.isOk = true;
       } else {
-        ret.v = false;
-        ret.e = 'Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run';
+        this.javaCheck.isOk = false;
+        err = 'Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run';
       }
     } else {
-      ret.v = false;
-      ret.e = 'An error occurred while checking the installed Java version';
+      this.javaCheck.isOk = false;
+      err = 'An error occurred while checking the installed Java version';
     }
-    this.javaChecked = true;
-    return ret;
+    this.javaCheck.checked = true;
+    return err;
   } else {
     return null;
   }
@@ -281,20 +280,7 @@ GremlinServerHandler.prototype.start = function () {
   }
 
   return new Promise((fulfill, reject) => {
-    const elasticsearchStatus = self.server.plugins.elasticsearch.status;
-
-    if (elasticsearchStatus.state === 'green') {
-      startServer(self, fulfill, reject);
-    }
-    elasticsearchStatus.on('change', function (prev, prevmsg) {
-      if (elasticsearchStatus.state === 'green') {
-        if (!self.initialized) {
-          startServer(self, fulfill, reject);
-        } else {
-          fulfill({ message: 'GremlinServerHandler already initialized' });
-        }
-      }
-    });
+    startServer(self, fulfill, reject);
   });
 };
 
@@ -325,6 +311,10 @@ GremlinServerHandler.prototype.stop = function () {
   }
 };
 
+GremlinServerHandler.prototype.isInitialized = function () {
+  return this.initialized;
+};
+
 GremlinServerHandler.prototype._ping = function () {
   const options = {
     method: 'GET',
@@ -334,6 +324,13 @@ GremlinServerHandler.prototype._ping = function () {
     options.ca = this.ca;
   }
   return rp(options);
+};
+
+/*
+ * Used in tests.
+ */
+GremlinServerHandler.prototype._getJavaCheck = function () {
+  return this.javaCheck;
 };
 
 module.exports = GremlinServerHandler;

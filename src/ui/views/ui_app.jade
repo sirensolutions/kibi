@@ -17,14 +17,14 @@ block content
       display: -webkit-flex;
       display: -ms-flexbox;
       display: flex;
-      width: 620px;
-      height: 185px;
+      width: 765px;
+      height: 150px;
       padding: 0;
       text-align: center;
     }
 
     .kibanaLoader__logo {
-      width: 150px;
+      width: 120px;
       height: 100%;
       padding: 20px;
     }
@@ -50,12 +50,6 @@ block content
       font-size: 48px; /* siren: changed */
       font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
       padding-bottom: 12px;
-    }
-
-    /* siren: changed colorShift to siren colors */
-    .ellipsis {
-      -webkit-animation: colorShift 3s infinite;
-              animation: colorShift 3s infinite;
     }
 
     @-webkit-keyframes colorShift {
@@ -86,12 +80,10 @@ block content
   .kibanaWelcomeView
     .kibanaLoader
       .kibanaLoader__logo
+        // kibi: loading indicator
         .kibanaWelcomeLogo
       .kibanaLoader__content
         | #{i18n('UI-WELCOME_MESSAGE')}
-        // kibi: loading indicator
-        div.ellipsis
-          | &nbsp;...
 
   script.
     window.onload = function () {

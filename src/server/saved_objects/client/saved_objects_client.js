@@ -281,7 +281,6 @@ export class SavedObjectsClient {
   async _withKibanaIndex(method, params, req) {
     try {
       let model;
-
       switch (method) {
         case 'index':
           model = this._savedObjectsApi.getModel(params.type);

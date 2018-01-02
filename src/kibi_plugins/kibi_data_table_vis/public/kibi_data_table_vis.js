@@ -24,9 +24,9 @@ function KibiDataTableVisTypeProvider(Private, config) {
   // Vis object of this type.
   return new TemplateVisType({
     name: 'kibi-data-table',
-    title: 'Kibi Enhanced Search Results',
+    title: 'Enhanced Search Results',
     icon: 'fa-th',
-    category: VisType.CATEGORY.KIBI,
+    category: VisType.CATEGORY.SIREN,
     description: 'Display search results - just like "searches" - but allows one to click and select a result. ' +
                  'In Kibi other components can listen and react to these selections.',
     template,

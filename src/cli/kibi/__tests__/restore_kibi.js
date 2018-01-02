@@ -49,7 +49,7 @@ describe('Restore Kibi', function () {
   });
 
   it('should restore the data and mappings of both ACL and kibi indices', async function () {
-    config.kibi_access_control = {
+    config.investigate_access_control = {
       acl: {
         enabled: true,
         index: 'acl'
@@ -73,7 +73,7 @@ describe('Restore Kibi', function () {
   });
 
   it('should not restore the ACL index if disabled', async function () {
-    config.kibi_access_control = {
+    config.investigate_access_control = {
       acl: {
         enabled: false,
         index: 'acl'

@@ -19,7 +19,9 @@ module.exports = function (kibana) {
 
         runner.count().then((count) => {
           if (count > 0) {
-            this.status.red(`There are ${count} objects that are out of date; please run "bin/kibi upgrade" and restart the server.`);
+            let outOfDateObjectsMessage = `There are ${count} objects that are out of date. `;
+            outOfDateObjectsMessage += 'please run "bin/investigate upgrade" and restart the server.';
+            this.status.red(outOfDateObjectsMessage);
           } else {
             this.status.green('All objects are up to date.');
           }

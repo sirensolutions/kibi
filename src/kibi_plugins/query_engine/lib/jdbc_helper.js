@@ -29,21 +29,21 @@ JdbcHelper.prototype.getAbsolutePathToSindicetechFolder = function () {
   let pathToSindicetechFolder = '';
   if (os.platform().indexOf('win') === 0) {
     //windows
-    if (_endsWith(currentDir, '\\src\\plugins\\kibi_core\\lib')) {
+    if (_endsWith(currentDir, '\\src\\plugins\\query_engine\\lib')) {
       // development
-      pathToSindicetechFolder = currentDir.replace(/src\\plugins\\kibi_core\\lib$/, '');
-    } else if (_endsWith(currentDir, '\\src\\plugins\\kibi_core\\lib')) {
+      pathToSindicetechFolder = currentDir.replace(/src\\plugins\\query_engine\\lib$/, '');
+    } else if (_endsWith(currentDir, '\\src\\plugins\\query_engine\\lib')) {
       // production
-      pathToSindicetechFolder = currentDir.replace(/src\\plugins\\kibi_core\\lib$/, '');
+      pathToSindicetechFolder = currentDir.replace(/src\\plugins\\query_engine\\lib$/, '');
     }
   } else {
     //unix
-    if (_endsWith(currentDir, '/src/plugins/kibi_core/lib')) {
+    if (_endsWith(currentDir, '/src/plugins/query_engine/lib')) {
       // development
-      pathToSindicetechFolder = currentDir.replace(/src\/plugins\/kibi_core\/lib$/, '');
-    } else if (_endsWith(currentDir, '/src/plugins/kibi_core/lib')) {
+      pathToSindicetechFolder = currentDir.replace(/src\/plugins\/query_engine\/lib$/, '');
+    } else if (_endsWith(currentDir, '/src/plugins/query_engine/lib')) {
       // production
-      pathToSindicetechFolder = currentDir.replace(/src\/plugins\/kibi_core\/lib$/, '');
+      pathToSindicetechFolder = currentDir.replace(/src\/plugins\/query_engine\/lib$/, '');
     }
   }
   return pathToSindicetechFolder;

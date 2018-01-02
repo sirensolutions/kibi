@@ -350,9 +350,9 @@ export default function sirenJoin(server) {
       join.types = targetIndex.types;
     }
     // NOTE: temporary disabled until there is a version that supports join type
-    // if (type) {
-    // join.type = type;
-    // }
+    if (type) {
+      join.type = type;
+    }
     if (limit) {
       join.limit = limit;
     }

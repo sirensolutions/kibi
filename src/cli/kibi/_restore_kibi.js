@@ -35,8 +35,8 @@ export default class RestoreKibi {
 
     await this._dump.fromFileToElasticsearch(kibiIndex, 'mapping');
     await this._dump.fromFileToElasticsearch(kibiIndex, 'data');
-    if (get(this._config, 'kibi_access_control.acl.enabled')) {
-      const aclIndex = get(this._config, 'kibi_access_control.acl.index');
+    if (get(this._config, 'investigate_access_control.acl.enabled')) {
+      const aclIndex = get(this._config, 'investigate_access_control.acl.index');
       await this._dump.fromFileToElasticsearch(aclIndex, 'mapping');
       await this._dump.fromFileToElasticsearch(aclIndex, 'data');
     }

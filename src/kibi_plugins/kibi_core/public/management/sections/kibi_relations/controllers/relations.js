@@ -462,7 +462,7 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
 
   $($window).on('beforeunload', onBeforeUnload);
 
-  const cancelLogoutHandler = $rootScope.$on('kibi_access_control:logout', function (event) {
+  const cancelLogoutHandler = $rootScope.$on('investigate_access_control:logout', function (event) {
     if (!$scope.changed) {
       return;
     }

@@ -53,7 +53,7 @@ export default class ModelTestHelper {
         elasticsearch: {
           getCluster: () => this._cluster
         },
-        kibi_core: {
+        query_engine: {
           getCryptoHelper: () => ({
             encryptDatasourceParams: () => {}
           })

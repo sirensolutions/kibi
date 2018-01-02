@@ -11,7 +11,7 @@ import restoreCommand from './kibi/restore';
 import upgradeConfigCommand from './kibi/upgrade_config';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
-const program = new Command('bin/kibi'); // kibi: renamed kibana to kibi
+const program = new Command('bin/investigate'); // kibi: renamed kibana to investigate
 
 program
 .version(pkg.kibi_version)

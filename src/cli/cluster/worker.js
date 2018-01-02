@@ -26,6 +26,10 @@ module.exports = class Worker extends EventEmitter {
     if (!opts.log) {
       throw new Error('Undefined logger. Set one in opts.log property');
     }
+    if (!opts.title) {
+      throw new Error('Undefined title. Set one in opts.title property');
+    }
+
     // kibi: end
     this.log = opts.log;
     this.type = opts.type;

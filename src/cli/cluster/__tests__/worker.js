@@ -55,6 +55,9 @@ function setup(opts = {}) {
   if (!opts.log) {
     opts.log = testLogger;
   }
+  if (!opts.title) {
+    opts.title = 'Test worker';
+  }
   // kibi: end
   const worker = new Worker(opts);
   workersToShutdown.push(worker);

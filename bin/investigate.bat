@@ -26,7 +26,7 @@ TITLE Kibi Server
 
 REM kibi: we need conditionally run script to set the correct java home
 
-set CONFIG_PATH=%DIR%\config\kibi.yml
+set CONFIG_PATH=%DIR%\config\investigate.yml
 echo Checking jdbc_enabled flag in %CONFIG_PATH%
 
 for /f "tokens=2 delims=:" %%i in ('findstr /r /c:"load_jdbc:[ ]*" "%CONFIG_PATH%"') do set JDBC_ENABLED=%%i

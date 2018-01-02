@@ -14,7 +14,7 @@ export default function backupCommand(program) {
 
     if (options.dev) {
       try {
-        merge(config, readYamlConfig(fromRoot('config/kibi.dev.yml')));
+        merge(config, readYamlConfig(fromRoot('config/investigate.dev.yml')));
       }
       catch (e) {
         // ignore
@@ -48,7 +48,7 @@ export default function backupCommand(program) {
     .option(
       '-c, --config <path>',
       'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
-      process.env.CONFIG_PATH || fromRoot('config/kibi.yml')
+      process.env.CONFIG_PATH || fromRoot('config/investigate.yml')
     )
     .option(
       '--backup-dir <path>',

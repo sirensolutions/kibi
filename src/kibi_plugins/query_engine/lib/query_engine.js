@@ -513,7 +513,7 @@ QueryEngine.prototype.reloadQueries = function () {
             return new MysqlQuery(self.server, queryDef, self.cache);
           } else if (kibiUtils.isJDBC(queryDef.datasource.datasourceType)) {
             if (self.config.get('investigate_core.load_jdbc') === false) {
-              const msg = 'Please set the "kibi_core.load_jdbc" option to true in kibi.yml and restart the backend.';
+              const msg = 'Please set the "investigate_core.load_jdbc" option to true in kibi.yml and restart the backend.';
               return new ErrorQuery(self.server, msg);
             }
             return new JdbcQuery(self.server, queryDef, self.cache);

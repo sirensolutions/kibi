@@ -10,7 +10,7 @@ import { access } from 'fs';
 export default class RestoreKibi {
 
   /**
-   * @param config the kibi.yml config
+   * @param config the investigate.yml config
    * @param backupDir the folder with the backuped indices
    */
   constructor(config, backupDir) {

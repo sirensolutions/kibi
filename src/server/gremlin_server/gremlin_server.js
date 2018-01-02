@@ -125,7 +125,7 @@ function startServer(self, fulfill, reject) {
               }
             } else if (config.has('investigate_access_control.enabled') && config.get('investigate_access_control.enabled')) {
               const msg = 'Since you are using access control, you must enable HTTPS support in Gremlin Server ' +
-                'by configuring the key store in kibi.yml\n' +
+                'by configuring the key store in investigate.yml\n' +
                 'The following properties are required:\n' +
                 'kibi_core.gremlin_server.ssl.key_store\n' +
                 'kibi_core.gremlin_server.ssl.key_store_password\n' +

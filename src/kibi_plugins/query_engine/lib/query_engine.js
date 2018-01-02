@@ -125,13 +125,13 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
   return this.cluster.callWithInternalUser('cat.indices', {
     index: this.config.get('kibana.index')
   })
-    .then((kibiIndex) => {
-      if (!!kibiIndex) {
-        this.log.info('Found kibi index: [' + this.config.get('kibana.index') + ']');
-        return true;
-      }
-      return Promise.reject(new Error('Kibi index: [' + this.config.get('kibana.index') + '] does not exist'));
-    });
+  .then((kibiIndex) => {
+    if (!!kibiIndex) {
+      this.log.info('Found kibi index: [' + this.config.get('kibana.index') + ']');
+      return true;
+    }
+    return Promise.reject(new Error('Kibi index: [' + this.config.get('kibana.index') + '] does not exist'));
+  });
 };
 
 QueryEngine.prototype._refreshKibiIndex = function () {
@@ -262,18 +262,18 @@ QueryEngine.prototype._loadTemplates = function () {
         savedObjectsClient.create(
           'template',
           scriptData,
-        { id: templateId }
+          { id: templateId }
         )
-          .then(() => {
-            self.log.info('Template [' + templateId + '] successfully loaded');
-          })
-          .catch((err) => {
-            if (err.statusCode === 409) {
-              self.log.debug('Template [' + templateId + '] already exists');
-            } else {
-              self.log.error('Could not load template [' + templateId + ']', err);
-            }
-          });
+        .then(() => {
+          self.log.info('Template [' + templateId + '] successfully loaded');
+        })
+        .catch((err) => {
+          if (err.statusCode === 409) {
+            self.log.debug('Template [' + templateId + '] already exists');
+          } else {
+            self.log.error('Could not load template [' + templateId + ']', err);
+          }
+        });
       });
     });
   }));
@@ -316,14 +316,14 @@ QueryEngine.prototype._loadDatasources = function () {
           data,
           { id: datasourceId },
         )
-          .then(function (resp) {
-            self.log.info('Datasource [' + datasourceId + '] successfully loaded');
-            fulfill(true);
-          })
-          .catch(function (err) {
-            self.log.error('Could not load datasource [' + datasourceId + ']', err);
-            fulfill(true);
-          });
+        .then(function (resp) {
+          self.log.info('Datasource [' + datasourceId + '] successfully loaded');
+          fulfill(true);
+        })
+        .catch(function (err) {
+          self.log.error('Could not load datasource [' + datasourceId + ']', err);
+          fulfill(true);
+        });
       });
     }));
   });
@@ -356,18 +356,18 @@ QueryEngine.prototype._loadQueries = function () {
           data,
           { id: queryId },
         )
-          .then(function (resp) {
-            self.log.info('Query [' + queryId + '] successfully loaded');
-            fulfill(true);
-          })
-          .catch(function (err) {
-            if (err.statusCode === 409) {
-              self.log.warn('Query [' + queryId + '] already exists');
-            } else {
-              self.log.error('Could not load query [' + queryId + ']', err);
-            }
-            fulfill(true);
-          });
+        .then(function (resp) {
+          self.log.info('Query [' + queryId + '] successfully loaded');
+          fulfill(true);
+        })
+        .catch(function (err) {
+          if (err.statusCode === 409) {
+            self.log.warn('Query [' + queryId + '] already exists');
+          } else {
+            self.log.error('Could not load query [' + queryId + ']', err);
+          }
+          fulfill(true);
+        });
       });
     });
   });
@@ -422,117 +422,117 @@ QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
 QueryEngine.prototype.reloadQueries = function () {
   const self = this;
   return self._fetchQueriesFromEs()
-    .then(function (resp) {
-      const queryDefinitions = [];
-      const datasourcesIds = [];
-      if (resp.hits && resp.hits.hits && resp.hits.hits.length > 0) {
-        self.log.info('Reloading ' + resp.hits.hits.length + ' queries into memory:');
-        _.each(resp.hits.hits, function (hit) {
-          self.log.info('Reloading [' + hit._id + ']');
-          const queryDefinition = {
-            id:                hit._id,
-            label:             hit._source.title,
-            description:       hit._source.description,
-            activationQuery:   hit._source.activationQuery,
-            resultQuery:       hit._source.resultQuery,
-            datasourceId:      hit._source.datasourceId,
-            rest_method:       hit._source.rest_method,
-            rest_path:         hit._source.rest_path,
-            rest_body:         hit._source.rest_body,
-            tags:              hit._source.tags
-          };
+  .then(function (resp) {
+    const queryDefinitions = [];
+    const datasourcesIds = [];
+    if (resp.hits && resp.hits.hits && resp.hits.hits.length > 0) {
+      self.log.info('Reloading ' + resp.hits.hits.length + ' queries into memory:');
+      _.each(resp.hits.hits, function (hit) {
+        self.log.info('Reloading [' + hit._id + ']');
+        const queryDefinition = {
+          id:                hit._id,
+          label:             hit._source.title,
+          description:       hit._source.description,
+          activationQuery:   hit._source.activationQuery,
+          resultQuery:       hit._source.resultQuery,
+          datasourceId:      hit._source.datasourceId,
+          rest_method:       hit._source.rest_method,
+          rest_path:         hit._source.rest_path,
+          rest_body:         hit._source.rest_body,
+          tags:              hit._source.tags
+        };
 
-          if (datasourcesIds.indexOf(hit._source.datasourceId) === -1) {
-            datasourcesIds.push(hit._source.datasourceId);
-          }
-          // here we are querying the elastic search
-          // and rest_params, rest_headers
-          // comes back as strings
-          try {
-            queryDefinition.rest_params = JSON.parse(hit._source.rest_params);
-          } catch (e) {
-            queryDefinition.rest_params = [];
-          }
-          try {
-            queryDefinition.rest_headers = JSON.parse(hit._source.rest_headers);
-          } catch (e) {
-            queryDefinition.rest_headers = [];
-          }
-          try {
-            queryDefinition.rest_variables = JSON.parse(hit._source.rest_variables);
-          } catch (e) {
-            queryDefinition.rest_variables = [];
-          }
-          try {
-            queryDefinition.rest_resp_status_code = parseInt(hit._source.rest_resp_status_code);
-          } catch (e) {
-            queryDefinition.rest_resp_status_code = 200;
-          }
-          try {
-            queryDefinition.activation_rules = JSON.parse(hit._source.activation_rules);
-          } catch (e) {
-            queryDefinition.activation_rules = [];
-          }
+        if (datasourcesIds.indexOf(hit._source.datasourceId) === -1) {
+          datasourcesIds.push(hit._source.datasourceId);
+        }
+        // here we are querying the elastic search
+        // and rest_params, rest_headers
+        // comes back as strings
+        try {
+          queryDefinition.rest_params = JSON.parse(hit._source.rest_params);
+        } catch (e) {
+          queryDefinition.rest_params = [];
+        }
+        try {
+          queryDefinition.rest_headers = JSON.parse(hit._source.rest_headers);
+        } catch (e) {
+          queryDefinition.rest_headers = [];
+        }
+        try {
+          queryDefinition.rest_variables = JSON.parse(hit._source.rest_variables);
+        } catch (e) {
+          queryDefinition.rest_variables = [];
+        }
+        try {
+          queryDefinition.rest_resp_status_code = parseInt(hit._source.rest_resp_status_code);
+        } catch (e) {
+          queryDefinition.rest_resp_status_code = 200;
+        }
+        try {
+          queryDefinition.activation_rules = JSON.parse(hit._source.activation_rules);
+        } catch (e) {
+          queryDefinition.activation_rules = [];
+        }
 
-          queryDefinitions.push(queryDefinition);
-        });
-      }
+        queryDefinitions.push(queryDefinition);
+      });
+    }
 
-      if (queryDefinitions.length > 0) {
-        return self.cluster.callWithInternalUser('search', {
-          index: self.config.get('kibana.index'),
-          type: 'datasource',
-          size: 100
-        })
-          .then(function (datasources) {
-            // now as we have all datasources
-            // iterate over them and set the clazz
-            for (let i = 0; i < datasources.hits.total; i++) {
-              const hit = datasources.hits.hits[i];
-              if (datasourcesIds.indexOf(hit._id) !== -1) {
-                setDatasourceClazz(self.server, hit._source);
-              }
+    if (queryDefinitions.length > 0) {
+      return self.cluster.callWithInternalUser('search', {
+        index: self.config.get('kibana.index'),
+        type: 'datasource',
+        size: 100
+      })
+      .then(function (datasources) {
+        // now as we have all datasources
+        // iterate over them and set the clazz
+        for (let i = 0; i < datasources.hits.total; i++) {
+          const hit = datasources.hits.hits[i];
+          if (datasourcesIds.indexOf(hit._id) !== -1) {
+            setDatasourceClazz(self.server, hit._source);
+          }
+        }
+
+        self.queries = _(queryDefinitions).filter(function (queryDef) {
+          //filter out queries for which datasources does not exists
+          const datasource = _.find(datasources.hits.hits, (datasource) => datasource._id === queryDef.datasourceId);
+          if (datasource) {
+            datasource._source.id = datasource._id;
+            queryDef.datasource = datasource._source;
+            return true;
+          }
+          self.log.error('Query [' + queryDef.id + '] not loaded because datasource [' + queryDef.datasourceId + '] not found');
+          return false;
+        }).map(function (queryDef) {
+          // now once we have query definitions and datasources load queries
+          if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.sparql_http) {
+            return new SparqlQuery(self.server, queryDef, self.cache);
+          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.postgresql) {
+            return new PostgresQuery(self.server, queryDef, self.cache);
+          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.mysql) {
+            return new MysqlQuery(self.server, queryDef, self.cache);
+          } else if (kibiUtils.isJDBC(queryDef.datasource.datasourceType)) {
+            if (self.config.get('kibi_core.load_jdbc') === false) {
+              const msg = 'Please set the "kibi_core.load_jdbc" option to true in kibi.yml and restart the backend.';
+              return new ErrorQuery(self.server, msg);
             }
-
-            self.queries = _(queryDefinitions).filter(function (queryDef) {
-              //filter out queries for which datasources does not exists
-              const datasource = _.find(datasources.hits.hits, (datasource) => datasource._id === queryDef.datasourceId);
-              if (datasource) {
-                datasource._source.id = datasource._id;
-                queryDef.datasource = datasource._source;
-                return true;
-              }
-              self.log.error('Query [' + queryDef.id + '] not loaded because datasource [' + queryDef.datasourceId + '] not found');
-              return false;
-            }).map(function (queryDef) {
-              // now once we have query definitions and datasources load queries
-              if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.sparql_http) {
-                return new SparqlQuery(self.server, queryDef, self.cache);
-              } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.postgresql) {
-                return new PostgresQuery(self.server, queryDef, self.cache);
-              } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.mysql) {
-                return new MysqlQuery(self.server, queryDef, self.cache);
-              } else if (kibiUtils.isJDBC(queryDef.datasource.datasourceType)) {
-                if (self.config.get('kibi_core.load_jdbc') === false) {
-                  const msg = 'Please set the "kibi_core.load_jdbc" option to true in kibi.yml and restart the backend.';
-                  return new ErrorQuery(self.server, msg);
-                }
-                return new JdbcQuery(self.server, queryDef, self.cache);
-              } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.rest) {
-                return new RestQuery(self.server, queryDef, self.cache);
-              } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.sqlite) {
-                return new SQLiteQuery(self.server, queryDef, self.cache);
-              } else {
-                self.log.error('Unknown datasource type [' + queryDef.datasource.datasourceType + '] - could NOT create query object');
-                return false;
-              }
-            }).value();
-          });
-      }
-    }).catch(function (err) {
-      self.log.error('Something is wrong - elasticsearch is not running');
-      self.log.error(err);
-    });
+            return new JdbcQuery(self.server, queryDef, self.cache);
+          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.rest) {
+            return new RestQuery(self.server, queryDef, self.cache);
+          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.sqlite) {
+            return new SQLiteQuery(self.server, queryDef, self.cache);
+          } else {
+            self.log.error('Unknown datasource type [' + queryDef.datasource.datasourceType + '] - could NOT create query object');
+            return false;
+          }
+        }).value();
+      });
+    }
+  }).catch(function (err) {
+    self.log.error('Something is wrong - elasticsearch is not running');
+    self.log.error(err);
+  });
 };
 
 QueryEngine.prototype.clearCache =  function () {
@@ -540,12 +540,12 @@ QueryEngine.prototype.clearCache =  function () {
     if (this.cache) {
       const promisedReset = Promise.method(this.cache.reset);
       return promisedReset()
-        .then(() => this.reloadQueries())
-        .then(() => 'Cache cleared, Queries reloaded');
+      .then(() => this.reloadQueries())
+      .then(() => 'Cache cleared, Queries reloaded');
     }
     // here we are reloading queries no matter that cache is enabled or not
     return this.reloadQueries()
-      .then(() => 'The cache is disabled, Queries reloaded');
+    .then(() => 'The cache is disabled, Queries reloaded');
   });
 };
 
@@ -614,16 +614,16 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
 
   return Promise.map(withRightId, query => {
     return query.checkIfItIsRelevant(options)
-      .then(isQueryRelevant => {
-        switch (isQueryRelevant) {
-          case Symbols.QUERY_RELEVANT:
-            return query;
-          case Symbols.QUERY_DEACTIVATED:
-            return new InactivatedQuery(this.server, query.id, query.config.label);
-          case Symbols.SELECTED_DOCUMENT_NEEDED:
-            return new MissingSelectedDocumentQuery(query.id, query.config.label);
-        }
-      });
+    .then(isQueryRelevant => {
+      switch (isQueryRelevant) {
+        case Symbols.QUERY_RELEVANT:
+          return query;
+        case Symbols.QUERY_DEACTIVATED:
+          return new InactivatedQuery(this.server, query.id, query.config.label);
+        case Symbols.SELECTED_DOCUMENT_NEEDED:
+          return new MissingSelectedDocumentQuery(query.id, query.config.label);
+      }
+    });
   })
     .then(function (queryResponses) {
       // order templates as they were ordered in queryIds array
@@ -663,16 +663,16 @@ QueryEngine.prototype.getQueriesData = function (queryDefs, options) {
 
   return self._init().then(function () {
     return self._getQueries(queryIds, options)
-      .then(function (queries) {
+    .then(function (queries) {
 
-        const promises = _.map(queries, function (query) {
+      const promises = _.map(queries, function (query) {
 
-          const queryDefinition = self._getQueryDefById(queryDefs, query.id);
-          const queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
-          return query.fetchResults(options, null, queryVariableName);
-        });
-        return Promise.all(promises);
+        const queryDefinition = self._getQueryDefById(queryDefs, query.id);
+        const queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
+        return query.fetchResults(options, null, queryVariableName);
       });
+      return Promise.all(promises);
+    });
   });
 };
 
@@ -685,12 +685,12 @@ QueryEngine.prototype.getQueriesHtml = function (queryDefs, options) {
 
   return self._init().then(function () {
     return self._getQueries(queryIds, options)
-      .then(function (queries) {
-        return Promise.map(queries, query => {
-          const queryDef = self._getQueryDefById(queryDefs, query.id);
-          return query.getHtml(queryDef, options);
-        });
+    .then(function (queries) {
+      return Promise.map(queries, query => {
+        const queryDef = self._getQueryDefById(queryDefs, query.id);
+        return query.getHtml(queryDef, options);
       });
+    });
   });
 };
 
@@ -716,13 +716,13 @@ QueryEngine.prototype.getIdsFromQueries = function (queryDefs, options) {
 
   return self._init().then(function () {
     return self._getQueries(queryIds, options)
-      .then(function (queries) {
-        return Promise.map(queries, function (query) {
-          const queryDefinition = self._getQueryDefById(queryDefs, query.id);
-          const queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
-          return query.fetchResults(options, true, queryVariableName);
-        });
+    .then(function (queries) {
+      return Promise.map(queries, function (query) {
+        const queryDefinition = self._getQueryDefById(queryDefs, query.id);
+        const queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
+        return query.fetchResults(options, true, queryVariableName);
       });
+    });
   });
 };
 

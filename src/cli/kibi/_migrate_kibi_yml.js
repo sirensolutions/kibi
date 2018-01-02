@@ -94,7 +94,7 @@ function migrateKibiYml({ config: path , dev }) {
       if (keys.length === 1) {
         obj[keys[0]] = value;
       } else {
-        let key = keys.shift();
+        const key = keys.shift();
         obj[key] = addOldDefaultExplicitlyIfMissing(typeof obj[key] === 'undefined' ? {} : obj[key], keys, value);
       }
 

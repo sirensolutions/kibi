@@ -44,7 +44,7 @@ export default function (program) {
     const config = readYamlConfig(options.config);
 
     if (options.dev) {
-      try { merge(config, readYamlConfig(fromRoot('config/kibi.dev.yml'))); }
+      try { merge(config, readYamlConfig(fromRoot('config/investigate.dev.yml'))); }
       catch (e) { null; }
     }
 
@@ -114,7 +114,7 @@ export default function (program) {
     .option(
       '-c, --config <path>',
       'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
-      process.env.CONFIG_PATH || fromRoot('config/kibi.yml'))
+      process.env.CONFIG_PATH || fromRoot('config/investigate.yml'))
     .option(
       '--plugin-dir <path>',
       'A path to scan for plugins, this can be specified multiple ' +

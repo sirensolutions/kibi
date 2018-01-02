@@ -7,7 +7,7 @@ import { mkdir, access } from 'fs';
  * BackupKibi writes into a file the data and mappings of the kibi index.
  * If the ACL plugin is present, it saves also the ACL index.
  *
- * @param config the kibi.yml config
+ * @param config the investigate.yml config
  * @param backupDir the path to the folder to write to
  */
 export default class BackupKibi {

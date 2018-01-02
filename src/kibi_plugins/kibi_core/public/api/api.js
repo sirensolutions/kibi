@@ -5,12 +5,23 @@ import 'ui/notify';
 uiModules
 .get('kibana')
 .service('kibiEmbeddingAPI', function ($injector, $window) {
-
   /**
    * Provides Kibi functions to embedding apps.
    */
   class KibiEmbeddingAPI {
+    constructor(deprecated) {
+      this.deprecated = deprecated;
+    }
 
+    getDeprecatedInstance() {
+      return new KibiEmbeddingAPI(true);
+    }
+
+    deprecationLogger() {
+      if(this.deprecated) {
+        console.warn('[KibiEmbeddingAPI] window.kibi is deprecated and will change to window.investigate in a later version');
+      }
+    }
     /**
      * Generates a short URL for the current state.
      *
@@ -19,7 +30,7 @@ uiModules
      * @returns {Promise} - Resolved with the short URL.
      */
     async generateShortUrl(shareAsEmbed, displayNavBar) {
-
+      this.deprecationLogger();
       // NOTE: try get the sharingService via $injector
       // as e.g. on status page it is not autoloaded
       if ($injector.has('sharingService')) {
@@ -37,6 +48,7 @@ uiModules
      * @returns {Promise} - Resolved with true if token authentication was successful, an Error otherwise.
      */
     async setJWTToken(token) {
+      this.deprecationLogger();
       const kacService = $injector.get('kibiAccessControl');
       return await kacService.login({
         header: 'authorization',
@@ -49,5 +61,6 @@ uiModules
   return new KibiEmbeddingAPI();
 })
 .run((kibiEmbeddingAPI, $window) => {
-  $window.investigate = $window.kibi = kibiEmbeddingAPI;
+  $window.kibi = kibiEmbeddingAPI.getDeprecatedInstance();
+  $window.investigate = kibiEmbeddingAPI;
 });

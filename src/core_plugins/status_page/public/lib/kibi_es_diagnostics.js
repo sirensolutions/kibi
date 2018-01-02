@@ -1,9 +1,9 @@
 const _ = require('lodash');
 const angular = require('angular');
-const notify = require('ui/notify');
 const saveAs = require('@spalger/filesaver').saveAs;
 const esUrls = require('./kibi_es_apis_calls');
 import chrome from 'ui/chrome';
+import { notify } from 'ui/notify';
 
 module.exports = function (data, $http, kibiIndexName) {
   return function () {
@@ -16,7 +16,7 @@ module.exports = function (data, $http, kibiIndexName) {
     };
 
 
-    $http.get('elasticsearch/' + kibiIndexName + '/index-pattern/_search')
+    $http.get(chrome.getBasePath() + '/elasticsearch/' + kibiIndexName + '/index-pattern/_search')
     .then(function (indexPatternRes) {
       if (_.get(indexPatternRes, 'data.hits.hits')) {
         const indexes = _.map(indexPatternRes.data.hits.hits, (hit) => hit._id).join(',');

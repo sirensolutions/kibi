@@ -85,19 +85,16 @@ describe('Migrate Kibi Config', () => {
   });
 
   it('should insert the old defaults explicitly if not changed by the user', (done) => {
-
-    const valueReplacementMap = {
-      'investigate_access_control.admin_role':           { oldVal: 'kibiadmin' },
-      'elasticsearch.username':                          { oldVal: 'kibiserver' },
-      'investigate_access_control.sirenalert.username' : { oldVal: 'sentinl' }
-    };
-
     const mockSafeDump = sinon.stub(jsYaml, 'safeDump', contents => {
-      // kibi_access_control should have changed to investigate_access_control
+      // investigate_access_control.sirenalert.username should have been added with the value 'sentinl'
       expect(contents).to.have.property('investigate_access_control');
       expect(contents.investigate_access_control).to.have.property('sirenalert');
       expect(contents.investigate_access_control.sirenalert).to.have.property('username');
       expect(contents.investigate_access_control.sirenalert.username).to.equal('sentinl');
+      // investigate_access_control.admin_role should have been added with the value 'kibiadmin'
+      expect(contents).to.have.property('investigate_access_control');
+      expect(contents.investigate_access_control).to.have.property('admin_role');
+      expect(contents.investigate_access_control.admin_role).to.equal('kibiadmin');
     });
 
     const options = {

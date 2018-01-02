@@ -37,6 +37,15 @@ const testLogger = {
   error: function (data) {
     console.log('error:');
     console.log(data);
+  },
+  // src/cli/log.js
+  good: function (data) {
+    console.log('good:');
+    console.log(data);
+  },
+  bad: function (data) {
+    console.log('bad:');
+    console.log(data);
   }
 };
 // kibi: end

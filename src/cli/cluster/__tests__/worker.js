@@ -21,31 +21,38 @@ function assertListenerRemoved(emitter, event) {
 }
 
 // kibi: a fake logger
+const log = function () {
+  const args = Array.prototype.slice.call(arguments);
+  args.forEach(function (arg) {
+    console.log(arg);
+  });
+};
+
 const testLogger = {
-  debug: function (data) {
+  debug: function () {
     console.log('debug:');
-    console.log(data);
+    log(arguments);
   },
-  info: function (data) {
+  info: function () {
     console.log('info:');
-    console.log(data);
+    log(arguments);
   },
-  warn: function (data) {
+  warn: function () {
     console.log('warning:');
-    console.log(data);
+    log(arguments);
   },
-  error: function (data) {
+  error: function () {
     console.log('error:');
-    console.log(data);
+    log(arguments);
   },
   // src/cli/log.js
-  good: function (data) {
+  good: function () {
     console.log('good:');
-    console.log(data);
+    log(arguments);
   },
-  bad: function (data) {
+  bad: function () {
     console.log('bad:');
-    console.log(data);
+    log(arguments);
   }
 };
 // kibi: end

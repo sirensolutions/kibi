@@ -133,7 +133,7 @@ module.exports = function (kibana) {
 
       if (config.get('kibi_core.default_dashboard_title') !== '') {
         server.log(['warning','kibi_core'], 'kibi_core.default_dashboard_title is deprecated ' +
-        'and was moved to advance settings and should be removed from kibi.yml');
+        'and was moved to advance settings and should be removed from investigate.yml');
       }
 
       // Expose the migrations

@@ -20,7 +20,7 @@ export default (grunt) => {
   const FOLDER_LOGS = '/var/log/kibi';
   const FOLDER_PLUGINS = `${FOLDER_HOME}/plugins`;
 
-  const FILE_KIBANA_CONF = `${FOLDER_CONFIG}/kibi.yml`;
+  const FILE_KIBANA_CONF = `${FOLDER_CONFIG}/investigate.yml`;
   const FILE_KIBANA_BINARY = `${FOLDER_HOME}/bin/investigate`;
 
   return {

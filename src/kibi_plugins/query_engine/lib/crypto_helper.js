@@ -43,7 +43,7 @@ CryptoHelper.prototype.decodeBase64Key = function (base64key) {
       return keyBuffer;
   }
 
-  throw new Error('Invalid key length - check the encryption key in kibi.yml');
+  throw new Error('Invalid key length - check the encryption key in investigate.yml');
 };
 
 /**

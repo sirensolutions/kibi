@@ -4,7 +4,7 @@ import { fromRoot } from '../../utils';
 
 const CONFIG_PATHS = [
   process.env.CONFIG_PATH,
-  fromRoot('config/kibi.yml') // kibi: use kibi configuration file
+  fromRoot('config/investigate.yml') // kibi: use kibi configuration file
   //'/etc/kibana/kibana.yml' kibi: no such config location in kibi
 ].filter(Boolean);
 

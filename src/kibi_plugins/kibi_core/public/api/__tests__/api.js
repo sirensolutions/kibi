@@ -48,9 +48,9 @@ describe('KibiEmbeddingAPI', function () {
         return undefined;
       });
 
-      expect($window.kibi).to.ok();
+      expect($window.investigate).to.ok();
 
-      $window.kibi.generateShortUrl().then((url) => {
+      $window.investigate.generateShortUrl().then((url) => {
         expect(url).to.equal(fakeURLBase);
         done();
       }).catch(done);
@@ -65,9 +65,9 @@ describe('KibiEmbeddingAPI', function () {
         return name !== 'sharingService';
       });
 
-      expect($window.kibi).to.ok();
+      expect($window.investigate).to.ok();
 
-      $window.kibi.generateShortUrl().then((url) => {
+      $window.investigate.generateShortUrl().then((url) => {
         done('Should reject');
       }).catch((err) => {
         expect(err.message).to.equal('SharingService not available');

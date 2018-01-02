@@ -61,11 +61,29 @@ function renamePropAtSpecificPoint(obj, keyToChange, newKeyname) {
   return newObj;
 }
 
+function readFileContents(path) {
+  let fileContents;
+  try {
+    fileContents = read(path, 'utf8');
+    return fileContents;
+  } catch (e) {
+    if(e.code !== 'ENOENT') throw (e);
+    return false;
+  }
+}
+
 function migrateKibiYml({ config: path , dev }) {
   //check if replacing dev yamls
   const newPath = fromRoot(`config/investigate${(dev) ? '.dev' : ''}.yml`);
   if (dev) path = fromRoot('config/kibi.dev.yml');
-  let contents = safeLoad(read(path, 'utf8'));
+  const fileContents = readFileContents(path);
+  if (!fileContents) {
+    throw(`\nNo kibi.yml found to migrate,
+This command will migrate your kibi.yml to investigate.yml and update settings
+Please ensure you are running the correct command and the config path is correct (if set)`);
+  };
+
+  let contents = safeLoad(fileContents);
   // Take the map of old:new keys and convert each config setting in place
   // including nested config options
   // retains the nesting and order of properties

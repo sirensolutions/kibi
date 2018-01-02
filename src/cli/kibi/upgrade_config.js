@@ -3,7 +3,12 @@ import { fromRoot } from '../../utils';
 
 export default function (program) {
   async function processCommand(options) {
-    await _migrateKibiYml(options);
+    try {
+      await _migrateKibiYml(options);
+    } catch(e) {
+      process.stderr.write(`${e}\n`);
+      process.exit(1);
+    }
   }
 
   program

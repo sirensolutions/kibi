@@ -90,12 +90,12 @@ function migrateKibiYml({ config: path , dev }) {
   // we need to set these explicitly into the config, so the new
   // defaults are not used
   Object.keys(valueReplacementMap).map(key => {
-    const addOldDefaultExplicitlyIfMissing = (obj, keys, v) => {
+    const addOldDefaultExplicitlyIfMissing = (obj, keys, value) => {
       if (keys.length === 1) {
-        obj[keys[0]] = v;
+        obj[keys[0]] = value;
       } else {
         let key = keys.shift();
-        obj[key] = addOldDefaultExplicitlyIfMissing(typeof obj[key] === 'undefined' ? {} : obj[key], keys, v);
+        obj[key] = addOldDefaultExplicitlyIfMissing(typeof obj[key] === 'undefined' ? {} : obj[key], keys, value);
       }
 
       return obj;

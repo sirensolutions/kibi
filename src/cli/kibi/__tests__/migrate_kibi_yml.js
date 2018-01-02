@@ -10,9 +10,7 @@ import path from 'path';
 const mockKibiYml = `
 kibi_core: 
   admin: 'ted'
-kibi_access_control:
-  sentinl:
-    foo: 'bar'
+kibi_access_control.sentinl.foo: 'bar'
 `;
 
 const mockKibiDevYml = `

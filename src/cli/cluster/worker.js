@@ -22,6 +22,11 @@ module.exports = class Worker extends EventEmitter {
     opts = opts || {};
     super();
 
+    // kibi: extra check
+    if (!opts.log) {
+      throw new Error('Undefined logger. Set one in opts.log property');
+    }
+    // kibi: end
     this.log = opts.log;
     this.type = opts.type;
     this.title = opts.title || opts.type;

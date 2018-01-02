@@ -71,7 +71,7 @@ module.exports = class Worker extends EventEmitter {
 
     if (this.crashed) {
       this.emit('crashed');
-      this.log.bad(`${this.title} crashed`, 'with status code', code);
+      this.log.bad(`${this.title} crashed with status code ${code}`);
       if (!this.watch) process.exit(code);
     } else {
       // restart after graceful shutdowns

@@ -9,14 +9,12 @@ module.exports = function (server, mappings) {
       throw new SetupError(server, message, err);
     };
   }
-
   // kibi: renamed Kibana to Kibi
   return callWithInternalUser('indices.create', {
     index: index,
     body: {
       settings: {
-        number_of_shards: 1,
-        'index.mapper.dynamic': false,
+        number_of_shards: 1
       },
       mappings
     }

@@ -63,7 +63,7 @@ describe('saved_objects_api/functional', function () {
 
       beforeEach(function () {
         encryptSpy = sinon.spy(cryptoHelperMock, 'encryptDatasourceParams');
-        getCryptoHelperStub = sinon.stub(helper.server.plugins.kibi_core, 'getCryptoHelper', () => cryptoHelperMock);
+        getCryptoHelperStub = sinon.stub(helper.server.plugins.query_engine, 'getCryptoHelper', () => cryptoHelperMock);
       });
 
       it('when indexing a datasource', wrapAsync(async () => {

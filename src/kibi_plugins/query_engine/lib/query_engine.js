@@ -102,16 +102,14 @@ QueryEngine.prototype.loadPredefinedData = function () {
 
     const tryToLoad = function () {
       self._isKibiIndexPresent().then(function () {
-        self._loadTemplatesMapping().then(function () {
-          self._loadTemplates().then(function () {
-            return self._loadDatasources().then(function () {
-              return self._loadQueries().then(function () {
-                return self._refreshKibiIndex().then(function () {
-                  fulfill(true);
-                });
+        self._loadTemplates().then(function () {
+          return self._loadDatasources().then(function () {
+            return self._loadQueries().then(function () {
+              return self._refreshKibiIndex().then(function () {
+                fulfill(true);
               });
             });
-          }).catch(reject);
+          });
         }).catch(reject);
       }).catch(function (err) {
         self.log.warn('Could not retrieve Kibi index: ' + err);
@@ -129,10 +127,10 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
   })
   .then((kibiIndex) => {
     if (!!kibiIndex) {
-      this.log.info('Found siren index: [' + this.config.get('kibana.index') + ']');
+      this.log.info('Found kibi index: [' + this.config.get('kibana.index') + ']');
       return true;
     }
-    return Promise.reject(new Error('Siren index: [' + this.config.get('kibana.index') + '] does not exist'));
+    return Promise.reject(new Error('Kibi index: [' + this.config.get('kibana.index') + '] does not exist'));
   });
 };
 
@@ -216,9 +214,11 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
     }
   };
 
-  return this.cluster.callWithInternalUser('indices.putMapping', {
-    timeout: '1000ms',
-    index: this.config.get('kibana.index'),
+  const savedObjectsClient = self.server.savedObjectsClientFactory({
+    callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
+  });
+
+  return savedObjectsClient.create({
     type: 'template',
     body: mapping
   });
@@ -255,13 +255,15 @@ QueryEngine.prototype._loadTemplates = function () {
           scriptData.templateSource = sourceTemplate.toString();
         }
 
-        return self.cluster.callWithInternalUser('create', {
-          timeout: '1000ms',
-          index: self.config.get('kibana.index'),
-          type: 'template',
-          id: templateId,
-          body: JSON.stringify(scriptData, null, ' '),
-        })
+        const savedObjectsClient = self.server.savedObjectsClientFactory({
+          callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
+        });
+
+        savedObjectsClient.create(
+          'template',
+          scriptData,
+          { id: templateId }
+        )
         .then(() => {
           self.log.info('Template [' + templateId + '] successfully loaded');
         })
@@ -295,6 +297,7 @@ QueryEngine.prototype._loadDatasources = function () {
           reject(err);
           return;
         }
+
         if (self.config.has('kibi_core.gremlin_server.url')) {
           const gremlinUrl = self.config.get('kibi_core.gremlin_server.url');
           const datasourceObj = JSON.parse(data.toString());
@@ -302,17 +305,17 @@ QueryEngine.prototype._loadDatasources = function () {
 
           datasourceObjParam.url = gremlinUrl + '/graph/queryBatch';
           datasourceObj.datasourceParams = JSON.stringify(datasourceObjParam);
-
-          data = new Buffer(JSON.stringify(datasourceObj).length);
-          data.write(JSON.stringify(datasourceObj), 'utf-8');
+          data = datasourceObj;
         }
-        self.cluster.callWithInternalUser('index', {
-          timeout: '1000ms',
-          index: self.config.get('kibana.index'),
-          type: 'datasource',
-          id: datasourceId,
-          body: data.toString()
-        })
+
+        const savedObjectsClient = self.server.savedObjectsClientFactory({
+          callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
+        });
+        savedObjectsClient.create(
+          'datasource',
+          data,
+          { id: datasourceId },
+        )
         .then(function (resp) {
           self.log.info('Datasource [' + datasourceId + '] successfully loaded');
           fulfill(true);
@@ -342,13 +345,17 @@ QueryEngine.prototype._loadQueries = function () {
           reject(err);
           return;
         }
-        self.cluster.callWithInternalUser('create', {
-          timeout: '1000ms',
-          index: self.config.get('kibana.index'),
-          type: 'query',
-          id: queryId,
-          body: data.toString()
-        })
+
+
+        const savedObjectsClient = self.server.savedObjectsClientFactory({
+          callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
+        });
+
+        savedObjectsClient.search(
+          'datasource',
+          data,
+          { id: queryId },
+        )
         .then(function (resp) {
           self.log.info('Query [' + queryId + '] successfully loaded');
           fulfill(true);
@@ -585,7 +592,7 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
       if (!exists) {
         return Promise.reject(
           new Error('The query [' + id + '] requested by Kibi but not found in memory. ' +
-                    'Possible reason - query datasource was removed. Please check the configuration')
+            'Possible reason - query datasource was removed. Please check the configuration')
         );
       }
     }
@@ -618,24 +625,24 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
       }
     });
   })
-  .then(function (queryResponses) {
-    // order templates as they were ordered in queryIds array
-    // but do it only if NOT special case ALL
+    .then(function (queryResponses) {
+      // order templates as they were ordered in queryIds array
+      // but do it only if NOT special case ALL
 
-    if (all) {
-      return queryResponses;
-    }
-    const filteredSortedQueries = [];
-
-    _.each(queryIds, function (id) {
-      const found = _.find(queryResponses, 'id', id);
-      if (found) {
-        filteredSortedQueries.push(found);
+      if (all) {
+        return queryResponses;
       }
-    });
+      const filteredSortedQueries = [];
 
-    return filteredSortedQueries;
-  });
+      _.each(queryIds, function (id) {
+        const found = _.find(queryResponses, 'id', id);
+        if (found) {
+          filteredSortedQueries.push(found);
+        }
+      });
+
+      return filteredSortedQueries;
+    });
 };
 
 QueryEngine.prototype._getQueryDefById = function (queryDefs, queryId) {

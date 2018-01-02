@@ -28,7 +28,7 @@ uiRoutes
   reloadOnSearch: false,
   resolve: {
     datasource: function ($route, courier, savedDatasources, jdbcDatasources) {
-      // first try to get it from _vanguard/connector
+      // first try to get it from _siren/connector
       return jdbcDatasources.get($route.current.params.id)
       .then(datasource => {
         return jdbcDatasourceTranslate.jdbcDatasourceToSavedDatasource(datasource);

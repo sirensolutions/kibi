@@ -129,10 +129,10 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
   })
   .then((kibiIndex) => {
     if (!!kibiIndex) {
-      this.log.info('Found kibi index: [' + this.config.get('kibana.index') + ']');
+      this.log.info('Found siren index: [' + this.config.get('kibana.index') + ']');
       return true;
     }
-    return Promise.reject(new Error('Kibi index: [' + this.config.get('kibana.index') + '] does not exist'));
+    return Promise.reject(new Error('Siren index: [' + this.config.get('kibana.index') + '] does not exist'));
   });
 };
 

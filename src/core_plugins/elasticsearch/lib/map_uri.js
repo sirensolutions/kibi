@@ -40,7 +40,7 @@ export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
 
     // kibi: replace _search with _msearch to use siren-vanguard when available
     if (sirenAction && elasticsearchPlugins && contains(elasticsearchPlugins, 'siren-vanguard')) {
-      if (reqSubPath.endsWith('_search') || reqSubPath.endsWith('_msearch')) {
+      if (!reqSubPath.startsWith('/_siren/') && (reqSubPath.endsWith('_search') || reqSubPath.endsWith('_msearch'))) {
         mappedUrlComponents.pathname = joinPaths(esUrlBasePath, `siren/${trimLeft(reqSubPath, '/')}`);
       }
     }

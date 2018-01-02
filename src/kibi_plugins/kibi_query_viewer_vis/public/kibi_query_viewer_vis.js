@@ -18,9 +18,9 @@ function KibiQueryViewerVisTypeProvider(Private) {
   // Vis object of this type.
   return new TemplateVisType({
     name: 'kibiqueryviewervis',
-    title: 'Kibi Query Viewer',
+    title: 'Query Viewer',
     icon: 'fa-file-text',
-    category: VisType.CATEGORY.KIBI,
+    category: VisType.CATEGORY.SIREN,
     description: 'Your SQL/SPARQL queries results here (which can be parametric with the Kibi currently selected entity)',
     template,
     params: {

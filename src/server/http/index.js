@@ -183,6 +183,7 @@ module.exports = async function (kbnServer, server, config) {
   // Expose static assets (fonts, favicons).
   server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
   server.exposeStaticDir('/ui/favicons/{path*}', resolve(__dirname, '../../ui/public/assets/favicons'));
+  server.exposeStaticDir('/ui/images/{path*}', resolve(__dirname, '../../ui/public/assets/images'));
 
   kbnServer.mixin(versionCheckMixin);
 

@@ -27,6 +27,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
       onAddField: '=',
       onAddFilter: '=',
       onRemoveField: '=',
+      onQuickDashboard: '=',
     },
     template: fieldChooserTemplate,
     link: function ($scope) {

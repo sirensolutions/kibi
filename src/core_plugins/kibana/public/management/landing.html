@@ -1,9 +1,6 @@
 <kbn-management-app>
   <kbn-management-landing>
-    <!-- General info -->
-    <div class="page-row">
-      <div class="page-row-text">Version: {{::kbnVersion}}</div>
-    </div>
+    <!-- kibi: removed an extra row with duplicated version number -->
 
     <!-- Management sections for the ES stack -->
     <!-- kibi: info section expanded by default -->
@@ -52,7 +49,7 @@
               <div class="col-md-8 col-md-offset-2 jumbotron">
                 <center>
                   <div class="about-kibi-logo"></div>
-                  <h2>Kibi</h2>
+                  <h2>Siren Investigate</h2>
                   <p></p>
                   <div ng-if="section.info.licenseIsMissing" class="kbn-settings-about-license">
                     Please <a href="https://support.siren.io/support/solutions/articles/17000057493-get-your-license">contact us</a> to get a trial license or to purchase a license

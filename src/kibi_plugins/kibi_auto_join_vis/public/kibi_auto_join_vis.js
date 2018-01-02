@@ -13,9 +13,9 @@ function KibiAutoJoinVisTypeProvider(Private) {
 
   return new TemplateVisType({
     name: 'kibi_auto_join_vis',
-    title: 'Kibi Automatic Relational Filter',
+    title: 'Automatic Relational Filter',
     icon: 'fa-arrows-h',
-    category: VisType.CATEGORY.KIBI,
+    category: VisType.CATEGORY.SIREN,
     description: 'Relational widget displays buttons which allow user to switch between dashboards and preserve applied restrictions',
     template,
     params: {

@@ -46,22 +46,6 @@ uiModules
     },
 
     link: function ($scope) {
-      //kibi: Gets the vanguard version from the elasticsearchPlugins list
-      // for display on the management landing page
-      const plugins = elasticsearchPlugins.get({ version: true });
-
-      const getVanguardVersion = function (plugins) {
-        if (plugins) {
-          return plugins.filter(plugin => plugin.component === 'siren-vanguard')
-                        .map(plugin => plugin.version)
-                        .pop();
-        }
-      };
-
-      const vanguardVersion = getVanguardVersion(plugins);
-      const kibiIndex = chrome.getInjected('kbnIndex');
-      // kibi: end
-
       timefilter.enabled = false;
       $scope.sections = management.items.inOrder;
       $scope.section = management.getSection($scope.sectionName) || management;
@@ -71,6 +55,22 @@ uiModules
           item.active = `#${$location.path()}`.indexOf(item.url) > -1;
         });
       }
+
+      // kibi: Gets the vanguard version from the elasticsearchPlugins list
+      // for display on the management landing page
+      const getVanguardVersion = function (plugins) {
+        if (plugins) {
+          return plugins.filter(plugin => plugin.component === 'siren-vanguard')
+                        .map(plugin => plugin.version)
+                        .pop();
+        }
+      };
+
+      const plugins = elasticsearchPlugins.get({ version: true });
+      const vanguardVersion = getVanguardVersion(plugins);
+
+      // kibi: grab configured index
+      const kibiIndex = chrome.getInjected('kbnIndex');
 
       // kibi: about section improved
       management.getSection('kibana').info = {
@@ -125,12 +125,12 @@ uiModules
 
 uiModules
 .get('apps/management')
-.directive('kbnManagementLanding', function (kbnVersion) {
+// kibi: removed kbnVersion as we are not displaying it on the top of management section
+.directive('kbnManagementLanding', function () {
   return {
     restrict: 'E',
     link: function ($scope) {
       $scope.sections = management.items.inOrder;
-      $scope.kbnVersion = kbnVersion;
     }
   };
 });

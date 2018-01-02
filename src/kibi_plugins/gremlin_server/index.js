@@ -9,41 +9,47 @@ module.exports = function (kibana) {
     id: 'gremlin_server',
 
     init: function (server, options) {
+      let gremlin;
       this.status.yellow('Waiting the gremlin server to start up.');
 
-      const loadGremlinServer = () => {
-        const _config = server.config();
-        const gremlinServerconfig = _config.get('kibi_core.gremlin_server');
+      const _config = server.config();
+      const gremlinServerconfig = _config.get('kibi_core.gremlin_server');
 
-        if (gremlinServerconfig) {
-          const gremlin = new GremlinServerHandler(server);
+      if (gremlinServerconfig) {
+        gremlin = new GremlinServerHandler(server);
 
+        const loadGremlinServer = () => {
           const clean = function (code) {
-            return gremlin.stop();
+            if (gremlin) {
+              return gremlin.stop();
+            } else {
+              return Promise.resolve();
+            }
           };
-
-          this.kbnServer.cleaningArray.push(clean);
-
           gremlin.start().then(() => {
             this.status.green('Gremlin server up and running.');
+            this.kbnServer.cleaningArray.push(clean);
           })
           .catch((error) => {
             this.status.red(error.message);
           });
-        } else {
-          this.status.red('Gremlin server configuration not found in kibi.yml, please configure it.');
-        }
-      };
+        };
 
-      const status = server.plugins.elasticsearch.status;
-      if (status && status.state === 'green') {
-        loadGremlinServer();
+        const status = server.plugins.elasticsearch.status;
+        if (status && status.state === 'green') {
+          loadGremlinServer();
+        } else {
+          status.on('change', () => {
+            if (status.state === 'green' && !gremlin.isInitialized()) {
+              loadGremlinServer();
+            } else if (status.state === 'red' && gremlin.isInitialized()) {
+              this.status.red('Unable to connect to ElasticSsearch.');
+              gremlin.stop();
+            }
+          });
+        }
       } else {
-        status.on('change', () => {
-          if (server.plugins.elasticsearch.status.state === 'green') {
-            loadGremlinServer();
-          }
-        });
+        this.status.red('Gremlin server configuration not found in kibi.yml, please configure it.');
       }
     }
   });

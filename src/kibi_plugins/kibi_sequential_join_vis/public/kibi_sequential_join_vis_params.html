@@ -18,6 +18,7 @@
           <!-- hidden required input to invalidate the form properly -->
           <input type="hidden" name="relationId" required ng-model="button.indexRelationId"/>
           <span class="form-control relation-select"
+                ng-if="menu"
                 ng-class="{invalid: !button.indexRelationId, focused: focused[$index]}"
                 kibi-menu-template="menu.template"
                 kibi-menu-template-locals="{ relations: menu.relations, button: $index }"

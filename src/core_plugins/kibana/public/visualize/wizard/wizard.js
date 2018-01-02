@@ -39,7 +39,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   const visTypeCategoryToHumanReadableMap = {
     [VisType.CATEGORY.BASIC]: 'Basic Charts',
     [VisType.CATEGORY.DATA]: 'Data',
-    [VisType.CATEGORY.KIBI]: 'Kibi Visualisations', //kibi: Added Kibi Category to wizard
+    [VisType.CATEGORY.SIREN]: 'Siren Visualisations', //kibi: Added Kibi Category to wizard
     [VisType.CATEGORY.GRAPHIC]: 'Graphic',
     [VisType.CATEGORY.MAP]: 'Maps',
     [VisType.CATEGORY.OTHER]: 'Other',
@@ -76,7 +76,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 
   // Sort the categories alphabetically.
   const sortedVisTypeCategories = Object.values(categoryToVisTypesMap).sort((a, b) => {
-    if (a.label.match(/Kibi/)) return -1; // kibi: push Kibi Vis Category to the top
+    if (a.label.match(/Siren/)) return -1; // kibi: push Kibi Vis Category to the top
 
     const other = VisType.CATEGORY.OTHER.toLowerCase();
 

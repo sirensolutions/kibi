@@ -29,8 +29,11 @@ describe('Kibi Gremlin Server', function () {
       + 'Java HotSpot(TM) 64-Bit Server VM (build 25.25-b02, mixed mode)';
 
     const ret = gremlin._checkJavaVersionString(javaVersion);
+    const javaCheck = gremlin._getJavaCheck();
 
-    expect(ret.v).to.be(true);
+    expect(ret).to.be(undefined);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
   });
 
   it('should pass the Java 8 (Oracle) check - multiple strings', async function () {
@@ -41,11 +44,22 @@ describe('Kibi Gremlin Server', function () {
     ];
 
     let ret = gremlin._checkJavaVersionString(javaVersion[0]);
-    expect(ret.v).to.be(true);
+    let javaCheck = gremlin._getJavaCheck();
+    expect(ret).to.be(undefined);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
+
     ret = gremlin._checkJavaVersionString(javaVersion[1]);
+    javaCheck = gremlin._getJavaCheck();
     expect(ret).to.be(null);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
+
     ret = gremlin._checkJavaVersionString(javaVersion[2]);
+    javaCheck = gremlin._getJavaCheck();
     expect(ret).to.be(null);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
   });
 
   it('should pass the Java 8 (OpenJDK) check - single string', async function () {
@@ -55,8 +69,11 @@ describe('Kibi Gremlin Server', function () {
       + 'OpenJDK 64-Bit Server VM (build 25.25-b02, mixed mode)';
 
     const ret = gremlin._checkJavaVersionString(javaVersion);
+    const javaCheck = gremlin._getJavaCheck();
 
-    expect(ret.v).to.be(true);
+    expect(ret).to.be(undefined);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
   });
 
   it('should pass the Java 8 (OpenJDK) check - multiple strings', async function () {
@@ -67,11 +84,22 @@ describe('Kibi Gremlin Server', function () {
     ];
 
     let ret = gremlin._checkJavaVersionString(javaVersion[0]);
-    expect(ret.v).to.be(true);
+    let javaCheck = gremlin._getJavaCheck();
+    expect(ret).to.be(undefined);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
+
     ret = gremlin._checkJavaVersionString(javaVersion[1]);
+    javaCheck = gremlin._getJavaCheck();
     expect(ret).to.be(null);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
+
     ret = gremlin._checkJavaVersionString(javaVersion[2]);
+    javaCheck = gremlin._getJavaCheck();
     expect(ret).to.be(null);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
   });
 
   it('should not pass the Java 8 check - single string', async function () {
@@ -81,9 +109,11 @@ describe('Kibi Gremlin Server', function () {
       + 'Java HotSpot(TM) 64-Bit Server VM (build 25.25-b02, mixed mode)';
 
     const ret = gremlin._checkJavaVersionString(javaVersion);
+    const javaCheck = gremlin._getJavaCheck();
 
-    expect(ret.v).to.be(false);
-    expect(ret.e).to.be('Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run');
+    expect(javaCheck.isOk).to.be(false);
+    expect(javaCheck.checked).to.be(true);
+    expect(ret).to.be('Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run');
   });
 
   it('should not pass the Java 8 check - multiple strings', async function () {
@@ -94,8 +124,10 @@ describe('Kibi Gremlin Server', function () {
     ];
 
     let ret = gremlin._checkJavaVersionString(javaVersion[0]);
-    expect(ret.v).to.be(false);
-    expect(ret.e).to.be('Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run');
+    const javaCheck = gremlin._getJavaCheck();
+    expect(javaCheck.isOk).to.be(false);
+    expect(javaCheck.checked).to.be(true);
+    expect(ret).to.be('Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run');
     ret = gremlin._checkJavaVersionString(javaVersion[1]);
     expect(ret).to.be(null);
     ret = gremlin._checkJavaVersionString(javaVersion[2]);
@@ -106,8 +138,10 @@ describe('Kibi Gremlin Server', function () {
     const javaVersion = 'some error complaining java is not installed';
 
     const ret = gremlin._checkJavaVersionString(javaVersion);
-    expect(ret.v).to.be(false);
-    expect(ret.e).to.be('An error occurred while checking the installed Java version');
+    const javaCheck = gremlin._getJavaCheck();
+    expect(javaCheck.isOk).to.be(false);
+    expect(javaCheck.checked).to.be(true);
+    expect(ret).to.be('An error occurred while checking the installed Java version');
   });
 
   it('should find no other running gremlin server ', async function () {

@@ -25,7 +25,7 @@ data
 disabledPlugins
 webpackstats.json
 config/*
-!config/kibi.yml
+!config/investigate.yml
 coverage
 selenium
 .babelcache.json

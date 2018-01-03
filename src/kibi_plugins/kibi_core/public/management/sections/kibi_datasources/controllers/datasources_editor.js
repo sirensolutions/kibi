@@ -1,14 +1,14 @@
-import 'plugins/kibi_core/management/sections/kibi_datasources/styles/datasources_editor.less';
-import 'plugins/kibi_core/management/sections/kibi_datasources/services/_saved_datasource';
-import 'plugins/kibi_core/management/sections/kibi_datasources/services/saved_datasources';
+import 'plugins/investigate_core/management/sections/kibi_datasources/styles/datasources_editor.less';
+import 'plugins/investigate_core/management/sections/kibi_datasources/services/_saved_datasource';
+import 'plugins/investigate_core/management/sections/kibi_datasources/services/saved_datasources';
 import 'ui/kibi/components/query_engine_client/query_engine_client';
 import 'ui/kibi/directives/kibi_validate';
-import SetDatasourceSchemaProvider from 'plugins/kibi_core/management/sections/kibi_datasources/lib/set_datasource_schema';
-import template from 'plugins/kibi_core/management/sections/kibi_datasources/index.html';
+import SetDatasourceSchemaProvider from 'plugins/investigate_core/management/sections/kibi_datasources/lib/set_datasource_schema';
+import template from 'plugins/investigate_core/management/sections/kibi_datasources/index.html';
 import kibiUtils from 'kibiutils';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import { jdbcDatasourceTranslate } from 'plugins/kibi_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
+import { jdbcDatasourceTranslate } from 'plugins/investigate_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
 
 uiRoutes
 .when('/management/siren/datasources', {
@@ -86,7 +86,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
     // old jdbc datasources
     if (kibiUtils.isJDBC(datasource.datasourceType)) {
       const msg = 'Changes in a JDBC datasource requires the application to be restarted. ' +
-        'Please restart Kibi and do not forget to set kibi_core.load_jdbc to true.';
+        'Please restart Kibi and do not forget to set investigate_core.load_jdbc to true.';
       notify.warning(msg);
     }
 

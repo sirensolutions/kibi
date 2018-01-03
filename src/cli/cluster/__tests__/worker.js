@@ -20,7 +20,52 @@ function assertListenerRemoved(emitter, event) {
   );
 }
 
+// kibi: a fake logger
+const log = function () {
+  const args = Array.prototype.slice.call(arguments);
+  args.forEach(function (arg) {
+    console.log(arg);
+  });
+};
+
+const testLogger = {
+  debug: function () {
+    console.log('debug:');
+    log(arguments);
+  },
+  info: function () {
+    console.log('info:');
+    log(arguments);
+  },
+  warn: function () {
+    console.log('warning:');
+    log(arguments);
+  },
+  error: function () {
+    console.log('error:');
+    log(arguments);
+  },
+  // src/cli/log.js
+  good: function () {
+    console.log('good:');
+    log(arguments);
+  },
+  bad: function () {
+    console.log('bad:');
+    log(arguments);
+  }
+};
+// kibi: end
+
 function setup(opts = {}) {
+  // kibi: added extra logger
+  if (!opts.log) {
+    opts.log = testLogger;
+  }
+  if (!opts.title) {
+    opts.title = 'Test worker';
+  }
+  // kibi: end
   const worker = new Worker(opts);
   workersToShutdown.push(worker);
   return worker;

@@ -72,7 +72,7 @@ export default function (program) {
     try {
       await waitForGreenStatus(kbnServer, 10);
       try {
-        const indexHelper = kbnServer.server.plugins.query_engine.getIndexHelper();
+        const indexHelper = kbnServer.server.plugins.investigate_core.getIndexHelper();
         await indexHelper.rencryptAllValuesInKibiIndex(currentKey, newCipher, newKey, options.config);
         logger.log('Encryption key replaced successfully.');
       } catch (error) {

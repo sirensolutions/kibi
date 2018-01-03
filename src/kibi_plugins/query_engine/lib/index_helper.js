@@ -26,8 +26,8 @@ export default class IndexHelper {
    * Re-encrypts the encrypted parameters in datasource objects and updates the
    * value of the following parameters in the configuration file:
    *
-   * - kibi_core -> datasource_encryption_algorithm.
-   * - kibi_core -> datasource_encryption_key.
+   * - investigate_core -> datasource_encryption_algorithm.
+   * - investigate_core -> datasource_encryption_key.
    *
    * The original configuration file is renamed by appending the `.bak` extension.
    *

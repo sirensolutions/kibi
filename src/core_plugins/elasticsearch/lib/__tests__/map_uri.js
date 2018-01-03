@@ -10,7 +10,7 @@ describe('plugins/elasticsearch', function () {
       config() {
         return {
           get(key) {
-            if (key === 'kibi_core.clusterplugins') {
+            if (key === 'investigate_core.clusterplugins') {
               return [ 'siren-vanguard' ];
             }
           }
@@ -21,7 +21,7 @@ describe('plugins/elasticsearch', function () {
       config() {
         return {
           get(key) {
-            if (key === 'kibi_core.clusterplugins') {
+            if (key === 'investigate_core.clusterplugins') {
               return [];
             }
           }

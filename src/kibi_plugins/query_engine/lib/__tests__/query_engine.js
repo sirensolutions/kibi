@@ -26,9 +26,9 @@ const fakeServer = {
         switch (property) {
           case 'kibana.index':
             return '.kibi';
-          case 'kibi_core.gremlin_server.ssl.ca':
+          case 'investigate_core.gremlin_server.ssl.ca':
             return null;
-          case 'kibi_core.load_jdbc':
+          case 'investigate_core.load_jdbc':
             return false;
           default:
             throw new Error(`Unsupported config property: ${property}`);

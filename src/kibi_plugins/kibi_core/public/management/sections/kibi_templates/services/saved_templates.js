@@ -1,9 +1,9 @@
-import 'plugins/kibi_core/management/sections/kibi_templates/services/_saved_template';
+import 'plugins/investigate_core/management/sections/kibi_templates/services/_saved_template';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import { CacheProvider } from 'ui/kibi/helpers/cache_helper';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import savedTemplatesRegister from 'plugins/kibi_core/management/sections/kibi_templates/services/saved_templates_register';
+import savedTemplatesRegister from 'plugins/investigate_core/management/sections/kibi_templates/services/saved_templates_register';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 
 SavedObjectRegistryProvider.register(savedTemplatesRegister);

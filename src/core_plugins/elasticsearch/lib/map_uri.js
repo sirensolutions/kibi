@@ -14,7 +14,7 @@ export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
   }
 
   return function (request, done) {
-    const elasticsearchPlugins = serverConfig.get('kibi_core.clusterplugins');
+    const elasticsearchPlugins = serverConfig.get('investigate_core.clusterplugins');
     const {
       protocol: esUrlProtocol,
       slashes: esUrlHasSlashes,

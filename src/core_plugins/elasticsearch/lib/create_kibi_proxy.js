@@ -152,8 +152,7 @@ module.exports = function createProxy(server, method, path, config) {
           }
 
           if (data.length !== 0) {
-            inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.query_engine.getQueryEngine(),
-              dataPassed.savedQueries,
+            inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.query_engine.getQueryEngine(), dataPassed.savedQueries,
             dataPassed.credentials)
             .then((r) => {
               sendResponse(reply, new Buffer(JSON.stringify(r)), response, ttl);

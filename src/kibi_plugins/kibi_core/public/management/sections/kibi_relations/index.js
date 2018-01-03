@@ -1,6 +1,6 @@
 import { management } from 'ui/management';
-import 'plugins/kibi_core/management/sections/kibi_relations/controllers/relations';
-import 'plugins/kibi_core/management/sections/kibi_relations/advanced_options/advanced_options';
+import 'plugins/investigate_core/management/sections/kibi_relations/controllers/relations';
+import 'plugins/investigate_core/management/sections/kibi_relations/advanced_options/advanced_options';
 
 // kibi: We hide this section as it is replaced by the new Entities one.
 // management.getSection('kibana').register('relations', {

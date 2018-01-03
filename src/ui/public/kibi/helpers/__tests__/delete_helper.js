@@ -65,7 +65,7 @@ describe('Kibi Components', function () {
         $provide.constant('kbnDefaultAppId', '');
       });
 
-      ngMock.module('kibi_core/saved_objects/dashboard_groups', function ($provide) {
+      ngMock.module('investigate_core/saved_objects/dashboard_groups', function ($provide) {
         $provide.service('savedDashboardGroups', (Promise, Private) => {
           return mockSavedObjects(Promise, Private)('savedDashboardGroups', fakeSavedDashboardGroups);
         });

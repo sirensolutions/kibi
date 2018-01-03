@@ -22,6 +22,15 @@ module.exports = class Worker extends EventEmitter {
     opts = opts || {};
     super();
 
+    // kibi: extra check
+    if (!opts.log) {
+      throw new Error('Undefined logger. Set one in opts.log property');
+    }
+    if (!opts.title) {
+      throw new Error('Undefined title. Set one in opts.title property');
+    }
+
+    // kibi: end
     this.log = opts.log;
     this.type = opts.type;
     this.title = opts.title || opts.type;
@@ -62,7 +71,7 @@ module.exports = class Worker extends EventEmitter {
 
     if (this.crashed) {
       this.emit('crashed');
-      this.log.bad(`${this.title} crashed`, 'with status code', code);
+      this.log.bad(`${this.title} crashed with status code ${code}`);
       if (!this.watch) process.exit(code);
     } else {
       // restart after graceful shutdowns

@@ -1,6 +1,6 @@
-import 'plugins/kibi_core/management/sections/kibi_queries/styles/queries_editor.less';
-import 'plugins/kibi_core/management/sections/kibi_queries/services/_saved_query';
-import 'plugins/kibi_core/management/sections/kibi_queries/services/saved_queries';
+import 'plugins/investigate_core/management/sections/kibi_queries/styles/queries_editor.less';
+import 'plugins/investigate_core/management/sections/kibi_queries/services/_saved_query';
+import 'plugins/investigate_core/management/sections/kibi_queries/services/saved_queries';
 import 'angular-sanitize';
 import 'ng-tags-input';
 import 'ui/kibi/components/query_engine_client/query_engine_client';
@@ -8,7 +8,7 @@ import 'ui/kibi/directives/kibi_dynamic_html';
 import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 import 'ui/kibi/directives/kibi_param_entity_uri';
-import template from 'plugins/kibi_core/management/sections/kibi_queries/index.html';
+import template from 'plugins/investigate_core/management/sections/kibi_queries/index.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import _ from 'lodash';

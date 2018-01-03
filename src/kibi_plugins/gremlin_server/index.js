@@ -13,7 +13,7 @@ module.exports = function (kibana) {
       this.status.yellow('Waiting the gremlin server to start up.');
 
       const _config = server.config();
-      const gremlinServerconfig = _config.get('kibi_core.gremlin_server');
+      const gremlinServerconfig = _config.get('investigate_core.gremlin_server');
 
       if (gremlinServerconfig) {
         gremlin = new GremlinServerHandler(server);

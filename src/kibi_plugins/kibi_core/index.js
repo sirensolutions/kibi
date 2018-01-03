@@ -1,6 +1,8 @@
 import http from 'http';
 import path from 'path';
 
+import { name } from './package.json';
+
 import { patchElasticsearchClient } from './lib/elasticsearch/patch_elasticsearch_client';
 
 import migration1 from './lib/migrations/migration_1';
@@ -22,10 +24,6 @@ import migration15 from './lib/migrations/migration_15';
 /**
  * The Kibi core plugin.
  *
- * The plugin exposes the following methods to other hapi plugins:
- *
- * - getQueryEngine: returns an instance of QueryEngine.
- * - getIndexHelper: returns an instance of IndexHelper.
  */
 module.exports = function (kibana) {
 
@@ -50,37 +48,37 @@ module.exports = function (kibana) {
   return new kibana.Plugin({
     require: [ 'kibana' ],
 
-    id: 'kibi_core',
+    id: name,
 
     uiExports: {
       hacks: [
-        'plugins/kibi_core/restore',
-        'plugins/kibi_core/ui/directives/dashboards_nav/dashboards_nav',
-        'plugins/kibi_core/ui/chrome/services/dashboards_nav_state',
-        'plugins/kibi_core/saved_objects/dashboard_groups/saved_dashboard_groups',
-        'plugins/kibi_core/ui/services/dashboard_groups',
-        'plugins/kibi_core/ui/directives/dashboard_button/dashboard_button',
-        'plugins/kibi_core/api/api'
+        'plugins/investigate_core/restore',
+        'plugins/investigate_core/ui/directives/dashboards_nav/dashboards_nav',
+        'plugins/investigate_core/ui/chrome/services/dashboards_nav_state',
+        'plugins/investigate_core/saved_objects/dashboard_groups/saved_dashboard_groups',
+        'plugins/investigate_core/ui/services/dashboard_groups',
+        'plugins/investigate_core/ui/directives/dashboard_button/dashboard_button',
+        'plugins/investigate_core/api/api'
       ],
       managementSections: [
-        'plugins/kibi_core/management/sections/kibi_virtual_indices',
-        'plugins/kibi_core/management/sections/kibi_datasources',
-        'plugins/kibi_core/management/sections/kibi_entities',
-        'plugins/kibi_core/management/sections/kibi_queries',
-        'plugins/kibi_core/management/sections/kibi_relations',
-        'plugins/kibi_core/management/sections/kibi_templates'
+        'plugins/investigate_core/management/sections/kibi_virtual_indices',
+        'plugins/investigate_core/management/sections/kibi_datasources',
+        'plugins/investigate_core/management/sections/kibi_entities',
+        'plugins/investigate_core/management/sections/kibi_queries',
+        'plugins/investigate_core/management/sections/kibi_relations',
+        'plugins/investigate_core/management/sections/kibi_templates'
       ],
       navbarExtensions: [
-        'plugins/kibi_core/management/sections/navbar',
-        'plugins/kibi_core/dashboard/navbar'
+        'plugins/investigate_core/management/sections/navbar',
+        'plugins/investigate_core/dashboard/navbar'
       ],
       spyModes: [
-        'plugins/kibi_core/ui/spy_modes/multi_search_spy_mode'
+        'plugins/investigate_core/ui/spy_modes/multi_search_spy_mode'
       ],
       injectDefaultVars: function (server, options) {
         const vars = {};
 
-        // kibi_core options
+        // investigate_core options
         if (options) {
           vars.kibiDatasourcesSchema = options.datasources_schema;
           vars.kibiWarnings = {};
@@ -131,8 +129,8 @@ module.exports = function (kibana) {
 
       patchElasticsearchClient(server);
 
-      if (config.get('kibi_core.default_dashboard_title') !== '') {
-        server.log(['warning','kibi_core'], 'kibi_core.default_dashboard_title is deprecated ' +
+      if (config.get('investigate_core.default_dashboard_title') !== '') {
+        server.log(['warning','investigate_core'], 'investigate_core.default_dashboard_title is deprecated ' +
         'and was moved to advance settings and should be removed from investigate.yml');
       }
 

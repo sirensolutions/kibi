@@ -42,6 +42,7 @@ module.exports = class ClusterManager {
       }),
 
       this.server = new Worker({
+        title: 'CLI server',
         type: 'server',
         log: this.log,
         argv: serverArgv
@@ -168,7 +169,7 @@ module.exports = class ClusterManager {
   }
 
   onWatcherError(err) {
-    this.log.bad('failed to watch files!\n', err.stack);
+    this.log.bad(`failed to watch files!\n ${err.stack}`);
     process.exit(1); // eslint-disable-line no-process-exit
   }
 };

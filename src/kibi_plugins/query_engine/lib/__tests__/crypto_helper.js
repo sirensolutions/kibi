@@ -8,9 +8,9 @@ describe('Crypto Helper', function () {
   const defaultKey = 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=';
   const defaultConfig = {
     get(key) {
-      if (key === 'kibi_core.datasource_encryption_algorithm') {
+      if (key === 'investigate_core.datasource_encryption_algorithm') {
         return 'AES-GCM';
-      } else if (key === 'kibi_core.datasource_encryption_key') {
+      } else if (key === 'investigate_core.datasource_encryption_key') {
         return defaultKey;
       } else  {
         throw new Error('Unsupported config key: ' + key);

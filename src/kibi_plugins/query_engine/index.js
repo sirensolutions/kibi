@@ -95,12 +95,12 @@ module.exports = function (kibana) {
 
 
   return new kibana.Plugin({
-    require: ['kibana','kibi_core','saved_objects_api'],
+    require: ['kibana','investigate_core','saved_objects_api'],
     id: 'query_engine',
 
     init: function (server, options) {
       const config = server.config();
-      const datasourceCacheSize = config.get('kibi_core.datasource_cache_size');
+      const datasourceCacheSize = config.get('investigate_core.datasource_cache_size');
 
 
       this.status.yellow('Initialising the query engine');
@@ -197,7 +197,7 @@ module.exports = function (kibana) {
           const opts = {
             method: req.payload.method ? req.payload.method : 'POST',
             data: req.payload.data,
-            url: config.get('kibi_core.gremlin_server.url')
+            url: config.get('investigate_core.gremlin_server.url')
           };
           queryEngine.schema(req.payload.path, opts)
             .then(reply)

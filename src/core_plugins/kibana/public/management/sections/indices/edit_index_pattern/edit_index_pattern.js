@@ -15,7 +15,7 @@ import { IndexPatternAuthorizationError } from 'ui/errors';
 // kibi: end
 
 // kibi: removed routes. They're replaced by the ones in
-// src/kibi_plugins/kibi_core/public/management/sections/kibi_entities/controllers/entities.js
+// src/kibi_plugins/investigate_core/public/management/sections/kibi_entities/controllers/entities.js
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
     $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal, ontologyClient, kbnUrl) {

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { doesQueryDependOnEntity } from 'kibiutils';
 // kibi: this import is needed for any third party plugin
-import 'plugins/kibi_core/management/sections/kibi_queries/services/saved_queries';
+import 'plugins/investigate_core/management/sections/kibi_queries/services/saved_queries';
 // kibi: end
 
 export function ShouldEntityURIBeEnabledFactory(savedQueries, Promise) {

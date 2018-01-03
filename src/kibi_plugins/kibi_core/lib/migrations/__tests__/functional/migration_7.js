@@ -14,7 +14,7 @@ const serverConfig = requirefrom('test')('server_config');
 const { Cluster } = requirefrom('src/core_plugins/elasticsearch/lib')('cluster');
 const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
 
-describe('kibi_core/migrations/functional', function () {
+describe('investigate_core/migrations/functional', function () {
 
   const clusterUrl = urlFormat(serverConfig.servers.elasticsearch);
   const timeout = 60000;

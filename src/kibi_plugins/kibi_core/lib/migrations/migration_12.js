@@ -23,11 +23,11 @@ export default class Migration12 extends Migration {
     this._config =  configuration.config;
     this._index = configuration.config.get('kibana.index');
     // kibi: do NOT change to investigate_core as this is a migration which was implemented before the renaming
-    this._defaultDashboardTitleYml = configuration.config.get('kibi_core.default_dashboard_title');
+    this._defaultDashboardTitleYml = configuration.config.get('investigate_core.default_dashboard_title');
     this._type = 'config';
   }
   static get description() {
-    return 'Migrate kibi_core:default_dashboard_title property to advanced settings';
+    return 'Migrate investigate_core:default_dashboard_title property to advanced settings';
   }
 
   async _fetchDashboards() {
@@ -46,8 +46,8 @@ export default class Migration12 extends Migration {
     const dashboardWithTitleFromYmlFound = _.find(this._dashboards, d => d._source.title === this._defaultDashboardTitleYml);
 
     if (!dashboardWithTitleFromYmlFound) {
-      this._logger.warning('[' + this._defaultDashboardTitleYml + '] is set as kibi_core.default_dashboard_title in investigate.yml' +
-      ' but dashboard cannot be found.');
+      this._logger.warning('[' + this._defaultDashboardTitleYml + '] is set as investigate_core.default_dashboard_title' +
+      'in investigate.yml but dashboard cannot be found.');
       return count;
     }
 
@@ -76,7 +76,7 @@ export default class Migration12 extends Migration {
     }
 
     let body = '';
-    this._logger.info(`Updating kibi_core.default_dashboard_title from config`);
+    this._logger.info(`Updating investigate_core.default_dashboard_title from config`);
 
     await this._fetchDashboards();
 

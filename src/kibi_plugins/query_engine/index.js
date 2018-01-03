@@ -98,6 +98,14 @@ module.exports = function (kibana) {
     require: ['kibana','investigate_core','saved_objects_api'],
     id: 'query_engine',
 
+    uiExports: {
+      injectDefaultVars: function () {
+        return {
+          kibiDatasourcesSchema: datasourcesSchema.toInjectedVar()
+        };
+      }
+    },
+
     init: function (server, options) {
       const config = server.config();
       const datasourceCacheSize = config.get('investigate_core.datasource_cache_size');

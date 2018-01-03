@@ -123,6 +123,9 @@
           },
           "title": {
             "type": "text"
+          },
+          "paths": {
+            "type": "text"
           }
         }
       },

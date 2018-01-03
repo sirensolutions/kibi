@@ -9,7 +9,7 @@ export default class OntologyModel extends Model {
 
     const schema = Joi.object().keys({
       model: Joi.string(),
-      version: Joi.string()
+      version: Joi.number().integer()
     });
 
     super(server, 'ontology-model', schema, 'Ontology Model');

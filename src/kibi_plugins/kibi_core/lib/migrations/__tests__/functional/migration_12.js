@@ -39,9 +39,9 @@ describe('investigate_core/migrations/functional', function () {
     let configuration;
 
 
-    describe('should migrate if kibi_core.default_dashboard_title is defined and', function () {
+    describe('should migrate if investigate_core.default_dashboard_title is defined and', function () {
 
-      describe('valid dashboard from kibi_core.default_dashboard_title exist and nothing in kibi:defaultDashboardId', function () {
+      describe('valid dashboard from investigate_core.default_dashboard_title exist and nothing in kibi:defaultDashboardId', function () {
         beforeEach(async () => {
           await scenarioManager.reload(Scenario1);
           configuration = {
@@ -53,7 +53,7 @@ describe('investigate_core/migrations/functional', function () {
             }
           };
 
-          fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('Company');
+          fakeConfig.get.withArgs('investigate_core.default_dashboard_title').returns('Company');
         });
 
         afterEach(async () => {
@@ -90,7 +90,7 @@ describe('investigate_core/migrations/functional', function () {
         });
       });
 
-      describe('valid dashboard from kibi_core.default_dashboard_title exist' +
+      describe('valid dashboard from investigate_core.default_dashboard_title exist' +
       ' and invalid dashboard in kibi:defaultDashboardId', function () {
         beforeEach(async () => {
           await scenarioManager.reload(Scenario2);
@@ -103,7 +103,7 @@ describe('investigate_core/migrations/functional', function () {
             }
           };
 
-          fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('Company');
+          fakeConfig.get.withArgs('investigate_core.default_dashboard_title').returns('Company');
         });
 
         afterEach(async () => {
@@ -142,7 +142,7 @@ describe('investigate_core/migrations/functional', function () {
 
     describe('should NOT migrate if', function () {
 
-      describe('kibi_core.default_dashboard_title NOT defined', function () {
+      describe('investigate_core.default_dashboard_title NOT defined', function () {
         beforeEach(async () => {
           await scenarioManager.reload(Scenario1);
           configuration = {
@@ -154,7 +154,7 @@ describe('investigate_core/migrations/functional', function () {
             }
           };
 
-          fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('');
+          fakeConfig.get.withArgs('investigate_core.default_dashboard_title').returns('');
         });
 
         afterEach(async () => {
@@ -187,7 +187,7 @@ describe('investigate_core/migrations/functional', function () {
         });
       });
 
-      describe('kibi_core.default_dashboard_title defined but dashboard does NOT exist', function () {
+      describe('investigate_core.default_dashboard_title defined but dashboard does NOT exist', function () {
         beforeEach(async () => {
           await scenarioManager.reload(Scenario1);
           configuration = {
@@ -199,7 +199,7 @@ describe('investigate_core/migrations/functional', function () {
             }
           };
 
-          fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('doNotExistDashboard');
+          fakeConfig.get.withArgs('investigate_core.default_dashboard_title').returns('doNotExistDashboard');
         });
 
         afterEach(async () => {
@@ -232,7 +232,7 @@ describe('investigate_core/migrations/functional', function () {
         });
       });
 
-      describe('kibi_core.default_dashboard_title defined, dashboard exist, ' +
+      describe('investigate_core.default_dashboard_title defined, dashboard exist, ' +
                'but valid dashboard id already set in advanced settings', function () {
         beforeEach(async () => {
           await scenarioManager.reload(Scenario3);
@@ -245,7 +245,7 @@ describe('investigate_core/migrations/functional', function () {
             }
           };
 
-          fakeConfig.get.withArgs('kibi_core.default_dashboard_title').returns('Article');
+          fakeConfig.get.withArgs('investigate_core.default_dashboard_title').returns('Article');
         });
 
         afterEach(async () => {

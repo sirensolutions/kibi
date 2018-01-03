@@ -80,7 +80,7 @@ module.exports = function (kibana) {
 
         // investigate_core options
         if (options) {
-          vars.kibiDatasourcesSchema = options.datasources_schema;
+          vars.kibiDatasourcesSchema = options.datasources_schema || null;
           vars.kibiWarnings = {};
           if (options.datasource_encryption_key === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
             vars.kibiWarnings.datasource_encryption_warning = true;

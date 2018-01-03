@@ -29,10 +29,11 @@ const replacementMap = {
 };
 
 // This map holds potential value replacements.
-// If the key on the left hand side has the value stored as oldVal on the RHS,
-// then the key is replaced by the value stored as newVal.
-// If the key does not hold the oldVal (e.g. if the user has altered the setting manually
-// and diverted from our defaults), leave that value in place.
+// If the user has diverted from the old defaults for e.g. the admin_role
+// the user's settings should be retained in the yml.
+// On the other hand, if the old defaults haven't been changed, we need to
+// set the old defaults explicitly into the config to ensure back compatibility
+// with pre-Siren 10 setups
 const valueReplacementMap = {
   'investigate_access_control.admin_role':           { oldVal: 'kibiadmin' },
   'elasticsearch.username':                          { oldVal: 'kibiserver' },
@@ -110,15 +111,18 @@ Please ensure you are running the correct command and the config path is correct
   Object.keys(valueReplacementMap).map(key => {
     const addOldDefaultExplicitlyIfMissing = (obj, keys, value) => {
       if (keys.length === 1) {
+        // If the key is found on this level, we set it to the value in question
         obj[keys[0]] = value;
       } else {
+        // If the key is not found on this level, remove it from the front of the keys array and try next level down
         const key = keys.shift();
+        // Recursively walk down each branch and check for the key in question.
         obj[key] = addOldDefaultExplicitlyIfMissing(typeof obj[key] === 'undefined' ? {} : obj[key], keys, value);
       }
 
       return obj;
     };
-
+    // If the nesting level doesn't contain the key in question, we drop down one nesting level and check again
     if (!has(contents, key)) {
       contents = addOldDefaultExplicitlyIfMissing(contents, key.split('.'), valueReplacementMap[key].oldVal);
     }

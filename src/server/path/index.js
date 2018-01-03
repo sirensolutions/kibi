@@ -15,6 +15,30 @@ const DATA_PATHS = [
   '/var/lib/kibi'
 ].filter(Boolean);
 
+// kibi
+
+function checkKibiYmlExists(dev) {
+  const kibiYmlPath = fromRoot(`config/kibi${(dev) ? '.dev' : ''}.yml`);
+  try {
+    accessSync(kibiYmlPath);
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+function getConfig(dev) {
+  if(checkKibiYmlExists(dev)) {
+    throw new Error(`kibi.yml found in config folder. Please run bin/kibi upgrade-config to migrate your kibi.yml to investigate.yml
+       Please be aware that this command removes all comments in the kibi.yml
+       but the original file (with comments) is preserved as kibi.yml.pre10\n`);
+  } else {
+    return findFile(CONFIG_PATHS);
+  }
+}
+
+// kibi:end
+
 function findFile(paths) {
   const availablePath = find(paths, configPath => {
     try {
@@ -28,6 +52,6 @@ function findFile(paths) {
 }
 
 export default {
-  getConfig: () => findFile(CONFIG_PATHS),
+  getConfig, // kibi: check if kibi.yml exists and migrate if so
   getData: () => findFile(DATA_PATHS)
 };

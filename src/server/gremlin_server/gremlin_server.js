@@ -56,7 +56,7 @@ function startServer(self, fulfill, reject) {
 
         return fs.access(gremlinServerPath, fs.F_OK, (error) => {
           if (error !== null) {
-            reject(new Error('The Kibi Gremlin Server jar file was not found. Please check the configuration'));
+            reject(new Error('The Siren Gremlin Server jar file was not found. Please check the configuration'));
           } else {
             const serverURL = url.parse(self.url);
             const esUrl = config.get('elasticsearch.url');
@@ -154,7 +154,7 @@ function startServer(self, fulfill, reject) {
               }
             }
 
-            self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
+            self.server.log(['gremlin', 'info'], 'Starting the Siren gremlin server');
             self.gremlinServer = childProcess.spawn('java', args);
             self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin', 'error'], ('' + data).trim()));
             self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin', 'info'], ('' + data).trim()));
@@ -172,20 +172,20 @@ function startServer(self, fulfill, reject) {
                   .then(function (resp) {
                     const jsonResp = JSON.parse(resp.toString());
                     if (jsonResp.status === 'ok') {
-                      self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at ' + self.url);
+                      self.server.log(['gremlin', 'info'], 'Siren gremlin server running at ' + self.url);
                       self.initialized = true;
-                      fulfill({ message: 'The Kibi gremlin server started successfully.' });
+                      fulfill({ message: 'The Siren gremlin server started successfully.' });
                     } else {
-                      self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
+                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren gremlin server');
                       counter--;
                       setTimeout(() => self.ping(counter), timeout);
                     }
                   })
                   .catch(function (err) {
                     if (err.error.code !== 'ECONNREFUSED') {
-                      self.server.log(['gremlin', 'error'], 'Failed to ping the Kibi gremlin server: ' + err.message);
+                      self.server.log(['gremlin', 'error'], 'Failed to ping the Siren gremlin server: ' + err.message);
                     } else {
-                      self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
+                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren gremlin server');
                     }
                     counter--;
                     setTimeout(() => self.ping(counter), timeout);
@@ -193,7 +193,7 @@ function startServer(self, fulfill, reject) {
                 }, counter === maxCounter ? initialTimeout : timeout);
               } else {
                 self.gremlinServer.kill('SIGINT');
-                reject(new Error('The Kibi gremlin server did not start correctly'));
+                reject(new Error('The Siren gremlin server did not start correctly'));
               }
             };
             self.ping(counter);
@@ -202,7 +202,7 @@ function startServer(self, fulfill, reject) {
       })
       .catch(reject);
     } else {
-      const message = 'The Gremlin Server jar file was not found. Please check the ' +
+      const message = 'The Siren Gremlin Server jar file was not found. Please check the ' +
                        'value of the investigate_core.gremlin_server.path configuration property.';
       reject(new Error(message));
     }
@@ -257,7 +257,7 @@ GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
         this.javaCheck.isOk = true;
       } else {
         this.javaCheck.isOk = false;
-        err = 'Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run';
+        err = 'Java version is lower than the requested 1.8. The Siren Gremlin Server needs Java 8 to run';
       }
     } else {
       this.javaCheck.isOk = false;
@@ -290,16 +290,16 @@ GremlinServerHandler.prototype.stop = function () {
   if (self.initialized) {
     self.initialized = false;
     return new Promise(function (fulfill, reject) {
-      self.server.log(['gremlin', 'info'], 'Stopping the Kibi gremlin server');
+      self.server.log(['gremlin', 'info'], 'Stopping the Siren gremlin server');
 
       if (self.gremlinServer) {
         const exitCode = self.gremlinServer.kill('SIGINT');
         if (exitCode) {
-          self.server.log(['gremlin', 'info'], 'The Kibi gremlin server exited successfully');
+          self.server.log(['gremlin', 'info'], 'The Siren gremlin server exited successfully');
           fulfill(true);
         } else {
-          self.server.log(['gremlin', 'error'], 'The Kibi gremlin server exited with non zero status: ' + exitCode);
-          reject(new Error('The Kibi gremlin server exited with non zero status: ' + exitCode));
+          self.server.log(['gremlin', 'error'], 'The Siren gremlin server exited with non zero status: ' + exitCode);
+          reject(new Error('The Siren gremlin server exited with non zero status: ' + exitCode));
         }
       } else {
         fulfill(true);

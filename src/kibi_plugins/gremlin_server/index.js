@@ -10,7 +10,7 @@ module.exports = function (kibana) {
 
     init: function (server, options) {
       let gremlin;
-      this.status.yellow('Waiting the gremlin server to start up.');
+      this.status.yellow('Waiting the Siren gremlin server to start up.');
 
       const _config = server.config();
       const gremlinServerconfig = _config.get('investigate_core.gremlin_server');
@@ -27,7 +27,7 @@ module.exports = function (kibana) {
             }
           };
           gremlin.start().then(() => {
-            this.status.green('Gremlin server up and running.');
+            this.status.green('Siren gremlin server up and running.');
             this.kbnServer.cleaningArray.push(clean);
           })
           .catch((error) => {
@@ -49,7 +49,7 @@ module.exports = function (kibana) {
           });
         }
       } else {
-        this.status.red('Gremlin server configuration not found in kibi.yml, please configure it.');
+        this.status.red('Siren gremlin server configuration not found in investigate.yml, please configure it.');
       }
     }
   });

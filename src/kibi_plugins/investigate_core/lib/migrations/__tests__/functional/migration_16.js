@@ -49,9 +49,15 @@ describe('investigate_core/migrations/functional', function () {
         await scenarioManager.reload(Scenario2);
       });
 
-      it('should count all upgradeable objects', async () => {
+      it('should count objects and get 0', async () => {
         const migration = new Migration(configuration);
         const result = await migration.count();
+        expect(result).to.be(0);
+      });
+
+      it('should NOT upgrade any objects', async () => {
+        const migration = new Migration(configuration);
+        const result = await migration.upgrade();
         expect(result).to.be(0);
       });
 
@@ -77,7 +83,7 @@ describe('investigate_core/migrations/functional', function () {
         const before = await snapshot();
         const migration = new Migration(configuration);
 
-        let result = await migration.upgrade();
+        const result = await migration.upgrade();
         expect(result).to.be(1);
 
         const after = await snapshot();

@@ -235,7 +235,7 @@ module.exports = function (kibana) {
           const opts = {
             method: req.payload.method ? req.payload.method : 'POST',
             data: req.payload.data,
-            url: config.get('kibi_core.gremlin_server.url')
+            url: config.get('investigate_core.gremlin_server.url')
           };
 
           return queryEngine.schema(req.payload.path, opts)

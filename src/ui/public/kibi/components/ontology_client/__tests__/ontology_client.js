@@ -116,7 +116,9 @@ describe('Kibi Components', function () {
     });
 
     it('should encode relations id if needed', function () {
-      const _executeSchemaAndClearCacheStub = sinon.stub(ontologyClient, '_executeSchemaAndClearCache').returns(Promise.resolve());
+      const _executeSchemaUpdateAndClearCacheStub = sinon.stub(ontologyClient, '_executeSchemaUpdateAndClearCache')
+      .returns(Promise.resolve());
+
       const expectedArg = {
         path: '/schema/relations',
         method: 'POST',
@@ -124,9 +126,9 @@ describe('Kibi Components', function () {
       };
 
       ontologyClient.insertRelations([{ id: 'company%2F%2Fid%2Finvetment%2F%2Fcompanies' }]);
-      sinon.assert.calledWith(_executeSchemaAndClearCacheStub, expectedArg);
+      sinon.assert.calledWith(_executeSchemaUpdateAndClearCacheStub, expectedArg);
       ontologyClient.insertRelations([{ id: 'company//id/invetment//companies' }]);
-      sinon.assert.calledWith(_executeSchemaAndClearCacheStub, expectedArg);
+      sinon.assert.calledWith(_executeSchemaUpdateAndClearCacheStub, expectedArg);
     });
   });
 });

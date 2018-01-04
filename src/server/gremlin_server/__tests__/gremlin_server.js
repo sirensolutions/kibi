@@ -113,7 +113,7 @@ describe('Kibi Gremlin Server', function () {
 
     expect(javaCheck.isOk).to.be(false);
     expect(javaCheck.checked).to.be(true);
-    expect(ret).to.be('Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run');
+    expect(ret).to.be('Java version is lower than the requested 1.8. The Siren Gremlin Server needs Java 8 to run');
   });
 
   it('should not pass the Java 8 check - multiple strings', async function () {
@@ -127,7 +127,7 @@ describe('Kibi Gremlin Server', function () {
     const javaCheck = gremlin._getJavaCheck();
     expect(javaCheck.isOk).to.be(false);
     expect(javaCheck.checked).to.be(true);
-    expect(ret).to.be('Java version is lower than the requested 1.8. The Kibi Gremlin Server needs Java 8 to run');
+    expect(ret).to.be('Java version is lower than the requested 1.8. The Siren Gremlin Server needs Java 8 to run');
     ret = gremlin._checkJavaVersionString(javaVersion[1]);
     expect(ret).to.be(null);
     ret = gremlin._checkJavaVersionString(javaVersion[2]);

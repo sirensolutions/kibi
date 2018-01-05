@@ -141,7 +141,7 @@ module.exports = function (program) {
     // kibi: extra option adde to be able to ignore investigate.dev.yml when running tests
     .option('--ignoreDevYml', 'Allow to ignore investigate.dev.yml file when running in dev mode. ' +
                               'Useful for running tests like: grunt test:dev --kbnServer.ignoreDevYml')
-    .option('--sirenDisablePlugins', 'Tell kibi not to look for some plugins so we can run UI tests without them');
+    .option('--sirenDisablePlugins', 'Tell Investigate not to look for some plugins so we can run UI tests without them');
   }
 
   command

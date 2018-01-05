@@ -283,7 +283,7 @@ QueryEngine.prototype._loadDatasources = function () {
   const self = this;
   // load default datasource examples
   const datasourcesToLoad = [
-    'Kibi-Gremlin-Server'
+    'Siren-Gremlin-Server'
   ];
 
   self.log.info('Loading datasources');

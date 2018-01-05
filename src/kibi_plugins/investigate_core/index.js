@@ -20,6 +20,7 @@ import migration12 from './lib/migrations/migration_12';
 import migration13 from './lib/migrations/migration_13';
 import migration14 from './lib/migrations/migration_14';
 import migration15 from './lib/migrations/migration_15';
+import migration16 from './lib/migrations/migration_16';
 
 /**
  * The Kibi core plugin.
@@ -42,7 +43,8 @@ module.exports = function (kibana) {
     migration12,
     migration13,
     migration14,
-    migration15
+    migration15,
+    migration16
   ];
 
   return new kibana.Plugin({

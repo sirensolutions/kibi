@@ -1,1 +1,0 @@
-{"kibanaSavedObjectMeta":{"searchSourceJSON":"{}"},"version":1,"datasourceParams":"{\"timeout\":\"10000\",\"max_age\":3600000,\"url\":\"http://127.0.0.1:8061/graph/queryBatch\"}","datasourceType":"tinkerpop3","description":"","title":"Kibi Gremlin Server"}

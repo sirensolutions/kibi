@@ -1,5 +1,3 @@
-/* eslint max-len:0 */
-
 /**
  * Defines the index with no visualisations
  */
@@ -8,7 +6,7 @@ module.exports = [
     index: {
       _index: '.kibi',
       _type: 'foo',
-      _id: 'some-object-whichj-is-not-a-visualisation'
+      _id: 'some-object-which-is-not-a-visualisation'
     }
   },
   {

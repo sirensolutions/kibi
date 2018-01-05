@@ -42,7 +42,6 @@ describe('investigate_core/migrations/functional', function () {
 
   describe('Migration 16 - Functional test', function () {
 
-
     describe('there is no visualisations', function () {
 
       beforeEach(async () => {

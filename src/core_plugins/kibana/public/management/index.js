@@ -86,11 +86,11 @@ uiModules
       };
 
       function verifyLicense() {
-        if (!$injector.has('kibiLicenseService')) {
+        if (!$injector.has('sirenLicenseService')) {
           return Promise.resolve();
         }
-        const kibiLicenseService = $injector.get('kibiLicenseService');
-        return kibiLicenseService.verifyLicense();
+        const sirenLicenseService = $injector.get('sirenLicenseService');
+        return sirenLicenseService.verifyLicense();
       }
 
       verifyLicense().then(license => {

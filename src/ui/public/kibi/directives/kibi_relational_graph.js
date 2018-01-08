@@ -122,7 +122,15 @@ uiModules
               });
               return new Promise((fulfill, reject) => {
                 if (init) {
-                  relationalGraph.expand(klElements, {layout: {fit: true, tidy: true, tightness: 4}}, () => {
+                  relationalGraph.expand(klElements,
+                    {
+                      layout: {
+                        fit: true,
+                        tidy: true,
+                        tightness: 4,
+                        consistent: true
+                      }
+                    }, () => {
                     fulfill();
                   });
                 } else {

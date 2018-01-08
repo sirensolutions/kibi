@@ -87,9 +87,9 @@ uiModules.get('apps/management', ['kibana', 'ui.tree', 'ngAnimate'])
   };
 
   // Needed until we migrate the panels to use the new generic "entity"
-  $scope.$watch('selectedMenuItem', (item) => {
-    if (item && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== item.id)) {
-      kbnUrl.change(`/management/siren/entities/${item.id}`);
+  $scope.$watch('selectedMenuItem.id', (itemId) => {
+    if (itemId && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== itemId)) {
+      kbnUrl.change(`/management/siren/entities/${itemId}`);
     } else {
       const entity = $route.current.locals.selectedEntity;
       if (entity && (!$scope.entity || $scope.entity.id !== entity.id || $scope.entity.type !== entity.type)) {

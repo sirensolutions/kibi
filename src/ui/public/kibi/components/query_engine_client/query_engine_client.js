@@ -41,8 +41,12 @@ uiModules
     return $http.post(chrome.getBasePath() + '/gremlin/ping', { url: url });
   };
 
-  QueryEngineClient.prototype.schema = function (options) {
-    return $http.post(chrome.getBasePath() + '/schema', options);
+  QueryEngineClient.prototype.schemaQuery = function (options) {
+    return $http.post(chrome.getBasePath() + '/schemaQuery', options);
+  };
+
+  QueryEngineClient.prototype.schemaUpdate = function (options) {
+    return $http.post(chrome.getBasePath() + '/schemaUpdate', options);
   };
 
   QueryEngineClient.prototype.clearCache = function (service) {

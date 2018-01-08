@@ -66,46 +66,52 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   };
 
   const updateCounts = function (results, scope) {
-    const metaDefinitions = _.map(results, result => {
-      const definition = result.button;
-      // adding unique id as required by kibiMeta
-      definition.id =
-        result.button.sourceDashboardId +
-        result.button.targetDashboardId +
-        relationsHelper.getJoinIndicesUniqueID(
-          result.button.sourceIndexPatternId,
-          result.button.sourceIndexPatternType,
-          result.button.sourceField,
-          result.button.targetIndexPatternId,
-          result.button.targetIndexPatternType,
-          result.button.targetField,
-        );
 
-      return {
-        definition: definition,
-        callback: function (error, meta) {
-          if (error) {
-            notify.error(error);
-          }
-          if (scope && scope.multiSearchData) {
-            const queryParts = result.button.query.split('\n');
-            const stats = {
-              index: result.button.targetIndexPatternId,
-              type: result.button.targetIndexPatternType,
-              meta: {
-                label: result.button.label
-              },
-              response: meta,
-              query: JSON.parse(queryParts[1])
-            };
-            if (isJoinPruned(meta)) {
-              stats.pruned = true;
+    const metaDefinitions = [];
+    _.each(results, result => {
+      const definition = result.button;
+      // only make sense if query is there and not == null
+      if (definition.query) {
+
+        // adding unique id as required by kibiMeta
+        definition.id =
+          result.button.sourceDashboardId +
+          result.button.targetDashboardId +
+          relationsHelper.getJoinIndicesUniqueID(
+            result.button.sourceIndexPatternId,
+            result.button.sourceIndexPatternType,
+            result.button.sourceField,
+            result.button.targetIndexPatternId,
+            result.button.targetIndexPatternType,
+            result.button.targetField,
+          );
+
+        metaDefinitions.push({
+          definition: definition,
+          callback: function (error, meta) {
+            if (error) {
+              notify.error(error);
             }
-            $scope.multiSearchData.add(stats);
+            if (scope && scope.multiSearchData) {
+              const queryParts = result.button.query.split('\n');
+              const stats = {
+                index: result.button.targetIndexPatternId,
+                type: result.button.targetIndexPatternType,
+                meta: {
+                  label: result.button.label
+                },
+                response: meta,
+                query: JSON.parse(queryParts[1])
+              };
+              if (isJoinPruned(meta)) {
+                stats.pruned = true;
+              }
+              $scope.multiSearchData.add(stats);
+            }
+            buttonMetaCallback(result.button, meta);
           }
-          buttonMetaCallback(result.button, meta);
-        }
-      };
+        });
+      }
     });
     kibiMeta.getMetaForRelationalButtons(metaDefinitions);
   };
@@ -131,6 +137,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
             return { button, indices };
           });
         } else {
+          button.query = null; //set to null to indicate that counts should not be fetched
           return { button, indices };
         }
       })

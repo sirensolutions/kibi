@@ -21,7 +21,7 @@ uiModules
       const graphHelper = new GraphHelper({});
       const kl = linesPacked.lines;
       let relationalGraph;
-      let graphInitialized = false;
+      $scope.graphInitialized = false;
       $scope.klOptions = {
         iconFontFamily: 'FontAwesome',
         backColour: 'white',
@@ -33,17 +33,13 @@ uiModules
         handMode: true
       };
 
-      console.log($scope.selectedItem);
       $scope.klBasePath = chrome.getBasePath() + '/plugins/graph_browser_vis/webpackShims/';
 
       const updateRelationalGraph = function () {
         if (relationalGraph && $scope.isVisible) {
           graphHelper.focusOnNodes([$scope.selected.id], relationalGraph);
           relationalGraph.selection($scope.selected.id);
-          // TODO with the latest version we can zoom on an arbitrary array of elements
-          // the selected entity and the direct neighbours
-          // relationalGraph.zoom('fit', { ids: $scope.selected.id, animate: true});
-          relationalGraph.zoom('selection', { animate: true, time: 600 });
+          relationalGraph.zoom('fit', { ids: $scope.selected.id, animate: true, time: 600});
         }
       };
 
@@ -155,14 +151,14 @@ uiModules
         relationalGraph = graph;
 
         $scope.$watch('isVisible', (value) => {
-          if (value && !graphInitialized) {
+          if (value && !$scope.graphInitialized) {
             const element =  document.getElementsByClassName('relational-graph');
             const height = element[0].offsetHeight;
             const width = element[0].offsetWidth;
             kl.setSize('relationalGraph', width, height);
 
-            $scope.reloadGraph(!graphInitialized);
-            graphInitialized = true;
+            $scope.reloadGraph(!$scope.graphInitialized);
+            $scope.graphInitialized = true;
           }
         })
       };
@@ -176,15 +172,6 @@ uiModules
           // $scope.selected.type = node.d.entityType;
         }
       };
-
-      // Make keylines load after the page has been rendered.
-      $timeout(() => {
-        $scope.$watch('isVisible', (val) => {
-          if (val === true) {
-            $scope.isInitializable = true;
-          }
-        });
-      });
     }
   };
 });

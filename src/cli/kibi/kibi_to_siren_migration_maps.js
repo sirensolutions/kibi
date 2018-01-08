@@ -13,6 +13,8 @@ export default {
   valueReplacementMap: {
     'investigate_access_control.admin_role':           { oldVal: 'kibiadmin' },
     'elasticsearch.username':                          { oldVal: 'kibiserver' },
-    'investigate_access_control.sirenalert.username' : { oldVal: 'sentinl' }
+    'investigate_access_control.sirenalert.username':  { oldVal: 'sentinl' },
+    'kibana.index':                                    { oldVal: '.kibi' },
+    'investigate_access_control.acl.index':            { oldVal: '.kibiaccess' }
   }
 };

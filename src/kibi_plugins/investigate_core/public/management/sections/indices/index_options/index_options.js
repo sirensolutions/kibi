@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import indexOptionsTemplate from './index_options.html';
+import './index_options.less';
+
 
 uiModules.get('apps/management')
 .directive('indexOptions', function (ontologyClient, kbnUrl) {
-
   return {
     restrict: 'E',
     template: indexOptionsTemplate,

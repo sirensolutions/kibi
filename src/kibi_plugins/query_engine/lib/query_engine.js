@@ -29,6 +29,8 @@ function QueryEngine(server) {
   this.queries = [];
   this.initialized = false;
   this.log = logger(server, 'query_engine');
+  // kibi: we are using admin cluster directly where we don't have a access to the request object,
+  // for example, data sources and templates need to be loaded before user logged in the system
   this.cluster = server.plugins.elasticsearch.getCluster('admin');
 }
 
@@ -102,10 +104,12 @@ QueryEngine.prototype.loadPredefinedData = function () {
 
     const tryToLoad = function () {
       self._isKibiIndexPresent().then(function () {
-        self._loadTemplates().then(function () {
-          return self._loadDatasources().then(function () {
-            return self._refreshKibiIndex().then(function () {
-              fulfill(true);
+        self._loadTemplatesMapping().then(function () {
+          self._loadTemplates().then(function () {
+            return self._loadDatasources().then(function () {
+              return self._refreshKibiIndex().then(function () {
+                fulfill(true);
+              });
             });
           });
         }).catch(reject);

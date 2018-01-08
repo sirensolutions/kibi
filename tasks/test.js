@@ -115,6 +115,5 @@ module.exports = function (grunt) {
   });
   // kibi: end
 
-
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
 };

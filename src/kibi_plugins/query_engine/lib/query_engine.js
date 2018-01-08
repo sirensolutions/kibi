@@ -104,10 +104,8 @@ QueryEngine.prototype.loadPredefinedData = function () {
       self._isKibiIndexPresent().then(function () {
         self._loadTemplates().then(function () {
           return self._loadDatasources().then(function () {
-            return self._loadQueries().then(function () {
-              return self._refreshKibiIndex().then(function () {
-                fulfill(true);
-              });
+            return self._refreshKibiIndex().then(function () {
+              fulfill(true);
             });
           });
         }).catch(reject);
@@ -328,48 +326,6 @@ QueryEngine.prototype._loadDatasources = function () {
   });
 
   return Promise.all(promises);
-};
-
-QueryEngine.prototype._loadQueries = function () {
-  const self = this;
-  // load default query examples
-  const queriesToLoad = [];
-
-  self.log.info('Loading queries');
-
-  return Promise.map(queriesToLoad, function (queryId) {
-    return new Promise(function (fulfill, reject) {
-      fs.readFile(path.join(__dirname, 'queries', queryId + '.json'), function (err, data) {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-
-        const savedObjectsClient = self.server.savedObjectsClientFactory({
-          callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-        });
-
-        savedObjectsClient.search(
-          'datasource',
-          data,
-          { id: queryId },
-        )
-        .then(function (resp) {
-          self.log.info('Query [' + queryId + '] successfully loaded');
-          fulfill(true);
-        })
-        .catch(function (err) {
-          if (err.statusCode === 409) {
-            self.log.warn('Query [' + queryId + '] already exists');
-          } else {
-            self.log.error('Could not load query [' + queryId + ']', err);
-          }
-          fulfill(true);
-        });
-      });
-    });
-  });
 };
 
 QueryEngine.prototype.setupJDBC = function () {

@@ -13,7 +13,7 @@ uiModules
     replace: true,
     scope: {
       isVisible: '=',
-      selectedItem: '='
+      selected: '='
     },
     template,
     link: function ($scope) {
@@ -38,11 +38,11 @@ uiModules
 
       const updateRelationalGraph = function () {
         if (relationalGraph && $scope.isVisible) {
-          graphHelper.focusOnNodes([$scope.selectedItem.id], relationalGraph);
-          relationalGraph.selection($scope.selectedItem.id);
+          graphHelper.focusOnNodes([$scope.selected.id], relationalGraph);
+          relationalGraph.selection($scope.selected.id);
           // TODO with the latest version we can zoom on an arbitrary array of elements
           // the selected entity and the direct neighbours
-          // relationalGraph.zoom('fit', { ids: $scope.selectedItem.id, animate: true});
+          // relationalGraph.zoom('fit', { ids: $scope.selected.id, animate: true});
           relationalGraph.zoom('selection', { animate: true, time: 600 });
         }
       };
@@ -163,7 +163,9 @@ uiModules
         if (id && relationalGraph) {
           const node = relationalGraph.getItem(id);
           // this is to let other components react to the changed selection.
-          $scope.selectedItem = { id: node.id, type: node.d.entityType };
+          $scope.selected = { id: node.id, type: node.d.entityType };
+          // $scope.selected.id = node.id;
+          // $scope.selected.type = node.d.entityType;
         }
       };
 

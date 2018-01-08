@@ -261,8 +261,11 @@ module.exports = function (kibana) {
                     version: 1
                   };
                   return savedObjectsClient.create(ontologyDocType, doc, { id: ontologyDocId }, req)
-                  .then(reply);
+                  .then(reply)
+                  .catch(reply);
                 }
+              } else {
+                reply(err);
               }
             });
           })

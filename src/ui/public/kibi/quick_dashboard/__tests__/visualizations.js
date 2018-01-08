@@ -1,3 +1,4 @@
+import * as visTypes from '../vistypes';
 import { QuickDashMakeVisProvider } from '../make_visualizations';
 
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
@@ -170,9 +171,6 @@ function initTest() {
 describe('QuickDashboard Visualization Tests', function () {
   beforeEach(initTest);
 
-  it('dummy test', function () {
-  });
-
   describe('String fields', function () {
     it('Returns a pie with few uniques', function () {
       uniqueEsResp.aggregations.result.value = 5;
@@ -182,7 +180,7 @@ describe('QuickDashboard Visualization Tests', function () {
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
           expect(vises.length).to.be(1);
-          expect(vises[0].type).to.be('pie');
+          expect(vises[0].type).to.be(visTypes.PIE);
         });
     });
 
@@ -198,8 +196,8 @@ describe('QuickDashboard Visualization Tests', function () {
       return visBuilder(indexPattern, [ field, field2 ])
         .then(vises => {
           expect(vises.length).to.be(2);
-          expect(vises[0].type).to.be('tagcloud');
-          expect(vises[1].type).to.be('tagcloud');
+          expect(vises[0].type).to.be(visTypes.TAGCLOUD);
+          expect(vises[1].type).to.be(visTypes.TAGCLOUD);
         });
     });
 
@@ -219,8 +217,8 @@ describe('QuickDashboard Visualization Tests', function () {
       return visBuilder(indexPattern, [ field, field2 ])
         .then(vises => {
           expect(vises.length).to.be(2);
-          expect(vises[0].type).to.be('histogram');
-          expect(vises[1].type).to.be('histogram');
+          expect(vises[0].type).to.be(visTypes.HISTOGRAM);
+          expect(vises[1].type).to.be(visTypes.HISTOGRAM);
         });
     });
 
@@ -240,8 +238,8 @@ describe('QuickDashboard Visualization Tests', function () {
       return visBuilder(indexPattern, [ field, field2 ])
         .then(vises => {
           expect(vises.length).to.be(2);
-          expect(vises[0].type).to.be('table');
-          expect(vises[1].type).to.be('table');
+          expect(vises[0].type).to.be(visTypes.TABLE);
+          expect(vises[1].type).to.be(visTypes.TABLE);
         });
     });
   });
@@ -255,7 +253,7 @@ describe('QuickDashboard Visualization Tests', function () {
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
           expect(vises.length).to.be(1);
-          expect(vises[0].type).to.be('pie');
+          expect(vises[0].type).to.be(visTypes.PIE);
         });
     });
 
@@ -269,7 +267,7 @@ describe('QuickDashboard Visualization Tests', function () {
           return visBuilder(indexPattern, [ field ])
             .then(vises => {
               expect(vises.length).to.be(1);
-              expect(vises[0].type).to.be('histogram');
+              expect(vises[0].type).to.be(visTypes.HISTOGRAM);
             });
         };
       }
@@ -289,7 +287,7 @@ describe('QuickDashboard Visualization Tests', function () {
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
           expect(vises.length).to.be(1);
-          expect(vises[0].type).to.be('line');
+          expect(vises[0].type).to.be(visTypes.LINE);
         });
     });
   });
@@ -301,7 +299,7 @@ describe('QuickDashboard Visualization Tests', function () {
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
           expect(vises.length).to.be(1);
-          expect(vises[0].type).to.be('pie');
+          expect(vises[0].type).to.be(visTypes.PIE);
         });
     });
   });
@@ -313,29 +311,29 @@ describe('QuickDashboard Visualization Tests', function () {
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
           expect(vises.length).to.be(1);
-          expect(vises[0].type).to.be('tile_map');
+          expect(vises[0].type).to.be(visTypes.TILE_MAP);
         });
     });
   });
 
   describe('Additional visualizations', function () {
     it('Will add Kibi Data Table if available', function () {
-      additionalVisTypes.push({ name: 'kibi-data-table' });
+      additionalVisTypes.push({ name: visTypes.SIREN_DATA_TABLE });
 
       return visBuilder(indexPattern, [])
         .then(vises => {
           expect(vises.length).to.be(1);
-          expect(vises[0].type).to.be('kibi-data-table');
+          expect(vises[0].type).to.be(visTypes.SIREN_DATA_TABLE);
         });
     });
 
     it('Will add Kibi Multi-Chart if available', function () {
-      additionalVisTypes.push({ name: 'kibi_multi_chart_vis' });
+      additionalVisTypes.push({ name: visTypes.SIREN_MULTI_CHART });
 
       return visBuilder(indexPattern, [])
         .then(vises => {
           expect(vises.length).to.be(1);
-          expect(vises[0].type).to.be('kibi_multi_chart_vis');
+          expect(vises[0].type).to.be(visTypes.SIREN_MULTI_CHART);
         });
     });
   });

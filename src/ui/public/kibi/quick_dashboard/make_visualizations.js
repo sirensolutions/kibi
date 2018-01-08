@@ -1,6 +1,8 @@
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
+import * as visTypes from './vistypes';
+
 import _ from 'lodash';
 
 /*
@@ -20,18 +22,18 @@ export function QuickDashMakeVisProvider(
   $injector, Private, savedVisualizations, mappings, es) {
 
   const AggConfigs = Private(VisAggConfigsProvider);
-  const visTypes = Private(VisTypesRegistryProvider);
+  const visTypesRegistry = Private(VisTypesRegistryProvider);
 
   const TERM_ELEMENT_COUNT = 35;
   const TERM_ELEMENT_COUNT_4_TABLE = 100;
   const NUMERIC_HISTO_BUCKETS_COUNT = 150;
 
   const aggSchemasByVisType = {
-    table: 'bucket'
+    [visTypes.TABLE]: 'bucket'
   };
 
   const defaultParamsByVisType = {
-    histogram: { addLegend: false }   // No legend, would just show 'Count'
+    [visTypes.HISTOGRAM]: { addLegend: false }   // No legend, would just show 'Count'
   };
 
 
@@ -318,7 +320,7 @@ export function QuickDashMakeVisProvider(
     return evalUniqueCount(index, field).then(unique => {
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
-        return retVis('pie', 'terms', { size: TERM_ELEMENT_COUNT });
+        return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
       }
 
       // Otherwise, use a histogram
@@ -358,7 +360,7 @@ export function QuickDashMakeVisProvider(
     return evalUniqueCount(index, field).then(unique => {
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
-        return retVis('pie', 'terms', { size: TERM_ELEMENT_COUNT });
+        return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
       }
 
       return Promise.all([
@@ -369,7 +371,7 @@ export function QuickDashMakeVisProvider(
         // Use tagcloud if type is analyzed
         if(isAnalyzed) {
           const params = (termsEval.relativeCutoff < 0.1) ? { scale: 'log' } : {};
-          return retVis('tagcloud', 'terms', { size: TERM_ELEMENT_COUNT }, params);
+          return retVis(visTypes.TAGCLOUD, 'terms', { size: TERM_ELEMENT_COUNT }, params);
         }
 
 
@@ -377,7 +379,7 @@ export function QuickDashMakeVisProvider(
 
         // Use pie for 90% of the dataset in <= 10 terms
         if(cutoffIdx < 10) {
-          return retVis('pie', 'terms', { size: TERM_ELEMENT_COUNT });
+          return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
         }
 
         // Use histogram for 90% of the dataset in <= 50 terms
@@ -390,7 +392,7 @@ export function QuickDashMakeVisProvider(
         }
 
         // Use table otherwise
-        return retVis('table', 'terms', { size: TERM_ELEMENT_COUNT_4_TABLE });
+        return retVis(visTypes.TABLE, 'terms', { size: TERM_ELEMENT_COUNT_4_TABLE });
       });
     });
   }
@@ -402,7 +404,7 @@ export function QuickDashMakeVisProvider(
     // Specialized vis with multiple aggs
 
     return Promise.all([
-      newDefaultVis(index, 'line'),
+      newDefaultVis(index, visTypes.LINE),
       evalDateInterval(index, dateField)
     ])
     .then(([sVis, intervalParams]) => {
@@ -440,7 +442,8 @@ export function QuickDashMakeVisProvider(
   }
 
   function hasKibiDataTable() {
-    return !!visTypes.find(visType => visType.name === 'kibi-data-table');
+    return !!visTypesRegistry.find(
+      visType => visType.name === visTypes.SIREN_DATA_TABLE);
   }
 
   function addKibiDataTableIfPresent(index, fields, vises) {
@@ -451,7 +454,7 @@ export function QuickDashMakeVisProvider(
       .difference(_.compact([index.timeFieldName]))     // Time field already included
       .value();
 
-    return newDefaultVis(index, 'kibi-data-table')
+    return newDefaultVis(index, visTypes.SIREN_DATA_TABLE)
       .then(kibiDataTable => {
         configureVis(kibiDataTable, { displayName: 'Search Results' }, null, {
           columns: fieldNames
@@ -462,7 +465,8 @@ export function QuickDashMakeVisProvider(
   }
 
   function hasMultichartVis() {
-    return !!visTypes.find(visType => visType.name === 'kibi_multi_chart_vis');
+    return !!visTypesRegistry.find(
+      visType => visType.name === visTypes.SIREN_MULTI_CHART);
   }
 
   function multiChartCandidateFields(index) {
@@ -489,7 +493,7 @@ export function QuickDashMakeVisProvider(
       });
 
     return Promise.all([
-      newDefaultVis(index, 'kibi_multi_chart_vis'),
+      newDefaultVis(index, visTypes.SIREN_MULTI_CHART),
       analysisPromise
     ])
     .then(([ multiVis, analysis]) => {
@@ -570,11 +574,11 @@ export function QuickDashMakeVisProvider(
             break;
 
           case 'boolean':
-            output = createVis(index, field, 'pie', 'terms', { size: 2 });
+            output = createVis(index, field, visTypes.PIE, 'terms', { size: 2 });
             break;
 
           case 'geo_point':
-            output = createVis(index, field, 'tile_map', 'geohash_grid');
+            output = createVis(index, field, visTypes.TILE_MAP, 'geohash_grid');
             break;
 
           default:

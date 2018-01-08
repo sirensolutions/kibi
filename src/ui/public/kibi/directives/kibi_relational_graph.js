@@ -167,9 +167,8 @@ uiModules
         if (id && relationalGraph) {
           const node = relationalGraph.getItem(id);
           // this is to let other components react to the changed selection.
-          $scope.selected = { id: node.id, type: node.d.entityType };
-          // $scope.selected.id = node.id;
-          // $scope.selected.type = node.d.entityType;
+          $scope.selected.id = node.id;
+          $scope.selected.type = node.d.entityType;
         }
       };
     }

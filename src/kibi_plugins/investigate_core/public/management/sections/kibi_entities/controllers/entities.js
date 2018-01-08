@@ -11,7 +11,6 @@ import 'ui/kibi/directives/kibi_relational_graph';
 import './entity_relations';
 import './create_index_pattern';
 import './create_eid';
-import 'angular-animate';
 import 'angular-ui-tree';
 
 uiRoutes
@@ -66,7 +65,7 @@ uiRoutes
   }
 });
 
-uiModules.get('apps/management', ['kibana', 'ui.tree', 'ngAnimate'])
+uiModules.get('apps/management', ['kibana', 'ui.tree'])
 .controller('entities', function ($scope, $route, kbnUrl, createNotifier, indexPatterns, ontologyClient) {
   $scope.state = { section: 'entity_panel' };
 

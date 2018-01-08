@@ -69,7 +69,7 @@ const Private = function (provider) {
 };
 
 const $injector = new Map(_.pairs({
-  kibiMultiChartSDC() {
+  multiChartSDC() {
     return Promise.resolve({ field, sdc: { vis: 'something' } });
   }
 }));

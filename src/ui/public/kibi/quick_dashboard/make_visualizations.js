@@ -6,7 +6,7 @@ import * as visTypes from './vistypes';
 import _ from 'lodash';
 
 /*
- * Adapted from multichart vis, see the Kibi SDC4V papers for reference.
+ * Adapted from multichart vis, see the Siren SDC4V papers for reference.
  */
 
 
@@ -88,7 +88,7 @@ export function QuickDashMakeVisProvider(
     };
 
     if(timeFieldName) {
-      // All kibi searches are filtered by the timeField if that is present.
+      // All siren searches are filtered by the timeField if that is present.
       //
       // All hits without timeField value will therefore never be recovered in
       // any visualization - they must be filtered out from evaluations.
@@ -441,13 +441,13 @@ export function QuickDashMakeVisProvider(
     });
   }
 
-  function hasKibiDataTable() {
+  function hasSirenDataTable() {
     return !!visTypesRegistry.find(
       visType => visType.name === visTypes.SIREN_DATA_TABLE);
   }
 
-  function addKibiDataTableIfPresent(index, fields, vises) {
-    if(!hasKibiDataTable()) { return vises; }
+  function addSirenDataTableIfPresent(index, fields, vises) {
+    if(!hasSirenDataTable()) { return vises; }
 
     const fieldNames = _(fields)
       .map('name')
@@ -455,12 +455,12 @@ export function QuickDashMakeVisProvider(
       .value();
 
     return newDefaultVis(index, visTypes.SIREN_DATA_TABLE)
-      .then(kibiDataTable => {
-        configureVis(kibiDataTable, { displayName: 'Search Results' }, null, {
+      .then(sirenDataTable => {
+        configureVis(sirenDataTable, { displayName: 'Search Results' }, null, {
           columns: fieldNames
         });
 
-        return vises.concat(kibiDataTable);
+        return vises.concat(sirenDataTable);
       });
   }
 
@@ -480,14 +480,14 @@ export function QuickDashMakeVisProvider(
     if(!hasMultichartVis()) { return vises; }
 
     const candidateFields = multiChartCandidateFields(index);
-    const kibiMultiChartSDC = $injector.get('kibiMultiChartSDC');
+    const multiChartSDC = $injector.get('multiChartSDC');
 
     const analysisPromise = promiseSerialMap(candidateFields,
       field => {
         if(progress.canceled) { return Promise.reject(0); }
         progress.notify(`Multi-Chart - Analyzing field "${field.displayName}"`);
 
-        return kibiMultiChartSDC(index.id, field)
+        return multiChartSDC(index.id, field)
           .then(sdc => ({ field, sdc }))
           .catch(_.noop);                     // Errors become undefs
       });
@@ -514,7 +514,7 @@ export function QuickDashMakeVisProvider(
       const activeField = fieldsData[0].field;
 
       // Configure the visualization
-      multiVis.title = 'Kibi Multi-Chart';
+      multiVis.title = 'Multi-Chart';
 
       multiVis.vis.kibiSettings = {
         activeSetting: activeField.name,
@@ -589,9 +589,9 @@ export function QuickDashMakeVisProvider(
       })
       .then(vises => {
         if(progress.canceled) { return Promise.reject(0); }
-        progress.notify('Adding Kibi data table');
+        progress.notify('Adding Siren data table');
 
-        return addKibiDataTableIfPresent(index, fields, vises);
+        return addSirenDataTableIfPresent(index, fields, vises);
       })
       .then(vises => addMultichartVisIfPresent(index, vises, progress))
       .then(_.filter)
@@ -601,7 +601,7 @@ export function QuickDashMakeVisProvider(
     analysisStepsCount(index, fields) {
       let result = fields.length;
 
-      if(hasKibiDataTable()) { result += 1; }
+      if(hasSirenDataTable()) { result += 1; }
 
       if(hasMultichartVis()) {
         result += multiChartCandidateFields(index).length;

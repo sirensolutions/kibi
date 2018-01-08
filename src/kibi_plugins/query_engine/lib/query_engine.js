@@ -253,15 +253,13 @@ QueryEngine.prototype._loadTemplates = function () {
           scriptData.templateSource = sourceTemplate.toString();
         }
 
-        const savedObjectsClient = self.server.savedObjectsClientFactory({
-          callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-        });
-
-        savedObjectsClient.create(
-          'template',
-          scriptData,
-          { id: templateId }
-        )
+        return self.cluster.callWithInternalUser('create', {
+          timeout: '1000ms',
+          index: self.config.get('kibana.index'),
+          type: 'template',
+          id: templateId,
+          body: JSON.stringify(scriptData, null, ' '),
+        })
         .then(() => {
           self.log.info('Template [' + templateId + '] successfully loaded');
         })
@@ -302,17 +300,18 @@ QueryEngine.prototype._loadDatasources = function () {
 
           datasourceObjParam.url = gremlinUrl + '/graph/queryBatch';
           datasourceObj.datasourceParams = JSON.stringify(datasourceObjParam);
-          data = datasourceObj;
+
+          data = new Buffer(JSON.stringify(datasourceObj).length);
+          data.write(JSON.stringify(datasourceObj), 'utf-8');
         }
 
-        const savedObjectsClient = self.server.savedObjectsClientFactory({
-          callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-        });
-        savedObjectsClient.create(
-          'datasource',
-          data,
-          { id: datasourceId },
-        )
+        self.cluster.callWithInternalUser('index', {
+          timeout: '1000ms',
+          index: self.config.get('kibana.index'),
+          type: 'datasource',
+          id: datasourceId,
+          body: data.toString()
+        })
         .then(function (resp) {
           self.log.info('Datasource [' + datasourceId + '] successfully loaded');
           fulfill(true);

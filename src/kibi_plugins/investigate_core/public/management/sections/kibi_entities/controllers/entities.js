@@ -66,7 +66,7 @@ uiRoutes
   }
 });
 
-uiModules.get('apps/management', ['kibana', 'ui.tree'/*, 'ngAnimate'*/])
+uiModules.get('apps/management', ['kibana', 'ui.tree', 'ngAnimate'])
 .controller('entities', function ($scope, $route, $timeout, Private, kbnUrl, createNotifier, indexPatterns, ontologyClient) {
   $scope.state = { section: 'entity_panel' };
 

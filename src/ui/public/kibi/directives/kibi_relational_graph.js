@@ -10,6 +10,7 @@ uiModules
 .directive('kibiRelationalGraph', function (Private, $timeout, ontologyClient) {
   return {
     restrict: 'E',
+    replace: true,
     scope: {
       isVisible: '=',
       selectedItem: '='
@@ -32,20 +33,18 @@ uiModules
         handMode: true
       };
 
+      console.log($scope.selectedItem);
       $scope.klBasePath = chrome.getBasePath() + '/plugins/graph_browser_vis/webpackShims/';
 
       const updateRelationalGraph = function () {
-        // wait for the digest cycle to finish
-        // $timeout(() => {
-          if (relationalGraph && $scope.isVisible) {
-            graphHelper.focusOnNodes([$scope.selectedItem.id], relationalGraph);
-            relationalGraph.selection($scope.selectedItem.id);
-            // TODO with the latest version we can zoom on an arbitrary array of elements
-            // the selected entity and the direct neighbours
-            // relationalGraph.zoom('fit', { ids: $scope.selectedItem.id, animate: true});
-            relationalGraph.zoom('selection', { animate: true, time: 600 });
-          }
-        // });
+        if (relationalGraph && $scope.isVisible) {
+          graphHelper.focusOnNodes([$scope.selectedItem.id], relationalGraph);
+          relationalGraph.selection($scope.selectedItem.id);
+          // TODO with the latest version we can zoom on an arbitrary array of elements
+          // the selected entity and the direct neighbours
+          // relationalGraph.zoom('fit', { ids: $scope.selectedItem.id, animate: true});
+          relationalGraph.zoom('selection', { animate: true, time: 600 });
+        }
       };
 
       const hexToRgb = function (hex) {
@@ -147,28 +146,17 @@ uiModules
       $scope.klReady = function (graph) {
         relationalGraph = graph;
 
-        $scope.$watch(_.throttle(() => {
-          const element =  document.getElementsByClassName('relational-graph');
-          if (element && element[0] && element[0].attributes['ng-show']) {
-            return  {
-              h: element[0].offsetHeight,
-              w: element[0].offsetWidth
-            };
-          } else {
-            return {
-              h: 0,
-              w: 0
-            };
+        $scope.$watch('isVisible', (value) => {
+          if (value && !graphInitialized) {
+            const element =  document.getElementsByClassName('relational-graph');
+            const height = element[0].offsetHeight;
+            const width = element[0].offsetWidth;
+            kl.setSize('relationalGraph', width, height);
+
+            $scope.reloadGraph(!graphInitialized);
+            graphInitialized = true;
           }
-        }, 200), (value, oldValue) => {
-          if (relationalGraph && value && oldValue && (value.h !== oldValue.h || value.w !== oldValue.w)) {
-            if (oldValue.w === 0 || oldValue.h === 0) {
-              $scope.reloadGraph(!graphInitialized);
-              graphInitialized = true;
-            }
-            kl.setSize('relationalGraph', value.w, value.h);
-          }
-        });
+        })
       };
 
       $scope.klDblClick = function (id) {
@@ -181,7 +169,11 @@ uiModules
 
       // Make keylines load after the page has been rendered.
       $timeout(() => {
-        $scope.isInitializable = true;
+        $scope.$watch('isVisible', (val) => {
+          if (val === true) {
+            $scope.isInitializable = true;
+          }
+        });
       });
     }
   };

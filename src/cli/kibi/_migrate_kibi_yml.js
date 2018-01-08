@@ -2,8 +2,9 @@ import { safeLoad, safeDump } from 'js-yaml';
 import { readFileSync as read, writeFileSync as write, renameSync as rename } from 'fs';
 import { fromRoot } from '../../utils';
 import { has } from 'lodash';
+import { replacementMap, valueReplacementMap } from './kibi_to_siren_migration_maps';
 
-// The keys to be replaced are set as keys in the map
+// The keys to be replaced are set as keys in the replacementMap map
 // The new keys to replace the old keys with are the values
 // if replacing a nested key and then replacing a higher level key
 // in the same nested stanza, replace the lower key first.
@@ -22,23 +23,12 @@ import { has } from 'lodash';
 // }
 // converts to 'foo.bar.boop'
 
-const replacementMap = {
-  'kibi_access_control.sentinl': 'sirenalert',
-  kibi_access_control: 'investigate_access_control',
-  kibi_core: 'investigate_core'
-};
-
-// This map holds potential value replacements.
+// The valueReplacementMap map holds potential value replacements.
 // If the user has diverted from the old defaults for e.g. the admin_role
 // the user's settings should be retained in the yml.
 // On the other hand, if the old defaults haven't been changed, we need to
 // set the old defaults explicitly into the config to ensure back compatibility
 // with pre-Siren 10 setups
-const valueReplacementMap = {
-  'investigate_access_control.admin_role':           { oldVal: 'kibiadmin' },
-  'elasticsearch.username':                          { oldVal: 'kibiserver' },
-  'investigate_access_control.sirenalert.username' : { oldVal: 'sentinl' }
-};
 
 // remove the parent key from the string and return the child key
 // e.g. foo.bar.baz becomes bar.baz

@@ -252,13 +252,18 @@ module.exports = function (kibana) {
               .then(reply);
             })
             .catch((err) => {
-              // ontology-model not found. Create a new one.
-              const doc = {
-                model: response,
-                version: 1
-              };
-              return savedObjectsClient.create(ontologyDocType, doc, { id: ontologyDocId }, req)
-              .then(reply);
+              if (err.statusCode === 404) {
+                const response = JSON.parse(err.response);
+                if (response.found === false) {
+                  // ontology-model not found. Create a new one.
+                  const doc = {
+                    model: response,
+                    version: 1
+                  };
+                  return savedObjectsClient.create(ontologyDocType, doc, { id: ontologyDocId }, req)
+                  .then(reply);
+                }
+              }
             });
           })
           .catch(errors.StatusCodeError, function (err) {

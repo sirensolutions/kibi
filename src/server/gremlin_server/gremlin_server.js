@@ -21,7 +21,7 @@ function startServer(self, fulfill, reject) {
   self.url = config.get('investigate_core.gremlin_server.url');
   self._isAnotherGremlinRunning()
   .then(() => {
-    const msg = 'Another gremlin server was found running. Won\'t start another instance.';
+    const msg = 'Another Siren Gremlin Server was found running. Won\'t start another instance.';
     self.server.log(['gremlin', 'warning'], msg);
     fulfill({ message: msg });
   })
@@ -104,7 +104,7 @@ function startServer(self, fulfill, reject) {
                   break;
                 default:
                   const message = `Unknown ssl verificationMode: ${verificationMode} ` +
-                                   'while starting Gremlin Server';
+                                   'while starting the Siren Gremlin Server';
                   reject(new Error(message));
               }
             }
@@ -114,7 +114,7 @@ function startServer(self, fulfill, reject) {
               const sslKeyStore = config.get('investigate_core.gremlin_server.ssl.key_store');
               const sslKeyStorePsw = config.get('investigate_core.gremlin_server.ssl.key_store_password');
               if (!sslKeyStorePsw) {
-                const message = `The Gremlin Server keystore password was not specified; ` +
+                const message = `The Siren Gremlin Server keystore password was not specified; ` +
                                  'in investigate_core.gremlin_server.ssl.key_store_password';
                 reject(new Error(message));
               }
@@ -124,7 +124,7 @@ function startServer(self, fulfill, reject) {
                 args.push('--server.ssl.key-store-password=' + sslKeyStorePsw);
               }
             } else if (config.has('investigate_access_control.enabled') && config.get('investigate_access_control.enabled')) {
-              const msg = 'Since you are using access control, you must enable HTTPS support in Gremlin Server ' +
+              const msg = 'Since you are using access control, you must enable HTTPS support in Siren Gremlin Server ' +
                 'by configuring the key store in investigate.yml\n' +
                 'The following properties are required:\n' +
                 'investigate_core.gremlin_server.ssl.key_store\n' +
@@ -154,7 +154,7 @@ function startServer(self, fulfill, reject) {
               }
             }
 
-            self.server.log(['gremlin', 'info'], 'Starting the Siren gremlin server');
+            self.server.log(['gremlin', 'info'], 'Starting the Siren Gremlin Server');
             self.gremlinServer = childProcess.spawn('java', args);
             self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin', 'error'], ('' + data).trim()));
             self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin', 'info'], ('' + data).trim()));
@@ -172,20 +172,20 @@ function startServer(self, fulfill, reject) {
                   .then(function (resp) {
                     const jsonResp = JSON.parse(resp.toString());
                     if (jsonResp.status === 'ok') {
-                      self.server.log(['gremlin', 'info'], 'Siren gremlin server running at ' + self.url);
+                      self.server.log(['gremlin', 'info'], 'Siren Gremlin Server running at ' + self.url);
                       self.initialized = true;
                       fulfill({ message: 'The Siren gremlin server started successfully.' });
                     } else {
-                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren gremlin server');
+                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server');
                       counter--;
                       setTimeout(() => self.ping(counter), timeout);
                     }
                   })
                   .catch(function (err) {
                     if (err.error.code !== 'ECONNREFUSED') {
-                      self.server.log(['gremlin', 'error'], 'Failed to ping the Siren gremlin server: ' + err.message);
+                      self.server.log(['gremlin', 'error'], 'Failed to ping the Siren Gremlin Server: ' + err.message);
                     } else {
-                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren gremlin server');
+                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server');
                     }
                     counter--;
                     setTimeout(() => self.ping(counter), timeout);
@@ -193,7 +193,7 @@ function startServer(self, fulfill, reject) {
                 }, counter === maxCounter ? initialTimeout : timeout);
               } else {
                 self.gremlinServer.kill('SIGINT');
-                reject(new Error('The Siren gremlin server did not start correctly'));
+                reject(new Error('The Siren Gremlin Server did not start correctly'));
               }
             };
             self.ping(counter);
@@ -290,16 +290,16 @@ GremlinServerHandler.prototype.stop = function () {
   if (self.initialized) {
     self.initialized = false;
     return new Promise(function (fulfill, reject) {
-      self.server.log(['gremlin', 'info'], 'Stopping the Siren gremlin server');
+      self.server.log(['gremlin', 'info'], 'Stopping the Siren Gremlin Server');
 
       if (self.gremlinServer) {
         const exitCode = self.gremlinServer.kill('SIGINT');
         if (exitCode) {
-          self.server.log(['gremlin', 'info'], 'The Siren gremlin server exited successfully');
+          self.server.log(['gremlin', 'info'], 'The Siren Gremlin Server exited successfully');
           fulfill(true);
         } else {
-          self.server.log(['gremlin', 'error'], 'The Siren gremlin server exited with non zero status: ' + exitCode);
-          reject(new Error('The Siren gremlin server exited with non zero status: ' + exitCode));
+          self.server.log(['gremlin', 'error'], 'The Siren Gremlin Server exited with non zero status: ' + exitCode);
+          reject(new Error('The Siren Gremlin Server exited with non zero status: ' + exitCode));
         }
       } else {
         fulfill(true);

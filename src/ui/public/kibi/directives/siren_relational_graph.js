@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import template from './kibi_relational_graph.html';
+import template from './siren_relational_graph.html';
 import chrome from 'ui/chrome';
 import _ from 'lodash';
 import linesPacked from 'plugins/graph_browser_vis/webpackShims/lines-packed';

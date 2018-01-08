@@ -7,7 +7,7 @@ import 'plugins/investigate_core/ui/directives/saved_search_nav/saved_search_nav
 import 'plugins/kibana/management/sections/indices/edit_index_pattern/edit_index_pattern';
 import 'plugins/investigate_core/management/sections/kibi_entities/styles/entities.less';
 import 'plugins/investigate_core/management/sections/indices/index_options/index_options';
-import 'ui/kibi/directives/kibi_relational_graph';
+import 'ui/kibi/directives/siren_relational_graph';
 import './entity_relations';
 import './create_index_pattern';
 import './create_eid';

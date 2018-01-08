@@ -1,4 +1,6 @@
 
+import * as visTypes from './vistypes';
+
 import _ from 'lodash';
 
 
@@ -8,49 +10,49 @@ const gridWidth = 12;
 const maxPanelsPerRow = 3;
 
 const typeDefaults = _.indexBy([{
-  type: 'pie',
-  priority: 1,                      // See PanelSpecs for descriptions
+  type: visTypes.PIE,
+  priority: 1,                              // See PanelSpecs for descriptions
   minWidth: 3,
   minHeight: 2,
   grow: 1
 }, {
-  type: 'table',
+  type: visTypes.TABLE,
   priority: 1,
   minWidth: 3,
   minHeight: 3,
   grow: 0
 }, {
-  type: 'tagcloud',
+  type: visTypes.TAGCLOUD,
   priority: 1,
   minWidth: 3,
   minHeight: 3,
   grow: 1
 }, {
-  type: 'histogram',                // Vertical bars
+  type: visTypes.HISTOGRAM,                 // Vertical bars
   priority: 1,
   minWidth: 6,
   minHeight: 3,
   grow: 2
 }, {
-  type: 'line',                     // Currently used as timeline (datetimes)
+  type: visTypes.LINE,                      // Currently used as timeline (datetimes)
   priority: 2,
   minWidth: 9,
   minHeight: 3,
   grow: 2
 }, {
-  type: 'tile_map',                 // Coordinate map (geo points)
+  type: visTypes.TILE_MAP,                  // Coordinate map (geo points)
   priority: 3,
   minWidth: 9,
   minHeight: 3,
   grow: 2
 }, {
-  type: 'kibi-data-table',          // Kibi Data Table (search results)
+  type: visTypes.SIREN_MULTI_CHART,         // Multichart (jolly vis)
   priority: 0,
   minWidth: 6,
   minHeight: 3,
   grow: 1
 }, {
-  type: 'kibi_multi_chart_vis',     // Multichart (jolly vis)
+  type: visTypes.SIREN_DATA_TABLE,          // Siren Data Table (search results)
   priority: 0,
   minWidth: 6,
   minHeight: 3,

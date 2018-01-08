@@ -1,42 +1,47 @@
 import { ModalOverlay } from 'ui/modals/modal_overlay';
 
 import angular from 'angular';
+import _ from 'lodash';
 
 
 export function BaseModalProvider($rootScope, $compile) {
-  function assignEventHandlers(scope, modal, resolve) {
-    Object.assign(scope, {
-      destroy() {
-        angular.element(document.body).off('keydown');
-
-        modal.destroy();
-        this.$destroy();
-      },
-
-      onConfirm(result) {
-        this.destroy();
-        resolve(result);
-      },
-
-      onCancel() {
-        this.destroy();
-        resolve(null);
-      }
-    });
-
-    angular.element(document.body).on('keydown', (event) => {
+  function bindEscKey(scope) {
+    angular.element(document.body).on('keydown', event => {
       if(event.keyCode === 27) { scope.onCancel(); }
     });
   }
 
   return function baseModalPromise(template, scopeData) {
-    return new Promise(function baseModal(resolve) {
-      const scope = Object.assign($rootScope.$new(), scopeData);
+    const showVars = {};
 
-      const modalWindow = $compile(template)(scope);
-      const modal = new ModalOverlay(modalWindow);
+    const scope = Object.assign($rootScope.$new(), scopeData, {
+      onConfirm: _.once(function onConfirm(result) {
+        angular.element(document.body).off('keydown');
 
-      assignEventHandlers(scope, modal, resolve);
+        showVars.modal.destroy();
+        scope.$destroy();
+
+        showVars.resolve(result);
+      }),
+
+      onCancel() {
+        scope.onConfirm(null);
+      }
     });
+
+    return {
+      scope,
+
+      show() {
+        return new Promise(function show(resolve) {
+          const modalWindow = $compile(template)(scope);
+
+          showVars.resolve = resolve;
+          showVars.modal = new ModalOverlay(modalWindow);     // Spawns the modal
+
+          bindEscKey(scope);
+        });
+      }
+    };
   };
 }

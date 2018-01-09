@@ -270,7 +270,8 @@ module.exports = function (kibana) {
             });
           })
           .catch(errors.StatusCodeError, function (err) {
-            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
+            const message = err.error && err.error.message ? err.error.message : err.message;
+            reply(Boom.create(err.statusCode, message, err.error.stack));
           })
           .catch(errors.RequestError, function (err) {
             if (err.error.code === 'ETIMEDOUT') {

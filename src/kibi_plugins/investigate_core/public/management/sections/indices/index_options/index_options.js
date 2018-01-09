@@ -40,6 +40,12 @@ uiModules.get('apps/management')
           if ($scope.entity.longDescription) {
             entity.longDescription = $scope.entity.longDescription;
           }
+          if ($scope.entity.instanceLabel.type) {
+            entity.instanceLabelType = $scope.entity.instanceLabel.type;
+          }
+          if ($scope.entity.instanceLabel.value) {
+            entity.instanceLabelValue = $scope.entity.instanceLabel.value;
+          }
           promise = ontologyClient.updateEntity(entity);
         }
 

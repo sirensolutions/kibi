@@ -57,14 +57,14 @@
         <select required
                 class="kuiSelect"
                 ng-model="entity.instanceLabel.type">
-          <option value="field">Document Field</option>
-          <option value="scripted">Scripted Label</option>
+          <option value="FIELD">Document Field</option>
+          <option value="PARAMETERIZED">Scripted Label</option>
         </select><br/>
         <kibi-select
           required
           selected
           class="kibi-select-wrapper"
-          ng-if="entity.instanceLabel.type === 'field'"
+          ng-if="entity.instanceLabel.type === 'FIELD'"
           data-test-subj="index-relation-left-field"
           object-type="field"
           index-pattern-id="entity.id"
@@ -72,7 +72,7 @@
         ></kibi-select>
         <input
           required
-          ng-if="entity.instanceLabel.type === 'scripted'"
+          ng-if="entity.instanceLabel.type === 'PARAMETERIZED'"
           class="kuiTextInput kuiTextInput--large"
           data-test-subj="indexOptionsInstanceLabelValueInput"
           ng-model="entity.instanceLabel.value"

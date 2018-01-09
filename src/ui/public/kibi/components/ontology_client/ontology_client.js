@@ -174,12 +174,19 @@ uiModules
           Promise.reject(new Error('Failed to retrieve entities from the schema. An error has occurred.'));
         } else if (res.data) {
           const entities = _.reduce(res.data, (total, entity) => {
+            entity.instanceLabel = {};
             entity.id = this._removeNsDecode(entity.id);
             if (entity.longDescription) {
               entity.longDescription = this._removeNsDecode(entity.longDescription);
             }
             if (entity.label) {
               entity.label = entity.label.substring(0, entity.label.lastIndexOf('@'));
+            }
+            if (entity.instanceLabelType) {
+              entity.instanceLabel.type = entity.instanceLabelType;
+            }
+            if (entity.instanceLabelValue) {
+              entity.instanceLabel.value = entity.instanceLabelValue;
             }
 
             total.push(entity);
@@ -271,14 +278,17 @@ uiModules
    * The passed fields must not be already encoded. If this is the case use <insertEncodedEntity> instead.
    * Supported types: INDEX_PATTERN or VIRTUAL_ENTITY
    */
-  OntologyClient.prototype.insertEntity = function (id, label, type, icon, color, shortDescription, longDescription) {
+  OntologyClient.prototype.insertEntity = function (id, label, type, icon, color, shortDescription, longDescription,
+    instanceLabelType, instanceLabelValue) {
     const entity = {
       id: this._encodeUrl(id),
       label: label,
       type: type,
       icon: icon,
       color: color,
-      shortDescription: shortDescription
+      shortDescription: shortDescription,
+      instanceLabelType: instanceLabelType,
+      instanceLabelValue: instanceLabelValue
     };
     if (longDescription) {
       entity.longDescription = this._encodeUrl(entity.longDescription);

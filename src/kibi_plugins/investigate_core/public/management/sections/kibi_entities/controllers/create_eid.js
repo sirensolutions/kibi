@@ -20,7 +20,8 @@ module.directive('createEid', function () {
           icon,
           color
         } = this.formValues;
-        return ontologyClient.insertEntity(name, name, 'VIRTUAL_ENTITY', icon, color, shortDescription, longDescription)
+        return ontologyClient.insertEntity(name, name, 'VIRTUAL_ENTITY', icon, color, shortDescription, longDescription,
+          null, null)
         .then(() => {
           kbnUrl.change(`/management/siren/entities/${name}`);
         });

@@ -35,7 +35,7 @@ export default class BackupKibi {
     await this._dump.fromElasticsearchToFile(kibiIndex, 'data');
     await this._dump.fromElasticsearchToFile(kibiIndex, 'mapping');
     if (get(this._config, 'investigate_access_control.acl.enabled')) {
-      const aclIndex = get(this._config, 'investigate_access_control.acl.index');
+      const aclIndex = get(this._config, 'investigate_access_control.acl.index', '.sirenaccess');
       await this._dump.fromElasticsearchToFile(aclIndex, 'data');
       await this._dump.fromElasticsearchToFile(aclIndex, 'mapping');
     }

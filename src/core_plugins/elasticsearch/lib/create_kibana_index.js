@@ -19,12 +19,12 @@ module.exports = function (server, mappings) {
       mappings
     }
   })
-  .catch(handleError('Unable to create Kibi index "<%= kibana.index %>"'))
+  .catch(handleError('Unable to create Siren index "<%= kibana.index %>"'))
   .then(function () {
     return callWithInternalUser('cluster.health', {
       waitForStatus: 'yellow',
       index: index
     })
-    .catch(handleError('Waiting for Kibi index "<%= kibana.index %>" to come online failed.'));
+    .catch(handleError('Waiting for Siren index "<%= kibana.index %>" to come online failed.'));
   });
 };

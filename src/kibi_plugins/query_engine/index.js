@@ -239,17 +239,17 @@ module.exports = function (kibana) {
           };
 
           return queryEngine.schema(req.payload.path, opts)
-          .then((response) => {
+          .then((returnedModel) => {
             const ontologyDocId = 'default-ontology';
             const ontologyDocType = 'ontology-model';
             const savedObjectsClient = req.getSavedObjectsClient();
-
             return savedObjectsClient.get(ontologyDocType, ontologyDocId)
             .then((doc) => {
               const newProperties = doc.attributes;
-              newProperties.model = response;
+              newProperties.model = returnedModel;
               return savedObjectsClient.update(ontologyDocType, ontologyDocId, newProperties, {}, req)
-              .then(reply);
+              .then(reply)
+              .catch(reply);
             })
             .catch((err) => {
               if (err.statusCode === 404) {

@@ -1,7 +1,7 @@
 <div class="kibi-quickdash-create kuiModal">
   <div class="kuiModalHeader">
     <div class="kuiModalHeader__title">
-      Create a Quick Dashboard
+      Create a Prepopulated Dashboard
     </div>
 
     <div class="kuiModalHeaderCloseButton kuiIcon fa-times"
@@ -27,42 +27,23 @@
     <div class="form-group">
       <div>
         <label>
-          Saved Search
-          <a ng-click="showExplanation = !showExplanation">Why?</a>
+          Create Associated Saved Search
         </label>
-      </div>
-
-      <div ng-show="showExplanation" class="dashboard-explanation form-group">
-        <p>Add a Saved Search to a dashboard to:</p>
-        <ul>
-          <li>
-            Display a count of results (e.g. the hits on that saved search)
-          </li>
-          <li>
-            Populate the dashboard with meaningful Widgets - filtering by clicking
-            on the widget will always work coherently
-          </li>
-          <li>
-            Enable relational navigation across Dashboards (Set to Set navigation)
-          </li>
-        </ul>
-        <p>Dashboards without a Saved Search will be typically used only for cross index
-          "summary pages".</p>
       </div>
 
       <div>
         <input type="radio" ng-model="result.savedSearchAction" value="new">
-          New saved search with the same title
+          New saved search named "{{result.title}}"
         </input>
       </div>
-      <div ng-if="loadedSavedSearch">
+      <div ng-if="currentSavedSearchTitle">
         <input type="radio" ng-model="result.savedSearchAction" value="save">
-          Save current and use it
+          Save current search "{{currentSavedSearchTitle}}" and use it
         </input>
       </div>
-      <div>
-        <input type="radio" ng-model="result.savedSearchAction" value="none">
-          No saved search
+      <div ng-if="currentSavedSearchTitle">
+        <input type="radio" ng-model="result.savedSearchAction" value="nosave">
+          Use current search "{{currentSavedSearchTitle}}" without saving
         </input>
       </div>
     </div>

@@ -1,29 +1,39 @@
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
+import * as visTypes from './vistypes';
+
 import _ from 'lodash';
 
 /*
- * Adapted from multichart vis, see the Kibi SDC4V papers for reference.
+ * Adapted from multichart vis, see the Siren SDC4V papers for reference.
  */
+
+
+function promiseSerialMap(arr, map) {
+  return arr.reduce(function (promiseChain, val, idx) {
+    return promiseChain.then(results => map(val, idx)
+      .then(res => [...results, res]));
+  }, Promise.resolve([]));
+}
 
 
 export function QuickDashMakeVisProvider(
   $injector, Private, savedVisualizations, mappings, es) {
 
   const AggConfigs = Private(VisAggConfigsProvider);
-  const visTypes = Private(VisTypesRegistryProvider);
+  const visTypesRegistry = Private(VisTypesRegistryProvider);
 
   const TERM_ELEMENT_COUNT = 35;
   const TERM_ELEMENT_COUNT_4_TABLE = 100;
   const NUMERIC_HISTO_BUCKETS_COUNT = 150;
 
   const aggSchemasByVisType = {
-    table: 'bucket'
+    [visTypes.TABLE]: 'bucket'
   };
 
   const defaultParamsByVisType = {
-    histogram: { addLegend: false }   // No legend, would just show 'Count'
+    [visTypes.HISTOGRAM]: { addLegend: false }   // No legend, would just show 'Count'
   };
 
 
@@ -78,7 +88,7 @@ export function QuickDashMakeVisProvider(
     };
 
     if(timeFieldName) {
-      // All kibi searches are filtered by the timeField if that is present.
+      // All siren searches are filtered by the timeField if that is present.
       //
       // All hits without timeField value will therefore never be recovered in
       // any visualization - they must be filtered out from evaluations.
@@ -93,7 +103,16 @@ export function QuickDashMakeVisProvider(
   }
 
   function evalUniqueCount(index, field) {
-    const request = { result: { cardinality: fieldSpec(field) } };
+    const request = {
+      result: {
+        cardinality: _.assign({
+          // Unique count is always checked against low values (10), and
+          // high precision values are paid in memory usage on the server.
+
+          precision_threshold: 20         // Doubling just to be sure
+        }, fieldSpec(field))
+      }
+    };
 
     return searchAgg(index, request)
       .then(resp => resp.aggregations.result.value);
@@ -294,14 +313,14 @@ export function QuickDashMakeVisProvider(
 
 
   function analyzeNumber(index, field) {
-    if(!field.aggregatable) { return { vis: 'N/A' }; }
+    if(!field.aggregatable) { return null; }
 
     const retVis = createVis.bind(null, index, field);
 
     return evalUniqueCount(index, field).then(unique => {
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
-        return retVis('pie', 'terms', { size: TERM_ELEMENT_COUNT });
+        return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
       }
 
       // Otherwise, use a histogram
@@ -334,14 +353,14 @@ export function QuickDashMakeVisProvider(
   }
 
   function analyzeString(index, field) {
-    if(!field.aggregatable) { return { vis: 'N/A' }; }
+    if(!field.aggregatable) { return null; }
 
     const retVis = createVis.bind(null, index, field);
 
     return evalUniqueCount(index, field).then(unique => {
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
-        return retVis('pie', 'terms', { size: TERM_ELEMENT_COUNT });
+        return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
       }
 
       return Promise.all([
@@ -352,7 +371,7 @@ export function QuickDashMakeVisProvider(
         // Use tagcloud if type is analyzed
         if(isAnalyzed) {
           const params = (termsEval.relativeCutoff < 0.1) ? { scale: 'log' } : {};
-          return retVis('tagcloud', 'terms', { size: TERM_ELEMENT_COUNT }, params);
+          return retVis(visTypes.TAGCLOUD, 'terms', { size: TERM_ELEMENT_COUNT }, params);
         }
 
 
@@ -360,7 +379,7 @@ export function QuickDashMakeVisProvider(
 
         // Use pie for 90% of the dataset in <= 10 terms
         if(cutoffIdx < 10) {
-          return retVis('pie', 'terms', { size: TERM_ELEMENT_COUNT });
+          return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
         }
 
         // Use histogram for 90% of the dataset in <= 50 terms
@@ -373,7 +392,7 @@ export function QuickDashMakeVisProvider(
         }
 
         // Use table otherwise
-        return retVis('table', 'terms', { size: TERM_ELEMENT_COUNT_4_TABLE });
+        return retVis(visTypes.TABLE, 'terms', { size: TERM_ELEMENT_COUNT_4_TABLE });
       });
     });
   }
@@ -385,7 +404,7 @@ export function QuickDashMakeVisProvider(
     // Specialized vis with multiple aggs
 
     return Promise.all([
-      newDefaultVis(index, 'line'),
+      newDefaultVis(index, visTypes.LINE),
       evalDateInterval(index, dateField)
     ])
     .then(([sVis, intervalParams]) => {
@@ -422,29 +441,59 @@ export function QuickDashMakeVisProvider(
     });
   }
 
-  function addMultichartVisIfPresent(index, vises) {
-    // Bail out if the Kibi-Multichart vis is not installed
-    if(!visTypes.find(visType => visType.name === 'kibi_multi_chart_vis')) {
-      return vises;
-    }
+  function hasSirenDataTable() {
+    return !!visTypesRegistry.find(
+      visType => visType.name === visTypes.SIREN_DATA_TABLE);
+  }
 
-    const kibiMultiChartSDC = $injector.get('kibiMultiChartSDC');
+  function addSirenDataTableIfPresent(index, fields, vises) {
+    if(!hasSirenDataTable()) { return vises; }
 
+    const fieldNames = _(fields)
+      .map('name')
+      .difference(_.compact([index.timeFieldName]))     // Time field already included
+      .value();
 
-    const analysisPromise = Promise.all(
-      _(index.fields)
-        .filter(
-          field => field.visualizable &&
-          !_.includes(index.metaFields, field.name) &&
-          !field.name.endsWith('.geohash'))
-        .map(field => kibiMultiChartSDC(index.id, field)
+    return newDefaultVis(index, visTypes.SIREN_DATA_TABLE)
+      .then(sirenDataTable => {
+        configureVis(sirenDataTable, { displayName: 'Search Results' }, null, {
+          columns: fieldNames
+        });
+
+        return vises.concat(sirenDataTable);
+      });
+  }
+
+  function hasMultichartVis() {
+    return !!visTypesRegistry.find(
+      visType => visType.name === visTypes.SIREN_MULTI_CHART);
+  }
+
+  function multiChartCandidateFields(index) {
+    return index.fields.filter(field =>
+      field.visualizable &&
+      !_.includes(index.metaFields, field.name) &&
+      !field.name.endsWith('.geohash'));
+  }
+
+  function addMultichartVisIfPresent(index, vises, progress) {
+    if(!hasMultichartVis()) { return vises; }
+
+    const candidateFields = multiChartCandidateFields(index);
+    const multiChartSDC = $injector.get('multiChartSDC');
+
+    const analysisPromise = promiseSerialMap(candidateFields,
+      field => {
+        if(progress.canceled) { return Promise.reject(0); }
+        progress.notify(`Multi-Chart - Analyzing field "${field.displayName}"`);
+
+        return multiChartSDC(index.id, field)
           .then(sdc => ({ field, sdc }))
-          .catch(_.noop))                                 // Errors become undefs
-        .value()
-    );
+          .catch(_.noop);                     // Errors become undefs
+      });
 
     return Promise.all([
-      newDefaultVis(index, 'kibi_multi_chart_vis'),
+      newDefaultVis(index, visTypes.SIREN_MULTI_CHART),
       analysisPromise
     ])
     .then(([ multiVis, analysis]) => {
@@ -465,7 +514,7 @@ export function QuickDashMakeVisProvider(
       const activeField = fieldsData[0].field;
 
       // Configure the visualization
-      multiVis.title = 'Kibi Multi-Chart';
+      multiVis.title = 'Multi-Chart';
 
       multiVis.vis.kibiSettings = {
         activeSetting: activeField.name,
@@ -479,27 +528,6 @@ export function QuickDashMakeVisProvider(
 
       return vises.concat(multiVis);
     });
-  }
-
-  function addKibiDataTableIfPresent(index, fields, vises) {
-    // Bail out if the Kibi DataTable vis is not installed
-    if(!visTypes.find(visType => visType.name === 'kibi-data-table')) {
-      return vises;
-    }
-
-    const fieldNames = _(fields)
-      .map('name')
-      .difference(_.compact([index.timeFieldName]))     // Time field already included
-      .value();
-
-    return newDefaultVis(index, 'kibi-data-table')
-      .then(kibiDataTable => {
-        configureVis(kibiDataTable, { displayName: 'Search Results' }, null, {
-          columns: fieldNames
-        });
-
-        return vises.concat(kibiDataTable);
-      });
   }
 
   function updateVisStates(vises) {
@@ -516,42 +544,71 @@ export function QuickDashMakeVisProvider(
   }
 
 
-  return function (index, fields) {
-    return Promise.all(fields.map(field => {
-      let output;
+  return {
+    makeSavedVisualizations(index, fields, progress = {}) {
+      _.defaults(progress, {
+        canceled: false,
+        notify: _.noop
+      });
 
-      switch (field.type) {
-        case 'number':
-          output = analyzeNumber(index, field);
-          break;
+      return promiseSerialMap(fields, field => {
+        if(progress.canceled) { return Promise.reject(0); }
+        progress.notify(`Analyzing field "${field.displayName}"`);
 
-        case 'string':
-        case 'text':
-          output = analyzeString(index, field);
-          break;
+        let output;
 
-        case 'date':
-          output = analyzeDate(index, fields, field);
+        switch (field.type) {
+          case 'number':
+            output = analyzeNumber(index, field);
+            break;
 
-          break;
+          case 'string':
+          case 'text':
+          case 'keyword':
+            output = analyzeString(index, field);
+            break;
 
-        case 'boolean':
-          output = createVis(index, field, 'pie', 'terms', { size: 2 });
-          break;
+          case 'date':
+            output = analyzeDate(index, fields, field);
 
-        case 'geo_point':
-          output = createVis(index, field, 'tile_map', 'geohash_grid');
-          break;
+            break;
 
-        default:
-          output = { vis: 'N/A' };
+          case 'boolean':
+            output = createVis(index, field, visTypes.PIE, 'terms', { size: 2 });
+            break;
+
+          case 'geo_point':
+            output = createVis(index, field, visTypes.TILE_MAP, 'geohash_grid');
+            break;
+
+          default:
+            output = null;
+        }
+
+        return output;
+      })
+      .then(vises => {
+        if(progress.canceled) { return Promise.reject(0); }
+        progress.notify('Adding Siren data table');
+
+        return addSirenDataTableIfPresent(index, fields, vises);
+      })
+      .then(vises => addMultichartVisIfPresent(index, vises, progress))
+      .then(_.filter)
+      .then(updateVisStates);
+    },
+
+    analysisStepsCount(index, fields) {
+      let result = fields.length;
+
+      if(hasSirenDataTable()) { result += 1; }
+
+      if(hasMultichartVis()) {
+        result += multiChartCandidateFields(index).length;
       }
 
-      return output;
-    }))
-    .then(vises => addKibiDataTableIfPresent(index, fields, vises))
-    .then(vises => addMultichartVisIfPresent(index, vises))
-    .then(updateVisStates);
+      return result;
+    }
   };
 }
 

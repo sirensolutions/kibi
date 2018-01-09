@@ -199,7 +199,7 @@ module.exports = function (kibana) {
        */
       server.route({
         method: 'POST',
-        path: '/schema',
+        path: '/schemaQuery',
         handler: function (req, reply) {
           const config = server.config();
           const opts = {
@@ -223,6 +223,74 @@ module.exports = function (kibana) {
             });
         }
       });
+
+      /*
+       * Handles query to the ontology schema backend (in the gremlin server).
+       */
+      server.route({
+        method: 'POST',
+        path:'/schemaUpdate',
+        handler: function (req, reply) {
+          const config = server.config();
+          const opts = {
+            method: req.payload.method ? req.payload.method : 'POST',
+            data: req.payload.data,
+            url: config.get('investigate_core.gremlin_server.url')
+          };
+
+          return queryEngine.schema(req.payload.path, opts)
+          .then((response) => {
+            const ontologyDocId = 'default-ontology';
+            const ontologyDocType = 'ontology-model';
+            const savedObjectsClient = req.getSavedObjectsClient();
+
+            return savedObjectsClient.get(ontologyDocType, ontologyDocId)
+            .then((doc) => {
+              const newProperties = doc.attributes;
+              newProperties.model = response;
+              return savedObjectsClient.update(ontologyDocType, ontologyDocId, newProperties, {}, req)
+              .then(reply);
+            })
+            .catch((err) => {
+              if (err.statusCode === 404) {
+                const response = JSON.parse(err.response);
+                if (response.found === false) {
+                  // ontology-model not found. Create a new one.
+                  const doc = {
+                    model: response,
+                    version: 1
+                  };
+                  return savedObjectsClient.create(ontologyDocType, doc, { id: ontologyDocId }, req)
+                  .then(reply)
+                  .catch(reply);
+                }
+              } else {
+                reply(err);
+              }
+            });
+          })
+          .catch(errors.StatusCodeError, function (err) {
+            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
+          })
+          .catch(errors.RequestError, function (err) {
+            if (err.error.code === 'ETIMEDOUT') {
+              reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}` });
+            } else {
+              reply({ error: `An error occurred while sending a schema query: ${err.message}` });
+            }
+          })
+          .catch((err) => {
+            if (err.name === "AuthorizationError") {
+              reply(Boom.create(403, 'Request denied by ACL.', ''));
+            } else {
+              reply(err);
+            }
+          });
+        }
+      });
+
       /*
        * Translate a query containing kibi-specific DSL into an Elasticsearch query
        */

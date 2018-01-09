@@ -35,6 +35,9 @@
           },
           "title": {
             "type": "text"
+          },
+          "paths": {
+            "type": "text"
           }
         }
       },
@@ -214,6 +217,12 @@
           },
           "version": {
             "type": "integer"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "timeMode": {
+            "type": "string"
           }
         }
       },

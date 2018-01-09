@@ -1,0 +1,21 @@
+<div class="kibi-quickdash-progress kuiModal"
+  style="width: 450px">
+  <div class="kuiModalHeader">
+    <div class="kuiModalHeader__title">
+      Populating Dashboard...
+    </div>
+  </div>
+  <div class="kuiModalBody">
+    <progressbar max="progress.max" value="progress.value" animate="false" />
+    <div class="kuiModalBodyText">
+      {{progress.text}}
+    </div>
+  </div>
+  <div class="kuiModalFooter">
+    <button class="kuiButton kuiButton--hollow"
+      ng-click="onCancel()"
+      aria-label="Cancel">
+      Cancel
+    </button>
+</div>
+

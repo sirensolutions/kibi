@@ -1,5 +1,7 @@
 import createTemplate from './create_modal.html';
 import titleConflictTemplate from './title_conflict_modal.html';
+import progressTemplate from './progress_modal.html';
+
 import './create_modal.less';
 
 import { BaseModalProvider } from './base_modal';
@@ -17,13 +19,17 @@ export function QuickDashModalsProvider(Private) {
           storeTimeWithDashboard: true
         },
 
-        loadedSavedSearch: !!savedSearch.id,
+        currentSavedSearchTitle: savedSearch.id && savedSearch.title,
         showExplanation: false
       });
     },
 
-    titleConflict(options) {
-      return baseModal(titleConflictTemplate, options);
+    titleConflict(opts) {
+      return baseModal(titleConflictTemplate, opts);
+    },
+
+    progress(opts) {
+      return baseModal(progressTemplate, opts);
     }
   };
 }

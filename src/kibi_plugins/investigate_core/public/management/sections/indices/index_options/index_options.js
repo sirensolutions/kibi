@@ -5,7 +5,7 @@ import './index_options.less';
 
 
 uiModules.get('apps/management')
-.directive('indexOptions', function (ontologyClient, kbnUrl) {
+.directive('indexOptions', function ($compile, Private, ontologyClient, kbnUrl, createNotifier) {
   return {
     restrict: 'E',
     template: indexOptionsTemplate,
@@ -14,38 +14,46 @@ uiModules.get('apps/management')
       save: '='
     },
     link: function ($scope) {
+      const indexOptionsHelpers = Private(require('./helpers/index_options_helper'));
+
+      const addLabelPreviewPopup = function () {
+        var result = document.getElementsByClassName('label-preview');
+        const $el = angular.element(result);
+        $el.qtip('destroy', true);
+        const api = $el.qtip('api');
+        // build html content
+        indexOptionsHelpers.getInstanceLabelPreviewContent($scope.entity)
+        .then((html) =>{
+          if (api) {
+            api.set('content.text', html);
+          } else {
+            $el.qtip({
+              content: {
+                text: html,
+              },
+              position: {
+                my: 'left center',
+                at: 'right center'
+              },
+              hide: {
+                event: 'unfocus click'
+              },
+              show: 'click',
+              style: {
+                classes: 'qtip-light qtip-rounded qtip-shadow entity-label-preview'
+              }
+            });
+          }
+          $compile(html)($scope);
+        })
+      };
+
       $scope.save = function () {
         let promise;
         if ($scope.entity.type === 'VIRTUAL_ENTITY') {
           promise = ontologyClient.updateEntity($scope.entity);
         } else {
-          const entity = {
-            id: $scope.entity.id
-          };
-          if ($scope.entity.label) {
-            entity.label = $scope.entity.label;
-          }
-          if ($scope.entity.type) {
-            entity.type = $scope.entity.type;
-          }
-          if ($scope.entity.icon) {
-            entity.icon = $scope.entity.icon;
-          }
-          if ($scope.entity.color) {
-            entity.color = $scope.entity.color;
-          }
-          if ($scope.entity.shortDescription) {
-            entity.shortDescription = $scope.entity.shortDescription;
-          }
-          if ($scope.entity.longDescription) {
-            entity.longDescription = $scope.entity.longDescription;
-          }
-          if ($scope.entity.instanceLabel.type) {
-            entity.instanceLabelType = $scope.entity.instanceLabel.type;
-          }
-          if ($scope.entity.instanceLabel.value) {
-            entity.instanceLabelValue = $scope.entity.instanceLabel.value;
-          }
+          const entity = indexOptionsHelpers.getEntityForUpdate($scope.entity);
           promise = ontologyClient.updateEntity(entity);
         }
 
@@ -54,6 +62,15 @@ uiModules.get('apps/management')
           kbnUrl.change('/management/siren/entities/' + $scope.entity.id);
         });
       };
+
+      // Init the preview menu
+      if ($scope.entity) {
+        addLabelPreviewPopup();
+      }
+
+      $scope.$watch('entity.instanceLabel.value', () => {
+        addLabelPreviewPopup();
+      })
     }
   };
 });

@@ -5,7 +5,7 @@
   <h1
     class="kuiTitle kuiVerticalRhythm"
   >
-    {{ entity.type === 'INDEX_PATTERN' ? 'Index options' : 'Entity Identifier options' }}
+    {{ entity.type === 'INDEX_PATTERN' ? 'Index Pattern Options' : 'Entity Identifier Options' }}
   </h1>
 
   <div class="kuiVerticalRhythm">
@@ -63,6 +63,7 @@
         <kibi-select
           required
           selected
+          class="kibi-select-wrapper"
           ng-if="entity.instanceLabel.type === 'field'"
           data-test-subj="index-relation-left-field"
           object-type="field"
@@ -78,14 +79,8 @@
           ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
           type="text"
         />
-        <!-- <input
-          class="kuiTextInput kuiTextInput--large"
-          data-test-subj="indexOptionsInstanceLabelTypeInput"
-          ng-model="instanceLabelType"
-          ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
-          name="instanceLabelType"
-          type="text"
-        /> -->
+        <a tooltip="Clic to see the resulting label on a random subset of documents"
+           ng-if="entity.instanceLabel.value">preview<br/></a>
       </div>
     </div>
     <div class="kuiVerticalRhythm">

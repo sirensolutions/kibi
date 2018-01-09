@@ -39,16 +39,16 @@ uiModules
         if (relationalGraph && $scope.isVisible) {
           graphHelper.focusOnNodes([$scope.selected.id], relationalGraph);
           relationalGraph.selection($scope.selected.id);
-          relationalGraph.zoom('fit', { ids: $scope.selected.id, animate: true, time: 600});
+          relationalGraph.zoom('fit', { ids: $scope.selected.id, animate: true, time: 600 });
         }
       };
 
       const hexToRgb = function (hex) {
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
         } : null;
       };
 
@@ -85,7 +85,7 @@ uiModules
                 node.fi = {
                   c: node.c,
                   t: kl.getFontIcon(entity.icon)
-                }
+                };
                 delete node.c;
               }
 
@@ -127,8 +127,9 @@ uiModules
                         consistent: true
                       }
                     }, () => {
-                    fulfill();
-                  });
+                      fulfill();
+                    }
+                  );
                 } else {
                   relationalGraph.merge(klElements);
                 }
@@ -160,7 +161,7 @@ uiModules
             $scope.reloadGraph(!$scope.graphInitialized);
             $scope.graphInitialized = true;
           }
-        })
+        });
       };
 
       $scope.klDblClick = function (id) {

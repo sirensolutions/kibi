@@ -58,7 +58,7 @@ describe('investigate_core/migrations/functional', function () {
         const before = await snapshot();
         const migration = new Migration(configuration);
 
-        let result = await migration.upgrade();
+        const result = await migration.upgrade();
         expect(result).to.be(0);
       });
 
@@ -83,7 +83,7 @@ describe('investigate_core/migrations/functional', function () {
         const before = await snapshot();
         const migration = new Migration(configuration);
 
-        let result = await migration.upgrade();
+        const result = await migration.upgrade();
         expect(result).to.be(1);
 
         const after = await snapshot();

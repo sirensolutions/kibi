@@ -7,7 +7,6 @@ import 'plugins/investigate_core/ui/directives/saved_search_nav/saved_search_nav
 import 'plugins/kibana/management/sections/indices/edit_index_pattern/edit_index_pattern';
 import 'plugins/investigate_core/management/sections/kibi_entities/styles/entities.less';
 import 'plugins/investigate_core/management/sections/indices/index_options/index_options';
-import 'ui/kibi/directives/siren_relational_graph';
 import './entity_relations';
 import './create_index_pattern';
 import './create_eid';
@@ -52,7 +51,7 @@ uiRoutes
   template,
   reloadOnSearch: false,
   resolve: {
-    redirect: function ($location, config, kibiDefaultIndexPattern) {
+    redirect: function ($location, kibiDefaultIndexPattern) {
       // kibi: use our service to get default indexPattern
       return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
         const path = `/management/siren/entities/${defaultIndex.id}`;
@@ -66,12 +65,14 @@ uiRoutes
 });
 
 uiModules.get('apps/management', ['kibana', 'ui.tree'])
-.controller('entities', function ($scope, $route, kbnUrl, createNotifier, indexPatterns, ontologyClient) {
+.controller('entities', function ($scope, $route, $injector, kbnUrl, createNotifier) {
   $scope.state = { section: 'entity_panel' };
 
   const notify = createNotifier({
     location: 'Queries Editor'
   });
+
+  const isRelationalGraphAvailable = $injector.has('sirenRelationalGraphDirective');
 
   $scope.createNewIndexPattern = function () {
     $scope.state.section = 'create_ip';
@@ -82,7 +83,11 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
   };
 
   $scope.toggleRelationalGraph = function () {
-    $scope.isRelationalGraphVisible = !$scope.isRelationalGraphVisible;
+    if (isRelationalGraphAvailable) {
+      $scope.isRelationalGraphVisible = !$scope.isRelationalGraphVisible;
+    } else {
+      notify.warning('Siren Relational Graph not available, please install the Siren Graph Browser');
+    }
   };
 
   // Needed until we migrate the panels to use the new generic "entity"

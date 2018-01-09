@@ -9,7 +9,7 @@ import path from 'path';
 
 const mockKibiYml = `
 kibana:
-  index: '.notkibi'
+  index: '.kibi_or_not_kibi'
 kibi_core: 
   admin: 'ted'
 kibi_access_control.sentinl.foo: 'bar'
@@ -17,7 +17,7 @@ kibi_access_control.sentinl.foo: 'bar'
 
 const mockKibiDevYml = `
 kibana:
-  index: '.notkibi'
+  index: '.kibi_or_not_kibi'
 kibi_core:
   admin: 'bob'
 kibi_access_control:
@@ -99,7 +99,7 @@ describe('Migrate Kibi Config', () => {
       expect(contents.investigate_access_control.admin_role).to.equal('kibiadmin');
       // the .kibi and .kibiaccess indexes should have been added explicitly
       expect(contents.investigate_access_control.acl.index).to.equal('.kibiaccess');
-      expect(contents.kibana.index).to.equal('.notkibi');
+      expect(contents.kibana.index).to.equal('.kibi_or_not_kibi');
     });
 
     const options = {

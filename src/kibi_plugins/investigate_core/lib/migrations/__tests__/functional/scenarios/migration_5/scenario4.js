@@ -17,7 +17,7 @@ export default {
       haltOnFailure: true
     },
     {
-      indexName: '.kibi',
+      indexName: '.siren',
       indexDefinition: 'index_definition.js',
       source: 'index_data4.js',
       haltOnFailure: true

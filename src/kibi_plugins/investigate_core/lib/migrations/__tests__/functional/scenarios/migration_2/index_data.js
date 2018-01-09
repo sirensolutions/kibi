@@ -12,7 +12,7 @@ import { pkg } from '~/src/utils/package_json';
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'config',
       _id: pkg.kibi_version
     }
@@ -23,7 +23,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'query',
       _id: 'top-50-companies'
     }
@@ -50,7 +50,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'template',
       _id: 'kibi-table-handlebars'
     }
@@ -67,7 +67,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'template',
       _id: 'kibi-table-jade'
     }
@@ -84,7 +84,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'template',
       _id: 'kibi-jinja2'
     }
@@ -102,7 +102,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'template',
       _id: 'kibi-table-jade-2'
     }

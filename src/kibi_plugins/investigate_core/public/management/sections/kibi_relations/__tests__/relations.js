@@ -610,7 +610,7 @@ describe('Kibi Management', function () {
         const options = {
           relations: relations,
           events: {
-            'change:config.kibi:relations': function (event, relations) {
+            'change:.config.investigate:relations': function (event, relations) {
               _.each(relations.relationsIndices, function (relation) {
                 expect(relation.errors).to.be(undefined);
                 expect(relation.label).not.to.be(undefined);

@@ -61,33 +61,33 @@ describe('plugins/elasticsearch', function () {
 
     testRoute({
       method: 'POST',
-      url: '/elasticsearch/.kibi'
+      url: '/elasticsearch/.siren'
     }, 405);
 
     testRoute({
       method: 'PUT',
-      url: '/elasticsearch/.kibi'
+      url: '/elasticsearch/.siren'
     }, 405);
 
     testRoute({
       method: 'DELETE',
-      url: '/elasticsearch/.kibi'
+      url: '/elasticsearch/.siren'
     }, 405);
 
     testRoute({
       method: 'GET',
-      url: '/elasticsearch/.kibi'
+      url: '/elasticsearch/.siren'
     });
 
     testRoute({
       method: 'POST',
-      url: '/elasticsearch/.kibi/_bulk',
+      url: '/elasticsearch/.siren/_bulk',
       payload: '{}'
     }, 400);
 
     testRoute({
       method: 'POST',
-      url: '/elasticsearch/.kibi/__kibanaQueryValidator/_validate/query?explain=true&ignore_unavailable=true',
+      url: '/elasticsearch/.siren/__kibanaQueryValidator/_validate/query?explain=true&ignore_unavailable=true',
       headers: {
         'content-type': 'application/json'
       },
@@ -100,7 +100,7 @@ describe('plugins/elasticsearch', function () {
       headers: {
         'content-type': 'application/json'
       },
-      payload: { docs: [{ _index: '.kibi', _type: 'index-pattern', _id: '[logstash-]YYYY.MM.DD' }] }
+      payload: { docs: [{ _index: '.siren', _type: 'index-pattern', _id: '[logstash-]YYYY.MM.DD' }] }
     });
 
     testRoute({

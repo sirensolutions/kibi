@@ -25,7 +25,7 @@ import { pkg } from '~/src/utils/package_json';
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'config',
       _id: pkg.kibi_version
     }
@@ -36,7 +36,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'articles-sql-1'
     }
@@ -97,7 +97,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'articles-sql-1-nq'
     }
@@ -145,7 +145,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'articles-sql-1-np'
     }
@@ -192,7 +192,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'articles-sql-2'
     }
@@ -254,7 +254,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'articles-sql-2-fu'
     }
@@ -315,7 +315,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'data-table-1'
     }
@@ -359,7 +359,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'data-table-1-nq'
     }
@@ -396,7 +396,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'data-table-1-np'
     }
@@ -419,7 +419,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'data-table-2'
     }
@@ -463,7 +463,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'data-table-2-fu'
     }
@@ -506,7 +506,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'query-viewer-1'
     }
@@ -543,7 +543,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'query-viewer-1-np'
     }
@@ -565,7 +565,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'query-viewer-1-nq'
     }
@@ -590,7 +590,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'query-viewer-2'
     }
@@ -626,7 +626,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'query-viewer-2-fu'
     }
@@ -661,7 +661,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'query',
       _id: 'query-2'
     }
@@ -687,7 +687,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'template',
       _id: 'kibi-table-jade-2'
     }

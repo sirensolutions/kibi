@@ -689,7 +689,7 @@ describe('Kibi Components', function () {
         };
         config.set('kibi:relations', relations);
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$emit('change:.config.investigate:relations', relations);
         $rootScope.$digest();
 
         const button = {

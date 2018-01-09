@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import mockery from 'mockery';
 import IndexHelper from '../index_helper';
 
-const kibiIndex = '.kibi';
+const kibiIndex = '.siren';
 const fakeServer = {
   log: function (tags, data) {},
   config: function () {
@@ -34,7 +34,7 @@ const fakeServer = {
                     total: 1,
                     hits: [
                       {
-                        _index: '.kibi',
+                        _index: '.siren',
                         _type: 'datasource',
                         _id: 'mysql-test',
                         _score: 1,

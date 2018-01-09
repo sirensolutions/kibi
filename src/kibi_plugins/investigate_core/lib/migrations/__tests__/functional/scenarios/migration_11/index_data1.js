@@ -7,7 +7,7 @@
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'heatmap4'
     }
@@ -99,7 +99,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'heatmap5'
     }

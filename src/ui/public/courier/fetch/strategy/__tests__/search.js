@@ -63,8 +63,8 @@ describe('SearchStrategyProvider', () => {
 
       it('sends a match_none query to the index pattern', () => {
         return search.reqsFetchParamsToBody(reqsFetchParams).then(value => {
-          // kibi: 'index' changed to '.kibi'
-          expect(_.includes(value, '"index":[".kibi"]')).to.be(true);
+          // kibi: 'index' changed to '.siren'
+          expect(_.includes(value, '"index":[".siren"]')).to.be(true);
           expect(_.includes(value, emptySearch)).to.be(true);
         });
       });

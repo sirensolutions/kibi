@@ -9,7 +9,7 @@ import { pkg } from '~/src/utils/package_json';
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'config',
       _id: pkg.kibi_version
     }
@@ -19,7 +19,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'dashboard',
       _id: 'CompanyId',
 

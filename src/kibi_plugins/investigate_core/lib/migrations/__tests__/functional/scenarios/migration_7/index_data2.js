@@ -9,7 +9,7 @@ import { pkg } from '~/src/utils/package_json';
 export default [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'config',
       _id: pkg.kibi_version
     }
@@ -20,7 +20,7 @@ export default [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'config',
       _id: 'kibi'
     }

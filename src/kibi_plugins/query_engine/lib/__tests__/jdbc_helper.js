@@ -14,7 +14,7 @@ const fakeServer = {
         if (key === 'elasticsearch.url') {
           return 'http://localhost:12345';
         } else if (key === 'kibana.index') {
-          return '.kibi';
+          return '.siren';
         } else {
           return '';
         }

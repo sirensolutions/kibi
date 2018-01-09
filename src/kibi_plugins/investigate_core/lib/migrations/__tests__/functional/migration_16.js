@@ -20,7 +20,7 @@ describe('investigate_core/migrations/functional', function () {
   const fakeConfig = {
     get: sinon.stub()
   };
-  fakeConfig.get.withArgs('kibana.index').returns('.kibi');
+  fakeConfig.get.withArgs('kibana.index').returns('.siren');
 
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
   const cluster = new Cluster({
@@ -37,7 +37,7 @@ describe('investigate_core/migrations/functional', function () {
   };
 
   async function snapshot() {
-    return indexSnapshot(cluster, '.kibi');
+    return indexSnapshot(cluster, '.siren');
   }
 
   describe('Investigate Core - Migration 16 - Functional test', function () {
@@ -58,7 +58,7 @@ describe('investigate_core/migrations/functional', function () {
         const before = await snapshot();
         const migration = new Migration(configuration);
 
-        let result = await migration.upgrade();
+        const result = await migration.upgrade();
         expect(result).to.be(0);
       });
 
@@ -83,7 +83,7 @@ describe('investigate_core/migrations/functional', function () {
         const before = await snapshot();
         const migration = new Migration(configuration);
 
-        let result = await migration.upgrade();
+        const result = await migration.upgrade();
         expect(result).to.be(1);
 
         const after = await snapshot();

@@ -46,7 +46,7 @@ describe('Kibi Components', function () {
         expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: true, validDashboards: true });
       });
 
-      it('should init the relations on change:config.kibi:relations event', function () {
+      it('should init the relations on change:.config.investigate:relations event', function () {
         const relations = {
           relationsIndices: [
             {
@@ -66,7 +66,7 @@ describe('Kibi Components', function () {
           ]
         };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$emit('change:.config.investigate:relations', relations);
         $rootScope.$digest();
         expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: true, validDashboards: true });
       });
@@ -96,7 +96,7 @@ describe('Kibi Components', function () {
           ]
         };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$emit('change:.config.investigate:relations', relations);
         $rootScope.$digest();
       });
 
@@ -144,7 +144,7 @@ describe('Kibi Components', function () {
           ]
         };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$emit('change:.config.investigate:relations', relations);
         $rootScope.$digest();
         expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: true, validDashboards: true });
       });
@@ -173,7 +173,7 @@ describe('Kibi Components', function () {
             relationsDashboards: []
           };
 
-          $rootScope.$emit('change:config.kibi:relations', relations);
+          $rootScope.$emit('change:.config.investigate:relations', relations);
           $rootScope.$digest();
           expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: false, validDashboards: true });
         });
@@ -201,7 +201,7 @@ describe('Kibi Components', function () {
             relationsDashboards: []
           };
 
-          $rootScope.$emit('change:config.kibi:relations', relations);
+          $rootScope.$emit('change:.config.investigate:relations', relations);
           $rootScope.$digest();
           expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: false, validDashboards: true });
         });
@@ -229,7 +229,7 @@ describe('Kibi Components', function () {
             relationsDashboards: []
           };
 
-          $rootScope.$emit('change:config.kibi:relations', relations);
+          $rootScope.$emit('change:.config.investigate:relations', relations);
           $rootScope.$digest();
           expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: false, validDashboards: true });
         });
@@ -252,7 +252,7 @@ describe('Kibi Components', function () {
             relationsDashboards: []
           };
 
-          $rootScope.$emit('change:config.kibi:relations', relations);
+          $rootScope.$emit('change:.config.investigate:relations', relations);
           $rootScope.$digest();
           expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: false, validDashboards: true });
         });
@@ -287,7 +287,7 @@ describe('Kibi Components', function () {
           ];
           indicesTest.forEach((indices) => {
             relations.relationsIndices[0].indices = indices;
-            $rootScope.$emit('change:config.kibi:relations', relations);
+            $rootScope.$emit('change:.config.investigate:relations', relations);
             $rootScope.$digest();
             expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: false, validDashboards: true });
           });
@@ -321,7 +321,7 @@ describe('Kibi Components', function () {
             'indexa/typea/patha/indexb//pathb'
           ].forEach((id) => {
             relations.relationsDashboards[0].relation = id;
-            $rootScope.$emit('change:config.kibi:relations', relations);
+            $rootScope.$emit('change:.config.investigate:relations', relations);
             $rootScope.$digest();
             expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: true, validDashboards: false });
           });
@@ -350,7 +350,7 @@ describe('Kibi Components', function () {
             [], [ 'da' ], [ 'da', 'db', 'dc' ]
           ].forEach((dashboards) => {
             relations.relationsDashboards[0].dashboards = dashboards;
-            $rootScope.$emit('change:config.kibi:relations', relations);
+            $rootScope.$emit('change:.config.investigate:relations', relations);
             $rootScope.$digest();
             expect(relationsHelper.checkIfRelationsAreValid()).to.eql({ validIndices: true, validDashboards: false });
           });
@@ -473,7 +473,7 @@ describe('Kibi Components', function () {
           ]
         };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$emit('change:.config.investigate:relations', relations);
         $rootScope.$digest();
 
         expect(relationsHelper.addAdvancedJoinSettingsToRelation).withArgs(missingRelation).to.be.ok();
@@ -513,7 +513,7 @@ describe('Kibi Components', function () {
           ]
         };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$emit('change:.config.investigate:relations', relations);
         $rootScope.$digest();
 
         relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
@@ -568,7 +568,7 @@ describe('Kibi Components', function () {
           ]
         };
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$emit('change:.config.investigate:relations', relations);
         $rootScope.$digest();
 
         relationsHelper.addAdvancedJoinSettingsToRelation(relation1, 'forecast', 'weather-*');
@@ -626,7 +626,7 @@ describe('Kibi Components', function () {
                 ]
               };
 
-              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$emit('change:.config.investigate:relations', relations);
               $rootScope.$digest();
 
               relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
@@ -666,7 +666,7 @@ describe('Kibi Components', function () {
                 ]
               };
 
-              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$emit('change:.config.investigate:relations', relations);
               $rootScope.$digest();
 
               relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
@@ -706,7 +706,7 @@ describe('Kibi Components', function () {
                 ]
               };
 
-              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$emit('change:.config.investigate:relations', relations);
               $rootScope.$digest();
 
               relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
@@ -748,7 +748,7 @@ describe('Kibi Components', function () {
                 ]
               };
 
-              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$emit('change:.config.investigate:relations', relations);
               $rootScope.$digest();
 
               relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
@@ -811,7 +811,7 @@ describe('Kibi Components', function () {
                 ]
               };
 
-              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$emit('change:.config.investigate:relations', relations);
               $rootScope.$digest();
 
               relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
@@ -853,7 +853,7 @@ describe('Kibi Components', function () {
                 ]
               };
 
-              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$emit('change:.config.investigate:relations', relations);
               $rootScope.$digest();
 
               relationsHelper.addAdvancedJoinSettingsToRelation(relation1);
@@ -894,7 +894,7 @@ describe('Kibi Components', function () {
                 ]
               };
 
-              $rootScope.$emit('change:config.kibi:relations', relations);
+              $rootScope.$emit('change:.config.investigate:relations', relations);
               $rootScope.$digest();
 
               relationsHelper.addAdvancedJoinSettingsToRelation(relation1);

@@ -270,12 +270,12 @@ describe('SavedObjectsClient', () => {
     });
 
     it('accepts fields', () => {
-      const body = { index: '.kibi' };
+      const body = { index: '.siren' };
 
       savedObjectsClient.find(body);
       expect(savedObjectApi.search.calledOnce).to.be(true);
       const options = savedObjectApi.search.getCall(0).args[0];
-      expect(options.index).to.eql('.kibi');
+      expect(options.index).to.eql('.siren');
     });
   });
 });

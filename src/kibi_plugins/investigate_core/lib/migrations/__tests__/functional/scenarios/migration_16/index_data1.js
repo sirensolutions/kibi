@@ -1,7 +1,7 @@
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'datasource',
       _id: 'datasource1'
     }
@@ -11,7 +11,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'datasource',
       _id: 'Kibi-Gremlin-Server'
     }

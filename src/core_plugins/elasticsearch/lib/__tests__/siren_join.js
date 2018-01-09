@@ -7,7 +7,7 @@ describe('Join querying', function () {
 
   const server = {
     config: () => ({
-      get: () => '.kibi'
+      get: () => '.siren'
     })
   };
 

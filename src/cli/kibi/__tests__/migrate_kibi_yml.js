@@ -8,22 +8,22 @@ import sinon from 'sinon';
 import path from 'path';
 
 const mockKibiYml = `
+kibana:
+  index: '.notkibi'
 kibi_core: 
   admin: 'ted'
 kibi_access_control.sentinl.foo: 'bar'
-kibana:
-  index: '.notkibi'
 `;
 
 const mockKibiDevYml = `
+kibana:
+  index: '.notkibi'
 kibi_core:
   admin: 'bob'
 kibi_access_control:
   sentinl:
     foo: 'bar'
     username: 'sentinl'
-kibana:
-  index: '.notkibi'
 `;
 
 const configFolderPath = fromRoot('config');

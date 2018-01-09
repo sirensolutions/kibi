@@ -216,11 +216,9 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
     }
   };
 
-  const savedObjectsClient = self.server.savedObjectsClientFactory({
-    callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-  });
-
-  return savedObjectsClient.create({
+  return this.cluster.callWithInternalUser('indices.putMapping', {
+    timeout: '1000ms',
+    index: this.config.get('kibana.index'),
     type: 'template',
     body: mapping
   });

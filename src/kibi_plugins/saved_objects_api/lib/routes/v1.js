@@ -167,7 +167,7 @@ module.exports = (server, API_ROOT) => {
   });
 
   /**
-   * Updates a saved object in the .kibi index.
+   * Updates a saved object in the .siren index.
    *
    * Returns the same response as an Elasticsearch API index operation on success, a
    * wrapped error with the same format as Elasticsearch errors on conflicts.
@@ -207,7 +207,7 @@ module.exports = (server, API_ROOT) => {
   });
 
   /**
-   * Creates a saved object in the .kibi index.
+   * Creates a saved object in the .siren index.
    *
    * Returns the same response as an Elasticsearch API index operation on success, a
    * wrapped error with the same format as Elasticsearch errors on conflicts.
@@ -247,7 +247,7 @@ module.exports = (server, API_ROOT) => {
   });
 
   /**
-   * Partially updates a saved object in the .kibi index.
+   * Partially updates a saved object in the .siren index.
    *
    * Works like the Elasticsearch update API but accepts only a body containing a "doc"
    * object with the fields to update; scripting and upserts are not supported.
@@ -290,7 +290,7 @@ module.exports = (server, API_ROOT) => {
   });
 
   /**
-   * Deletes a saved object in the .kibi index.
+   * Deletes a saved object in the .siren index.
    */
   server.route({
     method: 'DELETE',

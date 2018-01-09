@@ -30,7 +30,7 @@ export default class BackupKibi {
     }
     await Promise.fromNode(cb => mkdir(this._backupDir, cb));
 
-    const kibiIndex = get(this._config, 'kibana.index', '.kibi');
+    const kibiIndex = get(this._config, 'kibana.index', '.siren');
 
     await this._dump.fromElasticsearchToFile(kibiIndex, 'data');
     await this._dump.fromElasticsearchToFile(kibiIndex, 'mapping');

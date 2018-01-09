@@ -31,7 +31,7 @@ export default class RestoreKibi {
       throw new Error(`Backup folder [${this._backupDir}] does not exist`);
     }
 
-    const kibiIndex = get(this._config, 'kibana.index', '.kibi');
+    const kibiIndex = get(this._config, 'kibana.index', '.siren');
 
     await this._dump.fromFileToElasticsearch(kibiIndex, 'mapping');
     await this._dump.fromFileToElasticsearch(kibiIndex, 'data');

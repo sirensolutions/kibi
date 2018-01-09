@@ -29,6 +29,8 @@ function QueryEngine(server) {
   this.queries = [];
   this.initialized = false;
   this.log = logger(server, 'query_engine');
+  // kibi: we are using admin cluster directly where we don't have a access to the request object,
+  // for example, data sources and templates need to be loaded before user logged in the system
   this.cluster = server.plugins.elasticsearch.getCluster('admin');
 }
 
@@ -102,9 +104,9 @@ QueryEngine.prototype.loadPredefinedData = function () {
 
     const tryToLoad = function () {
       self._isKibiIndexPresent().then(function () {
-        self._loadTemplates().then(function () {
-          return self._loadDatasources().then(function () {
-            return self._loadQueries().then(function () {
+        self._loadTemplatesMapping().then(function () {
+          self._loadTemplates().then(function () {
+            return self._loadDatasources().then(function () {
               return self._refreshKibiIndex().then(function () {
                 fulfill(true);
               });
@@ -214,11 +216,9 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
     }
   };
 
-  const savedObjectsClient = self.server.savedObjectsClientFactory({
-    callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-  });
-
-  return savedObjectsClient.create({
+  return this.cluster.callWithInternalUser('indices.putMapping', {
+    timeout: '1000ms',
+    index: this.config.get('kibana.index'),
     type: 'template',
     body: mapping
   });
@@ -255,15 +255,13 @@ QueryEngine.prototype._loadTemplates = function () {
           scriptData.templateSource = sourceTemplate.toString();
         }
 
-        const savedObjectsClient = self.server.savedObjectsClientFactory({
-          callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-        });
-
-        savedObjectsClient.create(
-          'template',
-          scriptData,
-          { id: templateId }
-        )
+        return self.cluster.callWithInternalUser('create', {
+          timeout: '1000ms',
+          index: self.config.get('kibana.index'),
+          type: 'template',
+          id: templateId,
+          body: JSON.stringify(scriptData, null, ' '),
+        })
         .then(() => {
           self.log.info('Template [' + templateId + '] successfully loaded');
         })
@@ -304,17 +302,18 @@ QueryEngine.prototype._loadDatasources = function () {
 
           datasourceObjParam.url = gremlinUrl + '/graph/queryBatch';
           datasourceObj.datasourceParams = JSON.stringify(datasourceObjParam);
-          data = datasourceObj;
+
+          data = new Buffer(JSON.stringify(datasourceObj).length);
+          data.write(JSON.stringify(datasourceObj), 'utf-8');
         }
 
-        const savedObjectsClient = self.server.savedObjectsClientFactory({
-          callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-        });
-        savedObjectsClient.create(
-          'datasource',
-          data,
-          { id: datasourceId },
-        )
+        self.cluster.callWithInternalUser('index', {
+          timeout: '1000ms',
+          index: self.config.get('kibana.index'),
+          type: 'datasource',
+          id: datasourceId,
+          body: data.toString()
+        })
         .then(function (resp) {
           self.log.info('Datasource [' + datasourceId + '] successfully loaded');
           fulfill(true);
@@ -328,48 +327,6 @@ QueryEngine.prototype._loadDatasources = function () {
   });
 
   return Promise.all(promises);
-};
-
-QueryEngine.prototype._loadQueries = function () {
-  const self = this;
-  // load default query examples
-  const queriesToLoad = [];
-
-  self.log.info('Loading queries');
-
-  return Promise.map(queriesToLoad, function (queryId) {
-    return new Promise(function (fulfill, reject) {
-      fs.readFile(path.join(__dirname, 'queries', queryId + '.json'), function (err, data) {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-
-        const savedObjectsClient = self.server.savedObjectsClientFactory({
-          callCluster: self.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-        });
-
-        savedObjectsClient.search(
-          'datasource',
-          data,
-          { id: queryId },
-        )
-        .then(function (resp) {
-          self.log.info('Query [' + queryId + '] successfully loaded');
-          fulfill(true);
-        })
-        .catch(function (err) {
-          if (err.statusCode === 409) {
-            self.log.warn('Query [' + queryId + '] already exists');
-          } else {
-            self.log.error('Could not load query [' + queryId + ']', err);
-          }
-          fulfill(true);
-        });
-      });
-    });
-  });
 };
 
 QueryEngine.prototype.setupJDBC = function () {

@@ -8,18 +8,22 @@ import sinon from 'sinon';
 import path from 'path';
 
 const mockKibiYml = `
+kibana:
+  index: '.kibi_or_not_kibi'
 kibi_core: 
   admin: 'ted'
 kibi_access_control.sentinl.foo: 'bar'
 `;
 
 const mockKibiDevYml = `
+kibana:
+  index: '.kibi_or_not_kibi'
 kibi_core:
   admin: 'bob'
 kibi_access_control:
   sentinl:
     foo: 'bar'
-    username: 'fasdf'
+    username: 'sentinl'
 `;
 
 const configFolderPath = fromRoot('config');
@@ -77,7 +81,7 @@ describe('Migrate Kibi Config', () => {
 
     migrateKibiYml(options);
 
-    jsYaml.safeDump.restore();
+    mockSafeDump.restore();
 
     done();
   });
@@ -93,6 +97,9 @@ describe('Migrate Kibi Config', () => {
       expect(contents).to.have.property('investigate_access_control');
       expect(contents.investigate_access_control).to.have.property('admin_role');
       expect(contents.investigate_access_control.admin_role).to.equal('kibiadmin');
+      // the .kibi and .kibiaccess indexes should have been added explicitly
+      expect(contents.investigate_access_control.acl.index).to.equal('.kibiaccess');
+      expect(contents.kibana.index).to.equal('.kibi_or_not_kibi');
     });
 
     const options = {
@@ -102,7 +109,7 @@ describe('Migrate Kibi Config', () => {
 
     migrateKibiYml(options);
 
-    jsYaml.safeDump.restore();
+    mockSafeDump.restore();
 
     done();
   });

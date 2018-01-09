@@ -8,7 +8,7 @@
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'vis'
     }
@@ -20,7 +20,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'vis1'
     }

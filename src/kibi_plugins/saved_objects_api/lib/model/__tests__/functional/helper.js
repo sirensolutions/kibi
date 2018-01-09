@@ -42,7 +42,7 @@ export default class ModelTestHelper {
     const configMock = {
       get: (key) => {
         if (key === 'kibana.index') {
-          return '.kibi';
+          return '.siren';
         }
         throw new Error(`Unknown configuration key: ${key}`);
       }
@@ -95,18 +95,18 @@ export default class ModelTestHelper {
   }
 
   /**
-   * Returns a snapshot of the .kibi index.
+   * Returns a snapshot of the .siren index.
    */
   async snapshot() {
-    return await indexSnapshot(this._cluster, '.kibi');
+    return await indexSnapshot(this._cluster, '.siren');
   }
 
   /**
-   * Returns the mappings in the .kibi index for the specified.type.
+   * Returns the mappings in the .siren index for the specified.type.
    */
   async getMappings(type) {
     return await this._cluster.callWithInternalUser('indices.getMapping', {
-      index: '.kibi',
+      index: '.siren',
       type: type
     });
   }
@@ -183,7 +183,7 @@ export default class ModelTestHelper {
     const mappingsAfter = await this.getMappings(this._typename);
 
     expect(index.get(id)._source[this._stringField]).to.be('1');
-    expect(mappingsAfter['.kibi'].mappings[this._typename].properties).to.eql(expectedMapping);
+    expect(mappingsAfter['.siren'].mappings[this._typename].properties).to.eql(expectedMapping);
   }
 
   /**
@@ -210,7 +210,7 @@ export default class ModelTestHelper {
     const mappingsAfter = await this.getMappings(this._typename);
 
     expect(index.get(id)._source[this._stringField]).to.be('1');
-    expect(mappingsAfter['.kibi'].mappings[this._typename].properties).to.eql(expectedMapping);
+    expect(mappingsAfter['.siren'].mappings[this._typename].properties).to.eql(expectedMapping);
   }
 
   /**
@@ -220,7 +220,7 @@ export default class ModelTestHelper {
     const callWithInternalUserMapping = sinon.spy(this._cluster, 'callWithInternalUser');
     try {
       await this._cluster.callWithInternalUser('indices.putMapping', {
-        index: '.kibi',
+        index: '.siren',
         type: this._typename,
         body: {
           properties: {
@@ -257,7 +257,7 @@ export default class ModelTestHelper {
           }
         }
       };
-      expect(mappingsAfter['.kibi'].mappings[this._typename].properties).to.eql(expectedMapping);
+      expect(mappingsAfter['.siren'].mappings[this._typename].properties).to.eql(expectedMapping);
     } finally {
       callWithInternalUserMapping.restore();
     }

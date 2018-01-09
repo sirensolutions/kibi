@@ -25,7 +25,7 @@ const fakeServer = {
       get: function (property) {
         switch (property) {
           case 'kibana.index':
-            return '.kibi';
+            return '.siren';
           case 'investigate_core.gremlin_server.ssl.ca':
             return null;
           case 'investigate_core.load_jdbc':
@@ -114,7 +114,7 @@ describe('Query Engine', function () {
       stubLoadPredefinedData = sinon.stub(QueryEngine.prototype, 'loadPredefinedData').returns(Promise.resolve());
       stubLoadTemplates = sinon.stub(QueryEngine.prototype, '_loadTemplates').returns(Promise.resolve());
       callWithInternalUserStub
-        .withArgs('search', { index: '.kibi', type: 'datasource', size: 100 })
+        .withArgs('search', { index: '.siren', type: 'datasource', size: 100 })
         .returns(Promise.resolve({
           hits: {
             total: 1,
@@ -151,7 +151,7 @@ describe('Query Engine', function () {
       const options = {};
 
       callWithInternalUserStub
-        .withArgs('search', { index: '.kibi', type: 'query', size: 100 })
+        .withArgs('search', { index: '.siren', type: 'query', size: 100 })
         .returns(Promise.resolve({
           hits: {
             hits: [
@@ -194,7 +194,7 @@ describe('Query Engine', function () {
       const options = {};
 
       callWithInternalUserStub
-        .withArgs('search', { index: '.kibi', type: 'query', size: 100 })
+        .withArgs('search', { index: '.siren', type: 'query', size: 100 })
         .returns(Promise.resolve({
           hits: {
             hits: [

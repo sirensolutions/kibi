@@ -14,7 +14,7 @@ describe('Backup Kibi', function () {
   beforeEach(async function () {
     config = {
       kibana: {
-        index: '.kibi'
+        index: '.siren'
       },
       elasticsearch: {
         url: 'http://localhost:9200'
@@ -44,8 +44,8 @@ describe('Backup Kibi', function () {
 
     await backupKibi.backup();
     sinon.assert.calledTwice(fromElasticsearchToFileStub);
-    sinon.assert.calledWith(fromElasticsearchToFileStub, '.kibi', 'data');
-    sinon.assert.calledWith(fromElasticsearchToFileStub, '.kibi', 'mapping');
+    sinon.assert.calledWith(fromElasticsearchToFileStub, '.siren', 'data');
+    sinon.assert.calledWith(fromElasticsearchToFileStub, '.siren', 'mapping');
   });
 
   it('should save the data and mappings of both ACL and kibi indices', async function () {
@@ -59,8 +59,8 @@ describe('Backup Kibi', function () {
 
     await backupKibi.backup();
     sinon.assert.callCount(fromElasticsearchToFileStub, 4);
-    sinon.assert.calledWith(fromElasticsearchToFileStub, '.kibi', 'data');
-    sinon.assert.calledWith(fromElasticsearchToFileStub, '.kibi', 'mapping');
+    sinon.assert.calledWith(fromElasticsearchToFileStub, '.siren', 'data');
+    sinon.assert.calledWith(fromElasticsearchToFileStub, '.siren', 'mapping');
     sinon.assert.calledWith(fromElasticsearchToFileStub, 'acl', 'data');
     sinon.assert.calledWith(fromElasticsearchToFileStub, 'acl', 'mapping');
   });
@@ -76,7 +76,7 @@ describe('Backup Kibi', function () {
 
     await backupKibi.backup();
     sinon.assert.calledTwice(fromElasticsearchToFileStub);
-    sinon.assert.calledWith(fromElasticsearchToFileStub, '.kibi', 'data');
-    sinon.assert.calledWith(fromElasticsearchToFileStub, '.kibi', 'mapping');
+    sinon.assert.calledWith(fromElasticsearchToFileStub, '.siren', 'data');
+    sinon.assert.calledWith(fromElasticsearchToFileStub, '.siren', 'mapping');
   });
 });

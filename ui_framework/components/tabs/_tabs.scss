@@ -3,8 +3,8 @@
   border-bottom: $globalBorderThick;
 }
 
-/* kibi: added kibi-break-tabs class to fix the tabs in management/siren/objects */
-.kuiTabs.kibi-break-tabs {
+/* kibi: added siren-break-tabs class to fix the tabs in management/siren/objects */
+.kuiTabs.siren-break-tabs {
   display: inline-block;
   button {
     padding: 8px 12px;

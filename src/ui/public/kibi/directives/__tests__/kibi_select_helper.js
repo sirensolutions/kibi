@@ -32,7 +32,7 @@ describe('Kibi Directives', function () {
         stubKibiDefaultIndexPattern = false
       } = {}) {
       ngMock.module('kibana', function ($provide) {
-        $provide.constant('kbnIndex', '.kibi');
+        $provide.constant('kbnIndex', '.siren');
         $provide.constant('kbnDefaultAppId', '');
         if (savedDatasources) {
           $provide.service('savedDatasources', (Promise, Private) => {

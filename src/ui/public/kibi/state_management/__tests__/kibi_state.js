@@ -66,7 +66,7 @@ describe('State Management', function () {
       globalState = new MockState({ filters: pinned || [] });
       $provide.service('globalState', () => globalState);
 
-      $provide.constant('kbnIndex', '.kibi');
+      $provide.constant('kbnIndex', '.siren');
       $provide.constant('kbnDefaultAppId', '');
     });
 

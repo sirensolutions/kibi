@@ -6,7 +6,7 @@
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'datasource',
       _id: 'Gremlin-Server'
     }
@@ -21,7 +21,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'query',
       _id: 'query-test'
     }
@@ -46,7 +46,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'query',
       _id: 'Companies-in-the-same-domain'
     }

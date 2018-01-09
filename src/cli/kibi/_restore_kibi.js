@@ -31,12 +31,12 @@ export default class RestoreKibi {
       throw new Error(`Backup folder [${this._backupDir}] does not exist`);
     }
 
-    const kibiIndex = get(this._config, 'kibana.index', '.kibi');
+    const kibiIndex = get(this._config, 'kibana.index', '.siren');
 
     await this._dump.fromFileToElasticsearch(kibiIndex, 'mapping');
     await this._dump.fromFileToElasticsearch(kibiIndex, 'data');
     if (get(this._config, 'investigate_access_control.acl.enabled')) {
-      const aclIndex = get(this._config, 'investigate_access_control.acl.index');
+      const aclIndex = get(this._config, 'investigate_access_control.acl.index', '.sirenaccess');
       await this._dump.fromFileToElasticsearch(aclIndex, 'mapping');
       await this._dump.fromFileToElasticsearch(aclIndex, 'data');
     }

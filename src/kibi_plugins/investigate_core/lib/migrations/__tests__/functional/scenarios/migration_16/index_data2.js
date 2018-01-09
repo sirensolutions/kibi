@@ -4,7 +4,7 @@
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualisation',
       _id: 'vis1'
     }

@@ -80,7 +80,7 @@ const fakeServer = {
     return {
       get(key) {
         if (key === 'kibana.index') {
-          return '.kibi';
+          return '.siren';
         }
         return '';
       }

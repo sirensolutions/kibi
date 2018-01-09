@@ -5,8 +5,8 @@
   <!--kibi: filter visualizations based on the savedSearchId -->
   <div class="kuiBar">
     <div class="fullWidth">
-      <div ng-if="kibi.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
-        <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch"/>
+      <div ng-if="investigate.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
+        <input ng-if="savedSearchId" type="checkbox" ng-model="investigate.basedOnSameSavedSearch"/>
         <label class="based-saved-search" ng-if="savedSearchId">
           Show only visualizations linked to the saved search "{{savedSearchTitle}}".
         </label>

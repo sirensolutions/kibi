@@ -9,7 +9,7 @@
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'Articles-Tagcloud'
     }
@@ -26,7 +26,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'visualization',
       _id: 'Articles-Wordcloud'
     }

@@ -12,7 +12,7 @@ import { pkg } from '~/src/utils/package_json';
 export default [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'config',
       _id: pkg.kibi_version
     }
@@ -23,7 +23,7 @@ export default [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'query',
       _id: 'companies-in-the-same-domain'
     }
@@ -52,7 +52,7 @@ export default [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'query',
       _id: 'top-20-companies'
     }
@@ -80,7 +80,7 @@ export default [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'query',
       _id: 'top-50-companies'
     }
@@ -108,7 +108,7 @@ export default [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'query',
       _id: 'top-100-companies'
     }
@@ -134,7 +134,7 @@ export default [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'query',
       _id: 'top-200-companies'
     }

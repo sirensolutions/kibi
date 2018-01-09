@@ -7,7 +7,7 @@
 export default [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'config',
       _id: '5.2.2-SNAPSHOT'
     }
@@ -18,7 +18,7 @@ export default [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'config',
       _id: '5.3.2'
     }

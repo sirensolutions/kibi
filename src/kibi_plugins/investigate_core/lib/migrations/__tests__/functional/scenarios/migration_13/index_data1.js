@@ -8,7 +8,7 @@
 module.exports = [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'index-pattern',
       _id: 'kibi'
     }
@@ -18,7 +18,7 @@ module.exports = [
   },
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'index-pattern',
       _id: 'kibi1'
     }

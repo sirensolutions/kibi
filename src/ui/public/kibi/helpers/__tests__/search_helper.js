@@ -55,7 +55,7 @@ describe('Kibi Components', function () {
       });
 
       it('should not modify a query against one or more indices.', () => {
-        const searchHelper = new SearchHelper('.kibi');
+        const searchHelper = new SearchHelper('.siren');
         const expected = '{"index":["log-2000*","log-2001*"],"ignore_unavailable": true}\n' +
                          '{"size":0,"query":{"bool":{"must":{"match_all":{}}}}}\n';
 

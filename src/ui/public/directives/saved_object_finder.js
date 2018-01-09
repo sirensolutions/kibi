@@ -46,7 +46,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       }
 
       // kibi: variable to store the checkbox state
-      $scope.kibi = {
+      $scope.investigate = {
         onDashboardPage: onDashboardPage(),
         basedOnSameSavedSearch: false,
         _prevBasedOnSameSavedSearch: false
@@ -295,14 +295,14 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         // and needs to be smart about when it actually searches
         const filter = currentFilter;
         // kibi: allow to filter visualizations based on the savedsearch associated to a dashboard
-        const basedOnSameSavedSearch = $scope.kibi.basedOnSameSavedSearch;
-        if (prevSearch === filter && $scope.kibi._prevBasedOnSameSavedSearch === basedOnSameSavedSearch) {
+        const basedOnSameSavedSearch = $scope.investigate.basedOnSameSavedSearch;
+        if (prevSearch === filter && $scope.investigate._prevBasedOnSameSavedSearch === basedOnSameSavedSearch) {
           return;
         }
         // kibi: end
 
         prevSearch = filter;
-        $scope.kibi._prevBasedOnSameSavedSearch = basedOnSameSavedSearch;
+        $scope.investigate._prevBasedOnSameSavedSearch = basedOnSameSavedSearch;
 
         self.service.find(filter)
         .then(function (hits) {

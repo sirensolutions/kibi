@@ -19,7 +19,7 @@ describe('investigate_core/migrations/functional', function () {
   const fakeConfig = {
     get: sinon.stub()
   };
-  fakeConfig.get.withArgs('kibana.index').returns('.kibi');
+  fakeConfig.get.withArgs('kibana.index').returns('.siren');
 
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
   const cluster = new Cluster({
@@ -36,7 +36,7 @@ describe('investigate_core/migrations/functional', function () {
   };
 
   async function snapshot() {
-    return indexSnapshot(cluster, '.kibi');
+    return indexSnapshot(cluster, '.siren');
   }
 
   describe('Migration 10 - Functional test', function () {

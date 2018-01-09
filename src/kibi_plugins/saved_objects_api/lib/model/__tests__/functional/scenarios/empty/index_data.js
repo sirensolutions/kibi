@@ -1,12 +1,12 @@
 import { pkg } from '~/src/utils/package_json';
 
 /**
- * An empty .kibi index.
+ * An empty .siren index.
  */
 export default [
   {
     index: {
-      _index: '.kibi',
+      _index: '.siren',
       _type: 'config',
       _id: pkg.kibi_version
     }

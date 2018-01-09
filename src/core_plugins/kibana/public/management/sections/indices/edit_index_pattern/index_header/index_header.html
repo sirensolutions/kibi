@@ -17,6 +17,20 @@
 
   <div class="kuiBarSection">
     <button
+      ng-if="toggleGraph"
+      ng-click="toggleGraph()"
+      aria-label="Toggle relational graph"
+      tooltip="Toggle relational graph"
+      class="kuiButton kuiButton--basic"
+      data-test-subj="toggleRelationGraphButton"
+    >
+      <span class="sr-only">Toggle relational graph</span>
+      <span
+        aria-hidden="true"
+        class="kuiIcon fak-graph"
+      ></span>
+    </button>
+    <button
       ng-if="save"
       ng-click="save()"
       aria-label="Save"

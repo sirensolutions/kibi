@@ -2,7 +2,6 @@ import { IndexPatternAuthorizationError } from 'ui/errors';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import _ from 'lodash';
-import chrome from 'ui/chrome';
 import template from 'plugins/investigate_core/management/sections/kibi_entities/index.html';
 import 'plugins/investigate_core/ui/directives/saved_search_nav/saved_search_nav';
 import 'plugins/kibana/management/sections/indices/edit_index_pattern/edit_index_pattern';
@@ -52,7 +51,7 @@ uiRoutes
   template,
   reloadOnSearch: false,
   resolve: {
-    redirect: function ($location, config, kibiDefaultIndexPattern) {
+    redirect: function ($location, kibiDefaultIndexPattern) {
       // kibi: use our service to get default indexPattern
       return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
         const path = `/management/siren/entities/${defaultIndex.id}`;
@@ -66,12 +65,14 @@ uiRoutes
 });
 
 uiModules.get('apps/management', ['kibana', 'ui.tree'])
-.controller('entities', function ($scope, $route, kbnUrl, createNotifier, indexPatterns, ontologyClient) {
+.controller('entities', function ($scope, $route, $injector, kbnUrl, createNotifier) {
   $scope.state = { section: 'entity_panel' };
 
   const notify = createNotifier({
     location: 'Queries Editor'
   });
+
+  const isRelationalGraphAvailable = $injector.has('sirenRelationalGraphDirective');
 
   $scope.createNewIndexPattern = function () {
     $scope.state.section = 'create_ip';
@@ -81,10 +82,18 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
     $scope.state.section = 'create_eid';
   };
 
+  $scope.toggleRelationalGraph = function () {
+    if (isRelationalGraphAvailable) {
+      $scope.isRelationalGraphVisible = !$scope.isRelationalGraphVisible;
+    } else {
+      notify.warning('Siren Relational Graph not available, please install the Siren Graph Browser');
+    }
+  };
+
   // Needed until we migrate the panels to use the new generic "entity"
-  $scope.$watch('selectedMenuItem', (item) => {
-    if (item && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== item.id)) {
-      kbnUrl.change(`/management/siren/entities/${item.id}`);
+  $scope.$watch('selectedMenuItem.id', (itemId) => {
+    if (itemId && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== itemId)) {
+      kbnUrl.change(`/management/siren/entities/${itemId}`);
     } else {
       const entity = $route.current.locals.selectedEntity;
       if (entity && (!$scope.entity || $scope.entity.id !== entity.id || $scope.entity.type !== entity.type)) {

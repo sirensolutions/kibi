@@ -140,6 +140,23 @@ uiModules
   };
 
   /*
+   * Returns the list of relation label pairs (unique values)
+   */
+  OntologyClient.prototype.getUniqueRelationLabelPairs = function () {
+    return this.getRelations()
+    .then((relations) => {
+      const relationLabelsSet = _.reduce(relations, (total, rel) => {
+        total.add({
+          directLabel : rel.directLabel,
+          inverseLabel: rel.inverseLabel
+        });
+        return total;
+      }, new Set());
+      return Array.from(relationLabelsSet);
+    });
+  };
+
+  /*
    *
    */
   OntologyClient.prototype.getUniqueFieldDescriptions = function () {

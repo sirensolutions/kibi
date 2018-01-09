@@ -13,7 +13,7 @@ uiModules.get('apps/management')
     scope: false,
     link: function ($scope) {
       $scope.relations = [];
-      let relationLabels;
+      const relationLabelPairMap = [];
 
       // init relations
       ontologyClient.getRelationsByDomain($scope.entity.id)
@@ -31,7 +31,15 @@ uiModules.get('apps/management')
 
       ontologyClient.getUniqueRelationLabels()
       .then((uniqueRelationLabels) => {
-        relationLabels = uniqueRelationLabels;
+        $scope.relationLabels = uniqueRelationLabels;
+      });
+
+      ontologyClient.getUniqueRelationLabelPairs()
+      .then((uniqueRelationLabelPairs) => {
+        _.each(uniqueRelationLabelPairs, function (pair) {
+          relationLabelPairMap[pair.directLabel] = pair.inverseLabel;
+          relationLabelPairMap[pair.directLabel] = pair.inverseLabel;
+        });
       });
 
       ontologyClient.getEntities()
@@ -82,6 +90,14 @@ uiModules.get('apps/management')
         } else {
           notify.warning('Some of the relations are not complete, please check them again.');
           return Promise.resolve();
+        }
+      };
+
+      $scope.setOppositeLabel = function (relation, labelType) {
+        if (labelType === 'inverse') {
+          relation.inverseLabel = relationLabelPairMap[relation.directLabel];
+        } else if (labelType === 'direct') {
+          relation.directLabel = relationLabelPairMap[relation.inverseLabel];
         }
       };
 

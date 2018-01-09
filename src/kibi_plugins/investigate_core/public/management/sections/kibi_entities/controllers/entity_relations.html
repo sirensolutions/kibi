@@ -34,21 +34,33 @@
 
     <div ng-class="{ 'col-lg-3': entity.type === 'INDEX_PATTERN', 'col-lg-4': entity.type === 'VIRTUAL_ENTITY' }">
       <p class="fa fa-long-arrow-right fa-2x relation-direction col-lg-12" />
-      <input required
-             ng-model="relation.directLabel"
-             data-test-subj="index-relation-directLabel"
-             class="form-control small-input"
-             type="text"
-             placeholder="Direct label"
-             class="form-control small-input"/>
-      <input required
-             ng-model="relation.inverseLabel"
-             data-test-subj="index-relation-inverseLabel"
-             class="form-control small-input"
-             type="text"
-             placeholder="Inverse label"
-             autofocus
-             class="form-control small-input"/>
+
+      <div class="label-inputs">
+        <ui-select
+          ng-model="relation.directLabel"
+          on-select="setOppositeLabel(relation, 'inverse')"
+        >
+          <ui-select-match>
+            {{$select.selected}}
+          </ui-select-match>
+          <ui-select-choices repeat="label in relationLabels | filter:$select.search | orderBy:label">
+            <div ng-bind-html="label | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+
+        <ui-select
+          ng-model="relation.inverseLabel"
+          on-select="setOppositeLabel(relation, 'direct')"
+        >
+          <ui-select-match>
+            {{$select.selected}}
+          </ui-select-match>
+          <ui-select-choices repeat="label in relationLabels | filter:$select.search | orderBy:label">
+            <div ng-bind-html="label | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+      </div>
+
       <p class="fa fa-long-arrow-left fa-2x relation-direction col-lg-12" />
     </div>
 

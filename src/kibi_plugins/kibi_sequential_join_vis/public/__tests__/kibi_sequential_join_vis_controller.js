@@ -129,7 +129,7 @@ describe('Kibi Sequential Join Visualization Controller', function () {
 
       init();
       kibiState._getDashboardAndSavedSearchMetas = sinon.stub().returns(Promise.resolve([]));
-      $rootScope.$emit('change:.config.investigate:relations', relations);
+      $rootScope.$emit('change:config.investigate:relations', relations);
       $scope.vis.params.buttons = [
         {
           filterLabel:  '..mentioned in $COUNT Articles',
@@ -171,7 +171,7 @@ describe('Kibi Sequential Join Visualization Controller', function () {
 
       init();
       kibiState._getDashboardAndSavedSearchMetas = sinon.stub().returns(Promise.resolve([]));
-      $rootScope.$emit('change:.config.investigate:relations', relations);
+      $rootScope.$emit('change:config.investigate:relations', relations);
       $scope.vis.params.buttons = [
         {
           filterLabel:  'something',
@@ -219,7 +219,7 @@ describe('Kibi Sequential Join Visualization Controller', function () {
 
       init({ enableAcl: false });
       kibiState._getDashboardAndSavedSearchMetas = sinon.stub().returns(Promise.resolve([]));
-      $rootScope.$emit('change:.config.investigate:relations', relations);
+      $rootScope.$emit('change:config.investigate:relations', relations);
       $scope.vis.params.buttons = [
         {
           filterLabel:  'something',
@@ -258,7 +258,7 @@ describe('Kibi Sequential Join Visualization Controller', function () {
       };
 
       init({ enableAcl: false });
-      $rootScope.$emit('change:.config.investigate:relations', relations);
+      $rootScope.$emit('change:config.investigate:relations', relations);
       $scope.vis.params.buttons = [
         {
           filterLabel:  '..mentioned in $COUNT Articles',
@@ -297,7 +297,7 @@ describe('Kibi Sequential Join Visualization Controller', function () {
       };
 
       init({ currentDashboardId: 'dashboard saved search missing', enableAcl: false });
-      $rootScope.$emit('change:.config.investigate:relations', relations);
+      $rootScope.$emit('change:config.investigate:relations', relations);
       $scope.vis.params.buttons = [
         {
           filterLabel:  '..mentioned in $COUNT Articles',
@@ -333,7 +333,7 @@ describe('Kibi Sequential Join Visualization Controller', function () {
       };
 
       init({ enableAcl: false });
-      $rootScope.$emit('change:.config.investigate:relations', relations);
+      $rootScope.$emit('change:config.investigate:relations', relations);
       $scope.vis.params.buttons = [
         {
           filterLabel:  '..mentioned in $COUNT Articles',

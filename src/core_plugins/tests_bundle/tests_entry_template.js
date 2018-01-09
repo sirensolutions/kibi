@@ -26,7 +26,7 @@ window.__KBN__ = {
   version: '1.2.3',
   buildNum: 1234,
   vars: {
-    kbnIndex: '.kibi', // kibi: sets kbnIndex to the .kibi index
+    kbnIndex: '.siren', // kibi: sets kbnIndex to the .siren index
     esShardTimeout: 1500,
     esApiVersion: ${JSON.stringify(esTestConfig.getBranch())},
     esRequestTimeout: '300000',

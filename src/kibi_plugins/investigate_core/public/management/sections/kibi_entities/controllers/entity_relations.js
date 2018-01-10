@@ -38,7 +38,6 @@ uiModules.get('apps/management')
       .then((uniqueRelationLabelPairs) => {
         _.each(uniqueRelationLabelPairs, function (pair) {
           relationLabelPairMap[pair.directLabel] = pair.inverseLabel;
-          relationLabelPairMap[pair.directLabel] = pair.inverseLabel;
         });
       });
 
@@ -93,6 +92,7 @@ uiModules.get('apps/management')
         }
       };
 
+      // this method automatically assigns inverseLabel when the user sets the directLabel or vice versa
       $scope.setOppositeLabel = function (relation, labelType) {
         if (labelType === 'inverse') {
           relation.inverseLabel = relationLabelPairMap[relation.directLabel];

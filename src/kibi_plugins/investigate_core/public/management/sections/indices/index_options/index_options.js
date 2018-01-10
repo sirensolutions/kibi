@@ -1,3 +1,4 @@
+import angular from 'angular';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import indexOptionsTemplate from './index_options.html';
@@ -17,7 +18,7 @@ uiModules.get('apps/management')
       const indexOptionsHelpers = Private(require('./helpers/index_options_helper'));
 
       const addLabelPreviewPopup = function () {
-        var result = document.getElementsByClassName('label-preview');
+        const result = document.getElementsByClassName('label-preview');
         const $el = angular.element(result);
         $el.qtip('destroy', true);
         const api = $el.qtip('api');
@@ -45,7 +46,7 @@ uiModules.get('apps/management')
             });
           }
           $compile(html)($scope);
-        })
+        });
       };
 
       $scope.save = function () {
@@ -70,7 +71,7 @@ uiModules.get('apps/management')
 
       $scope.$watch('entity.instanceLabel.value', () => {
         addLabelPreviewPopup();
-      })
+      });
     }
   };
 });

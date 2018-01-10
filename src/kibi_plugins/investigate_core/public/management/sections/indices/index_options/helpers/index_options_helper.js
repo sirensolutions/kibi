@@ -1,29 +1,6 @@
+import _ from 'lodash';
+
 export default function IndexOptionsHelperFactory(Promise, es, createNotifier) {
-
-  // Method taken from /query_engine/lib/query_helper.js
-  const parameterizedRegex = /(@doc\[.+?\]@)/g;
-  const _evaluateParameterizedString = function (parameterizedLabel, hit) {
-    let ret = parameterizedLabel;
-    let match = parameterizedRegex.exec(parameterizedLabel);
-
-    while (match !== null) {
-      let group = match[1];
-      group = group.replace('@doc', '');
-      group = group.substring(0, group.length - 1);
-
-      const value = _getValue(hit, group);
-
-      // Escape special characters
-      const reGroup = match[1].replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
-      const re = new RegExp(reGroup, 'g');
-      ret = ret.replace(re, value);
-
-      match = parameterizedRegex.exec(parameterizedLabel);
-    }
-
-    ret = ret.split('\\n').join('\n');
-    return ret;
-  };
 
   // Method taken from /query_engine/lib/query_helper.js
   const getValueRegex = /(\[[^\[\]].*?\])/g;
@@ -48,6 +25,31 @@ export default function IndexOptionsHelperFactory(Promise, es, createNotifier) {
       match = getValueRegex.exec(group);
     }
     return value;
+  };
+
+  // Method taken from /query_engine/lib/query_helper.js
+  const parameterizedRegex = /(@doc\[.+?\]@)/g;
+  const _evaluateParameterizedString = function (parameterizedLabel, hit) {
+    let ret = parameterizedLabel;
+    let match = parameterizedRegex.exec(parameterizedLabel);
+
+    while (match !== null) {
+      let group = match[1];
+      group = group.replace('@doc', '');
+      group = group.substring(0, group.length - 1);
+
+      const value = _getValue(hit, group);
+
+      // Escape special characters
+      const reGroup = match[1].replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+      const re = new RegExp(reGroup, 'g');
+      ret = ret.replace(re, value);
+
+      match = parameterizedRegex.exec(parameterizedLabel);
+    }
+
+    ret = ret.split('\\n').join('\n');
+    return ret;
   };
 
   const notify = createNotifier({
@@ -106,12 +108,12 @@ export default function IndexOptionsHelperFactory(Promise, es, createNotifier) {
             html += '  <tr><th>Document id</th><th>Label</th></tr>';
             _.each(results.hits.hits, (hit) => {
               html += '  <tr>';
-              html += '    <td>' + hit._id +'</td>';
+              html += '    <td>' + hit._id + '</td>';
 
               if (entity.instanceLabel.type === 'FIELD') {
                 html += '    <td>' + hit._source[entity.instanceLabel.value] + '</td>';
               } else {
-                html += '    <td>' + _evaluateParameterizedString(entity.instanceLabel.value, hit) + '</td>'
+                html += '    <td>' + _evaluateParameterizedString(entity.instanceLabel.value, hit) + '</td>';
               }
               html += '</tr>';
             });

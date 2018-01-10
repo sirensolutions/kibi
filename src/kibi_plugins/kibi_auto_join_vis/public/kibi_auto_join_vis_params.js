@@ -115,7 +115,7 @@ uiModules
           button.tooltip = 'Not visible';
           return 'fa fa-eye-slash button-set';
         }
-      }
+      };
 
       $scope.toggleButtonVisibility = function (button) {
         let visibility;

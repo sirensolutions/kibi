@@ -4,8 +4,8 @@
      ng-if="vis.params">
   <div class="panel-buttons">
     <a ng-repeat="button in buttons"
-       ng-if="button.type === 'INDEX_PATTERN' && (vis.params.visibility[button.id].button
-              || vis.params.visibility[button.id] === undefined)"
+       ng-if="button.type === 'INDEX_PATTERN' && (vis.params.visibility[button.id] === undefined
+              || vis.params.visibility[button.id].button)"
        ng-click="button.click(true)"
        ng-disabled="button.disabled"
        ng-mouseover="hoverIn(button)"

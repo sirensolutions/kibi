@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import EntityRelationsTemplate from './entity_relations.html';
 import 'plugins/investigate_core/ui/directives/entity_select/entity_select';
@@ -94,10 +95,38 @@ uiModules.get('apps/management')
 
       // this method automatically assigns inverseLabel when the user sets the directLabel or vice versa
       $scope.setOppositeLabel = function (relation, labelType) {
-        if (labelType === 'inverse') {
+        if (labelType === 'inverse' && relationLabelPairMap[relation.directLabel]) {
           relation.inverseLabel = relationLabelPairMap[relation.directLabel];
-        } else if (labelType === 'direct') {
+        } else if (labelType === 'direct' && relationLabelPairMap[relation.inverseLabel]) {
           relation.directLabel = relationLabelPairMap[relation.inverseLabel];
+        }
+      };
+
+      // this method automatically refresh suggestion list during user input
+      $scope.refreshSuggestions = function ($select) {
+        const search = $select.search;
+        let list = angular.copy($select.items);
+
+        //remove last user input
+        list = list.filter(function (item) {
+          if ($scope.relationLabels.indexOf(item) !== -1 || search === item) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+
+        if (!search) {
+          //use the predefined list
+          $select.items = list;
+        }
+        else {
+          //manually add user input and set selection
+          if($scope.relationLabels.indexOf(search) === -1) {
+            list.concat(search);
+          };
+          $select.items = list;
+          $select.selected = search;
         }
       };
 

@@ -43,7 +43,7 @@
           <ui-select-match>
             {{$select.selected}}
           </ui-select-match>
-          <ui-select-choices repeat="label in relationLabels | filter:$select.search | orderBy:label">
+          <ui-select-choices repeat="label in relationLabels | filter:$select.search | orderBy:label" refresh="refreshSuggestions($select)" refresh-delay="0">
             <div ng-bind-html="label | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>
@@ -55,7 +55,7 @@
           <ui-select-match>
             {{$select.selected}}
           </ui-select-match>
-          <ui-select-choices repeat="label in relationLabels | filter:$select.search | orderBy:label">
+          <ui-select-choices repeat="label in relationLabels | filter:$select.search | orderBy:label" refresh="refreshSuggestions($select)" refresh-delay="0">
             <div ng-bind-html="label | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>

@@ -523,7 +523,7 @@
       "multivalued": false,
       "encrypted": false,
       "inputType": "text",
-      "defaultValue": "com.mysql.jdbc.Driver",
+      "defaultValue": "",
       "placeholder": "JDBC driver class name (e.g.: com.mysql.jdbc.Driver)"
     },
     {
@@ -533,7 +533,7 @@
       "multivalued": false,
       "encrypted": false,
       "inputType": "text",
-      "defaultValue": "jdbc:mysql://localhost:3306/employees",
+      "defaultValue": "",
       "placeholder": "Connection string without username and password (e.g.: jdbc:mysql://localhost:3306/databasename)"
     },
     {

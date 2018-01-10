@@ -8,6 +8,11 @@ import sirenJoinModule from './siren_join';
 import dbfilter from './dbfilter';
 import inject from './inject';
 
+
+// kibi: imports
+import { getConfigMismatchErrorMessage } from './misconfigured_custom_cluster_errors';
+// kibi: end
+
 const createPath = function (prefix, path) {
   path = path[0] === '/' ? path : `/${path}`;
   prefix = prefix[0] === '/' ? prefix : `/${prefix}`;
@@ -17,13 +22,28 @@ const createPath = function (prefix, path) {
 
 module.exports = function createProxy(server, method, path, config) {
   const sirenJoin = sirenJoinModule(server);
+  const serverConfig = server.config();
+
 
   const proxies = new Map([
     ['/elasticsearch', server.plugins.elasticsearch.getCluster('data')],
     ['/es_admin', server.plugins.elasticsearch.getCluster('admin')]
   ]);
 
-  const serverConfig = server.config();
+
+  // kibi: add a proxy for connector plugin
+  let connectorAdminCluster = 'data';
+  if (serverConfig.has('elasticsearch.connector.admin.cluster')) {
+    const clusterName =  serverConfig.get('elasticsearch.connector.admin.cluster');
+    const clustersConfig = serverConfig.get('elasticsearch.clusters');
+    if (clusterName && clustersConfig && clustersConfig[clusterName]) {
+      connectorAdminCluster = clusterName;
+    } else {
+      server.log(['error', 'elasticsearch'], getConfigMismatchErrorMessage(clusterName));
+    }
+  }
+  proxies.set('/connector_elasticsearch', server.plugins.elasticsearch.getCluster(connectorAdminCluster));
+
   function getCredentials(request) {
     let credentials = serverConfig.has('xpack.security.cookieName') ? request.state[serverConfig.get('xpack.security.cookieName')] : null;
     if (request.auth && request.auth.credentials && request.auth.credentials.proxyCredentials) {

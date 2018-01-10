@@ -104,7 +104,7 @@ describe('plugins/elasticsearch', function () {
         const fn = createKibanaIndex(server);
         //kibi: Kibana changed to Kibi in message
         return fn.catch(function (err) {
-          expect(err.message).to.be('Unable to create Siren index ".my-kibana"');
+          expect(err.message).to.be('Unable to create Siren Investigate index ".my-kibana"');
           expect(err).to.have.property('origError', error);
         });
       });
@@ -115,7 +115,7 @@ describe('plugins/elasticsearch', function () {
         const fn = createKibanaIndex(server);
         //kibi: Kibana changed to Kibi in message
         return fn.catch(function (err) {
-          expect(err.message).to.be('Waiting for Siren index ".my-kibana" to come online failed.');
+          expect(err.message).to.be('Waiting for Siren Investigate index ".my-kibana" to come online failed.');
         });
       });
     });

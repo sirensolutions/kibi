@@ -71,8 +71,9 @@ export function ensureEsVersion(server, kibanaVersion, kibiVersion) { // kibi: k
         server.log(['warning'], {
           tmpl: (
             // kibi: changed the message
-            `You're running Kibi v${kibiVersion} with some different version of Elasticsearch. ` +
-            'Check the compability table on htttp://support.siren.io to make sure your Elasticsearch and Kibi versions are compatible.' +
+            `You're running Siren Investigate ${kibiVersion} with some different version of Elasticsearch. ` +
+            'Check the compatibility table on http://support.siren.io to make sure your Elasticsearch and ' +
+            'Siren Investigate versions are compatible.' +
             `Detected on following Elasticsearch nodes: ${warningNodeNames}`
           ), // kibi: end
           kibanaVersion,
@@ -86,7 +87,7 @@ export function ensureEsVersion(server, kibanaVersion, kibiVersion) { // kibi: k
 
       //kibi: changed the messsage
       const errorMessage =
-        `Kibi v${kibiVersion} requires Elasticsearch v` +
+        `Siren Investigate ${kibiVersion} requires Elasticsearch v` +
         `${kibanaVersion} on all nodes. I found ` +
         `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(', ')}`;
 

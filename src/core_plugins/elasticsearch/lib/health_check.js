@@ -96,7 +96,7 @@ module.exports = function (plugin, server, { mappings }) {
   }
 
   function setGreenStatus() {
-    return plugin.status.green('Kibana index ready');
+    return plugin.status.green('Siren Investigate index ready');
   }
 
   function check() {

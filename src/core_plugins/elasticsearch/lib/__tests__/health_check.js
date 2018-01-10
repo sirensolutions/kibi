@@ -138,7 +138,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
 
-          expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
+          expect(plugin.status.green.args[0][0]).to.be('Siren Investigate index ready');
         });
     });
 
@@ -165,7 +165,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
-          expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
+          expect(plugin.status.green.args[0][0]).to.be('Siren Investigate index ready');
         });
     });
 
@@ -188,7 +188,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
-          expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
+          expect(plugin.status.green.args[0][0]).to.be('Siren Investigate index ready');
         });
     });
 

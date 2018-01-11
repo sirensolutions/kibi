@@ -9,12 +9,10 @@ export function createCustomClusters(server) {
     if (Boolean(config.tribe.url)) {
       return config.tribe;
     }
-
     return config;
   }
 
-
-  const clustersConfig = config.get('elasticsearch.clusters');
+  const clustersConfig = config.get('elasticsearch.siren.clusters');
   each(clustersConfig, (conf, key) => {
     let config = conf;
     if (Boolean(conf.tribe.url)) {

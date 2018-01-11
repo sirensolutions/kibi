@@ -75,15 +75,16 @@ module.exports = function (kibana) {
 
       return object({
         enabled: boolean().default(true),
-        // kibi: added extra property "clusters"
-        // cluster names should be alphanumeric
-        clusters: object().pattern(/[a-zA-Z0-9]/, elasticsearchOptions),
-        // kibi: end
-        connector: Joi.object({
-          admin: Joi.object({
-            cluster: Joi.string().alphanum()
+        // kibi: added extra properties
+        siren: Joi.object({
+          clusters: object().pattern(/[a-zA-Z0-9]/, elasticsearchOptions),
+          connector: Joi.object({
+            admin: Joi.object({
+              cluster: Joi.string().alphanum()
+            })
           })
         }),
+        // kibi: end
         ... elasticsearchOptions
       }).default();
     },
@@ -142,7 +143,7 @@ module.exports = function (kibana) {
 
       createDataCluster(server);
       createAdminCluster(server);
-      createCustomClusters(server); // kibi: create extra clusters based on investigate.yml elasticsearch.clusters option
+      createCustomClusters(server); // kibi: create extra clusters based on investigate.yml elasticsearch.siren.clusters option
 
       // kibi: expose Investigate utility methods
       const transforms = transformations(server);

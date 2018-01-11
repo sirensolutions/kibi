@@ -33,9 +33,9 @@ module.exports = function createProxy(server, method, path, config) {
 
   // kibi: add a proxy for connector plugin
   let connectorAdminCluster = 'data';
-  if (serverConfig.has('elasticsearch.connector.admin.cluster')) {
-    const clusterName =  serverConfig.get('elasticsearch.connector.admin.cluster');
-    const clustersConfig = serverConfig.get('elasticsearch.clusters');
+  if (serverConfig.has('elasticsearch.siren.connector.admin.cluster')) {
+    const clusterName =  serverConfig.get('elasticsearch.siren.connector.admin.cluster');
+    const clustersConfig = serverConfig.get('elasticsearch.siren.clusters');
     if (clusterName && clustersConfig && clustersConfig[clusterName]) {
       connectorAdminCluster = clusterName;
     } else {

@@ -133,9 +133,9 @@ module.exports = function (plugin, server, { mappings }) {
         }
       })
       .then(() => {
-        if (config.has('elasticsearch.connector.admin.cluster')) {
-          const connectorAdminCluster = config.get('elasticsearch.connector.admin.cluster');
-          const clustersConfig = config.get('elasticsearch.clusters');
+        if (config.has('elasticsearch.siren.connector.admin.cluster')) {
+          const connectorAdminCluster = config.get('elasticsearch.siren.connector.admin.cluster');
+          const clustersConfig = config.get('elasticsearch.siren.clusters');
           if (!clustersConfig || !clustersConfig[connectorAdminCluster]) {
             return new Error(getConfigMismatchErrorMessage(connectorAdminCluster));
           }

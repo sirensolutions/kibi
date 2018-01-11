@@ -9,7 +9,6 @@ import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_part
 module.exports = function (grunt) {
   const platform = require('os').platform();
   const root = p => resolve(__dirname, '../../', p);
-
   // kibi: replaced script name with investigate
   const binScript =  /^win/.test(platform) ? '.\\bin\\investigate.bat' : './bin/investigate';
   const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\investigate.bat' : './build/kibana/bin/investigate';
@@ -34,7 +33,17 @@ module.exports = function (grunt) {
     if (flag.startsWith('--kbnServer.')) {
       flags.push(`--${flag.slice(12)}`);
     }
-
+    // kibi: below is needed when we want to pass boolean flags to disable plugins
+    // grunt transforms boolean arguments by prepending '--no' in front if boolean command line arguments set to false
+    // so we must change this back to format that can be passed to siren investigate.
+    if (flag.startsWith('--no-kbnServer.')) {
+      flags.push(`--${
+        flag.replace('--no', '-')
+        .concat('=false')
+        .slice(12)
+      }`);
+    }
+    // kibi: end
     return flags;
   }, []);
 

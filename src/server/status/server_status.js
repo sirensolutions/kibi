@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import states from './states';
 import Status from './status';
-import { version } from '../../../package.json';
+import { kibi_version as version } from '../../../package.json'; // kibi: report our version if plugin.version == 'kibana'
 
 module.exports = class ServerStatus {
   constructor(server) {

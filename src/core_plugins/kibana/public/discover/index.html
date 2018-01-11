@@ -149,7 +149,9 @@
                 index-pattern="indexPattern"
                 sorting="state.sort"
                 columns="state.columns"
-                infinite-scroll="true"
+                increase-sample="true"
+                search-source="searchSource"
+                enable-top-paginator="true"
                 filter="filterQuery"
                 filters="state.filters"
                 data-shared-item
@@ -162,11 +164,6 @@
                 on-remove-column="removeColumn"
               ></doc-table>
 
-              <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
-                These are the first {{opts.sampleSize}} documents matching
-                your search, refine your search to see others.
-                <a ng-click="toTop()">Back to top.</a>
-              </div>
             </div>
           </div>
         </div>

@@ -91,9 +91,13 @@ export function SegmentedRequestProvider(es, Private, Promise, timefilter, confi
         const indices = this._active = this._queue.splice(0, indexCount);
         params.index = _.pluck(indices, 'index');
 
-        if (isNumber(this._desiredSize)) {
-          params.body.size = this._pickSizeForIndices(indices);
+        // kibi: if search source size is different from desiredSize use search source size, otherwise use the desired size,
+        // for example, pagination for doc table in discover page
+        if (isNumber(this._desiredSize) || (this.source._state && isNumber(this.source._state.size))) {
+          params.body.size = (this.source._state && this.source._state.size !== this._desiredSize) ?
+          this.source._state.size : this._pickSizeForIndices(indices);
         }
+        // kibi: end
 
         return params;
       });
@@ -236,9 +240,13 @@ export function SegmentedRequestProvider(es, Private, Promise, timefilter, confi
         });
       }
 
-      if (isNumber(desiredSize)) {
-        this._mergedResp.hits.hits = mergedHits.slice(0, desiredSize);
+      // kibi: if search source size is different from desiredSize use search source size, otherwise use the desired size,
+      // for example, pagination for doc table in discover page
+      if (isNumber(desiredSize) || (this.source._state && isNumber(this.source._state.size))) {
+        this._mergedResp.hits.hits = (this.source._state && this.source._state.size !== this._desiredSize) ?
+        mergedHits.slice(0, this.source._state.size) : mergedHits.slice(0, desiredSize);
       }
+      // kibi: end
     }
 
     _mergeSegment(seg) {

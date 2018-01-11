@@ -24,4 +24,13 @@ module.exports = function (grunt) {
       });
     }).catch(done);
   });
+
+  grunt.registerTask('removeGremlin', function () {
+    try {
+      fs.rmdir('./gremlin_server');
+      grunt.log.ok('Successfully deleted Gremlin Server');
+    } catch (err) {
+      grunt.log.error('Failed to delete Gremlin Server');
+    }
+  });
 };

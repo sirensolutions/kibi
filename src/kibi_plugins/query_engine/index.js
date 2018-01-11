@@ -243,7 +243,7 @@ module.exports = function (kibana) {
             const ontologyDocId = 'default-ontology';
             const ontologyDocType = 'ontology-model';
             const savedObjectsClient = req.getSavedObjectsClient();
-            return savedObjectsClient.get(ontologyDocType, ontologyDocId)
+            return savedObjectsClient.get(ontologyDocType, ontologyDocId, req)
             .then((doc) => {
               const newProperties = doc.attributes;
               newProperties.model = returnedModel;
@@ -257,7 +257,7 @@ module.exports = function (kibana) {
                 if (response.found === false) {
                   // ontology-model not found. Create a new one.
                   const doc = {
-                    model: response,
+                    model: returnedModel,
                     version: 1
                   };
                   return savedObjectsClient.create(ontologyDocType, doc, { id: ontologyDocId }, req)

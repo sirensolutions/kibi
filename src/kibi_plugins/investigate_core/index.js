@@ -158,7 +158,9 @@ module.exports = function (kibana) {
         method: 'GET',
         path:'/getElasticsearchPlugins/{version?}',
         handler: function (request, reply) {
-          const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
+          // here we use admin cluster to make sure the _cat/plugins
+          // will work even if it is a tribe cluster
+          const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
           const h = `component${request.params.version && request.params.version === 'versions' ? ',version' : ''}`;
           return callWithInternalUser('cat.plugins', {
             h,
@@ -178,7 +180,9 @@ module.exports = function (kibana) {
         method: 'GET',
         path:'/elasticsearchVersion',
         handler: function (request, reply) {
-          const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
+          // here we use admin cluster to make sure the _cat/plugins
+          // will work even if it is a tribe cluster
+          const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
 
           return callWithInternalUser('nodes.info', {
             filterPath: [

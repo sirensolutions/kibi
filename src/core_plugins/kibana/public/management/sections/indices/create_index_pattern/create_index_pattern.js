@@ -324,7 +324,8 @@ uiModules.get('apps/management')
       indexPatterns.cache.clear(id);
 
       // kibi: added entity creation in the ontology model
-      return ontologyClient.insertEntity(id, id, 'INDEX_PATTERN', icon, color, shortDescription, longDescription)
+      return ontologyClient.insertEntity(id, id, 'INDEX_PATTERN', icon, color, shortDescription, longDescription,
+        null, null)
       .then(() => {
         kbnUrl.change(`/management/siren/entities/${id}`);
         // force loading while kbnUrl.change takes effect

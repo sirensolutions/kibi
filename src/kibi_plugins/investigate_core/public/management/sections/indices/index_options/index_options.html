@@ -1,11 +1,11 @@
 <div
   data-test-subj="indexOptionsContainer"
-  class="kuiViewContent"
+  class="kuiViewContent siren-index-option-container"
 >
   <h1
     class="kuiTitle kuiVerticalRhythm"
   >
-    {{ entity.type === 'INDEX_PATTERN' ? 'Index options' : 'Entity Identifier options' }}
+    {{ entity.type === 'INDEX_PATTERN' ? 'Index Pattern Options' : 'Entity Identifier Options' }}
   </h1>
 
   <div class="kuiVerticalRhythm">
@@ -31,7 +31,7 @@
       <label
         class="kuiLabel kuiVerticalRhythmSmall"
       >
-        Label
+        Class Label
       </label>
 
       <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
@@ -43,6 +43,45 @@
           name="label"
           type="text"
         />
+      </div>
+    </div>
+    <div class="kuiVerticalRhythm"
+         ng-if="entity.type === 'INDEX_PATTERN'">
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+      >
+        Instance Label
+      </label>
+
+      <div class="kuiVerticalRhythm kuiVerticalRhythmSmall instance-label">
+        <select required
+                class="kuiSelect"
+                ng-model="entity.instanceLabel.type">
+          <option value="FIELD">Document Field</option>
+          <option value="PARAMETERIZED">Scripted Label</option>
+        </select><br/>
+        <kibi-select
+          required
+          selected
+          class="kibi-select-wrapper"
+          ng-if="entity.instanceLabel.type === 'FIELD'"
+          data-test-subj="index-relation-left-field"
+          object-type="field"
+          index-pattern-id="entity.id"
+          ng-model="entity.instanceLabel.value"
+        ></kibi-select>
+        <input
+          required
+          ng-if="entity.instanceLabel.type === 'PARAMETERIZED'"
+          class="kuiTextInput kuiTextInput--large"
+          data-test-subj="indexOptionsInstanceLabelValueInput"
+          ng-model="entity.instanceLabel.value"
+          ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+          type="text"
+        />
+        <a tooltip="Clic to see the resulting label on a random subset of documents"
+           class="label-preview"
+           ng-show="entity.instanceLabel.value">preview<br/></a>
       </div>
     </div>
     <div class="kuiVerticalRhythm">

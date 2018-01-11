@@ -54,12 +54,16 @@
                     <li ng-repeat="(relName, dashboards) in button.compatibleDashboard">
                       <i class="fa {{ getRelationVisibilityClass(button, relName) }}"
                          tooltip-placement="right"
-                         tooltip="{{ button.tooltip.relation[relName] }}"
+                         tooltip="{{ button.tooltip.relation[relName].tooltip }}"
                          ng-click="toggleRelationVisibility(button, relName)"
-                      ></i>{{ relName }}
+                      ></i> {{ relName }}
                       <ul class="dashboards">
                         <li ng-repeat="dashboardName in dashboards">
-                          {{ dashboardName }}
+                          <i class="fa {{ getDashboardVisibilityClass(button, relName, dashboardName) }}"
+                             tooltip-placement="right"
+                             tooltip="{{ button.tooltip.relation[relName].dashboard[dashboardName] }}"
+                             ng-click="toggleDashboardVisibility(button, relName, dashboardName)"
+                          ></i> {{ dashboardName }}
                         </li>
                       </ul>
                     </li>

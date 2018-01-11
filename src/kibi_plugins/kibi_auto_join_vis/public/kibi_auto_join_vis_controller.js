@@ -220,7 +220,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       } else if (rel.range.type === 'INDEX_PATTERN') {
         button.type = 'INDEX_PATTERN';
 
-        promises.push(Promise.all([
+        promises.push(
+          Promise.all([
             savedDashboards.find(),
             savedSearches.find()
           ])

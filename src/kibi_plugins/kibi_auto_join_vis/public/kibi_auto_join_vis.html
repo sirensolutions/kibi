@@ -58,7 +58,8 @@
         >
           <div class="panel-buttons">
             <a ng-repeat="subButton in subButtons"
-               ng-if="subButton.type === 'INDEX_PATTERN'"
+               ng-if="subButton.type === 'INDEX_PATTERN'
+                      && vis.params.visibility[button.id].relation[key].dashboard[subButton.label] !== false"
                ng-click="subButton.click(true)"
                ng-disabled="subButton.disabled"
                ng-mouseover="hoverIn(subButton)"
@@ -74,32 +75,6 @@
                 <span class="go-to-dashboard">
                   <i class="fa fa-arrow-right"></i>
                 </span>
-              </h4>
-            </a>
-          </div>
-        </accordion-group>
-      </accordion>
-      <accordion close-others="true"
-                 ng-if="button.checkBox"
-      >
-        <accordion-group heading="{{key}}"
-                         ng-repeat="(key, altSubButtons) in button.altSub"
-        >
-          <div class="panel-buttons">
-            <a ng-repeat="altSubButton in altSubButtons"
-               ng-if="altSubButton.type === 'INDEX_PATTERN'"
-               ng-click="altSubButton.click(true)"
-               ng-disabled="altSubButton.disabled"
-               ng-mouseover="hoverIn(altSubButton)"
-               ng-mouseleave="hoverOut()"
-            >
-              <h4 class="panel-title">
-                {{altSubButton.label}}
-                <span ng-show="altSubButton.targetCount !== undefined"> ({{altSubButton.targetCount}})</span>
-                <span
-                  class="warning"
-                  ng-if="!!altSubButton.warning"
-                  title="{{altSubButton.warning}}">(*)</span>
               </h4>
             </a>
           </div>

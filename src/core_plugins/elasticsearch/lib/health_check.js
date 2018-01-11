@@ -90,7 +90,7 @@ module.exports = function (plugin, server, { mappings }) {
   }
 
   function waitForEsVersion(clusterName) {
-    return ensureEsVersion(clusterName, server, kibanaVersion.get(), kibiVersion.get())
+    return ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), clusterName)
     .catch(err => {
       plugin.status.red(err);
       return Promise.delay(REQUEST_DELAY).then(() => {
@@ -129,7 +129,7 @@ module.exports = function (plugin, server, { mappings }) {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {
           return waitForPong(callDataAsKibanaUser, tribeUrl)
-          .then(() => ensureEsVersion('admin', server, kibanaVersion.get(), kibiVersion.get()));
+          .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), 'admin'));
         }
       })
       .then(() => {
@@ -146,7 +146,7 @@ module.exports = function (plugin, server, { mappings }) {
           }
           const callConnectorAsKibanaUser = server.plugins.elasticsearch.getCluster(connectorAdminCluster).callWithInternalUser;
           return waitForPong(callConnectorAsKibanaUser, url)
-          .then(() => ensureEsVersion(connectorAdminCluster, server, kibanaVersion.get(), kibiVersion.get()));
+          .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), connectorAdminCluster));
         }
       });
 

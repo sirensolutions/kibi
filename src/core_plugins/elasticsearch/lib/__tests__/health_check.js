@@ -75,11 +75,16 @@ describe('plugins/elasticsearch', () => {
 
       const set = sinon.stub();
 
+      // kibi: added "has" stub
+      const has = sinon.stub();
+      has.withArgs('elasticsearch.connector.admin.cluster').returns(false);
+      // kibi: end
+
       // Setup the server mock
       server = {
         log: sinon.stub(),
         info: { port: 5601 },
-        config: function () { return { get, set }; },
+        config: function () { return { get, set, has }; },
         expose: sinon.stub(),
         plugins: {
           elasticsearch: {

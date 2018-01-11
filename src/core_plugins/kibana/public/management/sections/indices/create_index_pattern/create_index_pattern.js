@@ -288,7 +288,7 @@ uiModules.get('apps/management')
       shortDescription,
       longDescription,
       icon,
-      color
+      color,
       excludeIndices
     } = this.formValues;
 

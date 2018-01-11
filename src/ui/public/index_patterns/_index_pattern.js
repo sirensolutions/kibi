@@ -34,7 +34,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
-  const type = 'index-pattern';
   // kibi: adds
   const DocSource = Private(SavedObjectSourceFactory);
   const calculateWildcardIndices = Private(IndexPatternsCalculateWildcardIndicesProvider);
@@ -341,7 +340,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         });
     }
 
-    async toDetailedIndexList(start, stop, sortDirection) {
+    toDetailedIndexList(start, stop, sortDirection) {
       return Promise.resolve().then(() => {
         if (this.isTimeBasedInterval()) {
 
@@ -357,14 +356,15 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         }
 
         if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
-          return await calculateIndices(
+          return calculateIndices(
             // kibi: passing this.excludeIndices inside to filter before sorting
             this.title, this.timeFieldName, start, stop, sortDirection, this.isExcludeIndicesOn()
-          );
-        } catch(error) {
-          if (!isFieldStatsError(error)) {
-            throw error;
-          }
+          )
+          .catch(error => {
+            if (!isFieldStatsError(error)) {
+              throw error;
+            }
+          });
         }
 
         // kibi: added to expand and filter star pattern when it is not timebased

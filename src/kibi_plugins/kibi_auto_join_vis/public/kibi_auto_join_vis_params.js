@@ -29,12 +29,8 @@ uiModules
        */
       $scope.toggleTargetDashboards = function (button) {
         if (!button.compatibleDashboard) {
-          return Promise.all([
-            ontologyClient.getRelations(),
-            ontologyClient.getDashboardsByEntity(entity),
-            ontologyClient.getRelationsByDomain(entity.id)
-          ])
-          .then(([relations, dashboards, targetRelations]) => {
+          ontologyClient.getRelations()
+          .then((relations) => {
             const relation = _.find(relations, (rel) => {
               return rel.id === button.indexRelationId;
             });
@@ -42,14 +38,20 @@ uiModules
             if (relation.range.type === 'VIRTUAL_ENTITY') {
               entity = relation.range;
             }
-            const compatibleDashboards = _.map(dashboards, (dashboard) => {
-              return dashboard.title;
+            return Promise.all([
+              ontologyClient.getDashboardsByEntity(entity),
+              ontologyClient.getRelationsByDomain(entity.id)
+            ])
+            .then(([dashboards, targetRelations]) => {
+              const compatibleDashboards = _.map(dashboards, (dashboard) => {
+                return dashboard.title;
+              });
+              _.each(targetRelations, (targetRel) => {
+                button.compatibleDashboard = {};
+                button.compatibleDashboard[targetRel.directLabel] = compatibleDashboards;
+              });
+              button.showTargetDashboards = !button.showTargetDashboards;
             });
-            _.each(targetRelations, (targetRel) => {
-              button.compatibleDashboard = {};
-              button.compatibleDashboard[targetRel.directLabel] = compatibleDashboards;
-            });
-            button.showTargetDashboards = !button.showTargetDashboards;
           });
         } else {
           button.showTargetDashboards = !button.showTargetDashboards;

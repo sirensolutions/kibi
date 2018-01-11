@@ -133,7 +133,8 @@ module.exports = function (plugin, server, { mappings }) {
         }
       })
       .then(() => {
-        if (config.has(CONNECTOR_CLUSTER_PROPERTY)) {
+        // remember "has" will return true if it is defined in the schema !!!  So use get
+        if (config.get(CONNECTOR_CLUSTER_PROPERTY)) {
           const connectorAdminCluster = config.get(CONNECTOR_CLUSTER_PROPERTY);
           const clustersConfig = config.get(CLUSTERS_PROPERTY);
           if (!clustersConfig || !clustersConfig[connectorAdminCluster]) {
@@ -150,7 +151,8 @@ module.exports = function (plugin, server, { mappings }) {
         }
       })
       .then(() => {
-        if (config.has(ALERT_CLUSTER_PROPERTY)) {
+        // remember "has" will return true if it is defined in the schema !!!  So use get
+        if (config.get(ALERT_CLUSTER_PROPERTY)) {
           const alertAdminCluster = config.get(ALERT_CLUSTER_PROPERTY);
           const clustersConfig = config.get(CLUSTERS_PROPERTY);
           if (!clustersConfig || !clustersConfig[alertAdminCluster]) {

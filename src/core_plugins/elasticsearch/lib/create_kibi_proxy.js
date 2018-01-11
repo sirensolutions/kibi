@@ -33,7 +33,8 @@ module.exports = function createProxy(server, method, path, config) {
   // kibi: add proxies for special clusters
   // add a proxy for connector plugin
   let connectorAdminCluster = 'data';
-  if (serverConfig.has(CONNECTOR_CLUSTER_PROPERTY)) {
+  // remember "has" will return true if it is defined in the schema !!!  So use get
+  if (serverConfig.get(CONNECTOR_CLUSTER_PROPERTY)) {
     const clusterName =  serverConfig.get(CONNECTOR_CLUSTER_PROPERTY);
     const clustersConfig = serverConfig.get(CLUSTERS_PROPERTY);
     if (clusterName && clustersConfig && clustersConfig[clusterName]) {
@@ -46,7 +47,8 @@ module.exports = function createProxy(server, method, path, config) {
 
   // add a proxy for siren alert plugin
   let alertAdminCluster = 'data';
-  if (serverConfig.has(ALERT_CLUSTER_PROPERTY)) {
+  // remember "has" will return true if it is defined in the schema !!!  So use get
+  if (serverConfig.get(ALERT_CLUSTER_PROPERTY)) {
     const clusterName =  serverConfig.get(ALERT_CLUSTER_PROPERTY);
     const clustersConfig = serverConfig.get(CLUSTERS_PROPERTY);
     if (clusterName && clustersConfig && clustersConfig[clusterName]) {

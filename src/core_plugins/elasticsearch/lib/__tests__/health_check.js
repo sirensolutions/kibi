@@ -72,20 +72,18 @@ describe('plugins/elasticsearch', () => {
       get.withArgs('elasticsearch.url').returns(esUrl);
       get.withArgs('kibana.index').returns('.my-kibana');
       get.withArgs('pkg.version').returns('1.0.0');
+      // kibi: added
+      get.withArgs('elasticsearch.siren.connector.admin.cluster').returns(false);
+      get.withArgs('elasticsearch.siren.alert.admin.cluster').returns(false);
+      // kibi: end
 
       const set = sinon.stub();
-
-      // kibi: added "has" stub
-      const has = sinon.stub();
-      has.withArgs('elasticsearch.siren.connector.admin.cluster').returns(false);
-      has.withArgs('elasticsearch.siren.alert.admin.cluster').returns(false);
-      // kibi: end
 
       // Setup the server mock
       server = {
         log: sinon.stub(),
         info: { port: 5601 },
-        config: function () { return { get, set, has }; },
+        config: function () { return { get, set }; },
         expose: sinon.stub(),
         plugins: {
           elasticsearch: {

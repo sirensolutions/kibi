@@ -111,7 +111,9 @@ module.exports = function (grunt) {
   // kibi: Add this task to allow ui tests to run without stopping when there is a failure
   grunt.registerTask('test:ui:dev', () => {
     grunt.config.set('functional_test_runner.functional.options.configOverrides.mochaOpts.bail', false);
-    grunt.task.run(['test:ui']);
+    grunt.task.run([
+      'getGremlin',
+      'test:ui']);
   });
   // kibi: end
 

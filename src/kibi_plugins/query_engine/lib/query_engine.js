@@ -106,9 +106,11 @@ QueryEngine.prototype.loadPredefinedData = function () {
       self._isKibiIndexPresent().then(function () {
         self._loadTemplatesMapping().then(function () {
           self._loadTemplates().then(function () {
-            return self._loadDatasources().then(function () {
-              return self._refreshKibiIndex().then(function () {
-                fulfill(true);
+            self._loadDatasourcesMapping().then(function () {
+              return self._loadDatasources().then(function () {
+                return self._refreshKibiIndex().then(function () {
+                  fulfill(true);
+                });
               });
             });
           });
@@ -209,8 +211,27 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
   const mapping = {
     template: {
       properties: {
+        kibanaSavedObjectMeta: {
+          properties : {
+            searchSourceJSON : {
+              type : 'text'
+            }
+          }
+        },
         version: {
           type: 'integer'
+        },
+        templateSource: {
+          type: 'text'
+        },
+        templateEngine: {
+          type: 'text'
+        },
+        title: {
+          type: 'text'
+        },
+        description: {
+          type: 'text'
         }
       }
     }
@@ -220,6 +241,49 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
     timeout: '1000ms',
     index: this.config.get('kibana.index'),
     type: 'template',
+    body: mapping
+  });
+};
+
+/**
+ * Loads datasources mapping.
+ *
+ * @return {Promise}
+ */
+QueryEngine.prototype._loadDatasourcesMapping = function () {
+  const mapping = {
+    datasource: {
+      properties: {
+        kibanaSavedObjectMeta: {
+          properties: {
+            searchSourceJSON: {
+              type: 'text'
+            }
+          }
+        },
+        version: {
+          type: 'integer'
+        },
+        datasourceParams: {
+          type: 'text'
+        },
+        datasourceType: {
+          type: 'text'
+        },
+        description: {
+          type: 'text'
+        },
+        title: {
+          type: 'text'
+        }
+      }
+    }
+  };
+
+  return this.cluster.callWithInternalUser('indices.putMapping', {
+    timeout: '1000ms',
+    index: this.config.get('kibana.index'),
+    type: 'datasource',
     body: mapping
   });
 };

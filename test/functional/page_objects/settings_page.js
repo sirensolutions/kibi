@@ -308,7 +308,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const currentUrl = await remote.getCurrentUrl();
         log.info('currentUrl', currentUrl);
-        if (!currentUrl.match(/indices\/.+\?/)) {
+        // kibi: match for entities when save works
+        if (!currentUrl.match(/entities\/.+\?/)) {
           throw new Error('Index pattern not created');
         } else {
           log.debug('Index pattern created: ' + currentUrl);

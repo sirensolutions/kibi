@@ -12,7 +12,7 @@
       <select ng-model="filterIndexPattern"
               ng-model-options="{ debounce: 350 }"
               ng-options="option.name for option in availableIndexPatterns track by option.id"
-              ng-change="updateFilteredButtonsAndRelations()"
+              ng-change="updateFilteredButtons()"
               class="form-control">
       </select>
     </div>

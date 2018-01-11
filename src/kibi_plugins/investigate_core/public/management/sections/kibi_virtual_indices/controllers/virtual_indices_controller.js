@@ -24,12 +24,13 @@ function controller($scope, jdbcDatasources, createNotifier, es, confirmModal) {
 
   fetchVirtualIndexes();
 
-  // kibi: code to handle creation of jdbc datasource based index patterns
   $scope.jdbcFormValues = {
     datasource: null,
     resource: null,
+    name: null,
     key: null,
-    name: null
+    catalog: null,
+    schema: null
   };
 
   $scope.jdbcDatasources = [];
@@ -43,7 +44,9 @@ function controller($scope, jdbcDatasources, createNotifier, es, confirmModal) {
       _source: {
         datasource: $scope.jdbcFormValues.datasource,
         resource: $scope.jdbcFormValues.resource,
-        key: $scope.jdbcFormValues.key
+        key: $scope.jdbcFormValues.key,
+        catalog: $scope.jdbcFormValues.catalog,
+        schema: $scope.jdbcFormValues.schema
       }
     };
 

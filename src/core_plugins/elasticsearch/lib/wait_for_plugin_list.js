@@ -2,7 +2,9 @@ import _ from 'lodash';
 
 module.exports = function (plugin, server) {
   const config = server.config();
-  const callWithInternalUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
+  // here we use admin cluster to make sure the _cat/plugins
+  // will work even if it is a tribe cluster
+  const callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 
   return Promise.all(
     [

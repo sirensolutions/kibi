@@ -12,7 +12,9 @@ module.exports = function (kibana) {
     id: 'siren_federate',
 
     init: function (server, options) {
-      const callWithInternalUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
+      // here we use admin cluster to make sure the _cat/plugins
+      // will work even if it is a tribe cluster
+      const callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 
       this.status.yellow('Checking for Siren Federate Elasticsearch plugin.');
 

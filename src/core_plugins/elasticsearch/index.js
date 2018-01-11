@@ -13,6 +13,8 @@ import createKibanaProxy, { createPath } from './lib/create_kibana_proxy';
 import createKibiProxy from './lib/create_kibi_proxy';
 
 // kibi: kibi imports
+import { createCustomClusters } from './lib/custom_clusters';
+
 import transformations from './lib/transforms';
 import util from './lib/util';
 import dbfilter from './lib/dbfilter';
@@ -36,8 +38,8 @@ module.exports = function (kibana) {
         keyPassphrase: string()
       }).default();
 
-      return object({
-        enabled: boolean().default(true),
+      // kibi: extracted common schema part to reuse it inside "clusters" option
+      const elasticsearchOptions = {
         url: string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
         preserveHost: boolean().default(true),
         username: string(),
@@ -68,7 +70,27 @@ module.exports = function (kibana) {
           logQueries: boolean().default(false),
           ssl: sslSchema,
           apiVersion: Joi.string().default('5.x'),
-        }).default()
+        }).default(),
+      };
+
+      return object({
+        enabled: boolean().default(true),
+        // kibi: added extra properties
+        siren: Joi.object({
+          clusters: object().pattern(/[a-zA-Z0-9]/, elasticsearchOptions),
+          connector: Joi.object({
+            admin: Joi.object({
+              cluster: Joi.string().alphanum()
+            })
+          }),
+          alert: Joi.object({
+            admin: Joi.object({
+              cluster: Joi.string().alphanum()
+            })
+          })
+        }),
+        // kibi: end
+        ... elasticsearchOptions
       }).default();
     },
 
@@ -126,8 +148,9 @@ module.exports = function (kibana) {
 
       createDataCluster(server);
       createAdminCluster(server);
+      createCustomClusters(server); // kibi: create extra clusters based on investigate.yml elasticsearch.siren.clusters option
 
-      // kibi: expose Kibi utility methods
+      // kibi: expose Investigate utility methods
       const transforms = transformations(server);
       server.expose('transformSearchRequest', transforms.transformSearchRequest);
       server.expose('transformSearchResponse', transforms.transformSearchResponse);

@@ -14,6 +14,7 @@ import { ensureTypesExist } from './ensure_types_exist';
 import kibiVersion from './kibi_version';
 //added by kibi to know the list of installed plugins
 import pluginList from './wait_for_plugin_list';
+import { getConfigMismatchErrorMessage, CLUSTERS_PROPERTY, CONNECTOR_CLUSTER_PROPERTY, ALERT_CLUSTER_PROPERTY } from './custom_clusters';
 // kibi: end
 
 const NoConnections = elasticsearch.errors.NoConnections;
@@ -88,10 +89,13 @@ module.exports = function (plugin, server, { mappings }) {
     });
   }
 
-  function waitForEsVersion() {
-    return ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get()).catch(err => {
+  function waitForEsVersion(clusterName) {
+    return ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), clusterName)
+    .catch(err => {
       plugin.status.red(err);
-      return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
+      return Promise.delay(REQUEST_DELAY).then(() => {
+        waitForEsVersion(clusterName);
+      });
     });
   }
 
@@ -104,14 +108,12 @@ module.exports = function (plugin, server, { mappings }) {
 
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
-      .then(waitForEsVersion)
+      .then(() => waitForEsVersion('admin'))
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
       .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
       .then(_.partial(pluginList, plugin, server)) // kibi: added by kibi to know the list of installed plugins
-      // TODO: MERGE 5.6.x
-      // check but I think we do not want these two
-      // as mappings are handled by savedObjectAPI
+      // kibi: mappings are handled by savedObjectAPI
       // and we take take care about migrating config ourselves
       // .then(() => ensureTypesExist({
       //   callCluster: callAdminAsKibanaUser,
@@ -127,7 +129,41 @@ module.exports = function (plugin, server, { mappings }) {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {
           return waitForPong(callDataAsKibanaUser, tribeUrl)
-          .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get()));
+          .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), 'admin'));
+        }
+      })
+      .then(() => {
+        if (config.has(CONNECTOR_CLUSTER_PROPERTY)) {
+          const connectorAdminCluster = config.get(CONNECTOR_CLUSTER_PROPERTY);
+          const clustersConfig = config.get(CLUSTERS_PROPERTY);
+          if (!clustersConfig || !clustersConfig[connectorAdminCluster]) {
+            return new Error(getConfigMismatchErrorMessage(connectorAdminCluster, CONNECTOR_CLUSTER_PROPERTY));
+          }
+          const clusterConfig = clustersConfig[connectorAdminCluster];
+          let url =  clusterConfig.url;
+          if (clusterConfig.tribe && clusterConfig.tribe.url) {
+            url = clusterConfig.tribe.url;
+          }
+          const callConnectorAsKibanaUser = server.plugins.elasticsearch.getCluster(connectorAdminCluster).callWithInternalUser;
+          return waitForPong(callConnectorAsKibanaUser, url)
+          .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), connectorAdminCluster));
+        }
+      })
+      .then(() => {
+        if (config.has(ALERT_CLUSTER_PROPERTY)) {
+          const alertAdminCluster = config.get(ALERT_CLUSTER_PROPERTY);
+          const clustersConfig = config.get(CLUSTERS_PROPERTY);
+          if (!clustersConfig || !clustersConfig[alertAdminCluster]) {
+            return new Error(getConfigMismatchErrorMessage(alertAdminCluster, ALERT_CLUSTER_PROPERTY));
+          }
+          const clusterConfig = clustersConfig[alertAdminCluster];
+          let url =  clusterConfig.url;
+          if (clusterConfig.tribe && clusterConfig.tribe.url) {
+            url = clusterConfig.tribe.url;
+          }
+          const callAlertAsKibanaUser = server.plugins.elasticsearch.getCluster(alertAdminCluster).callWithInternalUser;
+          return waitForPong(callAlertAsKibanaUser, url)
+          .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), alertAdminCluster));
         }
       });
 

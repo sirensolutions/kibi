@@ -8,6 +8,11 @@ import sirenJoinModule from './siren_join';
 import dbfilter from './dbfilter';
 import inject from './inject';
 
+
+// kibi: imports
+import { getConfigMismatchErrorMessage, CLUSTERS_PROPERTY, CONNECTOR_CLUSTER_PROPERTY, ALERT_CLUSTER_PROPERTY } from './custom_clusters';
+// kibi: end
+
 const createPath = function (prefix, path) {
   path = path[0] === '/' ? path : `/${path}`;
   prefix = prefix[0] === '/' ? prefix : `/${prefix}`;
@@ -17,13 +22,42 @@ const createPath = function (prefix, path) {
 
 module.exports = function createProxy(server, method, path, config) {
   const sirenJoin = sirenJoinModule(server);
+  const serverConfig = server.config();
+
 
   const proxies = new Map([
     ['/elasticsearch', server.plugins.elasticsearch.getCluster('data')],
     ['/es_admin', server.plugins.elasticsearch.getCluster('admin')]
   ]);
 
-  const serverConfig = server.config();
+  // kibi: add proxies for special clusters
+  // add a proxy for connector plugin
+  let connectorAdminCluster = 'data';
+  if (serverConfig.has(CONNECTOR_CLUSTER_PROPERTY)) {
+    const clusterName =  serverConfig.get(CONNECTOR_CLUSTER_PROPERTY);
+    const clustersConfig = serverConfig.get(CLUSTERS_PROPERTY);
+    if (clusterName && clustersConfig && clustersConfig[clusterName]) {
+      connectorAdminCluster = clusterName;
+    } else {
+      server.log(['error', 'elasticsearch'], getConfigMismatchErrorMessage(clusterName, CONNECTOR_CLUSTER_PROPERTY));
+    }
+  }
+  proxies.set('/connector_elasticsearch', server.plugins.elasticsearch.getCluster(connectorAdminCluster));
+
+  // add a proxy for siren alert plugin
+  let alertAdminCluster = 'data';
+  if (serverConfig.has(ALERT_CLUSTER_PROPERTY)) {
+    const clusterName =  serverConfig.get(ALERT_CLUSTER_PROPERTY);
+    const clustersConfig = serverConfig.get(CLUSTERS_PROPERTY);
+    if (clusterName && clustersConfig && clustersConfig[clusterName]) {
+      alertAdminCluster = clusterName;
+    } else {
+      server.log(['error', 'elasticsearch'], getConfigMismatchErrorMessage(clusterName, ALERT_CLUSTER_PROPERTY));
+    }
+  }
+  proxies.set('/alert_elasticsearch', server.plugins.elasticsearch.getCluster(connectorAdminCluster));
+  // kibi: end
+
   function getCredentials(request) {
     let credentials = serverConfig.has('xpack.security.cookieName') ? request.state[serverConfig.get('xpack.security.cookieName')] : null;
     if (request.auth && request.auth.credentials && request.auth.credentials.proxyCredentials) {

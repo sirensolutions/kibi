@@ -20,7 +20,7 @@ function KibiAutoJoinVisTypeProvider(Private) {
     template,
     params: {
       defaults: {
-        buttons: []
+        visibility: {}
       },
       editor: '<kibi-auto-join-vis-params></kibi-auto-join-vis-params>'
     },

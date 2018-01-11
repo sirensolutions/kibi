@@ -77,17 +77,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       if (definition.query) {
         const sourceDash = result.button.sourceDashboardId ? result.button.sourceDashboardId : '';
         const targetDash = result.button.targetDashboardId ? result.button.targetDashboardId : '';
-        // adding unique id as required by kibiMeta
-        definition.id =
-          sourceDash + targetDash +
-          relationsHelper.getJoinIndicesUniqueID(
-            result.button.sourceIndexPatternId,
-            result.button.sourceIndexPatternType,
-            result.button.sourceField,
-            result.button.targetIndexPatternId,
-            result.button.targetIndexPatternType,
-            result.button.targetField,
-          );
 
         metaDefinitions.push({
           definition: definition,

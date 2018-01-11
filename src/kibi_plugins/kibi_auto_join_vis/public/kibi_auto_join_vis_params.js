@@ -12,6 +12,7 @@ uiModules
     template,
     link: function ($scope) {
       $scope.buttons = [];
+      $scope.menu = {};
 
       const notify = createNotifier({
         location: 'Kibi Automatic Relational filter params'
@@ -98,7 +99,42 @@ uiModules
         }
       };
 
-      $scope.menu = {};
+      $scope.resetVisibility = function () {
+        $scope.vis.params.visibility = {};
+      };
+
+      $scope.getButtonVisibilityClass = function (button) {
+        const visibility = $scope.vis.params.visibility;
+        if (visibility[button.id] === undefined || visibility[button.id].button === undefined) {
+          button.tooltip = 'Default visibility: visible';
+          return 'fa fa-eye button-default';
+        } else if (visibility[button.id].button) {
+          button.tooltip = 'Visible';
+          return 'fa fa-eye button-set';
+        } else {
+          button.tooltip = 'Not visible';
+          return 'fa fa-eye-slash button-set';
+        }
+      };
+
+      $scope.toggleButtonVisibility = function (button) {
+        let visibility;
+        if ($scope.vis.params.visibility[button.id]) {
+          visibility = $scope.vis.params.visibility[button.id];
+        } else {
+          visibility = {};
+        }
+        // default state
+        if (visibility === {}) {
+          visibility.button = true;
+        } else if (visibility.button) {
+          visibility.button = false;
+        } else {
+          visibility.button = true;
+        }
+
+        $scope.vis.params.visibility[button.id] = visibility;
+      };
 
       ontologyClient.getRelations().then((relations) => {
         return indexPatterns.getIds()

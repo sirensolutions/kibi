@@ -2,6 +2,12 @@
   <section>
     <h4>Relations</h4>
     <div class="form-group">
+      <div class="btn btn-default"
+           ng-click="resetVisibility()">
+        <span>Reset visibility</span>
+      </div>
+    </div>
+    <div class="form-group">
       <label>Filter by index-pattern:</label></br>
       <select ng-model="filterIndexPattern"
               ng-model-options="{ debounce: 350 }"
@@ -14,6 +20,14 @@
       <li ng-repeat="button in filteredButtons"
           class="queryOptionArea"
       >
+        <div class="btn-visibility-check">
+          <i
+             tooltip-placement="right"
+             tooltip="{{ button.tooltip }}"
+             class="fa {{ getButtonVisibilityClass(button) }}"
+             ng-click="toggleButtonVisibility(button)"
+          ></i>
+        </div>
         <div class="header" ng-if="button.type === 'INDEX_PATTERN'">
           <h2>
             {{ button.label }}

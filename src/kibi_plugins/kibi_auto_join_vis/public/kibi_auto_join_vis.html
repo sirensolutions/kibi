@@ -29,7 +29,7 @@
   >
     <accordion-group ng-repeat="button in buttons"
                      ng-if="button.type === 'VIRTUAL_ENTITY' && (vis.params.visibility[button.id] === undefined
-                            || !vis.params.visibility[button.id].button === false)"
+                            || vis.params.visibility[button.id].button !== false)"
                      is-open="button.isOpen"
                      >
       <accordion-heading>
@@ -53,6 +53,7 @@
       >
         <accordion-group heading="{{key}}"
                          ng-repeat="(key, subButtons) in button.sub"
+                         ng-if="vis.params.visibility[button.id].relation[key].toggle !== false"
                          is-open="visibility[key]"
         >
           <div class="panel-buttons">

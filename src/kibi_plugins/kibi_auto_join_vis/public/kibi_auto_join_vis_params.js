@@ -64,16 +64,50 @@ uiModules
 
       $scope.getButtonVisibilityClass = function (button) {
         const visibility = $scope.vis.params.visibility;
+        if (!button.tooltip) {
+          button.tooltip = {};
+        }
         if (visibility[button.id] === undefined || visibility[button.id].button === undefined) {
-          button.tooltip = 'Default visibility: visible';
+          button.tooltip.root = 'Default visibility: visible';
           return 'fa fa-eye button-default';
         } else if (visibility[button.id].button) {
-          button.tooltip = 'Visible';
+          button.tooltip.root = 'Visible';
           return 'fa fa-eye button-set';
         } else {
-          button.tooltip = 'Not visible';
+          button.tooltip.root = 'Not visible';
           return 'fa fa-eye-slash button-set';
         }
+      };
+
+      $scope.getRelationVisibilityClass = function (button, relName) {
+        const visibility = $scope.vis.params.visibility;
+        if (!button.tooltip) {
+          button.tooltip = { relation: {}};
+        } else if (!button.tooltip.relation) {
+          button.tooltip.relation = {};
+        }
+
+        let css;
+        if (visibility[button.id] && visibility[button.id].relation && visibility[button.id].relation[relName]
+          && (visibility[button.id].relation[relName].toggle === true || visibility[button.id].relation[relName].toggle === false)) {
+          css = 'button-set';
+        } else {
+          button.tooltip.relation[relName] =  'Default visibility: visible';
+          css = 'button-default';
+        }
+
+        if (visibility[button.id] && visibility[button.id].relation && visibility[button.id].relation[relName]
+          && visibility[button.id].relation[relName].toggle === false) {
+          button.tooltip.relation[relName] =  'Not visible';
+          css += ' fa-eye-slash';
+        } else {
+          if (css === 'button-set') {
+            button.tooltip.relation[relName] =  'Visible';
+          }
+          css += ' fa-eye';
+        }
+
+        return css;
       };
 
       $scope.toggleButtonVisibility = function (button) {
@@ -84,8 +118,8 @@ uiModules
           visibility = {};
         }
         // default state
-        if (visibility === {}) {
-          visibility.button = true;
+        if (_.isEmpty(visibility)) {
+          visibility.button = false;
         } else if (visibility.button) {
           visibility.button = false;
         } else {
@@ -95,7 +129,38 @@ uiModules
         $scope.vis.params.visibility[button.id] = visibility;
       };
 
-      return Promise.all([
+      $scope.toggleRelationVisibility = function (button, relationName) {
+        let visibility;
+        if ($scope.vis.params.visibility[button.id]) {
+          visibility = $scope.vis.params.visibility[button.id];
+        } else {
+          visibility = {};
+        }
+        if (!visibility.relation) {
+          visibility.relation = {};
+        }
+        // default state
+        if (!visibility.relation[relationName] || visibility.relation[relationName].toggle === undefined) {
+          visibility.relation[relationName] = { toggle: false };
+        } else {
+          visibility.relation[relationName].toggle = !visibility.relation[relationName].toggle;
+        }
+
+        // toggle dashboards
+        if (visibility.relation[relationName].dashboard) {
+          for (const dashboardName in visibility.relation[relationName].dashboard) {
+            if (visibility.relation[relationName].dashboard.hasOwnProperty(dashboardName)) {
+              visibility.relation[relationName].dashboard[dashboardName] = visibility.relation[relationName];
+            }
+          }
+        }
+
+        $scope.vis.params.visibility[button.id] = visibility;
+        return visibility;
+      };
+
+      // Init the config panel
+      Promise.all([
         ontologyClient.getRelations(),
         indexPatterns.getIds()
       ])

@@ -111,22 +111,26 @@ uiModules
         const relationsWithNoButton = _.filter(relations, (rel) => {
           return rel.domain.type === 'INDEX_PATTERN';
         });
-        _.each(relationsWithNoButton, (rel) => {
-          const button = {
-            indexRelationId: rel.id,
-            domainIndexPattern: rel.domain.id,
-            status: 'default'
-          };
-          if (rel.range.type === 'VIRTUAL_ENTITY') {
-            button.type = 'VIRTUAL_ENTITY';
-            button.id = rel.id + '-ve-' + rel.range.id;
-            button.label = rel.directLabel + ' (' + rel.range.id + ')';
-            $scope.buttons.push(button);
-          } else if (rel.range.type === 'INDEX_PATTERN') {
-            button.type = 'INDEX_PATTERN';
 
-            return Promise.all([savedDashboards.find(),savedSearches.find()])
-            .then(([savedDashboards, savedSearches]) => {
+        return Promise.all([
+          savedDashboards.find(),
+          savedSearches.find()
+        ])
+        .then(([savedDashboards, savedSearches]) => {
+          _.each(relationsWithNoButton, (rel) => {
+            const button = {
+              indexRelationId: rel.id,
+              domainIndexPattern: rel.domain.id,
+              status: 'default'
+            };
+            if (rel.range.type === 'VIRTUAL_ENTITY') {
+              button.type = 'VIRTUAL_ENTITY';
+              button.id = rel.id + '-ve-' + rel.range.id;
+              button.label = rel.directLabel + ' (' + rel.range.id + ')';
+              $scope.buttons.push(button);
+            } else if (rel.range.type === 'INDEX_PATTERN') {
+              button.type = 'INDEX_PATTERN';
+
               const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
                 const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
                 return searchSource.index === rel.range.id;
@@ -143,10 +147,10 @@ uiModules
                   $scope.buttons.push(clonedButton);
                 });
               });
-            });
-          }
-        });
-        $scope.updateFilteredButtons();
+            }
+          });
+        })
+        .then($scope.updateFilteredButtons);
       });
 
     }

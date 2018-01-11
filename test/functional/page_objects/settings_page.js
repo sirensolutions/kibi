@@ -32,7 +32,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
-      await this.clickLinkText('Index Patterns');
+      // kibi: add new links below as siren investigate has way of getting
+      // to the index pattern page than kibana
+      await this.clickLinkText('Entities');
+      await this.clickLinkText('Add Index Pattern');
+      // kibi: end
     }
 
     getAdvancedSettings(propertyName) {

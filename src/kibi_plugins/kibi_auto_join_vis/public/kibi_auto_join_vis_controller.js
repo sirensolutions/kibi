@@ -210,9 +210,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       };
       if (rel.range.type === 'VIRTUAL_ENTITY') {
         button.type = 'VIRTUAL_ENTITY';
-        promises.push(ontologyClient.getEntities()
-          .then((entities) => {
-            const virtualEntity = _.find(entities, (entity) => { return entity.id === rel.range.id; });
+        promises.push(ontologyClient.getEntityById(rel.range.id)
+          .then((virtualEntity) => {
             button.id = rel.id + '-ve-' + rel.range.id;
             button.label = rel.directLabel + ' (~{0} ' + virtualEntity.label + ')';
             newButtons.push(button);
@@ -220,27 +219,28 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         );
       } else if (rel.range.type === 'INDEX_PATTERN') {
         button.type = 'INDEX_PATTERN';
-        promises.push(savedDashboards.find()
-          .then((savedDashboards) => {
-            return savedSearches.find()
-            .then((savedSearches) => {
-              const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
-                const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
-                return searchSource.index === rel.range.id;
+
+        promises.push(
+          Promise.all([
+            savedDashboards.find(),
+            savedSearches.find()
+          ])
+          .then(([savedDashboards, savedSearches]) => {
+            const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
+              const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
+              return searchSource.index === rel.range.id;
+            });
+
+            _.each(compatibleSavedSearches, (compatibleSavedSearch) => {
+              const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
+                return savedDashboard.savedSearchId === compatibleSavedSearch.id;
               });
-
-              _.each(compatibleSavedSearches, (compatibleSavedSearch) => {
-                const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
-                  return savedDashboard.savedSearchId === compatibleSavedSearch.id;
-                });
-                _.each(compatibleDashboards, (compatibleDashboard) => {
-                  const clonedButton = _.clone(button);
-                  clonedButton.targetDashboardId = compatibleDashboard.id;
-                  clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
-                  clonedButton.label = rel.directLabel + ' (~{0} ' + compatibleDashboard.title + ')';
-                  newButtons.push(clonedButton);
-                });
-
+              _.each(compatibleDashboards, (compatibleDashboard) => {
+                const clonedButton = _.clone(button);
+                clonedButton.targetDashboardId = compatibleDashboard.id;
+                clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
+                clonedButton.label = rel.directLabel + ' (~{0} ' + compatibleDashboard.title + ')';
+                newButtons.push(clonedButton);
               });
             });
           })
@@ -361,49 +361,39 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                     button.sub = {};
 
                     return ontologyClient.getRelationsByDomain(button.targetIndexPatternId).then((relationsByDomain) => {
-                      const dashboardPromises = [];
-                      _.each(relationsByDomain, (relByDomain) => {
-                        if (relByDomain.range.id !== button.sourceIndexPatternId) {
-                          dashboardPromises.push(
-                            savedSearches.find().then((savedSearches) => {
-                              // filter the savedSearch with the same indexPattern
-                              const relevantSavedSearchIds = new Set();
-                              _.each(savedSearches.hits, (savedSearch) => {
-                                const json = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
-                                if (json.index === relByDomain.range.id) {
-                                  relevantSavedSearchIds.add(savedSearch.id);
+                      return Promise.all([
+                        savedDashboards.find(),
+                        savedSearches.find()
+                      ])
+                      .then(([savedDashboards, savedSearches]) => {
+                        _.each(relationsByDomain, (relByDomain) => {
+                          if (relByDomain.range.id !== button.sourceIndexPatternId) {
+                            // filter the savedSearch with the same indexPattern
+                            const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
+                              const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
+                              return searchSource.index === relByDomain.range.id;
+                            });
+
+                            _.each(compatibleSavedSearches, (compatibleSavedSearch) => {
+                              const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
+                                return savedDashboard.savedSearchId === compatibleSavedSearch.id;
+                              });
+                              _.each(compatibleDashboards, (compatibleDashboard) => {
+                                const subButton = kibiSequentialJoinVisHelper.constructSubButton(button,
+                                  compatibleDashboard, relByDomain);
+
+                                kibiSequentialJoinVisHelper.addClickHandlerToButton(subButton);
+
+                                const key = relByDomain.directLabel;
+                                if (!button.sub[key]) {
+                                  button.sub[key] = [];
                                 }
+                                button.sub[key].push(subButton);
                               });
-
-                              return savedDashboards.find().then((savedDashboards) => {
-                                const availableDashboards = [];
-                                _.each(savedDashboards.hits, (savedDashboard) => {
-                                  if (relevantSavedSearchIds.has(savedDashboard.savedSearchId)) {
-                                    availableDashboards.push({
-                                      id: savedDashboard.id,
-                                      title: savedDashboard.title
-                                    });
-                                  }
-                                });
-
-                                _.each(availableDashboards, (availableDashboard) => {
-                                  const subButton = kibiSequentialJoinVisHelper.constructSubButton(button,
-                                    availableDashboard, relByDomain);
-
-                                  kibiSequentialJoinVisHelper.addClickHandlerToButton(subButton);
-
-                                  const key = relByDomain.directLabel;
-                                  if (!button.sub[key]) {
-                                    button.sub[key] = [];
-                                  }
-                                  button.sub[key].push(subButton);
-                                });
-                              });
-                            })
-                          );
-                        }
+                            });
+                          }
+                        });
                       });
-                      return Promise.all(dashboardPromises);
                     });
                   })
                 );

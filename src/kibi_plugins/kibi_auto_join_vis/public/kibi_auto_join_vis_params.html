@@ -12,7 +12,7 @@
       <select ng-model="filterIndexPattern"
               ng-model-options="{ debounce: 350 }"
               ng-options="option.name for option in availableIndexPatterns track by option.id"
-              ng-change="updateFilteredButtonsAndRelations()"
+              ng-change="updateFilteredButtons()"
               class="form-control">
       </select>
     </div>
@@ -23,7 +23,7 @@
         <div class="btn-visibility-check">
           <i
              tooltip-placement="right"
-             tooltip="{{ button.tooltip }}"
+             tooltip="{{ button.tooltip.root }}"
              class="fa {{ getButtonVisibilityClass(button) }}"
              ng-click="toggleButtonVisibility(button)"
           ></i>
@@ -52,10 +52,18 @@
                   <ul ng-if="button.showTargetDashboards"
                       class="relations">
                     <li ng-repeat="(relName, dashboards) in button.compatibleDashboard">
-                      {{ relName }}
+                      <i class="fa {{ getRelationVisibilityClass(button, relName) }}"
+                         tooltip-placement="right"
+                         tooltip="{{ button.tooltip.relation[relName].tooltip }}"
+                         ng-click="toggleRelationVisibility(button, relName)"
+                      ></i> {{ relName }}
                       <ul class="dashboards">
                         <li ng-repeat="dashboardName in dashboards">
-                          {{ dashboardName }}
+                          <i class="fa {{ getDashboardVisibilityClass(button, relName, dashboardName) }}"
+                             tooltip-placement="right"
+                             tooltip="{{ button.tooltip.relation[relName].dashboard[dashboardName] }}"
+                             ng-click="toggleDashboardVisibility(button, relName, dashboardName)"
+                          ></i> {{ dashboardName }}
                         </li>
                       </ul>
                     </li>

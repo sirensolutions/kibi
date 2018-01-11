@@ -50,25 +50,6 @@
             </div>
           </div>
 
-          <!-- Pick resource -->
-          <div class="kuiVerticalRhythm">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-            >
-              Primary key (primary key for the table)
-            </label>
-
-            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
-              <input
-                class="kuiTextInput kuiTextInput--large"
-                data-test-subj="createJdbcIndexPatternPrimaryKey"
-                ng-model="jdbcFormValues.key"
-                name="jdbcPrimaryKey"
-                type="text"
-              >
-            </div>
-          </div>
-
           <!-- Pick name -->
           <div class="kuiVerticalRhythm">
             <label
@@ -89,6 +70,64 @@
               >
             </div>
           </div>
+
+          <!-- Pick resource -->
+          <div class="kuiVerticalRhythm">
+            <label
+              class="kuiLabel kuiVerticalRhythmSmall"
+            >
+              Primary key (Optional - primary key for the table)
+            </label>
+
+            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+              <input
+                class="kuiTextInput kuiTextInput--large"
+                data-test-subj="createJdbcIndexPatternPrimaryKey"
+                ng-model="jdbcFormValues.key"
+                name="jdbcPrimaryKey"
+                type="text"
+              >
+            </div>
+          </div>
+
+          <!-- Pick catalog -->
+          <div class="kuiVerticalRhythm">
+            <label
+              class="kuiLabel kuiVerticalRhythmSmall"
+            >
+              Catalog (Optional)
+            </label>
+
+            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+              <input
+                class="kuiTextInput kuiTextInput--large"
+                data-test-subj="createJdbcIndexPatternCatalog"
+                ng-model="jdbcFormValues.catalog"
+                name="jdbcCatalog"
+                type="text"
+              >
+            </div>
+          </div>
+
+          <!-- Pick schema -->
+          <div class="kuiVerticalRhythm">
+            <label
+              class="kuiLabel kuiVerticalRhythmSmall"
+            >
+              Schema (Optional)
+            </label>
+
+            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+              <input
+                class="kuiTextInput kuiTextInput--large"
+                data-test-subj="createJdbcIndexPatternSchema"
+                ng-model="jdbcFormValues.schema"
+                name="jdbcSchema"
+                type="text"
+              >
+            </div>
+          </div>
+
           <!-- Form actions -->
           <button
             data-test-subj="createVirtualIndexPatternCreateButton"
@@ -112,6 +151,8 @@
             <th>Datasource</th>
             <th>Resource</th>
             <th>Key</th>
+            <th>Catalog</th>
+            <th>Schema</th>
             <th>Delete</th>
           </tr>
         </thead>
@@ -121,6 +162,8 @@
             <td>{{virtualIndex._source.datasource}}</td>
             <td>{{virtualIndex._source.resource}}</td>
             <td>{{virtualIndex._source.key}}</td>
+            <td>{{virtualIndex._source.catalog}}</td>
+            <td>{{virtualIndex._source.schema}}</td>
             <td><button class="btn btn-danger" ng-click="delete(virtualIndex._id)">X</button></td>
           </tr>
         </tbody>

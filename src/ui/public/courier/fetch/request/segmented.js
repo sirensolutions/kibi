@@ -93,8 +93,9 @@ export function SegmentedRequestProvider(es, Private, Promise, timefilter, confi
 
         // kibi: if search source size is different from desiredSize use search source size, otherwise use the desired size,
         // for example, pagination for doc table in discover page
-        if (isNumber(this._desiredSize) || isNumber(this.source._state.size)) {
-          params.body.size = (this.source._state.size !== this._desiredSize) ? this.source._state.size : this._pickSizeForIndices(indices);
+        if (isNumber(this._desiredSize) || (this.source._state && isNumber(this.source._state.size))) {
+          params.body.size = (this.source._state && this.source._state.size !== this._desiredSize) ?
+          this.source._state.size : this._pickSizeForIndices(indices);
         }
         // kibi: end
 
@@ -241,8 +242,8 @@ export function SegmentedRequestProvider(es, Private, Promise, timefilter, confi
 
       // kibi: if search source size is different from desiredSize use search source size, otherwise use the desired size,
       // for example, pagination for doc table in discover page
-      if (isNumber(desiredSize)  || isNumber(this.source._state.size)) {
-        this._mergedResp.hits.hits = (this.source._state.size !== this._desiredSize) ?
+      if (isNumber(desiredSize) || (this.source._state && isNumber(this.source._state.size))) {
+        this._mergedResp.hits.hits = (this.source._state && this.source._state.size !== this._desiredSize) ?
         mergedHits.slice(0, this.source._state.size) : mergedHits.slice(0, desiredSize);
       }
       // kibi: end

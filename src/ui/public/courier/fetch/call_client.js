@@ -39,7 +39,8 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
           case ABORTED:
             return ABORTED;
           case DUPLICATE:
-            return request._uniq.resp;
+          // kibi: when using segmented request, it should also check 'request._uniq._mergedResp' too
+            return request._uniq.resp || request._uniq._mergedResp;
           default:
             const index = _.findIndex(requestsToFetch, request);
             if (index < 0) {

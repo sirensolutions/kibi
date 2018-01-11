@@ -78,6 +78,7 @@ describe('plugins/elasticsearch', () => {
       // kibi: added "has" stub
       const has = sinon.stub();
       has.withArgs('elasticsearch.siren.connector.admin.cluster').returns(false);
+      has.withArgs('elasticsearch.siren.alert.admin.cluster').returns(false);
       // kibi: end
 
       // Setup the server mock

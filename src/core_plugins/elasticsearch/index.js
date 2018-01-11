@@ -13,7 +13,7 @@ import createKibanaProxy, { createPath } from './lib/create_kibana_proxy';
 import createKibiProxy from './lib/create_kibi_proxy';
 
 // kibi: kibi imports
-import { createCustomClusters } from './lib/create_custom_clusters';
+import { createCustomClusters } from './lib/custom_clusters';
 
 import transformations from './lib/transforms';
 import util from './lib/util';
@@ -79,6 +79,11 @@ module.exports = function (kibana) {
         siren: Joi.object({
           clusters: object().pattern(/[a-zA-Z0-9]/, elasticsearchOptions),
           connector: Joi.object({
+            admin: Joi.object({
+              cluster: Joi.string().alphanum()
+            })
+          }),
+          alert: Joi.object({
             admin: Joi.object({
               cluster: Joi.string().alphanum()
             })

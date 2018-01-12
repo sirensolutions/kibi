@@ -208,7 +208,6 @@ QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
  * @return {Promise}
  */
 QueryEngine.prototype._loadTemplatesMapping = function () {
-  const self = this;
   const mapping = {
     template: {
       properties: {
@@ -241,12 +240,13 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
   return this.cluster.callWithInternalUser('indices.getMapping', {
     index: this.config.get('kibana.index'),
     type: 'template'
-  }).then(function (result) {
-    self.log.info('template mapping already exists so not creating');
+  })
+  .then(() => {
+    this.log.info('Template mapping already exists so not creating');
   })
   .catch(() => {
-    self.log.info('No template mapping exists so creating');
-    return self.cluster.callWithInternalUser('indices.putMapping', {
+    this.log.info('No template mapping exists so creating');
+    return this.cluster.callWithInternalUser('indices.putMapping', {
       timeout: '1000ms',
       index: this.config.get('kibana.index'),
       type: 'template',
@@ -261,7 +261,6 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
  * @return {Promise}
  */
 QueryEngine.prototype._loadDatasourcesMapping = function () {
-  const self = this;
   const mapping = {
     datasource: {
       properties: {
@@ -294,19 +293,19 @@ QueryEngine.prototype._loadDatasourcesMapping = function () {
   return this.cluster.callWithInternalUser('indices.getMapping', {
     index: this.config.get('kibana.index'),
     type: 'datasource'
-  }).then(function (result) {
-    self.log.info('datasource mapping already exists so not creating');
+  })
+  .then(() => {
+    this.log.info('Datasource mapping already exists so not creating');
   })
   .catch(() => {
-    self.log.info('No datasource mapping exists so creating');
-    return self.cluster.callWithInternalUser('indices.putMapping', {
+    this.log.info('No datasource mapping exists so creating');
+    return this.cluster.callWithInternalUser('indices.putMapping', {
       timeout: '1000ms',
       index: this.config.get('kibana.index'),
       type: 'datasource',
       body: mapping
     });
   });
-
 };
 
 /**

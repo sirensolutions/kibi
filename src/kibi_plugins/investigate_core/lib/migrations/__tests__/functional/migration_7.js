@@ -7,6 +7,7 @@ import Scenario2 from './scenarios/migration_7/scenario2';
 import Scenario3 from './scenarios/migration_7/scenario3';
 import Scenario4 from './scenarios/migration_7/scenario4';
 import Scenario5 from './scenarios/migration_7/scenario5';
+import Scenario6 from './scenarios/migration_7/scenario6';
 import { format as urlFormat } from 'url';
 
 const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
@@ -95,6 +96,17 @@ describe('investigate_core/migrations/functional', function () {
 
     it('should not do anything if there are only SNAPSHOT configurations', async () => {
       Scenario = Scenario4;
+      await scenarioManager.reload(Scenario);
+      const migration = new Migration(configuration);
+      let result = await migration.count();
+      expect(result).to.be(0);
+
+      result = await migration.upgrade();
+      expect(result).to.be(0);
+    });
+
+    it('should not do anything if there is a config with id "siren"', async () => {
+      Scenario = Scenario6;
       await scenarioManager.reload(Scenario);
       const migration = new Migration(configuration);
       let result = await migration.count();

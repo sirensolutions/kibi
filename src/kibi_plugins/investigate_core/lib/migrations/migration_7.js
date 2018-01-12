@@ -57,14 +57,18 @@ export default class Migration7 extends Migration {
     } catch (err) {
       if (err.status === 404) {
         const configurations = await this._getConfigurations();
-        let onlySnapshots = true;
+        let configIdIsSnapshotOrNotSiren = true;
         for (const config of configurations) {
           if (!config._id.endsWith('-SNAPSHOT')) {
-            onlySnapshots = false;
+            configIdIsSnapshotOrNotSiren = false;
+          }
+
+          if (config._id === 'siren') {
+            configIdIsSnapshotOrNotSiren = true;
             break;
           }
         }
-        return onlySnapshots ? 0 : 1;
+        return configIdIsSnapshotOrNotSiren ? 0 : 1;
       }
       throw err;
     }

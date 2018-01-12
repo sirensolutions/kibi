@@ -237,11 +237,21 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
     }
   };
 
-  return this.cluster.callWithInternalUser('indices.putMapping', {
-    timeout: '1000ms',
+  return this.cluster.callWithInternalUser('indices.getMapping', {
     index: this.config.get('kibana.index'),
-    type: 'template',
-    body: mapping
+    type: 'template'
+  })
+  .then(() => {
+    this.log.info('Template mapping already exists so not creating');
+  })
+  .catch(() => {
+    this.log.info('No template mapping exists so creating');
+    return this.cluster.callWithInternalUser('indices.putMapping', {
+      timeout: '1000ms',
+      index: this.config.get('kibana.index'),
+      type: 'template',
+      body: mapping
+    });
   });
 };
 
@@ -280,11 +290,21 @@ QueryEngine.prototype._loadDatasourcesMapping = function () {
     }
   };
 
-  return this.cluster.callWithInternalUser('indices.putMapping', {
-    timeout: '1000ms',
+  return this.cluster.callWithInternalUser('indices.getMapping', {
     index: this.config.get('kibana.index'),
-    type: 'datasource',
-    body: mapping
+    type: 'datasource'
+  })
+  .then(() => {
+    this.log.info('Datasource mapping already exists so not creating');
+  })
+  .catch(() => {
+    this.log.info('No datasource mapping exists so creating');
+    return this.cluster.callWithInternalUser('indices.putMapping', {
+      timeout: '1000ms',
+      index: this.config.get('kibana.index'),
+      type: 'datasource',
+      body: mapping
+    });
   });
 };
 

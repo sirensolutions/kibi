@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import moment from 'moment';
 
+// kibi: added to filter out all indices which match exclusion patterns
+import { IndexPatternsExcludeIndicesProvider } from 'ui/kibi/index_patterns/_exclude_indices';
+
 // gets parsed value if given arg is a moment object
 function timeValue(val) {
   return moment.isMoment(val) ? val.valueOf() : val;
@@ -23,14 +26,23 @@ function omitIndicesWithoutTimeField(indices, timeFieldName) {
   return _.pick(indices, index => index.fields[timeFieldName]);
 }
 
-export function IndexPatternsCalculateIndicesProvider(es) {
+export function IndexPatternsCalculateIndicesProvider(es, Private) { // kibi: added Private
+
+  // kibi: added excludeIndices
+  const exclusions = Private(IndexPatternsExcludeIndicesProvider);
 
   // Uses the field stats api to determine the names of indices that need to
   // be queried against that match the given pattern and fall within the
   // given time range
-  function calculateIndices(pattern, timeFieldName, start, stop, sortDirection) {
+  function calculateIndices(pattern, timeFieldName, start, stop, sortDirection, excludeIndices) {
     return getFieldStats(pattern, timeFieldName, start, stop)
     .then(resp => omitIndicesWithoutTimeField(resp.indices, timeFieldName))
+    .then(indices => {
+      if (excludeIndices) {
+        return exclusions.excludeIndices(indices);
+      }
+      return indices;
+    })
     .then(indices => sortIndexStats(indices, timeFieldName, sortDirection));
   }
 

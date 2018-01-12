@@ -34,6 +34,9 @@ describe('saved_objects_api/functional', function () {
       },
       timeFieldName: {
         type: 'text'
+      },
+      excludeIndices: {
+        type: 'boolean'
       }
     };
 

@@ -15,7 +15,8 @@ export default class IndexPatternModel extends Model {
       sourceFiltering: Joi.object().default({}),
       paths: Joi.object().default({}),
       fields: Joi.object().default({}),
-      fieldFormatMap: Joi.string()
+      fieldFormatMap: Joi.string(),
+      excludeIndices: Joi.boolean() // kibi: added by Kibi
     });
 
     super(server, 'index-pattern', schema, 'Index pattern');

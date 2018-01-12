@@ -154,13 +154,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     })).catch(notify.error);
   };
 
-  $scope.getCurrentDashboardBtnCounts = function () {
-    _addButtonQuery($scope.buttons, currentDashboardId, true) // TODO take care about this true parameter
-    .then(results => {
-      updateCounts(results, $scope);
-    });
-  };
-
   const delayExecutionHelper = new DelayExecutionHelper(
     (data, alreadyCollectedData) => {
       alreadyCollectedData.dashboardId = data.dashboardId;
@@ -480,6 +473,61 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     .catch(notify.error);
   };
 
+  /**
+   *  Returns the list of the currently visible virtual entity sub buttons.
+   */
+  const getVisibleVirtualEntitySubButtons = function (visibility) {
+    const visibleRelations = new Set();
+    for (const prop in visibility) {
+      if (visibility.hasOwnProperty(prop)) {
+        if (visibility[prop] === true) {
+          visibleRelations.add(prop);
+        }
+      }
+    }
+    // gathering buttons that have to computed
+    const visibleButtons = _.reduce($scope.buttons, (acc, button) => {
+      if (button.type === 'VIRTUAL_ENTITY') {
+        _.each(button.sub, (subButtons, rel) => {
+          if (visibleRelations.has(rel)) {
+            _.each(subButtons, (subButton) => {
+              if (!subButton.joinExecuted) {
+                acc.push(subButton);
+              }
+            });
+          }
+        });
+      }
+      return acc;
+    }, []);
+
+    return visibleButtons;
+  };
+
+  /**
+   *  Computes the counts for buttons in VIRTUAL_ENTITY buttons sub menu.
+   *  It used the passed visibility to compute only the currently shown.
+   */
+  const computeVisibleVirtualEntitySubButtonsCount = function (visibility) {
+    if (visibility) {
+      const buttons = getVisibleVirtualEntitySubButtons(visibility);
+
+      _addButtonQuery(buttons, currentDashboardId)
+      .then(results => {
+        updateCounts(results, $scope);
+      });
+    }
+  };
+
+  $scope.getCurrentDashboardBtnCounts = function () {
+    const virtualEntityButtons = getVisibleVirtualEntitySubButtons($scope.visibility);
+    const allButtons = $scope.buttons.concat(virtualEntityButtons);
+    _addButtonQuery(allButtons, currentDashboardId, true) // TODO take care about this true parameter
+    .then(results => {
+      updateCounts(results, $scope);
+    });
+  };
+
   const kibiDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
 
   $scope.$listen(kibiState, 'save_with_changes', function (diff) {
@@ -518,34 +566,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
   $scope.$watch('visibility', (newVal, oldVal) => {
     if (newVal && !_.isEqual(newVal, oldVal)) {
-      const visibleRelations = new Set();
-      for (const prop in newVal) {
-        if (newVal.hasOwnProperty(prop)) {
-          if (newVal[prop] === true) {
-            visibleRelations.add(prop);
-          }
-        }
-      }
-      // gathering buttons that have to computed
-      const computeButtons = _.reduce($scope.buttons, (acc, button) => {
-        if (button.type === 'VIRTUAL_ENTITY') {
-          _.each(button.sub, (subButtons, rel) => {
-            if (visibleRelations.has(rel)) {
-              _.each(subButtons, (subButton) => {
-                if (!subButton.joinExecuted) {
-                  acc.push(subButton);
-                }
-              });
-            }
-          });
-        }
-        return acc;
-      }, []);
-
-      _addButtonQuery(computeButtons, currentDashboardId)
-      .then(results => {
-        updateCounts(results, $scope);
-      });
+      computeVisibleVirtualEntitySubButtonsCount(newVal);
     }
   }, true);
 

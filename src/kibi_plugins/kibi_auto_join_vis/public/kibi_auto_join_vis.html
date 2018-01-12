@@ -84,4 +84,13 @@
 
     </accordion-group>
   </accordion>
+
+  <div class="btn-get-current-dashb-btn-counts"
+       ng-if="!btnCountsEnabled()"
+       tooltip-append-to-body="1"
+       tooltip="Refresh counts">
+    <a ng-click="getCurrentDashboardBtnCounts()">
+      <i aria-hidden="true" class="fa fa-refresh fa-lg"></i>
+    </a>
+  </div>
 </div>

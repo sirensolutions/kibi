@@ -6,30 +6,32 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-const indexPatternsResolutions = {
-  indexPatterns: function (Private) {
-    const savedObjectsClient = Private(SavedObjectsClientProvider);
+// kibi: not used anymore
+// const indexPatternsResolutions = {
+//   indexPatterns: function (Private) {
+//     const savedObjectsClient = Private(SavedObjectsClientProvider);
 
-    return savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: 10000
-    }).then(response => response.savedObjects);
-  }
-};
+//     return savedObjectsClient.find({
+//       type: 'index-pattern',
+//       fields: ['title'],
+//       perPage: 10000
+//     }).then(response => response.savedObjects);
+//   }
+// };
 
+// kibi: this routes are no longer used
 // add a dependency to all of the subsection routes
-uiRoutes
+//uiRoutes
 // kibi: route is changed to '/management\/siren\/indices/'
-.defaults(/management\/siren\/indices/, {
-  resolve: indexPatternsResolutions
-});
+//.defaults(/management\/siren\/indices/, {
+//  resolve: indexPatternsResolutions
+//});
 
-uiRoutes
+//uiRoutes
 // kibi: route is changed to '/management\/siren\/index/'
-.defaults(/management\/siren\/index/, {
-  resolve: indexPatternsResolutions
-});
+//.defaults(/management\/siren\/index/, {
+//  resolve: indexPatternsResolutions
+//});
 
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules.get('apps/management')

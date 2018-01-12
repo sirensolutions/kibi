@@ -369,7 +369,7 @@ export function getUiSettingDefaults() {
     },
     'siren:indexExclusionRegexList': {
       type: 'json',
-      value: JSON.stringify(['\\.kibi.*', 'watcher.*']),
+      value: JSON.stringify(['\\.siren.*', 'watcher.*']),
       description: 'List of regex pattern strings, used to filter out indices when performing searches'
     },
     'siren:indexExclusionRegexList': {

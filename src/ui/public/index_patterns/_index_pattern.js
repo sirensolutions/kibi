@@ -340,13 +340,13 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         });
     }
 
-    toDetailedIndexList(start, stop, sortDirection) {
-      return Promise.resolve().then(() => {
+    async toDetailedIndexList(start, stop, sortDirection) {
+      return Promise.resolve().then(async () => {
         if (this.isTimeBasedInterval()) {
 
           // kibi: added exclussion
           const indices = intervals.toIndexList(
-            this.id, this.getInterval(), start, stop, sortDirection
+            this.title, this.getInterval(), start, stop, sortDirection
           );
           if (this.isExcludeIndicesOn()) {
             return exclusions.excludeIndices(indices);
@@ -356,15 +356,16 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         }
 
         if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
-          return calculateIndices(
-            // kibi: passing this.excludeIndices inside to filter before sorting
-            this.title, this.timeFieldName, start, stop, sortDirection, this.isExcludeIndicesOn()
-          )
-          .catch(error => {
+          try {
+            return await calculateIndices(
+              // kibi: passing this.excludeIndices inside to filter before sorting
+              this.title, this.timeFieldName, start, stop, sortDirection, this.isExcludeIndicesOn()
+            );
+          } catch(error) {
             if (!isFieldStatsError(error)) {
               throw error;
             }
-          });
+          }
         }
 
         // kibi: added to expand and filter star pattern when it is not timebased

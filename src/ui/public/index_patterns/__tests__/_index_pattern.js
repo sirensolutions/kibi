@@ -417,7 +417,7 @@ describe('index pattern', function () {
         let spy;
 
         beforeEach(function () {
-          indexPattern.id = 'logstash-*';
+          indexPattern.title = 'logstash-*';
           indexPattern.timeFieldName = null;
           indexPattern.intervalName = null;
           indexPattern.notExpandable = true;
@@ -488,7 +488,7 @@ describe('index pattern', function () {
         let spy;
 
         beforeEach(function () {
-          indexPattern.id = 'logstash-*';
+          indexPattern.title = 'logstash-*';
           indexPattern.timeFieldName = null;
           indexPattern.intervalName = null;
           indexPattern.notExpandable = true;
@@ -544,6 +544,7 @@ describe('index pattern', function () {
         indexPattern.timeFieldName = defaultTimeField.name;
         indexPattern.intervalName = null;
         indexPattern.notExpandable = false;
+        indexPattern.excludeIndices = false;
       });
 
       it('invokes calculateIndices with given start/stop times and sortOrder', async function () {
@@ -553,7 +554,7 @@ describe('index pattern', function () {
 
         sinon.assert.calledOnce(calculateIndices);
         expect(calculateIndices.getCall(0).args).to.eql([
-          title, timeFieldName, 1, 2, 'sortOrder'
+          title, timeFieldName, 1, 2, 'sortOrder', false
         ]);
       });
 
@@ -631,7 +632,7 @@ describe('index pattern', function () {
       it('invokes interval toIndexList with given start/stop times', async function () {
         await indexPattern.toIndexList(1, 2);
         const { title } = indexPattern;
-        sinon.assert.calledWith(intervals.toIndexList, title, interval, 1, 2);
+        sinon.assert.calledWith(intervals.toIndexList, title, interval, 1, 2, undefined);
       });
 
       it('is fulfilled by the result of interval toIndexList', async function () {

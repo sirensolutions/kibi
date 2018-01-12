@@ -144,6 +144,22 @@ describe('Kibi Gremlin Server', function () {
     expect(ret).to.be('An error occurred while checking the installed Java version');
   });
 
+  it('should pass the _isJavaVersionCompatible check with both Java 8 and 9', async function () {
+    const javaVersion7 = '7';
+    const javaVersion8 = '8';
+    const javaVersion9 = '9';
+
+
+    let ret = gremlin._isJavaVersionCompatible(javaVersion7);
+    expect(ret).to.be(false);
+
+    ret = gremlin._isJavaVersionCompatible(javaVersion8);
+    expect(ret).to.be(true);
+
+    ret = gremlin._isJavaVersionCompatible(javaVersion9);
+    expect(ret).to.be(true);
+  });
+
   it('should find no other running gremlin server ', async function () {
     gremlin._ping = () => { return Promise.resolve(JSON.stringify({ status: 'ok' })); };
 

@@ -253,7 +253,7 @@ GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
     //[string, major, minor, patch, update, ...]
     const matches = versionLine.match(/(\d+?)\.(\d+?)\.(\d+?)(?:_(\d+))?/);
     if (matches) {
-      if (matches.length >= 2 && matches[2] === '8') {
+      if (matches.length >= 2 && this._isJavaVersionCompatible(matches[2])) {
         this.javaCheck.isOk = true;
       } else {
         this.javaCheck.isOk = false;
@@ -267,6 +267,24 @@ GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
     return err;
   } else {
     return null;
+  }
+};
+
+/**
+ * Checks that the passed string is a number and is >= 8,
+ * which is the minimum requirement for the gremlin server.
+ */
+GremlinServerHandler.prototype._isJavaVersionCompatible = function (string) {
+  // Check if the string is a number
+  if (!isNaN(string)) {
+    const num = parseInt(string);
+    if (num >= 8) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
   }
 };
 

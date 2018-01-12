@@ -25,7 +25,7 @@ describe('Kibi index pattern', function () {
 
     describe('Index map', function () {
       it('should exclude indices that match the patterns', function () {
-        configStub.withArgs('kibi:indexExclusionRegexList').returns([
+        configStub.withArgs('siren:indexExclusionRegexList').returns([
           'watcher.*',
           '\\.kibi.*'
         ]);
@@ -44,7 +44,7 @@ describe('Kibi index pattern', function () {
       });
 
       it('should ignore invalid regexes in the list', function () {
-        configStub.withArgs('kibi:indexExclusionRegexList').returns([
+        configStub.withArgs('siren:indexExclusionRegexList').returns([
           'watcher\\', // invalid
           '\\.kibi*',
         ]);
@@ -67,14 +67,14 @@ describe('Kibi index pattern', function () {
         expect(Notifier.prototype._notifs[0].type).to.equal('warning');
         expect(Notifier.prototype._notifs[0].content).to.equal(
           'Exclude indices: The following exclude regex pattern is invalid [ watcher\\]. ' +
-          'Correct it in Management -> Advanced Settings -> kibi:indexExclusionRegexList'
+          'Correct it in Management -> Advanced Settings -> siren:indexExclusionRegexList'
         );
       });
     });
 
     describe('Index array', function () {
       it('should exclude indices that match the patterns', function () {
-        configStub.withArgs('kibi:indexExclusionRegexList').returns([
+        configStub.withArgs('siren:indexExclusionRegexList').returns([
           'watcher.*',
           '\\.kibi.*'
         ]);
@@ -94,7 +94,7 @@ describe('Kibi index pattern', function () {
       });
 
       it('should ignore invalid regexes in the list', function () {
-        configStub.withArgs('kibi:indexExclusionRegexList').returns([
+        configStub.withArgs('siren:indexExclusionRegexList').returns([
           'watcher\\', // invalid
           '\\.kibi*',
         ]);
@@ -119,7 +119,7 @@ describe('Kibi index pattern', function () {
         expect(Notifier.prototype._notifs[0].type).to.equal('warning');
         expect(Notifier.prototype._notifs[0].content).to.equal(
           'Exclude indices: The following exclude regex pattern is invalid [ watcher\\]. ' +
-          'Correct it in Management -> Advanced Settings -> kibi:indexExclusionRegexList'
+          'Correct it in Management -> Advanced Settings -> siren:indexExclusionRegexList'
         );
       });
     });

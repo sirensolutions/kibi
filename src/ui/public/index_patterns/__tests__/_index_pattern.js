@@ -350,7 +350,7 @@ describe('index pattern', function () {
   // kibi: tests added to verify the behaviour when excludeIndices is set
   describe('Kibi index pattern #toDetailedIndexList with excludeIndices enabled' , function () {
 
-    describe('and default kibi:indexExclusionRegexList containing "foo" pattern' , function () {
+    describe('and default siren:indexExclusionRegexList containing "foo" pattern' , function () {
 
       const expectedNotFiltered = [
         { index: 'foo', max: Infinity, min: -Infinity },
@@ -368,7 +368,7 @@ describe('index pattern', function () {
           spy = sinon.spy(exclusions, 'excludeIndices');
           // stub config
           sinon.stub(config, 'get', function (key) {
-            if (key === 'kibi:indexExclusionRegexList') {
+            if (key === 'siren:indexExclusionRegexList') {
               return ['foo'];
             } else {
               throw new Error('The following key needs to be mocked too: ' + key);
@@ -435,7 +435,7 @@ describe('index pattern', function () {
       });
     });
 
-    describe('and default kibi:indexExclusionRegexList', function () {
+    describe('and default siren:indexExclusionRegexList', function () {
 
       const expectedNotFiltered = [
         { index: 'foo', max: Infinity, min: -Infinity },

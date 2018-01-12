@@ -18,7 +18,7 @@ export function IndexPatternsExcludeIndicesProvider(config, createNotifier) {
         // ignore invalid regexes but show warnings
         notify.warning(
           'The following exclude regex pattern is invalid [ ' + excludePattern + '].' +
-          ' Correct it in Management -> Advanced Settings -> kibi:indexExclusionRegexList'
+          ' Correct it in Management -> Advanced Settings -> siren:indexExclusionRegexList'
         );
       }
     }
@@ -32,7 +32,7 @@ export function IndexPatternsExcludeIndicesProvider(config, createNotifier) {
    * an array where each object has an index key
    */
   function excludeIndices(indices) {
-    const exclusionRegexesList = config.get('kibi:indexExclusionRegexList');
+    const exclusionRegexesList = config.get('siren:indexExclusionRegexList');
     if (indices instanceof Array) {
       const indicesArray = indices;
       const filteredArray = filter(indicesArray, indexObject => {

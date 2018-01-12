@@ -118,13 +118,15 @@ describe('IndexPatternsCalculateIndicesProvider', () => {
     });
 
     // kibi: check if excludeIndices works
-    describe('Kibi filters out indices specified in kibi:indexExclusionRegexList', function () {
+    describe('filters out indices specified in siren:indexExclusionRegexList', function () {
       beforeEach(function () {
         sinon.stub(configObject, 'get', function (key) {
-          if (key === 'kibi:indexExclusionRegexList') {
+          if (key === 'siren:indexExclusionRegexList') {
             return ['mock.*'];
           } else if (key === 'truncate:maxHeight') {
             return 115;
+          } else if (key === 'state:storeInSessionStorage') {
+            return true;
           } else {
             throw new Error('The following key needs to be mocked too: ' + key);
           }

@@ -4,7 +4,10 @@ import jQuery from 'jquery';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import createIndexPatternTemplate from '../create_index_pattern.html';
+// kibi: we use our version of the template
+import createIndexPatternTemplate from 'plugins/investigate_core/management/sections/kibi_entities/controllers/create_index_pattern.html';
+// kibi: end
+
 import { StubIndexPatternsApiClientModule } from 'ui/index_patterns/__tests__/stub_index_patterns_api_client';
 import { IndexPatternsApiClientProvider } from 'ui/index_patterns/index_patterns_api_client_provider';
 import { stubbedLogstashFields } from 'fixtures/logstash_fields';

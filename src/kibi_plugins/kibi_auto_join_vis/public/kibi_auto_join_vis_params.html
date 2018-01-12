@@ -1,5 +1,16 @@
 <div class="kibi-auto-join-vis-params" id="kibi-auto-join-vis-params">
   <section>
+    <div class="form-group">
+      <label>Hierarchy Type:</label></br>
+      <select ng-model="vis.params.layout"
+              ng-model-options="{ debounce: 350 }"
+              class="form-control">
+        <option value="normal">Normal</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+  </section>
+  <section>
     <h4>Relations</h4>
     <div class="form-group">
       <div class="btn btn-default"

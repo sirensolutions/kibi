@@ -47,9 +47,10 @@
              title="Order by Relation">
         </div>
       </accordion-heading>
+
       <!-- normal view -->
       <accordion close-others="true"
-                 ng-if="!button.checkBox"
+                 ng-if="vis.params.layout === 'normal' && !button.checkBox"
       >
         <accordion-group heading="{{key}}"
                          ng-repeat="(key, subButtons) in button.sub"
@@ -82,6 +83,36 @@
       </accordion>
       <!-- end normal view -->
 
+      <!-- light view -->
+      <accordion close-others="true"
+                 ng-if="vis.params.layout === 'light'"
+      >
+        <div class="panel-buttons"
+             ng-repeat="(key, subButtons) in button.sub"
+             ng-if="(vis.params.visibility[button.id].button || vis.params.visibility[button.id] === undefined)"
+        >
+          <a ng-repeat="subButton in subButtons"
+             ng-if="subButton.type === 'INDEX_PATTERN'"
+             ng-click="subButton.click(true)"
+             ng-disabled="subButton.disabled"
+             ng-mouseover="hoverIn(subButton)"
+             ng-mouseleave="hoverOut()"
+          >
+            <h4 class="panel-title">
+              <em>{{ key }}</em> {{ subButton.label }}
+              <span ng-show="subButton.targetCount !== undefined"> ({{subButton.targetCount}})</span>
+              <span
+                class="warning"
+                ng-if="!!subButton.warning"
+                title="{{subButton.warning}}">(*)</span>
+              <span class="go-to-dashboard">
+                <i class="fa fa-arrow-right"></i>
+              </span>
+            </h4>
+          </a>
+        </div>
+      </accordion>
+      <!-- end light view -->
     </accordion-group>
   </accordion>
 

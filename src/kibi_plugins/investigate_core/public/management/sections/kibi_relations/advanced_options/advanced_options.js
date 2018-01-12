@@ -36,7 +36,7 @@ uiModules
 
     // check if the limit property is present
     if (typeof $scope.relation.timeout === 'undefined') {
-      const defaultTimeout = config.get('kibi:joinTaskTimeout');
+      const defaultTimeout = config.get('siren:joinTaskTimeout');
       if (defaultTimeout === 0) {
         $scope.relation.timeout = -1; // -1 to take the global one from kibi:joinTaskTimeout
       } else {

@@ -53,17 +53,17 @@ describe('config component', function () {
 
     describe('kibi - validators', function () {
       beforeEach(function () {
-        $httpBackend.whenPOST('/api/kibana/settings/kibi:panel_vertical_size').respond(200);
-        $httpBackend.whenDELETE('/api/kibana/settings/kibi:panel_vertical_size').respond(200);
+        $httpBackend.whenPOST('/api/kibana/settings/siren:panel_vertical_size').respond(200);
+        $httpBackend.whenDELETE('/api/kibana/settings/siren:panel_vertical_size').respond(200);
       });
 
       afterEach(function () {
-        config.set('kibi:panel_vertical_size', null);
+        config.set('siren:panel_vertical_size', null);
         $timeout.flush();
       });
 
       it('should fail on negative number', function () {
-        return config.set('kibi:panel_vertical_size', -1)
+        return config.set('siren:panel_vertical_size', -1)
         .then(() => expect().fail('should fail'))
         .catch(err => {
           expect(err.message).to.contain('Should be a positive integer');
@@ -76,7 +76,7 @@ describe('config component', function () {
       });
 
       it('should fail when given anything but a number', function () {
-        return config.set('kibi:panel_vertical_size', 'not a number')
+        return config.set('siren:panel_vertical_size', 'not a number')
         .then(() => expect().fail('should fail'))
         .catch(err => {
           expect(err.message).to.contain('Should be a positive integer');
@@ -89,13 +89,13 @@ describe('config component', function () {
       });
 
       it('should accept a positive integer', function () {
-        config.set('kibi:panel_vertical_size', 20);
-        expect(config.get('kibi:panel_vertical_size')).to.be(20);
+        config.set('siren:panel_vertical_size', 20);
+        expect(config.get('siren:panel_vertical_size')).to.be(20);
       });
 
       it('should accept zero', function () {
-        config.set('kibi:panel_vertical_size', 0);
-        expect(config.get('kibi:panel_vertical_size')).to.be(0);
+        config.set('siren:panel_vertical_size', 0);
+        expect(config.get('siren:panel_vertical_size')).to.be(0);
       });
     });
   });

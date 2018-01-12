@@ -93,7 +93,7 @@ const typeToButtonClassMap = {
   info: 'btn-info',
   banner: 'btn-banner'
 };
-// kibi:end
+// kibi: end
 
 const buttonHierarchyClass = (index) => {
   if (index === 0) {

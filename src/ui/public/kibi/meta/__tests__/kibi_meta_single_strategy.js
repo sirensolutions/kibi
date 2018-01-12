@@ -17,7 +17,7 @@ describe('Kibi meta service - single strategy', function () {
   beforeEach(ngMock.inject(function (_config_) {
     config = _config_;
     sinon.stub(config, 'get', function (key) {
-      if (key === 'kibi:countFetchingStrategyDashboards' || key === 'kibi:countFetchingStrategyRelationalFilters') {
+      if (key === 'siren:countFetchingStrategyDashboards' || key === 'siren:countFetchingStrategyRelationalFilters') {
         return {
           name: 'default',
           batchSize: 2,

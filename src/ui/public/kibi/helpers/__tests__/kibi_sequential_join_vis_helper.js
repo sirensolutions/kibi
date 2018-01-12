@@ -71,7 +71,7 @@ function init({
       to: defaultTimeEnd
     };
     config.set('timepicker:timeDefaults', defaultTime);
-    config.set('kibi:relations', relations);
+    config.set('siren:relations', relations);
     timefilter.time = defaultTime;
   });
 }
@@ -687,9 +687,9 @@ describe('Kibi Components', function () {
             }
           ]
         };
-        config.set('kibi:relations', relations);
+        config.set('siren:relations', relations);
 
-        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$emit('change:config.siren:relations', relations);
         $rootScope.$digest();
 
         const button = {

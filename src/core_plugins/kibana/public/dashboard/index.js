@@ -48,7 +48,7 @@ uiRoutes
         let getDefaultDashboard = Promise.resolve({ id: '' });
         const notify = createNotifier();
 
-        const defDashConfig = config.get('kibi:defaultDashboardId');
+        const defDashConfig = config.get('siren:defaultDashboardId');
 
         if (defDashConfig) {
         //kibi: wrapped in another promise for displaying more meaningful warning

@@ -17,7 +17,7 @@ describe('Kibi meta service', function () {
   beforeEach(ngMock.inject(function (_config_) {
     config = _config_;
     sinon.stub(config, 'get', function (key) {
-      if (key === 'kibi:countFetchingStrategyDashboards') {
+      if (key === 'siren:countFetchingStrategyDashboards') {
         return {
           name: 'dashboards',
           batchSize: 2,
@@ -25,7 +25,7 @@ describe('Kibi meta service', function () {
           parallelRequests: 1
         };
       }
-      if (key === 'kibi:countFetchingStrategyRelationalFilters') {
+      if (key === 'siren:countFetchingStrategyRelationalFilters') {
         return {
           name: 'buttons',
           batchSize: 2,

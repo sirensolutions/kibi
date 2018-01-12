@@ -49,11 +49,11 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
 
       this.queues = {};
       this.strategies = {};
-      const dashboardStrategy = config.get('kibi:countFetchingStrategyDashboards');
+      const dashboardStrategy = config.get('siren:countFetchingStrategyDashboards');
       this._validateStrategy(dashboardStrategy);
       this.setStrategy(dashboardStrategy);
       this.dashboardStrategyName = dashboardStrategy.name;
-      const relFilterStrategy = config.get('kibi:countFetchingStrategyRelationalFilters');
+      const relFilterStrategy = config.get('siren:countFetchingStrategyRelationalFilters');
       this._validateStrategy(relFilterStrategy);
       this.setStrategy(relFilterStrategy);
       this.relFilterStrategyName = relFilterStrategy.name;

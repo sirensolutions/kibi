@@ -52,7 +52,7 @@ function getConfig(dev) {
   }
 }
 
-// kibi:end
+// kibi: end
 
 function findFile(paths) {
   const availablePath = find(paths, configPath => {

@@ -33,7 +33,7 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
     kbnUrl.change('/management/siren/relations/{{ id }}', { id: index });
   };
 
-  $scope.relations = config.get('kibi:relations');
+  $scope.relations = config.get('siren:relations');
 
   // track if the configuration has been changed
   $scope.changed = false;
@@ -492,7 +492,7 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       return _.omit(relation, [ 'errors' ]);
     });
 
-    return config.set('kibi:relations', $scope.relations)
+    return config.set('siren:relations', $scope.relations)
     .then(() => {
       notify.info('Relations saved');
       $scope.changed = false;

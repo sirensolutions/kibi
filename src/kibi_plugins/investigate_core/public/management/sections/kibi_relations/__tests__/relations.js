@@ -35,7 +35,7 @@ describe('Kibi Management', function () {
       }
 
       config = $injector.get('config');
-      config.set('kibi:relations', relations);
+      config.set('siren:relations', relations);
 
       $scope = $rootScope;
       const el = '<div><form name="indicesForm" class="ng-valid"/></div>';
@@ -67,9 +67,9 @@ describe('Kibi Management', function () {
       ngMock.module('kibana');
       ngMock.inject(($injector) => {
         config = $injector.get('config');
-        config.remove('kibi:relations'); // make sure we get the default value for this setting
+        config.remove('siren:relations'); // make sure we get the default value for this setting
       });
-      expect(config.get('kibi:relations').version).to.be(2);
+      expect(config.get('siren:relations').version).to.be(2);
     });
 
     describe('index patterns graph', function () {
@@ -610,7 +610,7 @@ describe('Kibi Management', function () {
         const options = {
           relations: relations,
           events: {
-            'change:config.kibi:relations': function (event, relations) {
+            'change:config.siren:relations': function (event, relations) {
               _.each(relations.relationsIndices, function (relation) {
                 expect(relation.errors).to.be(undefined);
                 expect(relation.label).not.to.be(undefined);

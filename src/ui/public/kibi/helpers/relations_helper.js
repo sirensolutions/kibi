@@ -5,7 +5,7 @@ export function RelationsHelperFactory(config) {
 
   let relations;
 
-  config.watch('kibi:relations', newRelations => {
+  config.watch('siren:relations', newRelations => {
     if (newRelations) {
       relations = newRelations;
     }
@@ -328,7 +328,7 @@ export function RelationsHelperFactory(config) {
 
       let defaultJoinTaskTimeout = -1;
       try {
-        defaultJoinTaskTimeout = parseInt(config.get('kibi:joinTaskTimeout'), 10);
+        defaultJoinTaskTimeout = parseInt(config.get('siren:joinTaskTimeout'), 10);
       } catch (e) {
         // ignore parsing error they should be handled when user is saving the value
       }

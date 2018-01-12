@@ -50,7 +50,7 @@ export class SavedObjectsClient {
     }).then(resp => {
       return this.createSavedObject(resp);
     });
-    // kibi:end
+    // kibi: end
   }
 
   /**

@@ -35,7 +35,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   $scope.btnCountsEnabled = function () {
-    return config.get('kibi:enableAllRelBtnCounts');
+    return config.get('siren:enableAllRelBtnCounts');
   };
 
   const buttonMetaCallback = function (button, meta) {

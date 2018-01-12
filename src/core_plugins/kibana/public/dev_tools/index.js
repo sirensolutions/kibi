@@ -4,7 +4,7 @@ import 'plugins/kibana/dev_tools/directives/dev_tools_app';
 // kibi: added by kibi
 import translateJoinQueryIndexTemplate from './views/translate_join_query_index.html';
 import './directives/translate_join_query';
-// kibi:end
+// kibi: end
 
 uiRoutes
 .when('/dev_tools', {

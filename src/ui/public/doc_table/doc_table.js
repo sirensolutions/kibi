@@ -12,7 +12,7 @@ import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 // kibi: imports
 import { ExportAsCsvProvider } from 'plugins/kibi_data_table_vis/actions/csv_export';
-// kibi:end
+// kibi: end
 
 uiModules.get('kibana')
 .directive('docTable', function (Private, courier, config, createNotifier, getAppState, pagerFactory, $filter) {

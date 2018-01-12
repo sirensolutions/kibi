@@ -33,7 +33,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   $scope.visibility = {};
 
   $scope.btnCountsEnabled = function () {
-    return config.get('kibi:enableAllRelBtnCounts');
+    return config.get('siren:enableAllRelBtnCounts');
   };
 
   $scope.getButtonLabel = function (button) {

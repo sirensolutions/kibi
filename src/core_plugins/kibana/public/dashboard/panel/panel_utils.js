@@ -10,7 +10,7 @@ export class PanelUtils {
    */
   static initializeDefaults(panel, config) { // kibi: added config
     panel.size_x = panel.size_x || DEFAULT_PANEL_WIDTH;
-    panel.size_y = panel.size_y || config.get('kibi:panel_vertical_size', DEFAULT_PANEL_HEIGHT); // kibi: get from config
+    panel.size_y = panel.size_y || config.get('siren:panel_vertical_size', DEFAULT_PANEL_HEIGHT); // kibi: get from config
 
     if (!panel.id) {
       // In the interest of backwards comparability

@@ -316,21 +316,21 @@ export function getUiSettingDefaults() {
     },
 
     // kibi: kibi options
-    'kibi:timePrecision' : {
+    'siren:timePrecision' : {
       type: 'string',
       value: 's',
       description: 'Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y'
     },
-    'kibi:zoom' : {
+    'siren:zoom' : {
       value: 1.0,
       description: 'Set the zoom level for the whole page. Good if the default size is too big for you. Does not work in Firefox.'
     },
-    'kibi:relations': {
+    'siren:relations': {
       type: 'json',
       value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
       description: 'Relations between index patterns and dashboards'
     },
-    'kibi:joinTaskTimeout': {
+    'siren:joinTaskTimeout': {
       type: 'number',
       value: 0,
       description:
@@ -338,62 +338,62 @@ export function getUiSettingDefaults() {
       'Set to 0 to disable the global timeout. ' +
       'Can be overwritten per relation in each relation\'s advanced options in the relational panel.'
     },
-    'kibi:panel_vertical_size': {
+    'siren:panel_vertical_size': {
       type: 'number',
       value: 3,
       description: 'Set to change the default vertical panel size.',
       validator: 'positiveIntegerValidator'
     },
-    'kibi:vertical_grid_resolution': {
+    'siren:vertical_grid_resolution': {
       type: 'number',
       value: 100,
       description: 'Set to change vertical grid resolution.',
       validator: 'positiveIntegerValidator'
     },
-    'kibi:enableAllDashboardsCounts' : {
+    'siren:enableAllDashboardsCounts' : {
       value: true,
       description: 'Enable counts on all dashboards.'
     },
-    'kibi:enableAllRelBtnCounts' : {
+    'siren:enableAllRelBtnCounts' : {
       value: true,
       description: 'Enable counts on all relational buttons.'
     },
-    'kibi:defaultDashboardId' : {
+    'siren:defaultDashboardId' : {
       type: 'kibiSelectDashboard',
       value: '',
       description: 'The dashboard that is displayed when clicking on the Dashboard tab for the first time.'
     },
-    'kibi:shieldAuthorizationWarning': {
+    'siren:shieldAuthorizationWarning': {
       value: true,
       description: 'Set to true to show all authorization warnings'
     },
-    'kibi:graphUseWebGl' : {
+    'siren:graphUseWebGl' : {
       value: true,
       description: 'Set to false to disable WebGL rendering'
     },
-    'kibi:graphStatesLimit': {
+    'siren:graphStatesLimit': {
       value: 5,
       description: 'Set how many undo/redo steps you want to maintain in memory'
     },
-    'kibi:graphExpansionLimit' : {
+    'siren:graphExpansionLimit' : {
       value: 500,
       description: 'Limit the number of elements to retrieve during the graph expansion'
     },
-    'kibi:graphRelationFetchLimit' : {
+    'siren:graphRelationFetchLimit' : {
       value: 2500,
       description: 'Limit the number of relations to retrieve after the graph expansion'
     },
-    'kibi:graphMaxConcurrentCalls' : {
+    'siren:graphMaxConcurrentCalls' : {
       value: 15,
       description: 'Limit the number of concurrent calls done by the Graph Browser'
     },
-    'kibi:countFetchingStrategyDashboards' : {
+    'siren:countFetchingStrategyDashboards' : {
       type: 'json',
       value: '{ "name": "default", "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
       description: 'Strategy used to fetch the counts for dashboards',
       validator: 'countStrategyValidator'
     },
-    'kibi:countFetchingStrategyRelationalFilters' : {
+    'siren:countFetchingStrategyRelationalFilters' : {
       type: 'json',
       value: '{ "name": "default", "batchSize": 2, "retryOnError": 1, "parallelRequests": 1 }',
       description: 'Strategy used to fetch the counts for relational filters',

@@ -91,8 +91,8 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
 
       // kibi: introduced instead of hardcoded value of 100
       // to allow to increase vertical grid resolution
-      const WIDGET_BASE_HEIGHT = config.get('kibi:vertical_grid_resolution') ?
-        config.get('kibi:vertical_grid_resolution') : 100;
+      const WIDGET_BASE_HEIGHT = config.get('siren:vertical_grid_resolution') ?
+        config.get('siren:vertical_grid_resolution') : 100;
       // kibi: end
 
       // debounced layout function is safe to call as much as possible

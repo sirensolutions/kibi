@@ -116,7 +116,7 @@ describe('kibana_map tests', function () {
   });
 
   describe('KibanaMap - baseLayer', function () {
-
+    this.timeout(30000); //kibi: extending timeout for these tests as the WMS response can be quite slow
     beforeEach(async function () {
       setupDOM();
       kibanaMap = new KibanaMap(domNode, {

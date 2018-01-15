@@ -14,6 +14,9 @@ export default function ({ getService, getPageObjects }) {
       })
       .then(function () {
         return PageObjects.settings.clickKibanaIndices();
+      })
+      .then(function () {
+        return PageObjects.settings.clickLinkText('Add Index Pattern');
       });
     });
 
@@ -28,6 +31,9 @@ export default function ({ getService, getPageObjects }) {
     it('should filter indexed fields', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
+      // kibi: open fields tab as default tab in kibi is different to kibana
+      await PageObjects.settings.clickIndexedFieldsTab();
+      // kibi: end
       await PageObjects.settings.getFieldTypes();
 
       await PageObjects.settings.setFieldTypeFilter('string');

@@ -14,6 +14,9 @@ export default function ({ getService, getPageObjects }) {
       })
       .then(function () {
         return PageObjects.settings.clickKibanaIndices();
+      })
+      .then(function () {
+        return PageObjects.settings.clickLinkText('Add Index Pattern');
       });
     });
 

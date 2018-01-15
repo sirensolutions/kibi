@@ -46,6 +46,9 @@ export default function ({ getService, getPageObjects }) {
       afterEach(async function () {
         // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
         await PageObjects.settings.controlChangeCancel();
+        // kibi: navigate back to entities page
+        await PageObjects.settings.goToEntitiesIndexedFields();
+        // kibi: end
       });
 
       it('should update the popularity input', async function () {
@@ -58,6 +61,9 @@ export default function ({ getService, getPageObjects }) {
       it('should be reset on cancel', async function () {
         // Cancel saving the popularity change
         await PageObjects.settings.controlChangeCancel();
+        // kibi: navigate back to entities page
+        await PageObjects.settings.goToEntitiesIndexedFields();
+        // kibi: end
         await fix5030();
         await PageObjects.settings.openControlsByName(fieldName);
         // check that it is 0 (previous increase was cancelled
@@ -69,6 +75,9 @@ export default function ({ getService, getPageObjects }) {
       it('can be saved', async function () {
         // Saving the popularity change
         await PageObjects.settings.controlChangeSave();
+        // kibi: navigate back to entities page
+        await PageObjects.settings.goToEntitiesIndexedFields();
+        // kibi: end
         await fix5030();
         await PageObjects.settings.openControlsByName(fieldName);
         const popularity = await PageObjects.settings.getPopularity();

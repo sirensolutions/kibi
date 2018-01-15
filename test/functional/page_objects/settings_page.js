@@ -35,7 +35,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       // kibi: add new links below as siren investigate has way of getting
       // to the index pattern page than kibana
       await this.clickLinkText('Entities');
-      await this.clickLinkText('Add Index Pattern');
+      //await this.clickLinkText('Add Index Pattern');
       // kibi: end
     }
 
@@ -300,15 +300,19 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
+        await this.clickLinkText('Add Index Pattern');
         await this.setIndexPatternField(indexPatternName);
         await this.selectTimeFieldOption(timefield);
         await this.getCreateButton().click();
+        // kibi: opens field tab after index pattern creation to match kibana behaviour
+        // as subsequent tests look for elements on the fields tab
+        await this.clickIndexedFieldsTab();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const currentUrl = await remote.getCurrentUrl();
         log.info('currentUrl', currentUrl);
-        // kibi: match for entities when save works
+        // kibi: kibi uses 'entities' in url so change match pattern
         if (!currentUrl.match(/entities\/.+\?/)) {
           throw new Error('Index pattern not created');
         } else {
@@ -334,6 +338,23 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         .clearValue().type(pattern);
     }
 
+    // kibi: helper function to open settings, click enitities and click indexed fields tab
+    async goToEntitiesIndexedFields(pattern) {
+      log.debug('openEntities');
+      await this.navigateTo();
+      await this.clickKibanaIndices();
+      return await this.clickIndexedFieldsTab();
+    }
+    // kibi: end
+
+    // kibi: helper function to open settings, click enitities and click scripted fields tab
+    async goToEntitiesScriptedFields(pattern) {
+      log.debug('openEntities');
+      await this.navigateTo();
+      await this.clickKibanaIndices();
+      return await this.clickScriptedFieldsTab();
+    }
+    // kibi: end
 
     async removeIndexPattern() {
       let alertText;
@@ -358,9 +379,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return alertText;
     }
 
-    async clickFieldsTab() {
+    async clickIndexedFieldsTab() {
       log.debug('click Fields tab');
-      await testSubjects.click('tab-indexFields');
+      // kibi: changed element name
+      await testSubjects.click('tab-indexedFields');
     }
 
     async clickScriptedFieldsTab() {

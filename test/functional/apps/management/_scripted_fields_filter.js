@@ -32,10 +32,17 @@ export default function ({ getService, getPageObjects }) {
       .addScriptedField(scriptedExpressionFieldName,
         'expression', 'number', null, '1', 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)'
       );
+      // kibi: navigate back to entities page and scripted fields tab
+      await PageObjects.settings.goToEntitiesScriptedFields();
+      // kibi: end
       await PageObjects.settings
       .addScriptedField(scriptedPainlessFieldName,
         'painless', 'number', null, '1', 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)'
       );
+
+      // kibi: navigate back to entities page and scripted fields tab
+      await PageObjects.settings.goToEntitiesScriptedFields();
+      // kibi: end
 
       // confirm two additional scripted fields were created
       await retry.try(async function () {

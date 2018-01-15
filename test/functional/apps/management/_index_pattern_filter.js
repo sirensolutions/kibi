@@ -14,7 +14,13 @@ export default function ({ getService, getPageObjects }) {
       })
       .then(function () {
         return PageObjects.settings.clickKibanaIndices();
+      })
+      // kibi: to run below tests Siren Investigate needs to click add index pattern if none already exists
+      // In kibana when you open the index patterns page and none exist it automatically opens 'add index pattern' page
+      .then(function () {
+        return PageObjects.settings.clickLinkText('Add Index Pattern');
       });
+      // kibi: end
     });
 
     beforeEach(function () {
@@ -28,6 +34,9 @@ export default function ({ getService, getPageObjects }) {
     it('should filter indexed fields', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
+      // kibi: open fields tab as default tab in Siren Investigate is different to kibana
+      await PageObjects.settings.clickFieldsTab();
+      // kibi: end
       await PageObjects.settings.getFieldTypes();
 
       await PageObjects.settings.setFieldTypeFilter('string');

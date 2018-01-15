@@ -32,11 +32,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
-      // kibi: add new links below as siren investigate has way of getting
-      // to the index pattern page than kibana
+      // kibi: Open Entities page for kibana to find index patterns
       await this.clickLinkText('Entities');
-      await this.clickLinkText('Add Index Pattern');
-      // kibi: end
     }
 
     getAdvancedSettings(propertyName) {
@@ -300,15 +297,22 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
+        // kibi: Siren Investigate opens does not open 'add index pattern' page
+        // if no index pattern exists so let's open it here.
+        await this.clickLinkText('Add Index Pattern');
         await this.setIndexPatternField(indexPatternName);
         await this.selectTimeFieldOption(timefield);
         await this.getCreateButton().click();
+        // kibi: opens field tab after index pattern creation to match kibana behaviour
+        // as subsequent tests look for elements on the fields tab
+        await this.clickFieldsTab();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const currentUrl = await remote.getCurrentUrl();
         log.info('currentUrl', currentUrl);
-        if (!currentUrl.match(/indices\/.+\?/)) {
+        // kibi: kibi uses 'entities' in url so change match pattern
+        if (!currentUrl.match(/entities\/.+\?/)) {
           throw new Error('Index pattern not created');
         } else {
           log.debug('Index pattern created: ' + currentUrl);
@@ -333,6 +337,23 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         .clearValue().type(pattern);
     }
 
+    // kibi: helper function to open settings, click enitities and click indexed fields tab
+    async goToEntitiesIndexedFields(pattern) {
+      log.debug('openEntities');
+      await this.navigateTo();
+      await this.clickKibanaIndices();
+      return await this.clickFieldsTab();
+    }
+    // kibi: end
+
+    // kibi: helper function to open settings, click enitities and click scripted fields tab
+    async goToEntitiesScriptedFields(pattern) {
+      log.debug('openEntities');
+      await this.navigateTo();
+      await this.clickKibanaIndices();
+      return await this.clickScriptedFieldsTab();
+    }
+    // kibi: end
 
     async removeIndexPattern() {
       let alertText;
@@ -359,7 +380,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickFieldsTab() {
       log.debug('click Fields tab');
-      await testSubjects.click('tab-indexFields');
+      // kibi: changed element name
+      await testSubjects.click('tab-indexedFields');
     }
 
     async clickScriptedFieldsTab() {

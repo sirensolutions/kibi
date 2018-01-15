@@ -35,7 +35,7 @@
       <accordion-heading>
         {{ getButtonLabel(button) }}
         <img
-          ng-if="button.isOpen && !button.checkBox"
+          ng-if="vis.params.layout === 'normal' && visibility.buttons[button.id] && !button.checkBox"
           class="dashboard-disabled"
           kbn-src="/plugins/kibana/assets/dashboard.svg"
           ng-click="toggleLayout(button, $event)"
@@ -43,7 +43,7 @@
           tooltip-append-to-body="1"
         >
         <img
-          ng-if="button.isOpen && button.checkBox"
+          ng-if="vis.params.layout === 'normal' && visibility.buttons[button.id] && button.checkBox"
           class="dashboard-enabled"
           kbn-src="/plugins/kibana/assets/dashboard.svg"
           ng-click="toggleLayout(button, $event)"
@@ -88,10 +88,11 @@
 
       <!-- normal view - dashboard view -->
       <accordion close-others="true"
-                 ng-if="button.checkBox"
+                 ng-if="vis.params.layout === 'normal' && button.checkBox"
       >
         <accordion-group heading="{{key}}"
                          ng-repeat="(key, altSubButtons) in button.altSub"
+                         is-open="visibility.altViewDashboards[key]"
         >
           <div class="panel-buttons">
             <a ng-repeat="altSubButton in altSubButtons"

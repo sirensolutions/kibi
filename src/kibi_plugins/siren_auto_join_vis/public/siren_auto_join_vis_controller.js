@@ -30,7 +30,14 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
-  $scope.visibility = { buttons: {}, subRelations: {} };
+  $scope.visibility = {
+    // Root buttons
+    buttons: {},
+    // Relations inside a button
+    subRelations: {},
+    // target dashboards for the alternative view
+    altViewDashboards: {}
+  };
 
   $scope.btnCountsEnabled = function () {
     return config.get('siren:enableAllRelBtnCounts');
@@ -522,11 +529,28 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           }
         }
       }
+      const visibleDashboards = new Set();
+      for (const prop in visibility.altViewDashboards) {
+        if (visibility.altViewDashboards.hasOwnProperty(prop)) {
+          if (visibility.altViewDashboards[prop] === true) {
+            visibleDashboards.add(prop);
+          }
+        }
+      }
       // gathering buttons that have to be computed
       returnButtons = _.reduce($scope.buttons, (acc, button) => {
         if (button.type === 'VIRTUAL_ENTITY') {
           _.each(button.sub, (subButtons, rel) => {
             if (visibleRelations.has(rel)) {
+              _.each(subButtons, (subButton) => {
+                if (!subButton.joinExecuted) {
+                  acc.push(subButton);
+                }
+              });
+            }
+          });
+          _.each(button.altSub, (subButtons, dashboardName) => {
+            if (visibleDashboards.has(dashboardName)) {
               _.each(subButtons, (subButton) => {
                 if (!subButton.joinExecuted) {
                   acc.push(subButton);

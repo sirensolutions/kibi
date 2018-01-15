@@ -36,13 +36,7 @@ export function IndexPatternsProvider(Notifier, Private, kbnIndex) {
 
   self.delete = function (pattern) {
     self.getIds.clearCache();
-    pattern.destroy();
-
-    // kibi: use Saved Objects Client client
-    return savedObjectsClient.delete(
-      'index-pattern',
-      pattern.id
-    );
+    return pattern.destroy();
   };
 
   self.errors = {

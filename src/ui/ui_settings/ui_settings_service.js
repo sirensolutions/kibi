@@ -116,7 +116,7 @@ export class UiSettingsService {
     let userSettings = {};
     const wrap401Errors = options.ignore401Errors !== undefined ? !options.ignore401Errors : false;
     try {
-      const resp = await configModel.get('kibi', req, { wrap401Errors });
+      const resp = await configModel.get('siren', req, { wrap401Errors });
       if (resp.found) {
         userSettings = resp._source;
       }
@@ -161,10 +161,10 @@ export class UiSettingsService {
     const configModel = this._server.plugins.saved_objects_api.getModel('config');
 
     try {
-      await configModel.patch('kibi', changes, req);
+      await configModel.patch('siren', changes, req);
     } catch (err) {
       if (err.status === 404) {
-        await configModel.create('kibi', changes, req);
+        await configModel.create('siren', changes, req);
       } else {
         throw err;
       }

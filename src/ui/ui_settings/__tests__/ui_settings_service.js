@@ -117,7 +117,7 @@ function setup(options = {}) {
     expect(method).to.be('get');
     expect(params).to.eql({
       index: configGet('kibana.index'),
-      id: 'kibi',
+      id: 'siren',
       type: 'config'
     });
   };
@@ -131,7 +131,7 @@ function setup(options = {}) {
     expect(method).to.be('update');
     expect(params).to.eql({
       index: configGet('kibana.index'),
-      id: 'kibi',
+      id: 'siren',
       type: 'config',
       body: { doc },
       refresh: true
@@ -199,7 +199,7 @@ describe('ui settings', () => {
     });
 
     // kibi: added tests
-    describe('kibi', function () {
+    describe('siren', function () {
       it('should create the config singleton if it does not exist yet', async function () {
         const { server, uiSettings, configGet, req } = setup({
           async callWithRequest(req, method, params) {
@@ -210,7 +210,7 @@ describe('ui settings', () => {
               case 'create':
                 expect(params.index).to.eql(configGet('kibana.index'));
                 expect(params.type).to.eql('config');
-                expect(params.id).to.eql('kibi');
+                expect(params.id).to.eql('siren');
                 expect(params.body).to.eql({ one: 'value' });
                 break;
               default:

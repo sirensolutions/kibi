@@ -488,7 +488,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           }
         }
       }
-      // gathering buttons that have to computed
+      // gathering buttons that have to be computed
       returnButtons = _.reduce($scope.buttons, (acc, button) => {
         if (button.type === 'VIRTUAL_ENTITY') {
           _.each(button.sub, (subButtons, rel) => {
@@ -513,7 +513,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         }
       }
 
-      // gathering buttons that have to computed
+      // gathering buttons that have to be computed
       returnButtons = _.reduce($scope.buttons, (acc, button) => {
         if (button.type === 'VIRTUAL_ENTITY' && visibleButtons.has(button.id)) {
           for (const prop in button.sub) {

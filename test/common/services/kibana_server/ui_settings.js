@@ -12,7 +12,7 @@ export class KibanaServerUiSettings {
     return {
       index: '.kibana',
       type: 'config',
-      id: 'kibi' // kibi: in Kibi the configuration document is always called 'kibi'
+      id: 'siren' // kibi: in Kibi the configuration document is always called 'siren'
     };
   }
 

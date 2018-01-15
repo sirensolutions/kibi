@@ -20,12 +20,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   const edit = onVisualizePage();
 
   const notify = createNotifier({
-    location: 'Kibi Automatic Relational filter'
+    location: 'Siren Automatic Relational filter'
   });
   const appState = getAppState();
 
   const relationsHelper = Private(RelationsHelperFactory);
-  const kibiSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
+  const sirenSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
   const currentDashboardId = kibiState._getCurrentDashboardId();
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -117,13 +117,13 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     return Promise.all(_.map(indexPatternButtons, (button) => {
       return Promise.all([
         kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
-        kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)
+        sirenSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)
       ])
       .then(([ indices, joinSeqFilter ]) => {
         button.joinSeqFilter = joinSeqFilter;
         button.disabled = false;
         if ($scope.btnCountsEnabled() || updateOnClick) {
-          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
+          return sirenSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
           .then((query) => {
             button.query = searchHelper.optimize(indices, query, button.targetIndexPatternId);
             return { button, indices };
@@ -142,7 +142,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           return { button, indices: [] };
         }
         if ($scope.btnCountsEnabled() || updateOnClick) {
-          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
+          return sirenSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
           .then((query) => {
             button.query = searchHelper.optimize([], query, button.targetIndexPatternId);
             return { button, indices: [] };
@@ -310,7 +310,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
               return [];
             }
 
-            const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
+            const buttons = sirenSequentialJoinVisHelper.constructButtonsArray(
               buttonDefs,
               currentDashboardIndex,
               currentDashboardId,
@@ -372,10 +372,10 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                                 return savedDashboard.savedSearchId === compatibleSavedSearch.id;
                               });
                               _.each(compatibleDashboards, (compatibleDashboard) => {
-                                const subButton = kibiSequentialJoinVisHelper.constructSubButton(button,
+                                const subButton = sirenSequentialJoinVisHelper.constructSubButton(button,
                                   compatibleDashboard, relByDomain);
 
-                                kibiSequentialJoinVisHelper.addClickHandlerToButton(subButton);
+                                sirenSequentialJoinVisHelper.addClickHandlerToButton(subButton);
 
                                 const key = relByDomain.directLabel;
                                 if (!button.sub[key]) {
@@ -399,7 +399,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           })
           .catch(notify.error);
         } else {
-          $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs);
+          $scope.buttons = sirenSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs);
         }
       });
     });
@@ -412,7 +412,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   const updateButtons = function (reason) {
     if (!kibiState.isSirenJoinPluginInstalled()) {
       notify.error(
-        'This version of Kibi Relational filter requires the Vanguard plugin. Please install it and restart Kibi.'
+        'This version of Siren Relational filter requires the Federate plugin for Elasticsearch. '
+        + 'Please install it and restart Siren Investigate.'
       );
       return;
     }
@@ -553,7 +554,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     });
   };
 
-  const kibiDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
+  const sirenDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
 
   $scope.$listen(kibiState, 'save_with_changes', function (diff) {
     if (diff.indexOf(kibiState._properties.dashboards) !== -1) {
@@ -610,7 +611,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
   $scope.$on('$destroy', function () {
     delayExecutionHelper.cancel();
-    kibiDashboardChangedOff();
+    sirenDashboardChangedOff();
     removeAutorefreshHandler();
     kibiMeta.flushQueues();
   });
@@ -634,5 +635,5 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 };
 
 uiModules
-.get('kibana/kibi_auto_join_vis', ['kibana'])
-.controller('KibiAutoJoinVisController', controller);
+.get('kibana/siren_auto_join_vis', ['kibana'])
+.controller('SirenAutoJoinVisController', controller);

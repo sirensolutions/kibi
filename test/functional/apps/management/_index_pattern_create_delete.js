@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
 
       // kibi: fails due to siren bug. When bug fixed we can comment back in
       // TODO: open kibi issue for this
-      xit('should return to index pattern creation page', function returnToPage() {
+      it('should return to index pattern creation page', function returnToPage() {
         return retry.try(function tryingForTime() {
           return PageObjects.settings.getCreateButton();
         });

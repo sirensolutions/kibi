@@ -3,19 +3,14 @@ import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
 // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
+// kibi: removed import of the create_index_template
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import template from './create_index_pattern.html';
 import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { pickCreateButtonText } from './pick_create_button_text';
 
-// kibi: change route from '/management/kibana/index'
-// to '/management/siren/index'
-uiRoutes
-.when('/management/siren/index', {
-  template,
-});
+// kibi: removed route '/management/kibana/index'
 
 uiModules.get('apps/management')
 .controller('managementIndicesCreate', function ($scope, $routeParams, kbnUrl, Private, Notifier, indexPatterns,

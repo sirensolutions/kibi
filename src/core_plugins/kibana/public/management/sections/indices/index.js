@@ -6,30 +6,10 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-const indexPatternsResolutions = {
-  indexPatterns: function (Private) {
-    const savedObjectsClient = Private(SavedObjectsClientProvider);
-
-    return savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: 10000
-    }).then(response => response.savedObjects);
-  }
-};
-
-// add a dependency to all of the subsection routes
-uiRoutes
-// kibi: route is changed to '/management\/siren\/indices/'
-.defaults(/management\/siren\/indices/, {
-  resolve: indexPatternsResolutions
-});
-
-uiRoutes
-// kibi: route is changed to '/management\/siren\/index/'
-.defaults(/management\/siren\/index/, {
-  resolve: indexPatternsResolutions
-});
+// kibi: removed not used
+// - indexPatternsResolutions function not used anymore
+// - route /management\/kibana\/indices/
+// - route /management\/kibana\/indix/
 
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules.get('apps/management')
@@ -61,9 +41,8 @@ uiModules.get('apps/management')
 });
 
 // kibi: We hide this section as it is replaced by the new Entities one.
-// kibi: url is changed to '#/management/siren/indices/'
 // management.getSection('kibana').register('indices', {
 //   display: 'Index Patterns',
 //   order: 0,
-//   url: '#/management/siren/indices/'
+//   url: '#/management/kibana/indices/'
 // });

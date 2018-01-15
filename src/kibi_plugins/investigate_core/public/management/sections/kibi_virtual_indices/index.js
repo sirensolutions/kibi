@@ -3,6 +3,6 @@ import 'plugins/investigate_core/management/sections/kibi_virtual_indices/contro
 
 management.getSection('kibana').register('virtualindices', {
   display: 'Virtual Indices',
-  order: 1,
+  order: 2,
   url: '#/management/siren/virtualindices'
 });

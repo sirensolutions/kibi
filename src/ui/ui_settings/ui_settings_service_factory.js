@@ -26,7 +26,7 @@ export function uiSettingsServiceFactory(server, status, options) { // kibi: pas
 
   return new UiSettingsService({
     type: 'config',
-    id: 'siren', // kibi: in investigate there is only one config with id = siren
+    id: 'siren', // kibi: in Investigate there is only one config with id = siren
     savedObjectsClient,
     readInterceptor,
     getDefaults,

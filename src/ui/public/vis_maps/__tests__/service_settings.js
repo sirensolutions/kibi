@@ -4,8 +4,6 @@ import url from 'url';
 import sinon from 'sinon';
 
 describe('service_settings (FKA tilemaptest)', function () {
-
-
   let serviceSettings;
   let mapsConfig;
 
@@ -34,10 +32,10 @@ describe('service_settings (FKA tilemaptest)', function () {
   const tmsManifest = {
     'services': [{
       'id': 'road_map',
-      'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
+      'url': 'https://tiles.siren.io/hot/{z}/{x}/{y}.png',
       'minZoom': 0,
       'maxZoom': 10,
-      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
+      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright)'
     }]
   };
 
@@ -114,10 +112,7 @@ describe('service_settings (FKA tilemaptest)', function () {
       expect(mapUrl).to.contain('{z}');
 
       const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.hostname).to.be('tiles.elastic.co');
-      expect(urlObject.query).to.have.property('my_app_name', 'kibana');
-      expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
-      expect(urlObject.query).to.have.property('my_app_version');
+      expect(urlObject.hostname).to.be('tiles.siren.io');
     });
 
     it('should get options', async function () {

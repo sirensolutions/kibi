@@ -136,15 +136,22 @@ describe('kibana_map tests', function () {
     it('TMS', async function () {
 
       const options = {
-        'url': 'https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
+        'url': 'https://tiles.siren.io/hot/{z}/{x}/{y}.png', //kibi: added Siren map tile server URL
         'minZoom': 0,
         'maxZoom': 12,
-        'attribution': '© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
+        'attribution': '© [OpenStreetMap]("http://www.openstreetmap.org/copyright")' // Changed attribution to OSM
       };
 
 
       return new Promise(function (resolve) {
         kibanaMap.on('baseLayer:loaded', () => {
+          // kibi: added test to check if loaded tiles are from the correct source
+          const loadedTiles = domNode.querySelectorAll('.leaflet-tile-loaded');
+          expect(loadedTiles).to.not.be.empty();
+          Array.prototype.map.call(loadedTiles, tile => {
+            expect(tile.currentSrc).to.match(/https:\/\/tiles\.siren\.io\/*/);
+          });
+          //kibi: end
           resolve();
         });
         kibanaMap.setBaseLayer({

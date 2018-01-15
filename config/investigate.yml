@@ -104,7 +104,6 @@
 #i18n.defaultLocale: "en"
 
 tilemap:
-  url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  url: 'https://tiles.siren.io/hot/{z}/{x}/{y}.png'
   options:
     attribution: '&copy; [OpenStreetMap]("http://www.openstreetmap.org/copyright")'
-    subdomains: ['a']

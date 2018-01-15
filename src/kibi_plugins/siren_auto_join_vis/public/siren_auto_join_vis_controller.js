@@ -412,7 +412,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   const updateButtons = function (reason) {
     if (!kibiState.isSirenJoinPluginInstalled()) {
       notify.error(
-        'This version of Siren Relational filter requires the Vanguard plugin. Please install it and restart Investigate.'
+        'This version of Siren Relational filter requires the Federate plugin for Elasticsearch. '
+        + 'Please install it and restart Siren Investigate.'
       );
       return;
     }

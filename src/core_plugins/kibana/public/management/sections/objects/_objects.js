@@ -1,5 +1,5 @@
 import { saveAs } from '@elastic/filesaver';
-import { find, flattenDeep, pluck, sortBy, partialRight, pick, filter } from 'lodash';
+import { find, flattenDeep, pluck, sortBy, partialRight, pick, filter, each } from 'lodash';
 import angular from 'angular';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
@@ -176,7 +176,7 @@ uiModules.get('apps/management')
       // TODO: Migrate all scope methods to the controller.
       $scope.bulkExport = function () {
         const objs = $scope.selectedItems.map(item => {
-          return { type: $scope.currentTab.type, id: item.id };
+          return { _type: $scope.currentTab.type, _id: item.id };
         });
 
         retrieveAndExportDocs(objs);
@@ -201,7 +201,20 @@ uiModules.get('apps/management')
 
       function retrieveAndExportDocs(objs) {
         if (!objs.length) return notify.error('No saved objects to export.');
-        savedObjectsClient.bulkGet(objs)
+
+        // kibi: create new object array which all hits are in same level
+        const bulkGetObjects = [];
+        each(objs, function (obj) {
+          if(obj.hits) {
+            each(obj.hits, function (hit) {
+              bulkGetObjects.push(hit);
+            });
+          } else {
+            bulkGetObjects.push(obj);
+          }
+        });
+
+        savedObjectsClient.bulkGet(bulkGetObjects)
         .then(function (response) {
           // kibi: sort the docs so the config is on the top
           const docs = response.docs.map(partialRight(pick, '_id', '_type', '_source'));

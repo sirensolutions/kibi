@@ -110,10 +110,12 @@ export class SavedObjectLoader {
   }
 
   scanAll(queryString, pageSize = 1000) {
-    return this.scanner.scanAndMap(queryString, {
-      pageSize,
-      docCount: Infinity
+    // kibi: use savedObjectsClient
+    return this.savedObjectsClient.find({
+      type: this.lowercaseType,
+      perPage: pageSize
     });
+    // kibi: end
   }
 
   /**

@@ -15,9 +15,12 @@ export default function ({ getService, getPageObjects }) {
       .then(function () {
         return PageObjects.settings.clickKibanaIndices();
       })
+      // kibi: to run below tests Siren Investigate needs to click add index pattern if none already exists
+      // In kibana when you open the index patterns page and none exist it automatically opens 'add index pattern' page
       .then(function () {
         return PageObjects.settings.clickLinkText('Add Index Pattern');
       });
+      // kibi: end
     });
 
     it('should enable creation after selecting time field', function () {

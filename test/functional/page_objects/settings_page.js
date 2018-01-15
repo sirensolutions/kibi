@@ -32,11 +32,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
-      // kibi: add new links below as siren investigate has way of getting
-      // to the index pattern page than kibana
+      // kibi: Open Entities page for kibana to find index patterns
       await this.clickLinkText('Entities');
-      //await this.clickLinkText('Add Index Pattern');
-      // kibi: end
     }
 
     getAdvancedSettings(propertyName) {
@@ -300,6 +297,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
+        // kibi: Siren Investigate opens does not open 'add index pattern' page
+        // if no index pattern exists so let's open it here.
         await this.clickLinkText('Add Index Pattern');
         await this.setIndexPatternField(indexPatternName);
         await this.selectTimeFieldOption(timefield);

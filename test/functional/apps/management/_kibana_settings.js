@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
         const currentUrl = await remote.getCurrentUrl();
-        // kibi: change below url parse as kibi also uses _k in url
+        // kibi: change below url parse as Siren Investigate also uses _k in url
         const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_k=(.*)&_a=(.*)/);
         const globalState = urlPieces[2];
         const appState = urlPieces[4];

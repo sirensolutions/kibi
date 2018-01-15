@@ -30,7 +30,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
-  $scope.visibility = {};
+  $scope.visibility = { buttons: {}, subRelations: {} };
 
   $scope.btnCountsEnabled = function () {
     return config.get('siren:enableAllRelBtnCounts');
@@ -477,31 +477,56 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
    *  Returns the list of the currently visible virtual entity sub buttons.
    */
   const getVisibleVirtualEntitySubButtons = function (visibility) {
-    const visibleRelations = new Set();
-    for (const prop in visibility) {
-      if (visibility.hasOwnProperty(prop)) {
-        if (visibility[prop] === true) {
-          visibleRelations.add(prop);
+    let returnButtons = [];
+
+    if ($scope.vis.params.layout === 'normal') {
+      const visibleRelations = new Set();
+      for (const prop in visibility.subRelations) {
+        if (visibility.subRelations.hasOwnProperty(prop)) {
+          if (visibility.subRelations[prop] === true) {
+            visibleRelations.add(prop);
+          }
         }
       }
-    }
-    // gathering buttons that have to computed
-    const visibleButtons = _.reduce($scope.buttons, (acc, button) => {
-      if (button.type === 'VIRTUAL_ENTITY') {
-        _.each(button.sub, (subButtons, rel) => {
-          if (visibleRelations.has(rel)) {
-            _.each(subButtons, (subButton) => {
-              if (!subButton.joinExecuted) {
-                acc.push(subButton);
-              }
-            });
+      // gathering buttons that have to be computed
+      returnButtons = _.reduce($scope.buttons, (acc, button) => {
+        if (button.type === 'VIRTUAL_ENTITY') {
+          _.each(button.sub, (subButtons, rel) => {
+            if (visibleRelations.has(rel)) {
+              _.each(subButtons, (subButton) => {
+                if (!subButton.joinExecuted) {
+                  acc.push(subButton);
+                }
+              });
+            }
+          });
+        }
+        return acc;
+      }, []);
+    } else if ($scope.vis.params.layout === 'light') {
+      const visibleButtons = new Set();
+      for (const prop in visibility.buttons) {
+        if (visibility.buttons.hasOwnProperty(prop)) {
+          if (visibility.buttons[prop] === true) {
+            visibleButtons.add(prop);
           }
-        });
+        }
       }
-      return acc;
-    }, []);
 
-    return visibleButtons;
+      // gathering buttons that have to be computed
+      returnButtons = _.reduce($scope.buttons, (acc, button) => {
+        if (button.type === 'VIRTUAL_ENTITY' && visibleButtons.has(button.id)) {
+          for (const prop in button.sub) {
+            if (button.sub.hasOwnProperty(prop)) {
+              acc.push.apply(acc, button.sub[prop]);
+            }
+          }
+        }
+        return acc;
+      }, []);
+    }
+
+    return returnButtons;
   };
 
   /**

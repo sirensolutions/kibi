@@ -30,31 +30,32 @@
     <accordion-group ng-repeat="button in buttons"
                      ng-if="button.type === 'VIRTUAL_ENTITY' && (vis.params.visibility[button.id] === undefined
                             || vis.params.visibility[button.id].button !== false)"
-                     is-open="button.isOpen"
+                     is-open="visibility.buttons[button.id]"
                      >
       <accordion-heading>
         {{ getButtonLabel(button) }}
-        <div ng-if="button.isOpen && !button.checkBox"
+        <div ng-if="visibility.buttons[button.id] && !button.checkBox"
              class="dashboard-disabled"
              ng-click="toggleLayout(button, $event)"
              ng-include src="dashboardIcon"
              title="Order by Dashboard">
         </div>
-        <div ng-if="button.isOpen && button.checkBox"
+        <div ng-if="visibility.buttons[button.id] && button.checkBox"
              class="dashboard-enabled"
              ng-click="toggleLayout(button, $event)"
              ng-include src="dashboardIcon"
              title="Order by Relation">
         </div>
       </accordion-heading>
+
       <!-- normal view -->
       <accordion close-others="true"
-                 ng-if="!button.checkBox"
+                 ng-if="vis.params.layout === 'normal' && !button.checkBox"
       >
         <accordion-group heading="{{key}}"
                          ng-repeat="(key, subButtons) in button.sub"
                          ng-if="vis.params.visibility[button.id].relation[key].toggle !== false"
-                         is-open="visibility[key]"
+                         is-open="visibility.subRelations[key]"
         >
           <div class="panel-buttons">
             <a ng-repeat="subButton in subButtons"
@@ -82,6 +83,36 @@
       </accordion>
       <!-- end normal view -->
 
+      <!-- light view -->
+      <accordion close-others="true"
+                 ng-if="vis.params.layout === 'light'"
+      >
+        <div class="panel-buttons"
+             ng-repeat="(key, subButtons) in button.sub"
+             ng-if="(vis.params.visibility[button.id].button || vis.params.visibility[button.id] === undefined)"
+        >
+          <a ng-repeat="subButton in subButtons"
+             ng-if="subButton.type === 'INDEX_PATTERN'"
+             ng-click="subButton.click(true)"
+             ng-disabled="subButton.disabled"
+             ng-mouseover="hoverIn(subButton)"
+             ng-mouseleave="hoverOut()"
+          >
+            <h4 class="panel-title">
+              <em>{{ key }}</em> {{ subButton.label }}
+              <span ng-show="subButton.targetCount !== undefined"> ({{subButton.targetCount}})</span>
+              <span
+                class="warning"
+                ng-if="!!subButton.warning"
+                title="{{subButton.warning}}">(*)</span>
+              <span class="go-to-dashboard">
+                <i class="fa fa-arrow-right"></i>
+              </span>
+            </h4>
+          </a>
+        </div>
+      </accordion>
+      <!-- end light view -->
     </accordion-group>
   </accordion>
 

@@ -89,14 +89,12 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      // kibi: fails due siren bug https://github.com/sirensolutions/kibi-internal/issues/4216
       it('should return to index pattern creation page', function returnToPage() {
         return retry.try(function tryingForTime() {
           return PageObjects.settings.getCreateButton();
         });
       });
 
-      // kibi: fails due siren bug https://github.com/sirensolutions/kibi-internal/issues/4216
       it('should remove index pattern from url', function indexNotInUrl() {
         // give the url time to settle
         return retry.try(function tryingForTime() {

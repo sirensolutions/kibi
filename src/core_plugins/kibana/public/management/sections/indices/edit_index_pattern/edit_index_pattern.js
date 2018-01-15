@@ -25,7 +25,7 @@ uiModules.get('apps/management')
   // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
 
   $scope.kbnUrl = Private(UrlProvider);
-  $scope.indexPattern = $route.current.locals.selectedEntity;
+
   docTitle.change($scope.indexPattern.id);
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 

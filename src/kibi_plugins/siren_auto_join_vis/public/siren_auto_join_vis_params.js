@@ -1,12 +1,12 @@
 import _ from 'lodash';
 
-import template from 'plugins/kibi_auto_join_vis/kibi_auto_join_vis_params.html';
+import template from 'plugins/siren_auto_join_vis/siren_auto_join_vis_params.html';
 import { uiModules } from 'ui/modules';
 import 'ui/kibi/components/ontology_client/ontology_client';
 
 uiModules
-.get('kibana/kibi_auto_join_vis')
-.directive('kibiAutoJoinVisParams', function (createNotifier, ontologyClient, savedDashboards, savedSearches, indexPatterns) {
+.get('kibana/siren_auto_join_vis')
+.directive('sirenAutoJoinVisParams', function (createNotifier, ontologyClient, savedDashboards, savedSearches, indexPatterns) {
   return {
     restrict: 'E',
     template,
@@ -14,7 +14,7 @@ uiModules
       $scope.buttons = [];
 
       const notify = createNotifier({
-        location: 'Kibi Automatic Relational filter params'
+        location: 'Siren Automatic Relational filter params'
       });
 
       // Updates the buttons to show according to the selected indexpattern.

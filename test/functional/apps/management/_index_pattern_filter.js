@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
       // kibi: open fields tab as default tab in Siren Investigate is different to kibana
-      await PageObjects.settings.clickIndexedFieldsTab();
+      await PageObjects.settings.clickFieldsTab();
       // kibi: end
       await PageObjects.settings.getFieldTypes();
 

@@ -305,7 +305,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await this.getCreateButton().click();
         // kibi: opens field tab after index pattern creation to match kibana behaviour
         // as subsequent tests look for elements on the fields tab
-        await this.clickIndexedFieldsTab();
+        await this.clickFieldsTab();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -342,7 +342,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug('openEntities');
       await this.navigateTo();
       await this.clickKibanaIndices();
-      return await this.clickIndexedFieldsTab();
+      return await this.clickFieldsTab();
     }
     // kibi: end
 
@@ -378,7 +378,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return alertText;
     }
 
-    async clickIndexedFieldsTab() {
+    async clickFieldsTab() {
       log.debug('click Fields tab');
       // kibi: changed element name
       await testSubjects.click('tab-indexedFields');

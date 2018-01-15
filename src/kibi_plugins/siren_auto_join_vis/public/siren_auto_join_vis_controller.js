@@ -41,6 +41,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     return button.label.replace('{0}', count);
   };
 
+  $scope.toggleLayout = function (button, $event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+    button.checkBox = !button.checkBox;
+  };
+
   const buttonMetaCallback = function (button, meta) {
     if (button.forbidden) {
       button.warning = 'Access to an index referred by this button is forbidden.';
@@ -178,6 +184,33 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       dashboardId: dashboardId
     });
     return Promise.resolve(buttons);
+  };
+
+  /**
+   * Add the alternative menu hierarchy where you use dashboard and then select one of the available relations
+   */
+  const addAlternativeSubHierarchy = function (buttons) {
+    _.each(buttons, (button) => {
+      if (button.type === 'VIRTUAL_ENTITY') {
+        button.altSub = {};
+        const subButtons = button.sub;
+        if (subButtons) {
+          for (var key in subButtons) {
+            if (subButtons.hasOwnProperty(key)) {
+              _.each(subButtons[key], (subButton) => {
+                const altSubButton = _.clone(subButton);
+                altSubButton.label = key;
+
+                if (!button.altSub[subButton.label]) {
+                  button.altSub[subButton.label] = [];
+                }
+                button.altSub[subButton.label].push(altSubButton);
+              });
+            }
+          }
+        }
+      }
+    });
   };
 
   const getNewButtons = function (relations, existingButtons) {
@@ -395,6 +428,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
             });
 
             return Promise.all(subButtonPromises).then(() => {
+              addAlternativeSubHierarchy(buttons);
               return buttons;
             });
           })

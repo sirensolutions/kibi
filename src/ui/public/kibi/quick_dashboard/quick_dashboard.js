@@ -397,12 +397,15 @@ export function QuickDashboardProvider(
 
   function openDashboardPage({ dashState }) {
     const dashId = dashState.savedDashboard.id;
+
+    // Opened dashboard will be in 'View' mode
     const appState = dashState.appState;
+    appState.viewMode = 'view';
 
     // Stores the appState in the localSession and returns a query param reference
     const appQueryParam = appState.toQueryParam(appState.toObject());
 
-    // Opened dashboard will be in 'Edit' mode, supplying the created app state
+    // Change url, supplying the created app state
     kbnUrl.change(createDashboardEditUrl(dashId) + `?_a=${appQueryParam}`);
   }
 

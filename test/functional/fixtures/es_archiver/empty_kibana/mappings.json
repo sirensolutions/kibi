@@ -49,6 +49,9 @@
           "createDate": {
             "type": "date"
           },
+          "sirenSession": {
+            "type": "object"
+          },
           "url": {
             "type": "text",
             "fields": {
@@ -119,6 +122,9 @@
           },
           "paths": {
             "type": "text"
+          },
+          "excludeIndices": {
+            "type": "boolean"
           }
         }
       },

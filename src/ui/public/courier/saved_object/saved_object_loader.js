@@ -6,6 +6,7 @@ import { SavedObjectsClient } from 'ui/saved_objects';
 
 // kibi: imports
 import { jdbcDatasourceTranslate } from 'plugins/investigate_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
+import angular from 'angular';
 // kibi: end
 
 export class SavedObjectLoader {
@@ -193,7 +194,9 @@ export class SavedObjectLoader {
       //kibi: when escaping reserved characters in query, we do not filter with reserved chracters
       //if searchString contains reserved characters check titles of hits
       if (safeQuery) {
-        result.hits = _.filter(result.hits, function (hit) { return hit.title.includes(searchString); });
+        result.hits = _.filter(result.hits, function (hit) {
+          return angular.lowercase(hit.title).includes(angular.lowercase(searchString));
+        });
         result.total = result.hits.length;
       }
       //kibi: end

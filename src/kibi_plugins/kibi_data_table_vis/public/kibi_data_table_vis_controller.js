@@ -22,6 +22,7 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
 
   $scope.customView = Boolean($scope.vis.params.templateId);
   $scope.showCustomView = Boolean($scope.vis.params.templateId);
+  const appState = getAppState();
 
   /**
    * extract fields from query
@@ -180,6 +181,14 @@ function KibiDataTableVisController(getAppState, courier, $window, createNotifie
         }
       }
     }
+  });
+
+  // kibi: store filters and pass them to doc_table
+  $scope.$listen(appState, 'save_with_changes', function (diff) {
+    if (diff.indexOf('filters') === -1) {
+      return;
+    }
+    $scope.filters = appState.filters;
   });
 
   const _addRelationalColumn = function () {

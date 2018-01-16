@@ -20,7 +20,7 @@ describe('Kibi data table controller', function () {
   let courier;
   let onVisualizePageStub;
 
-  const init = function ({ props, getAppState, searchSourceMeta, kibiStateMeta }) {
+  const init = function ({ props, searchSourceMeta, kibiStateMeta }) {
     ngMock.inject(function (Private, _$window_, $rootScope, $controller) {
       const searchSource = Private(StubbedSearchSourceProvider);
       if (searchSourceMeta) {
@@ -57,7 +57,6 @@ describe('Kibi data table controller', function () {
         confirmModal: confirmModalStub,
         kibiState,
         courier,
-        getAppState,
         $scope: $parentScope
       });
 
@@ -67,6 +66,10 @@ describe('Kibi data table controller', function () {
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
+    const appState = new MockState({ filters: [] });
+    $provide.service('getAppState', () => {
+      return function () { return appState; };
+    });
   }));
 
   afterEach(function () {
@@ -76,6 +79,20 @@ describe('Kibi data table controller', function () {
   });
 
   describe('column alias', function () {
+
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      const appState = new MockState({
+        query: {
+          query_string: {
+            query: 'labelAlias:value'
+          }
+        }
+      });
+      $provide.service('getAppState', () => {
+        return function () { return appState; };
+      });
+    }));
+
     it('should warn the user if the table has zero result and an alias in the query string is used', function () {
       const props = {
         hits: [],
@@ -86,17 +103,8 @@ describe('Kibi data table controller', function () {
           }
         }
       };
-      const getAppState = function () {
-        return {
-          query: {
-            query_string: {
-              query: 'labelAlias:value'
-            }
-          }
-        };
-      };
 
-      init({ props, getAppState });
+      init({ props });
       expect(Notifier.prototype._notifs).to.have.length(1);
       expect(Notifier.prototype._notifs[0].type).to.be('warning');
       expect(Notifier.prototype._notifs[0].content)

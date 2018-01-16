@@ -18,7 +18,7 @@ import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
 function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, es, createNotifier, globalState, Promise,
-  kbnIndex, config, savedDashboards, timefilter, kibiMeta) {
+  kbnIndex, config, savedDashboards, timefilter, kibiMeta, ontologyClient) {
   const DelayExecutionHelper = Private(DelayExecutionHelperFactory);
   const searchHelper = new SearchHelper(kbnIndex);
   const edit = onVisualizePage();
@@ -196,97 +196,106 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   };
 
   const _constructButtons = $scope._constructButtons = function () {
-    const originalButtonDefs = _.filter($scope.vis.params.buttons,
-      btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
+    return ontologyClient.getRelations().then((relations) => {
+      const originalButtonDefs = _.filter($scope.vis.params.buttons,
+        btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
 
-    $scope.vis.error = '';
+      $scope.vis.error = '';
 
-    if (originalButtonDefs.length !== $scope.vis.params.buttons.length) {
-      $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
+      if (originalButtonDefs.length !== $scope.vis.params.buttons.length) {
+        $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
+        if (!edit) {
+          return Promise.reject($scope.vis.error);
+        }
+      }
+
       if (!edit) {
-        return Promise.reject($scope.vis.error);
-      }
-    }
-
-    if (!edit) {
-      let getButtonDefs;
-      const kacConfiguration = chrome.getInjected('kacConfiguration');
-      if (kacConfiguration && kacConfiguration.acl && kacConfiguration.acl.enabled === true) {
-        getButtonDefs = savedDashboards.find().then((dashboards) => {
-          // iterate over the original definitions and remove the ones that depend on missing dashboards
-          return _.filter(originalButtonDefs, (btn) => {
-            // sourceDashboardId is optional
-            if (btn.sourceDashboardId && !_.find(dashboards.hits, 'id', btn.sourceDashboardId)) {
-              return false;
-            }
-            if (!_.find(dashboards.hits, 'id', btn.targetDashboardId)) {
-              return false;
-            }
-            return true;
+        let getButtonDefs;
+        const kacConfiguration = chrome.getInjected('kacConfiguration');
+        if (kacConfiguration && kacConfiguration.acl && kacConfiguration.acl.enabled === true) {
+          getButtonDefs = savedDashboards.find().then((dashboards) => {
+            // iterate over the original definitions and remove the ones that depend on missing dashboards
+            return _.filter(originalButtonDefs, (btn) => {
+              // sourceDashboardId is optional
+              if (btn.sourceDashboardId && !_.find(dashboards.hits, 'id', btn.sourceDashboardId)) {
+                return false;
+              }
+              if (!_.find(dashboards.hits, 'id', btn.targetDashboardId)) {
+                return false;
+              }
+              return true;
+            });
           });
-        });
+        } else {
+          getButtonDefs = Promise.resolve(originalButtonDefs);
+        }
+
+        return getButtonDefs.then((buttonDefs) => {
+          const dashboardIds = [ currentDashboardId ];
+          _.each(buttonDefs, function (button) {
+            if (!_.contains(dashboardIds, button.targetDashboardId)) {
+              dashboardIds.push(button.targetDashboardId);
+            }
+          });
+
+          return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, false)
+          .then((metas) => {
+            return {
+              metas,
+              buttonDefs
+            };
+          });
+        })
+        .then(({ metas, buttonDefs }) => {
+          let currentDashboardIndex;
+          const dashboardIdIndexPair = new Map();
+
+          for (let i = 0; i < metas.length; i++) {
+            dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
+            if (metas[i].savedDash.id === currentDashboardId) {
+              currentDashboardIndex = metas[i].savedSearchMeta.index;
+            }
+          }
+
+          if (!currentDashboardIndex) {
+            return [];
+          }
+
+          const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
+            buttonDefs,
+            currentDashboardIndex,
+            currentDashboardId,
+            dashboardIdIndexPair,
+            relations
+          );
+
+          // disable buttons until buttons are ready
+          _.each(buttons, function (button) {
+            button.disabled = true;
+          });
+
+          // retain the buttons order
+          for (let i = 0; i < buttons.length; i++) {
+            buttons[i].btnIndex = i;
+          }
+          if (!buttons.length) {
+            $scope.vis.error =
+              `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
+              `No button has a source index matching the current dashboard index: ${currentDashboardIndex}.`;
+          }
+          return buttons;
+        })
+        .catch(notify.error);
       } else {
-        getButtonDefs = Promise.resolve(originalButtonDefs);
-      }
-
-      return getButtonDefs.then((buttonDefs) => {
-        const dashboardIds = [ currentDashboardId ];
-        _.each(buttonDefs, function (button) {
-          if (!_.contains(dashboardIds, button.targetDashboardId)) {
-            dashboardIds.push(button.targetDashboardId);
-          }
-        });
-
-        return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, false)
-        .then((metas) => {
-          return {
-            metas,
-            buttonDefs
-          };
-        });
-      })
-      .then(({ metas, buttonDefs }) => {
-        let currentDashboardIndex;
-        const dashboardIdIndexPair = new Map();
-
-        for (let i = 0; i < metas.length; i++) {
-          dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
-          if (metas[i].savedDash.id === currentDashboardId) {
-            currentDashboardIndex = metas[i].savedSearchMeta.index;
-          }
-        }
-
-        if (!currentDashboardIndex) {
-          return [];
-        }
-
-        const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
-          buttonDefs,
-          currentDashboardIndex,
-          currentDashboardId,
-          dashboardIdIndexPair
+        $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
+          originalButtonDefs,
+          null,
+          null,
+          null,
+          relations
         );
-
-        // disable buttons until buttons are ready
-        _.each(buttons, function (button) {
-          button.disabled = true;
-        });
-
-        // retain the buttons order
-        for (let i = 0; i < buttons.length; i++) {
-          buttons[i].btnIndex = i;
-        }
-        if (!buttons.length) {
-          $scope.vis.error =
-            `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
-            `No button has a source index matching the current dashboard index: ${currentDashboardIndex}.`;
-        }
-        return buttons;
-      })
-      .catch(notify.error);
-    } else {
-      $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs);
-    }
+      }
+    });
   };
 
   /*

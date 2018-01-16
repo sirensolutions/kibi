@@ -23,7 +23,7 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       }
       const relation = _.find(relations, 'id', buttonDef.indexRelationId);
       if (!relation) {
-        throw new Error(`Couldn't find a relation with id: ${relationId}`);
+        throw new Error(`Couldn't find a relation with id: ${buttonDef.indexRelationId}`);
       }
       // filter it out if currentDashboardIndex is neither in source nor in target for the button relation
       if (currentDashboardIndexId &&

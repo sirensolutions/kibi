@@ -16,7 +16,7 @@ export function RelationsHelperFactory(config, ontologyClient) {
       ontologyClient.getRelations()
       .then((rels) => {
         relations = rels;
-      })
+      });
     }
 
     /**
@@ -93,7 +93,7 @@ export function RelationsHelperFactory(config, ontologyClient) {
         return true;
       }
 
-      let relation = _.find(relations, 'id', relationId);
+      const relation = _.find(relations, 'id', relationId);
 
       if (relation.joinType) {
         rel.type = relation.joinType;

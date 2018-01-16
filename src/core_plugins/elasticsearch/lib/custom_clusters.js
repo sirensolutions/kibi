@@ -4,6 +4,7 @@ import { clientLogger } from './client_logger';
 export const CLUSTERS_PROPERTY = 'elasticsearch.siren.clusters';
 export const CONNECTOR_CLUSTER_PROPERTY = 'elasticsearch.siren.connector.admin.cluster';
 export const ALERT_CLUSTER_PROPERTY = 'elasticsearch.siren.alert.admin.cluster';
+export const MANAGEMENT_CLUSTER_PROPERTY = 'elasticsearch.siren.management.admin.cluster';
 
 export function getConfigMismatchErrorMessage(clusterName, clusterProperty) {
   return 'Could not find configuration for [' + clusterName + '] cluster. ' +

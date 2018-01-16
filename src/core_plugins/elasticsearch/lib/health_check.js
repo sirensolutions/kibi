@@ -14,7 +14,12 @@ import { ensureTypesExist } from './ensure_types_exist';
 import kibiVersion from './kibi_version';
 //added by kibi to know the list of installed plugins
 import pluginList from './wait_for_plugin_list';
-import { getConfigMismatchErrorMessage, CLUSTERS_PROPERTY, CONNECTOR_CLUSTER_PROPERTY, ALERT_CLUSTER_PROPERTY } from './custom_clusters';
+import {
+  getConfigMismatchErrorMessage,
+  CLUSTERS_PROPERTY,
+  MANAGEMENT_CLUSTER_PROPERTY,
+  CONNECTOR_CLUSTER_PROPERTY,
+  ALERT_CLUSTER_PROPERTY } from './custom_clusters';
 // kibi: end
 
 const NoConnections = elasticsearch.errors.NoConnections;
@@ -103,6 +108,25 @@ module.exports = function (plugin, server, { mappings }) {
     return plugin.status.green('Siren Investigate index ready');
   }
 
+  function pingCustomCluster(clusterNameProperty) {
+    // remember "has" will return true if it is defined in the schema !!!  So use get
+    if (config.get(clusterNameProperty)) {
+      const clusterName = config.get(clusterNameProperty);
+      const clustersConfig = config.get(CLUSTERS_PROPERTY);
+      if (!clustersConfig || !clustersConfig[clusterName]) {
+        return new Error(getConfigMismatchErrorMessage(clusterName, clusterNameProperty));
+      }
+      const clusterConfig = clustersConfig[clusterName];
+      let url =  clusterConfig.url;
+      if (clusterConfig.tribe && clusterConfig.tribe.url) {
+        url = clusterConfig.tribe.url;
+      }
+      const callClusterAsKibanaUser = server.plugins.elasticsearch.getCluster(clusterName).callWithInternalUser;
+      return waitForPong(callClusterAsKibanaUser, url)
+      .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), clusterName));
+    }
+  };
+
   function check() {
     const results = {};
 
@@ -132,42 +156,9 @@ module.exports = function (plugin, server, { mappings }) {
           .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), 'admin'));
         }
       })
-      .then(() => {
-        // remember "has" will return true if it is defined in the schema !!!  So use get
-        if (config.get(CONNECTOR_CLUSTER_PROPERTY)) {
-          const connectorAdminCluster = config.get(CONNECTOR_CLUSTER_PROPERTY);
-          const clustersConfig = config.get(CLUSTERS_PROPERTY);
-          if (!clustersConfig || !clustersConfig[connectorAdminCluster]) {
-            return new Error(getConfigMismatchErrorMessage(connectorAdminCluster, CONNECTOR_CLUSTER_PROPERTY));
-          }
-          const clusterConfig = clustersConfig[connectorAdminCluster];
-          let url =  clusterConfig.url;
-          if (clusterConfig.tribe && clusterConfig.tribe.url) {
-            url = clusterConfig.tribe.url;
-          }
-          const callConnectorAsKibanaUser = server.plugins.elasticsearch.getCluster(connectorAdminCluster).callWithInternalUser;
-          return waitForPong(callConnectorAsKibanaUser, url)
-          .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), connectorAdminCluster));
-        }
-      })
-      .then(() => {
-        // remember "has" will return true if it is defined in the schema !!!  So use get
-        if (config.get(ALERT_CLUSTER_PROPERTY)) {
-          const alertAdminCluster = config.get(ALERT_CLUSTER_PROPERTY);
-          const clustersConfig = config.get(CLUSTERS_PROPERTY);
-          if (!clustersConfig || !clustersConfig[alertAdminCluster]) {
-            return new Error(getConfigMismatchErrorMessage(alertAdminCluster, ALERT_CLUSTER_PROPERTY));
-          }
-          const clusterConfig = clustersConfig[alertAdminCluster];
-          let url =  clusterConfig.url;
-          if (clusterConfig.tribe && clusterConfig.tribe.url) {
-            url = clusterConfig.tribe.url;
-          }
-          const callAlertAsKibanaUser = server.plugins.elasticsearch.getCluster(alertAdminCluster).callWithInternalUser;
-          return waitForPong(callAlertAsKibanaUser, url)
-          .then(() => ensureEsVersion(server, kibanaVersion.get(), kibiVersion.get(), alertAdminCluster));
-        }
-      });
+      .then(config.get(CONNECTOR_CLUSTER_PROPERTY))
+      .then(config.get(MANAGEMENT_CLUSTER_PROPERTY))
+      .then(config.get(ALERT_CLUSTER_PROPERTY));
 
     return healthCheck
     .then(() => server.expose('latestHealthCheckResults', results))

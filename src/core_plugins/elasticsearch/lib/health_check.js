@@ -17,7 +17,7 @@ import pluginList from './wait_for_plugin_list';
 import {
   getConfigMismatchErrorMessage,
   CLUSTERS_PROPERTY,
-  MANAGEMENT_CLUSTER_PROPERTY,
+  SECURITY_CLUSTER_PROPERTY,
   CONNECTOR_CLUSTER_PROPERTY,
   ALERT_CLUSTER_PROPERTY } from './custom_clusters';
 // kibi: end
@@ -157,7 +157,7 @@ module.exports = function (plugin, server, { mappings }) {
         }
       })
       .then(config.get(CONNECTOR_CLUSTER_PROPERTY))
-      .then(config.get(MANAGEMENT_CLUSTER_PROPERTY))
+      .then(config.get(SECURITY_CLUSTER_PROPERTY))
       .then(config.get(ALERT_CLUSTER_PROPERTY));
 
     return healthCheck

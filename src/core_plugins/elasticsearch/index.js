@@ -88,7 +88,7 @@ module.exports = function (kibana) {
               cluster: Joi.string().alphanum()
             })
           }),
-          management: Joi.object({
+          security: Joi.object({
             admin: Joi.object({
               cluster: Joi.string().alphanum()
             })

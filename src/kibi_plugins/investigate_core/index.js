@@ -73,7 +73,6 @@ module.exports = function (kibana) {
         'plugins/investigate_core/management/sections/kibi_datasources',
         'plugins/investigate_core/management/sections/kibi_entities',
         'plugins/investigate_core/management/sections/kibi_queries',
-        'plugins/investigate_core/management/sections/kibi_relations',
         'plugins/investigate_core/management/sections/kibi_templates'
       ],
       navbarExtensions: [

@@ -18,40 +18,6 @@ export function RelationsHelperFactory(config, ontologyClient) {
         relations = rels;
       })
     }
-    /**
-     * validateDashboardsRelation validates the given relation between two dashboards
-     *
-     * @param relation the relation between dashboards
-     * @returns true if the relation is ok
-     */
-    validateDashboardsRelation(relation, relationsToCheck) {
-      relationsToCheck = relationsToCheck || relations;
-
-      if (relationsToCheck && relationsToCheck.relationsIndices) {
-        // check if the relation exists and is unique
-        const relationIndices = _.filter(relationsToCheck.relationsIndices, (relInd) => relInd.id === relation.relation);
-        if (relationIndices.length !== 1) {
-          return false;
-        }
-      } else {
-        // basic test of the id format
-        if (!relation.relation) {
-          return false;
-        }
-        const parts = relation.relation.split(SEPARATOR);
-        if (!checkIdFormat.call(this, parts)) {
-          return false;
-        }
-      }
-      // check the connected dashboards
-      if (relation.dashboards.length !== 2) {
-        return false;
-      }
-      if (!relation.dashboards[0] || !relation.dashboards[1]) {
-        return false;
-      }
-      return true;
-    }
 
     /**
      * validateRelationIdWithRelations validates the given ID of a relation between indices
@@ -92,32 +58,6 @@ export function RelationsHelperFactory(config, ontologyClient) {
 
       return true;
     };
-
-    /**
-     * checkIfRelationsAreValid checks that the relations defined between dashboards and indices are ok
-     *
-     * @param relationsToCheck the indices/dashboards relations to check. If not passed, the relations are taken from the config
-     * @returns an object { validIndices, validDashboards } where the fields are boolean
-     */
-    checkIfRelationsAreValid(relationsToCheck) {
-      relationsToCheck = relationsToCheck || relations;
-
-      if (!relationsToCheck || !relationsToCheck.relationsIndices || !relationsToCheck.relationsDashboards) {
-        // not initialized yet
-        return { validIndices: true, validDashboards: true };
-      }
-
-      return {
-        // check that the indices relations are defined correctly
-        validIndices: _.reduce(relationsToCheck.relationsIndices, (acc, rel) => {
-          return acc && this.validateIndicesRelation(rel);
-        }, true),
-          // check the dashboard relations
-        validDashboards: _.reduce(relationsToCheck.relationsDashboards, (acc, rel) => {
-          return acc && this.validateDashboardsRelation(rel, relationsToCheck);
-        }, true)
-      };
-    }
 
     /**
      * Returns a unique identifier for the relation between the indices indexa and indexb

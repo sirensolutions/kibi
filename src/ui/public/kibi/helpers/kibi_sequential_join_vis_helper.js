@@ -21,46 +21,49 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       if (buttonDef.sourceDashboardId && currentDashboardId) {
         return buttonDef.sourceDashboardId === currentDashboardId;
       }
-      const relationInfo = relationsHelper.getRelationInfosFromRelationID(buttonDef.indexRelationId, relations);
+      const relation = _.find(relations, 'id', buttonDef.indexRelationId);
+      if (!relation) {
+        throw new Error(`Couldn't find a relation with id: ${relationId}`);
+      }
       // filter it out if currentDashboardIndex is neither in source nor in target for the button relation
       if (currentDashboardIndexId &&
-          currentDashboardIndexId !== relationInfo.source.index &&
-          currentDashboardIndexId !== relationInfo.target.index) {
+          currentDashboardIndexId !== relation.domain.id &&
+          currentDashboardIndexId !== relation.range.id) {
         return false;
       }
       // filter if targetDashboardId == currentDashboardId
       // the button should be shown only if it is based on a self join relation
       if (currentDashboardId && currentDashboardId === buttonDef.targetDashboardId) {
-        return relationInfo.source.index === relationInfo.target.index;
+        return relation.domain.id === relation.range.id;
       }
       if (buttonDef.type !== 'VIRTUAL_ENTITY' &&
-          dashboardIdIndexPair && currentDashboardIndexId === relationInfo.source.index &&
-          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.target.index) {
+          dashboardIdIndexPair && currentDashboardIndexId === relation.domain.id &&
+          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relation.range.id) {
         return false;
       }
-      if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.target.index &&
-          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.source.index) {
+      if (dashboardIdIndexPair && currentDashboardIndexId === relation.range.id &&
+          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relation.domain.id) {
         return false;
       }
       return true;
     })
     .map(function (button) {
       if (button.indexRelationId && currentDashboardIndexId) {
-        const relationInfo = relationsHelper.getRelationInfosFromRelationID(button.indexRelationId, relations);
-        if (relationInfo.source.index === currentDashboardIndexId) {
-          button.sourceIndexPatternId = relationInfo.source.index;
-          button.sourceIndexPatternType = relationInfo.source.type;
-          button.sourceField = relationInfo.source.path;
-          button.targetIndexPatternId = relationInfo.target.index;
-          button.targetIndexPatternType = relationInfo.target.type;
-          button.targetField = relationInfo.target.path;
+        const relation = _.find(relations, 'id', button.indexRelationId);
+        if (relation.domain.id === currentDashboardIndexId) {
+          button.sourceIndexPatternId = relation.domain.id;
+          button.sourceIndexPatternType = null;
+          button.sourceField = relation.domain.field;
+          button.targetIndexPatternId = relation.range.id;
+          button.targetIndexPatternType = null;
+          button.targetField = relation.range.field;
         } else {
-          button.sourceIndexPatternId = relationInfo.target.index;
-          button.sourceIndexPatternType = relationInfo.target.type;
-          button.sourceField = relationInfo.target.path;
-          button.targetIndexPatternId = relationInfo.source.index;
-          button.targetIndexPatternType = relationInfo.source.type;
-          button.targetField = relationInfo.source.path;
+          button.sourceIndexPatternId = relation.range.id;
+          button.sourceIndexPatternType = null;
+          button.sourceField = relation.range.field;
+          button.targetIndexPatternId = relation.domain.id;
+          button.targetIndexPatternType = null;
+          button.targetField = relation.domain.field;
         }
       }
       return button;

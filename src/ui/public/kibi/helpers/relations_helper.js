@@ -199,33 +199,6 @@ export function RelationsHelperFactory(config) {
     }
 
     /**
-     * getRelationInfosFromRelationID returns the index, type, and path of the relation's source,
-     * and the index, type, and path of the relation's target, given its ID and the available relations.
-     *
-     * @param relationId the ID of the relation as computed with RelationsHelper.getJoinIndicesUniqueID
-     * @returns an object with source and target fields.
-     */
-    getRelationInfosFromRelationID(relationId, relations) {
-      const rel = _.find(relations, 'id', relationId);
-
-      if (!rel) {
-        throw new Error(`Couldn't find a relation with id: ${relationId}`);
-      }
-      return {
-        source: {
-          index: rel.domain.id,
-          type: null,
-          path: rel.domain.field
-        },
-        target: {
-          index: rel.range.id,
-          type: null,
-          path: rel.range.field
-        }
-      };
-    }
-
-    /**
      * Adds advanced join parameters for the given relation.
      * Rel is an array with the following format:
      *

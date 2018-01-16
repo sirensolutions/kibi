@@ -94,10 +94,6 @@ export function RelationsHelperFactory(config) {
       if (!relation.id) {
         return false;
       }
-      const parts = relation.id.split(SEPARATOR);
-      if (!checkIdFormat.call(this, parts)) {
-        return false;
-      }
       // label (which is the straight field) should be defined
       if (!relation.directLabel) {
         return false;
@@ -107,22 +103,6 @@ export function RelationsHelperFactory(config) {
         return false;
       }
 
-      /**
-       * @retval true if @a and @b are strictly equal or are both empty
-       * @retval false if not.
-       */
-      const areEqual = (a, b) => {
-        return a === b || _.isEmpty(a) && _.isEmpty(b) || _.isNull(a) && b === 'null' || a === 'null' && _.isNull(b);
-      };
-
-      // test if the ID is correct
-      const isSyntacticallyCorrectId = function (relation, parts) {
-        return areEqual(relation.domain.id, parts[0]) && areEqual(relation.domain.field, parts[2])
-          && areEqual(relation.range.id, parts[3]) && areEqual(relation.range.field, parts[5]);
-      };
-      if (!isSyntacticallyCorrectId(relation, parts)) {
-        return false;
-      }
       return true;
     };
 
@@ -220,55 +200,29 @@ export function RelationsHelperFactory(config) {
 
     /**
      * getRelationInfosFromRelationID returns the index, type, and path of the relation's source,
-     * and the index, type, and path of the relation's target, given its ID.
+     * and the index, type, and path of the relation's target, given its ID and the available relations.
      *
      * @param relationId the ID of the relation as computed with RelationsHelper.getJoinIndicesUniqueID
      * @returns an object with source and target fields.
      */
-    getRelationInfosFromRelationID(relationId) {
-      const restore = function (str) {
-        return str.replace('-slash-', SEPARATOR);
-      };
+    getRelationInfosFromRelationID(relationId, relations) {
+      const rel = _.find(relations, 'id', relationId);
 
-      const parts = relationId.split(SEPARATOR);
-      if (parts.length !== 6) {
-        throw new Error(`Got badly formatted relation ID: ${relationId}`);
+      if (!rel) {
+        throw new Error(`Couldn't find a relation with id: ${relationId}`);
       }
       return {
         source: {
-          index: restore(parts[0]),
-          type: restore(parts[1]),
-          path: restore(parts[2])
+          index: rel.domain.id,
+          type: null,
+          path: rel.domain.field
         },
         target: {
-          index: restore(parts[3]),
-          type: restore(parts[4]),
-          path: restore(parts[5])
+          index: rel.range.id,
+          type: null,
+          path: rel.range.field
         }
       };
-    }
-
-    /**
-     * Create the human readable label from given relation id
-     * the targetIndexId parameter tells the direction of the label
-     * This method is used in sequential join filter visualisation configuration
-     */
-    createMoreDetailedLabel(relationId, targetIndexId) {
-      const rel = this.getRelationInfosFromRelationID(relationId);
-      if (targetIndexId === rel.target.index) {
-        return rel.source.index + '/' +
-               (rel.source.type ? rel.source.type + '/' : '') +
-               rel.source.path + ' <-> ' +
-               rel.target.index + '/' +
-               (rel.target.type ? rel.target.type + '/' : '') +
-               rel.target.path;
-      }
-      return rel.target.index + '/' +
-             (rel.target.type ? rel.target.type + '/' : '') +
-             rel.target.path + ' <-> ' +
-             rel.source.index + '/' +
-             (rel.source.type ? rel.source.type + '/' : '') +
-             rel.source.path;
     }
 
     /**

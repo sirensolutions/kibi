@@ -314,7 +314,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
               buttonDefs,
               currentDashboardIndex,
               currentDashboardId,
-              dashboardIdIndexPair
+              dashboardIdIndexPair,
+              relations
             );
 
             // disable buttons until buttons are ready
@@ -399,7 +400,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           })
           .catch(notify.error);
         } else {
-          $scope.buttons = sirenSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs);
+          $scope.buttons = sirenSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs, null, null, null, relations);
         }
       });
     });

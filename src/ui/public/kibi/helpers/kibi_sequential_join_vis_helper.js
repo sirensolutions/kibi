@@ -13,14 +13,15 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
   function KibiSequentialJoinVisHelper() {}
 
   KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId,
-                                                                          currentDashboardId, dashboardIdIndexPair) {
+                                                                          currentDashboardId, dashboardIdIndexPair,
+                                                                          relations) {
     return _.chain(buttonDefs)
     .filter(function (buttonDef) {
       // if sourceDashboardId is defined keep only the one which match
       if (buttonDef.sourceDashboardId && currentDashboardId) {
         return buttonDef.sourceDashboardId === currentDashboardId;
       }
-      const relationInfo = relationsHelper.getRelationInfosFromRelationID(buttonDef.indexRelationId);
+      const relationInfo = relationsHelper.getRelationInfosFromRelationID(buttonDef.indexRelationId, relations);
       // filter it out if currentDashboardIndex is neither in source nor in target for the button relation
       if (currentDashboardIndexId &&
           currentDashboardIndexId !== relationInfo.source.index &&
@@ -45,7 +46,7 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
     })
     .map(function (button) {
       if (button.indexRelationId && currentDashboardIndexId) {
-        const relationInfo = relationsHelper.getRelationInfosFromRelationID(button.indexRelationId);
+        const relationInfo = relationsHelper.getRelationInfosFromRelationID(button.indexRelationId, relations);
         if (relationInfo.source.index === currentDashboardIndexId) {
           button.sourceIndexPatternId = relationInfo.source.index;
           button.sourceIndexPatternType = relationInfo.source.type;

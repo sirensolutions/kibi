@@ -172,8 +172,8 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       const indexb = relation.indices[1];
 
       if (indexa.indexPatternId && indexa.path && indexb.indexPatternId && indexb.path) {
-        return relationsHelper.getJoinIndicesUniqueID(indexa.indexPatternId, indexa.indexPatternType, indexa.path,
-                                                      indexb.indexPatternId, indexb.indexPatternType, indexb.path);
+        return relationsHelper.getJoinIndicesUniqueID(indexa.indexPatternId, indexa.path,
+                                                      indexb.indexPatternId, indexb.path);
       }
       return offset;
     });
@@ -188,8 +188,8 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
     };
 
     const getRelationId = function (indices) {
-      return relationsHelper.getJoinIndicesUniqueID(indices[0].indexPatternId, indices[0].indexPatternType, indices[0].path,
-                                                    indices[1].indexPatternId, indices[1].indexPatternType, indices[1].path);
+      return relationsHelper.getJoinIndicesUniqueID(indices[0].indexPatternId, indices[0].path,
+                                                    indices[1].indexPatternId, indices[1].path);
     };
 
     const checkMappings = [];

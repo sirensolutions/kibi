@@ -444,10 +444,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         const virtualButton = {
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
-          sourceIndexPatternType: this.targetIndexPatternType,
           targetField: this.sourceField,
           targetIndexPatternId: this.sourceIndexPatternId,
-          targetIndexPatternType: this.sourceIndexPatternType,
           targetDashboardId: currentDashboardId
         };
 

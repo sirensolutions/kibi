@@ -188,13 +188,13 @@ export function RelationsHelperFactory(config) {
     /**
      * Returns a unique identifier for the relation between the indices indexa and indexb
      */
-    getJoinIndicesUniqueID(indexPatternIda, indexPatternTypea, patha, indexPatternIdb, indexPatternTypeb, pathb) {
+    getJoinIndicesUniqueID(indexPatternIda, patha, indexPatternIdb, pathb) {
       const clean = function (str) {
         return str.replace(/\//, '-slash-');
       };
 
-      const ia = `${clean(indexPatternIda)}/${clean(indexPatternTypea || '')}/${clean(patha)}`;
-      const ib = `${clean(indexPatternIdb)}/${clean(indexPatternTypeb || '')}/${clean(pathb)}`;
+      const ia = `${clean(indexPatternIda)}//${clean(patha)}`;
+      const ib = `${clean(indexPatternIdb)}//${clean(pathb)}`;
       return ia < ib ? ia + SEPARATOR + ib : ib + SEPARATOR + ia;
     }
 

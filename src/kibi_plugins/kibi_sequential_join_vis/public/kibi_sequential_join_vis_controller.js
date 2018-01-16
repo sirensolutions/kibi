@@ -79,10 +79,8 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
           result.button.targetDashboardId +
           relationsHelper.getJoinIndicesUniqueID(
             result.button.sourceIndexPatternId,
-            result.button.sourceIndexPatternType,
             result.button.sourceField,
             result.button.targetIndexPatternId,
-            result.button.targetIndexPatternType,
             result.button.targetField,
           );
 
@@ -335,10 +333,8 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
         const virtualButton = {
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
-          sourceIndexPatternType: this.targetIndexPatternType,
           targetField: this.sourceField,
           targetIndexPatternId: this.sourceIndexPatternId,
-          targetIndexPatternType: this.sourceIndexPatternType,
           targetDashboardId: currentDashboardId
         };
 

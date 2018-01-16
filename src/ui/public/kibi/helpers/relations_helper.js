@@ -1,21 +1,23 @@
 import _ from 'lodash';
 
-export function RelationsHelperFactory(config) {
+export function RelationsHelperFactory(config, ontologyClient) {
   const SEPARATOR = '/';
-
   let relations;
-
-  config.watch('siren:relations', newRelations => {
-    if (newRelations) {
-      relations = newRelations;
-    }
-  });
 
   const checkIdFormat = function (parts) {
     return parts && parts.length === 6;
   };
 
   class RelationsHelper {
+    /**
+     * Initializes the relations.
+     */
+    init() {
+      ontologyClient.getRelations()
+      .then((rels) => {
+        relations = rels;
+      })
+    }
     /**
      * validateDashboardsRelation validates the given relation between two dashboards
      *
@@ -52,21 +54,6 @@ export function RelationsHelperFactory(config) {
     }
 
     /**
-     * validateIndicesRelationFromId validates the given ID of a relation between indices
-     *
-     * @param relationId the ID of the relation
-     * @returns true if the relation exists and is ok
-     */
-    validateIndicesRelationFromId(relationId) {
-      if (!relationId) {
-        throw new Error('relationId cannot be undefined');
-      }
-
-      const relation = _.find(relations.relationsIndices, 'id', relationId);
-      return Boolean(relation && this.validateIndicesRelation(relation));
-    }
-
-    /**
      * validateRelationIdWithRelations validates the given ID of a relation between indices
      * against the provided relations.
      *
@@ -84,7 +71,7 @@ export function RelationsHelperFactory(config) {
     };
 
     /**
-     * validateEntitiesRelation validates the given relation between two entity sets.
+     * validateEntitiesRelation validates the given relation.
      *
      * @param relation the relation between indices
      * @returns true if the relation is ok
@@ -105,59 +92,6 @@ export function RelationsHelperFactory(config) {
 
       return true;
     };
-
-    /**
-     * validateIndicesRelation validates the given relation between two indices
-     *
-     * @param relation the relation between indices
-     * @returns true if the relation is ok
-     */
-    validateIndicesRelation(relation) {
-      // the id should have 6 parts
-      if (!relation.id) {
-        return false;
-      }
-      const parts = relation.id.split(SEPARATOR);
-      if (!checkIdFormat.call(this, parts)) {
-        return false;
-      }
-      // label should be defined
-      if (!relation.label) {
-        return false;
-      }
-      // check the indices relation
-      if (relation.indices.length !== 2) {
-        return false;
-      }
-      const leftIndex = relation.indices[0];
-      const rightIndex = relation.indices[1];
-      if (!leftIndex.indexPatternId || !leftIndex.path) {
-        return false;
-      }
-      if (!rightIndex.indexPatternId || !rightIndex.path) {
-        return false;
-      }
-
-      /**
-       * @retval true if @a and @b are strictly equal or are both empty
-       * @retval false if not.
-       */
-      const areEqual = (a, b) => a === b || _.isEmpty(a) && _.isEmpty(b);
-
-      // test if the ID is correct
-      const checkID = function (leftIndex, rightIndex, parts) {
-        return leftIndex.indexPatternId === parts[0] &&
-          areEqual(leftIndex.indexPatternType, parts[1]) &&
-          leftIndex.path === parts[2] &&
-          rightIndex.indexPatternId === parts[3] &&
-          areEqual(rightIndex.indexPatternType, parts[4]) &&
-          rightIndex.path === parts[5];
-      };
-      if (!checkID(leftIndex, rightIndex, parts) && !checkID(rightIndex, leftIndex, parts)) {
-        return false;
-      }
-      return true;
-    }
 
     /**
      * checkIfRelationsAreValid checks that the relations defined between dashboards and indices are ok
@@ -213,44 +147,16 @@ export function RelationsHelperFactory(config) {
      *
      * The types field is optional.
      */
-    addAdvancedJoinSettingsToRelation(rel, sourceIndexPatternId, targetIndexPatternId) {
-      if (!relations || !relations.relationsIndices) {
+    addAdvancedJoinSettingsToRelation(rel, relationId) {
+      if (!relations || !relations.length) {
         // not initialized yet
         return true;
       }
-      // get indices relations
-      const relationsIndices = relations.relationsIndices;
 
-      if (!relationsIndices.length) {
-        return;
-      }
+      let relation = _.find(relations, 'id', relationId);
 
-      const relationPart = function (indexPatternId, relPart) {
-        let label = (indexPatternId || relPart.indices[0]) + SEPARATOR;
-
-        if (relPart.types) {
-          label += relPart.types[0];
-        }
-        return label + SEPARATOR + relPart.path;
-      };
-
-      // find the first relation linking the given indices
-      const sourcePartOfTheRelationId = relationPart(sourceIndexPatternId, rel.relation[0]);
-      const targetPartOfTheRelationId = relationPart(targetIndexPatternId, rel.relation[1]);
-      let relationId = sourcePartOfTheRelationId + SEPARATOR + targetPartOfTheRelationId;
-      let indexRelation = _.find(relationsIndices, 'id', relationId);
-      if (!indexRelation) {
-        // try to find the relation in other direction
-        relationId = targetPartOfTheRelationId + SEPARATOR + sourcePartOfTheRelationId;
-        indexRelation = _.find(relationsIndices, 'id', relationId);
-        if (!indexRelation) {
-          // the relations settings are not mandatory to create a relational filter
-          return;
-        }
-      }
-
-      if (indexRelation.type) {
-        rel.type = indexRelation.type;
+      if (relation.joinType) {
+        rel.type = relation.joinType;
       }
 
       let defaultJoinTaskTimeout = -1;
@@ -260,13 +166,13 @@ export function RelationsHelperFactory(config) {
         // ignore parsing error they should be handled when user is saving the value
       }
 
-      if (indexRelation.task_timeout === 0) {
+      if (relation.timeout === 0) {
         // allow to disable task_timeout for single relation when set to exactly zero
         return;
       }
 
-      if (indexRelation.task_timeout && indexRelation.task_timeout > 0) {
-        rel.task_timeout = indexRelation.task_timeout;
+      if (relation.timeout && relation.timeout > 0) {
+        rel.task_timeout = relation.timeout;
       } else if (defaultJoinTaskTimeout > 0) {
         rel.task_timeout = defaultJoinTaskTimeout;
       }

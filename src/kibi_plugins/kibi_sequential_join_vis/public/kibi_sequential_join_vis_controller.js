@@ -29,6 +29,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const appState = getAppState();
 
   const relationsHelper = Private(RelationsHelperFactory);
+  relationsHelper.init();
   const kibiSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
   const currentDashboardId = kibiState._getCurrentDashboardId();
   $scope.currentDashboardId = currentDashboardId;
@@ -196,7 +197,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const _constructButtons = $scope._constructButtons = function () {
     return ontologyClient.getRelations().then((relations) => {
       const originalButtonDefs = _.filter($scope.vis.params.buttons,
-        btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
+        btn => relationsHelper.validateRelationIdWithRelations(btn.indexRelationId, relations));
 
       $scope.vis.error = '';
 

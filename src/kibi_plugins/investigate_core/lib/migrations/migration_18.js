@@ -93,6 +93,18 @@ export default class Migration18 extends Migration {
     }
   }
 
+  _replaceKeys = (object, upgradeableKeys) => {
+    upgradeableKeys.map(upgradeableKey => {
+      const newKey = `siren:${upgradeableKey}`;
+      const oldKey = `kibi:${upgradeableKey}`;
+
+      object[newKey] = object[oldKey];
+      delete object[oldKey];
+    });
+
+    return object;
+  };
+
   _isUpgradeable(object) {
     return this._getUpgradeableKeys(object).length;
   }
@@ -115,17 +127,11 @@ export default class Migration18 extends Migration {
     for (const obj of objects) {
       if (this._isUpgradeable(obj._source) > 0) {
         let newSource = Object.assign({}, obj._source);
-        this._replaceKeys = upgradeableKey => {
-          const newKey = `siren:${upgradeableKey}`;
-          const oldKey = `kibi:${upgradeableKey}`;
-
-          newSource[newKey] = newSource[oldKey];
-          delete newSource[oldKey];
-        };
 
         const upgradeableKeys = this._getUpgradeableKeys(obj._source);
         // replace any of the settings with kibi: prefix that are present in the keyMap above
-        upgradeableKeys.map(this._replaceKeys);
+        newSource = this._replaceKeys(newSource, upgradeableKeys);
+
         // remove any extraneous settings with a kibi: prefix as they are deprecated and would
         // remain as kibi:whatever otherwise
         newSource = this._removeDeprecatedKeys(newSource);

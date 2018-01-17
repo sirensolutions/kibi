@@ -2,23 +2,12 @@ import _ from 'lodash';
 
 export function RelationsHelperFactory(config, ontologyClient) {
   const SEPARATOR = '/';
-  let relations;
 
   const checkIdFormat = function (parts) {
     return parts && parts.length === 6;
   };
 
   class RelationsHelper {
-    /**
-     * Initializes the relations.
-     */
-    init() {
-      ontologyClient.getRelations()
-      .then((rels) => {
-        relations = rels;
-      });
-    }
-
     /**
      * validateRelationIdWithRelations validates the given ID of a relation between indices
      * against the provided relations.
@@ -88,35 +77,34 @@ export function RelationsHelperFactory(config, ontologyClient) {
      * The types field is optional.
      */
     addAdvancedJoinSettingsToRelation(rel, relationId) {
-      if (!relations || !relations.length) {
-        // not initialized yet
-        return true;
-      }
+      return ontologyClient.getRelations()
+      .then((relations) => {
+        const relation = _.find(relations, 'id', relationId);
 
-      const relation = _.find(relations, 'id', relationId);
+        if (relation.joinType) {
+          rel.type = relation.joinType;
+        }
 
-      if (relation.joinType) {
-        rel.type = relation.joinType;
-      }
+        let defaultJoinTaskTimeout = -1;
+        try {
+          defaultJoinTaskTimeout = parseInt(config.get('siren:joinTaskTimeout'), 10);
+        } catch (e) {
+          // ignore parsing error they should be handled when user is saving the value
+        }
 
-      let defaultJoinTaskTimeout = -1;
-      try {
-        defaultJoinTaskTimeout = parseInt(config.get('siren:joinTaskTimeout'), 10);
-      } catch (e) {
-        // ignore parsing error they should be handled when user is saving the value
-      }
+        if (relation.timeout === 0) {
+          // allow to disable task_timeout for single relation when set to exactly zero
+          return rel;
+        }
 
-      if (relation.timeout === 0) {
-        // allow to disable task_timeout for single relation when set to exactly zero
-        return;
-      }
+        if (relation.timeout && relation.timeout > 0) {
+          rel.task_timeout = relation.timeout;
+        } else if (defaultJoinTaskTimeout > 0) {
+          rel.task_timeout = defaultJoinTaskTimeout;
+        }
 
-      if (relation.timeout && relation.timeout > 0) {
-        rel.task_timeout = relation.timeout;
-      } else if (defaultJoinTaskTimeout > 0) {
-        rel.task_timeout = defaultJoinTaskTimeout;
-      }
-
+        return rel;
+      });
     }
   }
 

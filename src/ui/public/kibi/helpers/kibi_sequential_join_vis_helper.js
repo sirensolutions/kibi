@@ -162,18 +162,20 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
         });
       } else {
         // build join sequence + add a group of sequances to the top of the array
-        const joinSeqFilter = this.buildNewJoinSeqFilter({
+        return this.buildNewJoinSeqFilter({
           sourceIndices,
           targetIndices,
           button,
           filters: remainingFilters,
           queries,
           time
+        })
+        .then((joinSeqFilter) => {
+          // here create a group from existing ones and add it on the top
+          const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
+          joinSeqFilter.join_sequence.unshift(group);
+          return joinSeqFilter;
         });
-        // here create a group from existing ones and add it on the top
-        const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
-        joinSeqFilter.join_sequence.unshift(group);
-        return joinSeqFilter;
       }
     });
   };
@@ -215,28 +217,31 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
   // ]
   KibiSequentialJoinVisHelper.prototype.buildNewJoinSeqFilter = function ({ sourceIndices, targetIndices, button, filters, queries,
                                                                           time }) {
-    const relation = this._getRelation({ sourceIndices, targetIndices, button, filters, queries, time });
-    const label = 'First join_seq filter ever';
+    return this._getRelation({ sourceIndices, targetIndices, button, filters, queries, time })
+    .then((relation) => {
+      const label = 'First join_seq filter ever';
 
-    return {
-      meta: {
-        alias: label,
-        version: 2
-      },
-      join_sequence: [ relation ]
-    };
+      return {
+        meta: {
+          alias: label,
+          version: 2
+        },
+        join_sequence: [ relation ]
+      };
+    });
   };
 
   KibiSequentialJoinVisHelper.prototype.addRelationToJoinSeqFilter = function ({ sourceIndices, targetIndices, button, filters, queries,
                                                                                time, joinSeqFilter }) {
     const joinSeqFiltersCloned = _.cloneDeep(joinSeqFilter);
-    const relation = this._getRelation({ sourceIndices, targetIndices, button, filters, queries, time });
-
-    this._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
-    joinSeqFiltersCloned.join_sequence.push(relation);
-    // make sure that the new filter is not negated
-    joinSeqFiltersCloned.meta.negate = false;
-    return joinSeqFiltersCloned;
+    return this._getRelation({ sourceIndices, targetIndices, button, filters, queries, time })
+    .then((relation) => {
+      this._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
+      joinSeqFiltersCloned.join_sequence.push(relation);
+      // make sure that the new filter is not negated
+      joinSeqFiltersCloned.meta.negate = false;
+      return joinSeqFiltersCloned;
+    });
   };
 
   KibiSequentialJoinVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
@@ -275,10 +280,11 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       ]
     };
 
-    relationsHelper.addAdvancedJoinSettingsToRelation(ret, button.indexRelationId);
-
-    ret.relation[0].queries = [ queryBuilder(filters, queries, time) ];
-    return ret;
+    return relationsHelper.addAdvancedJoinSettingsToRelation(ret, button.indexRelationId)
+    .then((ret) => {
+      ret.relation[0].queries = [ queryBuilder(filters, queries, time) ];
+      return ret;
+    });
   };
 
   KibiSequentialJoinVisHelper.prototype.buildCountQuery = function (targetDashboardId, joinSeqFilter) {

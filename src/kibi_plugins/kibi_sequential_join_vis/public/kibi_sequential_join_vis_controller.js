@@ -29,7 +29,6 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const appState = getAppState();
 
   const relationsHelper = Private(RelationsHelperFactory);
-  relationsHelper.init();
   const kibiSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
   const currentDashboardId = kibiState._getCurrentDashboardId();
   $scope.currentDashboardId = currentDashboardId;

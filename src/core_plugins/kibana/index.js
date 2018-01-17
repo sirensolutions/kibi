@@ -54,11 +54,11 @@ module.exports = function (kibana) {
           //if the url is set, the old settings must be used.
           //keeping this logic for backward compatibilty.
           const configuredUrl = server.config().get('tilemap.url');
-          const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
+          // kibi: added default manifest url to prevent config being overridden by default settings
+          const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== 'https://tiles.siren.io/v1/manifest';
           const tilemapConfig = serverConfig.get('tilemap');
           const regionmapsConfig = serverConfig.get('regionmap');
           const mapConfig = serverConfig.get('map');
-
 
           regionmapsConfig.layers =  (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
 

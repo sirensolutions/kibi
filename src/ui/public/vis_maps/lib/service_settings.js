@@ -10,7 +10,6 @@ marked.setOptions({
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
 
-
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
 
@@ -45,10 +44,14 @@ uiModules.get('kibana')
         this._invalidateSettings();
       }
       _invalidateSettings() {
-
-        this._loadCatalogue = _.once(async() => {
+        // kibi: added isLayerRequest argument to set the request URL to the Elastic layer server if
+        // kibi: the request is for layers, if the request is for tiles, we use the Siren tile server URL
+        this._loadCatalogue = _.once(async(isLayersRequest) => {
+          const manifestUrl = (isLayersRequest) ? mapConfig.manifestServiceUrl : tilemapsConfig.deprecated.config.url;
           try {
-            const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
+            // kibi: take the url for the manifest directly from the server default settings or user config
+            const response = await this._getManifest(manifestUrl, this._queryParams);
+            // kibi: end
             return response.data;
           } catch (e) {
             if (!e) {
@@ -63,7 +66,7 @@ uiModules.get('kibana')
 
 
         this._loadFileLayers = _.once(async() => {
-          const catalogue = await this._loadCatalogue();
+          const catalogue = await this._loadCatalogue(true);
           const fileService = catalogue.services.filter((service) => service.type === 'file')[0];
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson');
@@ -75,16 +78,14 @@ uiModules.get('kibana')
         });
 
         this._loadTMSServices = _.once(async() => {
-
           if (tilemapsConfig.deprecated.isOverridden) {//use settings from yml (which are overridden)
             const tmsService = _.cloneDeep(tmsOptionsFromConfig);
             tmsService.url = tilemapsConfig.deprecated.config.url;
             return tmsService;
           }
-
-          const catalogue = await this._loadCatalogue();
-          const tmsService = catalogue.services.filter((service) => service.type === 'tms')[0];
-          const manifest = await this._getManifest(tmsService.manifest, this._queryParams);
+          // kibi: take the url for the manifest directly from the server default settings or user config
+          const manifest = await this._getManifest(tilemapsConfig.deprecated.config.url, this._queryParams);
+          //kibi: end
           const services = manifest.data.services;
 
           const firstService = _.cloneDeep(services[0]);
@@ -114,7 +115,6 @@ uiModules.get('kibana')
         });
       }
 
-
       async getFileLayers() {
         return await this._loadFileLayers();
       }
@@ -122,7 +122,6 @@ uiModules.get('kibana')
       async getTMSService() {
 
         const tmsService = await this._loadTMSServices();
-
         return {
           getUrl: function () {
             return tmsService.url;
@@ -150,7 +149,7 @@ uiModules.get('kibana')
       }
 
       getFallbackZoomSettings(isWMSEnabled) {
-        return (isWMSEnabled) ? { minZoom: 0, maxZoom: 18 } : { minZoom: 0, maxZoom: 10 };
+        return (isWMSEnabled) ? { minZoom: 0, maxZoom: 18 } : { minZoom: 0, maxZoom: 15 };
       }
 
       /**

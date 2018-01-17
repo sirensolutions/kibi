@@ -43,7 +43,7 @@ window.__KBN__ = {
       layers: []
     },
     mapConfig: {
-      manifestServiceUrl: 'https://geo.elastic.co/v1/manifest'
+      manifestServiceUrl: 'https://tiles.siren.io/v1/manifest'
     }
   },
   uiSettings: {

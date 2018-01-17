@@ -6,9 +6,10 @@ import sinon from 'sinon';
 describe('service_settings (FKA tilemaptest)', function () {
   let serviceSettings;
   let mapsConfig;
+  let tilemapsConfig; //kibi: returned tilemaps config as default
 
-  const manifestUrl = 'https://geo.elastic.co/v1/manifest';
-  const tmsManifestUrl = `https://tiles.elastic.co/v2/manifest`;
+  const manifestUrl = 'https://geo.elastic.co/v1/manifest'; // kibi: added our manifest url
+  const tmsManifestUrl = `https://tiles.siren.io/v1/manifest`; // kibi: added our manifest url
   const vectorManifestUrl = `https://layers.geo.elastic.co/v1/manifest`;
   const manifestUrl2 = 'https://foobar/v1/manifest';
 
@@ -30,13 +31,15 @@ describe('service_settings (FKA tilemaptest)', function () {
   };
 
   const tmsManifest = {
+    //kibi: edited manifest being returned to match that served by tile server manifest requests
     'services': [{
-      'id': 'road_map',
+      'id': 'siren_map',
       'url': 'https://tiles.siren.io/hot/{z}/{x}/{y}.png',
       'minZoom': 0,
-      'maxZoom': 10,
+      'maxZoom': 14,
       'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright)'
     }]
+    //kibi: end
   };
 
   const vectorManifest = {
@@ -79,6 +82,7 @@ describe('service_settings (FKA tilemaptest)', function () {
 
     serviceSettings = $injector.get('serviceSettings');
     mapsConfig = $injector.get('mapConfig');
+    tilemapsConfig = $injector.get('tilemapsConfig'); // kibi: mock out tilemapConfig
 
     sinon.stub(serviceSettings, '_getManifest', function (url) {
       let contents = null;
@@ -95,6 +99,8 @@ describe('service_settings (FKA tilemaptest)', function () {
         data: contents
       };
     });
+    //kibi: add url to tilemapsConfig
+    tilemapsConfig.deprecated.config.url = 'https://tiles.siren.io/v1/manifest';
     $rootScope.$digest();
   }));
 
@@ -119,8 +125,15 @@ describe('service_settings (FKA tilemaptest)', function () {
       const tmsService = await serviceSettings.getTMSService();
       const options = tmsService.getTMSOptions();
       expect(options).to.have.property('minZoom');
+      // kibi: add check for options settings from manifest
+      expect(options.minZoom).to.equal(0);
       expect(options).to.have.property('maxZoom');
-      expect(options).to.have.property('attribution').contain('&#169;');
+      expect(options.maxZoom).to.equal(14);
+      expect(options).to.have.property('attribution');
+      expect(options.attribution).to.contain('&#169;');
+      expect(options).to.have.property('id');
+      expect(options.id).to.equal('siren_map');
+      // kibi: end
     });
 
     describe('modify - url', function () {

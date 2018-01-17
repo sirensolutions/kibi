@@ -195,11 +195,11 @@ module.exports = () => Joi.object({
     })
   }).default(),
   tilemap: Joi.object({
-    url: Joi.string(),
+    url: Joi.string().default('https://tiles.siren.io/v1/manifest'), //kibi: added default map tile server manifest URL
     options: Joi.object({
       attribution: Joi.string(),
       minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
-      maxZoom: Joi.number().default(10),
+      maxZoom: Joi.number().default(14),
       tileSize: Joi.number(),
       subdomains: Joi.array().items(Joi.string()).single(),
       errorTileUrl: Joi.string().uri(),

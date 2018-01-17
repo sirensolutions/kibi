@@ -102,8 +102,3 @@
 # The default locale. This locale can be used in certain circumstances to substitute any missing
 # translations.
 #i18n.defaultLocale: "en"
-
-tilemap:
-  url: 'https://tiles.siren.io/hot/{z}/{x}/{y}.png'
-  options:
-    attribution: '&copy; [OpenStreetMap]("http://www.openstreetmap.org/copyright")'

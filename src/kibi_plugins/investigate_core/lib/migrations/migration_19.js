@@ -42,42 +42,46 @@ export default class Migration18 extends Migration {
     return `Migrate ${DASHBOARD_STRATEGY_KEY} and ${BUTTON_STRATEGY_KEY} objects with missing "name" property`;
   }
 
-  _isUpgradeable(_source) {
+
+  _isStrategyUpgradeable(strategy, propertyName) {
+    if (typeof strategy !== 'string') {
+      this._logger.error('Error expected ' + propertyName + ' to be a string but got ' + strategy);
+      return undefined;
+    } else {
+      try {
+        strategy = JSON.parse(strategy);
+      } catch (e) {
+        this._logger.error('Error while parsing the strategy [' + strategy + ']', e);
+        return undefined;
+      }
+    }
+    if (strategy.name === undefined) {
+      return true;
+    }
+    return false;
+  }
+
+  _isSourceUpgradeable(_source) {
     let dashboardStrategy = _source[DASHBOARD_STRATEGY_KEY];
     if (dashboardStrategy) {
-      if (typeof dashboardStrategy !== 'string') {
-        this._logger.error('Error expected ' + DASHBOARD_STRATEGY_KEY + ' value to be a string but got ' + dashboardStrategy);
-        return;
-      } else {
-        try {
-          dashboardStrategy = JSON.parse(dashboardStrategy);
-        } catch (e) {
-          this._logger.error('Error while parsing the strategy [' + dashboardStrategy + ']', e);
-          return;
-        }
-      }
-      if (dashboardStrategy.name === undefined) {
+      const isUpgradeable = this._isStrategyUpgradeable(dashboardStrategy, DASHBOARD_STRATEGY_KEY);
+      if (isUpgradeable === true) {
         return true;
+      } else if (isUpgradeable === undefined) {
+        // there was an error so return
+        return;
       }
     }
     let buttonStrategy = _source[BUTTON_STRATEGY_KEY];
     if (buttonStrategy) {
-      if (typeof buttonStrategy !== 'string') {
-        this._logger.error('Error expected ' + BUTTON_STRATEGY_KEY + ' value to be a string but got ' + buttonStrategy);
-        return;
-      } else {
-        try {
-          buttonStrategy = JSON.parse(buttonStrategy);
-        } catch (e) {
-          this._logger.error('Error while parsing the strategy [' + buttonStrategy + ']', e);
-          return;
-        }
-      }
-      if (buttonStrategy.name === undefined) {
+      const isUpgradeable = this._isStrategyUpgradeable(buttonStrategy, BUTTON_STRATEGY_KEY);
+      if (isUpgradeable === true) {
         return true;
+      } else if (isUpgradeable === undefined) {
+        // there was an error so return
+        return;
       }
     }
-    return false;
   }
 
   async count() {
@@ -87,7 +91,7 @@ export default class Migration18 extends Migration {
     }
     // we assume there is only 1 config with id == siren
     const _source = objects[0]._source;
-    if (this._isUpgradeable(_source)) {
+    if (this._isSourceUpgradeable(_source)) {
       return 1;
     }
     return 0;
@@ -104,43 +108,32 @@ export default class Migration18 extends Migration {
 
     let dashboardStrategy = _source[DASHBOARD_STRATEGY_KEY];
     if (dashboardStrategy) {
-      if (typeof dashboardStrategy !== 'string') {
-        this._logger.error('Error expected ' + DASHBOARD_STRATEGY_KEY + ' value to be a string but got ' + dashboardStrategy);
-        return;
-      } else {
-        try {
-          dashboardStrategy = JSON.parse(dashboardStrategy);
-        } catch (e) {
-          this._logger.error('Error while parsing the strategy [' + dashboardStrategy + ']', e);
-          return;
-        }
-      }
-      if (dashboardStrategy.name === undefined) {
+      const isUpgradeable = this._isStrategyUpgradeable(dashboardStrategy, DASHBOARD_STRATEGY_KEY);
+      if (isUpgradeable === true) {
+        dashboardStrategy = JSON.parse(dashboardStrategy);
         dashboardStrategy.name = 'default';
         _source[DASHBOARD_STRATEGY_KEY] = JSON.stringify(dashboardStrategy);
         count = 1;
+      } else if (isUpgradeable === undefined) {
+        // there was an error so return
+        return;
       }
     }
 
     let buttonStrategy = _source[BUTTON_STRATEGY_KEY];
     if (buttonStrategy) {
-      if (typeof buttonStrategy !== 'string') {
-        this._logger.error('Error expected ' + BUTTON_STRATEGY_KEY + ' value to be a string but got ' + buttonStrategy);
-        return;
-      } else {
-        try {
-          buttonStrategy = JSON.parse(buttonStrategy);
-        } catch (e) {
-          this._logger.error('Error while parsing the strategy [' + buttonStrategy + ']', e);
-          return;
-        }
-      }
-      if (buttonStrategy.name === undefined) {
+      const isUpgradeable = this._isStrategyUpgradeable(buttonStrategy, BUTTON_STRATEGY_KEY);
+      if (isUpgradeable === true) {
+        buttonStrategy = JSON.parse(buttonStrategy);
         buttonStrategy.name = 'default';
         _source[BUTTON_STRATEGY_KEY] = JSON.stringify(buttonStrategy);
         count = 1;
+      } else if (isUpgradeable === undefined) {
+        // there was an error so return
+        return;
       }
     }
+
     const body = JSON.stringify({
       update: {
         _index: obj._index,

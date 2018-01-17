@@ -37,19 +37,17 @@ describe('investigate_core/migrations/functional', function () {
   }
 
   describe('Investigate Core - Migration 19 - Functional test', function () {
-    let warningSpy;
     let configuration;
-
+    let errorSpy;
     beforeEach(() => {
       configuration = {
         config: fakeConfig,
         client: cluster.getClient(),
         logger: {
-          warning: sinon.spy(),
-          info: sinon.spy()
+          error: sinon.spy()
         }
       };
-      warningSpy = configuration.logger.warning;
+      errorSpy = configuration.logger.error;
       fakeConfig.get.withArgs('kibana.index').returns('.siren');
     });
 
@@ -66,6 +64,7 @@ describe('investigate_core/migrations/functional', function () {
         const migration = new Migration(configuration);
         const result = await migration.count();
         expect(result).to.be(1);
+        sinon.assert.notCalled(errorSpy);
       }));
 
       it('should upgrade all upgradeable objects', wrapAsync(async () => {
@@ -77,8 +76,6 @@ describe('investigate_core/migrations/functional', function () {
 
         const after = await snapshot('.siren');
         expect(before.size).to.equal(after.size);
-
-        expect(warningSpy.called).to.be(false);
 
         const beforeSource = before.get('siren')._source;
         const afterSource = after.get('siren')._source;
@@ -95,6 +92,7 @@ describe('investigate_core/migrations/functional', function () {
         expect(beforeCountFetchingStrategyButtons.name).to.equal(undefined);
         expect(afterCountFetchingStrategyButtons.name).to.equal('default');
 
+        sinon.assert.notCalled(errorSpy);
       }));
     });
 
@@ -111,6 +109,7 @@ describe('investigate_core/migrations/functional', function () {
         const migration = new Migration(configuration);
         const result = await migration.count();
         expect(result).to.be(0);
+        sinon.assert.notCalled(errorSpy);
       }));
 
       it('should not upgrade', wrapAsync(async () => {
@@ -120,8 +119,8 @@ describe('investigate_core/migrations/functional', function () {
         const after = await snapshot('.siren');
 
         expect(result).to.be(0);
-
         expect(before.get('siren')).to.eql(after.get('siren'));
+        sinon.assert.notCalled(errorSpy);
       }));
     });
 
@@ -147,8 +146,8 @@ describe('investigate_core/migrations/functional', function () {
         const after = await snapshot('.siren');
 
         expect(result).to.be(0);
-
         expect(before.get('siren')).to.eql(after.get('siren'));
+        sinon.assert.notCalled(errorSpy);
       }));
     });
 

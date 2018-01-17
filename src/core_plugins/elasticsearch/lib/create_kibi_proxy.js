@@ -111,7 +111,7 @@ module.exports = function createProxy(server, method, path, config) {
               );
             }
 
-            if (req.url ===  '/elasticsearch/_siren/license') {
+            if (req.url ===  '/es_admin/_siren/license') {
               return fulfill({
                 payload: Buffer.concat(chunks),
                 data: dataToPass

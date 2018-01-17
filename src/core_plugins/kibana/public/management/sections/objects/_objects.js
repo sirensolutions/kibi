@@ -102,8 +102,8 @@ uiModules.get('apps/management')
 
       const refreshData = () => {
         // kibi: dashboard groups should be recomputed after import
-        dashboardGroups.computeGroups('new objects were imported');
-        return getData(this.advancedFilter);
+        return dashboardGroups.computeGroups('new objects were imported')
+        .then(() => getData(this.advancedFilter));
       };
 
       // TODO: Migrate all scope methods to the controller.

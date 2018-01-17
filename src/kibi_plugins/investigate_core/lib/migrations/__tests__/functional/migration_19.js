@@ -6,6 +6,7 @@ import requirefrom from 'requirefrom';
 import Migration from '../../migration_19';
 import Scenario1 from './scenarios/migration_19/scenario1';
 import Scenario2 from './scenarios/migration_19/scenario2';
+import Scenario3 from './scenarios/migration_19/scenario3';
 import url from 'url';
 
 const serverConfig = requirefrom('test')('server_config');
@@ -87,10 +88,17 @@ describe('investigate_core/migrations/functional', function () {
 
         expect(beforeCountFetchingStrategyDashboards.name).to.equal(undefined);
         expect(afterCountFetchingStrategyDashboards.name).to.equal('default');
+
+        const beforeCountFetchingStrategyButtons = JSON.parse(beforeSource['siren:countFetchingStrategyRelationalFilters']);
+        const afterCountFetchingStrategyButtons = JSON.parse(afterSource['siren:countFetchingStrategyRelationalFilters']);
+
+        expect(beforeCountFetchingStrategyButtons.name).to.equal(undefined);
+        expect(afterCountFetchingStrategyButtons.name).to.equal('default');
+
       }));
     });
 
-    describe('should not migrate countFetchingStrategyDashboards countFetchingStrategyRelationalFilters', function () {
+    describe('should not migrate existing countFetchingStrategyDashboards countFetchingStrategyRelationalFilters', function () {
       beforeEach(wrapAsync(async () => {
         await scenarioManager.reload(Scenario2);
       }));
@@ -116,5 +124,33 @@ describe('investigate_core/migrations/functional', function () {
         expect(before.get('siren')).to.eql(after.get('siren'));
       }));
     });
+
+    describe('should not migrate non existing countFetchingStrategyDashboards countFetchingStrategyRelationalFilters', function () {
+      beforeEach(wrapAsync(async () => {
+        await scenarioManager.reload(Scenario3);
+      }));
+
+      afterEach(wrapAsync(async () => {
+        await scenarioManager.unload(Scenario3);
+      }));
+
+      it('should not find any object to upgrade', wrapAsync(async () => {
+        const migration = new Migration(configuration);
+        const result = await migration.count();
+        expect(result).to.be(0);
+      }));
+
+      it('should not upgrade', wrapAsync(async () => {
+        const before = await snapshot('.siren');
+        const migration = new Migration(configuration);
+        const result = await migration.upgrade();
+        const after = await snapshot('.siren');
+
+        expect(result).to.be(0);
+
+        expect(before.get('siren')).to.eql(after.get('siren'));
+      }));
+    });
+
   });
 });

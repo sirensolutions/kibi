@@ -11,6 +11,9 @@ import Migration from 'kibiutils/lib/migrations/migration';
  * If not adds the "name" = "default"
  */
 
+const DASHBOARD_STRATEGY_KEY = 'siren:countFetchingStrategyDashboards';
+const BUTTON_STRATEGY_KEY = 'siren:countFetchingStrategyRelationalFilters';
+
 export default class Migration18 extends Migration {
 
   constructor(configuration) {
@@ -36,20 +39,41 @@ export default class Migration18 extends Migration {
   }
 
   static get description() {
-    return 'Migrate siren:countFetchingStrategyDashboards and siren:countFetchingStrategyRelationalFilters ' +
-           'objects with missing "name" property';
+    return `Migrate ${DASHBOARD_STRATEGY_KEY} and ${BUTTON_STRATEGY_KEY} objects with missing "name" property`;
   }
 
   _isUpgradeable(_source) {
-    if (_source['siren:countFetchingStrategyDashboards']) {
-      const strategy = JSON.parse(_source['siren:countFetchingStrategyDashboards']);
-      if (strategy.name === undefined) {
+    let dashboardStrategy = _source[DASHBOARD_STRATEGY_KEY];
+    if (dashboardStrategy) {
+      if (typeof dashboardStrategy !== 'string') {
+        this._logger.error('Error expected ' + DASHBOARD_STRATEGY_KEY + ' value to be a string but got ' + dashboardStrategy);
+        return;
+      } else {
+        try {
+          dashboardStrategy = JSON.parse(dashboardStrategy);
+        } catch (e) {
+          this._logger.error('Error while parsing the strategy [' + dashboardStrategy + ']', e);
+          return;
+        }
+      }
+      if (dashboardStrategy.name === undefined) {
         return true;
       }
     }
-    if (_source['siren:countFetchingStrategyRelationalFilters']) {
-      const strategy = JSON.parse(_source['siren:countFetchingStrategyRelationalFilters']);
-      if (strategy.name === undefined) {
+    let buttonStrategy = _source[BUTTON_STRATEGY_KEY];
+    if (buttonStrategy) {
+      if (typeof buttonStrategy !== 'string') {
+        this._logger.error('Error expected ' + BUTTON_STRATEGY_KEY + ' value to be a string but got ' + buttonStrategy);
+        return;
+      } else {
+        try {
+          buttonStrategy = JSON.parse(buttonStrategy);
+        } catch (e) {
+          this._logger.error('Error while parsing the strategy [' + buttonStrategy + ']', e);
+          return;
+        }
+      }
+      if (buttonStrategy.name === undefined) {
         return true;
       }
     }
@@ -77,19 +101,43 @@ export default class Migration18 extends Migration {
     let count = 0;
     const obj = objects[0];
     const _source = obj._source;
-    if (_source['siren:countFetchingStrategyDashboards']) {
-      const strategy = JSON.parse(_source['siren:countFetchingStrategyDashboards']);
-      if (strategy.name === undefined) {
-        strategy.name = 'default';
-        _source['siren:countFetchingStrategyDashboards'] = JSON.stringify(strategy);
+
+    let dashboardStrategy = _source[DASHBOARD_STRATEGY_KEY];
+    if (dashboardStrategy) {
+      if (typeof dashboardStrategy !== 'string') {
+        this._logger.error('Error expected ' + DASHBOARD_STRATEGY_KEY + ' value to be a string but got ' + dashboardStrategy);
+        return;
+      } else {
+        try {
+          dashboardStrategy = JSON.parse(dashboardStrategy);
+        } catch (e) {
+          this._logger.error('Error while parsing the strategy [' + dashboardStrategy + ']', e);
+          return;
+        }
+      }
+      if (dashboardStrategy.name === undefined) {
+        dashboardStrategy.name = 'default';
+        _source[DASHBOARD_STRATEGY_KEY] = JSON.stringify(dashboardStrategy);
         count = 1;
       }
     }
-    if (_source['siren:countFetchingStrategyRelationalFilters']) {
-      const strategy = JSON.parse(_source['siren:countFetchingStrategyRelationalFilters']);
-      if (strategy.name === undefined) {
-        strategy.name = 'default';
-        _source['siren:countFetchingStrategyRelationalFilters'] = JSON.stringify(strategy);
+
+    let buttonStrategy = _source[BUTTON_STRATEGY_KEY];
+    if (buttonStrategy) {
+      if (typeof buttonStrategy !== 'string') {
+        this._logger.error('Error expected ' + BUTTON_STRATEGY_KEY + ' value to be a string but got ' + buttonStrategy);
+        return;
+      } else {
+        try {
+          buttonStrategy = JSON.parse(buttonStrategy);
+        } catch (e) {
+          this._logger.error('Error while parsing the strategy [' + buttonStrategy + ']', e);
+          return;
+        }
+      }
+      if (buttonStrategy.name === undefined) {
+        buttonStrategy.name = 'default';
+        _source[BUTTON_STRATEGY_KEY] = JSON.stringify(buttonStrategy);
         count = 1;
       }
     }

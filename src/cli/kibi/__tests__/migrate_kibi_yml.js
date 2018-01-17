@@ -69,9 +69,6 @@ describe('Migrate Kibi Config', () => {
       // kibi_core should have changed to investigate_core
       expect(contents).to.have.property('investigate_core');
       expect(contents).to.not.have.property('kibi_core');
-      // kibi_access_control.sentinl should have changed to investigate_access_control.sirenalert
-      expect(contents.investigate_access_control).to.have.property('sirenalert');
-      expect(contents.investigate_access_control).to.not.have.property('sentinl');
     });
 
     const options = {
@@ -90,9 +87,6 @@ describe('Migrate Kibi Config', () => {
     const mockSafeDump = sinon.stub(jsYaml, 'safeDump', contents => {
       // investigate_access_control.sirenalert.username should have been added with the value 'sentinl'
       expect(contents).to.have.property('investigate_access_control');
-      expect(contents.investigate_access_control).to.have.property('sirenalert');
-      expect(contents.investigate_access_control.sirenalert).to.have.property('username');
-      expect(contents.investigate_access_control.sirenalert.username).to.equal('sentinl');
       // investigate_access_control.admin_role should have been added with the value 'kibiadmin'
       expect(contents).to.have.property('investigate_access_control');
       expect(contents.investigate_access_control).to.have.property('admin_role');

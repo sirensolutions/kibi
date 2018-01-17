@@ -43,7 +43,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function ($route, kbnIndex, createNotifier, Private, kbnUrl, Promise, confirmModal) {
+.directive('kbnManagementObjects', function ($route, kbnIndex, createNotifier, Private, kbnUrl, Promise, confirmModal, dashboardGroups) {
 
   // kibi: all below dependencies added by kibi to improve import/export and delete operations
   const cache = Private(CacheProvider);
@@ -101,6 +101,8 @@ uiModules.get('apps/management')
       };
 
       const refreshData = () => {
+        // kibi: dashboard groups should be recomputed after import
+        dashboardGroups.computeGroups('new objects were imported');
         return getData(this.advancedFilter);
       };
 
@@ -260,7 +262,99 @@ uiModules.get('apps/management')
           // as visualisations could depend on searches
           // lets order the export to make sure that searches comes before visualisations
           // then also import object sequentially to avoid errors
-          return importExportHelper.importDocuments(docs, $scope.services, notify, overwriteAll)
+          return importExportHelper.importIndexPatternsConfigSortDocuments(docs, notify)
+          .then(docs => {
+            // make sure we have an array, show an error otherwise
+            if (!Array.isArray(docs)) {
+              notify.error('Saved objects file format is invalid and cannot be imported.');
+              return;
+            }
+
+            const conflictedIndexPatterns = [];
+
+            function importDocument(doc) {
+              const { service } = find($scope.services, { type: doc._type }) || {};
+
+              if (!service) {
+                const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
+                const reason = `Invalid type: "${doc._type}"`;
+
+                notify.warning(`${msg}, ${reason}`, {
+                  lifetime: 0,
+                });
+
+                return;
+              }
+
+              return service.get()
+                .then(function (obj) {
+                  obj.id = doc._id;
+                  return obj.applyESResp(doc)
+                    .then(() => {
+                      return obj.save({ confirmOverwrite : !overwriteAll });
+                    })
+                    .catch((err) => {
+                      if (err instanceof SavedObjectNotFound && err.savedObjectType === 'index-pattern') {
+                        conflictedIndexPatterns.push({ obj, doc });
+                        return;
+                      }
+
+                      // swallow errors here so that the remaining promise chain executes
+                      err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
+                      notify.error(err);
+                    });
+                });
+            }
+
+            function groupByType(docs) {
+              const defaultDocTypes = {
+                searches: [],
+                other: [],
+              };
+
+              return docs.reduce((types, doc) => {
+                switch (doc._type) {
+                  case 'search':
+                    types.searches.push(doc);
+                    break;
+                  default:
+                    types.other.push(doc);
+                }
+                return types;
+              }, defaultDocTypes);
+            }
+
+            const docTypes = groupByType(docs);
+
+            return Promise.map(docTypes.searches, importDocument)
+              .then(() => Promise.map(docTypes.other, importDocument))
+              .then(() => {
+                if (conflictedIndexPatterns.length) {
+                  showChangeIndexModal(
+                    (objs) => {
+                      return Promise.map(
+                        conflictedIndexPatterns,
+                        ({ obj }) => {
+                          const oldIndexId = obj.searchSource.getOwn('index');
+                          const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
+                          if (newIndexId === oldIndexId) {
+                            // Skip
+                            return;
+                          }
+                          return obj.hydrateIndexPattern(newIndexId)
+                            .then(() => obj.save({ confirmOverwrite : !overwriteAll }));
+                        }
+                      ).then(refreshData);
+                    },
+                    conflictedIndexPatterns,
+                    $route.current.locals.indexPatterns,
+                  );
+                } else {
+                  return refreshData();
+                }
+              })
+              .catch(notify.error);
+          })
           .then(() => queryEngineClient.clearCache()) // kibi: to clear backend cache
           .then(importExportHelper.reloadQueries) // kibi: to clear backend cache
           .then(refreshData)

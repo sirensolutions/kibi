@@ -173,7 +173,7 @@ export function SimpleGaugeProvider() {
 
       const isTextTooLong = function () {
         const textLength = this.getBBox().width;
-        const textTooLong = textLength > width;
+        const textTooLong = textLength - 20 > width; // siren: adjusts container margin length
         if (textTooLong) {
           hiddenLabels = true;
         }
@@ -190,7 +190,7 @@ export function SimpleGaugeProvider() {
           .attr('style', 'dominant-baseline: central; text-anchor: middle; pointer-events: none;')
           .call(this.wrapText, width)
           .attr('y', function () {
-            const textMargin = 10;
+            const textMargin = 0;  // siren: adjusts container margin length
             const height = this.getBBox().height;
             return (-fontSize / 2) - height - textMargin;
           })

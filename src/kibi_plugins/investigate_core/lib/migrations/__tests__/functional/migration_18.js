@@ -6,6 +6,7 @@ import requirefrom from 'requirefrom';
 import Migration from '../../migration_18';
 import Scenario1 from './scenarios/migration_18/scenario1';
 import Scenario2 from './scenarios/migration_18/scenario2';
+import Scenario3 from './scenarios/migration_18/scenario3';
 import url from 'url';
 
 const serverConfig = requirefrom('test')('server_config');
@@ -52,7 +53,7 @@ describe('investigate_core/migrations/functional', function () {
       fakeConfig.get.withArgs('kibana.index').returns('.siren');
     });
 
-    describe(`should update the kibi:* advanced settings to investigate:*`, function () {
+    describe(`should update the kibi:* advanced settings to siren:*`, function () {
       beforeEach(wrapAsync(async () => {
         await scenarioManager.reload(Scenario1);
       }));
@@ -79,20 +80,57 @@ describe('investigate_core/migrations/functional', function () {
 
         expect(warningSpy.called).to.be(false);
 
-        const afterSource = after.get('siren');
-        const beforeSource = before.get('siren');
+        const afterSource = after.get('siren')._source;
+        const beforeSource = before.get('siren')._source;
 
         expect(afterSource).to.not.have.property('kibi:relations');
         expect(afterSource).to.not.have.property('kibi:enableAllDashboardsCounts');
-        expect(afterSource).to.not.have.property('siren:relations');
-        expect(afterSource).to.not.have.property('siren:enableAllDashboardsCounts');
+        expect(afterSource).to.have.property('siren:relations');
+        expect(afterSource).to.have.property('siren:enableAllDashboardsCounts');
         expect(afterSource['siren:relations']).to.equal(beforeSource['kibi:relations']);
         expect(afterSource['siren:enableAllDashboardsCounts']).to.equal(beforeSource['kibi:enableAllDashboardsCounts']);
         result = await migration.count();
         expect(result).to.be(0);
       }));
     });
+    describe(`should remove any kibi: prefixed settings that were deprecated`, function () {
+      beforeEach(wrapAsync(async () => {
+        await scenarioManager.reload(Scenario3);
+      }));
 
+      afterEach(wrapAsync(async () => {
+        await scenarioManager.unload(Scenario3);
+      }));
+
+      it('should count all upgradeable objects', wrapAsync(async () => {
+        const migration = new Migration(configuration);
+        const result = await migration.count();
+        expect(result).to.be(2);
+      }));
+
+      it('should upgrade all upgradeable objects', wrapAsync(async () => {
+        const before = await snapshot('.siren');
+        const migration = new Migration(configuration);
+
+        let result = await migration.upgrade();
+        expect(result).to.be(2);
+
+        const after = await snapshot('.siren');
+        expect(before.size).to.equal(after.size);
+
+        expect(warningSpy.called).to.be(false);
+
+        const afterSource = after.get('siren')._source;
+        const beforeSource = before.get('siren')._source;
+
+        expect(afterSource).to.have.property('siren:relations');
+        expect(afterSource).to.have.property('siren:enableAllDashboardsCounts');
+        expect(afterSource).to.not.have.property('kibi:joinLimit');
+        expect(afterSource).to.not.have.property('kibi:deprecated');
+        result = await migration.count();
+        expect(result).to.be(0);
+      }));
+    });
     describe('should not change other keys', function () {
       beforeEach(wrapAsync(async () => {
         await scenarioManager.reload(Scenario2);

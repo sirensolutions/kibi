@@ -41,6 +41,11 @@ export function GaugeChartProvider(Private) {
             .style('text-align', 'center')
             .style('overflow-y', 'auto');
 
+          // siren: automatic metric element distribution
+          const yPos = {};
+          const simpleGauges = [];
+          // siren: end
+
           data.series.forEach(series => {
             const svg = div.append('svg')
               .style('display', 'inline-block')
@@ -57,17 +62,27 @@ export function GaugeChartProvider(Private) {
 
             if (self.gaugeConfig.type === 'simple') {
               const bbox = svg.node().firstChild.getBBox();
-              svg
-                .attr('width', () => {
-                  return bbox.width;
-                })
-                .attr('height', () => {
-                  return bbox.height;
-                });
 
-              const transformX = bbox.width / 2;
-              const transformY = bbox.height / 2;
+              // siren: automatic metric element distribution
+              simpleGauges.push({ svg, g, bbox });
+
+              const finalWidth = bbox.width + containerMargin / 4;
+              const finalHeight = bbox.height + containerMargin / 4;
+
+              svg
+              .attr('width', () => {
+                return finalWidth;
+              })
+              .attr('height', () => {
+                return finalHeight;
+              });
+
+              const transformX = finalWidth / 2;
+              const transformY = finalHeight / 2;
               g.attr('transform', `translate(${transformX}, ${transformY})`);
+
+              yPos[g.node().getBoundingClientRect().y] = 1;
+              // siren: end
             } else {
               svg.attr('height', height);
               const transformX = width / 2;
@@ -77,6 +92,33 @@ export function GaugeChartProvider(Private) {
 
             self.addEvents(gauges);
           });
+
+          // siren: automatic metric element distribution
+          if (self.gaugeConfig.type === 'simple') {
+            const lines = Object.keys(yPos).length;
+            simpleGauges.forEach(gauge => {
+              const bbox = gauge.bbox;
+              const finalWidth = bbox.width + containerMargin / 4;
+
+              let calcHeight = containerHeight / lines;
+              calcHeight = calcHeight < 130 ? 130 : calcHeight;
+              const sum = calcHeight * lines >= containerHeight + containerMargin * 2.2 ? 10 : 0;
+              const finalHeight = Math.min(containerHeight + containerMargin, calcHeight - containerMargin + sum);
+
+              gauge.svg
+                .attr('width', () => {
+                  return finalWidth;
+                })
+                .attr('height', () => {
+                  return finalHeight;
+                });
+
+              const transformX = finalWidth / 2;
+              const transformY = finalHeight / 2;
+              gauge.g.attr('transform', `translate(${transformX}, ${transformY})`);
+            });
+          }
+          // siren: end
 
           if (self.gaugeConfig.type !== 'simple') {
             div.append('div')

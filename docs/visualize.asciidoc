@@ -178,6 +178,4 @@ include::visualize/kibi/box_plot.asciidoc[]
 
 include::visualize/kibi/bubble_diagram.asciidoc[]
 
-include::visualize/kibi/vector_map.asciidoc[]
-
 include::visualize/kibi/horizontal_bar_chart.asciidoc[]

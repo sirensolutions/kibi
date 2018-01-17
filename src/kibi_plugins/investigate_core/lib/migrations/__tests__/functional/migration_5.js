@@ -41,7 +41,7 @@ describe('investigate_core/migrations/functional', function () {
   async function snapshot() {
     return indexSnapshot(cluster, '.siren');
   }
-  describe('Migration 5 - Functional test', function () {
+  describe('Investigate Core - Migration 5 - Functional test', function () {
     let warningSpy;
     let configuration;
 

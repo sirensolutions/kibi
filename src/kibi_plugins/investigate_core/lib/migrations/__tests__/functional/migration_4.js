@@ -35,7 +35,7 @@ describe('investigate_core/migrations/functional', function () {
     return indexSnapshot(cluster, indexName);
   }
 
-  describe('Migration 4 - Functional test', function () {
+  describe('Investigate Core - Migration 4 - Functional test', function () {
     let warningSpy;
     let configuration;
 

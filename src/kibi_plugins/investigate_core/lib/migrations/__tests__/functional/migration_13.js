@@ -37,7 +37,7 @@ describe('investigate_core/migrations/functional', function () {
     return indexSnapshot(cluster, '.siren');
   }
 
-  describe('Migration 13 - Functional test', function () {
+  describe('Investigate Core - Migration 13 - Functional test', function () {
     let configuration;
 
     describe('two indices with sourceFiltering', function () {

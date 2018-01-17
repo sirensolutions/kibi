@@ -37,7 +37,7 @@ describe('investigate_core/migrations/functional', function () {
     return indexSnapshot(cluster, '.siren');
   }
 
-  describe('Migration 15 - Functional test', function () {
+  describe('Investigate Core - Migration 15 - Functional test', function () {
     let configuration;
 
     describe('one config with string "discover:sampleSize" and two visualization with string "pageSize"', function () {

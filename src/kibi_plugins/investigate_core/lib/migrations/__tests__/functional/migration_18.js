@@ -36,7 +36,7 @@ describe('investigate_core/migrations/functional', function () {
     return indexSnapshot(cluster, '.siren');
   }
 
-  describe('Migration 18 - Functional test', function () {
+  describe('Investigate Core - Migration 18 - Functional test', function () {
     let warningSpy;
     let configuration;
 
@@ -53,7 +53,7 @@ describe('investigate_core/migrations/functional', function () {
       fakeConfig.get.withArgs('kibana.index').returns('.siren');
     });
 
-    describe(`should update the kibi:* advanced settings to siren:*`, function () {
+    describe('should update the kibi:* advanced settings to siren:*', function () {
       beforeEach(wrapAsync(async () => {
         await scenarioManager.reload(Scenario1);
       }));

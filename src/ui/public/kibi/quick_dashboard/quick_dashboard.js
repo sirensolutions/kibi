@@ -12,10 +12,24 @@ import _ from 'lodash';
 
 // Local Functions
 
-function lastReducer(regex, last, obj) {
-  obj = obj._source || obj;
-  const match = obj.title.match(regex);
-  return match ? Math.max(last, +(match[1] || 1)) : last;
+function titleRoot(title) {
+  const numRe = /( #[0-9]*)$/;
+
+  const numMatch = title.match(numRe);
+  if(numMatch) { title = title.slice(0, title.length - numMatch[1].length); }
+
+  return title;
+}
+
+function lastReducer(title) {
+  const escTitle = _.escapeRegExp(title);
+  const regex = new RegExp(`^${escTitle}(?: #([0-9]*))?$`);
+
+  return function (last, obj) {
+    obj = obj._source || obj;
+    const match = obj.title.match(regex);
+    return match ? Math.max(last, +(match[1] || 1)) : last;
+  };
 }
 
 function flattenDashboardGroups(dashboardGroups) {
@@ -37,11 +51,19 @@ function flattenDashboardGroups(dashboardGroups) {
 }
 
 function getLastDashboardNumber(dashboards, title) {
-  const escTitle = _.escapeRegExp(title);
-  const regex = new RegExp(`^${escTitle}(?: #([0-9]*))?$`);
-  const reducer = lastReducer.bind(null, regex);
+  return title
+    ? dashboards.reduce(lastReducer(title), 0)
+    : Promise.resolve(0);
+}
 
-  return dashboards.reduce(reducer, 0);
+function getLastSavedSearchNumber(savedSearches, title) {
+  if(!title) { return Promise.resolve(0); }
+
+  const nonWordsRe = /\W/g;
+  const onlyWordCharsTitle = title.replace(nonWordsRe, ' ');
+
+  return savedSearches.scanAll(onlyWordCharsTitle)
+    .then(scan => scan.hits.reduce(lastReducer(title), 0));
 }
 
 
@@ -72,17 +94,28 @@ export function QuickDashboardProvider(
     return args;
   }
 
+  function toUniqueSearchTitle(title) {
+    title = titleRoot(title);
+
+    return getLastSavedSearchNumber(savedSearches, title)
+      .then(num => num ? `${title} #${num + 1}` : title);
+  }
+
   function askUserSpecs(args) {
     const { defaultDashTitle, savedSearch } = args;
 
-    return quickDashModals.create({ title: defaultDashTitle, savedSearch })
-      .show()
-      .then(userSpecs => {
-        if(!userSpecs) { return Promise.reject(0); }    // Canceled
+    return quickDashModals.create({
+      title: defaultDashTitle,
+      currSearchTitle: savedSearch.id && savedSearch.title,
+      toUniqueSearchTitle
+    })
+    .show()
+    .then(userSpecs => {
+      if(!userSpecs) { return Promise.reject(0); }    // Canceled
 
-        args.userSpecs = userSpecs;
-        return args;
-      });
+      args.userSpecs = userSpecs;
+      return args;
+    });
   }
 
   function findSingleQuickEntry(candidateDashes) {
@@ -277,7 +310,7 @@ export function QuickDashboardProvider(
     switch(userSpecs.savedSearchAction) {
       case 'new':
         savedSearch.id = undefined;
-        savedSearch.title = dashboard.title;
+        savedSearch.title = userSpecs.newSavedSearchTitle;
 
         // There *MUST NOT* be a 'duplicate title' popup at this stage.
         // We'll be simulating a previous save.

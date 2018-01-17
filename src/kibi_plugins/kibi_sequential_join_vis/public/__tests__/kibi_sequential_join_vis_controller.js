@@ -168,7 +168,7 @@ describe('Kibi Sequential Join Visualization Controller', function () {
         }
       ];
 
-      init({ relations: relations});
+      init({ relations: relations });
       kibiState._getDashboardAndSavedSearchMetas = sinon.stub().returns(Promise.resolve([]));
       $scope.vis.params.buttons = [
         {

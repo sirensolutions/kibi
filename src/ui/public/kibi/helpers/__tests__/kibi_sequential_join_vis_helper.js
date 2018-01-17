@@ -203,7 +203,8 @@ describe('Kibi Components', function () {
           const index = 'ia';
           const currentDashboardId = 'dashboardA';
 
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair, relations);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(
+            buttonDefs, index, currentDashboardId, dashboardIdIndexPair, relations);
           expect(buttons.length).to.equal(0);
         });
 
@@ -238,7 +239,8 @@ describe('Kibi Components', function () {
           const index = 'ia';
           const currentDashboardId = 'dashboardC';
 
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair, relations);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(
+            buttonDefs, index, currentDashboardId, dashboardIdIndexPair, relations);
           expect(buttons.length).to.equal(0);
         });
 
@@ -273,7 +275,8 @@ describe('Kibi Components', function () {
           const index = 'ia';
           const currentDashboardId = 'dashboardC';
 
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair, relations);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(
+            buttonDefs, index, currentDashboardId, dashboardIdIndexPair, relations);
           expect(buttons.length).to.equal(0);
         });
       });

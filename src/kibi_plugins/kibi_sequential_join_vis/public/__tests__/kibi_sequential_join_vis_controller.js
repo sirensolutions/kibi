@@ -63,12 +63,22 @@ describe('Kibi Sequential Join Visualization Controller', function () {
     }
   ];
 
-  function init({ enableAcl = true, currentDashboardId = 'myCurrentDashboard' } = {}) {
+  function init({ enableAcl = true, currentDashboardId = 'myCurrentDashboard', relations = [] } = {}) {
     ngMock.module('kibana/kibi_sequential_join_vis', $provide => {
       $provide.constant('kacConfiguration', { acl: { enabled: enableAcl } });
 
       $provide.service('getAppState', function () {
         return () => new MockState({ filters: [] });
+      });
+    });
+
+    ngMock.module('kibana/ontology_client', function ($provide) {
+      $provide.service('ontologyClient', function () {
+        return {
+          getRelations: function () {
+            return Promise.resolve(relations);
+          }
+        };
       });
     });
 
@@ -114,26 +124,21 @@ describe('Kibi Sequential Join Visualization Controller', function () {
 
   describe('_constructButtons', function () {
     it('should reject if a button definition is incorrect', function () {
-      const relations = {
-        relationsIndices: [
-          {
-            id: 'indexa//patha/indexb//pathb',
-            label: 'myrel',
-            indices: [
-              { indexPatternId: 'indexa', indexPatternType: '', path: 'patha' },
-              { indexPatternId: 'indexb', indexPatternType: '', path: 'pathb' }
-            ]
-          }
-        ]
-      };
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'myrel',
+          domain: { id: 'indexa', field: 'patha' },
+          range: { id: 'indexb', field: 'pathb' }
+        }
+      ];
 
-      init();
+      init({ relations: relations });
       kibiState._getDashboardAndSavedSearchMetas = sinon.stub().returns(Promise.resolve([]));
-      $rootScope.$emit('change:config.siren:relations', relations);
       $scope.vis.params.buttons = [
         {
           filterLabel:  '..mentioned in $COUNT Articles',
-          indexRelationId:  'article//companies/company//id',
+          indexRelationId:  'another-uuid',
           label:  'Companies -->',
           sourceDashboardId:  '',
           targetDashboardId:  'Companies'
@@ -148,41 +153,34 @@ describe('Kibi Sequential Join Visualization Controller', function () {
     });
 
     it('should remove the definition of buttons based on forbidden dashboards', function () {
-      const relations = {
-        relationsIndices: [
-          {
-            id: 'indexa//patha/indexb//pathb',
-            label: 'myrel',
-            indices: [
-              { indexPatternId: 'indexa', indexPatternType: '', path: 'patha' },
-              { indexPatternId: 'indexb', indexPatternType: '', path: 'pathb' }
-            ]
-          },
-          {
-            id: 'article//companies/company//id',
-            label: 'mentions',
-            indices: [
-              { indexPatternId: 'article', indexPatternType: '', path: 'companies' },
-              { indexPatternId: 'company', indexPatternType: '', path: 'id' }
-            ]
-          }
-        ]
-      };
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'myrel',
+          domain: { id: 'indexa', field: 'patha' },
+          range: { id: 'indexb', field: 'pathb' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'mentions',
+          domain: { id: 'article', ield: 'companies' },
+          range: { id: 'company', field: 'id' }
+        }
+      ];
 
-      init();
+      init({ relations: relations});
       kibiState._getDashboardAndSavedSearchMetas = sinon.stub().returns(Promise.resolve([]));
-      $rootScope.$emit('change:config.siren:relations', relations);
       $scope.vis.params.buttons = [
         {
           filterLabel:  'something',
-          indexRelationId:  'indexa//patha/indexb//pathb',
+          indexRelationId:  'some-uuid',
           label:  'to b',
           sourceDashboardId:  '',
           targetDashboardId:  'DashboardB'
         },
         {
           filterLabel:  '..mentioned in $COUNT Articles',
-          indexRelationId:  'article//companies/company//id',
+          indexRelationId:  'another-uuid',
           label:  'Companies -->',
           sourceDashboardId:  '',
           targetDashboardId:  'Companies'
@@ -196,41 +194,34 @@ describe('Kibi Sequential Join Visualization Controller', function () {
     });
 
     it('should not remove the definition of buttons based on missing dashboards if ACL is disabled', function () {
-      const relations = {
-        relationsIndices: [
-          {
-            id: 'indexa//patha/indexb//pathb',
-            label: 'myrel',
-            indices: [
-              { indexPatternId: 'indexa', indexPatternType: '', path: 'patha' },
-              { indexPatternId: 'indexb', indexPatternType: '', path: 'pathb' }
-            ]
-          },
-          {
-            id: 'article//companies/company//id',
-            label: 'mentions',
-            indices: [
-              { indexPatternId: 'article', indexPatternType: '', path: 'companies' },
-              { indexPatternId: 'company', indexPatternType: '', path: 'id' }
-            ]
-          }
-        ]
-      };
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'myrel',
+          domain: { id: 'indexa', field: 'patha' },
+          range: { id: 'indexb', field: 'pathb' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'mentions',
+          domain: { id: 'article', field: 'companies' },
+          range: { id: 'company', field: 'id' }
+        }
+      ];
 
-      init({ enableAcl: false });
+      init({ enableAcl: false, relations: relations });
       kibiState._getDashboardAndSavedSearchMetas = sinon.stub().returns(Promise.resolve([]));
-      $rootScope.$emit('change:config.siren:relations', relations);
       $scope.vis.params.buttons = [
         {
           filterLabel:  'something',
-          indexRelationId:  'indexa//patha/indexb//pathb',
+          indexRelationId:  'some-uuid',
           label:  'to b',
           sourceDashboardId:  '',
           targetDashboardId:  'DashboardB'
         },
         {
           filterLabel:  '..mentioned in $COUNT Articles',
-          indexRelationId:  'article//companies/company//id',
+          indexRelationId:  'another-uuid',
           label:  'Companies -->',
           sourceDashboardId:  '',
           targetDashboardId:  'Companies'
@@ -244,32 +235,25 @@ describe('Kibi Sequential Join Visualization Controller', function () {
     });
 
     it('should build the buttons', function () {
-      const relations = {
-        relationsIndices: [
-          {
-            id: 'article//companies/company//id',
-            label: 'mentions',
-            indices: [
-              { indexPatternId: 'article', indexPatternType: '', path: 'companies' },
-              { indexPatternId: 'company', indexPatternType: '', path: 'id' }
-            ]
-          }
-        ]
-      };
+      const relations = [{
+        id: 'another-uuid',
+        directLabel: 'mentions',
+        domain: { id: 'article', field: 'companies' },
+        range: { id: 'company', field: 'id' }
+      }];
 
-      init({ enableAcl: false });
-      $rootScope.$emit('change:config.siren:relations', relations);
+      init({ enableAcl: false, relations: relations });
       $scope.vis.params.buttons = [
         {
           filterLabel:  '..mentioned in $COUNT Articles',
-          indexRelationId:  'article//companies/company//id',
+          indexRelationId:  'another-uuid',
           label:  'rel',
           sourceDashboardId:  '',
           targetDashboardId:  'Test'
         },
         {
           filterLabel:  '..mentioned in $COUNT Articles',
-          indexRelationId:  'article//companies/company//id',
+          indexRelationId:  'another-uuid',
           label:  'Companies -->',
           sourceDashboardId:  '',
           targetDashboardId:  'Companies'
@@ -283,25 +267,18 @@ describe('Kibi Sequential Join Visualization Controller', function () {
     });
 
     it('should not build the buttons if the current dashboard index is missing', function () {
-      const relations = {
-        relationsIndices: [
-          {
-            id: 'article//companies/company//id',
-            label: 'mentions',
-            indices: [
-              { indexPatternId: 'article', indexPatternType: '', path: 'companies' },
-              { indexPatternId: 'company', indexPatternType: '', path: 'id' }
-            ]
-          }
-        ]
-      };
+      const relations = [{
+        id: 'another-uuid',
+        directLabel: 'mentions',
+        domain: { id: 'article', field: 'companies' },
+        range: { id: 'company', field: 'id' }
+      }];
 
-      init({ currentDashboardId: 'dashboard saved search missing', enableAcl: false });
-      $rootScope.$emit('change:config.siren:relations', relations);
+      init({ currentDashboardId: 'dashboard saved search missing', enableAcl: false, relations: relations });
       $scope.vis.params.buttons = [
         {
           filterLabel:  '..mentioned in $COUNT Articles',
-          indexRelationId:  'article//companies/company//id',
+          indexRelationId:  'another-uuid',
           label:  'Companies -->',
           sourceDashboardId:  '',
           targetDashboardId:  'Companies'
@@ -319,32 +296,25 @@ describe('Kibi Sequential Join Visualization Controller', function () {
     });
 
     it('should build the buttons even if some information needed by a button is missing', function () {
-      const relations = {
-        relationsIndices: [
-          {
-            id: 'article//companies/company//id',
-            label: 'mentions',
-            indices: [
-              { indexPatternId: 'article', indexPatternType: '', path: 'companies' },
-              { indexPatternId: 'company', indexPatternType: '', path: 'id' }
-            ]
-          }
-        ]
-      };
+      const relations = [{
+        id: 'another-uuid',
+        directLabel: 'mentions',
+        domain: { id: 'article', field: 'companies' },
+        range: { id: 'company', field: 'id' }
+      }];
 
-      init({ enableAcl: false });
-      $rootScope.$emit('change:config.siren:relations', relations);
+      init({ enableAcl: false, relations: relations });
       $scope.vis.params.buttons = [
         {
           filterLabel:  '..mentioned in $COUNT Articles',
-          indexRelationId:  'article//companies/company//id',
+          indexRelationId:  'another-uuid',
           label:  'rel',
           sourceDashboardId:  '',
           targetDashboardId:  'dashboard saved search missing'
         },
         {
           filterLabel:  '..mentioned in $COUNT Articles',
-          indexRelationId:  'article//companies/company//id',
+          indexRelationId:  'another-uuid',
           label:  'Companies -->',
           sourceDashboardId:  '',
           targetDashboardId:  'Companies'

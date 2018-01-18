@@ -2,7 +2,7 @@ import { safeLoad, safeDump } from 'js-yaml';
 import { readFileSync as read, writeFileSync as write, renameSync as rename } from 'fs';
 import { fromRoot } from '../../utils';
 import { has } from 'lodash';
-import { replacementMap, valueReplacementMap } from './kibi_to_siren_migration_maps';
+import { replacementMap, valueReplacementMap, settingsForRemovalIfNotCustomMap } from './kibi_to_siren_migration_maps';
 
 // The keys to be replaced are set as keys in the replacementMap map
 // The new keys to replace the old keys with are the values
@@ -32,6 +32,12 @@ import { replacementMap, valueReplacementMap } from './kibi_to_siren_migration_m
 
 // remove the parent key from the string and return the child key
 // e.g. foo.bar.baz becomes bar.baz
+
+// The settingsForRemovalIfNotCustomMap map holds keys and *old* values of
+// settings that are to be removed *if the user has not customised them*
+// i.e. if the gremlin_server.path is gremlin_server/gremlin-es2-server.jar
+// in the config, we remove it. if it has been customised, it is not removed
+
 function getChildKey(key) {
   return key.substr(key.indexOf('.') + 1);
 }
@@ -75,6 +81,7 @@ Please ensure you are running the correct command and the config path is correct
   };
 
   let contents = safeLoad(fileContents);
+
   // Take the map of old:new keys and convert each config setting in place
   // including nested config options
   // retains the nesting and order of properties
@@ -94,6 +101,7 @@ Please ensure you are running the correct command and the config path is correct
 
     contents = _replaceKeys(contents, key, replacementMap[key]);
   });
+
   // Set the old defaults into the migrated config.
   // if a user was depending on any old defaults that we are changing,
   // we need to set these explicitly into the config, so the new
@@ -116,6 +124,32 @@ Please ensure you are running the correct command and the config path is correct
     if (!has(contents, key)) {
       contents = addOldDefaultExplicitlyIfMissing(contents, key.split('.'), valueReplacementMap[key].oldVal);
     }
+  });
+
+  // Remove any of the old default settings that have been hardcoded into Investigate only
+  // if they have not been customised by the user (e.g. if they are using their own gremlin_server.path, we leave that in the yml)
+  // If all the settings in a stanza are removed, the stanza itself is removed from the yml
+  Object.keys(settingsForRemovalIfNotCustomMap).map(key => {
+    const removeOldSettingIfNotCustom = (obj, keys, value) => {
+      if (keys.length === 1) {
+        const valueToCheck = obj[keys[0]];
+        // If the setting is our old default
+        if (valueToCheck === value.oldVal) {
+          delete obj[keys[0]];
+        }
+      } else {
+        const key = keys.shift();
+        // If the nesting level doesn't contain the key in question, we drop down one nesting level and check again
+        obj[key] = Object.assign({}, removeOldSettingIfNotCustom(typeof obj[key] === 'undefined' ? {} : obj[key], keys, value));
+        if(Object.keys(obj[key]).length === 0) {
+          delete obj[key];
+        }
+      }
+
+      return obj;
+    };
+
+    contents = Object.assign({}, removeOldSettingIfNotCustom(contents, key.split('.'), settingsForRemovalIfNotCustomMap[key]));
   });
 
   const newYml = safeDump(contents);

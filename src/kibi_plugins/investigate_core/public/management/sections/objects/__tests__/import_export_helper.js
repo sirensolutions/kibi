@@ -44,10 +44,10 @@ describe('Kibi Components', function () {
       sinon.stub(indexPatterns, 'getIds').returns(Promise.resolve(['index-pattern-1']));
       importExportHelper.addExtraObjectForExportAll(objectToExport).then((results) => {
         expect(results.length).to.equal(2);
-        // kibi: kibi uses _id:'kibi'
+        // kibi: kibi uses _id:'siren'
         // and '_' is added to id and type
         expect(results[0][0]).to.eql({
-          _id: 'kibi',
+          _id: 'siren',
           _type: 'config'
         });
         expect(results[1][0]).to.eql({
@@ -71,17 +71,17 @@ describe('Kibi Components', function () {
         sinon.assert.calledWith(
           notifyErrorSpy,
           'Config object version [y.y.y-y] in the import ' +
-          'does not match current version [ kibi ]\n' +
+          'does not match current version [ siren ]\n' +
           'Non of the advanced settings parameters were imported'
         );
         done();
       }).catch(done);
     });
 
-    it('loadConfig should set the correct config values if config version === kibi', (done) => {
-      // kibi: kibi uses _id:'kibi'
+    it('loadConfig should set the correct config values if config version === siren', (done) => {
+      // kibi: siren uses _id:'siren'
       const configToLoad = {
-        _id: 'kibi',
+        _id: 'siren',
         _source: {
           key1: 'value1'
         }
@@ -117,6 +117,25 @@ describe('Kibi Components', function () {
         );
         done();
       }).catch(done);
+    });
+
+    it('checkVisualizationTypeExists should trigger a error when there is no visualization type in siren' +
+       'which same as visualization type', (done) => {
+      const visualizationDocument = {
+        _id: 'id',
+        _source: {
+          visState: '{ "type": "notExistingType" }'
+        }
+      };
+
+      importExportHelper.checkVisualizationTypeExists(visualizationDocument , notify);
+      sinon.assert.calledOnce(notifyErrorSpy);
+      sinon.assert.calledWith(
+        notifyErrorSpy,
+        'Unknown visualisation type [notExistingType] for [id]. ' +
+          'Make sure that all required plugins are installed'
+      );
+      done();
     });
 
   });

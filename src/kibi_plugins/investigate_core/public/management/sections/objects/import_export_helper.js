@@ -24,7 +24,7 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
           // that index-pattern matches any existing indices
           const promise = es.indices.getFieldMapping({
             index: doc._id,
-            field: '*',
+            fields: '*',
             allowNoIndices: false,
             includeDefaults: true
           }).catch((err) => {
@@ -45,8 +45,8 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
 
     loadConfig(configDocument, notify) {
       if (configDocument) {
-        // kibi: kibi uses 'kibi' config
-        if (configDocument._id === 'kibi') {
+        // kibi: siren uses 'siren' config
+        if (configDocument._id === 'siren') {
           // override existing config values
           const promises = [];
           _.each(configDocument._source, function (value, key) {
@@ -56,7 +56,7 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
         } else {
           notify.error(
             'Config object version [' + configDocument._id + '] in the import ' +
-            'does not match current version [ kibi ]\n' +
+            'does not match current version [ siren ]\n' +
             'Non of the advanced settings parameters were imported'
           );
           return Promise.resolve(true);
@@ -67,69 +67,70 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
       }
     }
 
-    executeSequentially(docs, services, notify, overwriteAll) {
-      const functionArray = [];
-      _.each(docs, function (doc) {
-        functionArray.push(function (previousOperationResult) {
-          // previously this part was done in Promise.map
-          const { service } = _.find(services, { type: doc._type }) || {};
-
-          if (!service) {
-            const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
-            const reason = `Invalid type: "${doc._type}"`;
-
-            notify.warning(`${msg}, ${reason}`, {
-              lifetime: 0,
-            });
-
-            return Promise.resolve({});
-          }
-
-          // extra check to make sure that required visualisation plugin is present
-          if (doc._type === 'visualization') {
-            try {
-              const visState = JSON.parse(doc._source.visState);
-              if (!visTypes.byName[visState.type]) {
-                notify.error(
-                  'Unknown visualisation type [' + visState.type + '] for [' + doc._id + ']. ' +
-                  'Make sure that all require plugins are installed'
-                );
-                return Promise.resolve({});
-              }
-            } catch (err) {
-              notify.error('Unknown error while parsing visState of [' + doc._id + '] visualisation.');
-            }
-          }
-
-          return service.get()
-          .then(function (obj) {
-            obj.id = doc._id;
-            return obj.applyESResp(doc)
-            .then(() => {
-              return obj.save({ confirmOverwrite : !overwriteAll });
-            })
-            .catch((err) => {
-              // swallow errors here so that the remaining promise chain executes
-              err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
-              notify.error(err);
-            });
-          });
-          // end
-        });
-      });
-
-      return functionArray.reduce(
-        function (prev, curr, i) {
-          return prev.then(function (res) {
-            return curr(res);
-          });
-        },
-        Promise.resolve(null)
-      );
-    }
-
     reloadQueries() {
       return queryEngineClient.clearCache();
+    }
+
+    checkVisualizationTypeExists(doc, notify) {
+      // extra check to make sure that required visualisation plugin is present
+      try {
+        const visState = JSON.parse(doc._source.visState);
+        if (!visTypes.byName[visState.type]) {
+          notify.error(
+            'Unknown visualisation type [' + visState.type + '] for [' + doc._id + ']. ' +
+            'Make sure that all required plugins are installed'
+          );
+          return false;
+        } else {
+          return true;
+        }
+      } catch (err) {
+        notify.error('Unknown error while parsing visState of [' + doc._id + '] visualisation.');
+      }
+    }
+
+    /*
+     * Remove defaults scripts from the list of import objects
+     */
+    removeDefaultScripts(docs, notify) {
+      const sampleScriptsId = [
+        'Signal-Dead-Companies',
+        'Select-By-Edge-Count',
+        'Select-By-Type',
+        'Add-time-fields.-(works-only-with-Kibi-Demo-data)',
+        'Replace-Investment-with-edge.-(works-only-with-Kibi-Demo-data)',
+        'Select-All',
+        'Shortest-Path',
+        'Replace-Investment-with-edge-(onUpdate).-(works-only-with-Kibi-Demo-data)',
+        'Expand-by-relation',
+        'Select-Invert',
+        'Select-Extend',
+        'Expand-by-top-comention',
+        'Default-Expansion-Policy',
+        'Add-geo-locations-for-map-visualization.-(works-only-with-Kibi-Demo-data)',
+        'Show-nodes-count-by-type'
+      ];
+
+      const defaultScriptsInDocs = [];
+      docs = _.filter(docs, function (doc) {
+        if(doc._type === 'script') {
+          if(_.includes(sampleScriptsId, doc._id)) {
+            defaultScriptsInDocs.push(doc._source.title);
+            return false;
+          } else {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      });
+
+      if(defaultScriptsInDocs.length > 0) {
+        notify.warning(
+          'These scripts [' + defaultScriptsInDocs + '] are immutable scripts and cannot be modified'
+        );
+      }
+      return docs;
     }
 
     /*
@@ -137,7 +138,7 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
      */
     addExtraObjectForExportAll(objectsToExport) {
       // kibi: '_' is added to id and type
-      objectsToExport.push([{ _id: 'kibi', _type: 'config' }]);
+      objectsToExport.push([{ _id: 'siren', _type: 'config' }]);
 
       return indexPatterns.getIds().then(function (list) {
         _.each(list, (id) => {
@@ -166,7 +167,7 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
       });
     }
 
-    importDocuments(docs, services, notify, overwriteAll) {
+    importIndexPatternsConfigSortDocuments(docs, notify) {
       // kibi: change the import to sequential to solve the dependency problem between objects
       // as visualisations could depend on searches
       // lets order the export to make sure that searches comes before visualisations
@@ -180,8 +181,13 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
         return o._type === 'index-pattern';
       });
 
+      const self = this;
       docs = _.filter(docs, function (doc) {
-        return doc._type !== 'config' && doc._type !== 'index-pattern';
+        if (doc._type === 'visualization') {
+          return self.checkVisualizationTypeExists(doc, notify);
+        } else {
+          return doc._type !== 'config' && doc._type !== 'index-pattern';
+        }
       });
 
       // kibi: added to sort the docs by type
@@ -203,10 +209,7 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
 
       return this.loadIndexPatterns(indexPatternDocuments, notify).then(() => {
         return this.loadConfig(configDocument, notify).then(() => {
-          return this.executeSequentially(docs, services, notify, overwriteAll).then(() => {
-            // kibi: dashboard groups should be recomputed after import
-            return dashboardGroups.computeGroups('new objects were imported');
-          });
+          return docs;
         });
       });
     }

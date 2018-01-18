@@ -78,7 +78,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
           throw `Should be valid JSON string but was [${val}].`;
         }
         countStrategyValidator(strategy);
-        return strategy;
+        return JSON.stringify(strategy);
       default:
         throw `Unknown validator [${validator}] for [${val}].`;
     }

@@ -39,7 +39,7 @@ describe('investigate_core/migrations/functional', function () {
     return indexSnapshot(cluster, '.siren');
   }
 
-  describe('Migration 10 - Functional test', function () {
+  describe('Investigate Core - Migration 10 - Functional test', function () {
 
     beforeEach(async () => {
       await scenarioManager.reload(Scenario);

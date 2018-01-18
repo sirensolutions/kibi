@@ -372,11 +372,6 @@ export function getUiSettingDefaults() {
       value: JSON.stringify(['\\.siren.*', 'watcher.*']),
       description: 'List of regex pattern strings, used to filter out indices when performing searches'
     },
-    'siren:indexExclusionRegexList': {
-      type: 'json',
-      value: JSON.stringify(['\\.siren.*', 'watcher.*']),
-      description: 'List of regex pattern strings, used to filter out indices when performing searches'
-    },
     'siren:graphUseWebGl' : {
       value: true,
       description: 'Set to false to disable WebGL rendering'

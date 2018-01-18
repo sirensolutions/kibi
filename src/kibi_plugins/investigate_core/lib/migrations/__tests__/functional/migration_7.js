@@ -41,7 +41,7 @@ describe('investigate_core/migrations/functional', function () {
     }
   };
 
-  describe('Kibi Core Migration 7 - Functional test', function () {
+  describe('Investigate Core - Migration 7 - Functional test', function () {
     let Scenario;
 
     async function snapshot() {

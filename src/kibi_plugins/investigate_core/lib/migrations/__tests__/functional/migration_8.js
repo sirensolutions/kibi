@@ -132,7 +132,7 @@ describe('investigate_core/migrations/functional', function () {
   };
 
 
-  describe('Migration 8 - Functional test', function () {
+  describe('Investigate Core - Migration 8 - Functional test', function () {
     let warningSpy;
     let configuration;
 

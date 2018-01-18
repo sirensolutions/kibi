@@ -20,10 +20,6 @@ export default {
   // if the stanza that contains them is empty after their removal (because all of the properties in it are removed)
   // the stanza itself is also removed
   settingsForRemovalIfNotCustomMap: {
-    'investigate_core.gremlin_server.path':                   { oldVal: 'gremlin_server/gremlin-es2-server.jar' },
-    'investigate_core.gremlin_server.url':                    { oldVal: 'https://127.0.0.1:8061' },
-    'investigate_core.gremlin_server.ssl.key_store':          { oldVal: 'pki/gremlin.jks' },
-    'investigate_core.gremlin_server.ssl.key_store_password': { oldVal: 'password' },
-    'investigate_core.gremlin_server.ssl.ca':                 { oldVal: 'pki/cacert.pem' }
+    'investigate_core.gremlin_server.path':                   { oldVal: 'gremlin_server/gremlin-es2-server.jar' }
   }
 };

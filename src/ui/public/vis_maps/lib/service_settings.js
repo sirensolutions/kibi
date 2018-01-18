@@ -44,13 +44,10 @@ uiModules.get('kibana')
         this._invalidateSettings();
       }
       _invalidateSettings() {
-        // kibi: added isLayerRequest argument to set the request URL to the Elastic layer server if
-        // kibi: the request is for layers, if the request is for tiles, we use the Siren tile server URL
         this._loadCatalogue = _.once(async() => {
           try {
-            // kibi: take the url for the manifest directly from the server default settings or user config
             const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
-            // kibi: end
+
             return response.data;
           } catch (e) {
             if (!e) {
@@ -84,6 +81,9 @@ uiModules.get('kibana')
           }
           const catalogue = await this._loadCatalogue();
           const fileService = catalogue.services.filter((service) => service.type === 'tms')[0];
+          if (mapConfig.sirensecret !== '') {
+            this._queryParams.sirensecret = mapConfig.sirensecret;
+          }
           // kibi: take the url for the manifest directly from the server default settings or user config
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           //kibi: end

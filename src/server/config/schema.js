@@ -188,7 +188,8 @@ module.exports = () => Joi.object({
     v6ApiFormat: Joi.boolean().default(false)
   }).default(),
   map: Joi.object({
-    manifestServiceUrl: Joi.string().default('https://tiles.siren.io/v1/catalogue')
+    manifestServiceUrl: Joi.string().default('https://tiles.siren.io/v1/catalogue'),
+    sirensecret: Joi.string().allow('').default('')
   }).default(),
   tilemap: Joi.object({
     url: Joi.string(),

@@ -52,7 +52,6 @@ describe(`Server logging configuration`, function () {
           if (!line) {
             return line; // ignore empty lines
           }
-          console.log('line: ', line);
           if (json--) {
             expect(parseJsonLogLine).withArgs(line).to.not.throwError();
           } else {

@@ -110,14 +110,14 @@ module.exports = function (kibana) {
         gremlin_server: Joi.object({
           log_conf_path: Joi.string().allow('').default(''),
           debug_remote: Joi.string().allow('').default(''),
-          path: Joi.string().allow('').default(''),
-          url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://127.0.0.1:8080'),
+          path: Joi.string().default('gremlin_server/gremlin-server.jar'),
+          url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://127.0.0.1:8061'),
           ssl: Joi.object({
             key_store: Joi.string(),
             key_store_password: Joi.string(),
             ca: Joi.string()
-          })
-        }),
+          }).default()
+        }).default(),
 
         datasource_encryption_algorithm: Joi.string().default('AES-GCM'),
         datasource_encryption_key: Joi.string().default('iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='),

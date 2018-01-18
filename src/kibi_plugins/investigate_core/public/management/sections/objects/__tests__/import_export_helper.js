@@ -133,7 +133,7 @@ describe('Kibi Components', function () {
       sinon.assert.calledWith(
         notifyErrorSpy,
         'Unknown visualisation type [notExistingType] for [id]. ' +
-          'Make sure that all require plugins are installed'
+          'Make sure that all required plugins are installed'
       );
       done();
     });

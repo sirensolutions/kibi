@@ -78,7 +78,7 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
         if (!visTypes.byName[visState.type]) {
           notify.error(
             'Unknown visualisation type [' + visState.type + '] for [' + doc._id + ']. ' +
-            'Make sure that all require plugins are installed'
+            'Make sure that all required plugins are installed'
           );
           return false;
         } else {

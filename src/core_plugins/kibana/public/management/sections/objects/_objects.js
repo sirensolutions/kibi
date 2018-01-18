@@ -287,23 +287,23 @@ uiModules.get('apps/management')
               }
 
               return service.get()
-                .then(function (obj) {
-                  obj.id = doc._id;
-                  return obj.applyESResp(doc)
-                    .then(() => {
-                      return obj.save({ confirmOverwrite : !overwriteAll });
-                    })
-                    .catch((err) => {
-                      if (err instanceof SavedObjectNotFound && err.savedObjectType === 'index-pattern') {
-                        conflictedIndexPatterns.push({ obj, doc });
-                        return;
-                      }
+              .then(function (obj) {
+                obj.id = doc._id;
+                return obj.applyESResp(doc)
+                .then(() => {
+                  return obj.save({ confirmOverwrite : !overwriteAll });
+                })
+                .catch((err) => {
+                  if (err instanceof SavedObjectNotFound && err.savedObjectType === 'index-pattern') {
+                    conflictedIndexPatterns.push({ obj, doc });
+                    return;
+                  }
 
-                      // swallow errors here so that the remaining promise chain executes
-                      err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
-                      notify.error(err);
-                    });
+                  // swallow errors here so that the remaining promise chain executes
+                  err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
+                  notify.error(err);
                 });
+              });
             }
 
             function groupByType(docs) {
@@ -327,33 +327,33 @@ uiModules.get('apps/management')
             const docTypes = groupByType(docs);
 
             return Promise.map(docTypes.searches, importDocument)
-              .then(() => Promise.map(docTypes.other, importDocument))
-              .then(() => {
-                if (conflictedIndexPatterns.length) {
-                  showChangeIndexModal(
-                    (objs) => {
-                      return Promise.map(
-                        conflictedIndexPatterns,
-                        ({ obj }) => {
-                          const oldIndexId = obj.searchSource.getOwn('index');
-                          const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
-                          if (newIndexId === oldIndexId) {
-                            // Skip
-                            return;
-                          }
-                          return obj.hydrateIndexPattern(newIndexId)
-                            .then(() => obj.save({ confirmOverwrite : !overwriteAll }));
+            .then(() => Promise.map(docTypes.other, importDocument))
+            .then(() => {
+              if (conflictedIndexPatterns.length) {
+                showChangeIndexModal(
+                  (objs) => {
+                    return Promise.map(
+                      conflictedIndexPatterns,
+                      ({ obj }) => {
+                        const oldIndexId = obj.searchSource.getOwn('index');
+                        const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
+                        if (newIndexId === oldIndexId) {
+                          // Skip
+                          return;
                         }
-                      ).then(refreshData);
-                    },
-                    conflictedIndexPatterns,
-                    $route.current.locals.indexPatterns,
-                  );
-                } else {
-                  return refreshData();
-                }
-              })
-              .catch(notify.error);
+                        return obj.hydrateIndexPattern(newIndexId)
+                        .then(() => obj.save({ confirmOverwrite : !overwriteAll }));
+                      }
+                    ).then(refreshData);
+                  },
+                  conflictedIndexPatterns,
+                  $route.current.locals.indexPatterns,
+                );
+              } else {
+                return refreshData();
+              }
+            })
+            .catch(notify.error);
           })
           .then(() => queryEngineClient.clearCache()) // kibi: to clear backend cache
           .then(importExportHelper.reloadQueries) // kibi: to clear backend cache

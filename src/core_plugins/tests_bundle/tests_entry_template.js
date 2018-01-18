@@ -43,7 +43,7 @@ window.__KBN__ = {
       layers: []
     },
     mapConfig: {
-      manifestServiceUrl: 'the catalogue url'
+      manifestServiceUrl: 'tiles.siren.io/v1/catalogue'
     }
   },
   uiSettings: {

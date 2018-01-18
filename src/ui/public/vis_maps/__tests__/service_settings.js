@@ -8,7 +8,7 @@ describe('service_settings (FKA tilemaptest)', function () {
   let mapsConfig;
   let tilemapsConfig; //kibi: returned tilemaps config as default
 
-  const manifestUrl = 'the catalogue url'; // kibi: added our manifest url
+  const manifestUrl = 'tiles.siren.io/v1/catalogue'; // kibi: added our manifest url
   const tmsManifestUrl = `https://tiles.siren.io/v1/manifest`; // kibi: added our manifest url
   const vectorManifestUrl = `https://tiles.siren.io/v1/vector-manifest`;
   const manifestUrl2 = 'https://foobar/v1/manifest';

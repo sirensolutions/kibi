@@ -16,7 +16,8 @@
       <div>
         <input type="text" class="kuiLocalDropdownInput"
           ng-model="result.title" placeholder="Enter Dashboard Title"
-          input-focus="select" />
+          input-focus="select"
+          ng-change="onTitleChange()"/>
       </div>
       <label>
         <input type="checkbox" ng-model="result.storeTimeWithDashboard" />
@@ -33,23 +34,24 @@
 
       <div>
         <input type="radio" ng-model="result.savedSearchAction" value="new">
-          New saved search named "{{result.title}}"
+          New saved search named "{{result.newSavedSearchTitle}}"
         </input>
       </div>
-      <div ng-if="currentSavedSearchTitle">
+      <div ng-if="currSearchTitle">
         <input type="radio" ng-model="result.savedSearchAction" value="save">
-          Save current search "{{currentSavedSearchTitle}}" and use it
+          Save current search "{{currSearchTitle}}" and use it
         </input>
       </div>
-      <div ng-if="currentSavedSearchTitle">
+      <div ng-if="currSearchTitle">
         <input type="radio" ng-model="result.savedSearchAction" value="nosave">
-          Use current search "{{currentSavedSearchTitle}}" without saving
+          Use current search "{{currSearchTitle}}" without saving
         </input>
       </div>
     </div>
 
     <button type="submit" class="btn btn-primary" data-test-subj="confirmButton"
-      ng-disabled="!result.title" aria-label="Create Quick Dashboard">
+      ng-disabled="!result.title || loading" aria-label="Create Quick Dashboard">
+      <i ng-show="loading" class="fa fa-spinner fa-pulse"></i>
       Create
     </button>
   </form>

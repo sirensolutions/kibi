@@ -84,13 +84,13 @@ describe('investigate_core/migrations/functional', function () {
         const afterCountFetchingStrategyDashboards = JSON.parse(afterSource['siren:countFetchingStrategyDashboards']);
 
         expect(beforeCountFetchingStrategyDashboards.name).to.equal(undefined);
-        expect(afterCountFetchingStrategyDashboards.name).to.equal('default');
+        expect(afterCountFetchingStrategyDashboards.name).to.equal('dashboardStrategy');
 
         const beforeCountFetchingStrategyButtons = JSON.parse(beforeSource['siren:countFetchingStrategyRelationalFilters']);
         const afterCountFetchingStrategyButtons = JSON.parse(afterSource['siren:countFetchingStrategyRelationalFilters']);
 
         expect(beforeCountFetchingStrategyButtons.name).to.equal(undefined);
-        expect(afterCountFetchingStrategyButtons.name).to.equal('default');
+        expect(afterCountFetchingStrategyButtons.name).to.equal('relationalButtonStrategy');
 
         sinon.assert.notCalled(errorSpy);
       }));

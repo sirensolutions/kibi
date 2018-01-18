@@ -111,7 +111,7 @@ export default class Migration18 extends Migration {
       const isUpgradeable = this._isStrategyUpgradeable(dashboardStrategy, DASHBOARD_STRATEGY_KEY);
       if (isUpgradeable === true) {
         dashboardStrategy = JSON.parse(dashboardStrategy);
-        dashboardStrategy.name = 'default';
+        dashboardStrategy.name = 'dashboardStrategy';
         _source[DASHBOARD_STRATEGY_KEY] = JSON.stringify(dashboardStrategy);
         count = 1;
       } else if (isUpgradeable === undefined) {
@@ -125,7 +125,7 @@ export default class Migration18 extends Migration {
       const isUpgradeable = this._isStrategyUpgradeable(buttonStrategy, BUTTON_STRATEGY_KEY);
       if (isUpgradeable === true) {
         buttonStrategy = JSON.parse(buttonStrategy);
-        buttonStrategy.name = 'default';
+        buttonStrategy.name = 'relationalButtonStrategy';
         _source[BUTTON_STRATEGY_KEY] = JSON.stringify(buttonStrategy);
         count = 1;
       } else if (isUpgradeable === undefined) {

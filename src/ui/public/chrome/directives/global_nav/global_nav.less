@@ -1,6 +1,7 @@
 
 @import (reference) "~ui/styles/mixins";
 @import (reference) "~ui/styles/variables";
+@import (reference) "~ui/kibi/styles/kibi_variables";
 
 @global-nav-logo-height: 70px;
 
@@ -11,7 +12,7 @@
   top: 0;
   bottom: 0;
   z-index: 0;
-  background-color: @app-links-wrapper-background;
+  background-color: @siren-app-menu-inactive; // kibi: changed form @app-links-wrapper-background
   overflow: hidden;
 
   &.is-global-nav-open {

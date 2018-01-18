@@ -1,4 +1,6 @@
 @import (reference) "~ui/styles/variables";
+@import (reference) "~ui/kibi/styles/kibi_variables";
+
 
 .global-nav-link {
   position: relative;
@@ -16,7 +18,7 @@
 
   &:hover,
   &.active {
-    background-color: @app-links-active-background;
+    background-color: @siren-app-menu-active; // kibi: changed from @app-links-active-background
 
     .global-nav-link__anchor {
       color: @white;

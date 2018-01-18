@@ -1,5 +1,21 @@
 @import (reference) "~ui/styles/variables";
 
+/* Dashboard */
+@siren-dashboard-active-background:   #2f5f97;
+@siren-dashboard-inactive-background: #6079a2;
+@siren-dashboard-selection-bg:        #69a999;
+
+@siren-app-menu-inactive: #4a5c7b;
+@siren-app-menu-active: #344055;
+
+@siren-dashboard-menu-group-bg: #4a5c7b;
+
+@siren-top-bar: @dashboard-bg;
+
+/* selected entity */
+@entity-bg: @siren-dashboard-selection-bg;
+
+
 /* kibi defined variables */
 @kibi-light-border: #dedede;
 
@@ -23,19 +39,15 @@
 
 @st-dark-gray:     #656A76;
 
-@brand-relational:      #048CC8;
-@btn-relational-color:           @white;
-@btn-relational-bg:              @brand-relational;
-@btn-disabled-relational-bg:     #656A76;
-@btn-relational-border:          darken(@btn-info-bg, 5%);
+@brand-relational:           @siren-dashboard-inactive-background; /* #048CC8; */
+@btn-relational-color:       @white;
+@btn-relational-bg:          @brand-relational;
+@btn-disabled-relational-bg: #656A76;
+@btn-relational-border:      darken(@btn-info-bg, 5%);
 
-@entity-bg: #715AD0;
 
 //== Navbar
 
 @navbar-arrow-size:                5px;
 
-/* Dashboard */
-@siren-dashboard-active-background:   #2f5f97;
-@siren-dashboard-inactive-background: #339abb;
-@siren-dashboard-selection-bg:        #6aa99a;
+

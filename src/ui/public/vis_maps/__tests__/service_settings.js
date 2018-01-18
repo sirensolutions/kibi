@@ -8,9 +8,9 @@ describe('service_settings (FKA tilemaptest)', function () {
   let mapsConfig;
   let tilemapsConfig; //kibi: returned tilemaps config as default
 
-  const manifestUrl = 'https://geo.elastic.co/v1/manifest'; // kibi: added our manifest url
+  const manifestUrl = 'the catalogue url'; // kibi: added our manifest url
   const tmsManifestUrl = `https://tiles.siren.io/v1/manifest`; // kibi: added our manifest url
-  const vectorManifestUrl = `https://layers.geo.elastic.co/v1/manifest`;
+  const vectorManifestUrl = `https://tiles.siren.io/v1/vector-manifest`;
   const manifestUrl2 = 'https://foobar/v1/manifest';
 
   const manifest = {
@@ -82,7 +82,6 @@ describe('service_settings (FKA tilemaptest)', function () {
 
     serviceSettings = $injector.get('serviceSettings');
     mapsConfig = $injector.get('mapConfig');
-    tilemapsConfig = $injector.get('tilemapsConfig'); // kibi: mock out tilemapConfig
 
     sinon.stub(serviceSettings, '_getManifest', function (url) {
       let contents = null;
@@ -99,8 +98,7 @@ describe('service_settings (FKA tilemaptest)', function () {
         data: contents
       };
     });
-    //kibi: add url to tilemapsConfig
-    tilemapsConfig.deprecated.config.url = 'https://tiles.siren.io/v1/manifest';
+
     $rootScope.$digest();
   }));
 

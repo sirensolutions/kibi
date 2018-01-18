@@ -46,11 +46,10 @@ uiModules.get('kibana')
       _invalidateSettings() {
         // kibi: added isLayerRequest argument to set the request URL to the Elastic layer server if
         // kibi: the request is for layers, if the request is for tiles, we use the Siren tile server URL
-        this._loadCatalogue = _.once(async(isLayersRequest) => {
-          const manifestUrl = (isLayersRequest) ? mapConfig.manifestServiceUrl : tilemapsConfig.deprecated.config.url;
+        this._loadCatalogue = _.once(async() => {
           try {
             // kibi: take the url for the manifest directly from the server default settings or user config
-            const response = await this._getManifest(manifestUrl, this._queryParams);
+            const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
             // kibi: end
             return response.data;
           } catch (e) {
@@ -66,7 +65,7 @@ uiModules.get('kibana')
 
 
         this._loadFileLayers = _.once(async() => {
-          const catalogue = await this._loadCatalogue(true);
+          const catalogue = await this._loadCatalogue();
           const fileService = catalogue.services.filter((service) => service.type === 'file')[0];
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson');
@@ -83,8 +82,10 @@ uiModules.get('kibana')
             tmsService.url = tilemapsConfig.deprecated.config.url;
             return tmsService;
           }
+          const catalogue = await this._loadCatalogue();
+          const fileService = catalogue.services.filter((service) => service.type === 'tms')[0];
           // kibi: take the url for the manifest directly from the server default settings or user config
-          const manifest = await this._getManifest(tilemapsConfig.deprecated.config.url, this._queryParams);
+          const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           //kibi: end
           const services = manifest.data.services;
 
@@ -92,7 +93,6 @@ uiModules.get('kibana')
           if (!firstService) {
             throw new Error('Manifest response does not include sufficient service data.');
           }
-
 
           firstService.attribution = $sanitize(marked(firstService.attribution));
           firstService.subdomains = firstService.subdomains || [];

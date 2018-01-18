@@ -77,17 +77,8 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
     // conflict info
     obj.writ('conflictDescriptions');
 
-    // kibi: add path sequence and multifields properties
+    // kibi: add path sequence
     obj.comp('path', indexPattern.paths && indexPattern.paths[spec.name] || []);
-
-    const multifields = filter(indexPattern.fields, (f) => {
-      const nameMatched = f.name.indexOf(spec.name + '.') === 0;
-      // if name starts with same prefix + dot
-      // do another check to make sure that the field is a subfield
-      // and NOT just another field with a "dot" in it
-      return nameMatched && indexPattern.kibiPathsFetched && !Boolean(indexPattern.paths[f.name]);
-    });
-    obj.comp('multifields', multifields);
     // kibi: end
 
     return obj.create();
@@ -113,6 +104,14 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
 
   Field.prototype.routes = {
     edit: '/management/siren/indices/{{indexPattern.id}}/field/{{name}}'
+  };
+
+  Field.prototype.getMultiFields = function (indexPattern) {
+    if (this.type === 'string') {
+      const prefix = `${this.name}.`;
+      return indexPattern.fields.byType.string.filter(f => f.name.startsWith(prefix));
+    }
+    return [];
   };
 
   return Field;

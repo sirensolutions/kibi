@@ -54,12 +54,12 @@ export function NormalizeSortRequestProvider(config) {
         // 1) if there is a valid type try to use it and ignore defaultSortOptions
         // 2) if the type is text or string try to find a subtype which is either keyword or not analyzed string
         if (indexField && indexField.sortable && indexField.type && indexField.type !== 'conflict') {
-          const alternativeSortingField = getAlternativeSortingField(indexField);
+          const alternativeSortingField = getAlternativeSortingField(indexPattern, indexField);
           if (alternativeSortingField) {
             sortField = alternativeSortingField.name;
-            sortValue.unmapped_type = alternativeSortingField.type;
+            sortValue.unmapped_type = alternativeSortingField.esType;
           } else {
-            sortValue.unmapped_type = indexField.type;
+            sortValue.unmapped_type = indexField.esType;
           }
         }
         // kibi: end

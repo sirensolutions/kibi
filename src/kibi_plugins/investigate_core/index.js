@@ -111,11 +111,11 @@ module.exports = function (kibana) {
           log_conf_path: Joi.string().allow('').default(''),
           debug_remote: Joi.string().allow('').default(''),
           path: Joi.string().default('gremlin_server/gremlin-server.jar'),
-          url: Joi.string().uri({ scheme: ['http', 'https'] }).default('https://127.0.0.1:8061'),
+          url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://127.0.0.1:8061'),
           ssl: Joi.object({
-            key_store: Joi.string().default('pki/gremlin.jks'),
-            key_store_password: Joi.string().default('password'),
-            ca: Joi.string().default('pki/cacert.pem')
+            key_store: Joi.string(),
+            key_store_password: Joi.string(),
+            ca: Joi.string()
           }).default()
         }).default(),
 

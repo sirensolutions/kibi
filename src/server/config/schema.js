@@ -188,14 +188,11 @@ module.exports = () => Joi.object({
     v6ApiFormat: Joi.boolean().default(false)
   }).default(),
   map: Joi.object({
-    manifestServiceUrl: Joi.when('$dev', {
-      is: true,
-      then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'),
-      otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v1/manifest')
-    })
+    manifestServiceUrl: Joi.string().default('https://tiles.siren.io/v1/catalogue'),
+    sirensecret: Joi.string().allow('').default('')
   }).default(),
   tilemap: Joi.object({
-    url: Joi.string().default('https://tiles.siren.io/v1/manifest'), //kibi: added default map tile server manifest URL
+    url: Joi.string(),
     options: Joi.object({
       attribution: Joi.string(),
       minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),

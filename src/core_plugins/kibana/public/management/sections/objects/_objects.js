@@ -247,6 +247,9 @@ uiModules.get('apps/management')
           return;
         }
 
+        // kibi: remove default scripts from docs
+        docs = importExportHelper.removeDefaultScripts(docs, notify);
+
         return new Promise((resolve) => {
           confirmModal(
             `If any of the objects already exist, do you want to automatically overwrite them?`, {

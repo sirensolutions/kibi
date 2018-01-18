@@ -90,6 +90,50 @@ export default function ImportHelperFactory(config, es, kibiVersion, kbnIndex,
     }
 
     /*
+     * Remove defaults scripts from the list of import objects
+     */
+    removeDefaultScripts(docs, notify) {
+      const sampleScriptsId = [
+        'Signal-Dead-Companies',
+        'Select-By-Edge-Count',
+        'Select-By-Type',
+        'Add-time-fields.-(works-only-with-Kibi-Demo-data)',
+        'Replace-Investment-with-edge.-(works-only-with-Kibi-Demo-data)',
+        'Select-All',
+        'Shortest-Path',
+        'Replace-Investment-with-edge-(onUpdate).-(works-only-with-Kibi-Demo-data)',
+        'Expand-by-relation',
+        'Select-Invert',
+        'Select-Extend',
+        'Expand-by-top-comention',
+        'Default-Expansion-Policy',
+        'Add-geo-locations-for-map-visualization.-(works-only-with-Kibi-Demo-data)',
+        'Show-nodes-count-by-type'
+      ];
+
+      const defaultScriptsInDocs = [];
+      docs = _.filter(docs, function (doc) {
+        if(doc._type === 'script') {
+          if(_.includes(sampleScriptsId, doc._id)) {
+            defaultScriptsInDocs.push(doc._source.title);
+            return false;
+          } else {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      });
+
+      if(defaultScriptsInDocs.length > 0) {
+        notify.warning(
+          'These scripts [' + defaultScriptsInDocs + '] are immutable scripts and cannot be modified'
+        );
+      }
+      return docs;
+    }
+
+    /*
      * Add config and index patterns to the list of exported objects
      */
     addExtraObjectForExportAll(objectsToExport) {

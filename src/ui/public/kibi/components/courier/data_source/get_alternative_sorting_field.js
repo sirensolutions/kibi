@@ -1,19 +1,18 @@
 import { find } from 'lodash';
 
-export function getAlternativeSortingField(indexField) {
-  if (indexField.type && (indexField.type === 'string' || indexField.type === 'text')) {
-    // search for subproperty with type keyword or string but not analyzed
-    const multifields = indexField.multifields;
+export function getAlternativeSortingField(indexPattern, indexField) {
+  if (indexField.esType && (indexField.esType === 'text' || indexField.esType === 'string')) {
+    const multifields = indexField.getMultiFields(indexPattern);
     if (multifields.length > 0) {
       // try to find a keyword subfield
-      const keywordSubfield = find(multifields, sf => sf.type === 'keyword');
+      const keywordSubfield = find(multifields, sf => sf.esType === 'keyword');
       if (keywordSubfield) {
         return keywordSubfield;
       }
-      // try to find a string not analyzed subfield
-      const stringNoyAnalyzedSubfield = find(multifields, sf => sf.type === 'string' && sf.analyzed === false);
-      if (stringNoyAnalyzedSubfield) {
-        return stringNoyAnalyzedSubfield;
+      // try to find a legacy string not analyzed field
+      const stringNotAnalyzedSubField = find(multifields, sf => sf.type === 'string' && sf.aggregatable === true);
+      if (stringNotAnalyzedSubField) {
+        return stringNotAnalyzedSubField;
       }
     }
   }

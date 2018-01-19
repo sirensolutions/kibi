@@ -1,4 +1,5 @@
 @import (reference) "~ui/styles/variables";
+@import (reference) "~ui/kibi/styles/kibi_variables";
 
 /* kibi: additional kibi styles */
 .docTableBar {
@@ -96,5 +97,13 @@ doc-table {
 
   &:focus {
     opacity: 1; /* 3 */
+  }
+}
+
+.tab-dashboard.theme-dark .panel {
+  tr {
+    &#fixed-header {
+      background-color: @fixed-header-dark !important;
+    }
   }
 }

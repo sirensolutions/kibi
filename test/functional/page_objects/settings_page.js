@@ -529,6 +529,22 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async getVisualizationRows() {
       return await testSubjects.findAll(`objectsTableRow`);
     }
+
+    //kibi: Add tabs that are only in Siren Investigate
+    async clickTemplatesTab() {
+      await (await testSubjects.find('objectsTab-templates')).click();
+    }
+
+    async getTemplatesRows() {
+      return await testSubjects.findAll(`objectsTableRow`);
+    }
+
+    async clickTemplatesTabCheckbox() {
+      await remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('table[data-test-subj^="objectsTable-templates"] input[type^="checkbox"]')
+      .click();
+    }
+    // kibi: end
   }
 
   return new SettingsPage();

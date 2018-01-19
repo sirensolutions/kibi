@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "kibi-html-angular",
+    "_type": "template",
+    "_source": {
+      "title": "kibi-html-angular",
+      "description": "An html-angular template, for each document displays a panel populated with all property values",
+      "templateSource": "",
+      "templateEngine": "html-angular",
+      "version": 2,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{}"
+      }
+    }
+  }
+]

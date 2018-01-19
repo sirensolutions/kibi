@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import path from 'path';
+import { esTestConfig } from '../../../../src/test_utils/es/es_test_config';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -18,6 +19,26 @@ export default function ({ getService, getPageObjects }) {
     after(async function () {
       await esArchiver.unload('management');
     });
+
+    // kibi: added test to import template
+    it('should export saved template object normally', async function () {
+      await esArchiver.load('management');
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_siren_import_objects.json'));
+      await PageObjects.common.clickConfirmOnModal();
+      await PageObjects.settings.clickTemplatesTab();
+      const rowCount = await retry.try(async () => {
+        const rows = await PageObjects.settings.getTemplatesRows();
+        if (rows.length !== 1) {
+          throw 'Not loaded yet';
+        }
+        return rows.length;
+      });
+      expect(rowCount).to.be(1);
+      await esArchiver.unload('management');
+    });
+    // kibi: end
 
     it('should import saved objects normally', async function () {
       await esArchiver.load('management');

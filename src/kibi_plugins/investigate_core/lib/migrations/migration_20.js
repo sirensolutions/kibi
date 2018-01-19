@@ -47,7 +47,7 @@ export default class Migration8 extends Migration {
       query: {
         match_all: {}
       }
-    }
+    };
   }
 
   static get description() {
@@ -126,7 +126,7 @@ export default class Migration8 extends Migration {
     const updatedVisualizations = this._getUpdatedJoinVisualizations(joinVisualizations, idsMap);
 
     _.each(updatedVisualizations, (vis) => {
-        body += JSON.stringify({
+      body += JSON.stringify({
         update: {
           _index: vis._index,
           _type: vis._type,
@@ -193,9 +193,9 @@ export default class Migration8 extends Migration {
    */
   _getUUID() {
     const _pattern = function (t, s) {
-      var p = ((t ? (Date.now()) : (Math.random())).toString(16) + '0000000').substr(2, 8);
+      const p = ((t ? (Date.now()) : (Math.random())).toString(16) + '0000000').substr(2, 8);
       return s ? '-' + p.substr(0, 4) + '-' + p.substr(4, 4) : p;
-    }
+    };
     return _pattern(true) + _pattern(false, true) + _pattern(false, true) + _pattern();
   }
 

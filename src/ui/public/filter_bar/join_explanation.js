@@ -135,7 +135,7 @@ uiModules
 
   const explainFilterInMustNot = function (filter, indexId) {
     return explainFilter(filter, indexId).then(function (filterExplanation) {
-      return 'NOT ' + filterExplanation;
+      return ' NOT' + filterExplanation;
     });
   };
 
@@ -153,6 +153,19 @@ uiModules
           // only if the query is different than star query
           if (!_.has(queryString, 'query_string.query') || _.get(queryString, 'query_string.query') !== '*') {
             promises.push(explainFilter(queryString, indexId));
+          }
+        });
+      }
+
+      if (query.query && query.query.bool && query.query.bool.must_not) {
+        let queryStrings = query.query.bool.must_not;
+        if (!(query.query.bool.must_not instanceof Array)) {
+          queryStrings = [ query.query.bool.must_not ];
+        }
+        _.each(queryStrings, (queryString) => {
+          // only if the query is different than star query
+          if (!_.has(queryString, 'query_string.query') || _.get(queryString, 'query_string.query') !== '*') {
+            promises.push(explainFilterInMustNot(queryString, indexId));
           }
         });
       }
@@ -195,7 +208,6 @@ uiModules
     } else {
       promises.push(Promise.resolve(''));
     }
-
 
     if (relation[1].queries instanceof Array && relation[1].queries.length > 0) {
       promises.push(explainQueries(relation[1].queries, relation[1].pattern));

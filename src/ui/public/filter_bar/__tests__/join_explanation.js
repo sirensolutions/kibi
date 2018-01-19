@@ -141,6 +141,7 @@ describe('Kibi Components', function () {
       };
       return joinSequenceToHtml(relations).replace(new RegExp(SPACING, 'g'), ' ').trim();
     };
+
     it('notify user if join is pruned', function (done) {
 
       const joinFilter = {
@@ -181,6 +182,80 @@ describe('Kibi Components', function () {
       joinExplanation.getFilterExplanations([ joinFilter ]).then(function (exp) {
         expect(exp.length).to.equal(1);
         expect(exp[0]).to.be(expected);
+        done();
+      }).catch(done);
+    });
+
+
+    it('prints a nice label for single join_sequence with queries.query.bool.must_not and queries.query.bool.must', function (done) {
+
+      const joinFilter = {
+        join_sequence: [
+          {
+            relation: [
+              {
+                pattern: 'article',
+                path: 'companies',
+                indices: [
+                  'article'
+                ],
+                termsEncoding: 'long',
+                queries: [
+                  {
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            query_string: {
+                              query: 'boo'
+                            }
+                          }
+                        ],
+                        must_not: [
+                          {
+                            match: {
+                              source: {
+                                query: 'Ars Technica',
+                                type: 'phrase'
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                pattern: 'company',
+                path: 'id',
+                indices: [
+                  'company'
+                ],
+                termsEncoding: 'long'
+              }
+            ]
+          }
+        ]
+      };
+
+      const expected = expectedJoinSequenceHTML([
+        {
+          from: {
+            index: [ 'article' ],
+            path: 'companies',
+            queries: [
+              'query: <b>boo</b>',
+              'NOT match on source: <b>Ars Technica</b>'
+            ]
+          },
+          to: { index: [ 'company' ], path: 'id' }
+        },
+      ]);
+
+      joinExplanation.getFilterExplanations([ joinFilter ]).then(function (expl) {
+        expect(expl.length).to.equal(1);
+        expect(expl[0]).to.be(expected);
         done();
       }).catch(done);
     });

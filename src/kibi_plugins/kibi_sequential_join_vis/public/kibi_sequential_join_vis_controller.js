@@ -261,10 +261,10 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
 
           const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
             buttonDefs,
+            relations,
             currentDashboardIndex,
             currentDashboardId,
-            dashboardIdIndexPair,
-            relations
+            dashboardIdIndexPair
           );
 
           // disable buttons until buttons are ready
@@ -287,9 +287,6 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       } else {
         $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
           originalButtonDefs,
-          null,
-          null,
-          null,
           relations
         );
       }

@@ -12,9 +12,10 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
 
   function KibiSequentialJoinVisHelper() {}
 
-  KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId,
-                                                                          currentDashboardId, dashboardIdIndexPair,
-                                                                          relations) {
+  KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, relations,
+                                                                          currentDashboardIndexId,
+                                                                          currentDashboardId,
+                                                                          dashboardIdIndexPair) {
     return _.chain(buttonDefs)
     .filter(function (buttonDef) {
       // if sourceDashboardId is defined keep only the one which match

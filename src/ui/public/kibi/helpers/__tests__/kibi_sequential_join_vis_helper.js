@@ -128,7 +128,7 @@ describe('Kibi Components', function () {
       const index = 'index1';
       const buttonDefs = [ button1 ];
 
-      const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, null, null, relations);
+      const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
 
       expect(buttons.length).to.equal(1);
 
@@ -171,7 +171,7 @@ describe('Kibi Components', function () {
 
           const index = 'ia';
 
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, null, null, relations);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           expect(buttons[0].sourceIndexPatternId).to.equal('ia');
           expect(buttons[0].sourceField).to.equal('fa');
@@ -211,7 +211,7 @@ describe('Kibi Components', function () {
           const currentDashboardId = 'dashboardA';
 
           const buttons = sequentialJoinVisHelper.constructButtonsArray(
-            buttonDefs, index, currentDashboardId, dashboardIdIndexPair, relations);
+            buttonDefs, relations, index, currentDashboardId, dashboardIdIndexPair);
           expect(buttons.length).to.equal(0);
         });
 
@@ -247,7 +247,7 @@ describe('Kibi Components', function () {
           const currentDashboardId = 'dashboardC';
 
           const buttons = sequentialJoinVisHelper.constructButtonsArray(
-            buttonDefs, index, currentDashboardId, dashboardIdIndexPair, relations);
+            buttonDefs, relations, index, currentDashboardId, dashboardIdIndexPair);
           expect(buttons.length).to.equal(0);
         });
 
@@ -283,7 +283,7 @@ describe('Kibi Components', function () {
           const currentDashboardId = 'dashboardC';
 
           const buttons = sequentialJoinVisHelper.constructButtonsArray(
-            buttonDefs, index, currentDashboardId, dashboardIdIndexPair, relations);
+            buttonDefs, relations, index, currentDashboardId, dashboardIdIndexPair);
           expect(buttons.length).to.equal(0);
         });
       });
@@ -332,7 +332,7 @@ describe('Kibi Components', function () {
         });
 
         it('should set the default filter label if no custom is set', function () {
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, null, null, relations);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');
@@ -354,7 +354,7 @@ describe('Kibi Components', function () {
 
         it('should replace both $COUNT and $DASHBOARD occurrences', function () {
           buttonDefs[0].filterLabel = 'My custom label with placeholders $COUNT $DASHBOARD';
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, null, null, relations);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');
@@ -377,7 +377,7 @@ describe('Kibi Components', function () {
 
         it('should replace $DASHBOARD', function () {
           buttonDefs[0].filterLabel = 'My custom label $DASHBOARD';
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, null, null, relations);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');
@@ -399,7 +399,7 @@ describe('Kibi Components', function () {
 
         it('should replace $COUNT', function () {
           buttonDefs[0].filterLabel = 'My custom label $COUNT';
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, null, null, relations);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');
@@ -421,7 +421,7 @@ describe('Kibi Components', function () {
 
         it('should replace nothing', function () {
           buttonDefs[0].filterLabel = 'My custom label';
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, null, null, relations);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');

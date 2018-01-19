@@ -65,7 +65,9 @@ uiModules
             }
             if (appState) {
               // leaving this console log print to have an idea how long this takes on different systems
-              console.log('Got appState during dashboard_group service initailization after ' + (i * 10) + 'ms');
+              if (console.debug) {
+                console.debug('Got appState during dashboard_group service initailization after ' + (i * 10) + 'ms');
+              }
               return fulfill();
             }
             if (++i > MAX) {
@@ -102,18 +104,11 @@ uiModules
     }
 
     _dashboardMetadataCallback(dashboard, meta, filters, queries, dirty) {
-      if (dashboard.error) {
-        dashboard.count = 'Error';
-      } else if (dashboard.forbidden) {
-        dashboard.count = 'Forbidden';
-      } else if (!_.contains(Object.keys(meta), 'error')) {
+      if (!_.contains(Object.keys(meta), 'error')) {
         dashboard.count = meta.hits.total;
       } else if (_.contains(Object.keys(meta), 'error') && meta.error.reason) {
-        dashboard.count = 'Error: ' + meta.error.reason;
-      } else if (_.contains(Object.keys(meta), 'error') && _.contains(meta.error, 'ElasticsearchSecurityException')) {
-        dashboard.count = 'Forbidden';
-      } else {
-        dashboard.count = 'Error';
+        notify.error('Error: ' + meta.error.reason);
+        dashboard.count = '';
       }
       dashboard.isPruned = isJoinPruned(meta);
       dashboard.dirty = dirty;
@@ -287,9 +282,9 @@ uiModules
 
     updateMetadataOfDashboardIds(ids, forceCountsUpdate = false) {
       const self = this;
-      if (console) {
+      if (console.debug) {
         const msg = `update metadata for following dashboards: ${JSON.stringify(ids, null, ' ')}`;
-        console.log(msg); // eslint-disable-line no-console
+        console.debug(msg); // eslint-disable-line no-console
       }
 
       return this._getDashboardsMetadata(ids, forceCountsUpdate)
@@ -637,8 +632,8 @@ uiModules
      *
      */
     computeGroups(reason) {
-      if (console) {
-        console.log('Dashboard Groups will be recomputed because: [' + reason + ']'); // eslint-disable-line no-console
+      if (console.debug) {
+        console.debug('Dashboard Groups will be recomputed because: [' + reason + ']'); // eslint-disable-line no-console
       }
       return this._computeGroupsFromSavedDashboardGroups()
       .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(dashboardGroups1))

@@ -24,12 +24,14 @@
               ng-if="dash.group.iconCss"
               class="dashboard-icon-image {{dash.group.iconCss}}"
               tooltip="{{dash.group.title}}"
+              tooltip-placement="right"
             ></i>
             <img
               ng-show="dash.id"
               ng-if="dash.group.iconUrl"
               ng-src="dashboard-icon-image {{dash.group.iconUrl}}"
               tooltip="{{dash.group.title}}"
+              tooltip-placement="right"
             />
             <span class="dashboard-title">
               {{ getDashTitle() }}

@@ -4,7 +4,7 @@ import template from 'plugins/investigate_core/ui/directives/dashboard_button/da
 
 uiModules
 .get('kibana')
-.directive('kibiDashboardButton', function ($rootScope, chrome, appSwitcherEnsureNavigation, globalNavState, dashboardsNavState) {
+.directive('kibiDashboardButton', function ($rootScope, $window, chrome, globalNavState, dashboardsNavState) {
   return {
     template,
     transclude: true,
@@ -21,10 +21,15 @@ uiModules
       };
       $scope.clickAction = ($event, link) => {
         if (!link.active) {
-          appSwitcherEnsureNavigation($event, link);
+          if (link.lastSubUrl) {
+            $window.location.href = link.lastSubUrl;
+          } else {
+            $window.location.href = link.url;
+          }
         } else {
           $scope.toggleDashboardNav($event);
         }
+        $event.stopPropagation();
       };
       $scope.getIndicatorClass = link => {
         return link.active ? 'kibi-dashboard-button-indicator' : '';

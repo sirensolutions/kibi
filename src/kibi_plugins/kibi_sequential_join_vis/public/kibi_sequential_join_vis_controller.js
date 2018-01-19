@@ -305,8 +305,8 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       return;
     }
 
-    if (console) {
-      console.log(`Updating counts on the relational buttons because: ${reason}`);
+    if (console.debug) {
+      console.debug(`Updating counts on the relational buttons because: ${reason}`);
     }
     const self = this;
 

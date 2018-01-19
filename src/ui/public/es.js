@@ -33,7 +33,7 @@ uiModules
   .service('es', function (esFactory, esUrl, esApiVersion, esRequestTimeout) {
     return esFactory({
       host: esUrl,
-      log: 'info',
+      log: 'error', // siren: console logs only on error level
       requestTimeout: esRequestTimeout,
       apiVersion: esApiVersion,
       plugins
@@ -45,7 +45,7 @@ uiModules
   .service('esAdmin', function (esFactory, esAdminUrl, esApiVersion, esRequestTimeout) {
     return esFactory({
       host: esAdminUrl,
-      log: 'info',
+      log: 'error', // siren: console logs only on error level
       requestTimeout: esRequestTimeout,
       apiVersion: esApiVersion,
       plugins

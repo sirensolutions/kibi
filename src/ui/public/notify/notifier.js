@@ -11,9 +11,11 @@ import chrome from 'ui/chrome';
 const notifs = [];
 const version = metadata.version;
 const buildNum = metadata.buildNum;
-const consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
-const log = _.bindKey(console, 'log');
+// siren: put log only in debug level
+const consoleGroups = false;
+const log = _.bindKey(console, 'debug');
+// siren: end
 
 // used to identify the first call to fatal, set to false there
 let firstFatal = true;

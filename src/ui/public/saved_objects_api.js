@@ -11,7 +11,7 @@ uiModules
 
   client = esFactory({
     host: savedObjectsAPIUrl,
-    log: 'info',
+    log: 'error',
     requestTimeout: esRequestTimeout,
     apiVersion: esApiVersion,
     plugins: [function (Client, config) {

@@ -219,12 +219,20 @@ function setActiveApi(api) {
         setActiveApi(loadApisFromJson(data));
       },
       function (jqXHR) {
-        console.log("failed to load API '" + api + "': " + jqXHR.responseText);
+        // siren: log to debug level only
+        if (console.debug) {
+          console.debug("failed to load API '" + api + "': " + jqXHR.responseText);
+        }
+        // siren: end
       });
     return;
 
   }
-  console.log("setting active api to [" + api.name + "]");
+  // siren: log to debug level only
+  if (console.debug) {
+    console.debug("setting active api to [" + api.name + "]");
+  }
+  // siren: end
 
   ACTIVE_API = api;
 }

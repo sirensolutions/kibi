@@ -21,10 +21,10 @@ export function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState,
     if (!dashboardsIds.length) {
       return;
     }
-    if (console) {
+    if (console.debug) {  // eslint-disable-line no-console
       const msg = `KibiNavBar requested count update for following dashboards
         ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`;
-      console.log(msg); // eslint-disable-line no-console
+      console.debug(msg); // eslint-disable-line no-console
     }
     return this.delayExecutionHelper.addEventData({
       forceUpdate: forceUpdate,

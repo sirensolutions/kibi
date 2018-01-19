@@ -77,10 +77,8 @@ export function RelationsHelperFactory(config, ontologyClient) {
      * The types field is optional.
      */
     addAdvancedJoinSettingsToRelation(rel, relationId) {
-      return ontologyClient.getRelations()
-      .then((relations) => {
-        const relation = _.find(relations, 'id', relationId);
-
+      return ontologyClient.getRelationById(relationId)
+      .then((relation) => {
         if (relation.joinType) {
           rel.type = relation.joinType;
         }

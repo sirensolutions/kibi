@@ -1,8 +1,19 @@
 <div ng-if="isFirst" class="kibi-dashboards-nav-dummy-container drag-after"
-     ng-class="{ hovered: state.hovered }" dashboard-dummy-container="{{ DUMMY_PLACEHOLDER_FIRST_GROUP }}" state="state">
+     ng-class="{ hovered: state.hovered }"
+     dashboard-dummy-container="{{ DUMMY_PLACEHOLDER_FIRST_GROUP }}"
+     state="state">
 </div>
-<div class="kibi-dashboards-nav-edit-link-group" dashboard-draggable-item="group" state="state" id="kibi-dashboard-group-{{ group.id }}">
-  <div ng-class="{ 'dashboard-group': !group.virtual, 'dashboard': group.virtual, active: group.id === dashboardLoaded, highlight: group.collapsed && doesGroupHaveAnyHighlightedDashboard(group.dashboards) }">
+<div class="kibi-dashboards-nav-edit-link-group"
+     dashboard-draggable-item="group"
+     state="state"
+     id="kibi-dashboard-group-{{ group.id }}">
+  <div ng-class="{
+      'dashboard-group': !group.virtual,
+      'dashboard': group.virtual,
+      'active': group.id === dashboardLoaded,
+      'highlight': (group.collapsed && doesGroupHaveAnyHighlightedDashboard(group.dashboards))
+                || (group.virtual && dashboardIsHighlighted(group.selected))
+    }">
     <div class="icon" ng-if="!group.virtual">
       <i
          ng-if="group.iconCss"
@@ -34,7 +45,12 @@
         kibi-context-menu-click-menu="clickMenuVirtualGroup(item)"
       >
         <div ng-mouseenter="refreshTooltipContent($event, group)">
-          <div class="title" ng-class="{ collapsed: !isSidebarOpen, 'dashboard-nav-title-virtual-group': group.virtual, 'no-indicators': !group.selected.savedSearchId }">
+          <div class="title"
+               ng-class="{
+                 'collapsed': !isSidebarOpen,
+                 'dashboard-nav-title-virtual-group': group.virtual,
+                 'no-indicators': !group.selected.savedSearchId
+               }">
             {{ group.title }}
           </div>
           <div ng-if="!group.virtual" class="action">
@@ -78,7 +94,10 @@
   <div ng-if="!group.virtual && !group.collapsed">
     <div ng-repeat="dashboard in group.dashboards | filter: { title: filter }">
       <div class="dashboards-nav-edit-link-dashboard"
-        ng-class="{ active: dashboard.id === dashboardLoaded, highlight: dashboardIsHighlighted(dashboard) }"
+        ng-class="{
+          'active': dashboard.id === dashboardLoaded,
+          'highlight': dashboardIsHighlighted(dashboard)
+        }"
         ng-click="selectDashboard($index)"
         dashboard-draggable-item="$index" state="state"
       >

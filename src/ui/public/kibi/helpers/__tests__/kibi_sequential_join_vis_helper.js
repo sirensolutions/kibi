@@ -6,6 +6,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import Promise from 'bluebird';
+import _ from 'lodash';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 
 let sequentialJoinVisHelper;
@@ -57,6 +58,12 @@ function init({
       return {
         getRelations: function () {
           return Promise.resolve(relations);
+        },
+        getRelationById: function (relId) {
+          return this.getRelations()
+          .then((relations) => {
+            return _.find(relations, 'id', relId);
+          });
         }
       };
     });

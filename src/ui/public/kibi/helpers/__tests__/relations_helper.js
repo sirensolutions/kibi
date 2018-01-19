@@ -2,6 +2,7 @@ import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
+import _ from 'lodash';
 
 let relationsHelper;
 let $rootScope;
@@ -15,6 +16,12 @@ function init(relations = [], additionalStubsF = null) {
       return {
         getRelations: function () {
           return Promise.resolve(relations);
+        },
+        getRelationById: function (relId) {
+          return this.getRelations()
+          .then((relations) => {
+            return _.find(relations, 'id', relId);
+          });
         }
       };
     });

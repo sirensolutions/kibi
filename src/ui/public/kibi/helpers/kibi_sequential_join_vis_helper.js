@@ -161,7 +161,7 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
           joinSeqFilter
         });
       } else {
-        // build join sequence + add a group of sequances to the top of the array
+        // build join sequences + add a group of sequances to the top of the array
         return this.buildNewJoinSeqFilter({
           sourceIndices,
           targetIndices,

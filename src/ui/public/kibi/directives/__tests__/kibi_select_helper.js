@@ -101,6 +101,12 @@ describe('Kibi Directives', function () {
             return {
               getRelations: function () {
                 return Promise.resolve(stubRelations);
+              },
+              getRelationById: function (relId) {
+                return this.getRelations()
+                .then((relations) => {
+                  return _.find(relations, 'id', relId);
+                });
               }
             };
           });

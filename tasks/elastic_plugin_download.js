@@ -83,7 +83,7 @@ module.exports = function (grunt) {
     })
     .then(() => {
       // remove old plugin and rename extracted file
-      rimraf(pluginTargetDir + 'siren-vanguard', function(err) {
+      rimraf(pluginTargetDir + 'siren-vanguard', function (err) {
         if(err && err.code === 'ENOENT') {
           // Siren Vanguard doens't exist
           grunt.log.ok('No existing Siren Vanguard plugin in elasticsearch. Creating...');

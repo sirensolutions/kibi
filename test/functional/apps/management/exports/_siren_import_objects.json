@@ -5,7 +5,7 @@
     "_source": {
       "title": "kibi-html-angular",
       "description": "An html-angular template, for each document displays a panel populated with all property values",
-      "templateSource": "<!-- Example html-angular template \n     For each document a panel populated with all property values !-->\n<!DOCTYPE html>\n<div style=\"word-wrap: break-word;\">\n    <div ng-repeat=\"hit in hits|limitTo:limit track by hit._index+hit._type+hit._id+hit._score\"  class=\"snippet\"  style=\"width: 99%; border:1px #ddd solid; margin: 4px; padding: 4px; float: left\">\n        <h4 style=\"margin: 10px\" ng-if=\"hit._source.title\">\n            <div ng-bind-html=\"indexPattern.formatField(hit, 'title') | trustAsHtml\"></div>\n        </h4>\n                <table>\n                    <tr>\n                        <th style=\"text-align: right; padding: 4px;\">Property</th>\n                        <th style=\"padding: 4px;\">Value</th>\n                    </tr>      \n                    <tr ng-repeat=\"(key,value) in hit._source\"  ng-if=\"value !== null && value !== undefined && value !== ''\">\n                        <td style=\"width: 150px; font-weight: bold; vertical-align: top; text-align: right; padding: 4px;\"> {{key}}:</td>\n                        <td style=\"padding: 4px;\">{{value}}</td>\n                    </tr>  \n                </table>\n      </div>\n</div>\n<div style=\"clear: both;\"></div>",
+      "templateSource": "",
       "templateEngine": "html-angular",
       "version": 2,
       "kibanaSavedObjectMeta": {

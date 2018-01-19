@@ -2,12 +2,10 @@ import maven from 'maven';
 import fs from 'fs';
 import { esTestConfig } from "../src/test_utils/es/es_test_config";
 import crypto from 'crypto';
+import DecompressZip from '@bigfunger/decompress-zip';
+import rimraf from 'rimraf';
 
 module.exports = function (grunt) {
-  const DecompressZip = require('@bigfunger/decompress-zip');
-  const rimraf = require('rimraf');
-
-
   const extractArchive = function (tempArchiveFile, pathToUnzip) {
     grunt.log.write('Extracting archive ' + tempArchiveFile + '\n');
     return new Promise(function (resolve, reject) {
@@ -20,7 +18,7 @@ module.exports = function (grunt) {
       });
 
       unzipper.on('extract', () => {
-        rimraf(tempArchiveFile, resolve); // siren: remove temp files on extraction end
+        rimraf(tempArchiveFile, resolve);
       });
     });
   };
@@ -31,7 +29,7 @@ module.exports = function (grunt) {
     if (grunt.option('esvm-no-fresh')) {
       grunt.task.run(['downloadVanguard']);
     }
-    else{
+    else {
       // Else we have to download new esvm, install our plugin and set
       // the option to not download new esvm later during test run
       // Unfortunately we have to start elasticsearch too as part of the task to download it.
@@ -41,11 +39,11 @@ module.exports = function (grunt) {
         'esvm_shutdown:ui',
         'stopFreshDownload'
       ]);
-    };
+    }
   });
 
   grunt.registerTask('stopFreshDownload', function (freshDownload) {
-    grunt.config.set('esvm.options.fresh',false);
+    grunt.config.set('esvm.options.fresh', false);
   });
 
   grunt.registerTask('downloadVanguard', function () {
@@ -72,7 +70,7 @@ module.exports = function (grunt) {
       outputDirectory: pluginTargetDir,
       'mdep.useBaseVersion': true,
       transitive: false,
-      'overWriteIfNew': true
+      overWriteIfNew: true
     })
     .then(() => {
       // extract and then delete zip
@@ -84,7 +82,7 @@ module.exports = function (grunt) {
     .then(() => {
       // remove old plugin and rename extracted file
       rimraf(pluginTargetDir + 'siren-vanguard', function (err) {
-        if(err && err.code === 'ENOENT') {
+        if (err && err.code === 'ENOENT') {
           // Siren Vanguard doens't exist
           grunt.log.ok('No existing Siren Vanguard plugin in elasticsearch. Creating...');
         } else if (err) {

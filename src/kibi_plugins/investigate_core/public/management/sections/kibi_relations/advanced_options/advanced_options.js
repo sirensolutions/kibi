@@ -16,6 +16,10 @@ uiModules
 
   $scope.joinTypes = [
     {
+      value: null,
+      label: 'Automatic'
+    },
+    {
       value: 'MERGE_JOIN',
       label: 'Distributed join using merge join algorithm'
     },
@@ -32,7 +36,8 @@ uiModules
   ontologyClient.getRelations()
   .then((relations) => {
     const relId = decodeURIComponent($routeParams.relId);
-    $scope.relation = _.find(relations, (rel) => { return rel.id === relId; });
+    $scope.relation = _.find(relations, rel => rel.id === relId);
+    $scope.inverseRelation = _.find(relations, rel => rel.id === $scope.relation.inverseOf);
 
     // check if the limit property is present
     if (typeof $scope.relation.timeout === 'undefined') {
@@ -53,8 +58,9 @@ uiModules
     $scope.submit = function () {
       if (!$scope.relation.joinType || $scope.relation.joinType === '') {
         delete $scope.relation.joinType;
+        delete $scope.inverseRelation.joinType;
       }
-      ontologyClient.insertRelations([$scope.relation])
+      ontologyClient.insertRelations([$scope.relation, $scope.inverseRelation])
       .then(() => {
         kbnUrl.change('/management/siren/entities/' + $routeParams.entity);
       });

@@ -96,8 +96,11 @@ export default class Migration20 extends Migration {
     }
 
     const relations = JSON.parse(obj._source['siren:relations']);
-    const idsMap = this._upgradeSirenRelations(relations);
+    if (!this._isUpgradeable(relations)) {
+      return count;
+    }
 
+    const idsMap = this._upgradeSirenRelations(relations);
     if (idsMap === {}) {
       return count;
     }

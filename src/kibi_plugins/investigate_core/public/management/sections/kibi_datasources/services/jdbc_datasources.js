@@ -29,7 +29,9 @@ uiModules
     }
 
     validate(datasource) {
-      return $http.post(this.datasourceBaseUrl + '/' + datasource._id + '/_validate', datasource._source).then(res => res.data);
+      return $http.post(this.datasourceBaseUrl + '/' + datasource._id + '/_validate', datasource._source)
+      .then(res => res.data)
+      .catch(res => Promise.reject(res.data));
     }
 
     getVirtualIndex(id) {

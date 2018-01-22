@@ -52,8 +52,7 @@
 
           <div class="form-group" ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new' && isNew === false">
             <label>Test connection</label>
-            <button ng-click="testConnection()" class="btn btn-success">Test</button>
-            <span>{{connectionStatus}}</span>
+            <button ng-click="testConnection()" class="btn btn-success">Test connection</button>
           </div>
 
           <div ng-repeat="param in datasource.schema" >

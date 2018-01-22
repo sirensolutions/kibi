@@ -1,11 +1,12 @@
 import GremlinServerHandler from '../../server/gremlin_server/gremlin_server';
+
 /**
  * The gremlin_server plugin checks the status of the gremlin server.
  */
 module.exports = function (kibana) {
 
   return new kibana.Plugin({
-    require: ['elasticsearch', 'kibana'],
+    require: ['elasticsearch', 'kibana', 'migrations'],
     id: 'gremlin_server',
 
     init: function (server, options) {

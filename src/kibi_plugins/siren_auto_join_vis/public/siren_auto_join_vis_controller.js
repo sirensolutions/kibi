@@ -312,6 +312,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
             const buttons = sirenSequentialJoinVisHelper.constructButtonsArray(
               buttonDefs,
+              relations,
               currentDashboardIndex,
               currentDashboardId,
               dashboardIdIndexPair
@@ -399,7 +400,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           })
           .catch(notify.error);
         } else {
-          $scope.buttons = sirenSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs);
+          $scope.buttons = sirenSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs, relations);
         }
       });
     });
@@ -443,10 +444,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         const virtualButton = {
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
-          sourceIndexPatternType: this.targetIndexPatternType,
           targetField: this.sourceField,
           targetIndexPatternId: this.sourceIndexPatternId,
-          targetIndexPatternType: this.sourceIndexPatternType,
           targetDashboardId: currentDashboardId
         };
 

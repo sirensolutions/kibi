@@ -12,54 +12,55 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
 
   function KibiSequentialJoinVisHelper() {}
 
-  KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId,
-                                                                          currentDashboardId, dashboardIdIndexPair) {
+  KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, relations,
+                                                                          currentDashboardIndexId,
+                                                                          currentDashboardId,
+                                                                          dashboardIdIndexPair) {
     return _.chain(buttonDefs)
     .filter(function (buttonDef) {
       // if sourceDashboardId is defined keep only the one which match
       if (buttonDef.sourceDashboardId && currentDashboardId) {
         return buttonDef.sourceDashboardId === currentDashboardId;
       }
-      const relationInfo = relationsHelper.getRelationInfosFromRelationID(buttonDef.indexRelationId);
+      const relation = _.find(relations, 'id', buttonDef.indexRelationId);
+      if (!relation) {
+        throw new Error(`Couldn't find a relation with id: ${buttonDef.indexRelationId}`);
+      }
       // filter it out if currentDashboardIndex is neither in source nor in target for the button relation
       if (currentDashboardIndexId &&
-          currentDashboardIndexId !== relationInfo.source.index &&
-          currentDashboardIndexId !== relationInfo.target.index) {
+          currentDashboardIndexId !== relation.domain.id &&
+          currentDashboardIndexId !== relation.range.id) {
         return false;
       }
       // filter if targetDashboardId == currentDashboardId
       // the button should be shown only if it is based on a self join relation
       if (currentDashboardId && currentDashboardId === buttonDef.targetDashboardId) {
-        return relationInfo.source.index === relationInfo.target.index;
+        return relation.domain.id === relation.range.id;
       }
       if (buttonDef.type !== 'VIRTUAL_ENTITY' &&
-          dashboardIdIndexPair && currentDashboardIndexId === relationInfo.source.index &&
-          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.target.index) {
+          dashboardIdIndexPair && currentDashboardIndexId === relation.domain.id &&
+          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relation.range.id) {
         return false;
       }
-      if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.target.index &&
-          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.source.index) {
+      if (dashboardIdIndexPair && currentDashboardIndexId === relation.range.id &&
+          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relation.domain.id) {
         return false;
       }
       return true;
     })
     .map(function (button) {
       if (button.indexRelationId && currentDashboardIndexId) {
-        const relationInfo = relationsHelper.getRelationInfosFromRelationID(button.indexRelationId);
-        if (relationInfo.source.index === currentDashboardIndexId) {
-          button.sourceIndexPatternId = relationInfo.source.index;
-          button.sourceIndexPatternType = relationInfo.source.type;
-          button.sourceField = relationInfo.source.path;
-          button.targetIndexPatternId = relationInfo.target.index;
-          button.targetIndexPatternType = relationInfo.target.type;
-          button.targetField = relationInfo.target.path;
+        const relation = _.find(relations, 'id', button.indexRelationId);
+        if (relation.domain.id === currentDashboardIndexId) {
+          button.sourceIndexPatternId = relation.domain.id;
+          button.sourceField = relation.domain.field;
+          button.targetIndexPatternId = relation.range.id;
+          button.targetField = relation.range.field;
         } else {
-          button.sourceIndexPatternId = relationInfo.target.index;
-          button.sourceIndexPatternType = relationInfo.target.type;
-          button.sourceField = relationInfo.target.path;
-          button.targetIndexPatternId = relationInfo.source.index;
-          button.targetIndexPatternType = relationInfo.source.type;
-          button.targetField = relationInfo.source.path;
+          button.sourceIndexPatternId = relation.range.id;
+          button.sourceField = relation.range.field;
+          button.targetIndexPatternId = relation.domain.id;
+          button.targetField = relation.domain.field;
         }
       }
       return button;
@@ -161,19 +162,21 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
           joinSeqFilter
         });
       } else {
-        // build join sequence + add a group of sequances to the top of the array
-        const joinSeqFilter = this.buildNewJoinSeqFilter({
+        // build join sequences + add a group of sequances to the top of the array
+        return this.buildNewJoinSeqFilter({
           sourceIndices,
           targetIndices,
           button,
           filters: remainingFilters,
           queries,
           time
+        })
+        .then((joinSeqFilter) => {
+          // here create a group from existing ones and add it on the top
+          const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
+          joinSeqFilter.join_sequence.unshift(group);
+          return joinSeqFilter;
         });
-        // here create a group from existing ones and add it on the top
-        const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
-        joinSeqFilter.join_sequence.unshift(group);
-        return joinSeqFilter;
       }
     });
   };
@@ -215,28 +218,31 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
   // ]
   KibiSequentialJoinVisHelper.prototype.buildNewJoinSeqFilter = function ({ sourceIndices, targetIndices, button, filters, queries,
                                                                           time }) {
-    const relation = this._getRelation({ sourceIndices, targetIndices, button, filters, queries, time });
-    const label = 'First join_seq filter ever';
+    return this._getRelation({ sourceIndices, targetIndices, button, filters, queries, time })
+    .then((relation) => {
+      const label = 'First join_seq filter ever';
 
-    return {
-      meta: {
-        alias: label,
-        version: 2
-      },
-      join_sequence: [ relation ]
-    };
+      return {
+        meta: {
+          alias: label,
+          version: 2
+        },
+        join_sequence: [ relation ]
+      };
+    });
   };
 
   KibiSequentialJoinVisHelper.prototype.addRelationToJoinSeqFilter = function ({ sourceIndices, targetIndices, button, filters, queries,
                                                                                time, joinSeqFilter }) {
     const joinSeqFiltersCloned = _.cloneDeep(joinSeqFilter);
-    const relation = this._getRelation({ sourceIndices, targetIndices, button, filters, queries, time });
-
-    this._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
-    joinSeqFiltersCloned.join_sequence.push(relation);
-    // make sure that the new filter is not negated
-    joinSeqFiltersCloned.meta.negate = false;
-    return joinSeqFiltersCloned;
+    return this._getRelation({ sourceIndices, targetIndices, button, filters, queries, time })
+    .then((relation) => {
+      this._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
+      joinSeqFiltersCloned.join_sequence.push(relation);
+      // make sure that the new filter is not negated
+      joinSeqFiltersCloned.meta.negate = false;
+      return joinSeqFiltersCloned;
+    });
   };
 
   KibiSequentialJoinVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
@@ -274,17 +280,12 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
         }
       ]
     };
-    if (button.sourceIndexPatternType) {
-      ret.relation[0].types = [ button.sourceIndexPatternType ];
-    }
-    if (button.targetIndexPatternType) {
-      ret.relation[1].types = [ button.targetIndexPatternType ];
-    }
 
-    relationsHelper.addAdvancedJoinSettingsToRelation(ret, button.sourceIndexPatternId, button.targetIndexPatternId);
-
-    ret.relation[0].queries = [ queryBuilder(filters, queries, time) ];
-    return ret;
+    return relationsHelper.addAdvancedJoinSettingsToRelation(ret, button.indexRelationId)
+    .then((ret) => {
+      ret.relation[0].queries = [ queryBuilder(filters, queries, time) ];
+      return ret;
+    });
   };
 
   KibiSequentialJoinVisHelper.prototype.buildCountQuery = function (targetDashboardId, joinSeqFilter) {
@@ -310,11 +311,9 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       sourceDashboardId: parentButton.sourceDashboardId,
       sourceField: parentButton.sourceField,
       sourceIndexPatternId: parentButton.sourceIndexPatternId,
-      sourceIndexPatternType: parentButton.sourceIndexPatternType,
       targetDashboardId: dashboard.id,
       targetField: relation.range.field,
       targetIndexPatternId: relation.range.id,
-      targetIndexPatternType: parentButton.targetIndexPatternType,
       type: 'INDEX_PATTERN'
     };
   };

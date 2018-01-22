@@ -13,6 +13,7 @@ uiModules
   function OntologyClient() {
     this._cachedEntityRanges = {};
     this._cachedEntitiesMap = {};
+    this._cachedRelationsMap = {};
   }
 
   OntologyClient.prototype._encodeUrl = function (str) {
@@ -77,11 +78,30 @@ uiModules
           }, []);
 
           this._cachedRelationsList = relations;
-          return relations;
+          return _.cloneDeep(relations);
         }
         Promise.reject(new Error('Failed to retrieve relations from the schema. No data retrieved.'));
       })
       .catch(notify.error);
+    }
+  };
+
+  /*
+   * Returns a relation by id.
+   */
+  OntologyClient.prototype.getRelationById = function (relationId) {
+    if (this._cachedRelationsMap[relationId]) {
+      const clonedRelation = _.cloneDeep(this._cachedRelationsMap[relationId]);
+      return Promise.resolve(clonedRelation);
+    } else {
+      return this.getRelations()
+      .then((relations) => {
+        const relation = _.find(relations, (rel) => { return rel.id === relationId; });
+        if (relation) {
+          this._cachedRelationsMap[relationId] = relation;
+        }
+        return relation;
+      });
     }
   };
 
@@ -210,7 +230,7 @@ uiModules
             return total;
           }, []);
           this._cachedEntitiesList = entities;
-          return entities;
+          return _.cloneDeep(entities);
         }
         Promise.reject(new Error('Failed to retrieve entities from the schema. No data retrieved.'));
       })
@@ -399,11 +419,15 @@ uiModules
     .catch(notify.error);
   };
 
+  /**
+   * Clears all the cached objects.
+   */
   OntologyClient.prototype.clearCache = function () {
     this._cachedEntitiesList = null;
     this._cachedEntitiesMap = {};
     this._cachedRelationsList = null;
     this._cachedEntityRanges = {};
+    this._cachedRelationsMap = {};
   };
 
   return new OntologyClient();

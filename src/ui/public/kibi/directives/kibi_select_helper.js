@@ -292,11 +292,8 @@ export function KibiSelectHelperFactory(config, indexPatterns, Private, Promise,
         });
       }
 
-      return ontologyClient.getRelations()
-      .then((relations) => {
-        const indexRelation = _.find(relations, (rel) => {
-          return rel.id === indexRelationId;
-        });
+      return ontologyClient.getRelationById(indexRelationId)
+      .then((indexRelation) => {
 
         if (!indexRelation) {
           return [];

@@ -6,6 +6,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import Promise from 'bluebird';
+import _ from 'lodash';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 
 let sequentialJoinVisHelper;
@@ -25,10 +26,7 @@ function init({
     indexPatterns = [],
     savedSearches = [],
     savedDashboards = [ { id: currentDashboardId, title: currentDashboardId } ],
-    relations = {
-      relationsIndices: [],
-      relationsDashboards: []
-    }
+    relations = []
   } = {}) {
   ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
     $provide.constant('kbnDefaultAppId', '');
@@ -55,6 +53,22 @@ function init({
     $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
   });
 
+  ngMock.module('kibana/ontology_client', function ($provide) {
+    $provide.service('ontologyClient', function () {
+      return {
+        getRelations: function () {
+          return Promise.resolve(relations);
+        },
+        getRelationById: function (relId) {
+          return this.getRelations()
+          .then((relations) => {
+            return _.find(relations, 'id', relId);
+          });
+        }
+      };
+    });
+  });
+
   ngMock.inject(function (_config_, _$rootScope_, timefilter, _kibiState_, Private, Promise, _kibiMeta_) {
     config = _config_;
     $rootScope = _$rootScope_;
@@ -71,7 +85,6 @@ function init({
       to: defaultTimeEnd
     };
     config.set('timepicker:timeDefaults', defaultTime);
-    config.set('siren:relations', relations);
     timefilter.time = defaultTime;
   });
 }
@@ -81,7 +94,7 @@ describe('Kibi Components', function () {
 
     beforeEach(function () {
       button1 = {
-        indexRelationId: 'index1//f1/index2//f2',
+        indexRelationId: 'some-uuid',
         label: 'button 1',
         updateSourceCount: function () {}
       };
@@ -98,11 +111,24 @@ describe('Kibi Components', function () {
       init({
         currentDashboardId: ''
       });
+      const relations = [
+        {
+          id: 'some-uuid',
+          domain: {
+            id: 'index1',
+            field: 'f1'
+          },
+          range: {
+            id: 'index2',
+            field: 'f2'
+          }
+        }
+      ];
 
       const index = 'index1';
       const buttonDefs = [ button1 ];
 
-      const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+      const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
 
       expect(buttons.length).to.equal(1);
 
@@ -120,55 +146,61 @@ describe('Kibi Components', function () {
     describe('constructButtonArray', function () {
       describe('buttons configured with sourceDashboard targetDashboard and indexRelationId', function () {
         it('should correctly assign source and target index, type and field', function () {
-          init({
-            relations: {
-              relationsIndices: [
-                {
-                  id: 'ia//fa/ib//fb'
-                }
-              ],
-              relationsDashboards: []
+          init();
+          const relations = [
+            {
+              id: 'some-uuid',
+              domain: {
+                id: 'ia',
+                field: 'fa'
+              },
+              range: {
+                id: 'ib',
+                field: 'fb'
+              }
             }
-          });
+          ];
           const buttonDefs = [
             {
               label: 'from A to B',
               sourceDashboardId: 'dashboardA',
               redirectToDashboard: 'dashboardB',
-              indexRelationId: 'ia//fa/ib//fb'
+              indexRelationId: 'some-uuid'
             }
           ];
 
           const index = 'ia';
 
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           expect(buttons[0].sourceIndexPatternId).to.equal('ia');
-          expect(buttons[0].sourceIndexPatternType).to.equal('');
           expect(buttons[0].sourceField).to.equal('fa');
           expect(buttons[0].targetIndexPatternId).to.equal('ib');
-          expect(buttons[0].targetIndexPatternType).to.equal('');
           expect(buttons[0].targetField).to.equal('fb');
         });
       });
 
       describe('buttons configured with targetDashboard and indexRelationId', function () {
         it('should correctly filter out if currentDashboardIndex is neither in source nor in target for the button relation', function () {
-          init({
-            relations: {
-              relationsIndices: [
-                {
-                  id: 'ic//fc/id//fd'
-                }
-              ],
-              relationsDashboards: []
+          init();
+          const relations = [
+            {
+              id: 'some-uuid',
+              domain: {
+                id: 'ic',
+                field: 'fc'
+              },
+              range: {
+                id: 'id',
+                field: 'fd'
+              }
             }
-          });
+          ];
           const buttonDefs = [
             {
               label: 'from C to D',
               targetDashboardId: 'dashboardC',
-              indexRelationId: 'ic//fc/id//fd'
+              indexRelationId: 'some-uuid'
             }
           ];
           const dashboardIdIndexPair = new Map();
@@ -178,27 +210,32 @@ describe('Kibi Components', function () {
           const index = 'ia';
           const currentDashboardId = 'dashboardA';
 
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(
+            buttonDefs, relations, index, currentDashboardId, dashboardIdIndexPair);
           expect(buttons.length).to.equal(0);
         });
 
-        it('should correctly filter out it if currentDashboardIndex same as relation source index' +
+        it('should correctly filter out it if currentDashboardIndex same as relation source index ' +
           'but index of targetDashboard different than relation target index', function () {
-          init({
-            relations: {
-              relationsIndices: [
-                {
-                  id: 'ia//fa/ib//fb'
-                }
-              ],
-              relationsDashboards: []
+          init();
+          const relations = [
+            {
+              id: 'some-uuid',
+              domain: {
+                id: 'ia',
+                field: 'fa'
+              },
+              range: {
+                id: 'ib',
+                field: 'fb'
+              }
             }
-          });
+          ];
           const buttonDefs = [
             {
               label: 'from B to A',
               targetDashboardId: 'dashboardA',
-              indexRelationId: 'ia//fa/ib//fb'
+              indexRelationId: 'some-uuid'
             }
           ];
           const dashboardIdIndexPair = new Map();
@@ -209,27 +246,32 @@ describe('Kibi Components', function () {
           const index = 'ia';
           const currentDashboardId = 'dashboardC';
 
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(
+            buttonDefs, relations, index, currentDashboardId, dashboardIdIndexPair);
           expect(buttons.length).to.equal(0);
         });
 
-        it('should correctly filter it out if currentDashboardIndex same as relation target index' +
+        it('should correctly filter it out if currentDashboardIndex same as relation target index ' +
           'but index of targetDashboard different than relation source index', function () {
-          init({
-            relations: {
-              relationsIndices: [
-                {
-                  id: 'ib//fb/ia//fa'
-                }
-              ],
-              relationsDashboards: []
+          init();
+          const relations = [
+            {
+              id: 'some-uuid',
+              domain: {
+                id: 'ib',
+                field: 'fb'
+              },
+              range: {
+                id: 'ia',
+                field: 'fa'
+              }
             }
-          });
+          ];
           const buttonDefs = [
             {
               label: 'from B to A',
               targetDashboardId: 'dashboardA',
-              indexRelationId: 'ib//fb/ia//fa'
+              indexRelationId: 'some-uuid'
             }
           ];
           const dashboardIdIndexPair = new Map();
@@ -240,7 +282,8 @@ describe('Kibi Components', function () {
           const index = 'ia';
           const currentDashboardId = 'dashboardC';
 
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(
+            buttonDefs, relations, index, currentDashboardId, dashboardIdIndexPair);
           expect(buttons.length).to.equal(0);
         });
       });
@@ -256,6 +299,19 @@ describe('Kibi Components', function () {
       describe('custom filter label', function () {
         let index;
         let buttonDefs;
+        const relations = [
+          {
+            id: 'some-uuid',
+            domain: {
+              id: 'index1',
+              field: 'f1'
+            },
+            range: {
+              id: 'index2',
+              field: 'f2'
+            }
+          }
+        ];
 
         beforeEach(() => {
           init();
@@ -276,7 +332,7 @@ describe('Kibi Components', function () {
         });
 
         it('should set the default filter label if no custom is set', function () {
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');
@@ -298,7 +354,7 @@ describe('Kibi Components', function () {
 
         it('should replace both $COUNT and $DASHBOARD occurrences', function () {
           buttonDefs[0].filterLabel = 'My custom label with placeholders $COUNT $DASHBOARD';
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');
@@ -321,7 +377,7 @@ describe('Kibi Components', function () {
 
         it('should replace $DASHBOARD', function () {
           buttonDefs[0].filterLabel = 'My custom label $DASHBOARD';
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');
@@ -343,7 +399,7 @@ describe('Kibi Components', function () {
 
         it('should replace $COUNT', function () {
           buttonDefs[0].filterLabel = 'My custom label $COUNT';
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');
@@ -365,7 +421,7 @@ describe('Kibi Components', function () {
 
         it('should replace nothing', function () {
           buttonDefs[0].filterLabel = 'My custom label';
-          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
           expect(button.label).to.equal('button 1');
@@ -415,13 +471,27 @@ describe('Kibi Components', function () {
       it('should expand the time-based index pattern', function () {
         const currentDashboardId = 'dashboardA';
         const button = {
+          indexRelationId: 'some-uuid',
           sourceField: 'fa',
           sourceIndexPatternId: 'ia-*',
           targetField: 'fb',
           targetIndexPatternId: 'ib'
         };
+        const relations = [
+          {
+            id: 'some-uuid',
+            domain: {
+              id: 'ia-*',
+              field: 'fa'
+            },
+            range: {
+              id: 'ib',
+              field: 'fb'
+            }
+          }
+        ];
 
-        init({ currentDashboardId, indexPatterns, savedDashboards });
+        init({ currentDashboardId, indexPatterns, savedDashboards, relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia-*').returns([ 'ia-1', 'ia-2' ]);
@@ -441,6 +511,7 @@ describe('Kibi Components', function () {
       let indexPatterns;
       let savedDashboards;
       let savedSearches;
+      let relations;
 
       beforeEach(function () {
         indexPatterns = [
@@ -474,6 +545,19 @@ describe('Kibi Components', function () {
             }
           }
         ];
+        relations = [
+          {
+            id: 'some-uuid',
+            domain: {
+              id: 'ia',
+              field: 'fa'
+            },
+            range: {
+              id: 'ib',
+              field: 'fb'
+            }
+          }
+        ];
       });
 
       it('should build the join_sequence', function () {
@@ -485,7 +569,7 @@ describe('Kibi Components', function () {
           targetIndexPatternId: 'ib'
         };
 
-        init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches });
+        init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches, relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
@@ -542,13 +626,11 @@ describe('Kibi Components', function () {
         const button = {
           sourceField: 'fa',
           sourceIndexPatternId: 'ia',
-          sourceIndexPatternType: 'ta',
           targetField: 'fb',
           targetIndexPatternId: 'ib',
-          targetIndexPatternType: 'tb'
         };
 
-        init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches });
+        init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches, relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
@@ -601,7 +683,7 @@ describe('Kibi Components', function () {
       });
 
       it('should get the query from the search meta', function () {
-        init({ indexPatterns, savedDashboards, savedSearches });
+        init({ indexPatterns, savedDashboards, savedSearches, relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
@@ -644,7 +726,7 @@ describe('Kibi Components', function () {
       });
 
       it('should set the default siren-vanguard parameters', function () {
-        init({ indexPatterns, savedDashboards, savedSearches });
+        init({ indexPatterns, savedDashboards, savedSearches, relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
@@ -666,31 +748,21 @@ describe('Kibi Components', function () {
       });
 
       it('should set the advanced siren-vanguard parameters', function () {
-        init({ indexPatterns, savedSearches, savedDashboards });
-
-        const relations = {
-          relationsIndices: [
-            {
-              type: 'INNER_JOIN',
-              indices: [
-                {
-                  indexPatternId: 'ia',
-                  path: 'fa'
-                },
-                {
-                  indexPatternId: 'ib',
-                  path: 'fb'
-                }
-              ],
-              label: 'rel',
-              id: 'ia//fa/ib//fb'
-            }
-          ]
-        };
-        config.set('siren:relations', relations);
-
-        $rootScope.$emit('change:config.siren:relations', relations);
-        $rootScope.$digest();
+        const relations = [
+          {
+            id: 'some-uuid',
+            domain: {
+              id: 'ia',
+              field: 'fa'
+            },
+            range: {
+              id: 'ib',
+              field: 'fb'
+            },
+            joinType: 'INNER_JOIN'
+          }
+        ];
+        init({ indexPatterns, savedSearches, savedDashboards, relations });
 
         const button = {
           sourceField: 'fa',

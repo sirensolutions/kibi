@@ -29,11 +29,8 @@ uiModules
        */
       $scope.toggleTargetDashboards = function (button) {
         if (!button.compatibleDashboard) {
-          ontologyClient.getRelations()
-          .then((relations) => {
-            const relation = _.find(relations, (rel) => {
-              return rel.id === button.indexRelationId;
-            });
+          ontologyClient.getRelationById(button.indexRelationId)
+          .then((relation) => {
             let entity = relation.domain;
             if (relation.range.type === 'VIRTUAL_ENTITY') {
               entity = relation.range;

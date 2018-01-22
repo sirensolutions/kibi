@@ -158,12 +158,15 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
       notify.info('Connection OK');
     })
     .catch(err => {
-      if (err.error && err.error.reason) {
+      if (err && err.error && err.error.reason) {
         notify.error(err.error.reason + ' ' + JSON.stringify(err));
-      } else if (err.error && err.message) {
+      } else if (err && err.error && err.message) {
         notify.error(err.message + ' ' + JSON.stringify(err));
-      } else {
+      } else if (err) {
         notify.error('Unknown error: ' + JSON.stringify(err));
+      } else {
+        // this happens when Investigate backend is down
+        notify.error('Unknown connection error. Please refresh the browser and try again');
       }
     });
   };

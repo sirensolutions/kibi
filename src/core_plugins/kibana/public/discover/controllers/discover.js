@@ -94,13 +94,19 @@ uiRoutes
             stateVal: state.index,
             stateValFound: specified && exists
           })
-          // kibi: redirect if access to index pattern is forbidden
           .catch(error => {
+            // kibi: redirect if
+            // access to index pattern is forbidden
+            // unable to fetch the index pattern for any other reason
+            let message;
             if (error instanceof IndexPatternAuthorizationError) {
-              createNotifier().warning(`Access to index pattern ${id} is forbidden.`);
-              kbnUrl.redirect('/discover');
-              return Promise.halt();
+              message = `Access to index pattern ${id} is forbidden.`;
+            } else {
+              message = `Could not fetch index pattern. Cause: ${id} ${JSON.stringify(error)}`;
             }
+            createNotifier().error(message);
+            kbnUrl.redirect('/discover');
+            return Promise.halt();
           });
         });
       });

@@ -186,7 +186,7 @@ describe('plugins/elasticsearch', () => {
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           sinon.assert.calledOnce(plugin.status.red);
           expect(plugin.status.red.args[0][0]).to.be(
-            'Elasticsearch is still initializing the kibana index.'
+            'Elasticsearch is still initializing the Siren Investigate index.'  // kibi: changed kibana to Siren Investigate
           );
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));

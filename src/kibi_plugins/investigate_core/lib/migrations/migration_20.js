@@ -14,7 +14,7 @@ import _ from 'lodash';
  * - converts the old relation ids to UUIDs.
  * - updates every join button replacing its relation id with the new one.
  */
-export default class Migration8 extends Migration {
+export default class Migration20 extends Migration {
 
   constructor(configuration) {
     super(configuration);

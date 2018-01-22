@@ -34,101 +34,28 @@ describe('investigate_core/migrations/functional', function () {
     return indexSnapshot(cluster, indexName);
   }
 
-  const areRelationsIdTheSame = function (originalId, upgradedId) {
-    const originalIdParts = originalId.split('/');
-    const upgradedIdParts = upgradedId.split('/');
-
-    expect(originalIdParts).to.have.length(4);
-    expect(upgradedIdParts).to.have.length(6);
-    expect(upgradedIdParts[0]).to.be(originalIdParts[0]); // left index
-    expect(upgradedIdParts[1]).to.be(''); // left type
-    expect(upgradedIdParts[2]).to.be(originalIdParts[1]); // left path
-    expect(upgradedIdParts[3]).to.be(originalIdParts[2]); // right index
-    expect(upgradedIdParts[4]).to.be(''); // right type
-    expect(upgradedIdParts[5]).to.be(originalIdParts[3]); // right path
+  const checkOriginalRelationId = function (originalRelation) {
+    const originalParts = originalRelation.id.split('/');
+    expect(originalParts.length).to.be(6);
   };
 
-  const areIndicesRelationsTheSame = function (originalRelation, upgradedRelation) {
-    expect(originalRelation).to.be.ok();
-    expect(upgradedRelation).to.be.ok();
-    expect(upgradedRelation.label).to.be(originalRelation.label);
-    expect(upgradedRelation.indices).to.have.length(2);
-
-    expect(Object.keys(upgradedRelation.indices[0])).to.have.length(3);
-    expect(upgradedRelation.indices[0].indexPatternId).to.be(originalRelation.indices[0].indexPatternId);
-    expect(upgradedRelation.indices[0].indexPatternType).to.be('');
-    expect(originalRelation.indices[0].indexPatternType).to.be.an('undefined');
-    expect(upgradedRelation.indices[0].path).to.be(originalRelation.indices[0].path);
-
-    expect(Object.keys(upgradedRelation.indices[1])).to.have.length(3);
-    expect(upgradedRelation.indices[1].indexPatternId).to.be(originalRelation.indices[1].indexPatternId);
-    expect(upgradedRelation.indices[1].indexPatternType).to.be('');
-    expect(originalRelation.indices[1].indexPatternType).to.be.an('undefined');
-    expect(upgradedRelation.indices[1].path).to.be(originalRelation.indices[1].path);
-    areRelationsIdTheSame(originalRelation.id, upgradedRelation.id);
-  };
-
-  const checkWasNotUpgraded = function (original, upgraded) {
-    const upgradedSirenRelations = JSON.parse(upgraded._source['siren:relations']);
-    const originalSirenRelations = JSON.parse(original._source['siren:relations']);
-    expect(upgradedSirenRelations).to.eql(originalSirenRelations);
+  const checkUpgradedRelationId = function (upgradedRelation) {
+    const upgradedParts = upgradedRelation.id.split('/');
+    expect(upgradedParts.length).to.be(1);
   };
 
   const checkWasUpgraded = function (original, upgraded) {
     const upgradedSirenRelations = JSON.parse(upgraded._source['siren:relations']);
     const originalSirenRelations = JSON.parse(original._source['siren:relations']);
 
-    expect(upgradedSirenRelations).not.to.be.an('undefined');
-
-    // the version field is new
-    const upgreadedKeysNo = Object.keys(upgradedSirenRelations).length;
-    const originalKeysNo = Object.keys(originalSirenRelations).length;
-
-    expect(upgreadedKeysNo - 1).to.equal(originalKeysNo);
-
-    expect(Object.keys(upgradedSirenRelations.relationsIndices).length)
-    .to.be(Object.keys(originalSirenRelations.relationsIndices).length);
-    expect(Object.keys(upgradedSirenRelations.relationsDashboards).length)
-    .to.be(Object.keys(originalSirenRelations.relationsDashboards).length);
-    if (originalSirenRelations.relationsDashboardsSerialized) {
-      expect(Object.keys(upgradedSirenRelations.relationsDashboardsSerialized).length)
-      .to.be(Object.keys(originalSirenRelations.relationsDashboardsSerialized).length);
-    } else {
-      expect(upgradedSirenRelations.relationsDashboardsSerialized).to.not.be.ok();
-    }
-    expect(upgradedSirenRelations.relationsIndicesSerialized).to.eql(originalSirenRelations.relationsIndicesSerialized);
-
-    // check indices relations
-    _.each(originalSirenRelations.relationsIndices, (originalRelation, i) => {
-      const upgradedRelation = upgradedSirenRelations.relationsIndices[i];
-      areIndicesRelationsTheSame(originalRelation, upgradedRelation);
+    // check tthat the ids of the old relations differ from the new ones.
+    _.each(originalSirenRelations.relationsIndices, (originalRelation) => {
+      checkOriginalRelationId(originalRelation);
     });
-    // check dashboards relations
-    _.each(originalSirenRelations.relationsDashboards, (originalRelation, i) => {
-      const upgradedRelation = upgradedSirenRelations.relationsDashboards[i];
-      expect(upgradedRelation).to.be.ok();
-      expect(Object.keys(upgradedRelation)).to.have.length(2);
-      expect(upgradedRelation.dashboards).to.eql(originalRelation.dashboards);
 
-      const originalIndicesRelation = _.find(originalSirenRelations.relationsIndices, 'id', originalRelation.relation);
-      const upgradedIndicesRelation = _.find(upgradedSirenRelations.relationsIndices, 'id', upgradedRelation.relation);
-      areIndicesRelationsTheSame(originalIndicesRelation, upgradedIndicesRelation);
+    _.each(upgradedSirenRelations.relationsIndices, (upgradedRelation) => {
+      checkUpgradedRelationId(upgradedRelation);
     });
-    // check dashboards relations serialized
-    if (originalSirenRelations.relationsDashboardsSerialized) {
-      expect(_.omit(upgradedSirenRelations.relationsDashboardsSerialized, 'links'))
-      .to.eql(_.omit(originalSirenRelations.relationsDashboardsSerialized, 'links'));
-      _.each(originalSirenRelations.relationsDashboardsSerialized.links, (originalRelation, i) => {
-        const upgradedRelation = upgradedSirenRelations.relationsDashboardsSerialized.links[i];
-        expect(_.omit(upgradedRelation, 'data')).to.eql(_.omit(originalRelation, 'data'));
-        expect(Object.keys(upgradedRelation.data)).to.have.length(2);
-        areRelationsIdTheSame(originalRelation.data.id, upgradedRelation.data.relation);
-        const dashboardsRelations = _.find(upgradedSirenRelations.relationsDashboards, upgradedRelation.data);
-        expect(dashboardsRelations).to.be.ok();
-      });
-    }
-
-    expect(upgradedSirenRelations.version).to.equal(2);
   };
 
 
@@ -140,7 +67,7 @@ describe('investigate_core/migrations/functional', function () {
       await scenarioManager.reload(Scenario);
     });
 
-    describe('should update the relations when siren:relations', function () {
+    describe('upgradeable siren:relations', function () {
       const indexName = '.siren1';
 
       beforeEach(() => {
@@ -183,28 +110,28 @@ describe('investigate_core/migrations/functional', function () {
       });
     });
 
-    // describe('should not update the relations if already with an UUID', function () {
-    //   const indexName = '.siren2';
-    //
-    //   beforeEach(() => {
-    //     configuration = {
-    //       config: fakeConfig,
-    //       client: cluster.getClient(),
-    //       logger: {
-    //         warning: sinon.spy(),
-    //         info: sinon.spy()
-    //       }
-    //     };
-    //     warningSpy = configuration.logger.warning;
-    //     fakeConfig.get.withArgs('kibana.index').returns(indexName);
-    //   });
+    describe('should not update the relations if already with an UUID', function () {
+      const indexName = '.siren2';
 
-    //   it('should count all upgradeable objects', async () => {
-    //     const migration = new Migration(configuration);
-    //     const result = await migration.count();
-    //     expect(result).to.be(0);
-    //   });
-    // });
+      beforeEach(() => {
+        configuration = {
+          config: fakeConfig,
+          client: cluster.getClient(),
+          logger: {
+            warning: sinon.spy(),
+            info: sinon.spy()
+          }
+        };
+        warningSpy = configuration.logger.warning;
+        fakeConfig.get.withArgs('kibana.index').returns(indexName);
+      });
+
+      it('should count all upgradeable objects', async () => {
+        const migration = new Migration(configuration);
+        const result = await migration.count();
+        expect(result).to.be(0);
+      });
+    });
 
     afterEach(async () => {
       await scenarioManager.unload(Scenario);

@@ -8,7 +8,7 @@
 module.exports = [
   {
     index: {
-      _index: '.siren',
+      _index: '.siren1',
       _type: 'config',
       _id: 'siren'
     }
@@ -19,7 +19,7 @@ module.exports = [
 
   {
     index: {
-      _index: '.siren',
+      _index: '.siren1',
       _type: 'visualization',
       _id: 'Relational-Browsing',
     }

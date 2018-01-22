@@ -2,7 +2,7 @@ import Migration from 'kibiutils/lib/migrations/migration';
 import _ from 'lodash';
 
 /**
- * Investigate Core - Migration 19.
+ * Investigate Core - Migration 20.
  *
  * Looks for:
  *

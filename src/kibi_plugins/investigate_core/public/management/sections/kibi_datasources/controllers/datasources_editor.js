@@ -155,10 +155,16 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
   $scope.testConnection = function () {
     jdbcDatasources.validate(jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource))
     .then(res => {
-      $scope.connectionStatus = res;
+      notify.info('Connection OK');
     })
     .catch(err => {
-      $scope.connectionStatus = err;
+      if (err.error && err.error.reason) {
+        notify.error(err.error.reason + ' ' + JSON.stringify(err));
+      } else if (err.error && err.message) {
+        notify.error(err.message + ' ' + JSON.stringify(err));
+      } else {
+        notify.error('Unknown error: ' + JSON.stringify(err));
+      }
     });
   };
 

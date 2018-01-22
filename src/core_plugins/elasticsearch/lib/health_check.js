@@ -88,7 +88,7 @@ module.exports = function (plugin, server, { mappings }) {
       }
 
       if (health === INITIALIZING) {
-        plugin.status.red('Elasticsearch is still initializing the kibana index.');
+        plugin.status.red('Elasticsearch is still initializing the Siren Investigate index.'); // kibi: changed kibana to Siren Investigate
         return Promise.delay(REQUEST_DELAY).then(waitForShards);
       }
     });

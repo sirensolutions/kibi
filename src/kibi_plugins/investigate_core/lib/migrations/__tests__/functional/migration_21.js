@@ -4,8 +4,8 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'sinon';
 import requirefrom from 'requirefrom';
-import Migration from '../../migration_20';
-import Scenario from './scenarios/migration_20/scenario';
+import Migration from '../../migration_21';
+import Scenario from './scenarios/migration_21/scenario';
 import url from 'url';
 
 const serverConfig = requirefrom('test')('server_config');
@@ -20,7 +20,26 @@ describe('investigate_core/migrations/functional', function () {
   this.timeout(timeout);
 
   const fakeConfig = {
-    get: sinon.stub()
+    get: sinon.stub(),
+    has: sinon.stub()
+  };
+
+  const fakeServer = {
+    config: () => { return fakeConfig; },
+    plugins: {
+      elasticsearch: {
+        getCluster: () => {
+          return {
+            callWithInternalUser: sinon.stub()
+          }
+        }
+      }
+    },
+    log: (message, msg) => {
+      // if (message[1] === 'warning' || message[1] === 'error') {
+        console.log('LOG: ' + message + ' - ' + msg);
+      // }
+    }
   };
 
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
@@ -34,32 +53,12 @@ describe('investigate_core/migrations/functional', function () {
     return indexSnapshot(cluster, indexName);
   }
 
-  const checkOriginalRelationId = function (originalRelation) {
-    const originalParts = originalRelation.id.split('/');
-    expect(originalParts.length).to.be(6);
-  };
+  const checkConfigWasUpgraded = function (original, upgraded) {
+    expect(original._source['siren:relations']).to.not.be(undefined);
+    expect(upgraded._source['siren:relations']).to.be(undefined);
+  }
 
-  const checkUpgradedRelationId = function (upgradedRelation) {
-    const upgradedParts = upgradedRelation.id.split('/');
-    expect(upgradedParts.length).to.be(1);
-  };
-
-  const checkWasUpgraded = function (original, upgraded) {
-    const upgradedSirenRelations = JSON.parse(upgraded._source['siren:relations']);
-    const originalSirenRelations = JSON.parse(original._source['siren:relations']);
-
-    // check tthat the ids of the old relations differ from the new ones.
-    _.each(originalSirenRelations.relationsIndices, (originalRelation) => {
-      checkOriginalRelationId(originalRelation);
-    });
-
-    _.each(upgradedSirenRelations.relationsIndices, (upgradedRelation) => {
-      checkUpgradedRelationId(upgradedRelation);
-    });
-  };
-
-
-  describe('Investigate Core - Migration 20 - Functional test', function () {
+  describe('Investigate Core - Migration 21 - Functional test', function () {
     let warningSpy;
     let configuration;
 
@@ -67,26 +66,34 @@ describe('investigate_core/migrations/functional', function () {
       await scenarioManager.reload(Scenario);
     });
 
-    describe('upgradeable siren:relations', function () {
+    describe('relational schema migration', function () {
       const indexName = '.siren1';
 
       beforeEach(() => {
         configuration = {
           config: fakeConfig,
           client: cluster.getClient(),
+          server: fakeServer,
           logger: {
             warning: sinon.spy(),
-            info: sinon.spy()
+            info: sinon.spy(),
+            error: sinon.spy()
           }
         };
         warningSpy = configuration.logger.warning;
+        fakeConfig.has.withArgs('kibana.index').returns(true);
         fakeConfig.get.withArgs('kibana.index').returns(indexName);
+        fakeConfig.get.withArgs('investigate_core.gremlin_server.url').returns('http://127.0.0.1:8061');
+        fakeConfig.has.withArgs('investigate_core.gremlin_server.path').returns(true);
+        fakeConfig.get.withArgs('investigate_core.gremlin_server.path').returns('gremlin_server/gremlin-server.jar');
+        fakeConfig.has.withArgs('elasticsearch.url').returns(true);
+        fakeConfig.get.withArgs('elasticsearch.url').returns('http://127.0.0.1:9220');
       });
 
       it('should count all upgradeable objects', async () => {
         const migration = new Migration(configuration);
         const result = await migration.count();
-        expect(result).to.be(2);
+        expect(result).to.be(1);
       });
 
       it('should upgrade all upgradeable objects', async () => {
@@ -94,14 +101,22 @@ describe('investigate_core/migrations/functional', function () {
         const migration = new Migration(configuration);
 
         let result = await migration.upgrade();
-        expect(result).to.be(2);
+        expect(result).to.be(1);
 
         const after = await snapshot(indexName);
-        expect(before.size).to.equal(after.size);
+        // here we should have the new ontology-model object indexed
+        expect(before.size).to.not.equal(after.size);
 
-        const original = before.get('siren');
-        const upgraded = after.get('siren');
-        checkWasUpgraded(original, upgraded);
+        // check that the siren.relations field is not there anymore
+        const originalConfig = before.get('siren');
+        const upgradedConfig = after.get('siren');
+        checkConfigWasUpgraded(originalConfig, upgradedConfig);
+
+        // check that now we have the ontology-model document
+        const originalOntology = before.get('default-ontology');
+        expect(originalOntology).to.be(undefined);
+        const upgradedOntology = after.get('default-ontology');
+        expect(upgradedOntology).to.not.be(undefined);
 
         expect(warningSpy.called).to.be(false);
 
@@ -110,7 +125,7 @@ describe('investigate_core/migrations/functional', function () {
       });
     });
 
-    describe('should not update the relations if already with an UUID', function () {
+    describe('no schema to migrate', function () {
       const indexName = '.siren2';
 
       beforeEach(() => {
@@ -119,7 +134,8 @@ describe('investigate_core/migrations/functional', function () {
           client: cluster.getClient(),
           logger: {
             warning: sinon.spy(),
-            info: sinon.spy()
+            info: sinon.spy(),
+            error: sinon.spy()
           }
         };
         warningSpy = configuration.logger.warning;

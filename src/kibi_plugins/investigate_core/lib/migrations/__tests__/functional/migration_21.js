@@ -31,14 +31,14 @@ describe('investigate_core/migrations/functional', function () {
         getCluster: () => {
           return {
             callWithInternalUser: sinon.stub()
-          }
+          };
         }
       }
     },
     log: (message, msg) => {
-      // if (message[1] === 'warning' || message[1] === 'error') {
+      if (message[1] === 'warning' || message[1] === 'error') {
         console.log('LOG: ' + message + ' - ' + msg);
-      // }
+      }
     }
   };
 
@@ -56,7 +56,7 @@ describe('investigate_core/migrations/functional', function () {
   const checkConfigWasUpgraded = function (original, upgraded) {
     expect(original._source['siren:relations']).to.not.be(undefined);
     expect(upgraded._source['siren:relations']).to.be(undefined);
-  }
+  };
 
   describe('Investigate Core - Migration 21 - Functional test', function () {
     let warningSpy;

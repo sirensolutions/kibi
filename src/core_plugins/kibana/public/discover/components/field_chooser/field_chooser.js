@@ -28,6 +28,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
       onAddFilter: '=',
       onRemoveField: '=',
       onQuickDashboard: '=',
+      onGuessFields: '=',
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
@@ -212,6 +213,12 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
           })
         }));
       }
+
+      // kibi: Added discriminator for 'Guess Fields'/'Generate Dashboard' button
+      $scope.haveNoFields = function () {
+        return $scope.columns.length <= 0 || $scope.columns[0] === '_source';
+      };
+      // kibi: end
 
       $scope.computeDetails = function (field, recompute) {
         if (_.isUndefined(field.details) || recompute) {

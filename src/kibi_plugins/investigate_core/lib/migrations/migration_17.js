@@ -25,7 +25,6 @@ export default class Migration17 extends Migration {
     this._index = configuration.config.get('kibana.index');
     this._type = 'config';
     this._querySiren = {
-      size: 1000,
       query: {
         bool: {
           filter: [
@@ -39,7 +38,6 @@ export default class Migration17 extends Migration {
       }
     };
     this._queryKibi = {
-      size: 1000,
       query: {
         bool: {
           filter: [

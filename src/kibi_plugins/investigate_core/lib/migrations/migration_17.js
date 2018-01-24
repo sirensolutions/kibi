@@ -24,8 +24,20 @@ export default class Migration17 extends Migration {
     this._client = configuration.client;
     this._index = configuration.config.get('kibana.index');
     this._type = 'config';
-    this._query = {
-      size: 1000,
+    this._querySiren = {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                _id: 'siren'
+              }
+            }
+          ]
+        }
+      }
+    };
+    this._queryKibi = {
       query: {
         bool: {
           filter: [
@@ -45,12 +57,17 @@ export default class Migration17 extends Migration {
   }
 
   async count() {
-    const configs = await this.scrollSearch(this._index, this._type, this._query);
-    return configs.length;
+    const configsSiren = await this.scrollSearch(this._index, this._type, this._querySiren);
+    const configsKibi = await this.scrollSearch(this._index, this._type, this._queryKibi);
+    return configsSiren.length === 0 && configsKibi.length > 0 ? 1 : 0;
   }
 
   async upgrade() {
-    const configurations = await this.scrollSearch(this._index, this._type, this._query);
+    const count = await this.count();
+    if (count === 0) {
+      return 0;
+    }
+    const configurations = await this.scrollSearch(this._index, this._type, this._queryKibi);
     if (configurations.length === 0) {
       return 0;
     }

@@ -103,7 +103,15 @@ export function VisProvider(createNotifier, Private) {
       _.cloneDeep(state.params || {}),
       _.cloneDeep(this.type.params.defaults || {})
     );
-    if (!this.params.type) this.params.type = this.type.name;
+    // siren: type name assignment on multichart
+    if (this.type.name === 'multi_chart_vis') {
+      if (state.kibiSettings.settings.all) {
+        this.params.type = Object.keys(state.kibiSettings.settings.all.byName[state.kibiSettings.activeSetting].modes)[0];
+      }
+    } else {
+      if (!this.params.type) this.params.type = this.type.name;
+    }
+    // siren: end
 
     // kibi: aditional visualization settings
     this.kibiSettings = _.defaults({}, state.kibiSettings);

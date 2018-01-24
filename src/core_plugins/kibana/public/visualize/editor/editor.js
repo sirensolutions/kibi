@@ -210,7 +210,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     $scope.dateDocLinks = documentationLinks.date;
 
     // kibi: Multichart needs the savedVis reference
-    if (vis.type.name === 'kibi_multi_chart_vis') {
+    if (vis.type.name === 'multi_chart_vis') {
       vis._kibiSavedVis = savedVis;
     }
     // kibi: end

@@ -61,7 +61,7 @@ export default class Migration17 extends Migration {
   async count() {
     const configsSiren = await this.scrollSearch(this._index, this._type, this._querySiren);
     const configsKibi = await this.scrollSearch(this._index, this._type, this._queryKibi);
-    return configsSiren.length == 0 && configsKibi.length > 0 ? 1 : 0;
+    return configsSiren.length === 0 && configsKibi.length > 0 ? 1 : 0;
   }
 
   async upgrade() {

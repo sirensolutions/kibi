@@ -19,7 +19,7 @@ export function patchElasticsearchClient(server) {
 
   // NOTE:
   // At this moment the default client does not exist yet so there is no way to check
-  // that the Vanguard plugin is actually installed.
+  // that the Federate plugin is actually installed.
   // The methods are exposed and if the plugin is not installed the calls will fail
   // with an error from elasticsearch.
   const _ = require('lodash');

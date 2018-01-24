@@ -12,7 +12,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:env', () => {
     // make sure JAVA_HOME points to JDK8
-    const HOME = '/usr/lib/jvm/jdk8';
+    // kibi: we take the java home configuration form grunt config
+    const HOME = grunt.option('javaHome');
     process.env.JAVA_HOME = HOME;
 
     // extend PATH to point to JDK8

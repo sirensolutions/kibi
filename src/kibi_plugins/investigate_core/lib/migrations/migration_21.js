@@ -2,7 +2,7 @@ import Migration from 'kibiutils/lib/migrations/migration';
 import _ from 'lodash';
 
 /**
- * Investigate Core - Migration 20.
+ * Investigate Core - Migration 21.
  *
  * Looks for:
  *
@@ -72,18 +72,17 @@ export default class Migration21 extends Migration {
   }
 
   async upgrade() {
-    let count = 0;
     const objects = await this.scrollSearch(this._index, this._type, this._query);
     if (objects.length === 0) {
-      return count;
+      return 0;
     }
     if (objects.length !== 1) {
       this._logger.error('There should be only one config object');
-      return count;
+      return 0;
     }
     const obj = objects[0];
     if (!obj._source['siren:relations']) {
-      return count;
+      return 0;
     }
 
     const relations = JSON.parse(obj._source['siren:relations']);

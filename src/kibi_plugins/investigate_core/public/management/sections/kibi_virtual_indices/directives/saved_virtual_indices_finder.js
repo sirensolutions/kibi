@@ -3,10 +3,7 @@ import angular from 'angular';
 import { keyMap } from 'ui/utils/key_map';
 import { uiModules } from 'ui/modules';
 import savedVirtualIndicesFinderTemplate from './saved_virtual_indices_finder.html';
-
-// kibi: imports
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
-// kibi: end
 
 const module = uiModules.get('kibana');
 
@@ -16,7 +13,7 @@ module.directive('savedVirtualIndicesFinder', function ($location, $injector, kb
     restrict: 'E',
     scope: {
       type: '@',
-      // kibi: allow to override the number of objects per page
+      // allow to override the number of objects per page
       perPage: '=?perPage',
     },
     template: savedVirtualIndicesFinderTemplate,
@@ -27,13 +24,12 @@ module.directive('savedVirtualIndicesFinder', function ($location, $injector, kb
       // the text input element
       const $input = $element.find('input[ng-model=filter]');
 
-      // kibi: allow to override the number of objects per page
+      // allow to override the number of objects per page
       if (!$scope.perPage) {
         // The number of items to show in the list
         $scope.perPage = config.get('savedObjects:perPage');
       }
       this.perPage = $scope.perPage;
-      // kibi: end
 
       // the list that will hold the suggestions
       const $list = $element.find('ul');

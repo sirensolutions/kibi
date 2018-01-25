@@ -15,6 +15,8 @@ import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
 // kibi: this import is needed for any third party plugin
 import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
 import 'plugins/kibana/discover/saved_searches/saved_searches';
+import 'ui/kibi/components/ontology_client/ontology_client';
+import 'ui/kibi/components/query_engine_client/query_engine_client';
 // kibi: end
 
 function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns, globalState,

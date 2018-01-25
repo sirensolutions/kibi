@@ -1,4 +1,3 @@
-
 import { GuessFieldsProvider } from '../guess_fields';
 
 import { QuickDashModalsProvider } from '../quickdash_modals';

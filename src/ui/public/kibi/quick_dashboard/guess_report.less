@@ -14,7 +14,17 @@
     text-align: center;
   }
 
-  thead {
+  table {
+    border-collapse: separate;
+  }
+
+  th {
+    /* Sticky header that degrades gracefully if no browser support is present */
+    position: sticky;
+    top: 0;
+    padding: 0 .5rem;
+    background-color: white;
+    border-bottom: 1px solid @gray13;
   }
 
   tbody {
@@ -24,18 +34,6 @@
 
     tr:nth-child(even) {
       background-color: @gray14;
-    }
-  }
-
-  th {
-    /* Sticky header that degrades gracefully if no browser support is present */
-    position: sticky;
-    top: 0;
-    background-color: white;
-
-    & > div {
-      padding: 0 .5rem;
-      border-bottom: 1px solid @gray13;
     }
   }
 

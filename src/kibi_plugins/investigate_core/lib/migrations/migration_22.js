@@ -4,7 +4,7 @@ import rp from 'request-promise';
 import GremlinServerHandler from '../../../../server/gremlin_server/gremlin_server';
 
 /**
- * Investigate Core - Migration 21.
+ * Investigate Core - Migration 22.
  *
  * Looks for:
  *
@@ -15,7 +15,7 @@ import GremlinServerHandler from '../../../../server/gremlin_server/gremlin_serv
  * - if not null uses the gremlin server to convert it to the ontology based schema.
  * - deletes the siren:relations setting.
  */
-export default class Migration21 extends Migration {
+export default class Migration22 extends Migration {
 
   constructor(configuration) {
     super(configuration);

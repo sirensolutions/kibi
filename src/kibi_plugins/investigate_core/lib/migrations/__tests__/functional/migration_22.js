@@ -4,8 +4,8 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'sinon';
 import requirefrom from 'requirefrom';
-import Migration from '../../migration_21';
-import Scenario from './scenarios/migration_21/scenario';
+import Migration from '../../migration_22';
+import Scenario from './scenarios/migration_22/scenario';
 import url from 'url';
 import { esTestConfig } from '../../../../../../test_utils/es';
 
@@ -58,7 +58,7 @@ describe('investigate_core/migrations/functional', function () {
     expect(upgraded._source['siren:relations']).to.be(undefined);
   };
 
-  describe('Investigate Core - Migration 21 - Functional test', function () {
+  describe('Investigate Core - Migration 22 - Functional test', function () {
     let warningSpy;
     let configuration;
 

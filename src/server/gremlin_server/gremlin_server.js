@@ -154,6 +154,8 @@ function startServer(self, fulfill, reject) {
               }
             }
 
+            console.log('STARTING GREMLIN SERVER WITH ARGUMENTS:');
+            console.log(JSON.stringify(args));
             self.server.log(['gremlin', 'info'], 'Starting the Siren Gremlin Server');
             self.gremlinServer = childProcess.spawn('java', args);
             self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin', 'error'], ('' + data).trim()));

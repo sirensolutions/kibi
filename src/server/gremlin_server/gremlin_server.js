@@ -182,7 +182,7 @@ function startServer(self, fulfill, reject) {
                     }
                   })
                   .catch(function (err) {
-                    if (err.error.code !== 'ECONNREFUSED') {
+                    if (err.error && err.error.code !== 'ECONNREFUSED') {
                       self.server.log(['gremlin', 'error'], 'Failed to ping the Siren Gremlin Server: ' + err.message);
                     } else {
                       self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server');
@@ -338,6 +338,7 @@ GremlinServerHandler.prototype._ping = function () {
     method: 'GET',
     uri: this.url + '/ping'
   };
+  console.log('PINGING: ' + this.url);
   if (this.ca) {
     options.ca = this.ca;
   }

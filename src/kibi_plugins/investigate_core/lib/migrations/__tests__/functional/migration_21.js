@@ -7,6 +7,7 @@ import requirefrom from 'requirefrom';
 import Migration from '../../migration_21';
 import Scenario from './scenarios/migration_21/scenario';
 import url from 'url';
+import { esTestConfig } from '../../../../../../test_utils/es';
 
 const serverConfig = requirefrom('test')('server_config');
 const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
@@ -36,9 +37,8 @@ describe('investigate_core/migrations/functional', function () {
       }
     },
     log: (message, msg) => {
-      if (message[1] === 'warning' || message[1] === 'error') {
-        console.log('LOG: ' + message + ' - ' + msg);
-      }
+      // just print every log in case we have problems during tests.
+      console.log(message + ' - ' + msg);
     }
   };
 
@@ -80,14 +80,16 @@ describe('investigate_core/migrations/functional', function () {
             error: sinon.spy()
           }
         };
+        const esUrlParts = esTestConfig.getUrlParts();
+        const elasticUrl = esUrlParts.protocol + '://' + esUrlParts.hostname + ':' + esUrlParts.port;
         warningSpy = configuration.logger.warning;
         fakeConfig.has.withArgs('kibana.index').returns(true);
         fakeConfig.get.withArgs('kibana.index').returns(indexName);
-        fakeConfig.get.withArgs('investigate_core.gremlin_server.url').returns('http://127.0.0.1:8061');
+        fakeConfig.get.withArgs('investigate_core.gremlin_server.url').returns('http://127.0.0.1:8062');
         fakeConfig.has.withArgs('investigate_core.gremlin_server.path').returns(true);
         fakeConfig.get.withArgs('investigate_core.gremlin_server.path').returns('gremlin_server/gremlin-server.jar');
         fakeConfig.has.withArgs('elasticsearch.url').returns(true);
-        fakeConfig.get.withArgs('elasticsearch.url').returns('http://127.0.0.1:9220');
+        fakeConfig.get.withArgs('elasticsearch.url').returns(elasticUrl);
       });
 
       it('should count all upgradeable objects', async () => {

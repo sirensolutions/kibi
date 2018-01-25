@@ -19,7 +19,8 @@ module.exports = function (grunt) {
     'esvm:test',
     'getGremlin',
     'simplemocha:migrations',
-    'esvm_shutdown:test'
+    'esvm_shutdown:test',
+    'removeGremlin'
     // kibi: end
   ]);
 

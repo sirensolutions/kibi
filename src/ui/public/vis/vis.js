@@ -105,7 +105,7 @@ export function VisProvider(createNotifier, Private) {
     );
     // siren: type name assignment on multichart
     if (this.type.name === 'multi_chart_vis') {
-      if (state.kibiSettings.settings.all) {
+      if (state.kibiSettings && state.kibiSettings.settings.all) {
         this.params.type = Object.keys(state.kibiSettings.settings.all.byName[state.kibiSettings.activeSetting].modes)[0];
       }
     } else {

@@ -9,12 +9,7 @@ import { CONFIRM_BUTTON, CANCEL_BUTTON } from 'ui_framework/components/modal/con
 uiRoutes
 .when('/management/siren/virtualindices', {
   template,
-  reloadOnSearch: false,
-  resolve: {
-    isNew: function () {
-      return true;
-    }
-  }
+  reloadOnSearch: false
 })
 .when('/management/siren/virtualindices/:id?', {
   template,
@@ -31,15 +26,11 @@ uiRoutes
           virtualIndex: '/management/siren/virtualindices'
         });
       });
-    },
-    isNew: function () {
-      return false;
     }
   }
 });
 
 function controller($scope, $route, jdbcDatasources, createNotifier, es, confirmModal, $element, kbnUrl) {
-  $scope.isNew = $route.current.locals.isNew;
 
   if ($route.current.locals.virtualIndex) {
     $scope.virtualIndex = $route.current.locals.virtualIndex._source;
@@ -55,11 +46,7 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
   };
 
   $scope.isDeleteValid = function () {
-    if ($scope.virtualIndex && $scope.virtualIndex.id) {
-      return true;
-    } else {
-      return false;
-    }
+    return $scope.virtualIndex && $scope.virtualIndex.id;
   };
 
   const fetchVirtualIndexes = function () {
@@ -100,9 +87,7 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
   jdbcDatasources.list().then(datasources => {
     $scope.jdbcDatasources = datasources;
     if ($scope.virtualIndex) {
-      $scope.datasource = find($scope.jdbcDatasources, function (jdbcDatasource) {
-        return $scope.virtualIndex.datasource === jdbcDatasource._id;
-      });
+      $scope.datasource = find($scope.jdbcDatasources, '_id', $scope.virtualIndex.datasource);
     }
   });
 

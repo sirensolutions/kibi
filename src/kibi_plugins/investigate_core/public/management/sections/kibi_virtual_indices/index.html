@@ -1,174 +1,131 @@
 <kbn-management-app section="kibana" class="kuiView">
-  <div ng-controller="VirtualIndicesController" class="app-container virtual_indices_editor kibi-config-section">
+  <div ng-controller="VirtualIndicesController" class="app-container virtual_indices_editor kibi-config-section" id=virtual_indices_editor>
 
     <div class="container">
       <h2>Add new virtual index</h2>
       <div class="kuiVerticalRhythm">
-        <form
-          name="form"
-          role="form"
-          class="kuiVerticalRhythm"
-          ng-submit="registerJdbcIndexPattern()"
-        >
+
+        <form name="objectForm" novalidate>
           <!-- Pick datasource -->
           <div class="kuiVerticalRhythm">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-            >
-              Jdbc datasource name
-            </label>
-
-            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
-              <select
-                class="kuiSelect kuiSelect--large"
-                data-test-subj="createJdbcIndexPatternNameInput"
-                ng-model="jdbcFormValues.datasource"
-                name="jdbcDatasource"
-                required
-                ng-options="datasource._id as datasource._id for datasource in jdbcDatasources track by datasource._id"
-              ></select>
-            </div>
-          </div>
-
-          <!-- Pick resource -->
-          <div class="kuiVerticalRhythm">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-            >
-              Resource name (table name)
-            </label>
-
-            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
-              <input
-                class="kuiTextInput kuiTextInput--large"
-                data-test-subj="createJdbcIndexPatternResourceName"
-                ng-model="jdbcFormValues.resource"
-                name="jdbcResource"
-                required
-                type="text"
+              <label
+                class="kuiLabel kuiVerticalRhythmSmall"
               >
+                Jdbc datasource name
+              </label>
+
+              <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+                <select
+                  class="kuiSelect kuiSelect--large"
+                  data-test-subj="createJdbcIndexPatternNameInput"
+                  ng-model="datasource"
+                  name="jdbcDatasource"
+                  required
+                  ng-options="datasource._id as datasource._id for datasource in jdbcDatasources track by datasource._id"
+                ></select>
+              </div>
             </div>
-          </div>
 
-          <!-- Pick name -->
-          <div class="kuiVerticalRhythm">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-            >
-              Index pattern name
-            </label>
-
-            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
-              <input
-                class="kuiTextInput kuiTextInput--large"
-                data-test-subj="createIndexPatternNameInput"
-                ng-model="jdbcFormValues.name"
-                name="jdbcIndexName"
-                validate-jdbc-index-name
-                required
-                type="text"
+            <!-- Pick resource -->
+            <div class="kuiVerticalRhythm">
+              <label
+                class="kuiLabel kuiVerticalRhythmSmall"
               >
+                Resource name (table name)
+              </label>
+
+              <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+                <input
+                  class="kuiTextInput kuiTextInput--large"
+                  data-test-subj="createJdbcIndexPatternResourceName"
+                  ng-model="virtualIndex.resource"
+                  name="jdbcResource"
+                  required
+                  type="text"
+                >
+              </div>
             </div>
-          </div>
 
-          <!-- Pick resource -->
-          <div class="kuiVerticalRhythm">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-            >
-              Primary key (Optional - primary key for the table)
-            </label>
-
-            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
-              <input
-                class="kuiTextInput kuiTextInput--large"
-                data-test-subj="createJdbcIndexPatternPrimaryKey"
-                ng-model="jdbcFormValues.key"
-                name="jdbcPrimaryKey"
-                type="text"
+            <!-- Pick name -->
+            <div class="kuiVerticalRhythm">
+              <label
+                class="kuiLabel kuiVerticalRhythmSmall"
               >
+                Index pattern name
+              </label>
+
+              <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+                <input
+                  class="kuiTextInput kuiTextInput--large"
+                  data-test-subj="createIndexPatternNameInput"
+                  ng-model="virtualIndex.id"
+                  name="jdbcIndexName"
+                  validate-jdbc-index-name
+                  required
+                  type="text"
+                >
+              </div>
             </div>
-          </div>
 
-          <!-- Pick catalog -->
-          <div class="kuiVerticalRhythm">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-            >
-              Catalog (Optional)
-            </label>
-
-            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
-              <input
-                class="kuiTextInput kuiTextInput--large"
-                data-test-subj="createJdbcIndexPatternCatalog"
-                ng-model="jdbcFormValues.catalog"
-                name="jdbcCatalog"
-                type="text"
+            <!-- Pick resource -->
+            <div class="kuiVerticalRhythm">
+              <label
+                class="kuiLabel kuiVerticalRhythmSmall"
               >
+                Primary key (Optional - primary key for the table)
+              </label>
+
+              <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+                <input
+                  class="kuiTextInput kuiTextInput--large"
+                  data-test-subj="createJdbcIndexPatternPrimaryKey"
+                  ng-model="virtualIndex.key"
+                  name="jdbcPrimaryKey"
+                  type="text"
+                >
+              </div>
             </div>
-          </div>
 
-          <!-- Pick schema -->
-          <div class="kuiVerticalRhythm">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-            >
-              Schema (Optional)
-            </label>
-
-            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
-              <input
-                class="kuiTextInput kuiTextInput--large"
-                data-test-subj="createJdbcIndexPatternSchema"
-                ng-model="jdbcFormValues.schema"
-                name="jdbcSchema"
-                type="text"
+            <!-- Pick catalog -->
+            <div class="kuiVerticalRhythm">
+              <label
+                class="kuiLabel kuiVerticalRhythmSmall"
               >
-            </div>
-          </div>
+                Catalog (Optional)
+              </label>
 
-          <!-- Form actions -->
-          <button
-            data-test-subj="createVirtualIndexPatternCreateButton"
-            class="kuiButton kuiButton--primary kuiVerticalRhythm"
-            type="submit"
-          >
-            Add Virtual Index Pattern
-          </button>
+              <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+                <input
+                  class="kuiTextInput kuiTextInput--large"
+                  data-test-subj="createJdbcIndexPatternCatalog"
+                  ng-model="virtualIndex.catalog"
+                  name="jdbcCatalog"
+                  type="text"
+                >
+              </div>
+            </div>
+
+            <!-- Pick schema -->
+            <div class="kuiVerticalRhythm">
+              <label
+                class="kuiLabel kuiVerticalRhythmSmall"
+              >
+                Schema (Optional)
+              </label>
+
+              <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+                <input
+                  class="kuiTextInput kuiTextInput--large"
+                  data-test-subj="createJdbcIndexPatternSchema"
+                  ng-model="virtualIndex.schema"
+                  name="jdbcSchema"
+                  type="text"
+                >
+              </div>
+            </div>
         </form>
+
       </div>
-    </div>
-
-    <div class="container">
-      <h2>List of virtual indices</h2>
-
-
-      <table class="table table-condensed">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Datasource</th>
-            <th>Resource</th>
-            <th>Key</th>
-            <th>Catalog</th>
-            <th>Schema</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="virtualIndex in virtualIndexPatterns">
-            <td>{{virtualIndex._id}}</td>
-            <td>{{virtualIndex._source.datasource}}</td>
-            <td>{{virtualIndex._source.resource}}</td>
-            <td>{{virtualIndex._source.key}}</td>
-            <td>{{virtualIndex._source.catalog}}</td>
-            <td>{{virtualIndex._source.schema}}</td>
-            <td><button class="btn btn-danger" ng-click="delete(virtualIndex._id)">X</button></td>
-          </tr>
-        </tbody>
-      </table>
-
     </div>
   </div>
 </kbn-management-app>

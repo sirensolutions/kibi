@@ -16,8 +16,8 @@ const program = new Command('bin/investigate'); // kibi: renamed kibana to inves
 program
 .version(pkg.kibi_version)
 .description(
-  'Kibi extends Kibana with data intelligence features. ' +
-  'At the core, kibi can join and filter data live from multiple indexes (elasticsearch) or from SQL/NOSQL sources. ' +
+  'Siren Investigate extends Kibana with data intelligence features. ' +
+  'At the core, Siren Investigate can join and filter data live from multiple indexes (elasticsearch) or from SQL/NOSQL sources. ' +
   'Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.'
 );
 

@@ -204,19 +204,7 @@ uiModules.get('apps/management')
       function retrieveAndExportDocs(objs) {
         if (!objs.length) return notify.error('No saved objects to export.');
 
-        // kibi: create new object array which all hits are in same level
-        const bulkGetObjects = [];
-        each(objs, function (obj) {
-          if(obj.hits) {
-            each(obj.hits, function (hit) {
-              bulkGetObjects.push(hit);
-            });
-          } else {
-            bulkGetObjects.push(obj);
-          }
-        });
-
-        savedObjectsClient.bulkGet(bulkGetObjects)
+        savedObjectsClient.bulkGet(objs)
         .then(function (response) {
           // kibi: sort the docs so the config is on the top
           const docs = response.docs.map(partialRight(pick, '_id', '_type', '_source'));

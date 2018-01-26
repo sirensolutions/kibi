@@ -23,45 +23,43 @@ export default class Migration17 extends Migration {
     this._logger = configuration.logger;
     this._client = configuration.client;
     this._index = configuration.config.get('kibana.index');
+    this._type = 'config';
+    this._querySiren = {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                _id: 'siren'
+              }
+            }
+          ]
+        }
+      }
+    };
+    this._queryKibi = {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                _id: 'kibi'
+              }
+            }
+          ]
+        }
+      }
+    };
   }
 
   static get description() {
     return 'Migrate config object id from "kibi" to "siren"';
   }
 
-  async _getConfigurations() {
-    const configurations = await this._client.search({
-      index: this._index,
-      type: 'config',
-      size: 1000
-    });
-    return configurations.hits.hits;
-  }
-
   async count() {
-    const existingConfigs = await this._client.count({
-      index: this._index,
-      type: 'config',
-      ignoreUnavailable: true
-    });
-    if (existingConfigs.count === 0) {
-      return 0;
-    }
-    try {
-      await this._client.get({
-        index: this._index,
-        type: 'config',
-        id: 'siren'
-      });
-    } catch (err) {
-      if (err.status === 404) {
-        const configs = await this._getConfigurations();
-        return configs.length;
-      } else {
-        throw err;
-      }
-    }
-    return 0;
+    const configsSiren = await this.scrollSearch(this._index, this._type, this._querySiren);
+    const configsKibi = await this.scrollSearch(this._index, this._type, this._queryKibi);
+    return configsSiren.length === 0 && configsKibi.length > 0 ? 1 : 0;
   }
 
   async upgrade() {
@@ -69,18 +67,14 @@ export default class Migration17 extends Migration {
     if (count === 0) {
       return 0;
     }
-    const configurations = await this._getConfigurations();
-    let configuration;
+    const configurations = await this.scrollSearch(this._index, this._type, this._queryKibi);
+    if (configurations.length === 0) {
+      return 0;
+    }
+
     let body = '';
     for (const config of configurations) {
       body += JSON.stringify({
-        delete: {
-          _index: config._index,
-          _type: config._type,
-          _id: "kibi"
-        }
-      }) + '\n' +
-      JSON.stringify({
         index: {
           _index: config._index,
           _type: config._type,
@@ -90,12 +84,12 @@ export default class Migration17 extends Migration {
       JSON.stringify(config._source) + '\n';
     }
 
-    if (count > 0) {
+    if (body.length) {
       await this._client.bulk({
         refresh: true,
         body: body
       });
     }
-    return count;
+    return configurations.length;
   }
 }

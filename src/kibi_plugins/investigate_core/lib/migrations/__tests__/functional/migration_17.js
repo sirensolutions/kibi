@@ -59,15 +59,15 @@ describe('investigate_core/migrations/functional', function () {
         expect(result).to.be(1);
       });
 
-      it('should try to upgrade and get 0 on a subsequent count', async () => {
+      it('should try to upgrade and get 1 new object', async () => {
         const before = await snapshot();
         const migration = new Migration(configuration);
 
         const result = await migration.upgrade();
         expect(result).to.be(1);
 
-        const newCount = await migration.count();
-        expect(newCount).to.be(0);
+        const after = await snapshot();
+        expect(before.size + 1).to.equal(after.size);
       });
 
       it('should store the old config object with only the id changed', async () => {

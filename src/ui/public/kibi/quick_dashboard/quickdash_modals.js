@@ -1,8 +1,10 @@
 import createTemplate from './create_modal.html';
 import titleConflictTemplate from './title_conflict_modal.html';
+import guessReportTemplate from './guess_report.html';
 import progressTemplate from './progress_modal.html';
 
 import './create_modal.less';
+import './guess_report.less';
 
 import { BaseModalProvider } from './base_modal';
 
@@ -56,6 +58,10 @@ export function QuickDashModalsProvider(Private) {
 
     titleConflict(opts) {
       return baseModal(titleConflictTemplate, opts);
+    },
+
+    guessReport(opts) {
+      return baseModal(guessReportTemplate, opts);
     },
 
     progress(opts) {

@@ -1,0 +1,42 @@
+<div class="kibi-guess-fields-report kuiModal">
+  <div class="kuiModalHeader">
+    <div class="kuiModalHeader__title">
+      Autoselect Top 10 &ndash; Report
+    </div>
+  </div>
+
+  <div class="kuiModalBody">
+    <h3 ng-if="!stats.length">No field found</h3>
+    <table ng-if="stats.length">
+      <thead>
+        <tr>
+          <th><i class="fa fa-check"></i></th>
+          <th>Type</th>
+          <th>Name</th>
+          <th>Chart</th>
+          <th>Score</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="fieldStats in stats">
+          <td><i class="fa fa-check" ng-show="fieldStats.selected"></i></td>
+          <td><field-name field="fieldStats.typeField" /></td>
+          <td>{{fieldStats.field.displayName}}</td>
+          <td>{{fieldStats.sVis.vis.type.title}}</td>
+          <td>{{fieldStats.scoreStr}}</td>
+          <td>
+            <div ng-repeat="note in fieldStats.notes">{{note}}</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="kuiModalFooter">
+    <button class="btn btn-primary" aria-label="Ok"
+      ng-click="onConfirm()">
+      Ok
+    </button>
+  </div>
+</div>

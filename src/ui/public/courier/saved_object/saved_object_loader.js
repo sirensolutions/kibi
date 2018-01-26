@@ -115,7 +115,8 @@ export class SavedObjectLoader {
     return this.savedObjectsClient.find({
       type: this.lowercaseType,
       perPage: pageSize
-    });
+    })
+    .then(resp => Object.assign(resp, resp.hits));
     // kibi: end
   }
 

@@ -45,6 +45,22 @@ describe('saved_objects_api/functional', function () {
       timeTo: {
         type: 'text'
       },
+      refreshInterval: {
+        properties: {
+          display: {
+            type: 'text'
+          },
+          pause: {
+            type: 'boolean'
+          },
+          section: {
+            type: 'long'
+          },
+          value: {
+            type: 'long'
+          }
+        }
+      },
       title: {
         type: 'text'
       },

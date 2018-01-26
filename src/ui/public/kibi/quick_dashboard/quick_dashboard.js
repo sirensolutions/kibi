@@ -1,5 +1,6 @@
 import { QuickDashModalsProvider } from './quickdash_modals.js';
 import { QuickDashMakeVisProvider } from './make_visualizations';
+import { ProgressMapProvider } from './progress_map';
 import { panelsLayout } from './panels_layout';
 
 import { DashboardStateProvider } from 'plugins/kibana/dashboard/dashboard_state';
@@ -76,6 +77,7 @@ export function QuickDashboardProvider(
   const DashboardState = Private(DashboardStateProvider);
   const visMaker = Private(QuickDashMakeVisProvider);
   const quickDashModals = Private(QuickDashModalsProvider);
+  const progressMap = Private(ProgressMapProvider);
 
   const notify = createNotifier({ location: 'Quick Dashboard' });
 
@@ -169,72 +171,29 @@ export function QuickDashboardProvider(
     let { fieldNames } = args;
 
     if(timeFieldName && fieldNames.indexOf(timeFieldName) < 0) {
-      // The index's time field is always implicitly added. This is coherent with the
-      // way the 'Discover' app shows data.
-      fieldNames = fieldNames.concat([timeFieldName]);
+      // The index's time field is always implicitly added at the front.
+      // This is coherent with the way the 'Discover' app shows data.
+      fieldNames = [timeFieldName].concat(fieldNames);
     }
 
     args.fields = _(fieldNames)
       .map(fName => {
+        const field = indexPattern.fields.byName[fName];
+        if(!field || field.aggregatable) { return field; }
+
         // Non-aggregatable fields cannot be represented. In this case, they may have
-        // a corresponding 'raw' or 'keyword' (not es-analyzed) field which *is*
-        // aggregatable to be used instead.
+        // an aggregatable among their multifields, to be used instead. Note that
+        // we'll be getting the multifields straight from the index, the referenced
+        // on from the parent field don't look complete.
 
-        const candidates = [
-          indexPattern.fields.byName[fName],
-          indexPattern.fields.byName[fName + '.raw'],
-          indexPattern.fields.byName[fName + '.keyword']
-        ];
-
-        return candidates.find(field => field && field.aggregatable);
+        return _(field.multifields)
+          .map(mfStandIn => indexPattern.fields.byName[mfStandIn.name])
+          .find(mField => mField && mField.aggregatable);
       })
       .compact()
       .value();
 
     return args;
-  }
-
-  function progressNotified(operations) {
-    return function (args) {
-      const { indexPattern, fields } = args;
-
-      const progress = {
-        max: operations.length + visMaker.analysisStepsCount(indexPattern, fields),
-        value: -1,
-        text: '',
-        canceled: false,
-        notify: function (text) {
-          this.value += 1;
-          this.text = text;
-        },
-      };
-
-      args.progress = progress;
-
-
-      const progressModal = quickDashModals.progress({ progress });
-
-      progressModal.scope.onCancel = function () {
-        // Overriding cancel - modal shall not hide until
-        // current operation finishes
-        progress.canceled = true;
-        progress.text = 'Canceling...';
-      };
-
-      progressModal.show();
-
-
-      return operations.reduce(function (chain, op) {
-        return chain.then(input => {
-          if(progress.canceled) { return Promise.reject(0); }
-
-          progress.notify(op.text);
-          return op.fn(input);
-        });
-      }, Promise.resolve(args))
-      .finally(() => progressModal.scope.onConfirm())
-      .then(() => args);
-    };
   }
 
   function makeEmptyDashboard(args) {
@@ -248,7 +207,7 @@ export function QuickDashboardProvider(
 
         const dashState = new DashboardState(dash, AppState);
         dashState.appState.timeRestore = false;
-        dashState.saveState = () => {};
+        dashState.saveState = _.noop;
 
         dashState.setTitle(userSpecs.title);
 
@@ -259,12 +218,18 @@ export function QuickDashboardProvider(
       });
   }
 
-  function makeVisualizations(args) {
-    const { indexPattern, fields, progress } = args;
+  function makeVisSteps(args) {
+    return visMaker.analysisStepsCount(args.indexPattern, args.fields);
+  }
 
-    return visMaker.makeSavedVisualizations(indexPattern, fields, progress)
+  function makeVisualizations(args, progress) {
+    const { indexPattern, fields } = args;
+
+    return visMaker.makeSavedVisualizations(indexPattern, fields, { progress })
       .then(savedVises => {
-        args.savedVises = savedVises;
+        // Fields that couldn't be converted are retained, must be filtered out manually
+        args.savedVises = _.filter(savedVises);
+
         return args;
       });
   }
@@ -483,19 +448,24 @@ export function QuickDashboardProvider(
       .then(askUserSpecs)
       .then(checkDuplicateTitle)
       .then(retrieveFields)
-      .then(progressNotified([
+      .then(() => progressMap([
         { fn: makeEmptyDashboard, text: 'Making new Dashboard' },
-        { fn: makeVisualizations, text: 'Making Visualizations' },
+        { fn: makeVisualizations, text: 'Making Visualizations', countFn: makeVisSteps },
         { fn: saveVisualizations, text: 'Saving Visualizations' },
         { fn: fillDashboard,      text: 'Compiling Dashboard' },
         { fn: saveSavedSearch,    text: 'Saving Saved Search' },
         { fn: saveDashboard,      text: 'Saving Dashboard' }
-      ]))
+      ], {
+        title: 'Populating Dashboard...',
+        valueMap: (op, o, progress) => op.fn(args, progress),
+        textMap: 'text',
+        countMap: op => op.countFn ? op.countFn(args) : 1
+      }).then(() => args))
       .then(removeDupDashboard)
       .then(applyFilters)
       .then(openDashboardPage)
       .catch(err => undoSaves(args)
-        .then(() => err && notify.error(err)));
+        .then(() => { err && notify.error(err); }));
   }
 
   function releaseQuickComponents(dashId) {

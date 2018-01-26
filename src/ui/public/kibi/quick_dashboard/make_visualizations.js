@@ -1,6 +1,7 @@
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
+import { promiseMapSeries, fieldSpec, queryIsAnalyzed } from './commons';
 import * as visTypes from './vistypes';
 
 import _ from 'lodash';
@@ -9,13 +10,6 @@ import _ from 'lodash';
  * Adapted from multichart vis, see the Siren SDC4V papers for reference.
  */
 
-
-function promiseSerialMap(arr, map) {
-  return arr.reduce(function (promiseChain, val, idx) {
-    return promiseChain.then(results => map(val, idx)
-      .then(res => [...results, res]));
-  }, Promise.resolve([]));
-}
 
 
 export function QuickDashMakeVisProvider(
@@ -71,12 +65,6 @@ export function QuickDashMakeVisProvider(
       });
   }
 
-
-  function fieldSpec(field) {
-    return field.scripted
-      ? { script: { inline: field.script, lang: field.lang } }
-      : { field: field.name };
-  }
 
   function searchAgg(index, aggs) {
     const { timeFieldName } = index;
@@ -284,33 +272,6 @@ export function QuickDashMakeVisProvider(
     });
   }
 
-  function evalIsAnalyzed(index, field) {
-    if(field.type === 'text') { return Promise.resolve(true); }
-
-    // NOTE: Mappings are cached, so asking once per field is ok
-
-    return mappings.getMapping(index.id)
-      .then(indexMaps =>
-        _.some(indexMaps, indexMap =>
-          _.some(indexMap.mappings, typeMap => {
-            const prop = typeMap.properties[field.name];
-            if(!prop) { return false; }
-
-            switch (prop.type) {
-              case 'text':
-                return true;
-
-              case 'string':
-                return (prop.index !== 'not_analyzed');
-
-              default:
-                return false;
-            }
-          })
-        )
-      );
-  }
-
 
   function analyzeNumber(index, field) {
     if(!field.aggregatable) { return null; }
@@ -365,7 +326,7 @@ export function QuickDashMakeVisProvider(
 
       return Promise.all([
         evalTermsAgg(index, field, TERM_ELEMENT_COUNT_4_TABLE),
-        evalIsAnalyzed(index, field)
+        queryIsAnalyzed(mappings, index, field)
       ])
       .then(([termsEval, isAnalyzed]) => {
         // Use tagcloud if type is analyzed
@@ -398,6 +359,8 @@ export function QuickDashMakeVisProvider(
   }
 
   function analyzeDate(index, fields, dateField) {
+    if(!dateField.aggregatable) { return null; }
+
     // Will show a single timeline with all numeric fields on it as distinct lines
     const numericFields = _.filter(fields, field => field.type === 'number');
 
@@ -446,8 +409,10 @@ export function QuickDashMakeVisProvider(
       visType => visType.name === visTypes.SIREN_DATA_TABLE);
   }
 
-  function addSirenDataTableIfPresent(index, fields, vises) {
-    if(!hasSirenDataTable()) { return vises; }
+  function addSirenDataTable(index, fields, vises, progress) {
+    if(!progress.notifyStart('Adding Siren data table')) {
+      return Promise.reject(0);
+    }
 
     const fieldNames = _(fields)
       .map('name')
@@ -476,16 +441,16 @@ export function QuickDashMakeVisProvider(
       !field.name.endsWith('.geohash'));
   }
 
-  function addMultichartVisIfPresent(index, vises, progress) {
-    if(!hasMultichartVis()) { return vises; }
-
+  function addMultichartVis(index, vises, progress) {
     const candidateFields = multiChartCandidateFields(index);
     const multiChartSDC = $injector.get('multiChartSDC');
 
-    const analysisPromise = promiseSerialMap(candidateFields,
+    const analysisPromise = promiseMapSeries(candidateFields,
       field => {
-        if(progress.canceled) { return Promise.reject(0); }
-        progress.notify(`Multi-Chart - Analyzing field "${field.displayName}"`);
+        if(!progress.notifyStart(
+            `Multi-Chart - Analyzing field "${field.displayName}"`)) {
+          return Promise.reject(0);
+        }
 
         return multiChartSDC(index.id, field)
           .then(sdc => ({ field, sdc }))
@@ -514,7 +479,7 @@ export function QuickDashMakeVisProvider(
       const activeField = fieldsData[0].field;
 
       // Configure the visualization
-      multiVis.title = 'Multi-Chart';
+      multiVis.title = 'Multi-Chart (All Index Fields)';
 
       multiVis.vis.kibiSettings = {
         activeSetting: activeField.name,
@@ -534,6 +499,8 @@ export function QuickDashMakeVisProvider(
     // Vis states need to be set manually
 
     vises.forEach(sVis => {
+      if(!sVis) { return; }
+
       // Aggs need to be omitted or the vis aren't saved properly.
       // Yet unclear to me what's actually happening there.
 
@@ -545,15 +512,21 @@ export function QuickDashMakeVisProvider(
 
 
   return {
-    makeSavedVisualizations(index, fields, progress = {}) {
-      _.defaults(progress, {
-        canceled: false,
-        notify: _.noop
+    makeSavedVisualizations(index, fields, options = {}) {
+      _.defaults(options, {
+        addSirenDataTable: true,
+        addSirenMultiChart: true,
+
+        progress: { notifyStart: _.constant(true) }
       });
 
-      return promiseSerialMap(fields, field => {
-        if(progress.canceled) { return Promise.reject(0); }
-        progress.notify(`Analyzing field "${field.displayName}"`);
+      const { progress } = options;
+
+
+      return promiseMapSeries(fields, field => {
+        if(!progress.notifyStart(`Analyzing field "${field.displayName}"`)) {
+          return Promise.reject(0);
+        }
 
         let output;
 
@@ -570,7 +543,6 @@ export function QuickDashMakeVisProvider(
 
           case 'date':
             output = analyzeDate(index, fields, field);
-
             break;
 
           case 'boolean':
@@ -587,23 +559,29 @@ export function QuickDashMakeVisProvider(
 
         return output;
       })
-      .then(vises => {
-        if(progress.canceled) { return Promise.reject(0); }
-        progress.notify('Adding Siren data table');
-
-        return addSirenDataTableIfPresent(index, fields, vises);
-      })
-      .then(vises => addMultichartVisIfPresent(index, vises, progress))
-      .then(_.filter)
+      .then(vises => options.addSirenDataTable && hasSirenDataTable()
+        ? addSirenDataTable(index, fields, vises, progress)
+        : vises)
+      .then(vises => options.addSirenMultiChart && hasMultichartVis()
+        ? addMultichartVis(index, vises, progress)
+        : vises)
       .then(updateVisStates);
     },
 
-    analysisStepsCount(index, fields) {
+    analysisStepsCount(index, fields, options = {}) {
+      _.defaults(options, {
+        addSirenDataTable: true,
+        addSirenMultiChart: true
+      });
+
+
       let result = fields.length;
 
-      if(hasSirenDataTable()) { result += 1; }
+      if(options.addSirenDataTable && hasSirenDataTable()) {
+        result += 1;
+      }
 
-      if(hasMultichartVis()) {
+      if(options.addSirenMultiChart && hasMultichartVis()) {
         result += multiChartCandidateFields(index).length;
       }
 

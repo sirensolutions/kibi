@@ -325,11 +325,6 @@ export function getUiSettingDefaults() {
       value: 1.0,
       description: 'Set the zoom level for the whole page. Good if the default size is too big for you. Does not work in Firefox.'
     },
-    'siren:relations': {
-      type: 'json',
-      value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
-      description: 'Relations between index patterns and dashboards'
-    },
     'siren:joinTaskTimeout': {
       type: 'number',
       value: 0,

@@ -2,37 +2,53 @@
   <div class="row entity-header"
        ng-if="relations.length"
   >
-    <div class="col-lg-3"
-         ng-if="entity.type === 'INDEX_PATTERN'"
-    >
-      <p>Field</p>
+    <div class="col-lg-4">
+      <p>Source Entity</p>
     </div>
-     <div ng-class="{ 'col-lg-3': entity.type === 'INDEX_PATTERN', 'col-lg-4': entity.type === 'VIRTUAL_ENTITY' }">
+     <div class="col-lg-3">
       <p>Labels</p>
     </div>
-    <div ng-class="{ 'col-lg-5': entity.type === 'INDEX_PATTERN', 'col-lg-6': entity.type === 'VIRTUAL_ENTITY' }">
+    <div class="col-lg-4">
       <p>Target Entity</p>
     </div>
-    <div ng-class="{ 'col-lg-1': entity.type === 'INDEX_PATTERN', 'col-lg-2': entity.type === 'VIRTUAL_ENTITY' }">
+    <div class="col-lg-1">
     </div>
   </div>
 
   <div class="row relation vertical-center"
        ng-repeat="relation in relations"
   >
-    <div class="col-lg-3 "
-         ng-if="entity.type === 'INDEX_PATTERN'"
-    >
-      <kibi-select required
-                   data-test-subj="index-relation-left-field"
-                   object-type="field"
-                   analyzed-warning="true"
-                   index-pattern-id="entity.id"
-                   ng-model="relation.domain.field"
-      ></kibi-select>
+
+    <!-- source entity -->
+    <div class="col-lg-4 ">
+      <div>
+        <label class="col-lg-2">
+        </label>
+        <div class="col-lg-10 entity-select-disabled">
+          <entity-select required
+                         selected="relation.domain.id"
+                         entity-type="'ALL'"
+          ></entity-select>
+        </div>
+      </div>
+      <div ng-if="typeMap[relation.domain.id] === 'INDEX_PATTERN'">
+        <label class="col-lg-2">
+          Field
+        </label>
+        <div class="col-lg-10">
+          <kibi-select required
+                       data-test-subj="index-relation-left-field"
+                       object-type="field"
+                       analyzed-warning="true"
+                       index-pattern-id="entity.id"
+                       ng-model="relation.domain.field"
+          ></kibi-select>
+        </div>
+      </div>
     </div>
 
-    <div ng-class="{ 'col-lg-3': entity.type === 'INDEX_PATTERN', 'col-lg-4': entity.type === 'VIRTUAL_ENTITY' }">
+    <!-- labels -->
+    <div class="col-lg-3 labels-border">
       <p class="fa fa-long-arrow-right fa-2x relation-direction col-lg-12" />
 
       <div class="label-inputs">
@@ -64,24 +80,23 @@
       <p class="fa fa-long-arrow-left fa-2x relation-direction col-lg-12" />
     </div>
 
-    <div ng-class="{ 'col-lg-5': entity.type === 'INDEX_PATTERN', 'col-lg-6': entity.type === 'VIRTUAL_ENTITY' }">
-      <div class="col-lg-12">
+    <!-- target entity -->
+    <div class="col-lg-4">
+      <div>
         <label class="col-lg-2">
         </label>
-        <div class="col-lg-9">
+        <div class="col-lg-10">
           <entity-select required
                          selected="relation.range.id"
                          entity-type="{{ entity.type === 'INDEX_PATTERN' ? 'ALL' : 'INDEX_PATTERN' }}"
           ></entity-select>
         </div>
       </div>
-      <div class="col-lg-12"
-           ng-if="typeMap[relation.range.id] === 'INDEX_PATTERN'"
-      >
+      <div ng-if="typeMap[relation.range.id] === 'INDEX_PATTERN'">
         <label class="col-lg-2">
           Field
         </label>
-        <div class="col-lg-9">
+        <div class="col-lg-10">
           <kibi-select required
                        data-test-subj="index-relation-right-field"
                        object-type="field"
@@ -92,7 +107,9 @@
         </div>
       </div>
     </div>
-    <div ng-class="{ 'col-lg-1': entity.type === 'INDEX_PATTERN', 'col-lg-2': entity.type === 'VIRTUAL_ENTITY' }" class="horizontal-align">
+
+    <!-- relation options -->
+    <div class="col-lg-1">
       <button
          ng-click="edit(relation.id)"
          class="btn btn-xs"

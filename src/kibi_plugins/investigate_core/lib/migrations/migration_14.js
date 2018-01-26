@@ -3,7 +3,7 @@ import _ from 'lodash';
 import Migration from 'kibiutils/lib/migrations/migration';
 
 /**
- * Kibi Core - Migration 13.
+ * Kibi Core - Migration 14.
  *
  * Looks for:
  *

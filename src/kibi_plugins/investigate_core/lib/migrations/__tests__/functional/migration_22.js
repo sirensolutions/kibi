@@ -148,6 +148,7 @@ describe('investigate_core/migrations/functional', function () {
         const migration = new Migration(configuration);
         const result = await migration.count();
         expect(result).to.be(0);
+        expect(warningSpy.called).to.be(false);
       });
     });
 

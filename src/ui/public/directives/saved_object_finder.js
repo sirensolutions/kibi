@@ -11,8 +11,7 @@ import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
 const module = uiModules.get('kibana');
 
-module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config, savedSearches) {
-
+module.directive('savedObjectFinder', function ($location, kbnUrl, Private, config, savedSearches) {
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
 
   return {
@@ -52,7 +51,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         _prevBasedOnSameSavedSearch: false
       };
 
-      $scope.$watch('kibi.basedOnSameSavedSearch', function () {
+      $scope.$watch('investigate.basedOnSameSavedSearch', function () {
         filterResults();
       });
       // kibi: end

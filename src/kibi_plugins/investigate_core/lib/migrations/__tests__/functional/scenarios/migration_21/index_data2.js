@@ -3,7 +3,7 @@
 /**
  * Defines the following objects:
  *
- * - a configuration with a siren:relations with the new UUID ids.
+ * - a configuration with a siren:relations with relations that don't have an unsupported join type parameter.
  */
 module.exports = [
   {

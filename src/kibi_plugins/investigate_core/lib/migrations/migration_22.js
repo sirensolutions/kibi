@@ -100,48 +100,51 @@ export default class Migration22 extends Migration {
     this._logger.info(`Updating siren:relations from config with _id=${obj._id}`);
 
     const gremlin = new GremlinServerHandler(this._server);
-    await gremlin.start().then(() => {
-      // get the ontology schema
-      return this._getOntologyModelFromGremlin().then((ontology) => {
-        // add the new ontology-model document
-        let body = JSON.stringify({
-          index: {
-            _index: this._index,
-            _type: this._ontologyType,
-            _id: this._ontologyId
-          }
-        }) + '\n' +
-        JSON.stringify({ model: ontology, version: 1 }) + '\n';
+    try {
+      await gremlin.start().then(() => {
+        // get the ontology schema
+        return this._getOntologyModelFromGremlin()
+        .then((ontology) => {
+          //gremlin.stop();
+          // add the new ontology-model document
+          let body = JSON.stringify({
+            index: {
+              _index: this._index,
+              _type: this._ontologyType,
+              _id: this._ontologyId
+            }
+          }) + '\n' +
+          JSON.stringify({ model: ontology, version: 1 }) + '\n';
 
-        // remove siren:relations from the config object
-        delete obj._source['siren:relations'];
-        body += JSON.stringify({
-          index: {
-            _index: obj._index,
-            _type: obj._type,
-            _id: obj._id
-          }
-        }) + '\n' +
-        JSON.stringify(obj._source);
+          // remove siren:relations from the config object
+          delete obj._source['siren:relations'];
+          body += JSON.stringify({
+            index: {
+              _index: obj._index,
+              _type: obj._type,
+              _id: obj._id
+            }
+          }) + '\n' +
+          JSON.stringify(obj._source);
 
-        return this._client.bulk({
-          refresh: true,
-          body: body
+          return this._client.bulk({
+            refresh: true,
+            body: body
+          })
+          .then(() => {
+            count = 1;
+            return gremlin.stop();
+          });
         })
-        .then(() => {
-          count = 1;
-          return gremlin.stop();
+        .catch(() => {
+          this._logger.error('An error occurred while retrieving the ontology model.');
         });
-      })
-      .catch(() => {
-        this._logger.error('An error occurred while retrieving the ontology model.');
-        gremlin.stop();
       });
-    })
-    .catch(() => {
+    } catch (err) {
       this._logger.error('Could not start the Siren Gremlin Server');
-      gremlin.stop();
-    });
+    }
+
+    //gremlin.stop();
     return count;
   }
 }

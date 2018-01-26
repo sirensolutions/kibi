@@ -62,7 +62,7 @@ export default class Migration18 extends Migration {
   }
 
   _isSourceUpgradeable(_source) {
-    let dashboardStrategy = _source[DASHBOARD_STRATEGY_KEY];
+    const dashboardStrategy = _source[DASHBOARD_STRATEGY_KEY];
     if (dashboardStrategy) {
       const isUpgradeable = this._isStrategyUpgradeable(dashboardStrategy, DASHBOARD_STRATEGY_KEY);
       if (isUpgradeable === true) {
@@ -72,7 +72,7 @@ export default class Migration18 extends Migration {
         return;
       }
     }
-    let buttonStrategy = _source[BUTTON_STRATEGY_KEY];
+    const buttonStrategy = _source[BUTTON_STRATEGY_KEY];
     if (buttonStrategy) {
       const isUpgradeable = this._isStrategyUpgradeable(buttonStrategy, BUTTON_STRATEGY_KEY);
       if (isUpgradeable === true) {

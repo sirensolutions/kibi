@@ -105,7 +105,8 @@ export default class Migration22 extends Migration {
         // get the ontology schema
         return this._getOntologyModelFromGremlin()
         .then((ontology) => {
-          //gremlin.stop();
+          // stop the gremlin server right here as it is no longer needed
+          gremlin.stop();
           // add the new ontology-model document
           let body = JSON.stringify({
             index: {
@@ -138,13 +139,14 @@ export default class Migration22 extends Migration {
         })
         .catch(() => {
           this._logger.error('An error occurred while retrieving the ontology model.');
+          gremlin.stop();
         });
       });
     } catch (err) {
+      gremlin.stop();
       this._logger.error('Could not start the Siren Gremlin Server');
     }
 
-    //gremlin.stop();
     return count;
   }
 }

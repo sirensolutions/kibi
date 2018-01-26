@@ -27,22 +27,52 @@ export function FetchProvider(Private, Promise) {
   };
 
   this.fetchQueued = (strategy) => {
-    let requests = requestQueue.getStartable(strategy);
 
-    //kibi: Adding $$kibiSingleCall = true to a member of a visualization allows to avoid all other requests
-    //kibi: i.e. This is usefull for multi chart plugin
-    const multiChartRequest = _.filter(requests, function (req) {
-      return req.source && req.source.vis && req.source.vis.$$kibiSingleCall;
+    //siren: Multichart need this to filter out duplicated requests
+    const queuedRequests = _.filter(requestQueue, function (req) {
+      return req && req.source && req.source.vis && req.source.vis.$$sirenMultichart;
     });
-    if (multiChartRequest.length > 0) {
-      requests = multiChartRequest;
-      _.each(requests, function (req) {
-        if (req.source && req.source.vis && req.source.vis.$$kibiSingleCall) {
-          req.source.vis.$$kibiSingleCall = false;
+    if (queuedRequests.length > 0) {
+      const index = {};
+      const duplicated = queuedRequests.filter(req => {
+        const iid = req.source._instanceid;
+        if (!index[iid]) {
+          index[iid] = req;
+          return false;
+        }
+        return true;
+      });
+
+      duplicated.forEach(req => {
+        const iid = req.source._instanceid;
+        if (index[iid]) {
+          index[iid].abort();
         }
       });
     }
-    //kibi: end
+    //siren: end
+
+    let requests = requestQueue.getStartable(strategy);
+
+    //siren: Adding $$sirenSingleCall = true to a member of a visualization allows to avoid all other requests
+    //siren i.e. This is usefull for multi chart plugin
+    const multiChartRequest = _.filter(requests, function (req) {
+      return req && req.source && req.source.vis && req.source.vis.$$sirenSingleCall;
+    });
+    if (multiChartRequest.length > 0) {
+      for (let i = 0; i < multiChartRequest.length; i++) {
+        const req = multiChartRequest[i];
+        req.source.vis.$$sirenSingleCall = false;
+        if (i !== multiChartRequest.length - 1) {
+          req.abort();
+        } else {
+          // once all the previous request has been aborted,
+          // put the latest request as a single call for fetchTheseSoon.
+          requests = [req];
+        }
+      }
+    }
+    //siren: end
 
     return fetchTheseSoon(requests);
   };

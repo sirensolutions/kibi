@@ -33,6 +33,7 @@ import { getDefaultQuery } from 'ui/parse_query';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import { IndexPatternAuthorizationError } from 'ui/errors';
 import { QuickDashboardProvider } from 'ui/kibi/quick_dashboard/quick_dashboard';
+import { GuessFieldsProvider } from 'ui/kibi/quick_dashboard/guess_fields';
 // kibi: end
 
 const app = uiModules.get('apps/discover', [
@@ -150,6 +151,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
   const filterManager = Private(FilterManagerProvider);
   // kibi: Added quick dashboard maker
   const quickDashboard = Private(QuickDashboardProvider);
+  const guessFields = Private(GuessFieldsProvider);
   // kibi: end
 
   const notify = createNotifier({
@@ -571,13 +573,29 @@ function discoverController($scope, config, courier, $route, $window, createNoti
         savedSearch.sort = $scope.state.sort;
 
         return quickDashboard.create({
-          indexPattern: savedSearch.searchSource.vis.indexPattern,
+          indexPattern: $scope.indexPattern,
           savedSearch,
           fieldNames: $scope.state.columns,
           query: $scope.state.query,
           filters: $scope.state.filters,
           timeFilter: $scope.timefilter
         });
+      });
+  };
+
+  $scope.guessFields = function () {
+    const index = $scope.indexPattern;
+
+    // The timeField is excluded since it's already implicitly considered by discover.
+    // Apart from that, 'bad' fields are already filtered away by the ranking procedure.
+    const timeField = index.fields.byName[index.timeFieldName];
+    const fields = _.without(index.fields, timeField);
+
+    return guessFields(index, fields)
+      .then(guessedFields => {
+        if(!guessedFields) { return; }
+
+        $scope.state.columns = _.map(guessedFields, 'name');
       });
   };
   // kibi: end

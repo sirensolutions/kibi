@@ -41,14 +41,29 @@
   </ul>
 
   <!-- kibi: Added 'Quick Dashboard' button -->
-  <div class="kuiButtonGroup">
-    <button
-      class="discover-quickdashboard kuiButton kuiButton--primary kuiButton--small kuiVerticalRhythmSmall"
-      ng-disabled="columns.length <= 0 || columns[0] === '_source'"
-      ng-click="onQuickDashboard()"
-    >
-      Generate Dashboard
-    </button>
+  <div class="discover-quickdash-bar kuiButtonGroup" ng-show="haveNoFields()">
+    <span>
+      <button 
+        class="kuiButton kuiButton--primary kuiButton--small kuiVerticalRhythmSmall"
+        ng-click="onGuessFields()"
+      >
+        Autoselect Top 10
+      </button>
+      <kbn-info placement="top"
+        info="Automatically selects the 10 index fields that score best in a predefined heuristic classification" />
+    </span>
+  </div>
+  <div class="discover-quickdash-bar kuiButtonGroup" ng-show="!haveNoFields()">
+    <span>
+      <button 
+        class="kuiButton kuiButton--primary kuiButton--small kuiVerticalRhythmSmall"
+        ng-click="onQuickDashboard()"
+      >
+        Generate Dashboard
+      </button>
+      <kbn-info placement="top"
+        info="Generates a new dashboard and populates it with visualizations created automatically from the currently selected fields" \>
+    </span>
   </div>
   <!-- kibi: end -->
 

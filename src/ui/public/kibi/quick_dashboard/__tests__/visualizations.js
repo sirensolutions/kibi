@@ -14,26 +14,6 @@ import _ from 'lodash';
 
 const additionalVisTypes = [];
 
-function DummyAggConfigs() {}
-
-const field = {
-  name: 'field',
-  displayName: 'field',
-  type: undefined,
-  aggregatable: true,
-  visualizable: true
-};
-
-const field2 = _.cloneDeep(field);
-
-const indexPattern = {
-  timeFieldName: '',
-  fields: new IndexedArray({
-    index: ['name'],
-    initialSet: [ field ]
-  })
-};
-
 const baseEsResp = {
   hits: {
     total: 0,
@@ -45,6 +25,9 @@ const baseEsResp = {
   }
 };
 
+let indexPattern;
+let field;
+let field2;
 let uniqueEsResp;
 let termsEsResp;
 
@@ -58,7 +41,7 @@ histoEsResp.aggregations.result.buckets =
 const Private = function (provider) {
   switch(provider) {
     case VisAggConfigsProvider:
-      return DummyAggConfigs;
+      return () => {};
 
     case VisTypesRegistryProvider:
       return additionalVisTypes;
@@ -161,6 +144,24 @@ const visBuilder = QuickDashMakeVisProvider(
 function initTest() {
   additionalVisTypes.length = 0;
 
+  field = {
+    name: 'field',
+    displayName: 'field',
+    type: undefined,
+    aggregatable: true,
+    visualizable: true
+  };
+
+  field2 = _.cloneDeep(field);
+
+  indexPattern = {
+    timeFieldName: '',
+    fields: new IndexedArray({
+      index: ['name'],
+      initialSet: [ field ]
+    })
+  };
+
   uniqueEsResp = _.cloneDeep(baseEsResp);
   termsEsResp = _.cloneDeep(baseEsResp);
 }
@@ -170,6 +171,40 @@ function initTest() {
 
 describe('QuickDashboard Visualization Tests', function () {
   beforeEach(initTest);
+
+  describe('Bad fields', function () {
+    it('Returns nulls for unknown field types', function () {
+      field.name = 'unknownField';
+      field.type = 'unknown';
+
+      return visBuilder(indexPattern, [ field ])
+        .then(vises => {
+          expect(vises.length).to.be(1);
+          expect(vises[0]).to.be(null);
+        });
+    });
+
+    it('Returns nulls for not-aggregatable fields', function () {
+      field.aggregatable = false;
+
+      function doTest(fieldType) {
+        field.type = fieldType;
+
+        return visBuilder(indexPattern, [ field ])
+          .then(vises => {
+            expect(vises.length).to.be(1);
+            expect(vises[0]).to.be(null);
+          });
+      }
+
+      return Promise.resolve()
+        .then(doTest('string'))
+        .then(doTest('number'))
+        .then(doTest('date'))
+        .then(doTest('boolean'))
+        .then(doTest('geo_point'));
+    });
+  });
 
   describe('String fields', function () {
     it('Returns a pie with few uniques', function () {
@@ -186,6 +221,10 @@ describe('QuickDashboard Visualization Tests', function () {
 
     it('Returns cloud tag if field is analyzed', function () {
       uniqueEsResp.aggregations.result.value = 1e3;
+
+      termsEsResp.hits.total = 5000;
+      termsEsResp.aggregations.result.buckets =
+        _.times(50, _.constant({ doc_count: 100 }));
 
       field.name = 'textField';
       field.type = 'string';

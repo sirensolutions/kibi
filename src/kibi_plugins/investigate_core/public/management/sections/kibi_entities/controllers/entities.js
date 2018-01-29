@@ -13,7 +13,7 @@ import './create_eid';
 import 'angular-ui-tree';
 
 uiRoutes
-.when('/management/siren/entities/:entityId', {
+.when('/management/siren/indexesandrelations/:entityId', {
   template: template,
   resolve: {
     selectedEntity: function ($route, courier, Promise, createNotifier, kbnUrl, ontologyClient) {
@@ -36,10 +36,10 @@ uiRoutes
       .catch((error) => {
         if (error instanceof IndexPatternAuthorizationError) {
           createNotifier().warning(`Access to index pattern ${$route.current.params.entityId} is forbidden`);
-          kbnUrl.redirect('/management/siren/entities');
+          kbnUrl.redirect('/management/siren/indexesandrelations');
           return Promise.halt();
         } else {
-          return courier.redirectWhenMissing('/management/siren/entities')(error);
+          return courier.redirectWhenMissing('/management/siren/indexesandrelations')(error);
         }
       });
     }
@@ -47,17 +47,17 @@ uiRoutes
 });
 
 uiRoutes
-.when('/management/siren/entities', {
+.when('/management/siren/indexesandrelations', {
   template,
   reloadOnSearch: false,
   resolve: {
     redirect: function ($location, kibiDefaultIndexPattern) {
       // kibi: use our service to get default indexPattern
       return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
-        const path = `/management/siren/entities/${defaultIndex.id}`;
+        const path = `/management/siren/indexesandrelations/${defaultIndex.id}`;
         $location.path(path).replace();
       }).catch(err => {
-        const path = '/management/siren/entities';
+        const path = '/management/siren/indexesandrelations';
         $location.path(path).replace();
       });
     }
@@ -94,7 +94,7 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
   // Needed until we migrate the panels to use the new generic "entity"
   $scope.$watch('selectedMenuItem.id', (itemId) => {
     if (itemId && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== itemId)) {
-      kbnUrl.change(`/management/siren/entities/${itemId}`);
+      kbnUrl.change(`/management/siren/indexesandrelations/${itemId}`);
     } else {
       const entity = $route.current.locals.selectedEntity;
       if (entity && (!$scope.entity || $scope.entity.id !== entity.id || $scope.entity.type !== entity.type)) {

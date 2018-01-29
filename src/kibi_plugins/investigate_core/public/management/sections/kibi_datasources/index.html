@@ -4,10 +4,23 @@
     <div class="container">
 
       <div class="header">
-        <h2 class="title">Edit Datasource</h2>
+        <h2 class="title">Connect to an external datasource</h2>
       </div>
       <p>
-        Use this form to configure an external datasource, e.g. a connection to a SQL database.
+        Here, you can connect to two types of external datasource, JDBC and REST:
+      </p>
+      <h3>JDBC datasources:</h3>
+      <p>
+        Siren Investigate, by default, displays data which is contained in its predefined Siren Elasticsearch backend.
+        Configure a JDBC datasource to "federate" other backends (e.g. RDBMS and more). Once a JDBC datasource has been
+        configured, one can map remote tables and views to "virtual indexes" using the <a href='#/management/siren/indexesandrelations'>
+          Indexes and Relations
+        </a> screen.
+      </p>
+      <h3>REST datasources:</h3>
+      <p>
+        Configure a REST datasource to invoke a remote REST service. Typical use is via a REST query which is then visualized in a template
+        displayed using a query viewer dashboard component.
       </p>
 
       <div class="config-section">

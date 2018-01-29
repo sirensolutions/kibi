@@ -325,7 +325,7 @@ uiModules.get('apps/management')
       return ontologyClient.insertEntity(id, id, 'INDEX_PATTERN', icon, color, shortDescription, longDescription,
         null, null)
       .then(() => {
-        kbnUrl.change(`/management/siren/entities/${id}`);
+        kbnUrl.change(`/management/siren/indexesandrelations/${id}`);
         // force loading while kbnUrl.change takes effect
         loadingCount = Infinity;
       });

@@ -18,7 +18,7 @@ function _getDisplayName($location) {
     case 'relations':
       return 'Relations';
     case 'virtualindices':
-      return 'Virtual index';
+      return 'Virtual Index';
   }
 }
 

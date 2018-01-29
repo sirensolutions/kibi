@@ -28,7 +28,7 @@ uiRoutes
 
 // kibi: 'whenMissingRedirectTo' is changed
 loadDefault({
-  whenMissingRedirectTo: '/management/siren/entities'
+  whenMissingRedirectTo: '/management/siren/indexesandrelations'
 });
 
 uiModules

@@ -23,7 +23,7 @@ module.directive('createEid', function () {
         return ontologyClient.insertEntity(name, name, 'VIRTUAL_ENTITY', icon, color, shortDescription, longDescription,
           null, null)
         .then(() => {
-          kbnUrl.change(`/management/siren/entities/${name}`);
+          kbnUrl.change(`/management/siren/indexesandrelations/${name}`);
         });
       };
     }

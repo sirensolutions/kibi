@@ -51,7 +51,7 @@ uiModules
 
     // cancel button
     $scope.cancel = function () {
-      kbnUrl.change('/management/siren/entities/' + $routeParams.entity);
+      kbnUrl.change('/management/siren/indexesandrelations/' + $routeParams.entity);
     };
 
     // save button
@@ -62,7 +62,7 @@ uiModules
       }
       ontologyClient.insertRelations([$scope.relation, $scope.inverseRelation])
       .then(() => {
-        kbnUrl.change('/management/siren/entities/' + $routeParams.entity);
+        kbnUrl.change('/management/siren/indexesandrelations/' + $routeParams.entity);
       });
     };
   });

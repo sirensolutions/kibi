@@ -236,7 +236,7 @@ export class NoDefinedIndexPatterns extends KbnError {
 }
 
 /**
- * Tried to load a route besides management/siren/entities but you don't have a default index pattern!
+ * Tried to load a route besides management/siren/indexesandrelations but you don't have a default index pattern!
  */
 export class NoDefaultIndexPattern extends KbnError {
   constructor() {

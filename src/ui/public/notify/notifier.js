@@ -9,7 +9,8 @@ import chrome from 'ui/chrome';
 /* eslint no-console: 0 */
 
 const notifs = [];
-const version = metadata.version;
+// kibi: use kibi version
+const version = metadata.kibiVersion;
 const buildNum = metadata.buildNum;
 
 // siren: put log only in debug level

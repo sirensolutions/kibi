@@ -17,8 +17,10 @@ module.exports = function (grunt) {
     'simplemocha:all',
     // kibi: we are starting the es for migration tests
     'esvm:test',
+    'getGremlin',
     'simplemocha:migrations',
-    'esvm_shutdown:test'
+    'esvm_shutdown:test',
+    'removeGremlin'
     // kibi: end
   ]);
 

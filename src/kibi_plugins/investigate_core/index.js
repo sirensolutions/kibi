@@ -26,6 +26,7 @@ import migration18 from './lib/migrations/migration_18';
 import migration19 from './lib/migrations/migration_19';
 import migration20 from './lib/migrations/migration_20';
 import migration21 from './lib/migrations/migration_21';
+import migration22 from './lib/migrations/migration_22';
 import migration23 from './lib/migrations/migration_23';
 
 /**
@@ -56,6 +57,7 @@ module.exports = function (kibana) {
     migration19,
     migration20,
     migration21,
+    migration22,
     migration23
   ];
 

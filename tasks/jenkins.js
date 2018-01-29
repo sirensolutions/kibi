@@ -12,13 +12,16 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:env', () => {
     // make sure JAVA_HOME points to JDK8
-    const HOME = '/usr/lib/jvm/jdk8';
-    process.env.JAVA_HOME = HOME;
+    // kibi: we take the java home configuration form grunt config
+    const HOME = grunt.option('javaHome');
+    if (HOME) {
+      process.env.JAVA_HOME = HOME;
 
-    // extend PATH to point to JDK8
-    const path = process.env.PATH.split(delimiter);
-    path.unshift(`${HOME}/bin`);
-    process.env.PATH = path.join(delimiter);
+      // extend PATH to point to JDK8
+      const path = process.env.PATH.split(delimiter);
+      path.unshift(`${HOME}/bin`);
+      process.env.PATH = path.join(delimiter);
+    }
   });
 
   grunt.registerTask('jenkins:docs', [

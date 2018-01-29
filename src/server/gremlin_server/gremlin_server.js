@@ -170,22 +170,27 @@ function startServer(self, fulfill, reject) {
                 setTimeout(function () {
                   self._ping()
                   .then(function (resp) {
-                    const jsonResp = JSON.parse(resp.toString());
+                    let jsonResp;
+                    try {
+                      jsonResp = JSON.parse(resp.toString());
+                    } catch (err) {
+                      jsonResp = resp;
+                    }
                     if (jsonResp.status === 'ok') {
                       self.server.log(['gremlin', 'info'], 'Siren Gremlin Server running at ' + self.url);
                       self.initialized = true;
                       fulfill({ message: 'The Siren gremlin server started successfully.' });
                     } else {
-                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server');
+                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server. Ping response was ' + jsonResp);
                       counter--;
                       setTimeout(() => self.ping(counter), timeout);
                     }
                   })
                   .catch(function (err) {
-                    if (err.error.code !== 'ECONNREFUSED') {
+                    if (err.error && err.error.code !== 'ECONNREFUSED') {
                       self.server.log(['gremlin', 'error'], 'Failed to ping the Siren Gremlin Server: ' + err.message);
                     } else {
-                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server');
+                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server. Error ' + JSON.stringify(err));
                     }
                     counter--;
                     setTimeout(() => self.ping(counter), timeout);

@@ -218,7 +218,7 @@
     "lru-cache": "4.1.1",
     "request-promise": "4.1.1",
     "node-forge": "^0.6.37",
-    "kibiutils": "sirensolutions/kibiutils#1.9.0",
+    "kibiutils": "sirensolutions/kibiutils#1.10.0",
     "sqlite3": "3.1.4",
     "mysql": "2.10.2",
     "pg": "4.5.5",

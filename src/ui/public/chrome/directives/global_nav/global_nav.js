@@ -53,7 +53,10 @@ module.directive('globalNav', (globalNavState, $window,
         } else {
           $window.location.href = dashboardLink.url;
         }
-        $window.location.reload();
+        // kibi: if it is 'status' page, reload the page
+        if ($window.document.getElementsByClassName('kibi-es-diagnostics').length > 0) {
+          $window.location.reload();
+        };
       };
 
       // kibi: context menu over icon allows to open a clean Kibi session

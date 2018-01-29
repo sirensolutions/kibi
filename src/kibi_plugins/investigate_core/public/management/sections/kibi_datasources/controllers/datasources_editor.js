@@ -46,7 +46,8 @@ uiRoutes
   }
 });
 
-function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, queryEngineClient, $element, kibiWarnings, jdbcDatasources) {
+function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
+  queryEngineClient, $element, kibiWarnings, jdbcDatasources, confirmModal) {
   const setDatasourceSchema = Private(SetDatasourceSchemaProvider);
   const notify = createNotifier({
     location: 'Datasources Configuration Editor'
@@ -59,12 +60,22 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
   };
 
   $scope.saveObject = function () {
-
+    const modalOptions = {
+      title: 'JDBC datasource configuration successful',
+      confirmButtonText: 'Yes, take me there',
+      cancelButtonText: 'No, will do later',
+      onConfirm: () => kbnUrl.change('/management/siren/virtualindices/'),
+      onCancel: () => {}
+    };
     if (datasource.datasourceType === 'sql_jdbc_new') {
       const d = jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource);
       return jdbcDatasources.save(d).then(() => {
         notify.info('Datasource ' + d._id + ' successfully saved');
         kbnUrl.change('management/siren/datasources/' + d._id);
+        confirmModal(
+          'Next step is to map a remote table (or view) by creating a Virtual Index. Do that now?',
+          modalOptions
+        );
       });
     }
 

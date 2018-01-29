@@ -170,7 +170,12 @@ function startServer(self, fulfill, reject) {
                 setTimeout(function () {
                   self._ping()
                   .then(function (resp) {
-                    const jsonResp = JSON.parse(resp.toString());
+                    let jsonResp;
+                    try {
+                      jsonResp = JSON.parse(resp.toString());
+                    } catch (err) {
+                      jsonResp = resp;
+                    }
                     if (jsonResp.status === 'ok') {
                       self.server.log(['gremlin', 'info'], 'Siren Gremlin Server running at ' + self.url);
                       self.initialized = true;

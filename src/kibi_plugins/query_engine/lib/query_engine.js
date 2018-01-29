@@ -189,6 +189,9 @@ QueryEngine.prototype.gremlin = function (datasourceParams, options) {
   return rp(gremlinOptions);
 };
 
+/**
+ *  Issues a ping to the gremlin server.
+ */
 QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
   const options = {
     method: 'GET',

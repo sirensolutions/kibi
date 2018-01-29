@@ -1,6 +1,7 @@
 import Migration from 'kibiutils/lib/migrations/migration';
 import _ from 'lodash';
 import rp from 'request-promise';
+import fs from 'fs';
 import GremlinServerHandler from '../../../../server/gremlin_server/gremlin_server';
 
 /**
@@ -76,6 +77,11 @@ export default class Migration22 extends Migration {
       method: 'GET',
       uri: url + '/schema/getSchema'
     };
+
+    const sslCA = config.get('investigate_core.gremlin_server.ssl.ca');
+    if (sslCA) {
+      options.ca = fs.readFileSync(sslCA);
+    }
 
     return rp(options);
   }

@@ -29,6 +29,10 @@ uiModules
         } else {
           $scope.toggleDashboardNav($event);
         }
+        // if it is 'status' page, reload the page
+        if ($window.document.getElementsByClassName('kibi-es-diagnostics').length > 0) {
+          $window.location.reload();
+        };
         $event.stopPropagation();
       };
       $scope.getIndicatorClass = link => {

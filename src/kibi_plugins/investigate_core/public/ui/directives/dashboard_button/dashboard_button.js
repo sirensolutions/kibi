@@ -26,6 +26,7 @@ uiModules
           } else {
             $window.location.href = link.url;
           }
+          $window.location.reload();
         } else {
           $scope.toggleDashboardNav($event);
         }

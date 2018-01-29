@@ -53,6 +53,7 @@ module.directive('globalNav', (globalNavState, $window,
         } else {
           $window.location.href = dashboardLink.url;
         }
+        $window.location.reload();
       };
 
       // kibi: context menu over icon allows to open a clean Kibi session

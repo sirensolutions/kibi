@@ -47,7 +47,9 @@ uiModules
         if (res.status === 201) {
           return res.data;
         } else if (res.status === 200) {
-          return Promise.reject(new Error('Indexpattern alrteady exist'));
+          return {
+            updated: true
+          };
         } else {
           return Promise.reject(new Error('Could not create an index pattern ' + JSON.stringify(res)));
         }

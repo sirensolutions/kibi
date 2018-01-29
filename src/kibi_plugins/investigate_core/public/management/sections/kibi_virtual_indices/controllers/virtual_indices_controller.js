@@ -1,20 +1,53 @@
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import '../styles/kibi_virtual_indices.less';
+import '../styles/saved_virtual_indices_finder.less';
 import template from 'plugins/investigate_core/management/sections/kibi_virtual_indices/index.html';
 import { CONFIRM_BUTTON, CANCEL_BUTTON } from 'ui_framework/components/modal/confirm_modal';
 
 uiRoutes
 .when('/management/siren/virtualindices', {
   template,
+  reloadOnSearch: false
+})
+.when('/management/siren/virtualindices/:id?', {
+  template,
   reloadOnSearch: false,
+  resolve: {
+    virtualIndex: function ($route, courier, jdbcDatasources) {
+      //first try to get it from _siren/connector
+      return jdbcDatasources.getVirtualIndex($route.current.params.id)
+      .then(virtualIndex => {
+        return virtualIndex;
+      })
+      .catch(err => {
+        courier.redirectWhenMissing({
+          virtualIndex: '/management/siren/virtualindices'
+        });
+      });
+    }
+  }
 });
 
-function controller($scope, jdbcDatasources, createNotifier, es, confirmModal) {
+function controller($scope, $route, jdbcDatasources, createNotifier, es, confirmModal, $element, kbnUrl) {
+
+  if ($route.current.locals.virtualIndex) {
+    $scope.virtualIndex = $route.current.locals.virtualIndex._source;
+    $scope.virtualIndex.id = $route.current.locals.virtualIndex._id;
+  }
 
   const notify = createNotifier({
     location: 'Virtual Index Pattern Editor'
   });
+
+  $scope.isValid = function () {
+    return $element.find('form[name="objectForm"]').hasClass('ng-valid');
+  };
+
+  $scope.isDeleteValid = function () {
+    return $scope.virtualIndex && $scope.virtualIndex.id;
+  };
 
   const fetchVirtualIndexes = function () {
     jdbcDatasources.listVirtualIndices().then(virtualIndexPatterns => {
@@ -22,46 +55,44 @@ function controller($scope, jdbcDatasources, createNotifier, es, confirmModal) {
     });
   };
 
-  fetchVirtualIndexes();
-
-  $scope.jdbcFormValues = {
-    datasource: null,
-    resource: null,
-    name: null,
-    key: null,
-    catalog: null,
-    schema: null
-  };
-
-  $scope.jdbcDatasources = [];
-  jdbcDatasources.list().then(datasources => {
-    $scope.jdbcDatasources = datasources;
-  });
-
-  $scope.registerJdbcIndexPattern = () => {
+  $scope.saveObject = function () {
     const index = {
-      _id: $scope.jdbcFormValues.name,
+      _id: $scope.virtualIndex.id,
       _source: {
-        datasource: $scope.jdbcFormValues.datasource,
-        resource: $scope.jdbcFormValues.resource,
-        key: $scope.jdbcFormValues.key,
-        catalog: $scope.jdbcFormValues.catalog,
-        schema: $scope.jdbcFormValues.schema
+        datasource: $scope.datasource._id ? $scope.datasource._id : $scope.datasource,
+        resource: $scope.virtualIndex.resource,
+        key: $scope.virtualIndex.key,
+        catalog: $scope.virtualIndex.catalog,
+        schema: $scope.virtualIndex.schema
       }
     };
 
-    jdbcDatasources.createVirtualIndex(index).then(res => {
+    return jdbcDatasources.createVirtualIndex(index).then(res => {
       if (res.created === true) {
-        notify.info('Virtual Index Pattern created');
-        fetchVirtualIndexes();
+        notify.info('Saved virtual index ' + index._id);
+      } else if (res.updated === true) {
+        notify.info('Saved virtual index ' + index._id);
       }
     }).catch(err => {
       notify.error(err);
     });
   };
-  // kibi: end
 
-  $scope.delete = function (id) {
+
+  $scope.newObject = function () {
+    kbnUrl.change('/management/siren/virtualindices/', {});
+  };
+
+  $scope.jdbcDatasources = [];
+  jdbcDatasources.list().then(datasources => {
+    $scope.jdbcDatasources = datasources;
+    if ($scope.virtualIndex) {
+      $scope.datasource = find($scope.jdbcDatasources, '_id', $scope.virtualIndex.datasource);
+    }
+  });
+
+  $scope.deleteObject = function () {
+    const id = $scope.virtualIndex.id;
     // found a physical index lets ask user to delete it as well
     const confirmModalOptions = {
       confirmButtonText: 'Delete the virtual index',
@@ -80,6 +111,11 @@ function controller($scope, jdbcDatasources, createNotifier, es, confirmModal) {
     );
   };
 
+  // expose some methods to the navbar buttons
+  [ 'isValid', 'newObject', 'saveObject', 'deleteObject', 'isDeleteValid' ]
+  .forEach(name => {
+    $element.data(name, $scope[name]);
+  });
 }
 
 uiModules

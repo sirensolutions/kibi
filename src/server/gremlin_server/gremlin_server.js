@@ -181,19 +181,12 @@ function startServer(self, fulfill, reject) {
                       self.initialized = true;
                       fulfill({ message: 'The Siren gremlin server started successfully.' });
                     } else {
-                      console.log('==FOO wrong status ======================');
-                      console.log(jsonResp);
-
-
                       self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server. Ping response was ' + jsonResp);
                       counter--;
                       setTimeout(() => self.ping(counter), timeout);
                     }
                   })
                   .catch(function (err) {
-                    console.log('==FOO catch err ======================');
-                    console.log(err);
-
                     if (err.error && err.error.code !== 'ECONNREFUSED') {
                       self.server.log(['gremlin', 'error'], 'Failed to ping the Siren Gremlin Server: ' + err.message);
                     } else {
@@ -346,7 +339,6 @@ GremlinServerHandler.prototype.isInitialized = function () {
 };
 
 GremlinServerHandler.prototype._ping = function () {
-  console.log('==FOO pingin ' + this.url);
   const options = {
     method: 'GET',
     uri: this.url + '/ping'

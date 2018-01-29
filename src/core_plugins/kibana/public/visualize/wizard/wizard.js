@@ -141,7 +141,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 
   $scope.getVisTypeUrl = function (visType) {
     const baseUrl =
-      visType.requiresSearch
+      visType.requiresSearch || visType.name === 'multi_chart_vis' // siren: for multichart
       ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
       : `#${VisualizeConstants.CREATE_PATH}?`;
 

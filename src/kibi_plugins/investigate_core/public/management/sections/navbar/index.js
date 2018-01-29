@@ -17,6 +17,8 @@ function _getDisplayName($location) {
       return 'Datasource';
     case 'relations':
       return 'Relations';
+    case 'virtualindices':
+      return 'Virtual index';
   }
 }
 
@@ -51,6 +53,8 @@ function _getMethod($document, $location, name) {
       return angular.element($document.find('#queries_editor')).data(name);
     case 'datasources':
       return angular.element($document.find('#datasources_editor')).data(name);
+    case 'virtualindices':
+      return angular.element($document.find('#virtual_indices_editor')).data(name);
   }
 }
 
@@ -87,7 +91,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       return `New ${_getDisplayName($location)}`;
     },
     hideButton() {
-      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources');
+      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'virtualindices');
     },
     testId: 'new'
   };
@@ -117,7 +121,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       return !isValid();
     },
     hideButton() {
-      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'relations');
+      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'relations', 'virtualindices');
     },
     testId: 'save'
   };
@@ -133,7 +137,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       return `Open ${_getDisplayName($location)}`;
     },
     hideButton() {
-      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources');
+      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'virtualindices');
     },
     locals: {
       controller($scope) {
@@ -145,5 +149,37 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       }
     },
     testId: 'open'
+  };
+})
+// kibi: added by kibi for virtual indices tab
+// register the open button
+.register(function ($location, $document) {
+  return {
+    appName: 'management-subnav',
+    key: 'delete',
+    order: 4,
+    template: openTemplate,
+    run() {
+      const deleteObject = _getMethod($document, $location, 'deleteObject');
+
+      if (deleteObject) {
+        deleteObject();
+      }
+    },
+    disableButton() {
+      const isDeleteValid = _getMethod($document, $location, 'isDeleteValid');
+
+      if (!isDeleteValid) {
+        return true;
+      }
+      return !isDeleteValid();
+    },
+    tooltip() {
+      return `Delete ${_getDisplayName($location)}`;
+    },
+    hideButton() {
+      return _hideButton($location.path(), 'virtualindices');
+    },
+    testId: 'delete'
   };
 });

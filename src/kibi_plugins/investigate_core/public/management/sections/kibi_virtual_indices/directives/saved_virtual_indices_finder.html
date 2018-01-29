@@ -1,0 +1,63 @@
+<form
+  role="form"
+  class="kuiVerticalRhythm"
+>
+  <div class="kuiBarSection">
+    <div class="kuiSearchInput fullWidth">
+      <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+      <input
+        class="kuiSearchInput__input"
+        input-focus
+        ng-model="filter"
+        ng-attr-placeholder="{{ finder.properties.nouns | label }} Filter..."
+        ng-keydown="finder.filterKeyDown($event)"
+        name="filter"
+        type="text"
+        autocomplete="off"
+      />
+    </div>
+  </div>
+  
+  <paginate
+    list="finder.hits"
+    per-page="8"
+    class="kuiVerticalRhythm"
+  >
+    <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
+      <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
+        <span class="paginate-heading">
+          Name
+          <span
+            class="fa"
+            ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
+          </span>
+        </span>
+      </li>
+      <li
+        class="list-group-item list-group-menu-item"
+        ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
+        ng-repeat="hit in page"
+        ng-keydown="finder.hitKeyDown($event, page, paginate)"
+        ng-click="finder.onChoose(hit, $event)">
+  
+        <a ng-href="{{finder.makeUrl(hit)}}"
+            ng-blur="finder.hitBlur($event)"
+            ng-click="finder.preventClick($event)">
+            <span ng-class="kibiTitle">
+              {{hit._id}}
+            </span>
+        </a>
+      </li>
+      <li
+        class="list-group-item list-group-no-results"
+        ng-if="finder.hits.length === 0">
+        <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
+      </li>
+    </ul>
+    <!-- kibi: keep page info inside pagination -->
+    <div class="finder-hit-count" ng-if="finder.perPage < finder.hitCount">
+      <span>{{ finder.hitCount }} {{ finder.properties.nouns }}</span>
+    </div>
+    <!-- kibi: end -->
+  </paginate>
+</form>

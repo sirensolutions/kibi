@@ -1,0 +1,70 @@
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/variables";
+
+saved-virtual-indices-finder,
+paginated-selectable-list {
+  ul.li-striped {
+    li {
+      border: none;
+    }
+
+    li:nth-child(odd) {
+      background-color: @kibanaGray6;
+    }
+
+    li:nth-child(even) {
+      background-color: @white;
+    }
+
+    .paginate-heading {
+      font-weight: normal;
+      color: @kibanaGray1;
+    }
+
+    .list-group-item {
+      padding: 8px 15px;
+
+      ul {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+
+        .finder-type {
+          margin-right: 8px;
+          // kibi: added black to match the new black images
+          color: #000;
+        }
+      }
+
+      a {
+        i {
+          color: @saved-object-finder-icon-color !important;
+          margin-right: 10px;
+        }
+
+        display: block;
+        color: @saved-object-finder-link-color !important;
+      }
+
+      &:first-child {
+        .border-top-radius(0) !important;
+      }
+
+      &.list-group-no-results p {
+        margin-bottom: 0 !important;
+      }
+    }
+  }
+
+  paginate {
+    paginate-controls {
+      margin: 20px 20px 0; // kibi: no bottom margin
+    }
+
+    .finder-hit-count {
+      text-align: right;
+      font-size: 90%;
+      font-weight: bold;
+    }
+  }
+}

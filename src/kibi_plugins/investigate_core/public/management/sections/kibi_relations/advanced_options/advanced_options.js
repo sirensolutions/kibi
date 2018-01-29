@@ -56,10 +56,16 @@ uiModules
 
     // save button
     $scope.submit = function () {
+      // note: if we plan to allow the user to have different parameter in the direct and
+      // inverse relation, we need switch to a "deleteRelationsById" + "insertRelations(false)"
+      // that does not automatically add the inverse. Both the API are not yet implemented.
+      $scope.inverseRelation.joinType = $scope.relation.joinType;
+      $scope.inverseRelation.timeout = $scope.relation.timeout;
       if (!$scope.relation.joinType || $scope.relation.joinType === '') {
         delete $scope.relation.joinType;
         delete $scope.inverseRelation.joinType;
       }
+
       ontologyClient.insertRelations([$scope.relation, $scope.inverseRelation])
       .then(() => {
         kbnUrl.change('/management/siren/entities/' + $routeParams.entity);

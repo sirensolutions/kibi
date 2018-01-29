@@ -142,20 +142,15 @@ app.directive('dashboardApp', function (createNotifier, $injector) {
         if (dash.refreshInterval) {
           timefilter.refreshInterval = dash.refreshInterval;
         }
-      }
-      // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
-      // normal cross app navigation.
-      else if (!getAppState.previouslyStored()) {
-        if (dashboardState.getIsTimeSavedWithDashboard()) {
-          dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
-        }
-        else {
-          // kibi: set default time
-          const { mode, from, to } = config.get('timepicker:timeDefaults');
-          timefilter.time.mode = mode;
-          timefilter.time.to = to;
-          timefilter.time.from = from;
-        }
+      } else if (dashboardState.getIsTimeSavedWithDashboard()) {
+        dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
+      } else {
+        // kibi: set default time
+        const { mode, from, to } = config.get('timepicker:timeDefaults');
+        timefilter.time.mode = mode;
+        timefilter.time.to = to;
+        timefilter.time.from = from;
+        // kibi: end
       }
 
       const updateState = () => {

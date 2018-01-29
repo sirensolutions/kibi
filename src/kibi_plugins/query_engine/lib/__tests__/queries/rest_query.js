@@ -49,7 +49,7 @@ const fakeDoc2 = {
 
 describe('RestQuery', () => {
 
-  beforeEach(() => {
+  afterEach(() => {
     if (rp.Request.restore) {
       rp.Request.restore();
     }

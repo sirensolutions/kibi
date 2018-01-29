@@ -190,7 +190,8 @@ function startServer(self, fulfill, reject) {
                     if (err.error && err.error.code !== 'ECONNREFUSED') {
                       self.server.log(['gremlin', 'error'], 'Failed to ping the Siren Gremlin Server: ' + err.message);
                     } else {
-                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server. Error ' + JSON.stringify(err));
+                      self.server.log(['gremlin', 'warning'], 'Waiting for the Siren Gremlin Server.');
+                      self.server.log(['gremlin', 'debug'],  'Error ' + JSON.stringify(err));
                     }
                     counter--;
                     setTimeout(() => self.ping(counter), timeout);

@@ -69,9 +69,9 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
 
     return jdbcDatasources.createVirtualIndex(index).then(res => {
       if (res.created === true) {
-        notify.info('Saved virtual index [' + index._id + ']');
+        notify.info('Saved virtual index ' + index._id);
       } else if (res.updated === true) {
-        notify.info('Saved virtual index [' + index._id + ']');
+        notify.info('Saved virtual index ' + index._id);
       }
     }).catch(err => {
       notify.error(err);

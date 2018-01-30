@@ -100,6 +100,13 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
         throw new Error('field.doc_values has been removed, see https://github.com/elastic/kibana/pull/11969');
       }
     },
+    // kibi: add multifields property
+    multifields: {
+      get() {
+        return this.getMultiFields(this.indexPattern);
+      }
+    }
+    // kibi: end
   });
 
   Field.prototype.routes = {

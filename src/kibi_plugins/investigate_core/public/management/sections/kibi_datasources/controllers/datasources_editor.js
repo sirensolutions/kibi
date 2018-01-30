@@ -141,13 +141,15 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     kbnUrl.change('management/siren/datasources', {});
   };
 
-  $scope.$watch('datasource.datasourceType', function () {
+  $scope.$watch('datasource.datasourceType', function (newval, oldval) {
     // here reinit the datasourceDef
-    if (datasource.datasourceType === 'sql_jdbc_new' && datasource.title === 'New saved datasource') {
-      if (datasource.datasourceParams.drivername) {
-        datasource.title = datasource.datasourceParams.drivername.readable;
-      } else {
-        datasource.title = '';
+    if (datasource.datasourceType === 'sql_jdbc_new') {
+      if(datasource.title === 'New saved datasource') {
+        if (datasource.datasourceParams.drivername) {
+          datasource.title = datasource.datasourceParams.drivername.readable;
+        } else {
+          datasource.title = '';
+        }
       }
     }
 
@@ -160,6 +162,35 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     }
   });
 
+  $scope.$watchGroup([
+    'datasource.datasourceParams.drivername',
+    'datasource.datasourceParams.databasename',
+    'datasource.datasourceParams.username',
+    'datasource.datasourceParams.password',
+  ], function (vals) {
+    if(datasource.datasourceType === 'sql_jdbc_new') {
+      let driverName;
+      try {
+        driverName = JSON.parse(vals[0]);
+      } catch (e) {
+        driverName = vals[0];
+      }
+
+      const databaseName = vals[1];
+      const userName = vals[2];
+      const password = vals[3];
+
+      let url = driverName.defaultURL || '';
+      if (url) {
+        url = url.replace(/{{username}}/, (userName && password) ? userName + ':' + password + '@' : '');
+        url = url.replace(/{{port}}/, (driverName.defaultPort) ? driverName.defaultPort : '');
+        url = url.replace(/{{host}}/, 'localhost');
+        url = url.replace(/{{databasename}}/, (databaseName) ? databaseName : '');
+      }
+
+      datasource.datasourceParams.connection_string = url;
+    }
+  });
   // currently supported only for sql_jdbc_new
   $scope.testConnection = function () {
     const modalOptions = {

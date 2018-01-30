@@ -157,7 +157,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
   return {
     appName: 'management-subnav',
     key: 'delete',
-    order: 4,
+    order: 2,
     template: openTemplate,
     run() {
       const deleteObject = _getMethod($document, $location, 'deleteObject');

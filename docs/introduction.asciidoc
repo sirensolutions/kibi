@@ -4,7 +4,8 @@
 Kibi is an open source data intelligence platform built upon
 {kibana-announcement}[Kibana {kibana-version}].
 Kibi {version} supports Elasticsearch {elasticsearch-version}
-and the Vanguard plugin version {vanguard-version}. The Siren Vanguard plugin replaces the Siren Join plugin for distribution based on Elasticsearch 5.x.
+and the Federate plugin version {federate-version}. The Siren Federate plugin replaces the Siren Join plugin for
+distributions based on Elasticsearch 5.x.
 
 Kibi allows you to perform complex analytics on large volumes of data by providing
 customizable visualizations (charts, maps, metrics and tables) on Elasticsearch
@@ -60,8 +61,8 @@ templates.
 selected Elasticsearch documents as a node of a graph and allows the user to visually
 explore the connection between vertices.
 
-The Relational Filter visualization requires the {vanguard-website}[Vanguard
-plugin {vanguard-version}] for Elasticsearch.
+The Relational Filter visualization requires the {federate-website}[Siren Federate plugin {federate-version}]
+for Elasticsearch.
 
 [float]
 === How does Kibi compare to Kibana?

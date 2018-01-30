@@ -1,6 +1,6 @@
 import pluginList from '../../core_plugins/elasticsearch/lib/wait_for_plugin_list.js';
 import { find } from 'lodash';
-import { isVanguardVersionGreaterOrEqual } from './lib/is_vanguard_version_greater_or_equal';
+import { isVersionGreaterOrEqual } from './lib/is_version_gte';
 
 /**
  * The siren_federate plugin checks if there is Siren Federate plugin in Elasticsearch.
@@ -22,10 +22,10 @@ module.exports = function (kibana) {
 
         pluginList(this, server)
         .then((plugins)=> {
-          const vanguard = find(plugins, (p) => {
-            return p.component === 'siren-vanguard';
+          const pluginInfo = find(plugins, (p) => {
+            return p.component === 'siren-federate' || p.component === 'siren-vanguard';
           });
-          if (vanguard) {
+          if (pluginInfo) {
             // Check if it is the minimum version of Siren Federate
             callWithInternalUser('cat.nodes', { h: 'version', format:'json' })
             .then((nodeList) => {
@@ -34,9 +34,9 @@ module.exports = function (kibana) {
                 elasticsearchVersion = nodeList[i].version;
                 break;
               }
-              // for this 2 versions we check because only in -1 releases Vanguard does support "limit" parameter
+              // for this 2 versions we check because only in -1 releases Federate does support "limit" parameter
               if (elasticsearchVersion === '5.4.3') {
-                if (isVanguardVersionGreaterOrEqual(vanguard.version, '5.4.3-1')) {
+                if (isVersionGreaterOrEqual(pluginInfo.version, '5.4.3-1')) {
                   this.status.green('Siren Federate plugin is found.');
                   return;
                 } else {
@@ -45,7 +45,7 @@ module.exports = function (kibana) {
                 }
               }
               if (elasticsearchVersion === '5.5.2') {
-                if (isVanguardVersionGreaterOrEqual(vanguard.version, '5.5.2-1')) {
+                if (isVersionGreaterOrEqual(pluginInfo.version, '5.5.2-1')) {
                   this.status.green('Siren Federate plugin is found.');
                   return;
                 } else {

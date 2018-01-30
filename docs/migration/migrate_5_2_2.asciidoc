@@ -18,7 +18,7 @@ Elasticearch documentation.
 
 It is recommended to have a backup of the indices in the cluster;
 if running a production cluster, you will need to request an updated license
-for Siren Vanguard.
+for Siren Federate.
 
 [float]
 ===== Search Guard configuration backup
@@ -183,16 +183,16 @@ If installed, the following plugins must be removed:
 - `search-guard-ssl`
 
 [float]
-====== Siren Vanguard
+====== Siren Federate
 
-The Siren Vanguard plugin for Elasticsearch replaces the Siren Join and Siren
+The Siren Federate plugin for Elasticsearch replaces the Siren Join and Siren
 License plugins; to install the plugin, you need to download the zip package of
 the plugin from {download-ref}[our customer portal] and install it through
 `elasticsearch-plugin`, e.g.:
 
 [source,bash]
 ----
-./usr/share/elasticsearch/bin/elasticsearch-plugin install file:///path/to/vanguard-plugin.zip
+./usr/share/elasticsearch/bin/elasticsearch-plugin install file:///path/to/siren-federate-<version>-plugin.zip
 ----
 
 [float]

@@ -115,9 +115,9 @@ module.exports = function (grunt) {
     // Set option to keep running after failures
     grunt.config.set('functional_test_runner.functional.options.configOverrides.mochaOpts.bail', false);
 
-    // Get vanguard and gremlin and then run tests
+    // Get federate and gremlin and then run tests
     grunt.task.run([
-      'getVanguard',
+      'getFederate',
       'getGremlin',
       'test:ui'
     ]);

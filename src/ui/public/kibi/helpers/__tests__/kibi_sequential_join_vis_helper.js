@@ -725,7 +725,7 @@ describe('Kibi Components', function () {
         });
       });
 
-      it('should set the default siren-vanguard parameters', function () {
+      it('should set the default siren-federate parameters', function () {
         init({ indexPatterns, savedDashboards, savedSearches, relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
@@ -747,7 +747,7 @@ describe('Kibi Components', function () {
         });
       });
 
-      it('should set the advanced siren-vanguard parameters', function () {
+      it('should set the advanced siren-federate parameters', function () {
         const relations = [
           {
             id: 'some-uuid',

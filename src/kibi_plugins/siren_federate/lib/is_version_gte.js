@@ -1,6 +1,6 @@
 import semver from 'semver';
 
-export function isVanguardVersionGreaterOrEqual(actual, test) {
+export function isVersionGreaterThanOrEqual(actual, test) {
   const a = {
     major: semver.major(actual),
     minor: semver.minor(actual),
@@ -23,4 +23,4 @@ export function isVanguardVersionGreaterOrEqual(actual, test) {
     return true;
   }
   return false;
-};
+}

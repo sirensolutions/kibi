@@ -1,12 +1,13 @@
-Copyright 2015–2017 Siren Solutions
+Copyright 2015–2018 Siren Solutions
 
-Kibi is Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+Siren Investigate is Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+in compliance with the License. You may obtain a copy of the License at
 
   http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-Please note that Kibi uses the Siren Vanguard Elasticsearch plugin.
+Please note that Investigate uses the Siren Federate Elasticsearch plugin.
 For more information see
 
   http://siren.io/

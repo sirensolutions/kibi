@@ -56,18 +56,20 @@ uiModules
         });
       }
 
-      // kibi: Gets the vanguard version from the elasticsearchPlugins list
+      // kibi: Gets the federate version from the elasticsearchPlugins list
       // for display on the management landing page
-      const getVanguardVersion = function (plugins) {
+      const getPluginVersion = function (plugins) {
         if (plugins) {
-          return plugins.filter(plugin => plugin.component === 'siren-vanguard')
-                        .map(plugin => plugin.version)
-                        .pop();
+          return plugins.filter(plugin => {
+            return plugin.component === 'siren-federate' || plugin.component === 'siren-vanguard';
+          })
+          .map(plugin => plugin.version)
+          .pop();
         }
       };
 
       const plugins = elasticsearchPlugins.get({ version: true });
-      const vanguardVersion = getVanguardVersion(plugins);
+      const federateVersion = getPluginVersion(plugins);
 
       // kibi: grab configured index
       const kibiIndex = chrome.getInjected('kbnIndex');
@@ -77,7 +79,7 @@ uiModules
         kibiVersion: kibiVersion,
         kibiKibanaAnnouncement: kibiKibanaAnnouncement,
         buildTimestamp: buildTimestamp,
-        vanguardVersion: vanguardVersion,
+        federateVersion: federateVersion,
         kibiIndex: kibiIndex,
         esVersion: elasticsearchVersion.get(),
         build: buildNum,

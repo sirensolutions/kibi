@@ -9,7 +9,8 @@ describe('Notifier', function () {
   let notifier;
   let params;
   let message = 'Oh, the humanity!';
-  const version = window.__KBN__.version;
+  // kibi: use siren version
+  const version = window.__KBN__.kibiVersion;
   const buildNum = window.__KBN__.buildNum;
   const customText = 'fooMarkup';
   const customParams = {

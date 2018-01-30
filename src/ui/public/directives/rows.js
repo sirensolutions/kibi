@@ -92,7 +92,9 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
             }
             // kibi: end
           } else {
-            $cellContent.prepend(contents);
+            // kibi: added style because if the cell content value is empty, the two lenses are not aligned
+            $cellContent.prepend('<span style="display: inline-block">' + contents + '</span>');
+            // kibi: end
           }
         }
 

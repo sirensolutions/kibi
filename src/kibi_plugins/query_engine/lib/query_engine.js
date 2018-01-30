@@ -634,7 +634,7 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
       }
       if (!exists) {
         return Promise.reject(
-          new Error('The query [' + id + '] requested by Siren Investigate but not found in memory. ' +
+          new Error('The query [' + id + '] was requested by Siren Investigate but not found in memory. ' +
             'Possible reason - query datasource was removed. Please check the configuration')
         );
       }

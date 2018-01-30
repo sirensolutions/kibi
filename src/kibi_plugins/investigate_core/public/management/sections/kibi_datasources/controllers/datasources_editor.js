@@ -54,28 +54,16 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   });
   const datasource = $scope.datasource = $route.current.locals.datasource;
   $scope.isNew = $route.current.locals.isNew;
-
   $scope.isValid = function () {
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };
 
   $scope.saveObject = function () {
-    const modalOptions = {
-      title: 'JDBC datasource configuration successful',
-      confirmButtonText: 'Yes, take me there',
-      cancelButtonText: 'No, will do later',
-      onConfirm: () => kbnUrl.change('/management/siren/virtualindices/'),
-      onCancel: () => {}
-    };
     if (datasource.datasourceType === 'sql_jdbc_new') {
       const d = jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource);
       return jdbcDatasources.save(d).then(() => {
         notify.info('Datasource ' + d._id + ' successfully saved');
         kbnUrl.change('management/siren/datasources/' + d._id);
-        confirmModal(
-          'Next step is to map a remote table (or view) by creating a Virtual Index. Do that now?',
-          modalOptions
-        );
       });
     }
 
@@ -164,9 +152,21 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
 
   // currently supported only for sql_jdbc_new
   $scope.testConnection = function () {
+    const modalOptions = {
+      title: 'JDBC datasource configuration successful',
+      confirmButtonText: 'Yes, take me there',
+      cancelButtonText: 'No, will do later',
+      onConfirm: () => kbnUrl.change('/management/siren/virtualindices/'),
+      onCancel: () => {}
+    };
+
     jdbcDatasources.validate(jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource))
     .then(res => {
       notify.info('Connection OK');
+      confirmModal(
+        'Next step is to map a remote table (or view) by creating a Virtual Index. Do that now?',
+        modalOptions
+      );
     })
     .catch(err => {
       if (err && err.error && err.error.reason) {

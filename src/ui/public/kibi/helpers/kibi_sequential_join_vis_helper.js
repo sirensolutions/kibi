@@ -101,6 +101,7 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
               kbnUrl.change('/dashboard/{{id}}', { id: button.targetDashboardId });
             } else {
               kibiState.save();
+              kbnUrl.change('/dashboard/{{id}}', { id: button.targetDashboardId });
             }
           };
 

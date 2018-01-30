@@ -197,22 +197,26 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
    * Add the alternative menu hierarchy where you use dashboard and then select one of the available relations
    */
   const addAlternativeSubHierarchy = function (buttons) {
+    const addAltSubButtons = (subButtons, label, button) => {
+      _.each(subButtons, (subButton) => {
+        const altSubButton = _.clone(subButton);
+        altSubButton.label = label;
+
+        if (!button.altSub[subButton.label]) {
+          button.altSub[subButton.label] = [];
+        }
+        button.altSub[subButton.label].push(altSubButton);
+      });
+    };
+
     _.each(buttons, (button) => {
       if (button.type === 'VIRTUAL_ENTITY') {
         button.altSub = {};
         const subButtons = button.sub;
         if (subButtons) {
-          for (var key in subButtons) {
+          for (const key in subButtons) {
             if (subButtons.hasOwnProperty(key)) {
-              _.each(subButtons[key], (subButton) => {
-                const altSubButton = _.clone(subButton);
-                altSubButton.label = key;
-
-                if (!button.altSub[subButton.label]) {
-                  button.altSub[subButton.label] = [];
-                }
-                button.altSub[subButton.label].push(altSubButton);
-              });
+              addAltSubButtons(subButtons[key], key, button);
             }
           }
         }

@@ -11,7 +11,7 @@ module.exports = [
     index: {
       _index: '.siren',
       _type: 'config',
-      _id: pkg.kibi_version
+      _id: 'kibi'
     }
   },
   {

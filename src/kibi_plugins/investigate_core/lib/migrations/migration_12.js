@@ -22,7 +22,6 @@ export default class Migration12 extends Migration {
     this._client = configuration.client;
     this._config =  configuration.config;
     this._index = configuration.config.get('kibana.index');
-    // kibi: do NOT change to investigate_core as this is a migration which was implemented before the renaming
     this._defaultDashboardTitleYml = configuration.config.get('investigate_core.default_dashboard_title');
     this._type = 'config';
     this._query = {

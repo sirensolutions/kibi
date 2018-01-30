@@ -1,6 +1,7 @@
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
+import _ from 'lodash';
 import expect from 'expect.js';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import { mockSavedObjects } from 'fixtures/kibi/mock_saved_objects';

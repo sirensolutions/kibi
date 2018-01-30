@@ -526,9 +526,23 @@
       "inputType": "select",
       "defaultValue": "",
       "possibleValues": [
-       { "readable": "Dremio", "internal": "com.dremio.Driver" },
-       { "readable": "PostgreSQL", "internal": "org.postgreSQL.Driver" },
-       { "readable": "MySQL", "internal": "com.mysql.jdbc.Driver" }
+        { 
+         "readable": "Dremio", 
+         "internal": "com.dremio.Driver", 
+         "defaultURL": "jdbc:mysql://{{username}}{{host}}:{{port}}/{{databasename}}", 
+         "defaultPort": 9407,
+         "disclaimer": "This is a suggested connection string, your setup may vary and may require the addition of, for example, <a href=\"http://google.com\">UseLegacyDatetime</a>"
+        },
+        {
+          "readable": "PostgreSQL", 
+          "internal": "org.postgreSQL.Driver" , 
+          "defaultURL": "jdbc:postgresql://{{username}}{{host}}:{{port}}:{{databasename}}/postgresl", 
+          "defaultPort": 9407
+        },
+        {
+          "readable": "MySQL",
+          "internal": "com.mysql.jdbc.Driver"
+        }
       ],
       "placeholder": "JDBC driver class name (e.g.: com.mysql.jdbc.Driver)"
     },

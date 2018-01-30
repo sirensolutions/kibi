@@ -3,6 +3,6 @@ import 'plugins/investigate_core/management/sections/kibi_entities/controllers/e
 
 management.getSection('kibana').register('entities', {
   display: 'Indexes and Relations',
-  order: 3,
+  order: 1,
   url: '#/management/siren/indexesandrelations'
 });

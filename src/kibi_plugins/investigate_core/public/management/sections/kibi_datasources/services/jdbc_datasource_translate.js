@@ -24,7 +24,8 @@ export const jdbcDatasourceTranslate = {
       username: savedParams.username,
       password: savedParams.password,
       timezone: savedParams.timezone,
-      driver: savedParams.drivername,
+      databasename: savedParams.connection_string.split('/')[0],
+      driver: JSON.parse(savedParams.drivername).internal,
       url: savedParams.connection_string
     };
   },

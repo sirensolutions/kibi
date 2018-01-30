@@ -4,6 +4,6 @@ import 'plugins/investigate_core/management/sections/kibi_virtual_indices/direct
 
 management.getSection('kibana').register('virtualindexes', {
   display: 'Virtual Indexes',
-  order: 2,
+  order: 16,
   url: '#/management/siren/virtualindexes'
 });

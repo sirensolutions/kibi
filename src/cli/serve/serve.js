@@ -30,7 +30,7 @@ const getPluginsFolder = function () {
     statSync(fromRoot('plugins'));
     return fromRoot('plugins');
   } catch (err) {
-    console.warn('[WARNING] plugins folder is missing, please create one and restart kibi ...');
+    console.warn('[WARNING] plugins folder is missing, please create one and restart Siren Investigate ...');
     return null;
   }
 };

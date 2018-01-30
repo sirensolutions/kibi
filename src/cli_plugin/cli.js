@@ -12,8 +12,8 @@ const program = new Command('bin/investigate-plugin');
 program
 .version(pkg.version)
 .description(
-  'The Kibi plugin manager enables you to install and remove plugins that ' +
-  'provide additional functionality to Kibi'
+  'The Siren Investigate plugin manager enables you to install and remove plugins that ' +
+  'provide additional functionality to Siren Investigate'
 );
 
 listCommand(program);

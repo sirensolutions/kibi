@@ -201,7 +201,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       $scope.vis.error = '';
 
       if (originalButtonDefs.length !== $scope.vis.params.buttons.length) {
-        $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
+        $scope.vis.error = 'Invalid configuration of the Siren Investigate relational filter visualization';
         if (!edit) {
           return Promise.reject($scope.vis.error);
         }
@@ -300,7 +300,8 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const updateButtons = function (reason) {
     if (!kibiState.isSirenJoinPluginInstalled()) {
       notify.error(
-        'This version of Kibi Relational filter requires the Vanguard plugin. Please install it and restart Kibi.'
+        'This version of Siren Investigate Relational filter requires the Vanguard plugin. '
+        + 'Please install it and restart Siren Investigate.'
       );
       return;
     }

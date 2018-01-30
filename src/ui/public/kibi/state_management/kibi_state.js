@@ -895,7 +895,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
     // check siren-vanguard plugin
     if (!this.isSirenJoinPluginInstalled()) {
-      const error = 'The Siren Vanguard plugin is not installed. Please install the plugin and restart Kibi';
+      const error = 'The Siren Vanguard plugin is not installed. Please install the plugin and restart Siren Investigate';
       return Promise.reject(new Error(error));
     }
 

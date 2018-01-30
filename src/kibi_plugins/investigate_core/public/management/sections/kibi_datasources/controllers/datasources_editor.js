@@ -86,7 +86,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
     // old jdbc datasources
     if (kibiUtils.isJDBC(datasource.datasourceType)) {
       const msg = 'Changes in a JDBC datasource requires the application to be restarted. ' +
-        'Please restart Kibi and do not forget to set investigate_core.load_jdbc to true.';
+        'Please restart Siren Investigate and do not forget to set investigate_core.load_jdbc to true.';
       notify.warning(msg);
     }
 

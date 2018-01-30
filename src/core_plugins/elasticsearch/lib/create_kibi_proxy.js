@@ -106,7 +106,7 @@ module.exports = function createProxy(server, method, path, config) {
             // prevent the string to be created
             if (serverConfig.get('logging.verbose')) {
               server.log(
-                ['debug', 'kibi_proxy', 'raw kibi query'],
+                ['debug', 'kibi_proxy', 'raw Siren Investigate query'],
                 `\n-------------------------\n${req.url}\n${Buffer.concat(chunks).toString()}\n-------------------------`
               );
             }

@@ -148,7 +148,7 @@ describe('Kibi Sequential Join Visualization Controller', function () {
       return $scope._constructButtons()
       .then(() => expect().fail(new Error('should fail')))
       .catch(err => {
-        expect(err).to.be('Invalid configuration of the Kibi relational filter visualization');
+        expect(err).to.be('Invalid configuration of the Siren Investigate relational filter visualization');
       });
     });
 

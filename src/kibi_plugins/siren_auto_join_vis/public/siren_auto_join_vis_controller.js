@@ -30,7 +30,14 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
-  $scope.visibility = { buttons: {}, subRelations: {} };
+  $scope.visibility = {
+    // Root buttons
+    buttons: {},
+    // Relations inside a button
+    subRelations: {},
+    // target dashboards for the alternative view
+    altViewDashboards: {}
+  };
 
   $scope.btnCountsEnabled = function () {
     return config.get('siren:enableAllRelBtnCounts');
@@ -39,6 +46,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   $scope.getButtonLabel = function (button) {
     const count = button.targetCount ? button.targetCount : 0;
     return button.label.replace('{0}', count);
+  };
+
+  $scope.toggleLayout = function (button, $event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+    button.checkBox = !button.checkBox;
   };
 
   const buttonMetaCallback = function (button, meta) {
@@ -178,6 +191,37 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       dashboardId: dashboardId
     });
     return Promise.resolve(buttons);
+  };
+
+  /**
+   * Add the alternative menu hierarchy where you use dashboard and then select one of the available relations
+   */
+  const addAlternativeSubHierarchy = function (buttons) {
+    const addAltSubButtons = (subButtons, label, button) => {
+      _.each(subButtons, (subButton) => {
+        const altSubButton = _.clone(subButton);
+        altSubButton.label = label;
+
+        if (!button.altSub[subButton.label]) {
+          button.altSub[subButton.label] = [];
+        }
+        button.altSub[subButton.label].push(altSubButton);
+      });
+    };
+
+    _.each(buttons, (button) => {
+      if (button.type === 'VIRTUAL_ENTITY') {
+        button.altSub = {};
+        const subButtons = button.sub;
+        if (subButtons) {
+          for (const key in subButtons) {
+            if (subButtons.hasOwnProperty(key)) {
+              addAltSubButtons(subButtons[key], key, button);
+            }
+          }
+        }
+      }
+    });
   };
 
   const getNewButtons = function (relations, existingButtons) {
@@ -395,6 +439,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
             });
 
             return Promise.all(subButtonPromises).then(() => {
+              addAlternativeSubHierarchy(buttons);
               return buttons;
             });
           })
@@ -488,11 +533,28 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           }
         }
       }
+      const visibleDashboards = new Set();
+      for (const prop in visibility.altViewDashboards) {
+        if (visibility.altViewDashboards.hasOwnProperty(prop)) {
+          if (visibility.altViewDashboards[prop] === true) {
+            visibleDashboards.add(prop);
+          }
+        }
+      }
       // gathering buttons that have to be computed
       returnButtons = _.reduce($scope.buttons, (acc, button) => {
         if (button.type === 'VIRTUAL_ENTITY') {
           _.each(button.sub, (subButtons, rel) => {
             if (visibleRelations.has(rel)) {
+              _.each(subButtons, (subButton) => {
+                if (!subButton.joinExecuted) {
+                  acc.push(subButton);
+                }
+              });
+            }
+          });
+          _.each(button.altSub, (subButtons, dashboardName) => {
+            if (visibleDashboards.has(dashboardName)) {
               _.each(subButtons, (subButton) => {
                 if (!subButton.joinExecuted) {
                   acc.push(subButton);

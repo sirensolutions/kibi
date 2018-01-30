@@ -34,21 +34,24 @@
                      >
       <accordion-heading>
         {{ getButtonLabel(button) }}
-        <div ng-if="visibility.buttons[button.id] && !button.checkBox"
-             class="dashboard-disabled"
-             ng-click="toggleLayout(button, $event)"
-             ng-include src="dashboardIcon"
-             title="Order by Dashboard">
-        </div>
-        <div ng-if="visibility.buttons[button.id] && button.checkBox"
-             class="dashboard-enabled"
-             ng-click="toggleLayout(button, $event)"
-             ng-include src="dashboardIcon"
-             title="Order by Relation">
-        </div>
+        <img
+          ng-if="vis.params.layout === 'normal' && visibility.buttons[button.id] && !button.checkBox"
+          class="dashboard-disabled"
+          kbn-src="/plugins/kibana/assets/dashboard.svg"
+          ng-click="toggleLayout(button, $event)"
+          tooltip="Order by Dashboard"
+          tooltip-append-to-body="1"
+        >
+        <img
+          ng-if="vis.params.layout === 'normal' && visibility.buttons[button.id] && button.checkBox"
+          class="dashboard-enabled"
+          kbn-src="/plugins/kibana/assets/dashboard.svg"
+          ng-click="toggleLayout(button, $event)"
+          tooltip="Order by Relation"
+          tooltip-append-to-body="1"
+        >
       </accordion-heading>
-
-      <!-- normal view -->
+      <!-- normal view - relations view -->
       <accordion close-others="true"
                  ng-if="vis.params.layout === 'normal' && !button.checkBox"
       >
@@ -81,7 +84,37 @@
           </div>
         </accordion-group>
       </accordion>
-      <!-- end normal view -->
+      <!-- end normal view  - relations view -->
+
+      <!-- normal view - dashboard view -->
+      <accordion close-others="true"
+                 ng-if="vis.params.layout === 'normal' && button.checkBox"
+      >
+        <accordion-group heading="{{key}}"
+                         ng-repeat="(key, altSubButtons) in button.altSub"
+                         is-open="visibility.altViewDashboards[key]"
+        >
+          <div class="panel-buttons">
+            <a ng-repeat="altSubButton in altSubButtons"
+               ng-if="altSubButton.type === 'INDEX_PATTERN'"
+               ng-click="altSubButton.click(true)"
+               ng-disabled="altSubButton.disabled"
+               ng-mouseover="hoverIn(altSubButton)"
+               ng-mouseleave="hoverOut()"
+            >
+              <h4 class="panel-title">
+                {{altSubButton.label}}
+                <span ng-show="altSubButton.targetCount !== undefined"> ({{altSubButton.targetCount}})</span>
+                <span
+                  class="warning"
+                  ng-if="!!altSubButton.warning"
+                  title="{{altSubButton.warning}}">(*)</span>
+              </h4>
+            </a>
+          </div>
+        </accordion-group>
+      </accordion>
+      <!-- normal view - dashboard view -->
 
       <!-- light view -->
       <accordion close-others="true"

@@ -17,7 +17,7 @@ function _getDisplayName($location) {
       return 'Datasource';
     case 'relations':
       return 'Relations';
-    case 'virtualindices':
+    case 'virtualindexes':
       return 'Virtual Index';
   }
 }
@@ -53,7 +53,7 @@ function _getMethod($document, $location, name) {
       return angular.element($document.find('#queries_editor')).data(name);
     case 'datasources':
       return angular.element($document.find('#datasources_editor')).data(name);
-    case 'virtualindices':
+    case 'virtualindexes':
       return angular.element($document.find('#virtual_indices_editor')).data(name);
   }
 }
@@ -91,7 +91,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       return `New ${_getDisplayName($location)}`;
     },
     hideButton() {
-      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'virtualindices');
+      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'virtualindexes');
     },
     testId: 'new'
   };
@@ -121,7 +121,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       return !isValid();
     },
     hideButton() {
-      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'relations', 'virtualindices');
+      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'relations', 'virtualindexes');
     },
     testId: 'save'
   };
@@ -137,7 +137,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       return `Open ${_getDisplayName($location)}`;
     },
     hideButton() {
-      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'virtualindices');
+      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'virtualindexes');
     },
     locals: {
       controller($scope) {
@@ -178,7 +178,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       return `Delete ${_getDisplayName($location)}`;
     },
     hideButton() {
-      return _hideButton($location.path(), 'virtualindices');
+      return _hideButton($location.path(), 'virtualindexes');
     },
     testId: 'delete'
   };

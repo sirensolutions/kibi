@@ -65,7 +65,7 @@ module.directive('savedVirtualIndicesFinder', function ($location, $injector, kb
       };
 
       self.makeUrl = function (hit) {
-        return `#/management/siren/virtualindices/${hit._id}`;
+        return `#/management/siren/virtualindexes/${hit._id}`;
       };
 
       /**

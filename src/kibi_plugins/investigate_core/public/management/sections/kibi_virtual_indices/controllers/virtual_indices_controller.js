@@ -7,11 +7,11 @@ import template from 'plugins/investigate_core/management/sections/kibi_virtual_
 import { CONFIRM_BUTTON, CANCEL_BUTTON } from 'ui_framework/components/modal/confirm_modal';
 
 uiRoutes
-.when('/management/siren/virtualindices', {
+.when('/management/siren/virtualindexes', {
   template,
   reloadOnSearch: false
 })
-.when('/management/siren/virtualindices/:id?', {
+.when('/management/siren/virtualindexes/:id?', {
   template,
   reloadOnSearch: false,
   resolve: {
@@ -23,7 +23,7 @@ uiRoutes
       })
       .catch(err => {
         courier.redirectWhenMissing({
-          virtualIndex: '/management/siren/virtualindices'
+          virtualIndex: '/management/siren/virtualindexes'
         });
       });
     }
@@ -92,7 +92,7 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
 
 
   $scope.newObject = function () {
-    kbnUrl.change('/management/siren/virtualindices/', {});
+    kbnUrl.change('/management/siren/virtualindexes/', {});
   };
 
   $scope.jdbcDatasources = [];

@@ -155,7 +155,7 @@
                   class="form-control span9"/>
 
                 <select
-                  ng-if="param.inputType == 'select' && param.multivalued"
+                  ng-if="param.inputType == 'select' && param.multivalued && !param.readable"
                   name="{{param.name}}"
                   ng-required="{{param.required}}"
                   multiple
@@ -169,7 +169,7 @@
                 </select>
 
                 <select
-                  ng-if="param.inputType == 'select' && !param.multivalued"
+                  ng-if="param.inputType == 'select' && !param.multivalued && !param.readable"
                   name="{{param.name}}"
                   ng-required="{{ param.required }}"
                   ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
@@ -178,6 +178,19 @@
                     value="{{o}}"
                     ng-selected="datasource.datasourceParams[param.name] === o">
                     {{o}}
+                  </option>
+                </select>
+
+                <select
+                  ng-if="param.inputType == 'select' && !param.multivalued && param.readable"
+                  name="{{param.name}}"
+                  ng-required="{{ param.required }}"
+                  ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
+                  <option
+                    ng-repeat="o in param.possibleValues"
+                    value="{{o}}"
+                    ng-selected="datasource.datasourceParams[param.name] === o.internal">
+                    {{o.readable}} ({{o.internal}})
                   </option>
                 </select>
 

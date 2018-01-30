@@ -402,7 +402,7 @@
   "jdbc": [
     {
       "name": "drivername",
-      "label": "Driver name",
+      "label": "Driver class",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -518,23 +518,29 @@
   "jdbc_new": [
     {
       "name": "drivername",
-      "label": "Driver name",
+      "label": "Driver class",
       "required": true,
       "multivalued": false,
       "encrypted": false,
-      "inputType": "text",
+      "readable": true,
+      "inputType": "select",
       "defaultValue": "",
+      "possibleValues": [
+       { "readable": "Dremio", "internal": "com.dremio.Driver" },
+       { "readable": "PostgreSQL", "internal": "org.postgreSQL.Driver" },
+       { "readable": "MySQL", "internal": "com.mysql.jdbc.Driver" }
+      ],
       "placeholder": "JDBC driver class name (e.g.: com.mysql.jdbc.Driver)"
     },
     {
-      "name": "connection_string",
-      "label": "Connection string",
-      "required": true,
+      "name": "databasename",
+      "label": "Database",
+      "required": false,
       "multivalued": false,
       "encrypted": false,
       "inputType": "text",
       "defaultValue": "",
-      "placeholder": "Connection string without username and password (e.g.: jdbc:mysql://localhost:3306/databasename)"
+      "placeholder": "Remote JDBC database name"
     },
     {
       "name": "username",
@@ -565,6 +571,16 @@
       "encrypted": false,
       "defaultValue": "UTC",
       "placeholder": "e.g.: UTC"
+    },
+    {
+      "name": "connection_string",
+      "label": "Connection string",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "Connection string without username and password (e.g.: jdbc:mysql://localhost:3306/databasename)"
     }
   ]
 }

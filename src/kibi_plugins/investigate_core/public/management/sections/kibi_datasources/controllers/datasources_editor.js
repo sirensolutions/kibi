@@ -144,10 +144,20 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   $scope.$watch('datasource.datasourceType', function () {
     // here reinit the datasourceDef
     if (datasource.datasourceType === 'sql_jdbc_new' && datasource.title === 'New saved datasource') {
-      datasource.title = '';
+      if (datasource.datasourceParams.drivername) {
+        datasource.title = datasource.datasourceParams.drivername.readable;
+      } else {
+        datasource.title = '';
+      }
     }
 
     setDatasourceSchema(datasource);
+  });
+
+  $scope.$watch('datasource.datasourceParams.drivername', function (newval, oldval) {
+    if(newval) {
+      datasource.title = JSON.parse(newval).readable;
+    }
   });
 
   // currently supported only for sql_jdbc_new

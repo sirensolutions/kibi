@@ -22,9 +22,21 @@ export default class Migration12 extends Migration {
     this._client = configuration.client;
     this._config =  configuration.config;
     this._index = configuration.config.get('kibana.index');
-    // kibi: do NOT change to investigate_core as this is a migration which was implemented before the renaming
     this._defaultDashboardTitleYml = configuration.config.get('investigate_core.default_dashboard_title');
     this._type = 'config';
+    this._query = {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                _id: 'kibi'
+              }
+            }
+          ]
+        }
+      }
+    };
   }
   static get description() {
     return 'Migrate investigate_core:default_dashboard_title property to advanced settings';
@@ -47,11 +59,11 @@ export default class Migration12 extends Migration {
 
     if (!dashboardWithTitleFromYmlFound) {
       this._logger.warning('[' + this._defaultDashboardTitleYml + '] is set as investigate_core.default_dashboard_title' +
-      'in investigate.yml but dashboard cannot be found.');
+      ' in investigate.yml but dashboard cannot be found.');
       return count;
     }
 
-    const objects = await this.scrollSearch(this._index, this._type);
+    const objects = await this.scrollSearch(this._index, this._type, this._query);
     _.each(objects, (object) => {
       if(!this._doesDashboardExist(object._source['kibi:defaultDashboardId'])) {
         count++;
@@ -89,7 +101,7 @@ export default class Migration12 extends Migration {
       return upgraded;
     }
 
-    const objects = await this.scrollSearch(this._index, this._type);
+    const objects = await this.scrollSearch(this._index, this._type, this._query);
     for (const obj of objects) {
       // check if kibi:defaultDashboardId contains a valid dashboard id
       if (!this._doesDashboardExist(obj._source['kibi:defaultDashboardId'])) {

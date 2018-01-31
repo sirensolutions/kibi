@@ -4,6 +4,6 @@ include::external_datasources.asciidoc[]
 
 include::kibi_gremlin_server.asciidoc[]
 
-include::sentinl_joinquery.asciidoc[]
+include::sirenalert.asciidoc[]
 
 include::cross_frame_communication.asciidoc[]

@@ -4,7 +4,7 @@ import filterHeaders from './filter_headers';
 import setHeaders from './set_headers';
 
 // kibi: server and sirenAction added for
-// replacing '_search' with '_msearch' to use siren-vanguard when available
+// replacing '_search' with '_msearch' to use siren-federate when available
 
 export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
   const serverConfig = server.config();
@@ -38,8 +38,9 @@ export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
     const reqSubPath = request.path.replace(proxyPrefix, '');
     mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
 
-    // kibi: replace _search with _msearch to use siren-vanguard when available
-    if (sirenAction && elasticsearchPlugins && contains(elasticsearchPlugins, 'siren-vanguard')) {
+    // kibi: replace _search with _msearch to use siren-federate when available
+    if (sirenAction && elasticsearchPlugins && (contains(elasticsearchPlugins, 'siren-federate') ||
+        contains(elasticsearchPlugins, 'siren-vanguard'))) {
       if (!reqSubPath.startsWith('/_siren/') && (reqSubPath.endsWith('_search') || reqSubPath.endsWith('_msearch'))) {
         mappedUrlComponents.pathname = joinPaths(esUrlBasePath, `siren/${trimLeft(reqSubPath, '/')}`);
       }

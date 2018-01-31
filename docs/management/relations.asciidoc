@@ -3,9 +3,9 @@
 
 In this panel, you can define relationships between index patterns. These
 relationships ultimately form a **graph** of index patterns. This graph is used
-in conjunction with the Vanguard plugin, allowing to perform join operations
-between **dashboards**, i.e., filtering a dashboard's documents with regards to
-an other.
+in conjunction with the Siren Federate plugin, allowing to perform join operations
+between **dashboards**, i.e. filtering the documents in a dashboard that have one or more relationships with documents
+in another dashboard.
 
 [float]
 === Graph of Index Patterns
@@ -60,15 +60,14 @@ and setting the limit to 0 here disables the limit entirely.
 
 [[kibi-join-type]]
 ==== Join Type
-There are three types of join algorithms available in Kibi/Vanguard.
-By default (if not set) the backend will try to choose the best algorithm for a particular join. 
-The user can force it using one of the three available options
+Siren Federate provides three types of join algorithms; the plugin will try to pick the best algorithm
+for a given join automatically, however you can force the selection by choosing one of the available options:
 
 * MERGE_JOIN - Distributed join using merge join algorithm
 * HASH_JOIN - Distributed join using hash join algorithm
 * BROADCAST_JOIN - Broadcast join
 
-The detailed description of each algorithm can be found in Vanguard plugin documentation.  
+A detailed description of each algorithm can be found in the Siren Federate plugin documentation.  
 
 ==== Index Patterns Management Icon
 A relation is also indicated on the <<index-patterns,Index Patterns>> Management application thanks

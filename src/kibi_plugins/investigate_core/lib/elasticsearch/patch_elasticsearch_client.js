@@ -1,12 +1,15 @@
 /**
  * Patches the Elasticsearch client class to expose the following methods globally:
  *
- * - vanguard_search: Vanguard _search version
- * - vanguard_msearch Vanguard _msearch version
- * - coordinate_search: alias to vanguard_search kept for backward compatibility
- * - coordinate_msearch: alias for vanguard_msearch kept for backward compatibility
- * - kibi_search: wrapper around Vanguard _search that applies transformations
- *                functions exposed by the Elasticsearch plugin.
+ * - siren_search: method that sends an msearch request to siren/_search
+ * - siren_msearch method that sends an msearch request to siren/_msearch
+ * - investigate_search: wrapper around siren_search that applies transformations
+ *                       functions exposed by the Elasticsearch plugin.
+ * - vanguard_search: alias of siren_search for backward compatibility
+ * - vanguard_msearch: alias of siren_msearch for backward compatibility
+ * - coordinate_search: alias of vanguard_search kept for backward compatibility
+ * - coordinate_msearch: alias of vanguard_msearch kept for backward compatibility
+ * - kibi_search: alias of investigate_search for backward compatibility.
  *
  * @param {Server} server - A server instance.
  */
@@ -51,27 +54,30 @@ export function patchElasticsearchClient(server) {
 
   const sirenSearchSpec = _.cloneDeep(elasticsearch.Client.apis[apiVersion].search.spec);
   addSirenPrefixToUrls(sirenSearchSpec.urls);
-  elasticsearch.Client.apis[apiVersion].vanguard_search = ca(sirenSearchSpec);
+  elasticsearch.Client.apis[apiVersion].siren_search = ca(sirenSearchSpec);
 
   const sirenMsearchSpec = _.cloneDeep(elasticsearch.Client.apis[apiVersion].msearch.spec);
   addSirenPrefixToUrls(sirenMsearchSpec.urls);
-  elasticsearch.Client.apis[apiVersion].vanguard_msearch = ca(sirenMsearchSpec);
+  elasticsearch.Client.apis[apiVersion].siren_msearch = ca(sirenMsearchSpec);
 
-  // keep aliases for backward compatibility
-  elasticsearch.Client.apis[apiVersion].coordinate_search = elasticsearch.Client.apis[apiVersion].vanguard_search;
-  elasticsearch.Client.apis[apiVersion].coordinate_msearch = elasticsearch.Client.apis[apiVersion].vanguard_msearch;
-
-  elasticsearch.Client.apis[apiVersion].kibi_search = function () {
+  elasticsearch.Client.apis[apiVersion].investigate_search = function () {
     const options = arguments[0];
     if (options && options.body) {
       return transformSearchRequest(options.body)
-      .then(({ search, savedQueries }) => {
-        return this.vanguard_search(...arguments)
-        .then((response) => transformSearchResponse(response, savedQueries));
-      });
+        .then(({ search, savedQueries }) => {
+          return this.siren_search(...arguments)
+            .then((response) => transformSearchResponse(response, savedQueries));
+        });
     } else {
-      return this.vanguard_search(...arguments);
+      return this.siren_search(...arguments);
     }
   };
+
+  // keep aliases for backward compatibility
+  elasticsearch.Client.apis[apiVersion].vanguard_search = elasticsearch.Client.apis[apiVersion].siren_search;
+  elasticsearch.Client.apis[apiVersion].vanguard_msearch = elasticsearch.Client.apis[apiVersion].siren_msearch;
+  elasticsearch.Client.apis[apiVersion].coordinate_search = elasticsearch.Client.apis[apiVersion].siren_search;
+  elasticsearch.Client.apis[apiVersion].coordinate_msearch = elasticsearch.Client.apis[apiVersion].siren_msearch;
+  elasticsearch.Client.apis[apiVersion].kibi_search = elasticsearch.Client.apis[apiVersion].investigate_search;
 
 }

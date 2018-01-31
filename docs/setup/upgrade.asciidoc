@@ -10,7 +10,7 @@ An existing Kibi installation can be upgraded as follows:
 - backup the `.kibiaccess` if ACL (Access Control Layer) is enabled.
 - {es-ref}setup-upgrade.html[upgrade Elasticsearch];
 - before restarting each Elasticsearch node, make sure to install a compatible version of the
-  {vanguard-website}#compatibility[Vanguard] plugin and access control plugins if required.
+  {federate-website}#compatibility[Siren Federate] plugin and access control plugins if required.
 - download and extract the new Kibi version.
 - copy the previous configuration file to the `config` directory of the new installation.
 - copy the files from the `data` directory in your old installation of the new installation.

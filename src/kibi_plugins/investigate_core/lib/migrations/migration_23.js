@@ -65,9 +65,20 @@ export default class Migration23 extends Migration {
   }
 
   async count() {
-    const dashboardMapping = await this._client.indices.getMapping({ index: this._index, type: this._type });
-
-    return this._isUpgradeable(dashboardMapping[this._index].mappings);
+    try {
+      const dashboardMapping = await this._client.indices.getMapping({
+        index: this._index,
+        type: this._type,
+        ignoreUnavailable: true,
+        allowNoIndices: true
+      });
+      return this._isUpgradeable(dashboardMapping[this._index].mappings);
+    } catch (e) {
+      if (e.status === 404) {
+        return 0;
+      }
+      throw e;
+    }
   }
 
   async upgrade() {

@@ -201,7 +201,7 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       // NOTE:
       // Sort queue by target index name/s
       // Done to increase the chance of parts of queries beeing reused
-      // by Vanguard during join computation while processing single msearch request
+      // by Federate during join computation while processing single msearch request
       queue.sort((a, b) => {
         const aString = this._getSortedIndices(a);
         const bString = this._getSortedIndices(b);

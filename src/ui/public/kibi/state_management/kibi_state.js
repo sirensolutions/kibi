@@ -893,9 +893,9 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     // on a dashboard without associated savedSearch
     const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds);
 
-    // check siren-vanguard plugin
+    // check siren-federate plugin
     if (!this.isSirenJoinPluginInstalled()) {
-      const error = 'The Siren Vanguard plugin is not installed. Please install the plugin and restart Siren Investigate';
+      const error = 'The Siren Federate plugin is not installed. Please install the plugin and restart Elasticsearch.';
       return Promise.reject(new Error(error));
     }
 
@@ -995,7 +995,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
   KibiState.prototype.isSirenJoinPluginInstalled = function () {
     const plugins = elasticsearchPlugins.get();
-    return plugins.indexOf('siren-vanguard') !== -1;
+    return !(plugins.indexOf('siren-federate') === -1 && plugins.indexOf('siren-vanguard') === -1);
   };
 
   return new KibiState();

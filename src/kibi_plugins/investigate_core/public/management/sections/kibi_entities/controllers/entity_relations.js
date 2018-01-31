@@ -94,11 +94,11 @@ uiModules.get('apps/management')
         }
       };
 
-      // this method automatically assigns inverseLabel when the user sets the directLabel or vice versa
+      // this method automatically assigns inverseLabel when the user sets the directLabel if it is not set already or vice versa
       $scope.setOppositeLabel = function (relation, labelType) {
-        if (labelType === 'inverse' && relationLabelPairMap[relation.directLabel]) {
+        if (labelType === 'inverse' && !relation.inverseLabel && relationLabelPairMap[relation.directLabel]) {
           relation.inverseLabel = relationLabelPairMap[relation.directLabel];
-        } else if (labelType === 'direct' && relationLabelPairMap[relation.inverseLabel]) {
+        } else if (labelType === 'direct' && !relation.directLabel && relationLabelPairMap[relation.inverseLabel]) {
           relation.directLabel = relationLabelPairMap[relation.inverseLabel];
         }
       };

@@ -444,6 +444,36 @@ describe('Kibi Components', function () {
       }).catch(done);
     });
 
+    it('prints a nice label for match_all object', function (done) {
+      const filter = {
+        match_all: {}
+      };
+
+      addFilter(joinSequenceFilters.join_sequence[0], filter);
+
+      const expected = expectedJoinSequenceHTML([
+        {
+          from: {
+            index: [ 'article' ],
+            path: 'id',
+            queries: [
+              'match all'
+            ]
+          },
+          to: {
+            index: [ 'company' ],
+            path: 'articleid'
+          }
+        }
+      ]);
+
+      joinExplanation.getFilterExplanations([ joinSequenceFilters ]).then(function (expl) {
+        expect(expl.length).to.equal(1);
+        expect(expl[0]).to.equal(expected);
+        done();
+      }).catch(done);
+    });
+
     it('prints a nice label for match_phrase_prefix string', function (done) {
       const filter = {
         match_phrase_prefix: {

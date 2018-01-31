@@ -83,6 +83,8 @@ uiModules
       return Promise.resolve(formatMatch(f, 'match_phrase'));
     } else if (f.match_phrase_prefix) {
       return Promise.resolve(formatMatch(f, 'match_phrase_prefix'));
+    } else if (f.match_all) {
+      return Promise.resolve(' match all ');
     } else if (f.range) {
       prop = Object.keys(f.range)[0];
       lowerBound = _.has(f.range[prop], 'gte') ? f.range[prop].gte : f.range[prop].gt;

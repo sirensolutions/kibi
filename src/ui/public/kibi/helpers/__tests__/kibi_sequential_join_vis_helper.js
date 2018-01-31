@@ -96,6 +96,7 @@ describe('Kibi Components', function () {
       button1 = {
         indexRelationId: 'some-uuid',
         label: 'button 1',
+        targetDashboardId: 'a-dashboard',
         updateSourceCount: function () {}
       };
       sinon.stub(button1, 'updateSourceCount').returns(Promise.resolve([ { button: button1 } ]));

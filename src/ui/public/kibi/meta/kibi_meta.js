@@ -226,9 +226,8 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       if (toProcess.length === 0) {
         if (queue.length > 0) {
           this._processSingleQueue(queueName);
-        } else {
-          return;
         }
+        return;
       }
 
       // fire the msearch

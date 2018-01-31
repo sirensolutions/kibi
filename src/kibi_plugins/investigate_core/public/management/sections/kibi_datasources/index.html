@@ -183,9 +183,9 @@
                   ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
                   <option
                     ng-repeat="o in param.possibleValues"
-                    value="{{o}}"
+                    value="o"
                     ng-selected="datasource.datasourceParams[param.name] === o.internal">
-                    {{o.readable}} ({{o.internal}})
+                    {{o.readable}}
                   </option>
                 </select>
               </div>

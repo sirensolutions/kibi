@@ -146,7 +146,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     if (datasource.datasourceType === 'sql_jdbc_new') {
       if(datasource.title === 'New saved datasource') {
         if (datasource.datasourceParams.drivername) {
-          datasource.title = datasource.datasourceParams.drivername.readable;
+          datasource.title = datasource.datasourceParams.drivername;
         } else {
           datasource.title = '';
         }
@@ -156,9 +156,9 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     setDatasourceSchema(datasource);
   });
 
-  $scope.$watch('datasource.datasourceParams.drivername', function (newval, oldval) {
-    if(newval) {
-      datasource.title = JSON.parse(newval).readable;
+  $scope.$watch('datasource.datasourceParams.datasourcedriver', function (newval, oldval) {
+    if (newval) {
+      datasource.title = datasource.datasourceParams.drivername;
     }
   });
 
@@ -169,18 +169,12 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     'datasource.datasourceParams.password',
   ], function (vals) {
     if(datasource.datasourceType === 'sql_jdbc_new') {
-      let driverName;
-      try {
-        driverName = JSON.parse(vals[0]);
-      } catch (e) {
-        driverName = vals[0];
-      }
-
+      const driverName = vals[0];
       const databaseName = vals[1];
       const userName = vals[2];
       const password = vals[3];
 
-      let url = driverName.defaultURL || '';
+      let url = driverName || '';
       if (url) {
         url = url.replace(/{{username}}/, (userName && password) ? userName + ':' + password + '@' : '');
         url = url.replace(/{{port}}/, (driverName.defaultPort) ? driverName.defaultPort : '');

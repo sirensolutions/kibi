@@ -82,6 +82,13 @@ export function QuickDashboardProvider(
   const notify = createNotifier({ location: 'Quick Dashboard' });
 
 
+  function showExperimentalWarning(args) {
+    return quickDashModals.experimentalWarning()
+      .show()
+      .then(ok => ok || Promise.reject(0))
+      .then(() => args);
+  }
+
   function makeDefaultTitle(args) {
     const { indexPattern, savedSearch, dashboardEntries } = args;
 
@@ -444,6 +451,7 @@ export function QuickDashboardProvider(
     }, args);
 
     return Promise.resolve(args)
+      .then(showExperimentalWarning)
       .then(makeDefaultTitle)
       .then(askUserSpecs)
       .then(checkDuplicateTitle)

@@ -30,7 +30,7 @@ uiModules
   let lastSelectDashboardEventTimer;
   const cache = Private(CacheProvider);
 
-  const _getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
+  const _getDashboardForGroup = function (groupTitle, dashboardDef) {
     return {
       id: dashboardDef.id,
       title: this._shortenDashboardName(groupTitle, dashboardDef.title),
@@ -528,7 +528,7 @@ uiModules
               if (dashboard && dashboard.id) {
                 const savedDashboard = _.find(respDashboards.hits, 'id', dashboard.id);
                 if (savedDashboard) {
-                  filtered.push(_getDashboardForGroup.call(self, group.id, group.title, savedDashboard));
+                  filtered.push(_getDashboardForGroup.call(self, group.title, savedDashboard));
                 }
               }
               return filtered;
@@ -587,7 +587,7 @@ uiModules
             // not in a group so add it as new group with single dashboard
             const groupId = dashboardDef.id;
             const groupTitle = dashboardDef.title;
-            const onlyOneDashboard = _getDashboardForGroup.call(self, groupId, groupTitle, dashboardDef);
+            const onlyOneDashboard = _getDashboardForGroup.call(self, groupTitle, dashboardDef);
 
             dashboardGroups1.push({
               virtual: true,
@@ -636,10 +636,9 @@ uiModules
         console.debug('Dashboard Groups will be recomputed because: [' + reason + ']'); // eslint-disable-line no-console
       }
       return this._computeGroupsFromSavedDashboardGroups()
-      .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(dashboardGroups1))
+      .then(dashboardGroups1 => this._addAdditionalGroupsFromSavedDashboards(dashboardGroups1))
       .then(groups => {
         this.groups = groups;
-        this.emit('groupsChanged');
         return groups;
       });
     }

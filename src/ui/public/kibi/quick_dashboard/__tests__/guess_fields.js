@@ -45,7 +45,8 @@ let histoEsResps;
 function init() {
   index = {
     id: 'indexId',
-    timeFieldName: ''
+    timeFieldName: '',
+    metaFields: ['metafield']
   };
 
   field = {
@@ -237,6 +238,14 @@ describe('QuickDash Guess Fields Tests', function () {
 
   it('Discards non-aggregatable fields', function () {
     field.aggregatable = false;
+
+    return guess([ field ]).then(resFields => {
+      expect(resFields.length).to.be(0);
+    });
+  });
+
+  it('Discards meta-fields', function () {
+    field.name = 'metafield';
 
     return guess([ field ]).then(resFields => {
       expect(resFields.length).to.be(0);

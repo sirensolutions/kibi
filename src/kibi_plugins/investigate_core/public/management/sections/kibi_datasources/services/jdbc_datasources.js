@@ -11,7 +11,7 @@ uiModules
     }
 
     get(id) {
-      return $http.get(this.datasourceBaseUrl + '/' + id).then(resp => resp.data);
+      return $http.get(this.datasourceBaseUrl + '/' + encodeURIComponent(id)).then(resp => resp.data);
     }
 
     list() {
@@ -21,15 +21,15 @@ uiModules
     }
 
     save(datasource) {
-      return $http.put(this.datasourceBaseUrl + '/' + datasource._id, datasource._source);
+      return $http.put(this.datasourceBaseUrl + '/' + encodeURIComponent(datasource._id), datasource._source);
     }
 
     delete(id) {
-      return $http.delete(this.datasourceBaseUrl + '/' + id);
+      return $http.delete(this.datasourceBaseUrl + '/' + encodeURIComponent(id));
     }
 
     validate(datasource) {
-      return $http.post(this.datasourceBaseUrl + '/' + datasource._id + '/_validate', datasource._source)
+      return $http.post(this.datasourceBaseUrl + '/' + encodeURIComponent(datasource._id) + '/_validate', datasource._source)
       .then(res => res.data)
       .catch(res => Promise.reject(res.data));
     }

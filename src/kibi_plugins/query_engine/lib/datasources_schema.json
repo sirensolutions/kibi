@@ -529,7 +529,9 @@
         "MySQL",
         "PostgreSQL",
         "SQLserver 2017",
-        "Oracle 12a+",
+        "Oracle 12c+",
+        "Spark SQL 2.2+",
+        "Sybase ASE 15.7+",
         "Presto"
       ]
     },

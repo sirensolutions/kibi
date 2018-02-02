@@ -60,7 +60,8 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
       "id": "Dremio",
       "driverClassName": "com.dremio.jdbc.Driver",
       "defaultURL": "jdbc:dremio:direct={{host}}:{{port}}{{databasename}}",
-      "defaultPort": 31010
+      "defaultPort": 31010,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.dremio.com/drivers/dremio-jdbc-driver.html\">Dremio JDBC documentation</a> for further information"
     },
     "MySQL": {
       "id": "MySQL",
@@ -72,22 +73,38 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     "PostgreSQL": {
       "driverClassName": "org.postgresql.Driver",
       "defaultURL": "jdbc:postgresql://{{username}}{{host}}:{{port}}{{databasename}}",
-      "defaultPort": 5342
+      "defaultPort": 5342,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://jdbc.postgresql.org/documentation/80/connect.html\">PostgreSQL JDBC documentation</a> for further information."
     },
     "SQLserver 2017": {
       "driverClassName": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
       "defaultURL": "jdbc:sqlserver://{{host}}:{{port}}{{username}}{{databasename}}",
-      "defaultPort": 1433
+      "defaultPort": 1433,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url\">SQL server JDBC documentation</a> for further information."
     },
-    "Oracle 12a": {
+    "Sybase ASE 15.7+" : {
+      "driverClassName": "net.sourceforge.jtds.jdbc.Driver",
+      "defaultURL": "jdbc:jtds:sybase://{{host}}:{{port}}{{databasename}}",
+      "defaultPort": 5000,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"http://razorsql.com/docs/help_sybase.html\">Sybase JDBC documentation</a> for further information."
+    },
+    "Oracle 12a+": {
       "driverClassName": "oracle.jdbc.OracleDriver",
       "defaultURL": "jdbc:oracle:thin:@{{host}}:{{port}}",
-      "defaultPort": 1521
+      "defaultPort": 1521,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.oracle.com/javase/tutorial/jdbc/basics/connecting.html#db_connection_url\">Oracle JDBC documentation</a> for further information."
+    },
+    "Spark SQL 2.2+":  {
+      "driverClassName": "com.simba.spark.jdbc4.Driver",
+      "defaultURL": "jdbc:hive2://{{host}}:{{port}}{{databasename}}",
+      "defaultPort": 10002,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://spark.apache.org/docs/latest/sql-programming-guide.html#running-the-thrift-jdbcodbc-server\">Spark SQL JDBC documentation</a> for further information."
     },
     "Presto": {
       "driverClassName": "com.facebook.presto.jdbc.PrestoDriver",
       "defaultURL":"jdbc:presto://{{host}}:{{port}}",
-      "defaultPort": 8080
+      "defaultPort": 8080,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://prestodb.io/docs/current/installation/jdbc.html\">Presto JDBC documentation</a> for further information."
     },
   };
 
@@ -149,23 +166,14 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   function _populateDatasourceDefaults(datasource) {
 
     if(datasource.datasourceType === 'sql_jdbc_new') {
-      if (!datasource.datasourceParams.datasourcedriver) {
-        datasource.datasourceParams.datasourcedriver = findKey(datasourceDefaults, {
-          "driverClassName": datasource.datasourceParams.drivername
-        });
-      }
-
       const singleDatasourceDefaults = datasourceDefaults[datasource.datasourceParams.datasourcedriver];
-      const driverName = singleDatasourceDefaults.driverClassName;
+      const driverName = datasource.datasourceParams.drivername || singleDatasourceDefaults.driverClassName;
       const defaultPort = singleDatasourceDefaults.defaultPort || '';
 
+      datasource.title = datasource.title || datasource.datasourceParams.datasourcedriver;
       datasource.datasourceParams.drivername = driverName;
       datasource.datasourceParams.defaultPort = defaultPort;
       datasource.datasourceParams.disclaimer = singleDatasourceDefaults.disclaimer || '';
-
-      datasource.title = (datasource.title !== "New Saved Datasource")
-        ? datasource.title
-        : datasource.datasourceParams.datasourcedriver;
 
       _populateConnectionString(datasource);
     }
@@ -187,6 +195,8 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
         let databaseString;
         if (datasource.datasourceParams.datasourcedriver === 'SQLserver 2017') {
           databaseString = `;database=${databaseName}`;
+        } else if (datasource.datasourceParams.datasourcedriver === 'Dremio') {
+          databaseString = `;databaseName=${databaseName}`;
         } else if (datasource.datasourceParams.datasourcedriver === 'Dremio') {
           databaseString = `;schema=${databaseName}`;
         } else {
@@ -238,7 +248,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
 
   $scope.$watch('datasource.datasourceType', function (newval, oldval) {
     // here reinit the datasourceDef
-    if (datasource.datasourceType === 'sql_jdbc_new' && datasource.title === 'New saved datasource') {
+    if (datasource.datasourceType === 'sql_jdbc_new' && datasource.title === 'New Saved Datasource') {
       datasource.title = '';
     }
 
@@ -246,6 +256,10 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   });
 
   $scope.$watch('datasource.datasourceParams.datasourcedriver', function (newval, oldval) {
+    if (newval !== oldval) {
+      datasource.datasourceParams.drivername = '';
+      datasource.title = (datasource.title === oldval || datasource.title === 'New Saved Datasource') ? '' : datasource.title;
+    }
     _populateDatasourceDefaults(datasource);
   });
 

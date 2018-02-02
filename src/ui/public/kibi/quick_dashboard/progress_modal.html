@@ -4,12 +4,17 @@
     <div class="kuiModalHeader__title">{{title}}</div>
   </div>
   <div class="kuiModalBody">
-    <progressbar max="progress.max" value="progress.value" animate="false" />
+    <progressbar max="progress.max" value="progress.value" animate="false">
+      <div class="progressbar-text">
+        {{progress.percentCompletion()}}% &ndash; ETA {{progress.eta()}}
+      </div>
+    </progressbar>
     <div class="kuiModalBodyText">
       {{progress.text}}
     </div>
   </div>
   <div class="kuiModalFooter">
+    <i>Keep this tab in the foreground to prevent stalling</i>
     <button class="kuiButton kuiButton--hollow"
       ng-click="onCancel()"
       aria-label="Cancel">

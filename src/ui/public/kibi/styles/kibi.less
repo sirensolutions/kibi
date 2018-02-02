@@ -172,3 +172,27 @@ kbn-top-nav div.kuiLocalNav {
   background-color: @siren-top-bar;
 }
 
+
+.siren-spinner {
+  width: 10px;
+  height: 10px;
+  position: relative;
+  display: inline-block;
+  margin-left: 2px;
+
+  .cube1, .cube2 {
+    background-color: #ccc;
+    width: 5px;
+    height: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-animation: sk-cubemove 1.8s infinite ease-in-out;
+    animation: sk-cubemove 1.8s infinite ease-in-out;
+  }
+  .cube2 {
+    -webkit-animation-delay: -0.9s;
+    animation-delay: -0.9s;
+  }
+}
+

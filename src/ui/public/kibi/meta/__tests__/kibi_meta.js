@@ -149,6 +149,18 @@ describe('Kibi meta service', function () {
 
       describe('single msearch call', function () {
 
+        it('no definitions - no msearch call', function (done) {
+
+          const definitions = [];
+          kibiMeta.getMetaForDashboards(definitions);
+
+          // wait 2 sec then check that there was no msearch call
+          setTimeout(function () {
+            sinon.assert.notCalled(msearchStub);
+            done();
+          }, 2000);
+        });
+
         it('single definition - response OK', function (done) {
           const expectedMeta1 = {
             hits: {

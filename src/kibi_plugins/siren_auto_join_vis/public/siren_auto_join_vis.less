@@ -52,7 +52,7 @@
       border: 0;
 
       .panel .panel-heading {
-        border-left: 5px solid #b6dbef;
+        border-left: 5px solid #6079a2;
         margin-bottom: 1px;
       }
 
@@ -71,22 +71,26 @@
           a  {
             display: block;
             color: #222;
-            background-color: #e1eff7;
-            padding: 4px 5px 4px 10px;
+            background-color: #e0e8f6;
+            padding: 4px 7px 4px 10px;
 
             .dashboard-enabled, .dashboard-disabled {
               width: 20px;
               float: right;
             }
 
-            .dashboard-enabled svg {
-              fill: #048cc8; // blue
+            .dashboard-enabled {
+              background-color: @siren-app-menu-active;
+              border-radius: 8px;
+              padding: 1px;
               width: 17px;
               height: 17px;
             }
 
-            .dashboard-disabled svg {
-              fill: #93b3c1; //graysh
+            .dashboard-disabled {
+              background-color: @siren-dashboard-inactive-background;
+              border-radius: 8px;
+              padding: 1px;
               width: 17px;
               height: 17px;
             }

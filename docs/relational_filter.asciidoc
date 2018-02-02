@@ -31,7 +31,8 @@ Clicking on the button will switch you to the _Companies_ dashboard and display 
 
 image::images/relational_filter/relational_filter_companies_target.png["Relational filter on the Companies dashboard",align="center", width="400"]
 
-The relational filter visualization requires the {vanguard-website}[Vanguard plugin {vanguard-version}] for Elasticsearch.
+The relational filter visualization requires the {federate-website}[Siren Federate plugin {federate-version}]
+for Elasticsearch.
 
 [float]
 [[relational_filter_config]]

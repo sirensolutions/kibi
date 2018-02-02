@@ -32,34 +32,34 @@ module.exports = function (plugin, server) {
           elasticsearchPluginNames.push(pluginEntry.component);
           elasticsearchPlugins.push(pluginEntry);
         }
-        if (pluginEntry.component === 'siren-vanguard') {
+        if (pluginEntry.component === 'siren-federate' || pluginEntry.component === 'siren-vanguard') {
           detectedSirenJoin = true;
         }
       });
 
       config.set('investigate_core.clusterplugins', elasticsearchPluginNames);
 
-      // 2 if siren-vanguard detected verify that it is installed on all data nodes
+      // 2 if siren-federate detected, verify that it is installed on all data nodes
       if (detectedSirenJoin) {
         _.each(nodeList, function (nodeEntry) {
           const nodeName = nodeEntry.name;
           const nodeRole = nodeEntry['node.role'];
           const nodeIp = nodeEntry.ip;
-          // we only check that siren-vanguard is installed on data nodes
+          // we only check that siren-federate is installed on data nodes
           if (nodeRole === 'd') {
             let foundCorrespondingNode = false;
             _.each(pluginList, function (pluginEntry) {
               const nName = pluginEntry.name;
               const pName = pluginEntry.component;
-              if (pName === 'siren-vanguard'  && nName === nodeName) {
+              if ((pName === 'siren-vanguard' || pName === 'siren-federate') && nName === nodeName) {
                 foundCorrespondingNode = true;
                 return false;
               }
             });
             if (!foundCorrespondingNode) {
               plugin.status.red(
-                'Siren Vanguard plugin is missing at data node:[' + nodeName + '] ip:[' + nodeIp + ']\n' +
-                'Siren Vanguard plugin should be installed on all data nodes.'
+                'Siren Federate plugin is missing at data node:[' + nodeName + '] ip:[' + nodeIp + ']\n' +
+                'Siren Federate plugin should be installed on all data nodes.'
               );
             }
           }

@@ -450,31 +450,33 @@ export function GuessFieldsProvider(
 
     args.groupsHash = groupsHash;
 
-    let currG = groups.indexOf(groupsHash[workStats[0].field.type]);
-    let currGroup = groups[currG];
-    let currScore = currGroup[0].score;
+    const result = [];
+
+    let currG = groups.indexOf(groupsHash[workStats[0].field.type]) - 1;
+    let currScore = -1;
 
     let nextG = currG;
     let nextGroup = null;
     let nextScore = currScore;
 
-    const result = [ groups[currG].shift() ];
-
     while(result.length !== workStats.length) {               // Must process all fields
       do {                                                    // Cycle groups from current
         nextG = (nextG + 1) % groups.length;
         nextGroup = groups[nextG];
-        nextScore = nextGroup.length && nextGroup[0].score;   // Skip empty groups
+        nextScore = nextGroup[0].score;
       } while(                                                // Pick first ok candidate
-        currGroup.length &&
         nextG !== currG &&
         2 * nextScore < currScore
       );
 
       result.push(nextGroup.shift());                         // Pull & output group head
 
+      if(!nextGroup.length) {                                 // Drop group if empty
+        _.pullAt(groups, nextG);
+        nextG = (nextG + groups.length - 1) % groups.length;
+      }
+
       currG = nextG;                                          // Update iterators
-      currGroup = nextGroup;
       currScore = nextScore;
     }
 

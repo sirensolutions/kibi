@@ -116,7 +116,7 @@ QueryEngine.prototype.loadPredefinedData = function () {
           });
         }).catch(reject);
       }).catch(function (err) {
-        self.log.warn('Could not retrieve Kibi index: ' + err);
+        self.log.warn('Could not retrieve Siren Investigate index: ' + err);
         setTimeout(tryToLoad.bind(self), 500);
       });
     };
@@ -131,10 +131,10 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
   })
   .then((kibiIndex) => {
     if (!!kibiIndex) {
-      this.log.info('Found kibi index: [' + this.config.get('kibana.index') + ']');
+      this.log.info('Found Siren Investigate index: [' + this.config.get('kibana.index') + ']');
       return true;
     }
-    return Promise.reject(new Error('Kibi index: [' + this.config.get('kibana.index') + '] does not exist'));
+    return Promise.reject(new Error('Siren Investigate index: [' + this.config.get('kibana.index') + '] does not exist'));
   });
 };
 
@@ -189,6 +189,9 @@ QueryEngine.prototype.gremlin = function (datasourceParams, options) {
   return rp(gremlinOptions);
 };
 
+/**
+ *  Issues a ping to the gremlin server.
+ */
 QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
   const options = {
     method: 'GET',
@@ -631,7 +634,7 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
       }
       if (!exists) {
         return Promise.reject(
-          new Error('The query [' + id + '] requested by Kibi but not found in memory. ' +
+          new Error('The query [' + id + '] was requested by Siren Investigate but not found in memory. ' +
             'Possible reason - query datasource was removed. Please check the configuration')
         );
       }

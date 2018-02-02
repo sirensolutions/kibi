@@ -11,7 +11,7 @@ describe('plugins/elasticsearch', function () {
         return {
           get(key) {
             if (key === 'investigate_core.clusterplugins') {
-              return [ 'siren-vanguard' ];
+              return [ 'siren-federate' ];
             }
           }
         };

@@ -96,6 +96,7 @@ describe('Kibi Components', function () {
       button1 = {
         indexRelationId: 'some-uuid',
         label: 'button 1',
+        targetDashboardId: 'a-dashboard',
         updateSourceCount: function () {}
       };
       sinon.stub(button1, 'updateSourceCount').returns(Promise.resolve([ { button: button1 } ]));
@@ -725,7 +726,7 @@ describe('Kibi Components', function () {
         });
       });
 
-      it('should set the default siren-vanguard parameters', function () {
+      it('should set the default siren-federate parameters', function () {
         init({ indexPatterns, savedDashboards, savedSearches, relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
@@ -747,7 +748,7 @@ describe('Kibi Components', function () {
         });
       });
 
-      it('should set the advanced siren-vanguard parameters', function () {
+      it('should set the advanced siren-federate parameters', function () {
         const relations = [
           {
             id: 'some-uuid',

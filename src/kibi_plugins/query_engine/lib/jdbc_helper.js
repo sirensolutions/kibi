@@ -162,10 +162,10 @@ JdbcHelper.prototype.prepareJdbcPaths = function () {
     }).catch(function (err) {
       const msg =
         'An error occurred while fetching datasources from ' + self.config.get('kibana.index') + ' index\n' +
-        '. This is fine if you just started kibi first time and ' +
-        ' the index does not yet exists.\n' +
+        '. This is fine if you just started Siren Investigate for the first time and ' +
+        ' the index does not yet exist.\n' +
         err.message + '\n' +
-        'Please check the logs if the warning persists after restarting Kibi.';
+        'Please check the logs if the warning persists after restarting Siren Investigate.';
       self.log.error(msg, err);
       resolve(ret);
     });

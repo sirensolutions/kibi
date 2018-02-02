@@ -55,7 +55,7 @@ const getFakePlugin = function () {
 describe('plugins/elasticsearch', function () {
   describe('lib/wait_plugin_list', function () {
 
-    it('should contain array with siren-vanguard', function () {
+    it('should contain array with siren-federate', function () {
       const fakePlugin = getFakePlugin();
       const fakeConfig = getFakeConfig();
       const fakeServer = getFakeServer(
@@ -70,19 +70,19 @@ describe('plugins/elasticsearch', function () {
         [
           {
             name: 'nodeA',
-            component: 'siren-vanguard'
+            component: 'siren-federate'
           },
         ]
       );
 
       return waitForPluginList(fakePlugin, fakeServer)
       .then(function () {
-        expect(fakeConfig['investigate_core.clusterplugins']).to.eql(['siren-vanguard']);
+        expect(fakeConfig['investigate_core.clusterplugins']).to.eql(['siren-federate']);
         expect(fakePlugin.status.red()).to.eql(undefined);
       });
     });
 
-    it('should contain array with siren-vanguard 2 nodes', function () {
+    it('should contain array with siren-federate 2 nodes', function () {
       const fakePlugin = getFakePlugin();
       const fakeConfig = getFakeConfig();
       const fakeServer = getFakeServer(
@@ -102,22 +102,22 @@ describe('plugins/elasticsearch', function () {
         [
           {
             name: 'nodeA',
-            component: 'siren-vanguard'
+            component: 'siren-federate'
           },
           {
             name: 'nodeB',
-            component: 'siren-vanguard'
+            component: 'siren-federate'
           },
         ]
       );
 
       return waitForPluginList(fakePlugin, fakeServer).then(function () {
-        expect(fakeConfig['investigate_core.clusterplugins']).to.eql(['siren-vanguard']);
+        expect(fakeConfig['investigate_core.clusterplugins']).to.eql(['siren-federate']);
         expect(fakePlugin.status.red()).to.eql(undefined);
       });
     });
 
-    it('should contain array with siren-vanguard 2 nodes but mark plugin status as red', function () {
+    it('should contain array with siren-federate 2 nodes but mark plugin status as red', function () {
       const fakePlugin = getFakePlugin();
       const fakeConfig = getFakeConfig();
       const fakeServer = getFakeServer(
@@ -137,26 +137,26 @@ describe('plugins/elasticsearch', function () {
         [
           {
             name: 'nodeA',
-            component: 'siren-vanguard'
+            component: 'siren-federate'
           },
           {
             name: 'nodeB',
-            component: 'missing-siren-vanguard'
+            component: 'missing-siren-federate'
           },
         ]
       );
 
       return waitForPluginList(fakePlugin, fakeServer).then(function () {
-        expect(fakeConfig['investigate_core.clusterplugins']).to.eql(['siren-vanguard', 'missing-siren-vanguard']);
+        expect(fakeConfig['investigate_core.clusterplugins']).to.eql(['siren-federate', 'missing-siren-federate']);
         expect(fakePlugin.status.red()).to.eql(
-          'Siren Vanguard plugin is missing at data node:[nodeB] ip:[127.0.0.1]\n' +
-          'Siren Vanguard plugin should be installed on all data nodes.'
+          'Siren Federate plugin is missing at data node:[nodeB] ip:[127.0.0.1]\n' +
+          'Siren Federate plugin should be installed on all data nodes.'
         );
       });
     });
 
 
-    it('should contain array with other-plugin, should not change status to red as no siren-vanguard detected', function () {
+    it('should contain array with other-plugin, should not change status to red as no siren-federate detected', function () {
       const fakePlugin = getFakePlugin();
       const fakeConfig = getFakeConfig();
       const fakeServer = getFakeServer(

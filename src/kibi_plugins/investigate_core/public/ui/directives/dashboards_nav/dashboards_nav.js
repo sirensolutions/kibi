@@ -314,18 +314,20 @@ uiModules
       $scope.dashboardLoaded = kibiState._getCurrentDashboardId();
       $scope.$watch(kibiState._getCurrentDashboardId, id => {
         $scope.dashboardLoaded = id;
-        $timeout(() => {
-          if ($scope.dashboardLoaded) {
-            const dashboard = $element.find('.active');
-            if (dashboard.length > 0) {
-              const offset = dashboard.offset().top - dashboardsNavState.scrollbarPos();
-              if (offset > window.innerHeight) {
-                dashboardsNavState.setScrollbarPos(offset);
-                $scope.links[0].scrollTop = dashboardsNavState.scrollbarPos();
+        if (id) {
+          $timeout(() => {
+            if ($scope.dashboardLoaded) {
+              const dashboard = $element.find('.active');
+              if (dashboard.length > 0) {
+                const offset = dashboard.offset().top - dashboardsNavState.scrollbarPos();
+                if (offset > window.innerHeight) {
+                  dashboardsNavState.setScrollbarPos(offset);
+                  $scope.links[0].scrollTop = dashboardsNavState.scrollbarPos();
+                }
               }
             }
-          }
-        }, 500);
+          }, 500);
+        }
       });
 
       $rootScope.$on('globalNavState:change', () => {

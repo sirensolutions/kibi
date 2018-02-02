@@ -426,7 +426,7 @@ uiModules
       })
       .then((res) => {
         schemaLastCheck = new Date().getTime();
-        if (res.data && res.data.version != schemaVersion) {
+        if (res.data && res.data.version !== schemaVersion) {
           schemaVersion = res.data.version;
           this.clearCache();
           return true;
@@ -438,7 +438,7 @@ uiModules
     } else {
       return Promise.resolve(false);
     }
-  }
+  };
 
   /**
    * Clears all the cached objects.

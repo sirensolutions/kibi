@@ -522,27 +522,15 @@
       "required": true,
       "multivalued": false,
       "encrypted": false,
-      "readable": true,
       "inputType": "select",
       "defaultValue": "",
       "possibleValues": [
-        { 
-          "readable": "Dremio", 
-          "internal": "com.dremio.Driver", 
-          "defaultURL": "jdbc:mysql://{{username}}{{host}}:{{port}}/{{databasename}}", 
-          "defaultPort": 9407,
-          "disclaimer": "This is a suggested connection string, your setup may vary and may require the addition of, for example, <a href=\"http://google.com\">UseLegacyDatetime</a>"
-         },
-         {
-           "readable": "PostgreSQL", 
-           "internal": "org.postgreSQL.Driver" , 
-           "defaultURL": "jdbc:postgresql://{{username}}{{host}}:{{port}}:{{databasename}}/postgresl", 
-           "defaultPort": 1234
-         },
-         {
-           "readable": "MySQL",
-           "internal": "com.mysql.jdbc.Driver"
-         }
+        "Dremio",
+        "MySQL",
+        "PostgreSQL",
+        "SQLserver 2017",
+        "Oracle 12a+",
+        "Presto"
       ]
     },
     {

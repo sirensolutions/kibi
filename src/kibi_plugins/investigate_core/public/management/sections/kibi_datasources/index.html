@@ -150,7 +150,7 @@
                   class="form-control span9"/>
 
                 <select
-                  ng-if="param.inputType == 'select' && param.multivalued && !param.readable"
+                  ng-if="param.inputType == 'select' && param.multivalued"
                   name="{{param.name}}"
                   ng-required="{{param.required}}"
                   multiple
@@ -164,7 +164,7 @@
                 </select>
 
                 <select
-                  ng-if="param.inputType == 'select' && !param.multivalued && !param.readable"
+                  ng-if="param.inputType == 'select' && !param.multivalued"
                   name="{{param.name}}"
                   ng-required="{{ param.required }}"
                   ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
@@ -175,21 +175,11 @@
                     {{o}}
                   </option>
                 </select>
-
-                <select
-                  ng-if="param.inputType == 'select' && !param.multivalued && param.readable"
-                  name="{{param.name}}"
-                  ng-required="{{ param.required }}"
-                  ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
-                  <option
-                    ng-repeat="o in param.possibleValues"
-                    value="o"
-                    ng-selected="datasource.datasourceParams[param.name] === o.internal">
-                    {{o.readable}}
-                  </option>
-                </select>
               </div>
             </ng-form>
+          </div>
+          <div ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new' && datasource.datasourceParams.disclaimer">
+           <p ng-bind-html="datasource.datasourceParams.disclaimer"></p>
           </div>
           <div class="form-group" ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
             <button ng-click="testConnection()" class="btn btn-success">Test connection</button>

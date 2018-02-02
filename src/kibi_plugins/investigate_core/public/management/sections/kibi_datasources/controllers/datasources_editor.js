@@ -8,6 +8,7 @@ import template from 'plugins/investigate_core/management/sections/kibi_datasour
 import kibiUtils from 'kibiutils';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { findKey } from 'lodash';
 import { jdbcDatasourceTranslate } from 'plugins/investigate_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
 
 uiRoutes
@@ -53,6 +54,43 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     location: 'Datasources Configuration Editor'
   });
   const datasource = $scope.datasource = $route.current.locals.datasource;
+
+  const datasourceDefaults = {
+    "Dremio": {
+      "id": "Dremio",
+      "driverClassName": "com.dremio.jdbc.Driver",
+      "defaultURL": "jdbc:dremio:direct={{host}}:{{port}}{{databasename}}",
+      "defaultPort": 31010
+    },
+    "MySQL": {
+      "id": "MySQL",
+      "driverClassName": "com.mysql.jdbc.Driver" ,
+      "defaultURL": "jdbc:mysql://{{username}}{{host}}:{{port}}{{databasename}}",
+      "defaultPort": 3306,
+      "disclaimer": "This is a suggested connection string, your setup may vary and may require the addition of, for example, <a href=\"https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-configuration-properties.html\">UseLegacyDatetime</a>"
+    },
+    "PostgreSQL": {
+      "driverClassName": "org.postgresql.Driver",
+      "defaultURL": "jdbc:postgresql://{{username}}{{host}}:{{port}}{{databasename}}",
+      "defaultPort": 5342
+    },
+    "SQLserver 2017": {
+      "driverClassName": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+      "defaultURL": "jdbc:sqlserver://{{host}}:{{port}}{{username}}{{databasename}}",
+      "defaultPort": 1433
+    },
+    "Oracle 12a": {
+      "driverClassName": "oracle.jdbc.OracleDriver",
+      "defaultURL": "jdbc:oracle:thin:@{{host}}:{{port}}",
+      "defaultPort": 1521
+    },
+    "Presto": {
+      "driverClassName": "com.facebook.presto.jdbc.PrestoDriver",
+      "defaultURL":"jdbc:presto://{{host}}:{{port}}",
+      "defaultPort": 8080
+    },
+  };
+
   $scope.isNew = $route.current.locals.isNew;
   $scope.isValid = function () {
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
@@ -108,6 +146,63 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     }
   };
 
+  function _populateDatasourceDefaults(datasource) {
+
+    if(datasource.datasourceType === 'sql_jdbc_new') {
+      if (!datasource.datasourceParams.datasourcedriver) {
+        datasource.datasourceParams.datasourcedriver = findKey(datasourceDefaults, {
+          "driverClassName": datasource.datasourceParams.drivername
+        });
+      }
+
+      const singleDatasourceDefaults = datasourceDefaults[datasource.datasourceParams.datasourcedriver];
+      const driverName = singleDatasourceDefaults.driverClassName;
+      const defaultPort = singleDatasourceDefaults.defaultPort || '';
+
+      datasource.datasourceParams.drivername = driverName;
+      datasource.datasourceParams.defaultPort = defaultPort;
+      datasource.datasourceParams.disclaimer = singleDatasourceDefaults.disclaimer || '';
+
+      datasource.title = (datasource.title !== "New Saved Datasource")
+        ? datasource.title
+        : datasource.datasourceParams.datasourcedriver;
+
+      _populateConnectionString(datasource);
+    }
+  }
+
+  function _populateConnectionString(datasource) {
+    const userName = datasource.datasourceParams.username || '';
+    const password = datasource.datasourceParams.password || '';
+    const databaseName = datasource.datasourceParams.databasename || '';
+    const defaultPort = datasource.datasourceParams.defaultPort || '';
+    if(datasource.datasourceParams.datasourcedriver) {
+      let url = datasourceDefaults[datasource.datasourceParams.datasourcedriver].defaultURL;
+
+      if (url) {
+        const usernameString = (datasource.datasourceParams.datasourcedriver === 'SQLserver 2017')
+        ? `;username=${userName};password=${password}`
+        : `${userName}:${password}@`;
+
+        let databaseString;
+        if (datasource.datasourceParams.datasourcedriver === 'SQLserver 2017') {
+          databaseString = `;database=${databaseName}`;
+        } else if (datasource.datasourceParams.datasourcedriver === 'Dremio') {
+          databaseString = `;schema=${databaseName}`;
+        } else {
+          databaseString = `/${databaseName}`;
+        }
+
+        url = url.replace(/{{username}}/, (userName && password) ? usernameString : '');
+        url = url.replace(/{{port}}/, (defaultPort) ? defaultPort : '');
+        url = url.replace(/{{host}}/, 'localhost');
+        url = url.replace(/{{databasename}}/, (databaseName) ? databaseString : '');
+      }
+
+      datasource.datasourceParams.connection_string = url;
+    }
+  }
+
   function _saveDatasource(datasource) {
     // make sure that any parameter which does not belong to the schema
     // is removed from datasourceParams
@@ -143,48 +238,25 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
 
   $scope.$watch('datasource.datasourceType', function (newval, oldval) {
     // here reinit the datasourceDef
-    if (datasource.datasourceType === 'sql_jdbc_new') {
-      if(datasource.title === 'New saved datasource') {
-        if (datasource.datasourceParams.drivername) {
-          datasource.title = datasource.datasourceParams.drivername;
-        } else {
-          datasource.title = '';
-        }
-      }
+    if (datasource.datasourceType === 'sql_jdbc_new' && datasource.title === 'New saved datasource') {
+      datasource.title = '';
     }
 
     setDatasourceSchema(datasource);
   });
 
   $scope.$watch('datasource.datasourceParams.datasourcedriver', function (newval, oldval) {
-    if (newval) {
-      datasource.title = datasource.datasourceParams.drivername;
-    }
+    _populateDatasourceDefaults(datasource);
   });
 
   $scope.$watchGroup([
-    'datasource.datasourceParams.drivername',
-    'datasource.datasourceParams.databasename',
     'datasource.datasourceParams.username',
     'datasource.datasourceParams.password',
-  ], function (vals) {
-    if(datasource.datasourceType === 'sql_jdbc_new') {
-      const driverName = vals[0];
-      const databaseName = vals[1];
-      const userName = vals[2];
-      const password = vals[3];
-
-      let url = driverName || '';
-      if (url) {
-        url = url.replace(/{{username}}/, (userName && password) ? userName + ':' + password + '@' : '');
-        url = url.replace(/{{port}}/, (driverName.defaultPort) ? driverName.defaultPort : '');
-        url = url.replace(/{{host}}/, 'localhost');
-        url = url.replace(/{{databasename}}/, (databaseName) ? databaseName : '');
-      }
-
-      datasource.datasourceParams.connection_string = url;
-    }
+    'datasource.datasourceParams.databasename',
+  ], function () {
+    _populateConnectionString(datasource);
   });
+
   // currently supported only for sql_jdbc_new
   $scope.testConnection = function () {
     const modalOptions = {

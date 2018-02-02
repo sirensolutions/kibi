@@ -1,4 +1,5 @@
 [[cross_frame_communication]]
+[float]
 = Cross Frame Communication
 
 To allow cross frame communication, {kibi-name} exposes an object at **window.sireninvestigate**;

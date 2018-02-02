@@ -43,14 +43,7 @@ with multiple groups of data coming from different indices.
 - The <<kibi_box_plot,Box Plot>> visualization, which displays a box plot chart
   from the data.
 
-<<<<<<< HEAD
 - The <<kibi_horizontal_bar_chart,Kibi Horizontal Bar Chart>> visualization,
-=======
-- The <<kibi_vector_map,{kibi-name} Vector Map>> visualization (Deprecated), which displays a
-  vector map where countries are colored based on aggregated field values.
-
-- The <<kibi_horizontal_bar_chart,{kibi-name} Horizontal Bar Chart>> visualization,
->>>>>>> a690273... Blanket update of all 'Kibi' references to 'Siren Investigate'
   which displays a horizontal bar chart.
 
 - The <<kibi_multi_chart,Multi Chart>> visualization, which displays
@@ -68,12 +61,8 @@ templates.
 selected Elasticsearch documents as a node of a graph and allows the user to visually
 explore the connection between vertices.
 
-<<<<<<< HEAD
 The Relational Filter visualization requires the {federate-website}[Siren Federate plugin {federate-version}]
 for Elasticsearch.
-=======
-The Relational Filter visualization requires the {vanguard-website}[Siren Federate Plugin For Elasticsearch {vanguard-version}].
->>>>>>> 2e91569... Rename Vanguard to Siren Federate Plugin for Elasticsearch
 
 [float]
 === How does {kibi-name} compare to Kibana?

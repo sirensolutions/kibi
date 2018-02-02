@@ -1,4 +1,5 @@
 [[releasenotes]]
+[float]
 = Release Notes
 
 include::release-notes/releasenotes_5.4.3-4.asciidoc[]

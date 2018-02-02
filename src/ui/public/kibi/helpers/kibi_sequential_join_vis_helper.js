@@ -2,7 +2,7 @@ import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import { QueryBuilderFactory } from 'ui/kibi/helpers/query_builder';
 import _ from 'lodash';
 
-export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private, kibiMeta, Promise, createNotifier) {
+export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private, Promise, createNotifier) {
   const queryBuilder = Private(QueryBuilderFactory);
   const relationsHelper = Private(RelationsHelperFactory);
 

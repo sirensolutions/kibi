@@ -72,7 +72,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       const definition = result.button;
       // only make sense if query is there and not == null
       if (definition.query) {
-
+        delete result.button.targetCount;
         // adding unique id as required by kibiMeta
         definition.id =
           result.button.sourceDashboardId +

@@ -14,6 +14,10 @@
         class="warning"
         ng-if="!!button.warning"
         title="{{button.warning}}">(*)</span>
+      <span ng-if="button.targetCount === undefined" class="siren-spinner">
+        <div class="cube1"></div>
+        <div class="cube2"></div>
+      </span>
   </button>
 
   <span ng-show="!btnCountsEnabled() && currentDashboardId">

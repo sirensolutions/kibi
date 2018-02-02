@@ -162,7 +162,11 @@ uiModules
             notify.info('Dashboard was successfuly created');
             $rootScope.$broadcast('kibi:dashboardgroup:changed');
             globalNavState.setOpen(false);
-            dashboardGroups.selectDashboard(dash.id);
+            const groupsChangedEvent = function () {
+              dashboardGroups.selectDashboard(dash.id);
+              dashboardGroups.off('groupsChanged', groupsChangedEvent);
+            };
+            dashboardGroups.on('groupsChanged', groupsChangedEvent);
           })
           .catch (reason => {
             $scope.isSaving = false;

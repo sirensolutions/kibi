@@ -80,7 +80,7 @@ export function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState,
       if (!currentDashboard) {
         return;
       }
-      if (diff.indexOf(kibiState._properties.groups) !== -1) {
+      if (diff.indexOf(kibiState._properties.groups) !== -1 || diff.indexOf(kibiState._properties.dashboards) !== -1) {
         this.updateAllCounts([currentDashboard], `KibiState change ${JSON.stringify(diff, null, ' ')}`);
       }
     };

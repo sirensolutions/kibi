@@ -33,48 +33,59 @@ describe('Kibi Components', function () {
 
     it('gets the relations from the ontology model', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getRelations();
       $httpBackend.flush();
     });
 
     it('gets ranges for the given entity', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getRangesForEntityId('id');
       $httpBackend.flush();
     });
 
     it('gets the relations for the given domain', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getRelationsByDomain('id');
       $httpBackend.flush();
     });
 
     it('gets the unique relation labels', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getUniqueRelationLabels();
       $httpBackend.flush();
     });
 
     it('gets the unique field descriptions', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getUniqueFieldDescriptions();
       $httpBackend.flush();
     });
 
     it('gets all the entities', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getEntities();
       $httpBackend.flush();
     });
 
     it('gets an entity by id', function () {
       $httpBackend.expectPOST(/\/schema/).respond({ data: { id: 'something' } });
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getEntityById('id');
       $httpBackend.flush();
     });
 
     it('gets the dashboard given an entity id', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
+      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getDashboardsByEntity({});
       $httpBackend.flush();
     });

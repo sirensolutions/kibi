@@ -10,6 +10,10 @@ uiModules
 
   const defaultKibiNs = 'http://siren.io/model#';
 
+  const schemaMaxAge = 10000; // 10 seconds
+  let schemaVersion;
+  let schemaLastCheck;
+
   function OntologyClient() {
     this._cachedEntityRanges = {};
     this._cachedEntitiesMap = {};
@@ -53,7 +57,7 @@ uiModules
    * Returns the list of available relations.
    */
   OntologyClient.prototype.getRelations = function () {
-    if (this._cachedRelationsList) {
+    if (!this._isCachedModelOutdated() && this._cachedRelationsList) {
       const clonedRelations = _.cloneDeep(this._cachedRelationsList);
       return Promise.resolve(clonedRelations);
     } else {
@@ -90,7 +94,7 @@ uiModules
    * Returns a relation by id.
    */
   OntologyClient.prototype.getRelationById = function (relationId) {
-    if (this._cachedRelationsMap[relationId]) {
+    if (!this._isCachedModelOutdated() && this._cachedRelationsMap[relationId]) {
       const clonedRelation = _.cloneDeep(this._cachedRelationsMap[relationId]);
       return Promise.resolve(clonedRelation);
     } else {
@@ -110,7 +114,7 @@ uiModules
    * Eg: [{ id: 'Article', type: 'INDEX_PATTERN' }]
    */
   OntologyClient.prototype.getRangesForEntityId = function (entityId) {
-    if (this._cachedEntityRanges[entityId]) {
+    if (!this._isCachedModelOutdated() && this._cachedEntityRanges[entityId]) {
       const clonedRanges = _.cloneDeep(this._cachedEntityRanges[entityId]);
       return Promise.resolve(clonedRanges);
     } else {
@@ -198,7 +202,7 @@ uiModules
    * Returns the list of available entities.
    */
   OntologyClient.prototype.getEntities = function () {
-    if (this._cachedEntitiesList) {
+    if (!this._isCachedModelOutdated() && this._cachedEntitiesList) {
       const clonedEntities = _.cloneDeep(this._cachedEntitiesList);
       return Promise.resolve(clonedEntities);
     } else {
@@ -242,7 +246,7 @@ uiModules
    * Returns an entity by id.
    */
   OntologyClient.prototype.getEntityById = function (entityId) {
-    if (this._cachedEntitiesMap[entityId]) {
+    if (!this._isCachedModelOutdated() && this._cachedEntitiesMap[entityId]) {
       const clonedEntity = _.cloneDeep(this._cachedEntitiesMap[entityId]);
       return Promise.resolve(clonedEntity);
     } else {
@@ -409,6 +413,31 @@ uiModules
       this.clearCache();
     })
     .catch(notify.error);
+  };
+
+  /*
+   * Check if the underlying ontology schema has been updated.
+   */
+  OntologyClient.prototype._isCachedModelOutdated = function () {
+    if (!schemaLastCheck || (new Date().getTime() - schemaLastCheck) > schemaMaxAge) {
+      return queryEngineClient.schemaQuery({
+        path: '/schema/getSchemaVersion',
+        method: 'GET'
+      })
+      .then((res) => {
+        schemaLastCheck = new Date().getTime();
+        if (res.data && res.data.version !== schemaVersion) {
+          schemaVersion = res.data.version;
+          this.clearCache();
+          return true;
+        } else {
+          return false;
+        }
+      })
+      .catch(notify.error);
+    } else {
+      return Promise.resolve(false);
+    }
   };
 
   /**

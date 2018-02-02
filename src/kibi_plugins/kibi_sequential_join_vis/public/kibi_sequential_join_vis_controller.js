@@ -132,10 +132,12 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
           return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
           .then((query) => {
             button.query = searchHelper.optimize(indices, query, button.targetIndexPatternId);
+            button.showSpinner = true;
             return { button, indices };
           });
         } else {
           button.query = null; //set to null to indicate that counts should not be fetched
+          button.showSpinner = false;
           return { button, indices };
         }
       })

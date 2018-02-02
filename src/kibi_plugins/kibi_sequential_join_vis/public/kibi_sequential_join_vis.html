@@ -14,7 +14,7 @@
         class="warning"
         ng-if="!!button.warning"
         title="{{button.warning}}">(*)</span>
-      <span ng-if="button.targetCount === undefined" class="siren-spinner">
+      <span ng-if="button.targetCount === undefined && button.showSpinner" class="siren-spinner">
         <div class="cube1"></div>
         <div class="cube2"></div>
       </span>

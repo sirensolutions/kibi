@@ -304,12 +304,12 @@ describe('QuickDash Guess Fields Tests', function () {
     });
   });
 
-  it('Prefers relational endpoint fields', function () {
+  it('Penalizes relational endpoint fields', function () {
     index.id = 'relationsTest';
 
     return guess(allFields).then(resFields => {
       expect(resFields.length).to.be(3);
-      expect(resFields[0]).to.be(field2);
+      expect(resFields[2]).to.be(field2);
     });
   });
 });

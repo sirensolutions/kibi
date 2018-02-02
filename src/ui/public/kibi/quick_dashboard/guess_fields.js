@@ -317,7 +317,7 @@ export function GuessFieldsProvider(
     if(!fieldStats.related) { return 1; }
 
     fieldStats.notes.push('Relation endpoint');
-    return 1.5;
+    return 0.5;
   }
 
   const scoreFunctions = [

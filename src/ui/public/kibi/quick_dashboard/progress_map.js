@@ -3,6 +3,8 @@ import { QuickDashModalsProvider } from './quickdash_modals';
 import { promiseMapSeries } from './commons';
 import _ from 'lodash';
 
+import './progress_modal.less';
+
 
 export function ProgressMapProvider(Private) {
   const quickDashModals = Private(QuickDashModalsProvider);
@@ -19,18 +21,46 @@ export function ProgressMapProvider(Private) {
       .mapValues(_.iteratee)
       .value();
 
+    const startTime = Date.now();
+
+    const max = _.sum(arr, countMap);
+    let value = -1;                               // Intended, at first notifyStart => 0
+    let text = '';
+    let canceled = false;
+
     const progress = {
-      max: _.sum(arr, countMap),
-      value: -1,                            // Intended, at first notifyStart => 0
-      text: '',
-      canceled: false,
+      get max() { return max; },
+      get value() { return value; },
+      get text() { return text; },
+      get canceled() { return canceled; },
 
-      notifyStart(text, count = 1) {
-        this.value += count;
-        this.text = text;
+      notifyStart(text_, count = 1) {
+        value += count;
+        text = text_;
 
-        return !this.canceled;
+        return !canceled;
       },
+
+      eta: _.throttle(function eta() {
+        if(value <= 0) { return '--:--:--'; }
+
+        let time = (max - value) * (Date.now() - startTime) / value;
+        time = Math.floor(time * 1e-3);
+
+        let ss = time % 60;
+        time = Math.round((time - ss) / 60);
+        ss = _.padLeft('' + ss, 2, '0');
+
+        let mm = time % 60;
+        time = Math.round((time - mm) / 60);
+        mm = _.padLeft('' + mm, 2, '0');
+
+        return `${time}:${mm}:${ss}`;
+      }, 400),
+
+      percentCompletion() {
+        return Math.floor(100 * value / max);
+      }
     };
 
 
@@ -39,8 +69,8 @@ export function ProgressMapProvider(Private) {
     progressModal.scope.onCancel = function () {
       // Overriding cancel - modal shall not hide until
       // current operation finishes
-      progress.canceled = true;
-      progress.text = 'Canceling...';
+      canceled = true;
+      text = 'Canceling...';
     };
 
     progressModal.show();

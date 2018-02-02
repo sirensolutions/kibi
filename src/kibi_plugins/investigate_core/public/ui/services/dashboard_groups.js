@@ -639,6 +639,7 @@ uiModules
       .then(dashboardGroups1 => this._addAdditionalGroupsFromSavedDashboards(dashboardGroups1))
       .then(groups => {
         this.groups = groups;
+        this.emit('groupsChanged');
         return groups;
       });
     }

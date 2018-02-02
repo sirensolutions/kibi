@@ -37,7 +37,7 @@ export function GuessFieldsProvider(
 
   // Filtering
 
-  function markMultifields(args) {
+  function makeIsMultifield(args) {
     // Input fields may be multifields - that is, alternate representations of some
     // parent fields. Find out those whose parent is already in the supplied fields list.
 
@@ -48,13 +48,19 @@ export function GuessFieldsProvider(
       .indexBy()
       .value();
 
-    args.workStats.forEach(fieldStats => {
-      fieldStats.multifield = !!multifieldNames[fieldStats.field.name];
-    });
+    return fieldStats => !!multifieldNames[fieldStats.field.name];
+  }
+
+  function makeIsMetaField(args) {
+    const { index } = args;
+
+    const metaFieldNames = _.indexBy(index.metaFields);
+    return fieldStats => !!metaFieldNames[fieldStats.field.name];
   }
 
   function markAcceptableFields(args) {
-    markMultifields(args);
+    const isMultifield = makeIsMultifield(args);
+    const isMetaField = makeIsMetaField(args);
 
     args.workStats.forEach(fieldStats => {
       const { field } = fieldStats;
@@ -63,7 +69,8 @@ export function GuessFieldsProvider(
       if(!field.searchable) { fieldStats.notes.push('Not searchable'); }
       if(!field.aggregatable) { fieldStats.notes.push('Not aggregatable'); }
       if(field.scripted) { fieldStats.notes.push('Scripted'); }
-      if(fieldStats.multifield) { fieldStats.notes.push('Multifield'); }
+      if(isMultifield(fieldStats)) { fieldStats.notes.push('Multifield'); }
+      if(isMetaField(fieldStats)) { fieldStats.notes.push('Meta Field'); }
 
       fieldStats.acceptable = (fieldStats.notes.length === notesLen);
     });
@@ -317,7 +324,7 @@ export function GuessFieldsProvider(
     if(!fieldStats.related) { return 1; }
 
     fieldStats.notes.push('Relation endpoint');
-    return 1.5;
+    return 0.5;
   }
 
   const scoreFunctions = [

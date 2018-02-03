@@ -24,8 +24,6 @@ export const jdbcDatasourceTranslate = {
       username: savedParams.username,
       password: savedParams.password,
       timezone: savedParams.timezone,
-      connection: savedParams.datasourcedriver,
-      database: savedParams.databasename,
       driver: savedParams.drivername,
       url: savedParams.connection_string
     };
@@ -36,8 +34,6 @@ export const jdbcDatasourceTranslate = {
       username: jdbcParams.username,
       password: jdbcParams.password,
       timezone: jdbcParams.timezone,
-      datasourcedriver: jdbcParams.connection,
-      databasename: jdbcParams.database,
       drivername: jdbcParams.driver,
       connection_string: jdbcParams.url
     };

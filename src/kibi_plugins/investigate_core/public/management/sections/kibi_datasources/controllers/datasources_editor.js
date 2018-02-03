@@ -8,7 +8,7 @@ import template from 'plugins/investigate_core/management/sections/kibi_datasour
 import kibiUtils from 'kibiutils';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import { findKey } from 'lodash';
+import { map } from 'lodash';
 import { jdbcDatasourceTranslate } from 'plugins/investigate_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
 
 uiRoutes
@@ -54,7 +54,14 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     location: 'Datasources Configuration Editor'
   });
   const datasource = $scope.datasource = $route.current.locals.datasource;
+  // Setup parameters for connection helper panel
+  $scope.toggleConnectionPanel = false;
+  $scope.databaseParams = {
+    databaseType: '',
+    databaseName: ''
+  };
 
+  // Default values for JDBC datasource params
   const datasourceDefaults = {
     "Dremio": {
       "id": "Dremio",
@@ -107,6 +114,9 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
       "disclaimer": "This is a suggested connection string, see the <a href=\"https://prestodb.io/docs/current/installation/jdbc.html\">Presto JDBC documentation</a> for further information."
     },
   };
+
+  // Pull out the connection types to populate the dropdown select in the connection helper
+  $scope.possibleDatabaseTypes = Object.keys(datasourceDefaults);
 
   $scope.isNew = $route.current.locals.isNew;
   $scope.isValid = function () {
@@ -163,41 +173,53 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     }
   };
 
-  function _populateDatasourceDefaults(datasource) {
+  /** _populateConnectionString
+   *  databaseParams {object}
+   *  databaseParams.databaseType {string} The value selected in the connection helper dropdown select
+   *  databaseParams.databaseName {string} (optional) User entered database name for JDBC connection
+   *
+   * Takes in database helper parameters and populates the suggested connection string.
+   * Also populates the drivername parameter if not already set by the user.
+  */
+  function _populateConnectionString(databaseParams) {
+    if(datasource.datasourceType === 'sql_jdbc_new' && databaseParams.databaseType) {
+      const userName = datasource.datasourceParams.username || '';
+      const password = datasource.datasourceParams.password || '';
+      const databaseName = databaseParams.databaseName || '';
+      const defaultPort = datasourceDefaults[databaseParams.databaseType].defaultPort || '';
+      // Pull out the default driver class names
+      const defaultDriverClassNames = map(datasourceDefaults, defaultObject => defaultObject.driverClassName);
 
-    if(datasource.datasourceType === 'sql_jdbc_new') {
-      const singleDatasourceDefaults = datasourceDefaults[datasource.datasourceParams.datasourcedriver];
-      const driverName = datasource.datasourceParams.drivername || singleDatasourceDefaults.driverClassName;
-      const defaultPort = singleDatasourceDefaults.defaultPort || '';
+      // if there is no drivername (or the drivername is one of the defaults)
+      // Update it with the new default. If it is custom-entered by the user, leave it there
+      if (!datasource.datasourceParams.drivername) {
+        datasource.datasourceParams.drivername = datasourceDefaults[databaseParams.databaseType].driverClassName;
+      } else if (defaultDriverClassNames.indexOf(datasource.datasourceParams.drivername) !== -1) {
+        datasource.datasourceParams.drivername = datasourceDefaults[databaseParams.databaseType].driverClassName;
+      }
 
-      datasource.title = datasource.title || datasource.datasourceParams.datasourcedriver;
-      datasource.datasourceParams.drivername = driverName;
-      datasource.datasourceParams.defaultPort = defaultPort;
-      datasource.datasourceParams.disclaimer = singleDatasourceDefaults.disclaimer || '';
+      // if the user hasn't entered a custom title or it is one of the default databaseTypes
+      // Update it with the new default.
+      if (!datasource.title) {
+        datasource.title = databaseParams.databaseType;
+      } else if (Object.keys(datasourceDefaults).indexOf(datasource.title) !== -1 && datasource.title !== databaseParams.databaseType) {
+        datasource.title = databaseParams.databaseType;
+      }
 
-      _populateConnectionString(datasource);
-    }
-  }
-
-  function _populateConnectionString(datasource) {
-    const userName = datasource.datasourceParams.username || '';
-    const password = datasource.datasourceParams.password || '';
-    const databaseName = datasource.datasourceParams.databasename || '';
-    const defaultPort = datasource.datasourceParams.defaultPort || '';
-    if(datasource.datasourceParams.datasourcedriver) {
-      let url = datasourceDefaults[datasource.datasourceParams.datasourcedriver].defaultURL;
+      datasource.datasourceParams.disclaimer = datasourceDefaults[databaseParams.databaseType].disclaimer || '';
+      let url = datasourceDefaults[databaseParams.databaseType].defaultURL;
 
       if (url) {
-        const usernameString = (datasource.datasourceParams.datasourcedriver === 'SQLserver 2017')
+        // SQL Server 2017 adds username/password as query parameters
+        const usernameString = (databaseParams.databaseType === 'SQLserver 2017')
         ? `;username=${userName};password=${password}`
         : `${userName}:${password}@`;
 
+        // SQL Server and Dremio add the database as query params
         let databaseString;
-        if (datasource.datasourceParams.datasourcedriver === 'SQLserver 2017') {
+        if (databaseParams.databaseType === 'SQLserver 2017') {
           databaseString = `;database=${databaseName}`;
-        } else if (datasource.datasourceParams.datasourcedriver === 'Dremio') {
-          databaseString = `;databaseName=${databaseName}`;
-        } else if (datasource.datasourceParams.datasourcedriver === 'Dremio') {
+        } else if (databaseParams.databaseType === 'Dremio') {
           databaseString = `;schema=${databaseName}`;
         } else {
           databaseString = `/${databaseName}`;
@@ -242,6 +264,10 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     });
   }
 
+  // Toggle the connection helper panel
+  $scope.openConnectionPanel = () => $scope.toggleConnectionPanel = !$scope.toggleConnectionPanel;
+  $scope.acceptConnectionString = () => $scope.toggleConnectionPanel = false;
+
   $scope.newObject = function () {
     kbnUrl.change('management/siren/datasources', {});
   };
@@ -255,20 +281,14 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     setDatasourceSchema(datasource);
   });
 
-  $scope.$watch('datasource.datasourceParams.datasourcedriver', function (newval, oldval) {
-    if (newval !== oldval) {
-      datasource.datasourceParams.drivername = '';
-      datasource.title = (datasource.title === oldval || datasource.title === 'New Saved Datasource') ? '' : datasource.title;
-    }
-    _populateDatasourceDefaults(datasource);
-  });
-
   $scope.$watchGroup([
-    'datasource.datasourceParams.username',
-    'datasource.datasourceParams.password',
-    'datasource.datasourceParams.databasename',
-  ], function () {
-    _populateConnectionString(datasource);
+    'databaseParams.databaseType',
+    'databaseParams.databaseName'
+  ], function ([ databaseType, databaseName ]) {
+    _populateConnectionString({
+      databaseType,
+      databaseName
+    });
   });
 
   // currently supported only for sql_jdbc_new

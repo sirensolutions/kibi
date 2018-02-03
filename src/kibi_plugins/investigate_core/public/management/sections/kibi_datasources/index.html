@@ -71,7 +71,12 @@
                 <label>{{param.label}}</label>
                 <span ng-if="param.inputType == 'list'">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <span ng-if="param.inputType == 'number' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
-                <span ng-if="param.inputType == 'text' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType == 'text' && !param.required && !param.help">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType == 'text' && param.help">
+                  <kbn-tooltip text="Help me create a jdbc connection string">
+                    <i ng-click="openConnectionPanel()" class="fa fa-question-circle"></i>
+                  </kbn-tooltip>
+                </span>
                 <span ng-if="param.inputType == 'checkbox' && !param.required">(Optional. Default={{param.defaultValue === false ? 'false' : 'true'}})</span>
                 <span ng-if="param.inputType == 'password' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <span ng-if="param.inputType == 'select' && param.multivalued && !param.required">(Optional. Default={{param.defaultValues ||'undefined'}})</span>
@@ -178,8 +183,39 @@
               </div>
             </ng-form>
           </div>
-          <div ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new' && datasource.datasourceParams.disclaimer">
-           <p ng-bind-html="datasource.datasourceParams.disclaimer"></p>
+          <div class="connection_helper" ng-if="toggleConnectionPanel">
+            <ng-form>
+              <div class="form-group">
+                <label>Database Type</label>
+                <select
+                  name="Database Type"
+                  ng-model="databaseParams.databaseType"
+                  class="form-control span9"  
+                >
+                <option
+                  ng-repeat="option in possibleDatabaseTypes"
+                  value="{{option}}"
+                  ng-selected="possibleDatabaseTypes === option">
+                  {{option}}
+                </option>
+              </select>
+              </div>
+            </ng-form>
+            <ng-form>
+              <div class="form-group">
+                <label>Database Name</label>
+                <input
+                  name="Database Name"
+                  ng-model="databaseParams.databaseName"
+                  class="form-control span9"
+                />
+              </div>
+            </ng-form>
+
+             <div ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new' && datasource.datasourceParams.disclaimer">
+              <p ng-bind-html="datasource.datasourceParams.disclaimer"></p>
+             </div>
+            <button ng-click="acceptConnectionString()" class="btn btn-success">OK</button>
           </div>
           <div class="form-group" ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
             <button ng-click="testConnection()" class="btn btn-success">Test connection</button>

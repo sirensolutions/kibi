@@ -517,25 +517,6 @@
   ],
   "jdbc_new": [
     {
-      "name": "datasourcedriver",
-      "label": "Connection type",
-      "required": true,
-      "multivalued": false,
-      "encrypted": false,
-      "inputType": "select",
-      "defaultValue": "",
-      "possibleValues": [
-        "Dremio",
-        "MySQL",
-        "PostgreSQL",
-        "SQLserver 2017",
-        "Oracle 12c+",
-        "Spark SQL 2.2+",
-        "Sybase ASE 15.7+",
-        "Presto"
-      ]
-    },
-    {
       "name": "drivername",
       "label": "Driver class",
       "required": true,
@@ -544,16 +525,6 @@
       "inputType": "text",
       "defaultValue": "",
       "placeholder": "JDBC driver class name (e.g.: com.mysql.jdbc.Driver)"
-    },
-    {
-      "name": "databasename",
-      "label": "Database",
-      "required": false,
-      "multivalued": false,
-      "encrypted": false,
-      "inputType": "text",
-      "defaultValue": "",
-      "placeholder": "Remote JDBC database name"
     },
     {
       "name": "username",
@@ -589,6 +560,7 @@
       "name": "connection_string",
       "label": "Connection string",
       "required": true,
+      "help": true,
       "multivalued": false,
       "encrypted": false,
       "inputType": "text",

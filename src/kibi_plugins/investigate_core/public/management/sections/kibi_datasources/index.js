@@ -4,6 +4,6 @@ import './services/jdbc_datasources';
 
 management.getSection('kibana').register('datasources', {
   display: 'Datasources',
-  order: 1,
+  order: 15,
   url: '#/management/siren/datasources'
 });

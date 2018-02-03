@@ -4,10 +4,23 @@
     <div class="container">
 
       <div class="header">
-        <h2 class="title">Edit Datasource</h2>
+        <h2 class="title">Connect to an external datasource</h2>
       </div>
       <p>
-        Use this form to configure an external datasource, e.g. a connection to a SQL database.
+        Here, you can connect to two types of external datasource, JDBC and REST:
+      </p>
+      <h3>JDBC datasources:</h3>
+      <p>
+        Siren Investigate, by default, displays data which is contained in its predefined Siren Elasticsearch backend.
+        Configure a JDBC datasource to "federate" other backends (e.g. RDBMS and more). Once a JDBC datasource has been
+        configured, one can map remote tables and views to "virtual indexes" using the <a href='#/management/siren/indexesandrelations'>
+          Indexes and Relations
+        </a> screen.
+      </p>
+      <h3>REST datasources:</h3>
+      <p>
+        Configure a REST datasource to invoke a remote REST service. Typical use is via a REST query which is then visualized in a template
+        displayed using a query viewer dashboard component.
       </p>
 
       <div class="config-section">
@@ -20,12 +33,14 @@
                     ng-model="datasource.datasourceType"
                     class="form-control span9"
                     required>
-                <option value="sql_jdbc_new">SQL JDBC (new)</option>
+              <optgroup label="Use to create Virtual Indexes">
+                <option value="sql_jdbc_new">JDBC</option>
+              </optgroup>
+              <optgroup label="Use to populate templates (deprecated)">
                 <option value="rest">REST</option>
                 <option value="tinkerpop3">TinkerPop3</option>
                 <option value="sparql_http">Sparql over http</option>
                 <option value="sparql_jdbc">Sparql JDBC</option>
-              <optgroup label="Deprecated - all replaced via new SQL JDBC">
                 <option value="sqlite">SQLite</option>
                 <option value="mysql">MySQL</option>
                 <option value="postgresql">PostgreSQL</option>
@@ -50,18 +65,18 @@
             />
           </div>
 
-          <div class="form-group" ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new' && isNew === false">
-            <label>Test connection</label>
-            <button ng-click="testConnection()" class="btn btn-success">Test connection</button>
-          </div>
-
           <div ng-repeat="param in datasource.schema" >
             <ng-form name="innerForm" novalidate>
               <div class="form-group">
                 <label>{{param.label}}</label>
                 <span ng-if="param.inputType == 'list'">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <span ng-if="param.inputType == 'number' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
-                <span ng-if="param.inputType == 'text' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType == 'text' && !param.required && !param.help">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType == 'text' && param.help">
+                  <kbn-tooltip text="Help me create a jdbc connection string">
+                    <i ng-click="openConnectionPanel()" class="fa fa-question-circle"></i>
+                  </kbn-tooltip>
+                </span>
                 <span ng-if="param.inputType == 'checkbox' && !param.required">(Optional. Default={{param.defaultValue === false ? 'false' : 'true'}})</span>
                 <span ng-if="param.inputType == 'password' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <span ng-if="param.inputType == 'select' && param.multivalued && !param.required">(Optional. Default={{param.defaultValues ||'undefined'}})</span>
@@ -165,11 +180,46 @@
                     {{o}}
                   </option>
                 </select>
-
               </div>
             </ng-form>
           </div>
+          <div class="connection_helper" ng-if="toggleConnectionPanel">
+            <ng-form>
+              <div class="form-group">
+                <label>Database Type</label>
+                <select
+                  name="Database Type"
+                  ng-model="databaseParams.databaseType"
+                  class="form-control span9"  
+                >
+                <option
+                  ng-repeat="option in possibleDatabaseTypes"
+                  value="{{option}}"
+                  ng-selected="possibleDatabaseTypes === option">
+                  {{option}}
+                </option>
+              </select>
+              </div>
+            </ng-form>
+            <ng-form>
+              <div class="form-group">
+                <label>Database Name</label>
+                <input
+                  name="Database Name"
+                  ng-model="databaseParams.databaseName"
+                  class="form-control span9"
+                />
+              </div>
+            </ng-form>
 
+             <div ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new' && datasource.datasourceParams.disclaimer">
+              <p ng-bind-html="datasource.datasourceParams.disclaimer"></p>
+             </div>
+            <button ng-click="acceptConnectionString()" class="btn btn-success">OK</button>
+          </div>
+          <div class="form-group" ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
+            <button ng-click="testConnection()" class="btn btn-success">Test connection</button>
+          </div>
         </form>
       </div>
     </div>

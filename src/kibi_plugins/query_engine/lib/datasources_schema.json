@@ -402,7 +402,7 @@
   "jdbc": [
     {
       "name": "drivername",
-      "label": "Driver name",
+      "label": "Driver class",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -518,23 +518,13 @@
   "jdbc_new": [
     {
       "name": "drivername",
-      "label": "Driver name",
+      "label": "Driver class",
       "required": true,
       "multivalued": false,
       "encrypted": false,
       "inputType": "text",
       "defaultValue": "",
       "placeholder": "JDBC driver class name (e.g.: com.mysql.jdbc.Driver)"
-    },
-    {
-      "name": "connection_string",
-      "label": "Connection string",
-      "required": true,
-      "multivalued": false,
-      "encrypted": false,
-      "inputType": "text",
-      "defaultValue": "",
-      "placeholder": "Connection string without username and password (e.g.: jdbc:mysql://localhost:3306/databasename)"
     },
     {
       "name": "username",
@@ -565,6 +555,17 @@
       "encrypted": false,
       "defaultValue": "UTC",
       "placeholder": "e.g.: UTC"
+    },
+    {
+      "name": "connection_string",
+      "label": "Connection string",
+      "required": true,
+      "help": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "Connection string without username and password (e.g.: jdbc:mysql://localhost:3306/databasename)"
     }
   ]
 }

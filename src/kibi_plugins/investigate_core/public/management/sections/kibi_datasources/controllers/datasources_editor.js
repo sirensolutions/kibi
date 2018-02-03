@@ -8,6 +8,7 @@ import template from 'plugins/investigate_core/management/sections/kibi_datasour
 import kibiUtils from 'kibiutils';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { map } from 'lodash';
 import { jdbcDatasourceTranslate } from 'plugins/investigate_core/management/sections/kibi_datasources/services/jdbc_datasource_translate';
 
 uiRoutes
@@ -46,20 +47,83 @@ uiRoutes
   }
 });
 
-function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, queryEngineClient, $element, kibiWarnings, jdbcDatasources) {
+function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
+  queryEngineClient, $element, kibiWarnings, jdbcDatasources, confirmModal) {
   const setDatasourceSchema = Private(SetDatasourceSchemaProvider);
   const notify = createNotifier({
     location: 'Datasources Configuration Editor'
   });
   const datasource = $scope.datasource = $route.current.locals.datasource;
-  $scope.isNew = $route.current.locals.isNew;
+  // Setup parameters for connection helper panel
+  $scope.toggleConnectionPanel = false;
+  $scope.databaseParams = {
+    databaseType: '',
+    databaseName: ''
+  };
 
+  // Default values for JDBC datasource params
+  const datasourceDefaults = {
+    "Dremio": {
+      "id": "Dremio",
+      "driverClassName": "com.dremio.jdbc.Driver",
+      "defaultURL": "jdbc:dremio:direct={{host}}:{{port}}{{databasename}}",
+      "defaultPort": 31010,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.dremio.com/drivers/dremio-jdbc-driver.html\">Dremio JDBC documentation</a> for further information"
+    },
+    "MySQL": {
+      "id": "MySQL",
+      "driverClassName": "com.mysql.jdbc.Driver" ,
+      "defaultURL": "jdbc:mysql://{{username}}{{host}}:{{port}}{{databasename}}",
+      "defaultPort": 3306,
+      "disclaimer": "This is a suggested connection string, your setup may vary and may require the addition of, for example, <a href=\"https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-configuration-properties.html\">UseLegacyDatetime</a>"
+    },
+    "PostgreSQL": {
+      "driverClassName": "org.postgresql.Driver",
+      "defaultURL": "jdbc:postgresql://{{username}}{{host}}:{{port}}{{databasename}}",
+      "defaultPort": 5342,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://jdbc.postgresql.org/documentation/80/connect.html\">PostgreSQL JDBC documentation</a> for further information."
+    },
+    "SQLserver 2017": {
+      "driverClassName": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+      "defaultURL": "jdbc:sqlserver://{{host}}:{{port}}{{username}}{{databasename}}",
+      "defaultPort": 1433,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url\">SQL server JDBC documentation</a> for further information."
+    },
+    "Sybase ASE 15.7+" : {
+      "driverClassName": "net.sourceforge.jtds.jdbc.Driver",
+      "defaultURL": "jdbc:jtds:sybase://{{host}}:{{port}}{{databasename}}",
+      "defaultPort": 5000,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"http://razorsql.com/docs/help_sybase.html\">Sybase JDBC documentation</a> for further information."
+    },
+    "Oracle 12a+": {
+      "driverClassName": "oracle.jdbc.OracleDriver",
+      "defaultURL": "jdbc:oracle:thin:@{{host}}:{{port}}",
+      "defaultPort": 1521,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.oracle.com/javase/tutorial/jdbc/basics/connecting.html#db_connection_url\">Oracle JDBC documentation</a> for further information."
+    },
+    "Spark SQL 2.2+":  {
+      "driverClassName": "com.simba.spark.jdbc4.Driver",
+      "defaultURL": "jdbc:hive2://{{host}}:{{port}}{{databasename}}",
+      "defaultPort": 10002,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://spark.apache.org/docs/latest/sql-programming-guide.html#running-the-thrift-jdbcodbc-server\">Spark SQL JDBC documentation</a> for further information."
+    },
+    "Presto": {
+      "driverClassName": "com.facebook.presto.jdbc.PrestoDriver",
+      "defaultURL":"jdbc:presto://{{host}}:{{port}}",
+      "defaultPort": 8080,
+      "disclaimer": "This is a suggested connection string, see the <a href=\"https://prestodb.io/docs/current/installation/jdbc.html\">Presto JDBC documentation</a> for further information."
+    },
+  };
+
+  // Pull out the connection types to populate the dropdown select in the connection helper
+  $scope.possibleDatabaseTypes = Object.keys(datasourceDefaults);
+
+  $scope.isNew = $route.current.locals.isNew;
   $scope.isValid = function () {
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };
 
   $scope.saveObject = function () {
-
     if (datasource.datasourceType === 'sql_jdbc_new') {
       const d = jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource);
       return jdbcDatasources.save(d).then(() => {
@@ -109,6 +173,68 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
     }
   };
 
+  /** _populateConnectionString
+   *  databaseParams {object}
+   *  databaseParams.databaseType {string} The value selected in the connection helper dropdown select
+   *  databaseParams.databaseName {string} (optional) User entered database name for JDBC connection
+   *
+   * Takes in database helper parameters and populates the suggested connection string.
+   * Also populates the drivername parameter if not already set by the user.
+  */
+  function _populateConnectionString(databaseParams) {
+    if(datasource.datasourceType === 'sql_jdbc_new' && databaseParams.databaseType) {
+      const userName = datasource.datasourceParams.username || '';
+      const password = datasource.datasourceParams.password || '';
+      const databaseName = databaseParams.databaseName || '';
+      const defaultPort = datasourceDefaults[databaseParams.databaseType].defaultPort || '';
+      // Pull out the default driver class names
+      const defaultDriverClassNames = map(datasourceDefaults, defaultObject => defaultObject.driverClassName);
+
+      // if there is no drivername (or the drivername is one of the defaults)
+      // Update it with the new default. If it is custom-entered by the user, leave it there
+      if (!datasource.datasourceParams.drivername) {
+        datasource.datasourceParams.drivername = datasourceDefaults[databaseParams.databaseType].driverClassName;
+      } else if (defaultDriverClassNames.indexOf(datasource.datasourceParams.drivername) !== -1) {
+        datasource.datasourceParams.drivername = datasourceDefaults[databaseParams.databaseType].driverClassName;
+      }
+
+      // if the user hasn't entered a custom title or it is one of the default databaseTypes
+      // Update it with the new default.
+      if (!datasource.title) {
+        datasource.title = databaseParams.databaseType;
+      } else if (Object.keys(datasourceDefaults).indexOf(datasource.title) !== -1 && datasource.title !== databaseParams.databaseType) {
+        datasource.title = databaseParams.databaseType;
+      }
+
+      datasource.datasourceParams.disclaimer = datasourceDefaults[databaseParams.databaseType].disclaimer || '';
+      let url = datasourceDefaults[databaseParams.databaseType].defaultURL;
+
+      if (url) {
+        // SQL Server 2017 adds username/password as query parameters
+        const usernameString = (databaseParams.databaseType === 'SQLserver 2017')
+        ? `;username=${userName};password=${password}`
+        : `${userName}:${password}@`;
+
+        // SQL Server and Dremio add the database as query params
+        let databaseString;
+        if (databaseParams.databaseType === 'SQLserver 2017') {
+          databaseString = `;database=${databaseName}`;
+        } else if (databaseParams.databaseType === 'Dremio') {
+          databaseString = `;schema=${databaseName}`;
+        } else {
+          databaseString = `/${databaseName}`;
+        }
+
+        url = url.replace(/{{username}}/, (userName && password) ? usernameString : '');
+        url = url.replace(/{{port}}/, (defaultPort) ? defaultPort : '');
+        url = url.replace(/{{host}}/, 'localhost');
+        url = url.replace(/{{databasename}}/, (databaseName) ? databaseString : '');
+      }
+
+      datasource.datasourceParams.connection_string = url;
+    }
+  }
+
   function _saveDatasource(datasource) {
     // make sure that any parameter which does not belong to the schema
     // is removed from datasourceParams
@@ -138,24 +264,50 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
     });
   }
 
+  // Toggle the connection helper panel
+  $scope.openConnectionPanel = () => $scope.toggleConnectionPanel = !$scope.toggleConnectionPanel;
+  $scope.acceptConnectionString = () => $scope.toggleConnectionPanel = false;
+
   $scope.newObject = function () {
     kbnUrl.change('management/siren/datasources', {});
   };
 
-  $scope.$watch('datasource.datasourceType', function () {
+  $scope.$watch('datasource.datasourceType', function (newval, oldval) {
     // here reinit the datasourceDef
-    if (datasource.datasourceType === 'sql_jdbc_new' && datasource.title === 'New saved datasource') {
+    if (datasource.datasourceType === 'sql_jdbc_new' && datasource.title === 'New Saved Datasource') {
       datasource.title = '';
     }
 
     setDatasourceSchema(datasource);
   });
 
+  $scope.$watchGroup([
+    'databaseParams.databaseType',
+    'databaseParams.databaseName'
+  ], function ([ databaseType, databaseName ]) {
+    _populateConnectionString({
+      databaseType,
+      databaseName
+    });
+  });
+
   // currently supported only for sql_jdbc_new
   $scope.testConnection = function () {
+    const modalOptions = {
+      title: 'JDBC datasource configuration successful',
+      confirmButtonText: 'Yes, take me there',
+      cancelButtonText: 'No, will do later',
+      onConfirm: () => kbnUrl.change('/management/siren/virtualindexes/'),
+      onCancel: () => {}
+    };
+
     jdbcDatasources.validate(jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource))
     .then(res => {
       notify.info('Connection OK');
+      confirmModal(
+        'Next step is to map a remote table (or view) by creating a Virtual Index. Do that now?',
+        modalOptions
+      );
     })
     .catch(err => {
       if (err && err.error && err.error.reason) {

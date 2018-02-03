@@ -60,7 +60,7 @@ uiModules.get('apps/management')
 
         return Promise.resolve(promise)
         .then(() => {
-          kbnUrl.change('/management/siren/entities/' + $scope.entity.id);
+          kbnUrl.change('/management/siren/indexesandrelations/' + $scope.entity.id);
         });
       };
 

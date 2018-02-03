@@ -1,4 +1,4 @@
-import { find } from 'lodash';
+import { find, noop } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import '../styles/kibi_virtual_indices.less';
@@ -7,11 +7,11 @@ import template from 'plugins/investigate_core/management/sections/kibi_virtual_
 import { CONFIRM_BUTTON, CANCEL_BUTTON } from 'ui_framework/components/modal/confirm_modal';
 
 uiRoutes
-.when('/management/siren/virtualindices', {
+.when('/management/siren/virtualindexes', {
   template,
   reloadOnSearch: false
 })
-.when('/management/siren/virtualindices/:id?', {
+.when('/management/siren/virtualindexes/:id?', {
   template,
   reloadOnSearch: false,
   resolve: {
@@ -23,7 +23,7 @@ uiRoutes
       })
       .catch(err => {
         courier.redirectWhenMissing({
-          virtualIndex: '/management/siren/virtualindices'
+          virtualIndex: '/management/siren/virtualindexes'
         });
       });
     }
@@ -56,6 +56,13 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
   };
 
   $scope.saveObject = function () {
+    const confirmModalOptions = {
+      title: 'Index created!',
+      confirmButtonText: 'Yes, take me there',
+      cancelButtonText: 'No, will do later',
+      onConfirm: () => kbnUrl.change('/management/siren/indexesandrelations/', {}),
+      onCancel: noop
+    };
     const index = {
       _id: $scope.virtualIndex.id,
       _source: {
@@ -73,6 +80,11 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
       } else if (res.updated === true) {
         notify.info('Saved virtual index ' + index._id);
       }
+      confirmModal(
+        'If you want to use this index data in the UI you should now add it in the “Indexes and Relationship” configuration.\n\n' +
+        'Go now?',
+        confirmModalOptions
+      );
     }).catch(err => {
       notify.error(err);
     });
@@ -80,7 +92,7 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
 
 
   $scope.newObject = function () {
-    kbnUrl.change('/management/siren/virtualindices/', {});
+    kbnUrl.change('/management/siren/virtualindexes/', {});
   };
 
   $scope.jdbcDatasources = [];

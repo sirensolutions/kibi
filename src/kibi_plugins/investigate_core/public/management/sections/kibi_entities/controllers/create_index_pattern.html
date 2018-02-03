@@ -8,9 +8,15 @@
   </h1>
 
   <p class="kuiText kuiVerticalRhythm">
-    In order to use Kibana you must configure at least one index pattern.
-    Index patterns are used to identify the Elasticsearch index to run
-    search and analytics against. They are also used to configure fields.
+    Here you can add a new "index pattern" of data to be used by Siren. 
+    An index pattern is one or more indexes matched by a wildcard 
+    (but to start, just put the name of an index that you know exists).
+  </p>
+  <p class="kuiText kuiVerticalRhythm">
+    You can add either native Elasticsearch indexes or Virtual (JDBC) indexes 
+    which you have previously created in the <a href="#/management/siren/virtualindexes">
+      Virtual Index management
+    </a>  screen.
   </p>
 
   <div class="kuiVerticalRhythm">

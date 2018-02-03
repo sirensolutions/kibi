@@ -101,12 +101,12 @@ uiModules.get('apps/management')
       return courier.indexPatterns.get($scope.indexPattern.id)
       .then((indexPatternObj) => {
         // kibi: change '$location.url('/management/kibana/index')'
-        // to '$location.url('/management/siren/entities')'
+        // to '$location.url('/management/siren/indexesandrelations')'
         return courier.indexPatterns.delete(indexPatternObj)
         // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
         .then(function () {
           return ontologyClient.deleteEntity(indexPatternObj.id)
-          .then(kbnUrl.change('/management/siren/entities'));
+          .then(kbnUrl.change('/management/siren/indexesandrelations'));
         })
         .catch(notify.error);
       });
@@ -132,7 +132,7 @@ uiModules.get('apps/management')
   $scope.removeEid = function () {
     function doRemove() {
       return ontologyClient.deleteEntity($route.current.locals.selectedEntity.id)
-      .then(kbnUrl.change('/management/siren/entities'));
+      .then(kbnUrl.change('/management/siren/indexesandrelations'));
     }
 
     const confirmModalOptions = {

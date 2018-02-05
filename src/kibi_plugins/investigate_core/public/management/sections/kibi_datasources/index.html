@@ -47,6 +47,36 @@
             </select>
           </div>
 
+          <div class="connection_helper form-group" ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
+            <ng-form>
+              <div class="form-group">
+                <label>Database Type</label>
+                <select
+                  name="Database Type"
+                  ng-model="databaseParams.databaseType"
+                  class="form-control span9"  
+                >
+                <option
+                  ng-repeat="option in possibleDatabaseTypes"
+                  value="{{option}}"
+                  ng-selected="possibleDatabaseTypes === option">
+                  {{option}}
+                </option>
+              </select>
+              </div>
+            </ng-form>
+            <ng-form>
+              <div class="form-group">
+                <label>Database Name</label>
+                <input
+                  name="Database Name"
+                  ng-model="databaseParams.databaseName"
+                  class="form-control span9"
+                />
+              </div>
+            </ng-form>
+          </div>
+          
           <div class="form-group" ng-if="datasource.datasourceType">
             <label ng-if="datasource.datasourceType !== 'sql_jdbc_new'">Title</label>
             <label ng-if="datasource.datasourceType === 'sql_jdbc_new'">Id</label>
@@ -181,40 +211,11 @@
               </div>
             </ng-form>
           </div>
-          <div class="connection_helper" ng-if="toggleConnectionPanel">
-            <ng-form>
-              <div class="form-group">
-                <label>Database Type</label>
-                <select
-                  name="Database Type"
-                  ng-model="databaseParams.databaseType"
-                  class="form-control span9"  
-                >
-                <option
-                  ng-repeat="option in possibleDatabaseTypes"
-                  value="{{option}}"
-                  ng-selected="possibleDatabaseTypes === option">
-                  {{option}}
-                </option>
-              </select>
-              </div>
-            </ng-form>
-            <ng-form>
-              <div class="form-group">
-                <label>Database Name</label>
-                <input
-                  name="Database Name"
-                  ng-model="databaseParams.databaseName"
-                  class="form-control span9"
-                />
-              </div>
-            </ng-form>
+          
+          <div ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new' && datasource.datasourceParams.connection_string && datasource.datasourceParams.disclaimer">
+            <p ng-bind-html="datasource.datasourceParams.disclaimer"></p>
+           </div>
 
-             <div ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new' && datasource.datasourceParams.disclaimer">
-              <p ng-bind-html="datasource.datasourceParams.disclaimer"></p>
-             </div>
-            <button ng-click="acceptConnectionString()" class="btn btn-success">OK</button>
-          </div>
           <div class="form-group" ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
             <button ng-click="testConnection()" class="btn btn-success">Test connection</button>
           </div>

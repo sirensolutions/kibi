@@ -183,8 +183,8 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   */
   function _populateConnectionString(databaseParams) {
     if(datasource.datasourceType === 'sql_jdbc_new' && databaseParams.databaseType) {
-      const userName = datasource.datasourceParams.username || '';
-      const password = datasource.datasourceParams.password || '';
+      const userName = databaseParams.username || '';
+      const password = databaseParams.password || '';
       const databaseName = databaseParams.databaseName || '';
       const defaultPort = datasourceDefaults[databaseParams.databaseType].defaultPort || '';
       // Pull out the default driver class names
@@ -283,11 +283,15 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
 
   $scope.$watchGroup([
     'databaseParams.databaseType',
-    'databaseParams.databaseName'
-  ], function ([ databaseType, databaseName ]) {
+    'databaseParams.databaseName',
+    'datasource.datasourceParams.username',
+    'datasource.datasourceParams.password'
+  ], function ([ databaseType, databaseName, username, password ]) {
     _populateConnectionString({
       databaseType,
-      databaseName
+      databaseName,
+      username,
+      password
     });
   });
 

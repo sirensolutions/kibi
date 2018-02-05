@@ -289,4 +289,68 @@ describe('Merge duplicated requests', function () {
     expect(requests[3].source._instanceid).to.equal('anotherDataSource');
   });
 
+  it('it should detect duplicated requests and assign _uniq property with resp - Scenario 6', function () {
+    const fakeRequest1 = new AbstractRequest({
+      _instanceid: 'dataSource'
+    });
+    const fakeRequest2 = new AbstractRequest({
+      _instanceid: 'dataSource'
+    });
+    const fakeRequest3 = new AbstractRequest({
+      _instanceid: 'dataSource'
+    });
+    const fakeRequest4 = {
+      key: 'notRequest'
+    };
+    const fakeRequests = [ fakeRequest1, fakeRequest2, fakeRequest3, fakeRequest4 ];
+    fakeRequest3.resp = 'response';
+    const requests = mergeDuplicateRequests(fakeRequests);
+
+
+    expect(requests.length).to.be(4);
+    expect(requests[0].CourierFetchRequestStatus).to.equal('duplicate');
+    expect(requests[1].CourierFetchRequestStatus).to.equal('duplicate');
+    expect(requests[2].CourierFetchRequestStatus).not.to.equal('duplicate');
+    expect(fakeRequest1._uniq.resp).to.equal('response');
+    expect(fakeRequest2._uniq.resp).to.equal('response');
+    expect(fakeRequest3._uniq).not.to.be.ok();
+    expect(fakeRequest4._uniq).not.to.be.ok();
+    expect(requests[2].source._instanceid).to.equal('dataSource');
+    expect(requests[3].key).to.equal('notRequest');
+  });
+
+  it('it should detect duplicated requests and assign _uniq property with resp - Scenario 7', function () {
+    const fakeRequest1 = new AbstractRequest({
+      _instanceid: 'dataSource'
+    });
+    const fakeRequest2 = new AbstractRequest({
+      _instanceid: 'dataSource'
+    });
+    const fakeRequest3 = new AbstractRequest({
+      _instanceid: 'dataSource'
+    });
+    const fakeRequest4 = {
+      key: 'notRequest'
+    };
+    const fakeRequest5 = new AbstractRequest({
+      _instanceid: 'dataSource'
+    });
+    const fakeRequests = [ fakeRequest1, fakeRequest2, fakeRequest3, fakeRequest4, fakeRequest5 ];
+    fakeRequest3.resp = 'response';
+    const requests = mergeDuplicateRequests(fakeRequests);
+
+    expect(requests.length).to.be(5);
+    expect(requests[0].CourierFetchRequestStatus).to.equal('duplicate');
+    expect(requests[1].CourierFetchRequestStatus).to.equal('duplicate');
+    expect(requests[4].CourierFetchRequestStatus).to.equal('duplicate');
+    expect(requests[2].CourierFetchRequestStatus).not.to.equal('duplicate');
+    expect(fakeRequest1._uniq.resp).to.equal('response');
+    expect(fakeRequest2._uniq.resp).to.equal('response');
+    expect(fakeRequest5._uniq.resp).to.equal('response');
+    expect(fakeRequest3._uniq).not.to.be.ok();
+    expect(fakeRequest4._uniq).not.to.be.ok();
+    expect(requests[2].source._instanceid).to.equal('dataSource');
+    expect(requests[3].key).to.equal('notRequest');
+  });
+
 });

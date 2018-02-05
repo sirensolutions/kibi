@@ -1,5 +1,6 @@
 import { IsRequestProvider } from './is_request';
 import { ReqStatusProvider } from './req_status';
+import { each } from 'lodash';
 
 export function MergeDuplicatesRequestProvider(Private) {
   const isRequest = Private(IsRequestProvider);
@@ -7,22 +8,45 @@ export function MergeDuplicatesRequestProvider(Private) {
 
   function mergeDuplicateRequests(requests) {
     // dedupe requests
-    const index = {};
-    return requests.map(function (req) {
-      if (!isRequest(req)) return req;
+    const sourceRequestMap = {};
+    const updateList = {};
+    const requestObjs = [];
 
-      const iid = req.source._instanceid;
-      if (!index[iid]) {
-        // this request is unique so far
-        index[iid] = req;
-        // keep the request
-        return req;
+    // kibi: if there is a duplicated request, use request source with resp or _mergedResp
+    for(let i = 0; i < requests.length; i++) {
+      if (!isRequest(requests[i])) {
+        requestObjs[i] = requests[i];
+      } else {
+        const iid = requests[i].source._instanceid;
+        if(!sourceRequestMap.hasOwnProperty(iid)) {
+          sourceRequestMap[iid] = i;
+          requestObjs[i] = requests[i];
+        } else {
+          if(requests[sourceRequestMap[iid]].resp || requests[sourceRequestMap[iid]]._mergedResp) {
+            requests[i]._uniq = requests[sourceRequestMap[iid]];
+            requestObjs[i] = DUPLICATE;
+          } else if (requests[i].resp  || requests[i]._mergedResp) {
+            requests[sourceRequestMap[iid]]._uniq =  requests[i];
+            requestObjs[sourceRequestMap[iid]] = DUPLICATE;
+            requestObjs[i] = requests[i];
+            each(updateList[sourceRequestMap[iid]], function (updateReq) {
+              requests[updateReq]._uniq =  requests[i];
+              requestObjs[updateReq] = DUPLICATE;
+            });
+            delete updateList[sourceRequestMap[iid]];
+            sourceRequestMap[iid] = i;
+          } else {
+            if(!updateList.hasOwnProperty(sourceRequestMap[iid])) {
+              updateList[sourceRequestMap[iid]] = [i];
+            } else {
+              updateList[sourceRequestMap[iid]].push(i);
+            }
+          }
+        }
       }
-
-      // the source was requested at least twice
-      req._uniq = index[iid];
-      return DUPLICATE;
-    });
+    }
+    return requestObjs;
+    // kibi: end
   }
 
   return mergeDuplicateRequests;

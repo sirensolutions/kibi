@@ -47,7 +47,7 @@ _elasticsearch/config_ directory:
 The password of all Java keystores is `password`.
 
 In addition, the following certificates are included in the
-_kibi/pki/searchguard_ directory:
+_siren-investigate/pki/searchguard_ directory:
 
 - **CN=sgadmin.crtfull.pem**: a certificate bundle
   with administrative privileges over the Search Guard Management REST API.
@@ -372,19 +372,19 @@ CLUSTER_COMPOSITE_OPS:
   - 'indices:admin/aliases*'
   - CLUSTER_COMPOSITE_OPS_RO
 
-##### KIBI #####
+##### SIREN #####
 
-KIBI_CLUSTER:
+SIREN_CLUSTER:
   - 'indices:data/read/scroll'
   - 'indices:data/read/scroll/clear'
   - 'cluster:internal/data/transfer/*'
   - 'indices:data/read/msearch*'
   - CLUSTER_COMPOSITE_OPS_RO
 
-KIBI_COMPOSITE:
+SIREN_COMPOSITE:
   - 'indices:siren/mplan*'
 
-KIBI_READONLY:
+SIREN_READONLY:
   - 'indices:data/read/field_stats*'
   - 'indices:data/read/field_caps*'
   - 'indices:data/read/get*'
@@ -397,31 +397,31 @@ KIBI_READONLY:
   - 'indices:admin/validate/query*'
   - 'indices:admin/get*'
   - 'indices:admin/version/get*'
-  - KIBI_COMPOSITE
+  - SIREN_COMPOSITE
 
-KIBI_READWRITE:
+SIREN_READWRITE:
   - 'indices:admin/exists*'
   - 'indices:admin/mapping/put*'
   - 'indices:admin/refresh*'
   - 'indices:data/write/delete*'
   - 'indices:data/write/index*'
   - 'indices:data/write/update*'
-  - KIBI_READONLY
+  - SIREN_READONLY
 ----
 
 This file contains named groups of permissions which can be used in the roles
 configuration file; the above configuration includes Search Guard default
 groups plus three {kibi-name} specific groups:
 
-- **KIBI_READWRITE**: groups all the permissions needed to search and update
+- **SIREN_READWRITE**: groups all the permissions needed to search and update
   the main {kibi-name} index (_.siren_); the group has to be assigned on the main index
   to all roles that can modify the {kibi-name} configuration.
-- **KIBI_READONLY**: groups all the permissions needed to search any
+- **SIREN_READONLY**: groups all the permissions needed to search any
   Elasticsearch index from {kibi-name}. The group has to be assigned on all indices
   that a role has access to.
-- **KIBI_CLUSTER**: sets the permission to read results from scrolling
+- **SIREN_CLUSTER**: sets the permission to read results from scrolling
   searches and send composite requests.
-- **KIBI_COMPOSITE**: groups all the permissions to execute composite requests
+- **SIREN_COMPOSITE**: groups all the permissions to execute composite requests
   not recognized by Search Guard; the group has to be granted on all indices
   to roles that have access only to a subset of indices (e.g. sirennoinvestor).
 
@@ -451,7 +451,7 @@ logstash:
     - 'indices:data/write/bulk*'
     - 'indices:admin/template/*'
     - CLUSTER_MONITOR
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
   indices:
     'logstash-*':
       '*':
@@ -483,20 +483,20 @@ monitoring:
 # Permissions for a Siren Alert user.
 sirenalert:
   cluster:
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
     - 'indices:data/write/bulk*'
     - 'indices:admin/template/*'
   indices:
     '*':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'watcher_alarms*':
       '*':
-        - KIBI_READWRITE
+        - SIREN_READWRITE
         - CREATE_INDEX
     '/(watcher|watcher_alarms)/':
       '*':
-        - KIBI_READWRITE
+        - SIREN_READWRITE
         - CREATE_INDEX
 
 # Permissions for the {kibi-name} server process.
@@ -509,85 +509,85 @@ sirenserver:
     - cluster:monitor/main
     - cluster:monitor/state
     - cluster:monitor/nodes/stats
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
     - CLUSTER_COMPOSITE_OPS
   indices:
     '*':
       '*':
         - indices:admin/get
-    '?kibi':
+    '?siren':
       '*':
         - ALL
-    '?kibiaccess':
+    '?sirenaccess':
       '*':
         - ALL
 
 # Permissions for a {kibi-name} administrator (read-write access to the .siren index).
 sirenadmin:
   cluster:
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
     - cluster:admin/plugin/siren/license/put
   indices:
     '*':
       '*':
-        - KIBI_READONLY
-    '?kibi':
+        - SIREN_READONLY
+    '?siren':
       '*':
-        - KIBI_READWRITE
+        - SIREN_READWRITE
     'watcher':
       '*':
-        - KIBI_READWRITE
+        - SIREN_READWRITE
 
 # Permissions for a {kibi-name} user (read only access to the .siren index).
 sirenuser:
   cluster:
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
   indices:
-    '?kibi':
+    '?siren':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'watcher':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'watcher_alarms*':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'article':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'investment':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'company':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'investor':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     '*':
       '*':
-        - KIBI_COMPOSITE
+        - SIREN_COMPOSITE
 
 # Permissions for a {kibi-name} user (read only), with no access to the investor index.
 sirennoinvestor:
   cluster:
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
   indices:
-    '?kibi':
+    '?siren':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'article':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'company':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'investment':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     '*':
       '*':
-        - KIBI_COMPOSITE
+        - SIREN_COMPOSITE
 ----
 
 The file defines the following roles:
@@ -718,10 +718,10 @@ _plugins/search-guard-5/tools/sgadmin.sh_ script as follows:
 ----
 $ bash plugins/search-guard-5/tools/sgadmin.sh \
   -cd config/sgconfig \
-  -cn kibi-distribution \
+  -cn siren-distribution \
   -ts config/truststore.jks \
   -tspass password \
-  -ks ../kibi/pki/searchguard/CN\=sgadmin-keystore.jks \
+  -ks ../siren-investigate/pki/searchguard/CN\=sgadmin-keystore.jks \
   -kspass password \
   -h localhost \
   -p 9330 \
@@ -735,10 +735,10 @@ To reload the configuration you have to use the same same command with the
 ----
 $ bash plugins/search-guard-5/tools/sgadmin.sh \
   -rl
-  -cn kibi-distribution \
+  -cn siren-distribution \
   -ts config/truststore.jks \
   -tspass password \
-  -ks ../kibi/pki/searchguard/CN\=sgadmin-keystore.jks \
+  -ks ../siren-investigate/pki/searchguard/CN\=sgadmin-keystore.jks \
   -kspass password \
   -h localhost \
   -p 9330 \
@@ -796,7 +796,7 @@ authenticated request with wget, e.g.:
 
 [source,shell]
 ----
-$ wget --ca-certificate=../kibi/pki/searchguard/ca.pem --http-user=sirenserver --http-password=password -qO - https://localhost:9220
+$ wget --ca-certificate=../siren-investigate/pki/searchguard/ca.pem --http-user=sirenserver --http-password=password -qO - https://localhost:9220
 ----
 
 To display information about the certificate as seen by a client you can
@@ -809,7 +809,7 @@ $ echo | openssl s_client -servername localhost -connect localhost:9220 -showcer
 
 === {kibi-name} configuration
 
-Edit _config/kibi.yml_ and specify the credentials of the **sirenserver**
+Edit _config/investigate.yml_ and specify the credentials of the **sirenserver**
 user, e.g.:
 
 [source,yaml]
@@ -847,10 +847,10 @@ e.g.:
 elasticsearch.ssl.verify: true
 ----
 
-Set the **kibi_core.elasticsearch.auth_plugin** option to **searchguard**:
+Set the **investigate_core.elasticsearch.auth_plugin** option to **searchguard**:
 
 ----
-kibi_core:
+investigate_core:
   elasticsearch:
     auth_plugin: 'searchguard'
 ----
@@ -859,13 +859,13 @@ E.g.:
 
 [source,yaml]
 ----
-kibi_core:
+investigate_core:
   elasticsearch:
     auth_plugin: 'searchguard'
 ----
 
 To enable the {kibi-name} access control plugin, specify the following configuration
-values in the **kibi_access_control** section:
+values in the **investigate_access_control** section:
 
 - **enabled**: set to **true** to enable the {kibi-name} access control plugin.
   Defaults to **false**.
@@ -895,7 +895,7 @@ E.g.:
 
 [source,yaml]
 ----
-kibi_access_control:
+investigate_access_control:
   enabled: true
   cookie:
     password: '12345678123456781234567812345678'
@@ -906,7 +906,7 @@ If {kibi-name} is running behind a reverse SSL proxy like Nginx, remember to set
 
 [source,yaml]
 ----
-kibi_access_control:
+investigate_access_control:
   enabled: true
   cookie:
     password: '12345678123456781234567812345678'
@@ -914,11 +914,11 @@ kibi_access_control:
 ----
 
 If you are using the Siren Alert plugin, you can specify the Siren Alert user
-credentials in the `kibi_access_control.sirenalert` section, e.g.:
+credentials in the `investigate_access_control.sirenalert` section, e.g.:
 
 [source,yaml]
 ----
-kibi_access_control:
+investigate_access_control:
   sirenalert:
     elasticsearch:
       username: sirenalert
@@ -971,7 +971,7 @@ API.
 ==== {kibi-name} configuration
 
 Copy the client certificate and its key to a directory readable by {kibi-name} (e.g. `pki`); then
-add the following parameters to the `kibi_access_control` configuration section:
+add the following parameters to the `investigate_access_control` configuration section:
 
 - **admin_role**: the Search Guard role that has access to the Search Guard
   management UI (**sirenadmin** by default).
@@ -984,7 +984,7 @@ E.g.:
 
 [source,yaml]
 ----
-kibi_access_control:
+investigate_access_control:
   admin_role: sirenadmin
   backends:
     searchguard:
@@ -1039,7 +1039,7 @@ to filter dashboards and visualizations visible to end users.
 
 ==== Setup
 
-To enable this feature, set the following parameters in the `kibi_access_control`
+To enable this feature, set the following parameters in the `investigate_access_control`
 configuration section:
 
 - **admin_role**: the Search Guard role that can use the saved objects access
@@ -1052,14 +1052,14 @@ E.g.:
 
 [source,yaml]
 ----
-kibi_access_control:
+investigate_access_control:
   acl:
     enabled: true
 ----
 
 Before restarting {kibi-name}, it is required to allow the backend user (`.sirenserver`
 by default) all permissions on the index set in
-`kibi_access_control.acl.index`; for example, the following snippet from
+`investigate_access_control.acl.index`; for example, the following snippet from
 `sg_roles.yml` grants all privileges to the `sirenserver` user on the
 `.sirenaccess` index.
 
@@ -1072,15 +1072,15 @@ sirenserver:
       - cluster:monitor/health
       - cluster:monitor/state
       - cluster:monitor/nodes/stats
-      - KIBI_CLUSTER
+      - SIREN_CLUSTER
   indices:
     '*':
       '*':
         - indices:admin/get
-    '?kibi*':
+    '?siren*':
       '*':
         - ALL
-    '?kibiaccess':
+    '?sirenaccess':
       '*':
         - ALL
 ----
@@ -1097,21 +1097,21 @@ E.g.:
 ----
 sirenuser:
   cluster:
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
   indices:
     /(article|investment|company|investor)/:
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     watcher:
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     '*':
       '*':
-        - KIBI_COMPOSITE
+        - SIREN_COMPOSITE
     watcher_alarms*:
       '*':
-        - KIBI_READONLY
-    '?kibi':
+        - SIREN_READONLY
+    '?siren':
       'null':
         - 'indices:data/read/search'
         - 'indices:data/read/coordinate-search'
@@ -1414,11 +1414,11 @@ image::images/authorization-visualization-empty.png["A visualization that refers
 If you have an existing Elasticsearch instance with X-Pack installed and wish to integrate with {kibi-name},
 there are a few short steps to take:
 
-First, set the backend parameter of the `kibi_access_control` section of the `siren.yml` to `xpack`:
+First, set the backend parameter of the `investigate_access_control` section of the `siren.yml` to `xpack`:
 
 [source,yaml]
 ----
-kibi_access_control:
+investigate_access_control:
   enabled: true
   backend: xpack
 ----

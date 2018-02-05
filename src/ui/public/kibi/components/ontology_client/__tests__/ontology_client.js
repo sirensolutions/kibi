@@ -41,7 +41,6 @@ describe('Kibi Components', function () {
     it('gets ranges for the given entity', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
       $httpBackend.expectPOST(/\/schemaQuery/).respond();
-      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getRangesForEntityId('id');
       $httpBackend.flush();
     });
@@ -77,14 +76,12 @@ describe('Kibi Components', function () {
     it('gets an entity by id', function () {
       $httpBackend.expectPOST(/\/schema/).respond({ data: { id: 'something' } });
       $httpBackend.expectPOST(/\/schemaQuery/).respond();
-      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getEntityById('id');
       $httpBackend.flush();
     });
 
     it('gets the dashboard given an entity id', function () {
       $httpBackend.expectPOST(/\/schema/).respond();
-      $httpBackend.expectPOST(/\/schemaQuery/).respond();
       $httpBackend.expectPOST(/\/schemaQuery/).respond();
       ontologyClient.getDashboardsByEntity({});
       $httpBackend.flush();

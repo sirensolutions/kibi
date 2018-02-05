@@ -252,6 +252,10 @@ app.directive('dashboardApp', function (createNotifier, $injector) {
         return dashboardState.uiState.createChild(path, uiState, true);
       };
 
+      $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
+      $scope.toggleSavedSearchExplanation = () => $scope.showSavedSearchExplanation = !$scope.showSavedSearchExplanation;
+      $scope.jumpToDiscover = () => $window.location.href = chrome.getNavLinkById('kibana:discover').url;
+
       $scope.$watch('model.darkTheme', () => {
         dashboardState.setDarkTheme($scope.model.darkTheme);
         updateTheme();

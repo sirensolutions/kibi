@@ -1,5 +1,6 @@
 import { isUndefined, each, find } from 'lodash';
 import { DatasourceTypes } from 'kibiutils';
+import moment from 'moment-timezone';
 
 export default function setDatasourceSchemaFactory(kibiDatasourcesSchema) {
   return function setDatasourceSchema(datasource) {
@@ -20,6 +21,9 @@ export default function setDatasourceSchemaFactory(kibiDatasourcesSchema) {
         datasource.schema = kibiDatasourcesSchema.sparql_http;
         break;
       case 'sql_jdbc_new':
+        // Add timezones from moment to populate timezone dropdown
+        const timezoneSchemaIndex = kibiDatasourcesSchema.jdbc_new.findIndex(schema => schema.name === 'timezone');
+        kibiDatasourcesSchema.jdbc_new[timezoneSchemaIndex].possibleValues = [...moment.tz.names()];
         datasource.schema = kibiDatasourcesSchema.jdbc_new;
         break;
       case DatasourceTypes.sql_jdbc:

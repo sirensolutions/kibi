@@ -55,7 +55,6 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   });
   const datasource = $scope.datasource = $route.current.locals.datasource;
   // Setup parameters for connection helper panel
-  $scope.toggleConnectionPanel = false;
   $scope.databaseParams = {
     databaseType: '',
     databaseName: ''
@@ -64,14 +63,12 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   // Default values for JDBC datasource params
   const datasourceDefaults = {
     "Dremio": {
-      "id": "Dremio",
       "driverClassName": "com.dremio.jdbc.Driver",
       "defaultURL": "jdbc:dremio:direct={{host}}:{{port}}{{databasename}}",
       "defaultPort": 31010,
       "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.dremio.com/drivers/dremio-jdbc-driver.html\">Dremio JDBC documentation</a> for further information"
     },
     "MySQL": {
-      "id": "MySQL",
       "driverClassName": "com.mysql.jdbc.Driver" ,
       "defaultURL": "jdbc:mysql://{{username}}{{host}}:{{port}}{{databasename}}",
       "defaultPort": 3306,
@@ -103,13 +100,13 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     },
     "Spark SQL 2.2+":  {
       "driverClassName": "com.simba.spark.jdbc4.Driver",
-      "defaultURL": "jdbc:hive2://{{host}}:{{port}}{{databasename}}",
+      "defaultURL": "jdbc:spark://{{host}}:{{port}}{{databasename}}",
       "defaultPort": 10002,
       "disclaimer": "This is a suggested connection string, see the <a href=\"https://spark.apache.org/docs/latest/sql-programming-guide.html#running-the-thrift-jdbcodbc-server\">Spark SQL JDBC documentation</a> for further information."
     },
     "Presto": {
       "driverClassName": "com.facebook.presto.jdbc.PrestoDriver",
-      "defaultURL":"jdbc:presto://{{host}}:{{port}}",
+      "defaultURL":"jdbc:presto://{{host}}:{{port}}{{databasename}}",
       "defaultPort": 8080,
       "disclaimer": "This is a suggested connection string, see the <a href=\"https://prestodb.io/docs/current/installation/jdbc.html\">Presto JDBC documentation</a> for further information."
     },
@@ -183,55 +180,56 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   */
   function _populateConnectionString(databaseParams) {
     if(datasource.datasourceType === 'sql_jdbc_new' && databaseParams.databaseType) {
-      const userName = datasource.datasourceParams.username || '';
-      const password = datasource.datasourceParams.password || '';
-      const databaseName = databaseParams.databaseName || '';
-      const defaultPort = datasourceDefaults[databaseParams.databaseType].defaultPort || '';
-      // Pull out the default driver class names
-      const defaultDriverClassNames = map(datasourceDefaults, defaultObject => defaultObject.driverClassName);
-
-      // if there is no drivername (or the drivername is one of the defaults)
-      // Update it with the new default. If it is custom-entered by the user, leave it there
-      if (!datasource.datasourceParams.drivername) {
-        datasource.datasourceParams.drivername = datasourceDefaults[databaseParams.databaseType].driverClassName;
-      } else if (defaultDriverClassNames.indexOf(datasource.datasourceParams.drivername) !== -1) {
-        datasource.datasourceParams.drivername = datasourceDefaults[databaseParams.databaseType].driverClassName;
-      }
-
       // if the user hasn't entered a custom title or it is one of the default databaseTypes
       // Update it with the new default.
       if (!datasource.title) {
-        datasource.title = databaseParams.databaseType;
-      } else if (Object.keys(datasourceDefaults).indexOf(datasource.title) !== -1 && datasource.title !== databaseParams.databaseType) {
-        datasource.title = databaseParams.databaseType;
+        datasource.title = databaseParams.databaseName;
+      } else if (datasource.title !== databaseParams.databaseName) {
+        datasource.title = databaseParams.databaseName;
       }
 
-      datasource.datasourceParams.disclaimer = datasourceDefaults[databaseParams.databaseType].disclaimer || '';
-      let url = datasourceDefaults[databaseParams.databaseType].defaultURL;
+      if($scope.isNew) {
+        const userName = databaseParams.username || '';
+        const password = databaseParams.password || '';
+        const databaseName = databaseParams.databaseName || '';
+        const defaultPort = datasourceDefaults[databaseParams.databaseType].defaultPort || '';
+      // Pull out the default driver class names
+        const defaultDriverClassNames = map(datasourceDefaults, defaultObject => defaultObject.driverClassName);
 
-      if (url) {
+      // if there is no drivername (or the drivername is one of the defaults)
+      // Update it with the new default. If it is custom-entered by the user, leave it there
+        if (!datasource.datasourceParams.drivername) {
+          datasource.datasourceParams.drivername = datasourceDefaults[databaseParams.databaseType].driverClassName;
+        } else if (defaultDriverClassNames.indexOf(datasource.datasourceParams.drivername) !== -1) {
+          datasource.datasourceParams.drivername = datasourceDefaults[databaseParams.databaseType].driverClassName;
+        }
+
+        datasource.datasourceParams.disclaimer = datasourceDefaults[databaseParams.databaseType].disclaimer || '';
+        let url = datasourceDefaults[databaseParams.databaseType].defaultURL;
+
+        if (url) {
         // SQL Server 2017 adds username/password as query parameters
-        const usernameString = (databaseParams.databaseType === 'SQLserver 2017')
+          const usernameString = (databaseParams.databaseType === 'SQLserver 2017')
         ? `;username=${userName};password=${password}`
         : `${userName}:${password}@`;
 
         // SQL Server and Dremio add the database as query params
-        let databaseString;
-        if (databaseParams.databaseType === 'SQLserver 2017') {
-          databaseString = `;database=${databaseName}`;
-        } else if (databaseParams.databaseType === 'Dremio') {
-          databaseString = `;schema=${databaseName}`;
-        } else {
-          databaseString = `/${databaseName}`;
+          let databaseString;
+          if (databaseParams.databaseType === 'SQLserver 2017') {
+            databaseString = `;database=${databaseName}`;
+          } else if (databaseParams.databaseType === 'Dremio') {
+            databaseString = `;schema=${databaseName}`;
+          } else {
+            databaseString = `/${databaseName}`;
+          }
+
+          url = url.replace(/{{username}}/, (userName && password) ? usernameString : '');
+          url = url.replace(/{{port}}/, (defaultPort) ? defaultPort : '');
+          url = url.replace(/{{host}}/, 'localhost');
+          url = url.replace(/{{databasename}}/, (databaseName) ? databaseString : '');
         }
-
-        url = url.replace(/{{username}}/, (userName && password) ? usernameString : '');
-        url = url.replace(/{{port}}/, (defaultPort) ? defaultPort : '');
-        url = url.replace(/{{host}}/, 'localhost');
-        url = url.replace(/{{databasename}}/, (databaseName) ? databaseString : '');
+        datasource.datasourceParams.connection_string = url;
       }
-
-      datasource.datasourceParams.connection_string = url;
     }
   }
 
@@ -256,6 +254,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     datasource.save().then(function (datasourceId) {
       if (datasourceId) {
         $scope.isNew = false;
+
         notify.info('Datasource ' + datasource.title + ' successfully saved');
         queryEngineClient.clearCache().then(function () {
           kbnUrl.change('management/siren/datasources/' + datasourceId);
@@ -283,11 +282,15 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
 
   $scope.$watchGroup([
     'databaseParams.databaseType',
-    'databaseParams.databaseName'
-  ], function ([ databaseType, databaseName ]) {
+    'databaseParams.databaseName',
+    'datasource.datasourceParams.username',
+    'datasource.datasourceParams.password'
+  ], function ([ databaseType, databaseName, username, password ]) {
     _populateConnectionString({
       databaseType,
-      databaseName
+      databaseName,
+      username,
+      password
     });
   });
 

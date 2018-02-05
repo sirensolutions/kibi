@@ -549,18 +549,16 @@
     {
       "name": "timezone",
       "label": "Timezone",
-      "inputType": "text",
+      "inputType": "select",
       "required": false,
       "multivalued": false,
       "encrypted": false,
-      "defaultValue": "UTC",
-      "placeholder": "e.g.: UTC"
+      "defaultValue": "UTC"
     },
     {
       "name": "connection_string",
       "label": "Connection string",
       "required": true,
-      "help": true,
       "multivalued": false,
       "encrypted": false,
       "inputType": "text",

@@ -1,5 +1,5 @@
 [[kibi_horizontal_bar_chart]]
-== Kibi Horizontal Bar Chart
+== {kibi-name} Horizontal Bar Chart
 
 This visualization displays a horizontal bar chart from the data in the current set of Elasticsearch documents.
 

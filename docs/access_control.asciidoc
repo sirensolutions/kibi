@@ -1,17 +1,17 @@
 [[access_control]]
 = Authentication and Access Control
 
-Kibi  can be integrated with Elasticsearch clusters protected by either
+{kibi-name} can be integrated with Elasticsearch clusters protected by either
 Search Guard or Elastic x-pack.
 
-In this scenario, both Kibi and Gremlin Server (the backend component
+In this scenario, both {kibi-name} and Gremlin Server (the backend component
 used by the <<graph_browser,graph browser>> visualization) must be configured to serve requests over HTTPS.
 
 
 [float]
-== Enabling HTTPS in Kibi
+== Enabling HTTPS in {kibi-name}
 
-It is strongly recommended that you protect your Kibi installation by using a reverse proxy.
+It is strongly recommended that you protect your {kibi-name} installation by using a reverse proxy.
 Some example configurations are given below, but other reverse proxies may also be used.
 
 
@@ -179,12 +179,12 @@ Your installation's requirements may be more stringent.
 [float]
 === Native SSL Support
 
-While you should always run Kibi behind an SSL reverse proxy, it is sometimes necessary to also enable SSL support
-on the Kibi server itself - for example, when the reverse proxy is an appliance, or is installed on a separate server.
+While you should always run {kibi-name} behind an SSL reverse proxy, it is sometimes necessary to also enable SSL support
+on the {kibi-name} server itself - for example, when the reverse proxy is an appliance, or is installed on a separate server.
 
 Native SSL support can be enabled by copying the certificate and key files to a
-location readable by the Kibi process and setting the following parameters
-in `config/kibi.yml`:
+location readable by the {kibi-name} process and setting the following parameters
+in `config/siren.yml`:
 
 - `server.ssl.enabled`: set to `true` to enable SSL.
 - `server.ssl.certificate`: path to a certificate.
@@ -202,7 +202,7 @@ server.ssl.certificate: "pki/server.crt"
 server.ssl.key: "pki/server.key"
 ----
 
-The Kibi  demo distribution includes a sample certificate and key in the `pki`
+The {kibi-name}  demo distribution includes a sample certificate and key in the `pki`
 directory.
 
 NOTE: For additional SSL settings please refer to the <<settings,settings chapter>>.
@@ -210,18 +210,18 @@ NOTE: For additional SSL settings please refer to the <<settings,settings chapte
 [float]
 == Enabling HTTPS in Gremlin Server
 
-HTTPS must be enabled in Gremlin Server to secure requests from Kibi, even
-if Kibi is configured behind a reverse SSL proxy.
+HTTPS must be enabled in Gremlin Server to secure requests from {kibi-name}, even
+if {kibi-name} is configured behind a reverse SSL proxy.
 
 To enable HTTPS in the Gremlin Server, set the following parameters in the
-`kibi_core.gremlin_server` section of the `config/kibi.yml` file:
+`kibi_core.gremlin_server` section of the `config/siren.yml` file:
 
 - **url**: the URL of the Gremlin Server endpoint; make sure that the protocol is set to `https`.
 - **ssl.key_store**: the path to the Gremlin Server certificate in Java KeyStore format.
 - **ssl.key_store_password**: the password of the Gremlin Server certificate keystore.
 - **ssl.ca**: the path of the certification authority chain bundle that
-  can be used to validate requests from Kibi to the Gremlin API; you can omit
-  this parameter if the certificates for the Kibi HTTPS interface have been
+  can be used to validate requests from {kibi-name} to the Gremlin API; you can omit
+  this parameter if the certificates for the {kibi-name} HTTPS interface have been
   issued and signed by a public authority.
 
 E.g.:
@@ -237,9 +237,9 @@ kibi_core:
       ca: "pki/cacert.pem"
 ----
 
-After restarting Kibi, click on **Settings**, then click on **Datasources**,
-and make sure that the URL of the `Kibi Gremlin Server` datasource is equal
-to the url set in `kibi.yml`.
+After restarting {kibi-name}, click on **Settings**, then click on **Datasources**,
+and make sure that the URL of the `{kibi-name} Gremlin Server` datasource is equal
+to the url set in `siren.yml`.
 
-The Kibi  demo distribution includes a sample keystore and CA bundle
+The {kibi-name}  demo distribution includes a sample keystore and CA bundle
 in the `pki` directory.

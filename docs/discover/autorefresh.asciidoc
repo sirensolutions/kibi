@@ -15,5 +15,5 @@ is open and select an autorefresh interval:
 
 image::images/autorefresh-intervals.png[]
 
-When auto-refresh is enabled, Kibi's top bar displays a pause button and the auto-refresh interval:
+When auto-refresh is enabled, {kibi-name}'s top bar displays a pause button and the auto-refresh interval:
 image:images/autorefresh-pause.png[]. Click the *Pause* button to pause auto-refresh.

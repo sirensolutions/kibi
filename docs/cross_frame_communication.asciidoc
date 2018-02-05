@@ -1,8 +1,9 @@
 [[cross_frame_communication]]
+[float]
 = Cross Frame Communication
 
-To allow cross frame communication, Kibi exposes an object at **window.kibi**;
-the object can be called only if both Kibi and the container page are in the same domain.
+To allow cross frame communication, {kibi-name} exposes an object at **window.sireninvestigate**;
+the object can be called only if both {kibi-name} and the container page are in the same domain.
 
 [float]
 == Methods
@@ -10,7 +11,7 @@ the object can be called only if both Kibi and the container page are in the sam
 [float]
 === generateShortUrl(shareAsEmbed, displayNavBar)
 
-Generates a shortened URL containing the current Kibi state and returns
+Generates a shortened URL containing the current {kibi-name} state and returns
 a promise fulfilled with the URL.
 
 **Parameters**:
@@ -21,12 +22,12 @@ a promise fulfilled with the URL.
 **Sample usage**:
 
 Put the following code in the container page, replacing `kibiframe` with
-the ID of the frame in which Kibi is embedded:
+the ID of the frame in which {kibi-name} is embedded:
 
 ```
 document.getElementById('kibiframe')
 .contentWindow
-.kibi
+.sireninvestigate
 .generateShortUrl(true, true)
 .then(function(url) {
   console.log("Generated URL: " + url);
@@ -54,12 +55,12 @@ once the token has been sent to the backend.
 **Sample usage**:
 
 Put the following code in the container page, replacing `kibiframe` with the ID
-of the frame in which Kibi is embedded:
+of the frame in which {kibi-name} is embedded:
 
 ```
 document.getElementById('kibiframe')
 .contentWindow
-.kibi
+.sireninvestigate
 .setJWTToken(`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraWJpdXNlciJ9.kZhLu15FwxrX4hPE1ciyzw_NufZ_oH7aSGpLZHachPg`)
 .then(function() {
   console.log('JWT token set.');
@@ -69,6 +70,6 @@ document.getElementById('kibiframe')
 });
 ```
 
-Once the token is set, you can change the Kibi URL and the user should be
+Once the token is set, you can change the {kibi-name} URL and the user should be
 authenticated; the application should call the method again with an updated
 token before the current one expires.

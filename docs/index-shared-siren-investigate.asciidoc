@@ -1,7 +1,13 @@
 :toc: right
 :docinfo: shared
 
-:version: 5.6.3
+:version:                5.6.5
+:logstash-version:       {version}
+:elasticsearch-version:  {version}
+:kibana-version:         {version}
+:vanguard-version:       {version}
+:kibi-version:           {version}
+:kibi-name:       Siren Investigate
 :kibi-version: {version}
 :kibi-ref: http://siren.solutions/kibi/docs/current/
 :kibi-default-port: 5606
@@ -14,14 +20,14 @@
 :federate-version: 5.6.6-10.0.0
 :federate-website: https://docs.support.siren.io/5.6.6-10.0.0/federate/
 
-:kibana-version: 5.6.3
 :kibana-announcement: https://www.elastic.co/blog/kibana-5-6-3-released
-:kibana-ref: https://www.elastic.co/guide/en/kibana/5.6
+:kibana-ref: https://www.elastic.co/guide/en/kibana/{branch}
 :logstash-ref: https://www.elastic.co/guide/en/logstash/
 
-:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.5/
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
 :es-ref: {elastic-ref}
-:elasticsearch-version: 5.6.3
+:xpack-ref:            https://www.elastic.co/guide/en/x-pack/{branch}
+:icons: font
 :es-default-port: 9220
 
 :searchguard-ref: http://floragunncom.github.io/search-guard-docs/

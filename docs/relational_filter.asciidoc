@@ -1,7 +1,7 @@
 [[relational-browsing]]
 = Relational Browsing
 
-Kibi allows you to _filter_ documents on a dashboard by showing only those that
+{kibi-name} allows you to _filter_ documents on a dashboard by showing only those that
 have a relation with documents displayed in a different dashboard, possibly
 stored in different indices.
 
@@ -53,7 +53,7 @@ The screenshot below shows the configuration of a relation from the `Articles` d
 
 image::images/relational_filter/relational_filter_config.png["Relational filter configuration",align="center"]
 
-It is possible to define multiple relations in a single Kibi relational
+It is possible to define multiple relations in a single {kibi-name} relational
 filter visualization; the visualization will display only buttons applicable
 to the currently displayed dashboard.
 
@@ -122,7 +122,7 @@ This displays a table that provides several statistics about each join.
 image::images/relational_filter/spy_filterjoin.png["Details about the filterjoin query",align="center"]
 
 .Raw Request
-The filterjoin query as sent by Kibi. This uses the internal API for defining the join.
+The filterjoin query as sent by {kibi-name}. This uses the internal API for defining the join.
 
 .Translated Request
 The filterjoin query as sent to the Elasticsearch cluster, presented in JSON format.
@@ -133,7 +133,7 @@ The raw response from the server, presented in JSON format.
 [float]
 ==== Debug
 
-The Debug tab presents the JSON object that Kibi uses for this relational filter.
+The Debug tab presents the JSON object that {kibi-name} uses for this relational filter.
 
 image::images/relational_filter/spy_debug.png["Debug spy panel of the relational filter visualization",align="center"]
 

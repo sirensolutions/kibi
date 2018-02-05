@@ -3,9 +3,9 @@
 
 A coordinate map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
 
-NOTE: By default, Kibi uses the http://www.openstreetmap.org/[Open Street Maps service]
+NOTE: By default, {kibi-name} uses the http://www.openstreetmap.org/[Open Street Maps service]
 to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
-in `kibi.yml`.
+in `siren.yml`.
 
 === Configuration
 
@@ -41,7 +41,7 @@ The _Precision_ slider determines the granularity of the results displayed on th
 for the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid]
 aggregation for details on the area specified by each precision level.
 
-NOTE: Higher precisions increase memory usage for the browser displaying Kibi as well as for the underlying
+NOTE: Higher precisions increase memory usage for the browser displaying {kibi-name} as well as for the underlying
 Elasticsearch cluster.
 
 - The _place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])_ box is checked by default. When this box is checked, the markers are
@@ -79,7 +79,7 @@ Heatmaps have the following options:
 
 * *Radius*: Sets the size of the individual heatmap dots.
 * *Blur*: Sets the amount of blurring for the heatmap dots.
-* *Maximum zoom*: Tilemaps in Kibi support 18 zoom levels. This slider defines the maximum zoom level at which the
+* *Maximum zoom*: Tilemaps in {kibi-name} support 18 zoom levels. This slider defines the maximum zoom level at which the
 heatmap dots appear at full intensity.
 * *Minimum opacity*: Sets the opacity cutoff for the dots.
 * *Show Tooltip*: Check this box to have a tooltip with the values for a given dot when the cursor is on that dot.

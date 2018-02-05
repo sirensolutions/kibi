@@ -1,20 +1,20 @@
 [[docker]]
-== Running Kibi on Docker
-Docker images for Kibi are available from the https://hub.docker.com/u/sirensolutions/[`sirensolutions`] organization on https://hub.docker.com[Dockerhub].
+== Running {kibi-name} on Docker
+Docker images for {kibi-name} are available from the https://hub.docker.com/u/sirensolutions/[`sirensolutions`] organization on https://hub.docker.com[Dockerhub].
 
 === Pulling the Image
-Obtaining Kibi for Docker is as simple as issuing a +docker pull+ command.
+Obtaining {kibi-name} for Docker is as simple as issuing a +docker pull+ command.
 
 ifeval::["{release-state}"=="unreleased"]
 
-However, version {version} of Kibi has not yet been released, so no Docker
+However, version {version} of {kibi-name} has not yet been released, so no Docker
 image is currently available for this version.
 
 endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-The Docker image for Kibi {version} can be retrieved with the following
+The Docker image for {kibi-name} {version} can be retrieved with the following
 command:
 
 ["source","sh",subs="attributes"]
@@ -42,20 +42,20 @@ docker run -d -p 5606:5606 -p 9220:9220 sirensolutions/{docker-image-name}-demo-
 [[docker-env-config]]
 ==== Environment variable configuration
 
-Under Docker, Kibi can be configured via environment variables. When
+Under Docker, {kibi-name} can be configured via environment variables. When
 the container starts, a helper process checks the environment for variables that
-can be mapped to Kibi command-line arguments.
+can be mapped to {kibi-name} command-line arguments.
 
 For compatibility with container orchestration systems, these
 environment variables are written in all capitals, with underscores as
 word separators. The helper translates these names to valid
-Kibi setting names.
+{kibi-name} setting names.
 
 Some example translations are shown here:
 
 .Example Docker Environment Variables
 [horizontal]
-**Environment Variable**:: **Kibi Setting**
+**Environment Variable**:: **{kibi-name} Setting**
 `SERVER_NAME`:: `server.name`
 `KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
 `XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
@@ -77,14 +77,14 @@ services:
 ----------------------------------------------------------
 
 Since environment variables are translated to CLI arguments, they take
-precedence over settings configured in `kibi.yml`.
+precedence over settings configured in `siren.yml`.
 
 ==== Docker defaults
-The default settings when using the `siren-kibi` image (standalone Kibi image) are:
+The default settings when using the `siren-kibi` image (standalone {kibi-name} image) are:
 
 [horizontal]
 `elasticsearch.url`:: `http://localhost:9220`
 `server.basepath`:: `""`
-`kibi.index`:: `.kibi`
+`kibi.index`:: `.siren`
 
 endif::[]

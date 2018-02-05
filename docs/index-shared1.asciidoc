@@ -1,6 +1,3 @@
-
-include::{asciidoc-dir}/../../shared/versions56.asciidoc[]
-
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
 :repo:           https://github.com/elastic/kibana/
 :issue:          {repo}issues/
@@ -8,8 +5,6 @@ include::{asciidoc-dir}/../../shared/versions56.asciidoc[]
 :commit:         {repo}commit/
 :blob:           {repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
-
-include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
 
 include::introduction.asciidoc[]
 

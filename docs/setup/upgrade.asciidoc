@@ -3,28 +3,28 @@
 
 NOTE: Before upgrading make sure to check the <<breaking-changes>> section.
 
-An existing Kibi installation can be upgraded as follows:
+An existing {kibi-name} installation can be upgraded as follows:
 
-- backup the `.kibi` index.
-- backup the Kibi configuration file (`config/kibi.yml`)
-- backup the `.kibiaccess` if ACL (Access Control Layer) is enabled.
+- backup the `.siren` index.
+- backup the {kibi-name} configuration file (`config/siren.yml`)
+- backup the `.sirenaccess` if ACL (Access Control Layer) is enabled.
 - {es-ref}setup-upgrade.html[upgrade Elasticsearch];
 - before restarting each Elasticsearch node, make sure to install a compatible version of the
   {federate-website}#compatibility[Siren Federate] plugin and access control plugins if required.
-- download and extract the new Kibi version.
+- download and extract the new {kibi-name} version.
 - copy the previous configuration file to the `config` directory of the new installation.
 - copy the files from the `data` directory in your old installation of the new installation.
 - check for breaking changes to the configuration described below.
-- install the compatible versions of third party Kibi/Kibana plugins that you might need in addition to the bundled ones.
+- install the compatible versions of third party {kibi-name}/Kibana plugins that you might need in addition to the bundled ones.
 - execute the <<kibi-upgrade-command, upgrade command>>.
 
 [float]
-=== Backing up and Restoring the Kibi Indices.
+=== Backing up and Restoring the {kibi-name} Indices.
 
-Before upgrading it is strongly recommended to have a backup of the `.kibi` index; the recommended way to perform regular backups of
+Before upgrading it is strongly recommended to have a backup of the `.siren` index; the recommended way to perform regular backups of
 Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapshot and restore modules].
 
-Kibi ships with a command line interface for creating dumps of the `.kibi` index and, in case the `ACL` is enabled, the `.kibiaccess` index as well.
+{kibi-name} ships with a command line interface for creating dumps of the `.siren` index and, in case the `ACL` is enabled, the `.sirenaccess` index as well.
 An index dump is composed of two parts: its mappings and its data.
 
 [float]
@@ -36,14 +36,14 @@ You can know more about its options by executing the following:
 
 [source,shell]
 ----
-$ ./bin/kibi backup --help
+$ ./bin/investigate backup --help
 ----
 
-For example, the following line will dump in `<MY_FOLDER>` the `.kibi` index and the `.kibiaccess` index if the option `kibi_access_control.acl.enabled` is true in `kibi.yml`:
+For example, the following line will dump in `<MY_FOLDER>` the `.siren` index and the `.sirenaccess` index if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
 
 [source,shell]
 ----
-$ ./bin/kibi backup --backup-dir <MY_FOLDER>
+$ ./bin/investigate backup --backup-dir <MY_FOLDER>
 ----
 
 [float]
@@ -55,35 +55,35 @@ You can know more about its options by executing the following:
 
 [source,shell]
 ----
-$ ./bin/kibi restore --help
+$ ./bin/investigate restore --help
 ----
 
-For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.kibiaccess` as well if the option `kibi_access_control.acl.enabled` is true in `kibi.yml`:
+For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.sirenaccess` as well if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
 
 [source,shell]
 ----
-$ ./bin/kibi restore --backup-dir <MY_FOLDER>
+$ ./bin/investigate restore --backup-dir <MY_FOLDER>
 ----
 
-In addition, an <<kibi-upgrade-command,upgrade>> of the Kibi indices is also executed after a successful restore.
+In addition, an <<kibi-upgrade-command,upgrade>> of the {kibi-name} indices is also executed after a successful restore.
 
 [float]
 [[kibi-upgrade-command]]
-=== Upgrading the .kibi index.
+=== Upgrading the .siren index.
 
-To upgrade the objects in the `.kibi` index (dashboards, visualizations, etc.), move to the directory in which Kibi is installed and
+To upgrade the objects in the `.siren` index (dashboards, visualizations, etc.), move to the directory in which {kibi-name} is installed and
 execute the following command:
 
 [source,shell]
 ----
-bin/kibi upgrade
+bin/investigate upgrade
 ----
 
 The command will look for out of date objects and upgrade them, e.g.:
 
 [source,shell]
 ----
-$ bin/kibi upgrade
+$ bin/investigate upgrade
   log   [17:58:33.494] [info][status][plugin:elasticsearch] Status changed from uninitialized to yellow - Waiting for Elasticsearch
   log   [17:58:36.127] [info][migrations] Executing migration "Upgrade scripts from version 1 to version 2"
   log   [17:58:36.141] [info][migrations] Executed migration "Upgrade scripts from version 1 to version 2"

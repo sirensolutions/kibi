@@ -3,9 +3,15 @@
 
 In this panel, you can define relationships between index patterns. These
 relationships ultimately form a **graph** of index patterns. This graph is used
+<<<<<<< HEAD
 in conjunction with the Siren Federate plugin, allowing to perform join operations
 between **dashboards**, i.e. filtering the documents in a dashboard that have one or more relationships with documents
 in another dashboard.
+=======
+in conjunction with the Siren Federate Plugin For Elasticsearch, allowing to perform join operations
+between **dashboards**, i.e., filtering a dashboard's documents with regards to
+an other.
+>>>>>>> 2e91569... Rename Vanguard to Siren Federate Plugin for Elasticsearch
 
 [float]
 === Graph of Index Patterns
@@ -42,7 +48,7 @@ The index pattern in question is then filtered by the values returned.
 
 These are used for displaying counts on relational buttons, for the content displayed on the current dashboard, etc.
 
-Setting the limit here to -1 here sets the limit to the default `kibi:joinLimit` set in the Kibi Advanced Settings 
+Setting the limit here to -1 here sets the limit to the default `kibi:joinLimit` set in the {kibi-name} Advanced Settings 
 and setting the limit to 0 here disables the limit entirely.
 
 ===== Example

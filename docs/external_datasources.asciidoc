@@ -1,7 +1,7 @@
 [[external_datasources]]
 = External Datasources
 
-Kibi provides visualizations and aggregations to integrate data from external
+{kibi-name} provides visualizations and aggregations to integrate data from external
 datasources. This section explains how to setup datasources and configure
 <<datasource-queries, queries>> and <<datasource-templates, query templates>>.
 
@@ -10,7 +10,7 @@ datasources. This section explains how to setup datasources and configure
 
 To create a new external datasource navigate to "Settings/Datasources"
 First fill the datasource title and name then pick one of the types
-Kibi supports:
+{kibi-name} supports:
 
 * REST
 * SQLite
@@ -26,15 +26,15 @@ Below is a list of additional mandatory parameters for each datasource type:
 * cache_enabled - enable server side cache for this datasource
 * max_age - the max age of an object in the cache, in milliseconds
 
-To control the maximum number of query results kept in cache, set the `kibi_core.datasource_cache_size` parameter in kibi.yml.
+To control the maximum number of query results kept in cache, set the `kibi_core.datasource_cache_size` parameter in siren.yml.
 
 [NOTE]
-A Kibi restart is required to apply changes to kibi.yml configuration file.
+A {kibi-name} restart is required to apply changes to siren.yml configuration file.
 
 *REST*
 
 * url - an URL of rest API endpoint
-* response_type - API results format, currently Kibi supports only *JSON*
+* response_type - API results format, currently {kibi-name} supports only *JSON*
 * username (optional) - username with access to the API
 * password (optional) - corresponding password
 * auth_token (optional) - token used in Token Authentication
@@ -54,21 +54,21 @@ A Kibi restart is required to apply changes to kibi.yml configuration file.
 == Parameters encryption
 
 Sensitive datasource parameters like passwords are encrypted before being
-stored in the `.kibi` index.
+stored in the `.siren` index.
 
 Before creating datasources containing sensitive parameters, make sure to set
 a custom encryption key by running the `replace_encryption_key` command:
 
 [source,bash]
 ----
-bin/kibi replace_encryption_key [options] <current_key> <new_key> <new_cipher>
+bin/investigate replace_encryption_key [options] <current_key> <new_key> <new_cipher>
 ----
 
 * **<current_key>** a base64 encoded string containing the current encryption key.
 * **<new_key>** a base64 encoded string containing the new encryption key.
 * **<new_cipher>** the cipher algorithm to use (currently only AES-GCM is supported).
 
-The current encryption key can be read from the `kibi.yml` file in the
+The current encryption key can be read from the `siren.yml` file in the
 `datasource_encryption_key` parameter.
 
 Keys can have a length of 16, 24 or 32 bytes; a quick way to encode a plaintext
@@ -81,7 +81,7 @@ Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=
 ----
 
 NOTE: Make sure to set the configuration file as readable only by the user
-running the Kibi process.
+running the {kibi-name} process.
 
 [float]
 [[entity_selection]]

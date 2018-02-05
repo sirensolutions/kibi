@@ -6,9 +6,9 @@ for evaluation purposes.
 
 == From a SQL Database using Logstash
 
-The indices in the Kibi demo distribution have been populated by running
+The indices in the Siren Platform demo distribution have been populated by running
 four https://www.elastic.co/products/logstash[Logstash] configurations over
-the SQLite database in `kibi/crunchbase.db`.
+the SQLite database in `siren-investigate/crunchbase.db`.
 
 The database has the following schema:
 
@@ -210,7 +210,7 @@ and the https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.htm
 documentation.
 
 [float]
-=== Browsing the Index in Kibi
+=== Browsing the Index in {kibi-name}
 
 Open {start-url} in your browser, click on the **Management** tab then on **Index Patterns**.
 

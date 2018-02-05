@@ -1,10 +1,10 @@
 [[kibi_gremlin_server]]
-= Kibi Gremlin Server
+= {kibi-name} Gremlin Server
 
-The **Kibi Gremlin Server** component is a backend component required by the <<graph_browser,Kibi Graph Browser>>
+The **{kibi-name} Gremlin Server** component is a backend component required by the <<graph_browser,{kibi-name} Graph Browser>>
 visualisation.
 
-In order to enable the Gremlin Server, make sure that `kibi.yml` contains
+In order to enable the Gremlin Server, make sure that `siren.yml` contains
 the following configuration:
 
 ```yml

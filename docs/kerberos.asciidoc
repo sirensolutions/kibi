@@ -3,19 +3,19 @@
 == Kerberos/SPNEGO authentication support
 
 This section offers an overview of how to enable Kerberos/SPNEGO authentication
-in Kibi.
+in {kibi-name}.
 
-Before enabling Kerberos support you should setup Kibi and Search Guard as
+Before enabling Kerberos support you should setup {kibi-name} and Search Guard as
 described in the <<searchguard_integration>> chapter.
 
 === Limitations
 
 The current implementation requires disabling the Kerberos replay cache in
-Search Guard, as the Kibi backend needs to make multiple requests to the
+Search Guard, as the {kibi-name} backend needs to make multiple requests to the
 Elasticsearch cluster on behalf of the user in several places without the
 ability to generate new service tickets.
 
-As long as all the traffic to Kibi is encrypted and the service ticket lifetime
+As long as all the traffic to {kibi-name} is encrypted and the service ticket lifetime
 is short (the default in most system is 5 to 10 minutes) this should not pose a
 significant security risk.
 
@@ -304,7 +304,7 @@ domain credentials.
 
 If an HTTP request to the cluster contains an HTTP Basic authorization header,
 it will still be authenticated by the HTTP authenticator defined in
-`basic_internal_auth_domain`; it is necessary to leave this enabled as the Kibi
+`basic_internal_auth_domain`; it is necessary to leave this enabled as the {kibi-name}
 backend uses this method to authenticate with the cluster.
 
 It is possible to enable only a single HTTP challenge; if your browser is
@@ -323,9 +323,9 @@ Search Guard role mapping, e.g.:
 
 [source,yaml]
 ----
-kibiuser:
+sirenuser:
   users:
-    - kibiuser
+    - sirenuser
     - domainuser
 ----
 
@@ -387,11 +387,11 @@ The most common issues are:
 To get additional debugging information you can set `krb_debug` to `true`
 temporarily in `sg_config.yml` and upload it to the cluster using `sgadmin`.
 
-=== Kibi configuration
+=== {kibi-name} configuration
 
-To enable SPNEGO support in Kibi, set the
+To enable SPNEGO support in {kibi-name}, set the
 `kibi_access_control.backends.searchguard.authenticator` option to
-`http-negotiate`, in `kibi.yml` e.g.:
+`http-negotiate`, in `siren.yml` e.g.:
 
 [source,yaml]
 ----
@@ -403,11 +403,11 @@ kibi_access_control:
       authenticator: 'http-negotiate'
 ----
 
-Then restart Kibi and verify that you can login from a browser in the domain
+Then restart {kibi-name} and verify that you can login from a browser in the domain
 using a user defined in Search Guard.
 
 When SPNEGO support is enabled, cookie based authentication will be disabled;
 if you need to provide both authentications for different networks, it is
-possible to start an additional Kibi instance with
+possible to start an additional {kibi-name} instance with
 `kibi_access_control.backend.searchguard.authenticator` set to `http-basic` or
 not set at all.

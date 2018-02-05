@@ -3,10 +3,10 @@
 
 [partintro]
 --
-A Kibi _dashboard_ displays a set of saved visualizations in a customizable
+A {kibi-name} _dashboard_ displays a set of saved visualizations in a customizable
 grid layout. You can save a dashboard to share or reload at a later time.
 
-In Kibi, dashboards are displayed in the left-hand panel and can be organized as <<dashboard-groups, dashboard groups>>.
+In {kibi-name}, dashboards are displayed in the left-hand panel and can be organized as <<dashboard-groups, dashboard groups>>.
 --
 
 [[dashboard-getting_started]]
@@ -17,7 +17,7 @@ You need at least one saved <<visualize, visualization>> to use a dashboard.
 [[creating-a-new-dashboard]]
 == Building a New Dashboard
 
-Dashboards can be accessed via the home icon or the Siren logo. When you click *Dashboard*, Kibi displays the first available
+Dashboards can be accessed via the home icon or the Siren logo. When you click *Dashboard*, {kibi-name} displays the first available
 dashboard or, if no dashboards have been defined, the dashboard creation screen.
 
 image:images/dashboard/NewDashboard.png[New Dashboard screen]
@@ -29,7 +29,7 @@ image:images/dashboard/CreateNewDashboard.png[Create New Dashboard]]
 image:images/dashboard/CreateNewDashboardPopup.png[Creating a New Dashboard]
 
 
-Build your dashboard by adding visualizations. By default, Kibi dashboards use a light color theme. To use a dark color
+Build your dashboard by adding visualizations. By default, {kibi-name} dashboards use a light color theme. To use a dark color
 theme instead, click the *Options* button (which you can find on the top horizonal menu or by right clicking on the dashboard name) and check the *Use dark theme* box.
 
 image:images/darktheme.png[Dark Theme Example]
@@ -57,11 +57,11 @@ image::images/dashboard/save_dashboard_opts.png["Dashboard settings",align="cent
 == Sharing Dashboards
 
 You can share dashboards with other users by sending a link or by embedding
-them into HTML pages; make sure that your Kibi installation is properly secured
+them into HTML pages; make sure that your {kibi-name} installation is properly secured
 when sharing a dashboard on a public facing server.
 
-NOTE: To view shared dashboards users must be able to access Kibi; keep
-this in mind if your Kibi instance is protected by an authentication proxy.
+NOTE: To view shared dashboards users must be able to access {kibi-name}; keep
+this in mind if your {kibi-name} instance is protected by an authentication proxy.
 
 To share a dashboard, click the *Share* button to display the _Sharing_ panel.
 
@@ -159,7 +159,7 @@ image:images/NYCTA-Statistics.jpg[]
 
 To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
 *Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it
-is stored in Elasticsearch. A formatted export contains the results of any applicable Kibi [field formatters].
+is stored in Elasticsearch. A formatted export contains the results of any applicable {kibi-name} [field formatters].
 
 [[changing-the-visualization]]
 == Changing the Visualization

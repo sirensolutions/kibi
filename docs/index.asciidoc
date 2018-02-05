@@ -1,14 +1,15 @@
-[[kibi-guide]]
-= Kibi User Guide
+include::index-shared-siren-investigate.asciidoc[]
 
-include::index-shared-kibi.asciidoc[]
+[[siren-investigate-guide]]
+= {kibi-name} User Guide
+
 include::index-shared1.asciidoc[]
 include::index-shared2.asciidoc[]
 include::index-shared3.asciidoc[]
 include::index-shared4.asciidoc[]
 include::index-shared5.asciidoc[]
-include::index-shared-kibi-access-control.asciidoc[]
-include::index-shared-kibi-components.asciidoc[]
-include::index-shared-kibi-data-ingestion.asciidoc[]
-include::index-shared-kibi-acknowledgements.asciidoc[]
+include::index-shared-siren-investigate-access-control.asciidoc[]
+include::index-shared-siren-investigate-components.asciidoc[]
+include::index-shared-siren-investigate-data-ingestion.asciidoc[]
+include::index-shared-siren-investigate-acknowledgements.asciidoc[]
 include::index-shared6.asciidoc[]

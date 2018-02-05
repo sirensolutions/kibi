@@ -1,5 +1,6 @@
 [[sirenalert]]
-= Siren Alert
+[float]
+== Siren Alert
 
 **Siren Alert** provides Investigate with alerting and reporting functionality to monitor, notify and visualize data
 series changes using standard queries, programmable validators and a variety of configurable actions.
@@ -8,6 +9,6 @@ Siren Alert is also designed to simplify the process of creating and managing al
 through its App and Spy integration.
 
 [float]
-== Documentation
+=== Documentation
 
 The full Siren Alert documentation is available https://github.com/sirensolutions/sentinl/wiki[here].

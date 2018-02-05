@@ -4,27 +4,27 @@
 [partintro]
 --
 The Management application is where you perform your runtime configuration of
-Kibi, including both the initial setup and ongoing configuration of index
-patterns, advanced settings that tweak the behaviors of Kibi itself, and
-the various "objects" that you can save throughout Kibi such as searches,
+{kibi-name}, including both the initial setup and ongoing configuration of index
+patterns, advanced settings that tweak the behaviors of {kibi-name} itself, and
+the various "objects" that you can save throughout {kibi-name} such as searches,
 visualizations, and dashboards.
 
 This section is pluginable, so in addition to the out of the box capabitilies,
-packs such as Kibi Access Control and X-Pack can add additional management capabilities.
+packs such as {kibi-name} Access Control and X-Pack can add additional management capabilities.
 --
 
 include::management/index-patterns.asciidoc[]
 
 include::management/relations.asciidoc[]
 
-[[kibi-settings-datasources]]
+[[siren-investigate-settings-datasources]]
 == Datasources
 
 For an overview of datasources, please read the <<external_datasources>>
 chapter.
 
 
-[[kibi-settings_queries]]
+[[siren-investigate-settings_queries]]
 == Queries
 
 For an overview of queries, please read the <<external_datasources>>

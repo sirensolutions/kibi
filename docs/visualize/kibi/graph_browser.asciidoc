@@ -1,12 +1,9 @@
 [[graph_browser]]
-== Kibi Graph Browser 
+== {kibi-name} Graph Browser 
 
-The Kibi Graph Browser displays Elasticsearch documents as nodes and Kibi relations as links of a graph.
+The {kibi-name} Graph Browser displays Elasticsearch documents as nodes and {kibi-name} relations as links of a graph.
 
 image::images/graph_browser/graph_browser_example.png["Graph Browser Example", title="Graph Browser Example", align="center"]
-
-NOTE: Kibi Graph Browser is not available in the publically downloadable version. +
-Please contact Siren at info@siren.io for further informations.
 
 [float]
 === Configuration
@@ -89,7 +86,7 @@ image::images/graph_browser/vertex_config.png["Vertex Configuration", title="Ver
 [float]
 === Navigating the Graph
 
-Once your Kibi Graph Browser visualization is ready, you can start your investigations. 
+Once your {kibi-name} Graph Browser visualization is ready, you can start your investigations. 
 
 ==== Toolbar
 You have several operations available:

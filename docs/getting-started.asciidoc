@@ -2,10 +2,10 @@
 = Getting Started
 
 == The demo distribution
-The quickest way to get started with Kibi is to download the Kibi demo
+The quickest way to get started with {kibi-name} is to download the Siren Platform demo
 distribution from {download-ref}[the downloads page].
 
-The Kibi demo distribution includes a ready to use Elasticsearch cluster in
+The Siren Platform demo distribution includes a ready to use Elasticsearch cluster in
 the `elasticsearch` directory; the cluster contains five indices:
 
 [horizontal]
@@ -13,10 +13,10 @@ the `elasticsearch` directory; the cluster contains five indices:
 `article`:: a collection of articles about companies
 `investment`:: a collection of investments in companies
 `investor`:: a collection of investors
-`.kibi`:: Kibi configuration
+`.siren`:: {kibi-name} configuration
 
 The indices have been populated through https://www.elastic.co/products/logstash[Logstash]
-from the SQLite database in `kibi/crunchbase.db`, as described in the <<logstash>> chapter.
+from the SQLite database in `siren-investigate/crunchbase.db`, as described in the <<logstash>> chapter.
 
 NOTE: The demo dataset has been built from a sample of articles gathered from
 tech blogs in 2013 and from data about companies, investments and investors in
@@ -26,17 +26,17 @@ the CrunchBase 2013 Snapshot, which is copyright (C) 2013 AOL Inc.
 
 You can access the demo as three different users:
 
-- `kibiadmin`: has read access to all data indices and can modify the Kibi configuration.
-- `kibiuser`: has read access to all data indices but cannot modify the Kibi configuration.
-- `kibinoinvestor`: has read access to all data indices except `investor`; the user has no access to the `Investors` dashboard.
+- `sirenadmin`: has read access to all data indices and can modify the {kibi-name} configuration.
+- `sirenuser`: has read access to all data indices but cannot modify the {kibi-name} configuration.
+- `sirennoinvestor`: has read access to all data indices except `investor`; the user has no access to the `Investors` dashboard.
 
 The password for all users is `password`.
 
 == Search
-After starting Elasticsearch and Kibi, as described in the <<setup, Setup chapter>>,
+After starting Elasticsearch and {kibi-name}, as described in the <<setup, Setup chapter>>,
 start your web browser and navigate to {start-url}.
 
-By default Kibi displays the _Articles_ dashboard, <<dashboard, dashboards>>
+By default {kibi-name} displays the _Articles_ dashboard, <<dashboard, dashboards>>
 can be configured to display multiple <<visualize, visualizations>> on the
 documents stored in a specific index or returned by a <<save-search,saved search>> on an index pattern.
 
@@ -114,7 +114,7 @@ NOTE: for more informations about relational filters, please read the
 
 It is possible to get additional information about companies by using the
 results of queries on SQL databases (or any of the datasources supported by
-Kibi) as aggregations on Elasticsearch documents.
+{kibi-name}) as aggregations on Elasticsearch documents.
 
 For example, in the _Query on Companies_ visualization you can see that 41 of
 the 96 companies have competitors and 8 of them are in the top 500 companies
@@ -298,17 +298,17 @@ NOTE: for additional documentation about this visualization, please read the
 [float]
 == Query Templates
 
-*Company Info* which is an instance of a Kibi query viewer visualization,
+*Company Info* which is an instance of a {kibi-name} query viewer visualization,
 displays the results of three SQL queries by rendering their results through
 templates; the queries take the selected entity ID as an input, thus the
 associated templates will be displayed only when an entity is selected.
 
-image::images/getting_started/templated_query_viewer_5.png["Kibi query viewer example",align="center"]
+image::images/getting_started/templated_query_viewer_5.png["{kibi-name} query viewer example",align="center"]
 
 The association between the query and templates can be set in the visualization
 configuration:
 
-image::images/getting_started/templated_query_viewer_config_5.png["Kibi query viewer configuration",align="center"]
+image::images/getting_started/templated_query_viewer_config_5.png["{kibi-name} query viewer configuration",align="center"]
 
 Query templates can be managed by clicking on the *Management* icon, then select *Advanced Settings* followed by *Templates*.
 

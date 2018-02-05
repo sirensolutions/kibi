@@ -1,43 +1,43 @@
 [[production]]
-== Using Kibi in a Production Environment
+== Using {kibi-name} in a Production Environment
 
-How you deploy Kibi largely depends on your use case. If you are the only user,
+How you deploy {kibi-name} largely depends on your use case. If you are the only user,
 you can run it on your local machine and configure it to point to whatever
 Elasticsearch instance you want to interact with. Conversely, if you have a
 large number of heavy users, you might need to load balance across multiple
 instances that are all connected to the same Elasticsearch cluster.
 
-While Kibi isn't terribly resource intensive, we still recommend running Kibi
+While {kibi-name} isn't terribly resource intensive, we still recommend running {kibi-name}
 separate from your Elasticsearch data or master nodes.
 
 Make sure to set the configuration file as readable only to the user running
-the Kibi process as it contains encryption keys to protect configuration
-settings stored in Elasticsearch; if you are connecting Kibi to external
+the {kibi-name} process as it contains encryption keys to protect configuration
+settings stored in Elasticsearch; if you are connecting {kibi-name} to external
 datasources, we also recommend to use credentials with no write privileges as
 they are not required by the system.
 
 [float]
 [[access-control]]
 === Access control
-Kibi is compatible with Elastic x-pack and Search Guard to enable index
+{kibi-name} is compatible with Elastic x-pack and Search Guard to enable index
 and document level access control.
 
 For more information about the Enterprise Edition access control features
-please see the <<access_control>> section.
+please see the <<access_control, Access Control>> section.
 
 [float]
 [[load-balancing]]
 === Load Balancing Across Multiple Elasticsearch Nodes
-If you have multiple nodes in your Elasticsearch cluster, the easiest way to distribute Kibi requests
-across the nodes is to run an Elasticsearch _client_ node on the same machine as Kibi.
+If you have multiple nodes in your Elasticsearch cluster, the easiest way to distribute {kibi-name} requests
+across the nodes is to run an Elasticsearch _client_ node on the same machine as {kibi-name}.
 Elasticsearch client nodes are essentially smart load balancers that are part of the cluster. They
 process incoming HTTP requests, redirect operations to the other nodes in the cluster as needed, and
 gather and return the results. For more information, see
 {ref}/modules-node.html[Node] in the Elasticsearch reference.
 
-To use a local client node to load balance Kibi requests:
+To use a local client node to load balance {kibi-name} requests:
 
-. Install Elasticsearch on the same machine as Kibi.
+. Install Elasticsearch on the same machine as {kibi-name}.
 . Configure the node as a client node. In `elasticsearch.yml`, set both `node.data` and `node.master` to `false`:
 +
 --------
@@ -55,7 +55,7 @@ name of your cluster.
 --------
 cluster.name: "my_cluster"
 --------
-. Make sure Kibi is configured to point to your local client node. In `kibi.yml`, the `elasticsearch.url` should be set to
+. Make sure {kibi-name} is configured to point to your local client node. In `siren.yml`, the `elasticsearch.url` should be set to
 `localhost:{es-default-port}`.
 +
 --------

@@ -79,7 +79,7 @@
           
           <div class="form-group" ng-if="datasource.datasourceType">
             <label ng-if="datasource.datasourceType !== 'sql_jdbc_new'">Title</label>
-            <label ng-if="datasource.datasourceType === 'sql_jdbc_new'">Id</label>
+            <label ng-if="datasource.datasourceType === 'sql_jdbc_new'">Local Siren Alias</label>
             <input type="text" ng-model="datasource.title" class="form-control span9" required/>
             <saved-object-save-as-check-box saved-object="datasource"></saved-object-save-as-check-box>
           </div>

@@ -55,7 +55,6 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   });
   const datasource = $scope.datasource = $route.current.locals.datasource;
   // Setup parameters for connection helper panel
-  $scope.toggleConnectionPanel = false;
   $scope.databaseParams = {
     databaseType: '',
     databaseName: ''
@@ -64,14 +63,12 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   // Default values for JDBC datasource params
   const datasourceDefaults = {
     "Dremio": {
-      "id": "Dremio",
       "driverClassName": "com.dremio.jdbc.Driver",
       "defaultURL": "jdbc:dremio:direct={{host}}:{{port}}{{databasename}}",
       "defaultPort": 31010,
       "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.dremio.com/drivers/dremio-jdbc-driver.html\">Dremio JDBC documentation</a> for further information"
     },
     "MySQL": {
-      "id": "MySQL",
       "driverClassName": "com.mysql.jdbc.Driver" ,
       "defaultURL": "jdbc:mysql://{{username}}{{host}}:{{port}}{{databasename}}",
       "defaultPort": 3306,
@@ -201,9 +198,9 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
       // if the user hasn't entered a custom title or it is one of the default databaseTypes
       // Update it with the new default.
       if (!datasource.title) {
-        datasource.title = databaseParams.databaseType;
-      } else if (Object.keys(datasourceDefaults).indexOf(datasource.title) !== -1 && datasource.title !== databaseParams.databaseType) {
-        datasource.title = databaseParams.databaseType;
+        datasource.title = databaseParams.databaseName;
+      } else if (datasource.title !== databaseParams.databaseName) {
+        datasource.title = databaseParams.databaseName;
       }
 
       datasource.datasourceParams.disclaimer = datasourceDefaults[databaseParams.databaseType].disclaimer || '';

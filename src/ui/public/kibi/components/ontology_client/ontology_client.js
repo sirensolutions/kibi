@@ -55,7 +55,7 @@ uiModules
   /*
    * Returns the list of available relations.
    */
-  OntologyClient.prototype.getRelations = function () {
+  OntologyClient.prototype.getRelations = _.throttle(function () {
     return this._isCachedModelOutdated()
     .then((isOutDated) => {
       if (!isOutDated && this._cachedRelationsList) {
@@ -90,7 +90,7 @@ uiModules
         .catch(notify.error);
       }
     });
-  };
+  }, 200);
 
   /*
    * Returns a relation by id.
@@ -209,7 +209,7 @@ uiModules
   /*
    * Returns the list of available entities.
    */
-  OntologyClient.prototype.getEntities = function () {
+  OntologyClient.prototype.getEntities = _.throttle(function () {
     return this._isCachedModelOutdated()
     .then((isOutDated) => {
       if (!isOutDated && this._cachedEntitiesList) {
@@ -251,7 +251,7 @@ uiModules
         .catch(notify.error);
       }
     });
-  };
+  }, 200);
 
   /*
    * Returns an entity by id.

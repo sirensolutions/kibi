@@ -57,56 +57,62 @@ uiModules
    * Returns the list of available relations.
    */
   OntologyClient.prototype.getRelations = function () {
-    if (!this._isCachedModelOutdated() && this._cachedRelationsList) {
-      const clonedRelations = _.cloneDeep(this._cachedRelationsList);
-      return Promise.resolve(clonedRelations);
-    } else {
-      return queryEngineClient.schemaQuery({
-        path: '/schema/relations',
-        method: 'GET'
-      })
-      .then((res) => {
-        if (res.status !== 200) {
-          Promise.reject(new Error('Failed to retrieve relations from the schema. An error has occurred.'));
-        } else if (res.data) {
-          const relations = _.reduce(res.data, (relationsArray, rel) => {
-            rel.id = this._removeNsDecode(rel.id);
-            rel.domain.id = this._removeNsDecode(rel.domain.id);
-            rel.range.id = this._removeNsDecode(rel.range.id);
-            if (rel.inverseOf) {
-              rel.inverseOf = this._removeNsDecode(rel.inverseOf);
-            }
+    return this._isCachedModelOutdated()
+    .then((isOutDated) => {
+      if (!isOutDated && this._cachedRelationsList) {
+        const clonedRelations = _.cloneDeep(this._cachedRelationsList);
+        return Promise.resolve(clonedRelations);
+      } else {
+        return queryEngineClient.schemaQuery({
+          path: '/schema/relations',
+          method: 'GET'
+        })
+        .then((res) => {
+          if (res.status !== 200) {
+            Promise.reject(new Error('Failed to retrieve relations from the schema. An error has occurred.'));
+          } else if (res.data) {
+            const relations = _.reduce(res.data, (relationsArray, rel) => {
+              rel.id = this._removeNsDecode(rel.id);
+              rel.domain.id = this._removeNsDecode(rel.domain.id);
+              rel.range.id = this._removeNsDecode(rel.range.id);
+              if (rel.inverseOf) {
+                rel.inverseOf = this._removeNsDecode(rel.inverseOf);
+              }
 
-            relationsArray.push(rel);
-            return relationsArray;
-          }, []);
+              relationsArray.push(rel);
+              return relationsArray;
+            }, []);
 
-          this._cachedRelationsList = relations;
-          return _.cloneDeep(relations);
-        }
-        Promise.reject(new Error('Failed to retrieve relations from the schema. No data retrieved.'));
-      })
-      .catch(notify.error);
-    }
+            this._cachedRelationsList = relations;
+            return _.cloneDeep(relations);
+          }
+          Promise.reject(new Error('Failed to retrieve relations from the schema. No data retrieved.'));
+        })
+        .catch(notify.error);
+      }
+    });
   };
 
   /*
    * Returns a relation by id.
    */
   OntologyClient.prototype.getRelationById = function (relationId) {
-    if (!this._isCachedModelOutdated() && this._cachedRelationsMap[relationId]) {
-      const clonedRelation = _.cloneDeep(this._cachedRelationsMap[relationId]);
-      return Promise.resolve(clonedRelation);
-    } else {
-      return this.getRelations()
-      .then((relations) => {
-        const relation = _.find(relations, (rel) => { return rel.id === relationId; });
-        if (relation) {
-          this._cachedRelationsMap[relationId] = relation;
-        }
-        return relation;
-      });
-    }
+    return this._isCachedModelOutdated()
+    .then((isOutDated) => {
+      if (!isOutDated && this._cachedRelationsMap[relationId]) {
+        const clonedRelation = _.cloneDeep(this._cachedRelationsMap[relationId]);
+        return Promise.resolve(clonedRelation);
+      } else {
+        return this.getRelations()
+        .then((relations) => {
+          const relation = _.find(relations, (rel) => { return rel.id === relationId; });
+          if (relation) {
+            this._cachedRelationsMap[relationId] = relation;
+          }
+          return relation;
+        });
+      }
+    });
   };
 
   /*
@@ -114,25 +120,28 @@ uiModules
    * Eg: [{ id: 'Article', type: 'INDEX_PATTERN' }]
    */
   OntologyClient.prototype.getRangesForEntityId = function (entityId) {
-    if (!this._isCachedModelOutdated() && this._cachedEntityRanges[entityId]) {
-      const clonedRanges = _.cloneDeep(this._cachedEntityRanges[entityId]);
-      return Promise.resolve(clonedRanges);
-    } else {
-      return this.getRelations()
-      .then((relations) => {
-        const ranges = _.reduce(relations, (total, relation) => {
-          if (relation.domain.id === entityId) {
-            total.push({
-              id: relation.range.id,
-              type: relation.range.type
-            });
-          }
-          return total;
-        }, []);
-        this._cachedEntityRanges[entityId] = ranges;
-        return ranges;
-      });
-    }
+    return this._isCachedModelOutdated()
+    .then((isOutDated) => {
+      if (!isOutDated && this._cachedEntityRanges[entityId]) {
+        const clonedRanges = _.cloneDeep(this._cachedEntityRanges[entityId]);
+        return Promise.resolve(clonedRanges);
+      } else {
+        return this.getRelations()
+        .then((relations) => {
+          const ranges = _.reduce(relations, (total, relation) => {
+            if (relation.domain.id === entityId) {
+              total.push({
+                id: relation.range.id,
+                type: relation.range.type
+              });
+            }
+            return total;
+          }, []);
+          this._cachedEntityRanges[entityId] = ranges;
+          return ranges;
+        });
+      }
+    });
   };
 
   /*
@@ -202,63 +211,69 @@ uiModules
    * Returns the list of available entities.
    */
   OntologyClient.prototype.getEntities = function () {
-    if (!this._isCachedModelOutdated() && this._cachedEntitiesList) {
-      const clonedEntities = _.cloneDeep(this._cachedEntitiesList);
-      return Promise.resolve(clonedEntities);
-    } else {
-      return queryEngineClient.schemaQuery({
-        path: '/schema/entities',
-        method: 'GET'
-      })
-      .then((res) => {
-        if (res.status !== 200) {
-          Promise.reject(new Error('Failed to retrieve entities from the schema. An error has occurred.'));
-        } else if (res.data) {
-          const entities = _.reduce(res.data, (total, entity) => {
-            entity.instanceLabel = {};
-            entity.id = this._removeNsDecode(entity.id);
-            if (entity.longDescription) {
-              entity.longDescription = this._removeNsDecode(entity.longDescription);
-            }
-            if (entity.label) {
-              entity.label = entity.label.substring(0, entity.label.lastIndexOf('@'));
-            }
-            if (entity.instanceLabelType) {
-              entity.instanceLabel.type = entity.instanceLabelType;
-            }
-            if (entity.instanceLabelValue) {
-              entity.instanceLabel.value = entity.instanceLabelValue;
-            }
+    return this._isCachedModelOutdated()
+    .then((isOutDated) => {
+      if (!isOutDated && this._cachedEntitiesList) {
+        const clonedEntities = _.cloneDeep(this._cachedEntitiesList);
+        return Promise.resolve(clonedEntities);
+      } else {
+        return queryEngineClient.schemaQuery({
+          path: '/schema/entities',
+          method: 'GET'
+        })
+        .then((res) => {
+          if (res.status !== 200) {
+            Promise.reject(new Error('Failed to retrieve entities from the schema. An error has occurred.'));
+          } else if (res.data) {
+            const entities = _.reduce(res.data, (total, entity) => {
+              entity.instanceLabel = {};
+              entity.id = this._removeNsDecode(entity.id);
+              if (entity.longDescription) {
+                entity.longDescription = this._removeNsDecode(entity.longDescription);
+              }
+              if (entity.label) {
+                entity.label = entity.label.substring(0, entity.label.lastIndexOf('@'));
+              }
+              if (entity.instanceLabelType) {
+                entity.instanceLabel.type = entity.instanceLabelType;
+              }
+              if (entity.instanceLabelValue) {
+                entity.instanceLabel.value = entity.instanceLabelValue;
+              }
 
-            total.push(entity);
-            return total;
-          }, []);
-          this._cachedEntitiesList = entities;
-          return _.cloneDeep(entities);
-        }
-        Promise.reject(new Error('Failed to retrieve entities from the schema. No data retrieved.'));
-      })
-      .catch(notify.error);
-    }
+              total.push(entity);
+              return total;
+            }, []);
+            this._cachedEntitiesList = entities;
+            return _.cloneDeep(entities);
+          }
+          Promise.reject(new Error('Failed to retrieve entities from the schema. No data retrieved.'));
+        })
+        .catch(notify.error);
+      }
+    });
   };
 
   /*
    * Returns an entity by id.
    */
   OntologyClient.prototype.getEntityById = function (entityId) {
-    if (!this._isCachedModelOutdated() && this._cachedEntitiesMap[entityId]) {
-      const clonedEntity = _.cloneDeep(this._cachedEntitiesMap[entityId]);
-      return Promise.resolve(clonedEntity);
-    } else {
-      return this.getEntities()
-      .then((entities) => {
-        const entity = _.find(entities, (entity) => { return entity.id === entityId; });
-        if (entity) {
-          this._cachedEntitiesMap[entity.id] = entity;
-        }
-        return entity;
-      });
-    }
+    return this._isCachedModelOutdated()
+    .then((isOutDated) => {
+      if (!isOutDated && this._cachedEntitiesMap[entityId]) {
+        const clonedEntity = _.cloneDeep(this._cachedEntitiesMap[entityId]);
+        return Promise.resolve(clonedEntity);
+      } else {
+        return this.getEntities()
+        .then((entities) => {
+          const entity = _.find(entities, (entity) => { return entity.id === entityId; });
+          if (entity) {
+            this._cachedEntitiesMap[entity.id] = entity;
+          }
+          return entity;
+        });
+      }
+    });
   };
 
   /*

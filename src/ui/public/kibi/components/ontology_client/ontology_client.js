@@ -12,7 +12,6 @@ uiModules
 
   const schemaMaxAge = 10000; // 10 seconds
   let schemaVersion;
-  let schemaLastCheck;
 
   function OntologyClient() {
     this._cachedEntityRanges = {};
@@ -433,27 +432,22 @@ uiModules
   /*
    * Check if the underlying ontology schema has been updated.
    */
-  OntologyClient.prototype._isCachedModelOutdated = function () {
-    if (!schemaLastCheck || (new Date().getTime() - schemaLastCheck) > schemaMaxAge) {
-      return queryEngineClient.schemaQuery({
-        path: '/schema/getSchemaVersion',
-        method: 'GET'
-      })
-      .then((res) => {
-        schemaLastCheck = new Date().getTime();
-        if (res.data && res.data.version !== schemaVersion) {
-          schemaVersion = res.data.version;
-          this.clearCache();
-          return true;
-        } else {
-          return false;
-        }
-      })
-      .catch(notify.error);
-    } else {
-      return Promise.resolve(false);
-    }
-  };
+  OntologyClient.prototype._isCachedModelOutdated = _.throttle(function () {
+    return queryEngineClient.schemaQuery({
+      path: '/schema/getSchemaVersion',
+      method: 'GET'
+    })
+    .then((res) => {
+      if (res.data && res.data.version !== schemaVersion) {
+        schemaVersion = res.data.version;
+        this.clearCache();
+        return true;
+      } else {
+        return false;
+      }
+    })
+    .catch(notify.error);
+  }, schemaMaxAge);
 
   /**
    * Clears all the cached objects.

@@ -8,7 +8,7 @@ marked.setOptions({
 });
 
 uiModules.get('kibana')
-  .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
+  .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kibiVersion) {
 
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
@@ -34,7 +34,7 @@ uiModules.get('kibana')
 
       constructor() {
         this._queryParams = {
-          my_app_version: kbnVersion
+          my_app_version: kibiVersion // kibi: we use our version
         };
 
         this._loadCatalogue = null;

@@ -559,7 +559,6 @@
       "name": "connection_string",
       "label": "Connection string",
       "required": true,
-      "help": true,
       "multivalued": false,
       "encrypted": false,
       "inputType": "text",

@@ -156,8 +156,8 @@ function startServer(self, fulfill, reject) {
 
             self.server.log(['gremlin', 'info'], 'Starting the Siren Gremlin Server');
             self.gremlinServer = childProcess.spawn('java', args);
-            self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin', 'error'], ('' + data).trim()));
-            self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin', 'info'], ('' + data).trim()));
+            self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin stderr stream', 'error'], ('' + data).trim()));
+            self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin stdout stream', 'info'], ('' + data).trim()));
             self.gremlinServer.on('error', (err) => reject);
 
             const maxCounter = 20;
@@ -230,7 +230,7 @@ function isJavaVersionOk(self) {
       const err = self._checkJavaVersionString(data);
       if (err) {
         reject(new Error(err));
-      } else {
+      } else if (self.javaCheck.isOk) {
         fulfill(true);
       }
     });
@@ -254,7 +254,7 @@ GremlinServerHandler.prototype._isAnotherGremlinRunning = function () {
 
 const javaNumberRegex = /(\d+?)\.(\d+?)\.(\d+?)(?:_(\d+))?/;
 GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
-  if (!this.javaCheck.checked) {
+  if (!this.javaCheck.checked || (this.javaCheck.checked && !this.javaCheck.isOk)) {
     let err;
     const versionLine = _.find(string.toString().split(os.EOL), (line) => {
       if (line.indexOf(' version ') !== -1) {
@@ -276,7 +276,6 @@ GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
       }
     } else {
       this.javaCheck.isOk = false;
-      err = 'An error occurred while checking the installed Java version';
     }
     this.javaCheck.checked = true;
     return err;

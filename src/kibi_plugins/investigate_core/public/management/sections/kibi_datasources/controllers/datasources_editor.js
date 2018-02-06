@@ -121,6 +121,30 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };
 
+  $scope.isDeleteValid = function () {
+    return !$scope.isNew && $scope.datasource && $scope.datasource.datasourceType === 'sql_jdbc_new';
+  };
+
+  $scope.deleteObject = function () {
+    const id = $scope.datasource.title;
+    // ask user to delete it as well
+    const confirmModalOptions = {
+      confirmButtonText: 'Delete the datasource',
+      onConfirm: () => {
+        jdbcDatasources.delete(id).then(() => {
+          notify.info(`Datasource ${id} successfully deleted`);
+          kbnUrl.change('management/siren/datasources');
+        }).catch(err => {
+          notify.error(err);
+        });
+      }
+    };
+    confirmModal(
+      `Are you sure you want to delete the datasource ${id}?`,
+      confirmModalOptions
+    );
+  };
+
   $scope.saveObject = function () {
     if (datasource.datasourceType === 'sql_jdbc_new') {
       const d = jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource);
@@ -310,7 +334,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   };
 
   // expose some methods to the navbar buttons
-  [ 'isValid', 'newObject', 'saveObject' ]
+  [ 'isValid', 'newObject', 'saveObject', 'isDeleteValid', 'deleteObject' ]
   .forEach(name => {
     $element.data(name, $scope[name]);
   });

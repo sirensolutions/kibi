@@ -147,8 +147,8 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
     testId: 'open'
   };
 })
-// kibi: added by kibi for virtual indices tab
-// register the open button
+// kibi: added by kibi for virtual indices and datasources tab
+// register the delete button
 .register(function ($location, $document) {
   return {
     appName: 'management-subnav',
@@ -174,7 +174,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       return `Delete ${_getDisplayName($location)}`;
     },
     hideButton() {
-      return _hideButton($location.path(), 'virtualindices');
+      return _hideButton($location.path(), 'datasources', 'virtualindices');
     },
     testId: 'delete'
   };

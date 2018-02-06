@@ -311,9 +311,9 @@ export class NoResults extends VislibError {
 export class NoAccessToFieldStats extends KbnError {
   constructor(message) {
     if (message) {
-      super(`No access for field_stats. ${message}`);
+      super(`field_stats request forbidden: ${message}`);
     } else {
-      super(`No access for field_stats.`);
+      super(`field_stats request forbidden.`);
     }
   }
 }

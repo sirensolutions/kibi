@@ -98,7 +98,7 @@ uiModules.get('apps/management')
       // kibi: added
       } else if (err instanceof NoAccessToFieldStats) {
         return {
-          error: 'You have no permissions to fetch field stats for this index pattern'
+          error: 'You have no permission to fetch field stats for this index pattern.'
         };
       }
       // kibi: end

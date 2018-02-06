@@ -72,7 +72,7 @@ uiModules
         notify.info(`Advanced settings for the ${$scope.relation.directLabel} relation successfuly updated`);
         kbnUrl.change('/management/siren/indexesandrelations/' + $routeParams.entity + '/relations');
       })
-      .catch(err => notify.error(err));
+      .catch(notify.error);
     };
   });
 });

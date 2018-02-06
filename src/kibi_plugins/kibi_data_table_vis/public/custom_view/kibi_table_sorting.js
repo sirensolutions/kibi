@@ -11,7 +11,8 @@ uiModules
     scope: {
       columns: '=',
       columnAliases: '=',
-      sorting: '='
+      sorting: '=',
+      searchSource: '=?'
     },
     template: template,
     link: function ($scope, $el, attrs) {
@@ -34,11 +35,14 @@ uiModules
           }
         ];
 
+        $scope.indexPattern = $scope.searchSource.get('index');
         _.each($scope.columns, (column, i) => {
-          $scope.sortingColumns.push({
-            value: column,
-            label: $scope.columnAliases[i] || column // alias or real name when aliases not used
-          });
+          if ($scope.indexPattern.fields.byName[column] && $scope.indexPattern.fields.byName[column].sortable) {
+            $scope.sortingColumns.push({
+              value: column,
+              label: $scope.columnAliases[i] || column // alias or real name when aliases not used
+            });
+          }
         });
       }
       populateSortingColumns();

@@ -77,6 +77,39 @@ describe('Investigate Gremlin Server', function () {
     expect(javaCheck.checked).to.be(true);
   });
 
+  it('should pass the Java 8 (Oracle) check - multiple strings with options', async function () {
+    const javaVersion = [
+      'Picked up _JAVA_OPTIONS: -Djava.io.tmpdir=/home/user/tmp'  + JSON.stringify(os.EOL),
+      'java version "1.8.0_25"' + JSON.stringify(os.EOL),
+      'Java(TM) SE Runtime Environment (build 1.8.0_25-b17)' + JSON.stringify(os.EOL),
+      'Java HotSpot(TM) 64-Bit Server VM (build 25.25-b02, mixed mode)'
+    ];
+
+    let ret = gremlin._checkJavaVersionString(javaVersion[0]);
+    let javaCheck = gremlin._getJavaCheck();
+    expect(ret).to.be(undefined);
+    expect(javaCheck.isOk).to.be(false);
+    expect(javaCheck.checked).to.be(true);
+
+    ret = gremlin._checkJavaVersionString(javaVersion[1]);
+    javaCheck = gremlin._getJavaCheck();
+    expect(ret).to.be(undefined);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
+
+    ret = gremlin._checkJavaVersionString(javaVersion[2]);
+    javaCheck = gremlin._getJavaCheck();
+    expect(ret).to.be(null);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
+
+    ret = gremlin._checkJavaVersionString(javaVersion[3]);
+    javaCheck = gremlin._getJavaCheck();
+    expect(ret).to.be(null);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
+  });
+
   it('should pass the Java 8 (OpenJDK) check - single string', async function () {
     const javaVersion =
         'openjdk version "1.8.0_25"' + JSON.stringify(os.EOL)
@@ -144,9 +177,9 @@ describe('Investigate Gremlin Server', function () {
     expect(javaCheck.checked).to.be(true);
     expect(ret).to.be('Java version is lower than the requested 1.8. The Siren Gremlin Server needs Java 8 to run');
     ret = gremlin._checkJavaVersionString(javaVersion[1]);
-    expect(ret).to.be(null);
+    expect(ret).to.be(undefined);
     ret = gremlin._checkJavaVersionString(javaVersion[2]);
-    expect(ret).to.be(null);
+    expect(ret).to.be(undefined);
   });
 
   it('should not pass the Java 8 check - java not installed', async function () {
@@ -156,7 +189,7 @@ describe('Investigate Gremlin Server', function () {
     const javaCheck = gremlin._getJavaCheck();
     expect(javaCheck.isOk).to.be(false);
     expect(javaCheck.checked).to.be(true);
-    expect(ret).to.be('An error occurred while checking the installed Java version');
+    expect(ret).to.be(undefined);
   });
 
   it('should pass the _isJavaVersionCompatible check with both Java 8 and 9', async function () {

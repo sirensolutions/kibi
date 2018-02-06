@@ -124,10 +124,12 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   $scope.saveObject = function () {
     if (datasource.datasourceType === 'sql_jdbc_new') {
       const d = jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource);
-      return jdbcDatasources.save(d).then(() => {
+      return jdbcDatasources.save(d)
+      .then(() => {
         notify.info('Datasource ' + d._id + ' successfully saved');
         kbnUrl.change('management/siren/datasources/' + d._id);
-      });
+      })
+      .catch(notify.error);
     }
 
     if (kibiWarnings.datasource_encryption_warning) {

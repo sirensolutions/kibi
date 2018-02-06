@@ -185,6 +185,16 @@ export class SavedObjectLoader {
             result.hits.push(jdbcDatasourceTranslate.jdbcDatasourceToSavedDatasource(datasource));
           });
           return result;
+        }).catch(err => {
+          if (err.status === 403 && err.data && err.data.error && err.data.error.type === 'security_exception') {
+            // ignore access error
+            // user will simply not see the JDBC datasources if s/he has no access
+            return result;
+          } else if (err.data && err.data.error) {
+            throw new Error('Access to JDBC datasources forbidden.' + JSON.stringify(err.data.error));
+          } else {
+            throw new Error('Access to JDBC datasources forbidden.' + JSON.stringify(err));
+          }
         });
       }
 

@@ -66,49 +66,50 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
       "driverClassName": "com.dremio.jdbc.Driver",
       "defaultURL": "jdbc:dremio:direct={{host}}:{{port}}{{databasename}}",
       "defaultPort": 31010,
-      "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.dremio.com/drivers/dremio-jdbc-driver.html\">Dremio JDBC documentation</a> for further information"
+      "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"https://docs.dremio.com/drivers/dremio-jdbc-driver.html\">Dremio JDBC documentation</a> for further information."
     },
     "MySQL": {
       "driverClassName": "com.mysql.jdbc.Driver" ,
-      "defaultURL": "jdbc:mysql://{{username}}{{host}}:{{port}}{{databasename}}",
+      "defaultURL": "jdbc:mysql://{{host}}:{{port}}{{databasename}}?useLegacyDatetimeCode=false",
       "defaultPort": 3306,
-      "disclaimer": "This is a suggested connection string, your setup may vary and may require the addition of, for example, <a href=\"https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-configuration-properties.html\">UseLegacyDatetime</a>"
+      "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference.html\">MySQL Connector/J documentation</a> for further information."
     },
     "PostgreSQL": {
       "driverClassName": "org.postgresql.Driver",
-      "defaultURL": "jdbc:postgresql://{{username}}{{host}}:{{port}}{{databasename}}",
-      "defaultPort": 5342,
-      "disclaimer": "This is a suggested connection string, see the <a href=\"https://jdbc.postgresql.org/documentation/80/connect.html\">PostgreSQL JDBC documentation</a> for further information."
+      "defaultURL": "jdbc:postgresql://{{host}}:{{port}}{{databasename}}",
+      "defaultPort": 5432,
+      "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"https://jdbc.postgresql.org/documentation/94/connect.html\">PostgreSQL JDBC documentation</a> for further information."
     },
-    "SQLserver 2017": {
+    "SQL Server 2017": {
       "driverClassName": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
-      "defaultURL": "jdbc:sqlserver://{{host}}:{{port}}{{username}}{{databasename}}",
+      "defaultURL": "jdbc:sqlserver://{{host}}:{{port}}{{databasename}}",
       "defaultPort": 1433,
-      "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url\">SQL server JDBC documentation</a> for further information."
+      "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url\">SQL Server JDBC documentation</a> for further information."
     },
-    "Sybase ASE 15.7+" : {
+    "SAP ASE 15.7" : {
       "driverClassName": "net.sourceforge.jtds.jdbc.Driver",
       "defaultURL": "jdbc:jtds:sybase://{{host}}:{{port}}{{databasename}}",
       "defaultPort": 5000,
-      "disclaimer": "This is a suggested connection string, see the <a href=\"http://razorsql.com/docs/help_sybase.html\">Sybase JDBC documentation</a> for further information."
+      "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"http://jtds.sourceforge.net/faq.html#urlFormat\">jTDS documentation</a> for further information." +
+                    " If your setup is using the jConnect JDBC Driver, see the <a target=\"_blank\" href=\"https://wiki.scn.sap.com/wiki/display/SYBCON/jConnect+Driver+Overview\">jConnect documentation</a> for further information."
     },
-    "Oracle 12a+": {
+    "Oracle Database 12c": {
       "driverClassName": "oracle.jdbc.OracleDriver",
-      "defaultURL": "jdbc:oracle:thin:@{{host}}:{{port}}",
+      "defaultURL": "jdbc:oracle:thin:@//{{host}}:{{port}}{{databasename}}",
       "defaultPort": 1521,
-      "disclaimer": "This is a suggested connection string, see the <a href=\"https://docs.oracle.com/javase/tutorial/jdbc/basics/connecting.html#db_connection_url\">Oracle JDBC documentation</a> for further information."
+      "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"https://docs.oracle.com/cd/E11882_01/java.112/e16548/urls.htm#JJDBC08200\">Oracle JDBC documentation</a> for further information."
     },
-    "Spark SQL 2.2+":  {
-      "driverClassName": "com.simba.spark.jdbc4.Driver",
-      "defaultURL": "jdbc:spark://{{host}}:{{port}}{{databasename}}",
-      "defaultPort": 10002,
-      "disclaimer": "This is a suggested connection string, see the <a href=\"https://spark.apache.org/docs/latest/sql-programming-guide.html#running-the-thrift-jdbcodbc-server\">Spark SQL JDBC documentation</a> for further information."
+    "Spark SQL 2.2":  {
+      "driverClassName": "com.simba.spark.jdbc41.Driver",
+      "defaultURL": "jdbc:spark://{{host}}:{{port}}{{databasename}};UseNativeQuery=1",
+      "defaultPort": 10000,
+      "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"https://www.simba.com/products/Spark/doc/JDBC_InstallGuide/content/jdbc/sp/using/connectionurl.htm\">Simba Spark JDBC documentation</a> for further information."
     },
     "Presto": {
       "driverClassName": "com.facebook.presto.jdbc.PrestoDriver",
       "defaultURL":"jdbc:presto://{{host}}:{{port}}{{databasename}}",
       "defaultPort": 8080,
-      "disclaimer": "This is a suggested connection string, see the <a href=\"https://prestodb.io/docs/current/installation/jdbc.html\">Presto JDBC documentation</a> for further information."
+      "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"https://prestodb.io/docs/current/installation/jdbc.html\">Presto JDBC documentation</a> for further information."
     },
   };
 
@@ -123,10 +124,12 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   $scope.saveObject = function () {
     if (datasource.datasourceType === 'sql_jdbc_new') {
       const d = jdbcDatasourceTranslate.savedDatasourceToJdbcDatasource(datasource);
-      return jdbcDatasources.save(d).then(() => {
+      return jdbcDatasources.save(d)
+      .then(() => {
         notify.info('Datasource ' + d._id + ' successfully saved');
         kbnUrl.change('management/siren/datasources/' + d._id);
-      });
+      })
+      .catch(notify.error);
     }
 
     if (kibiWarnings.datasource_encryption_warning) {
@@ -180,24 +183,14 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   */
   function _populateConnectionString(databaseParams) {
     if(datasource.datasourceType === 'sql_jdbc_new' && databaseParams.databaseType) {
-      // if the user hasn't entered a custom title or it is one of the default databaseTypes
-      // Update it with the new default.
-      if (!datasource.title) {
-        datasource.title = databaseParams.databaseName;
-      } else if (datasource.title !== databaseParams.databaseName) {
-        datasource.title = databaseParams.databaseName;
-      }
-
       if($scope.isNew) {
-        const userName = databaseParams.username || '';
-        const password = databaseParams.password || '';
         const databaseName = databaseParams.databaseName || '';
         const defaultPort = datasourceDefaults[databaseParams.databaseType].defaultPort || '';
-      // Pull out the default driver class names
+        // Pull out the default driver class names
         const defaultDriverClassNames = map(datasourceDefaults, defaultObject => defaultObject.driverClassName);
 
-      // if there is no drivername (or the drivername is one of the defaults)
-      // Update it with the new default. If it is custom-entered by the user, leave it there
+        // if there is no drivername (or the drivername is one of the defaults)
+        // Update it with the new default. If it is custom-entered by the user, leave it there
         if (!datasource.datasourceParams.drivername) {
           datasource.datasourceParams.drivername = datasourceDefaults[databaseParams.databaseType].driverClassName;
         } else if (defaultDriverClassNames.indexOf(datasource.datasourceParams.drivername) !== -1) {
@@ -208,22 +201,16 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
         let url = datasourceDefaults[databaseParams.databaseType].defaultURL;
 
         if (url) {
-        // SQL Server 2017 adds username/password as query parameters
-          const usernameString = (databaseParams.databaseType === 'SQLserver 2017')
-        ? `;username=${userName};password=${password}`
-        : `${userName}:${password}@`;
-
-        // SQL Server and Dremio add the database as query params
+          // SQL Server and Dremio add the database as query params
           let databaseString;
-          if (databaseParams.databaseType === 'SQLserver 2017') {
-            databaseString = `;database=${databaseName}`;
+          if (databaseParams.databaseType === 'SQL Server 2017') {
+            databaseString = `;databaseName=${databaseName}`;
           } else if (databaseParams.databaseType === 'Dremio') {
             databaseString = `;schema=${databaseName}`;
           } else {
             databaseString = `/${databaseName}`;
           }
 
-          url = url.replace(/{{username}}/, (userName && password) ? usernameString : '');
           url = url.replace(/{{port}}/, (defaultPort) ? defaultPort : '');
           url = url.replace(/{{host}}/, 'localhost');
           url = url.replace(/{{databasename}}/, (databaseName) ? databaseString : '');
@@ -282,15 +269,11 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
 
   $scope.$watchGroup([
     'databaseParams.databaseType',
-    'databaseParams.databaseName',
-    'datasource.datasourceParams.username',
-    'datasource.datasourceParams.password'
-  ], function ([ databaseType, databaseName, username, password ]) {
+    'databaseParams.databaseName'
+  ], function ([ databaseType, databaseName ]) {
     _populateConnectionString({
       databaseType,
-      databaseName,
-      username,
-      password
+      databaseName
     });
   });
 
@@ -300,7 +283,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
       title: 'JDBC datasource configuration successful',
       confirmButtonText: 'Yes, take me there',
       cancelButtonText: 'No, will do later',
-      onConfirm: () => kbnUrl.change('/management/siren/virtualindexes/'),
+      onConfirm: () => kbnUrl.change('/management/siren/virtualindices/'),
       onCancel: () => {}
     };
 

@@ -15,8 +15,6 @@ function _getDisplayName($location) {
       return 'Query';
     case 'datasources':
       return 'Datasource';
-    case 'relations':
-      return 'Relations';
     case 'virtualindexes':
       return 'Virtual Index';
   }
@@ -47,8 +45,6 @@ function _getMethod($document, $location, name) {
   switch (sectionName) {
     case 'templates':
       return angular.element($document.find('#templates_editor')).data(name);
-    case 'relations':
-      return angular.element($document.find('#relations')).data(name);
     case 'queries':
       return angular.element($document.find('#queries_editor')).data(name);
     case 'datasources':
@@ -121,7 +117,7 @@ NavBarExtensionsRegistryProvider.register(function ($document, $location) {
       return !isValid();
     },
     hideButton() {
-      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'relations', 'virtualindexes');
+      return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'virtualindexes');
     },
     testId: 'save'
   };

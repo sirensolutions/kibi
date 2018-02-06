@@ -13,7 +13,7 @@ import './create_eid';
 import 'angular-ui-tree';
 
 uiRoutes
-.when('/management/siren/indexesandrelations/:entityId', {
+.when('/management/siren/indexesandrelations/:entityId/:tab?', {
   template: template,
   resolve: {
     selectedEntity: function ($route, courier, Promise, createNotifier, kbnUrl, ontologyClient) {
@@ -42,6 +42,9 @@ uiRoutes
           return courier.redirectWhenMissing('/management/siren/indexesandrelations')(error);
         }
       });
+    },
+    activeTab: function ($route) {
+      return $route.current.params.tab;
     }
   }
 });

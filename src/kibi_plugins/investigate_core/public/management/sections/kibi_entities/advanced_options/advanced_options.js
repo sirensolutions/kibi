@@ -51,7 +51,7 @@ uiModules
 
     // cancel button
     $scope.cancel = function () {
-      kbnUrl.change('/management/siren/indexesandrelations/' + $routeParams.entity);
+      kbnUrl.change('/management/siren/indexesandrelations/' + $routeParams.entity + '/relations');
     };
 
     // save button
@@ -68,8 +68,11 @@ uiModules
 
       ontologyClient.insertRelations([$scope.relation, $scope.inverseRelation])
       .then(() => {
-        kbnUrl.change('/management/siren/indexesandrelations/' + $routeParams.entity);
-      });
+        $scope.relation.joinType = $scope.relation.joinType ? $scope.relation.joinType : null;
+        notify.info(`Advanced settings for the ${$scope.relation.directLabel} relation successfuly updated`);
+        kbnUrl.change('/management/siren/indexesandrelations/' + $routeParams.entity + '/relations');
+      })
+      .catch(notify.error);
     };
   });
 });

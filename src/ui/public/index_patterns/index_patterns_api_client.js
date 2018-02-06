@@ -2,7 +2,7 @@ import { resolve as resolveUrl, format as formatUrl } from 'url';
 
 import { pick, mapValues } from 'lodash';
 
-import { IndexPatternMissingIndices } from 'ui/errors';
+import { IndexPatternMissingIndices, NoAccessToFieldStats } from 'ui/errors';
 import { Notifier } from 'ui/notify';
 
 export function createIndexPatternsApiClient($http, basePath) {
@@ -39,6 +39,11 @@ export function createIndexPatternsApiClient($http, basePath) {
       if (resp.status === 404 && respBody.code === 'no_matching_indices') {
         throw new IndexPatternMissingIndices(respBody.message);
       }
+      // kibi: added
+      if (resp.status === 403 && resp.statusText === 'Forbidden' && resp.data.message.indexOf('indices:data/read/field_caps') !== -1) {
+        throw new NoAccessToFieldStats(resp.data.message);
+      }
+      // kibi: end
 
       const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
       err.status = resp.status;

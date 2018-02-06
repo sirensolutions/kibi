@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { IndexPatternMissingIndices } from 'ui/errors';
+import { IndexPatternMissingIndices, NoAccessToFieldStats } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
 // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
@@ -95,8 +95,13 @@ uiModules.get('apps/management')
         return {
           error: 'Unable to fetch mapping. Do you have indices matching the pattern?'
         };
+      // kibi: added
+      } else if (err instanceof NoAccessToFieldStats) {
+        return {
+          error: 'You have no permission to fetch field stats for this index pattern.'
+        };
       }
-
+      // kibi: end
       throw err;
     })
     .finally(() => {

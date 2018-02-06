@@ -302,3 +302,19 @@ export class NoResults extends VislibError {
     super('No results found');
   }
 }
+
+// kibi: errors added by us
+/**
+ * Siren added Errors
+ */
+
+export class NoAccessToFieldStats extends KbnError {
+  constructor(message) {
+    if (message) {
+      super(`field_stats request forbidden: ${message}`);
+    } else {
+      super(`field_stats request forbidden.`);
+    }
+  }
+}
+// kibi: end

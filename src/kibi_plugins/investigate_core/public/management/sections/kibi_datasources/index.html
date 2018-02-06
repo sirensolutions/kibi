@@ -3,32 +3,32 @@
 
     <div class="container">
 
-      <div class="header" ng-if="isNew === true">
+      <div class="header" ng-if="isNew">
         <h2 class="title">Connect to an external datasource</h2>
       </div>
       <div class="header" ng-if="!isNew">
         <h2 class="title"><i class="fa fa-database"/> {{ datasource.title }}</h2>
       </div>
-      <p ng-if="isNew === true">
+      <p ng-if="isNew">
         Here you can configure two types of external datasource, JDBC and REST.
       </p>
-      <h3 ng-if="isNew === true">JDBC datasources</h3>
+      <h3 ng-if="isNew">JDBC datasources</h3>
       <p ng-if="isNew === true">
         JDBC data sources define the configuration of connections to external databases; they are stored in the cluster
         and are visible to all the Siren Investigate instances with access to it.
       </p>
-      <p ng-if="isNew === true">
+      <p ng-if="isNew">
         Once configured, use the <a href='#/management/siren/virtualindices'>Virtual indices</a> management section to
         map individual database tables to virtual indices.
       </p>
-      <p ng-if="isNew === true">
+      <p ng-if="isNew">
         <strong>
         Please note that when encryption is enabled only the password field will be encrypted, so it is
         recommended to avoid putting credentials directly in the URL parameter.
         </strong>
       </p>
-      <h3 ng-if="isNew === true">REST datasources</h3>
-      <p ng-if="isNew === true">
+      <h3 ng-if="isNew">REST datasources</h3>
+      <p ng-if="isNew">
         Configure a REST datasource to invoke a REST service; the typical use is to display results in
         in a Query Viewer visualization.
       </p>
@@ -37,7 +37,7 @@
 
         <form ng-if="datasource" name="objectForm" novalidate>
 
-          <div class="form-group" ng-if="isNew === true">
+          <div class="form-group" ng-if="isNew">
             <label>Type</label>
             <select name="datasource-type"
                     ng-model="datasource.datasourceType"
@@ -52,7 +52,7 @@
             </select>
           </div>
 
-          <div class="connection_helper form-group" ng-if="isNew === true && datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
+          <div class="connection_helper form-group" ng-if="isNew && datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
             <ng-form>
               <div class="form-group">
                 <label>Database Type</label>
@@ -82,12 +82,12 @@
             </ng-form>
           </div>
 
-          <ng-form name="idForm" ng-if="isNew === true">
+          <ng-form name="idForm" ng-if="isNew">
             <div class="form-group" ng-if="datasource.datasourceType">
               <label ng-if="datasource.datasourceType !== 'sql_jdbc_new'">Datasource name</label>
               <label ng-if="datasource.datasourceType === 'sql_jdbc_new'">Datasource name</label>
-              <span ng-if="idForm['dsid'].$error.required" class="invalid">This field is required</span>
-              <input type="text" name="dsid" ng-model="datasource.title" class="form-control span9" required/>
+              <span ng-if="idForm['datasourceid'].$error.required" class="invalid">This field is required</span>
+              <input type="text" name="datasourceid" ng-model="datasource.title" class="form-control span9" required/>
               <saved-object-save-as-check-box
                 saved-object="datasource"
                 ng-if="datasource.datasourceType && datasource.datasourceType !== 'sql_jdbc_new'"/>
@@ -111,13 +111,13 @@
             <ng-form name="innerForm" novalidate>
               <div class="form-group">
                 <label>{{param.label}}</label>
-                <span ng-if="param.inputType == 'list'">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
-                <span ng-if="param.inputType == 'number' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
-                <span ng-if="param.inputType == 'text' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
-                <span ng-if="param.inputType == 'checkbox' && !param.required">(Optional. Default={{param.defaultValue === false ? 'false' : 'true'}})</span>
-                <span ng-if="param.inputType == 'password' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
-                <span ng-if="param.inputType == 'select' && param.multivalued && !param.required">(Optional. Default={{param.defaultValues ||'undefined'}})</span>
-                <span ng-if="param.inputType == 'select' && !param.multivalued && !param.required">(Optional. Default={{param.defaultValue ||'undefined'}})</span>
+                <span ng-if="param.inputType === 'list'">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType === 'number' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType === 'text' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType === 'checkbox' && !param.required">(Optional. Default={{param.defaultValue === false ? 'false' : 'true'}})</span>
+                <span ng-if="param.inputType === 'password' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType === 'select' && param.multivalued && !param.required">(Optional. Default={{param.defaultValues ||'undefined'}})</span>
+                <span ng-if="param.inputType === 'select' && !param.multivalued && !param.required">(Optional. Default={{param.defaultValue ||'undefined'}})</span>
 
                 <!-- kibi-validate messages -->
                 <span ng-if="innerForm[param.name].$error.required" class="invalid">This field is required</span>
@@ -153,7 +153,7 @@
                 </div>
 
                 <input
-                  ng-if="param.inputType == 'number'"
+                  ng-if="param.inputType === 'number'"
                   name="{{param.name}}"
                   type="number"
                   ng-required="{{param.required}}"
@@ -163,7 +163,7 @@
                   class="form-control span9"/>
 
                 <input
-                  ng-if="param.inputType == 'text'"
+                  ng-if="param.inputType === 'text'"
                   name="{{param.name}}"
                   type="text"
                   ng-required="{{param.required}}"
@@ -173,7 +173,7 @@
                   class="form-control span9"/>
 
                 <input
-                  ng-if="param.inputType == 'checkbox'"
+                  ng-if="param.inputType === 'checkbox'"
                   name="{{param.name}}"
                   type="checkbox"
                   ng-required="{{param.required}}"
@@ -182,7 +182,7 @@
                   class="form-control span9"/>
 
                 <input
-                  ng-if="param.inputType == 'password'"
+                  ng-if="param.inputType === 'password'"
                   name="{{param.name}}"
                   type="password"
                   ng-required="{{param.required}}"
@@ -191,12 +191,12 @@
                   placeholder="{{param.placeholder}}"
                   class="form-control span9"/>
 
-                <p ng-if="param.inputType == 'password' && datasource.datasourceType === 'sql_jdbc_new' && !isNew">
+                <p ng-if="param.inputType === 'password' && datasource.datasourceType === 'sql_jdbc_new' && !isNew">
                   If not set, the current password will not be changed.
                 </p>
 
                 <select
-                  ng-if="param.inputType == 'select' && param.multivalued"
+                  ng-if="param.inputType === 'select' && param.multivalued"
                   name="{{param.name}}"
                   ng-required="{{param.required}}"
                   multiple
@@ -210,7 +210,7 @@
                 </select>
 
                 <select
-                  ng-if="param.inputType == 'select' && !param.multivalued"
+                  ng-if="param.inputType === 'select' && !param.multivalued"
                   name="{{param.name}}"
                   ng-required="{{ param.required }}"
                   ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
@@ -229,7 +229,7 @@
             <p ng-bind-html="datasource.datasourceParams.disclaimer"></p>
            </div>
 
-          <div class="form-group" ng-if="isNew !== true && datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
+          <div class="form-group" ng-if="!isNew && datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
             <div id="button-wrapper" title="{{(objectForm.$dirty) ? 'Please save your settings before testing the connection' : ''}}">
               <button id="test-connection-button" ng-click="testConnection()" ng-disabled="objectForm.$dirty" class="btn btn-success">Test connection</button>
             </div>

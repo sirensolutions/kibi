@@ -226,19 +226,26 @@ export function QuickDashboardProvider(
   }
 
   function makeVisSteps(args) {
-    return visMaker.analysisStepsCount(args.indexPattern, args.fields);
+    const { userSpecs } = args;
+
+    return visMaker.analysisStepsCount(args.indexPattern, args.fields, {
+      addSirenMultiChart: userSpecs.addSirenMultiChart
+    });
   }
 
   function makeVisualizations(args, progress) {
-    const { indexPattern, fields } = args;
+    const { indexPattern, fields, userSpecs } = args;
 
-    return visMaker.makeSavedVisualizations(indexPattern, fields, { progress })
-      .then(savedVises => {
-        // Fields that couldn't be converted are retained, must be filtered out manually
-        args.savedVises = _.filter(savedVises);
+    return visMaker.makeSavedVisualizations(indexPattern, fields, {
+      addSirenMultiChart: userSpecs.addSirenMultiChart,
+      progress
+    })
+    .then(savedVises => {
+      // Fields that couldn't be converted are retained, must be filtered out manually
+      args.savedVises = _.filter(savedVises);
 
-        return args;
-      });
+      return args;
+    });
   }
 
   function saveVisualizations(args) {

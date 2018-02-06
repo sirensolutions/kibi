@@ -43,7 +43,8 @@ export function QuickDashModalsProvider(Private) {
           title,
           newSavedSearchTitle: '',
           savedSearchAction: 'new',
-          storeTimeWithDashboard: true
+          storeTimeWithDashboard: true,
+          addSirenMultiChart: false
         },
 
         currSearchTitle,

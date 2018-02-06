@@ -19,10 +19,18 @@
           input-focus="select"
           ng-change="onTitleChange()"/>
       </div>
-      <label>
-        <input type="checkbox" ng-model="result.storeTimeWithDashboard" />
-        Store time with dashboard
-      </label>
+      <div>
+        <label>
+          <input type="checkbox" ng-model="result.storeTimeWithDashboard" />
+          Store time with dashboard
+        </label>
+      </div>
+      <div>
+        <label>
+          <input type="checkbox" ng-model="result.addSirenMultiChart" />
+          Add Multichart visualization
+        </label>
+      </div>
     </div>
 
     <div class="form-group">

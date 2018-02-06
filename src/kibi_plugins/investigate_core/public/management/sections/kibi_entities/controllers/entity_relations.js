@@ -3,7 +3,7 @@ import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import EntityRelationsTemplate from './entity_relations.html';
 import 'plugins/investigate_core/ui/directives/entity_select/entity_select';
-import 'plugins/investigate_core/management/sections/kibi_relations/advanced_options/advanced_options';
+import '../advanced_options/advanced_options';
 
 uiModules.get('apps/management')
 .directive('entityRelations', function (createNotifier, ontologyClient, kbnUrl) {

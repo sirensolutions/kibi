@@ -18,7 +18,7 @@ import { IndexPatternAuthorizationError } from 'ui/errors';
 // src/kibi_plugins/investigate_core/public/management/sections/kibi_entities/controllers/entities.js
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
-    $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal, ontologyClient, kbnUrl) {
+  $scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle, confirmModal, ontologyClient, kbnUrl, $timeout) {
 
   const notify = createNotifier();
   const $state = $scope.state = new AppState();
@@ -154,4 +154,10 @@ uiModules.get('apps/management')
     $scope.indexPattern.timeFieldName = field.name;
     return $scope.indexPattern.save();
   };
+
+  $timeout(() => {
+    if ($route.current.locals.activeTab) {
+      $scope.changeTab(_.find($scope.editSections, 'title', $route.current.locals.activeTab));
+    }
+  });
 });

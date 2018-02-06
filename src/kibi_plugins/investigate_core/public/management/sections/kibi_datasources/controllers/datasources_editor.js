@@ -122,7 +122,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   };
 
   $scope.isDeleteValid = function () {
-    return $scope.datasource && $scope.datasource.title && $scope.datasource.datasourceType;
+    return !$scope.isNew && $scope.datasource && $scope.datasource.datasourceType === 'sql_jdbc_new';
   };
 
   $scope.deleteObject = function () {
@@ -133,13 +133,14 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
       onConfirm: () => {
         jdbcDatasources.delete(id).then(() => {
           notify.info(`Datasource ${id} successfully deleted`);
+          kbnUrl.change('management/siren/datasources');
         }).catch(err => {
           notify.error(err);
         });
       }
     };
     confirmModal(
-      `Are you sure you want to delete the datasource [${id}].`,
+      `Are you sure you want to delete the datasource ${id}?`,
       confirmModalOptions
     );
   };

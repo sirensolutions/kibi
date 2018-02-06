@@ -6,7 +6,8 @@ const NoConnections = require('elasticsearch').errors.NoConnections;
 
 import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
-import kibanaVersion from '../kibana_version';
+import kibiVersion from '../kibi_version';
+import { pkg } from '../../../../utils';
 import { esTestConfig } from '../../../../test_utils/es';
 import * as determineEnabledScriptingLangsNS from '../determine_enabled_scripting_langs';
 import { determineEnabledScriptingLangs } from '../determine_enabled_scripting_langs';
@@ -29,10 +30,10 @@ describe('plugins/elasticsearch', () => {
     }
 
     beforeEach(() => {
-      const COMPATIBLE_VERSION_NUMBER = '5.0.0';
+      const COMPATIBLE_VERSION_NUMBER = pkg.compatible_es_versions[0];
 
       // Stub the Kibana version instead of drawing from package.json.
-      sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
+      sandbox.stub(kibiVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
       sandbox.stub(ensureTypesExistNS, 'ensureTypesExist');
 
       // setup the plugin stub

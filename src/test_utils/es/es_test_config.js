@@ -23,6 +23,10 @@ export const esTestConfig = new class EsTestConfig {
     return '5.x';
   }
 
+  getVersion() {
+    return '5.6.5';
+  }
+
   getPort() {
     return this.getUrlParts().port;
   }

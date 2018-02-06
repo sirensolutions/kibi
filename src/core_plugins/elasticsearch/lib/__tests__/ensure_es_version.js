@@ -3,15 +3,15 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import SetupError from '../setup_error';
-
+import semver from 'semver';
+import { pkg } from '../../../../utils';
 import { esTestConfig } from '../../../../test_utils/es';
 import { ensureEsVersion } from '../ensure_es_version';
 
 describe('plugins/elasticsearch', () => {
   describe('lib/ensure_es_version', () => {
-    const KIBANA_VERSION = '5.1.0';
-    const KIBI_VERSION = '5.1.0'; // kibi: added KIBI_VERSION to all tests
-
+    const compatibleEsVersions = pkg.compatible_es_versions;
+    const KIBI_VERSION = compatibleEsVersions[0]; // kibi: added KIBI_VERSION to all tests
     let server;
 
     beforeEach(function () {
@@ -64,93 +64,62 @@ describe('plugins/elasticsearch', () => {
       cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
     }
 
+    function getPatchVersionOneLowerThanLowestCompatibleVersion(compatibleVersions) {
+      const firstVersionMajor = semver.major(compatibleVersions[0]);
+      const firstVersionMinor = semver.minor(compatibleVersions[0]);
+      const firstVersionPatch = semver.patch(compatibleVersions[0]);
+      return `${firstVersionMajor}.${firstVersionMinor}.${firstVersionPatch - 1}`;
+    }
+
     it('returns true with single a node that matches', async () => {
-      setNodes('5.1.0');
-      const result = await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
+      setNodes(compatibleEsVersions[0]);
+      const result = await ensureEsVersion(server, KIBI_VERSION);
       expect(result).to.be(true);
     });
 
     it('returns true with multiple nodes that satisfy', async () => {
-      setNodes('5.1.0', '5.2.0', '5.1.1-Beta1');
-      const result = await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
+      setNodes(...compatibleEsVersions);
+      const result = await ensureEsVersion(server, KIBI_VERSION);
       expect(result).to.be(true);
     });
 
     it('throws an error with a single node that is out of date', async () => {
       // 5.0.0 ES is too old to work with a 5.1.0 version of Kibana.
-      setNodes('5.1.0', '5.2.0', '5.0.0');
+
+      const compatibleEsVersionsClone = compatibleEsVersions.slice(0);
+      compatibleEsVersionsClone.unshift(getPatchVersionOneLowerThanLowestCompatibleVersion(compatibleEsVersionsClone));
+      setNodes(...compatibleEsVersionsClone);
       try {
-        await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
+        await ensureEsVersion(server, KIBI_VERSION);
       } catch (e) {
         expect(e).to.be.a(SetupError);
       }
     });
 
     it('fails if that single node is a client node', async () => {
-      setNodes(
-        '5.1.0',
-        '5.2.0',
-        { version: '5.0.0', attributes: { client: 'true' } },
-      );
+      const cloneOfCompatibleNodes = compatibleEsVersions.slice(0);
+      const lastVersion = cloneOfCompatibleNodes[cloneOfCompatibleNodes.length - 1];
+      cloneOfCompatibleNodes[cloneOfCompatibleNodes.length - 1] = {
+        version: lastVersion,
+        attributes: { client: true }
+      };
+
+      setNodes(...cloneOfCompatibleNodes);
       try {
-        await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
+        await ensureEsVersion(server, KIBI_VERSION);
       } catch (e) {
         expect(e).to.be.a(SetupError);
       }
     });
 
-    it('warns if a node is only off by a patch version', async () => {
-      setNodes('5.1.1');
-      await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
-      sinon.assert.callCount(server.log, 2);
-      expect(server.log.getCall(0).args[0]).to.contain('debug');
-      expect(server.log.getCall(1).args[0]).to.contain('warning');
-    });
-
-    it('warns if a node is off by a patch version and without http publish address', async () => {
-      setNodeWithoutHTTP('5.1.1');
-      await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
-      sinon.assert.callCount(server.log, 2);
-      expect(server.log.getCall(0).args[0]).to.contain('debug');
-      expect(server.log.getCall(1).args[0]).to.contain('warning');
-    });
-
     it('errors if a node incompatible and without http publish address', async () => {
-      setNodeWithoutHTTP('6.1.1');
+      setNodeWithoutHTTP(getPatchVersionOneLowerThanLowestCompatibleVersion(compatibleEsVersions));
       try {
-        await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
+        await ensureEsVersion(server, KIBI_VERSION);
       } catch (e) {
         expect(e.message).to.contain('incompatible nodes');
         expect(e).to.be.a(Error);
       }
-    });
-
-    it('only warns once per node list', async () => {
-      setNodes('5.1.1');
-
-      await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
-      sinon.assert.callCount(server.log, 2);
-      expect(server.log.getCall(0).args[0]).to.contain('debug');
-      expect(server.log.getCall(1).args[0]).to.contain('warning');
-
-      await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
-      sinon.assert.callCount(server.log, 3);
-      expect(server.log.getCall(2).args[0]).to.contain('debug');
-    });
-
-    it('warns again if the node list changes', async () => {
-      setNodes('5.1.1');
-
-      await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
-      sinon.assert.callCount(server.log, 2);
-      expect(server.log.getCall(0).args[0]).to.contain('debug');
-      expect(server.log.getCall(1).args[0]).to.contain('warning');
-
-      setNodes('5.1.2');
-      await ensureEsVersion(server, KIBANA_VERSION, KIBI_VERSION);
-      sinon.assert.callCount(server.log, 4);
-      expect(server.log.getCall(2).args[0]).to.contain('debug');
-      expect(server.log.getCall(3).args[0]).to.contain('warning');
     });
   });
 });

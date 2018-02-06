@@ -26,7 +26,7 @@ export function createEsTestCluster(options = {}) {
     name,
     log = console.log,
     port = esTestConfig.getPort(),
-    branch = esTestConfig.getBranch(),
+    version = esTestConfig.getVersion(),
   } = options;
 
   if (!name) {
@@ -57,7 +57,7 @@ export function createEsTestCluster(options = {}) {
     }
 
     async start() {
-      const download = isDownloadNeeded(branch);
+      const download = isDownloadNeeded(version);
 
       if (cluster) {
         throw new Error(`
@@ -70,7 +70,7 @@ export function createEsTestCluster(options = {}) {
         fresh: download,
         purge: !download,
         directory: ESVM_DIR,
-        branch,
+        version,
         config: {
           http: {
             port,
@@ -99,7 +99,7 @@ export function createEsTestCluster(options = {}) {
       if (download) {
         // track the branches that have successfully downloaded
         // after cluster.install() resolves
-        BRANCHES_DOWNLOADED.push(branch);
+        BRANCHES_DOWNLOADED.push(version);
       }
 
       await cluster.start();

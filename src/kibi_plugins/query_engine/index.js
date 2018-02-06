@@ -208,19 +208,19 @@ module.exports = function (kibana) {
             url: config.get('investigate_core.gremlin_server.url')
           };
           queryEngine.schema(req.payload.path, opts)
-            .then(reply)
-            .catch(errors.StatusCodeError, function (err) {
-              reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
-            })
-            .catch(errors.RequestError, function (err) {
-              if (err.error.code === 'ETIMEDOUT') {
-                reply(Boom.create(408, err.message, ''));
-              } else if (err.error.code === 'ECONNREFUSED') {
-                reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}` });
-              } else {
-                reply({ error: `An error occurred while sending a schema query: ${err.message}` });
-              }
-            });
+          .then(reply)
+          .catch(errors.StatusCodeError, function (err) {
+            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
+          })
+          .catch(errors.RequestError, function (err) {
+            if (err.error.code === 'ETIMEDOUT') {
+              reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}` });
+            } else {
+              reply({ error: `An error occurred while sending a schema query: ${err.message}` });
+            }
+          });
         }
       });
 
@@ -248,8 +248,7 @@ module.exports = function (kibana) {
               const newProperties = doc.attributes;
               newProperties.model = returnedModel;
               return savedObjectsClient.update(ontologyDocType, ontologyDocId, newProperties, {}, req)
-              .then(reply)
-              .catch(reply);
+              .then(reply);
             })
             .catch((err) => {
               if (err.statusCode === 404) {
@@ -265,7 +264,7 @@ module.exports = function (kibana) {
                   .catch(reply);
                 }
               } else {
-                reply(err);
+                throw err;
               }
             });
           })

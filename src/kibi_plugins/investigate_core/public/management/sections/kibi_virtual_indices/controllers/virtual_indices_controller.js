@@ -7,11 +7,11 @@ import template from 'plugins/investigate_core/management/sections/kibi_virtual_
 import { CONFIRM_BUTTON, CANCEL_BUTTON } from 'ui_framework/components/modal/confirm_modal';
 
 uiRoutes
-.when('/management/siren/virtualindexes', {
+.when('/management/siren/virtualindices', {
   template,
   reloadOnSearch: false
 })
-.when('/management/siren/virtualindexes/:id?', {
+.when('/management/siren/virtualindices/:id?', {
   template,
   reloadOnSearch: false,
   resolve: {
@@ -23,7 +23,7 @@ uiRoutes
       })
       .catch(err => {
         courier.redirectWhenMissing({
-          virtualIndex: '/management/siren/virtualindexes'
+          virtualIndex: '/management/siren/virtualindices'
         });
       });
     }
@@ -32,9 +32,11 @@ uiRoutes
 
 function controller($scope, $route, jdbcDatasources, createNotifier, es, confirmModal, $element, kbnUrl) {
 
+  $scope.isNew = true;
   if ($route.current.locals.virtualIndex) {
     $scope.virtualIndex = $route.current.locals.virtualIndex._source;
     $scope.virtualIndex.id = $route.current.locals.virtualIndex._id;
+    $scope.isNew = false;
   }
 
   const notify = createNotifier({
@@ -49,7 +51,7 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
     return $scope.virtualIndex && $scope.virtualIndex.id;
   };
 
-  const fetchVirtualIndexes = function () {
+  const fetchVirtualIndices = function () {
     jdbcDatasources.listVirtualIndices().then(virtualIndexPatterns => {
       $scope.virtualIndexPatterns = virtualIndexPatterns;
     });
@@ -92,7 +94,7 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
 
 
   $scope.newObject = function () {
-    kbnUrl.change('/management/siren/virtualindexes/', {});
+    kbnUrl.change('/management/siren/virtualindices/', {});
   };
 
   $scope.jdbcDatasources = [];
@@ -105,20 +107,19 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
 
   $scope.deleteObject = function () {
     const id = $scope.virtualIndex.id;
-    // found a physical index lets ask user to delete it as well
     const confirmModalOptions = {
       confirmButtonText: 'Delete the virtual index',
       onConfirm: () => {
         jdbcDatasources.deleteVirtualIndex(id).then(() => {
-          notify.info(`Virtual index pattern ${id} successfully deleted`);
-          fetchVirtualIndexes();
+          notify.info(`Virtual index ${id} successfully deleted`);
+          kbnUrl.change('/management/siren/virtualindices/', {});
         }).catch(err => {
           notify.error(err);
         });
       }
     };
     confirmModal(
-      `Are you sure you want to delete the virtual index [${id}].`,
+      `Are you sure you want to delete the virtual index ${id}?`,
       confirmModalOptions
     );
   };

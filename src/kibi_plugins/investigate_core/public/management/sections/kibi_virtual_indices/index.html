@@ -2,14 +2,15 @@
   <div ng-controller="VirtualIndicesController" class="app-container virtual_indices_editor kibi-config-section" id="virtual_indices_editor">
 
     <div class="container">
-      <h2>Add new virtual index</h2>
+      <h2 ng-if="isNew">Add new virtual index</h2>
+      <h2 ng-if="!isNew"><i class="fa fa-th-list"/> {{ virtualIndex.id }}</h2>
 
-      <p class="kuiText kuiVerticalRhythm">
+      <p ng-if="isNew" class="kuiText kuiVerticalRhythm">
         Once you have <a href='#/management/siren/datasources'>configured a JDBC datasource</a>,
-        here you can map a remote table or view to a local index name. This is called a "virtual index". 
+        here you can map a remote table or view to a local index name. This is called a "virtual index".
       </p>
-      <p class="kuiText kuiVerticalRhythm">
-        Virtual Indexes can be added and linked in the Siren datamodel exactly like native ones 
+      <p ng-if="isNew" class="kuiText kuiVerticalRhythm">
+        Virtual indices can be added and linked in the Siren data model exactly like native ones
         in the <a href='#/management/siren/indexesandrelations'>Indexes and Relations</a> screen.
       </p>
       <div class="kuiVerticalRhythm">
@@ -20,7 +21,7 @@
               <label
                 class="kuiLabel kuiVerticalRhythmSmall"
               >
-                JDBC datasource name
+                Datasource name
               </label>
 
               <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
@@ -40,7 +41,7 @@
               <label
                 class="kuiLabel kuiVerticalRhythmSmall"
               >
-                Resource name (table name)
+                Resource name (table or view)
               </label>
 
               <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
@@ -57,9 +58,7 @@
 
             <!-- Pick name -->
             <div class="kuiVerticalRhythm">
-              <label
-                class="kuiLabel kuiVerticalRhythmSmall"
-              >
+              <label class="kuiLabel kuiVerticalRhythmSmall">
                 Virtual index name
               </label>
 

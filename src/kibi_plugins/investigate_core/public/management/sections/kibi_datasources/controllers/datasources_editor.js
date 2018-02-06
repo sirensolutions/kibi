@@ -281,7 +281,7 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
       title: 'JDBC datasource configuration successful',
       confirmButtonText: 'Yes, take me there',
       cancelButtonText: 'No, will do later',
-      onConfirm: () => kbnUrl.change('/management/siren/virtualindexes/'),
+      onConfirm: () => kbnUrl.change('/management/siren/virtualindices/'),
       onCancel: () => {}
     };
 

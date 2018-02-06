@@ -3,46 +3,51 @@
 
     <div class="container">
 
-      <div class="header">
+      <div class="header" ng-if="isNew === true">
         <h2 class="title">Connect to an external datasource</h2>
       </div>
-      <p>
-        Here, you can connect to two types of external datasource, JDBC and REST:
+      <div class="header" ng-if="!isNew">
+        <h2 class="title"><i class="fa fa-database"/> {{ datasource.title }}</h2>
+      </div>
+      <p ng-if="isNew === true">
+        Here you can configure two types of external datasource, JDBC and REST.
       </p>
-      <h3>JDBC datasources:</h3>
-      <p>
-        JDBC data sources are connections to external databases. Once configured, use the <a href='#/management/siren/virtualindexes'>
-          Virtual Indexes
-        </a> section to map individual database tables to local virtual indexes.
+      <h3 ng-if="isNew === true">JDBC datasources</h3>
+      <p ng-if="isNew === true">
+        JDBC data sources define the configuration of connections to external databases; they are stored in the cluster
+        and are visible to all the Siren Investigate instances with access to it.
       </p>
-      <h3>REST datasources:</h3>
-      <p>
-        Configure a REST datasource to invoke a remote REST service. Typical use is via a REST query which is then visualized in a template
-        displayed using a query viewer dashboard component.
+      <p ng-if="isNew === true">
+        Once configured, use the <a href='#/management/siren/virtualindices'>Virtual indices</a> management section to
+        map individual database tables to virtual indices.
+      </p>
+      <p ng-if="isNew === true">
+        <strong>
+        Please note that when encryption is enabled only the password field will be encrypted, so it is
+        recommended to avoid putting credentials directly in the URL parameter.
+        </strong>
+      </p>
+      <h3 ng-if="isNew === true">REST datasources</h3>
+      <p ng-if="isNew === true">
+        Configure a REST datasource to invoke a remote REST service. The typical use is to display the results of
+        a call in a query viewer visualization.
       </p>
 
       <div class="config-section">
 
         <form ng-if="datasource" name="objectForm" novalidate>
 
-          <div class="form-group">
+          <div class="form-group" ng-if="isNew === true">
             <label>Type</label>
             <select name="datasource-type"
                     ng-model="datasource.datasourceType"
                     class="form-control span9"
                     required>
-              <optgroup label="Use to create Virtual Indexes">
+              <optgroup label="Use to create virtual indices">
                 <option value="sql_jdbc_new">JDBC</option>
               </optgroup>
               <optgroup label="Use to populate templates (deprecated)">
                 <option value="rest">REST</option>
-                <option value="tinkerpop3">TinkerPop3</option>
-                <option value="sparql_http">Sparql over http</option>
-                <option value="sparql_jdbc">Sparql JDBC</option>
-                <option value="sqlite">SQLite</option>
-                <option value="mysql">MySQL</option>
-                <option value="postgresql">PostgreSQL</option>
-                <option value="sql_jdbc">SQL JDBC (old)</option>
               </optgroup>
             </select>
           </div>
@@ -54,7 +59,7 @@
                 <select
                   name="Database Type"
                   ng-model="databaseParams.databaseType"
-                  class="form-control span9"  
+                  class="form-control span9"
                 >
                 <option
                   ng-repeat="option in possibleDatabaseTypes"
@@ -76,13 +81,22 @@
               </div>
             </ng-form>
           </div>
-          
-          <div class="form-group" ng-if="datasource.datasourceType">
-            <label ng-if="datasource.datasourceType !== 'sql_jdbc_new'">Title</label>
-            <label ng-if="datasource.datasourceType === 'sql_jdbc_new'">Local Siren Alias</label>
-            <input type="text" ng-model="datasource.title" class="form-control span9" required/>
-            <saved-object-save-as-check-box saved-object="datasource"></saved-object-save-as-check-box>
-          </div>
+
+          <ng-form name="idForm" ng-if="isNew === true">
+            <div class="form-group" ng-if="datasource.datasourceType">
+              <label ng-if="datasource.datasourceType !== 'sql_jdbc_new'">Datasource name</label>
+              <label ng-if="datasource.datasourceType === 'sql_jdbc_new'">Datasource name</label>
+              <span ng-if="idForm['dsid'].$error.required" class="invalid">This field is required</span>
+              <input type="text" name="dsid" ng-model="datasource.title" class="form-control span9" required/>
+              <saved-object-save-as-check-box
+                saved-object="datasource"
+                ng-if="datasource.datasourceType && datasource.datasourceType !== 'sql_jdbc_new'"/>
+              <p ng-if="datasource.datasourceType === 'sql_jdbc_new'">
+                Datasources are visible to all the Siren Investigate instances in the cluster, so it is recommended to
+                choose a meaningful name (e.g. mysql-sales).
+              </p>
+            </div>
+          </ng-form>
 
           <div class="form-group" ng-if="datasource.datasourceType && datasource.datasourceType !== 'sql_jdbc_new'">
             <label>Description</label>
@@ -177,6 +191,10 @@
                   placeholder="{{param.placeholder}}"
                   class="form-control span9"/>
 
+                <p ng-if="param.inputType == 'password' && datasource.datasourceType === 'sql_jdbc_new' && !isNew">
+                  If not set, the current password will not be changed.
+                </p>
+
                 <select
                   ng-if="param.inputType == 'select' && param.multivalued"
                   name="{{param.name}}"
@@ -206,13 +224,13 @@
               </div>
             </ng-form>
           </div>
-          
+
           <div ng-if="datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new' && datasource.datasourceParams.connection_string && datasource.datasourceParams.disclaimer">
             <p ng-bind-html="datasource.datasourceParams.disclaimer"></p>
            </div>
 
           <div class="form-group" ng-if="isNew !== true && datasource.datasourceType && datasource.datasourceType === 'sql_jdbc_new'">
-            <div id="button-wrapper" title="{{(objectForm.$dirty) ? 'Please save your settings before testing the connection' : ''}}"> 
+            <div id="button-wrapper" title="{{(objectForm.$dirty) ? 'Please save your settings before testing the connection' : ''}}">
               <button id="test-connection-button" ng-click="testConnection()" ng-disabled="objectForm.$dirty" class="btn btn-success">Test connection</button>
             </div>
           </div>

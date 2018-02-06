@@ -8,15 +8,16 @@
   </h1>
 
   <p class="kuiText kuiVerticalRhythm">
-    Here you can add a new "index pattern" of data to be used by Siren. 
-    An index pattern is one or more indexes matched by a wildcard 
-    (but to start, just put the name of an index that you know exists).
+    Here you can define a new "index pattern" to visualize data stored in an index.
   </p>
   <p class="kuiText kuiVerticalRhythm">
-    You can add either native Elasticsearch indexes or Virtual (JDBC) indexes 
-    which you have previously created in the <a href="#/management/siren/virtualindexes">
-      Virtual Index management
-    </a>  screen.
+    To display data from a single index, write the name of the index in the textbox below;
+    to display data from multiple indices with a common prefix write the common prefix followed by a * (e.g. logstash-*).
+  </p>
+  <p class="kuiText kuiVerticalRhythm">
+    You can match either native Elasticsearch indices or Virtual indices which were previously created
+    in the <a href="#/management/siren/virtualindices">Virtual indices</a> management screen; wildcard matching
+    is not supported for virtual indices.
   </p>
 
   <div class="kuiVerticalRhythm">
@@ -29,7 +30,7 @@
     >
       <!-- Index pattern input -->
       <div class="kuiVerticalRhythm">
-        <span>Index pattern</span>
+        <label class="kuiLabel">Index pattern</label>
 
         <small>
           <a

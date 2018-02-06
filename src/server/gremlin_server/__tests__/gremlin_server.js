@@ -4,7 +4,7 @@ const os = require('os');
 
 let gremlin;
 
-describe('Kibi Gremlin Server', function () {
+describe('Investigate Gremlin Server', function () {
 
   beforeEach(function () {
     const server = {
@@ -25,6 +25,21 @@ describe('Kibi Gremlin Server', function () {
   it('should pass the Java 8 (Oracle) check - single string', async function () {
     const javaVersion =
         'java version "1.8.0_25"' + JSON.stringify(os.EOL)
+      + 'Java(TM) SE Runtime Environment (build 1.8.0_25-b17)' + JSON.stringify(os.EOL)
+      + 'Java HotSpot(TM) 64-Bit Server VM (build 25.25-b02, mixed mode)';
+
+    const ret = gremlin._checkJavaVersionString(javaVersion);
+    const javaCheck = gremlin._getJavaCheck();
+
+    expect(ret).to.be(undefined);
+    expect(javaCheck.isOk).to.be(true);
+    expect(javaCheck.checked).to.be(true);
+  });
+
+  it('should pass the Java 8 (Oracle) check - single string with options', async function () {
+    const javaVersion =
+      'Picked up _JAVA_OPTIONS: -Djava.io.tmpdir=/home/user/tmp'  + JSON.stringify(os.EOL)
+      + 'java version "1.8.0_25"' + JSON.stringify(os.EOL)
       + 'Java(TM) SE Runtime Environment (build 1.8.0_25-b17)' + JSON.stringify(os.EOL)
       + 'Java HotSpot(TM) 64-Bit Server VM (build 25.25-b02, mixed mode)';
 

@@ -252,13 +252,22 @@ GremlinServerHandler.prototype._isAnotherGremlinRunning = function () {
   });
 };
 
+const javaNumberRegex = /(\d+?)\.(\d+?)\.(\d+?)(?:_(\d+))?/;
 GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
   if (!this.javaCheck.checked) {
     let err;
-    const versionLine = string.toString().split(os.EOL)[0];
-    //[string, major, minor, patch, update, ...]
-    const matches = versionLine.match(/(\d+?)\.(\d+?)\.(\d+?)(?:_(\d+))?/);
-    if (matches) {
+    const versionLine = _.find(string.toString().split(os.EOL), (line) => {
+      if (line.indexOf(' version ') !== -1) {
+        const numbers = line.match(javaNumberRegex);
+        if (numbers && numbers.length >= 2) {
+          return true;
+        }
+      }
+      return false;
+    });
+    if (versionLine && versionLine.match(javaNumberRegex)) {
+      //[string, major, minor, patch, update, ...]
+      const matches = versionLine.match(javaNumberRegex);
       if (matches.length >= 2 && this._isJavaVersionCompatible(matches[2])) {
         this.javaCheck.isOk = true;
       } else {

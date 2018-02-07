@@ -134,18 +134,17 @@ uiModules
 
     function replaceKibiStateInLastDashboardURL() {
       // 1 get the _k from current url
-      // 1 get last url for /dashboards
-      // 2 parse it
-      // 2 parse it
-      // 3 replace the _k for the last dash with the one from current discover
-      // 4 use chrome.trackSubUrlForApp  to preserve the change before navigating to dashboard app
       const _k = $location.search()._k;
 
+      // 2 get last url for /dashboards
       const lastDashboardURL = chrome.getNavLinks().filter(link => link.id === 'kibana:dashboard')[0];
       const { parsedUrl: parsedDashboardsURL, parsedHash: parsedDashboardsHash } = decodeKibanaUrl(lastDashboardURL.lastSubUrl);
+
+      // 3 get the hash part and modify the _k
       const hash = _.clone(parsedDashboardsHash);
       hash.query._k = _k;
 
+      // 4 reconstruct the new url
       const modifiedLastDashboardURL = format({
         pathname: '/app/kibana',
         query: parsedDashboardsURL.query,
@@ -155,7 +154,7 @@ uiModules
           hash: null
         })
       });
-
+      // 5 store it in the local storage for dashboard app
       chrome.trackSubUrlForApp('kibana:dashboard', modifiedLastDashboardURL);
     }
 

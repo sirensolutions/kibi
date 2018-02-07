@@ -62,8 +62,8 @@ function KibiMetaProvider(createNotifier, kibiState, es, config, $rootScope) {
         // here check if we are leaving dashboard app to another app where the
         // dashboard panel nor the relational buttons is visible
         // it is safe to flush all queues
-        if (current.$$route.originalPath.indexOf('/dashboard') === 0 &&
-            next.$$route.originalPath.indexOf('/dashboard') !== 0) {
+        if (current && current.$$route.originalPath.indexOf('/dashboard') === 0 &&
+            next && next.$$route.originalPath.indexOf('/dashboard') !== 0) {
           this.flushQueues();
           if (console.debug) { // eslint-disable-line no-console
             console.debug('Flushing kibiMeta queues'); // eslint-disable-line no-console

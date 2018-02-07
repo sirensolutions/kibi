@@ -10,7 +10,6 @@ import { management } from 'ui/management';
 import 'ui/kbn_top_nav';
 
 // kibi: imports
-import _ from 'lodash';
 import moment from 'moment-timezone';
 import loadDefault from 'ui/index_patterns/route_setup/load_default';
 import chrome from 'ui/chrome';
@@ -34,7 +33,7 @@ loadDefault({
 uiModules
 .get('apps/management')
 .directive('kbnManagementApp', function (Private, $location, timefilter,
-  buildNum, buildSha, buildTimestamp, kibiVersion, kibiKibanaAnnouncement,
+  buildNum, buildSha, buildTimestamp, kibiVersion, kbnVersion,
   $injector, config, Promise, elasticsearchPlugins, elasticsearchVersion) {
   return {
     restrict: 'E',
@@ -76,16 +75,25 @@ uiModules
 
       // kibi: about section improved
       management.getSection('kibana').info = {
-        kibiVersion: kibiVersion,
-        kibiKibanaAnnouncement: kibiKibanaAnnouncement,
-        buildTimestamp: buildTimestamp,
-        federateVersion: federateVersion,
-        kibiIndex: kibiIndex,
+        kibiVersion,
+        kbnVersion,
+        knownPluginsKibanaDocsLink: 'https://www.elastic.co/guide/en/kibana/current/known-plugins.html#known-plugins',
+        federateVersion,
+        kibiIndex,
         esVersion: elasticsearchVersion.get(),
-        build: buildNum,
-        sha: buildSha,
         currentYear: new Date().getFullYear()
       };
+
+      // kibi: if version ends in -SNAPSHOT, show the build timestamp and commit SHA
+      const snapshotMode = (kibiVersion.match(/.*-SNAPSHOT$/));
+      if(snapshotMode) {
+        management.getSection('kibana').info = Object.assign({}, management.getSection('kibana').info, {
+          buildTimestamp,
+          build: buildNum,
+          sha: buildSha,
+          snapshot: snapshotMode
+        });
+      }
 
       function verifyLicense() {
         if (!$injector.has('sirenLicenseService')) {
@@ -99,24 +107,24 @@ uiModules
         if (license && license.installed) {
           moment.tz.setDefault(config.get('dateFormat:tz'));
           const dateFormat = config.get('dateFormat');
-          _.assign(management.getSection('kibana').info, {
-            license: 'Installed (' + moment(license.content['valid-date'], 'YYYY/MM/DD').format(dateFormat) + ')',
-            licenseDescription: license.content.description,
+          let licenseDescription;
+          const licenseCompany = `Licensed ${(license.content.company) ? 'to ' + license.content.company : ''}`;
+          const licenseExpiry = ` exp: ${moment(license.content['valid-date'], 'YYYY/MM/DD').format(dateFormat)}`;
+
+          management.getSection('kibana').info = Object.assign({}, management.getSection('kibana').info, {
+            licenseCompany,
+            licenseExpiry,
+            licenseDescription: license.content.description || '',
             licenseGraphBrowserEnabled: license.content['graph-browser'],
             licenseIsValid: license.isValid,
-            licenseIsMissing: false,
-            licenseMaxNodes: license.content['max-nodes'],
-            licenseMaxUsers: license.content['max-users']
+            licenseIsMissing: false
           });
         } else {
-          _.assign(management.getSection('kibana').info, {
-            license: 'Not Installed',
+          management.getSection('kibana').info = Object.assign({}, management.getSection('kibana').info, {
+            licenseCompany: 'Install a license',
             licenseDescription: null,
-            licenseGraphBrowserEnabled: false,
             licenseIsValid: false,
             licenseIsMissing: true,
-            licenseMaxNodes: null,
-            licenseMaxUsers: null
           });
         }
       });

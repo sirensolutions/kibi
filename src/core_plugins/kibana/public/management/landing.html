@@ -57,75 +57,64 @@
                   <table class="table table-condensed kbn-settings-about-versions">
                     <tbody>
                       <tr>
-                        <td>Version</td>
+                        <td class="title">Investigate Version</td>
                         <td>{{::section.info.kibiVersion}}</td>
                       </tr>
-                      <tr>
-                        <td>Elasticsearch Version</td>
-                        <td>{{::section.info.esVersion}}</td>
-                      </tr>
                       <tr ng-if="section.info.federateVersion">
-                        <td>Federate Version</td>
-                        <td>{{::section.info.federateVersion}}</td>
+                        <td class="title">Federate Version</td>
+                        <td>{{::section.info.federateVersion}} on ES {{::section.info.esVersion}}</td>
                       </tr>
                       <tr ng-if="section.info.kibiIndex">
-                        <td>Investigate Index</td>
+                        <td class="title">Investigate Metadata Index</td>
                         <td>{{::section.info.kibiIndex}}</td>
                       </tr>
-                      <tr>
-                        <td>Build</td>
+                      <tr ng-if="section.info.snapshot">
+                        <td class="title">Build</td>
                         <td>{{::section.info.build}}</td>
                       </tr>
-
-                      <tr>
-                        <td>Built at</td>
+                      <tr ng-if="section.info.snapshot">
+                        <td class="title">Built at</td>
                         <td>{{::section.info.buildTimestamp}}</td>
                       </tr>
-
-                      <tr>
-                        <td>Commit SHA</td>
+                      <tr ng-if="section.info.snapshot">
+                        <td class="title">Commit SHA</td>
                         <td>{{::section.info.sha | limitTo:7}}</td>
                       </tr>
-
                       <tr>
-                        <td>Compatible with</td>
-                        <td><a href="{{::section.info.kibiKibanaAnnouncement}}">Kibana {{kbnVersion}}</a></td>
+                        <td class="title">Plugin Compatibility with</td>
+                        <td><a href="{{::section.info.knownPluginsKibanaDocsLink}}">Kibana {{::section.info.kbnVersion}}</a></td>
                       </tr>
-
                       <tr
                         ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
                       >
-                        <td>License</td>
-                        <td>{{ ::section.info.license }}</td>
+                        <td class="title">License</td>
+                        <td>
+                          <table class="table table-condensed license-info">
+                            <tbody>
+                              <tr>
+                                <td>
+                                  <a href="#/management/siren/license">{{ ::section.info.licenseCompany }}</a>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>
+                                  <span ng-if="section.info.licenseExpiry">{{::section.info.licenseExpiry}}</span>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>
+                                  <span ng-if="section.info.licenseDescription">{{::section.info.licenseDescription}}</span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
                       </tr>
-
-                      <tr
-                        ng-if="section.info.licenseDescription"
+                     <tr
                         ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
                       >
-                        <td>Description</td>
-                        <td>{{ ::section.info.licenseDescription }}</td>
-                      </tr>
-
-                      <tr
-                        ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
-                      >
-                        <td>Graph Browser</td>
+                        <td class="title">Graph Browser</td>
                         <td>{{ section.info.licenseGraphBrowserEnabled ? 'Enabled' : 'Not Enabled' }}</td>
-                      </tr>
-
-                      <tr
-                        ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
-                      >
-                        <td>License max Elasticsearch Nodes allowed</td>
-                        <td>{{ ::section.info.licenseMaxNodes }}</td>
-                      </tr>
-
-                      <tr
-                        ng-class="{ 'kbn-settings-about-license-invalid': !section.info.licenseIsValid }"
-                      >
-                        <td>License Max Users</td>
-                        <td>{{ ::section.info.licenseMaxUsers }}</td>
                       </tr>
                     </tbody>
                   </table>

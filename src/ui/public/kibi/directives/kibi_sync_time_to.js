@@ -5,10 +5,12 @@ import kibiTemplate from 'ui/kibi/directives/kibi_sync_time_to.html';
 import kibanaTemplate from 'ui/kibi/directives/kibana_sync_time_to.html';
 import { uiModules } from 'ui/modules';
 import { DashboardHelperFactory } from 'ui/kibi/helpers/dashboard_helper';
+import chrome from 'ui/chrome';
+import { parse, format } from 'url';
 
 uiModules
 .get('ui/kibi/kibi_sync_time_to')
-.directive('kibiSyncTimeTo', function (timefilter, $injector, Private, dashboardGroups) {
+.directive('kibiSyncTimeTo', function (timefilter, $injector, Private, dashboardGroups, $location) {
   const hasKibiState = $injector.has('kibiState');
 
   function linkWithKibiState($scope, $el, $attrs) {
@@ -63,8 +65,10 @@ uiModules
           }
         });
         $scope.dashboardGroups =  _.sortBy($scope.dashboardGroups, 'title');
-        virtualGroup.dashboards = _.sortBy(virtualGroup.dashboards, 'title');
-        $scope.dashboardGroups = $scope.dashboardGroups.concat([virtualGroup]);
+        if (virtualGroup.dashboards.length > 0) {
+          virtualGroup.dashboards = _.sortBy(virtualGroup.dashboards, 'title');
+          $scope.dashboardGroups = $scope.dashboardGroups.concat([virtualGroup]);
+        }
       });
     };
 
@@ -113,6 +117,47 @@ uiModules
       });
     };
 
+    function getAppId(pathname) {
+      const pathnameWithoutBasepath = pathname.slice(chrome.getBasePath().length);
+      const match = pathnameWithoutBasepath.match(/^\/app\/([^\/]+)(?:\/|\?|#|$)/);
+      if (match) return match[1];
+    }
+
+    function decodeKibanaUrl(url) {
+      const parsedUrl = parse(url, true);
+      const appId = getAppId(parsedUrl.pathname);
+      const hash = parsedUrl.hash || '';
+      const parsedHash = parse(hash.slice(1), true);
+
+      return { parsedUrl, parsedHash };
+    }
+
+    function replaceKibiStateInLastDashboardURL() {
+      // 1 get the _k from current url
+      const _k = $location.search()._k;
+
+      // 2 get last url for /dashboards
+      const lastDashboardURL = chrome.getNavLinks().filter(link => link.id === 'kibana:dashboard')[0];
+      const { parsedUrl: parsedDashboardsURL, parsedHash: parsedDashboardsHash } = decodeKibanaUrl(lastDashboardURL.lastSubUrl);
+
+      // 3 get the hash part and modify the _k
+      const hash = _.clone(parsedDashboardsHash);
+      hash.query._k = _k;
+
+      // 4 reconstruct the new url
+      const modifiedLastDashboardURL = format({
+        pathname: '/app/kibana',
+        query: parsedDashboardsURL.query,
+        hash: format({
+          pathname: hash.pathname,
+          query: hash.query,
+          hash: null
+        })
+      });
+      // 5 store it in the local storage for dashboard app
+      chrome.trackSubUrlForApp('kibana:dashboard', modifiedLastDashboardURL);
+    }
+
     $scope.syncTimeTo = function () {
       if ($scope.mode) {
         const syncFunctionName = 'apply' + _.capitalize($scope.mode);
@@ -148,6 +193,10 @@ uiModules
       }
 
       kibiState.save();
+      if (!currentDashId) {
+        // here no currentDashId mean we are on discover page
+        replaceKibiStateInLastDashboardURL();
+      }
     };
 
   }

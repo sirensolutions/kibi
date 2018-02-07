@@ -480,20 +480,10 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
             if (cached) {
               return cached.then(pattern => pattern.destroy());
             }
-
-            return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
-            .then(() => Promise
-              .try(() => {
-                const cached = patternCache.get(this.id);
-                if (cached) {
-                  return cached.then(pattern => pattern.destroy());
-                }
-              })
-              .then(() => docSources.get(this).doIndex(body))
-              .then(id => setId(this, id)),
-              _.constant(false) // if the user doesn't overwrite, resolve with false
-            );
           })
+          .then(() => docSources.get(this).doIndex(body))
+          .then(id => setId(this, id)),
+          _.constant(false) // if the user doesn't overwrite, resolve with false
         );
       });
     }

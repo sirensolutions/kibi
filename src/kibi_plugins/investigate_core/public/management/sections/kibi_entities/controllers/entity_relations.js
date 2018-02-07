@@ -26,7 +26,9 @@ uiModules.get('apps/management')
         let sortedRelations = relations;
         if (relations && relations.length && relations[0].domain.field) {
           //sort by id, as it is built with index/field
-          sortedRelations = _.sortBy(relations, 'id');
+          sortedRelations = _.sortBy(relations, function (rel) {
+            return [rel.domain.id, rel.domain.field, rel.range.id, rel.range.field];
+          });
         }
         $scope.relations = sortedRelations;
       });

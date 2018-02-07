@@ -674,7 +674,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     delayExecutionHelper.cancel();
     sirenDashboardChangedOff();
     removeAutorefreshHandler();
-    kibiMeta.flushQueues();
+    kibiMeta.flushRelationalButtonsFromQueue();
   });
 
   $scope.hoverIn = function (button) {

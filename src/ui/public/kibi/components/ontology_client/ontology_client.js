@@ -338,7 +338,7 @@ uiModules
       instanceLabelValue: instanceLabelValue
     };
     if (longDescription) {
-      entity.longDescription = this._encodeUrl(entity.longDescription);
+      entity.longDescription = this._encodeUrl(longDescription);
     }
     return this.insertEncodedEntity(entity);
   };

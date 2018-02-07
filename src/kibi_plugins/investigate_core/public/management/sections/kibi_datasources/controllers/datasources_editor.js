@@ -122,25 +122,32 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
   };
 
   $scope.isDeleteValid = function () {
-    return !$scope.isNew && $scope.datasource && $scope.datasource.datasourceType === 'sql_jdbc_new';
+    return !$scope.isNew && $scope.datasource && (datasource.datasourceType === 'rest' || datasource.datasourceType === 'sql_jdbc_new');
   };
 
   $scope.deleteObject = function () {
-    const id = $scope.datasource.title;
     // ask user to delete it as well
     const confirmModalOptions = {
       confirmButtonText: 'Delete the datasource',
       onConfirm: () => {
-        jdbcDatasources.delete(id).then(() => {
-          notify.info(`Datasource ${id} successfully deleted`);
-          kbnUrl.change('management/siren/datasources');
-        }).catch(err => {
-          notify.error(err);
-        });
+        if (datasource.datasourceType === 'sql_jdbc_new') {
+          const id = $scope.datasource.title;
+          jdbcDatasources.delete(id).then(() => {
+            notify.info(`Datasource ${id} successfully deleted`);
+            kbnUrl.change('management/siren/datasources');
+          }).catch(err => {
+            notify.error(err);
+          });
+        } else {
+          datasource.delete().then(function () {
+            notify.info('Datasource ' + datasource.title + ' successfully deleted');
+            kbnUrl.change('management/siren/datasources');
+          }).catch(notify.error);
+        }
       }
     };
     confirmModal(
-      `Are you sure you want to delete the datasource ${id}?`,
+      `Are you sure you want to delete the datasource ${datasource.title}?`,
       confirmModalOptions
     );
   };

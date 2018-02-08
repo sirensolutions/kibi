@@ -9,12 +9,14 @@ describe('Kibi meta service', function () {
   let es;
   let config;
   let msearchStub;
+  let $rootScope;
 
   beforeEach(ngMock.module('kibana'));
 
   // NOTE: important that we stub config before we inject kibiMeta
   // do not try to merge this beforeEach with next one
-  beforeEach(ngMock.inject(function (_config_) {
+  beforeEach(ngMock.inject(function (_config_, _$rootScope_) {
+    $rootScope = _$rootScope_;
     config = _config_;
     sinon.stub(config, 'get', function (key) {
       if (key === 'siren:countFetchingStrategyDashboards') {
@@ -363,6 +365,98 @@ describe('Kibi meta service', function () {
       });
 
       describe('Flush queues', function () {
+
+        it('should flush only button queue', function () {
+          // manually populate queues
+          kibiMeta.queues = {
+            dashboard: [
+              {
+                definition: { id: 'dash1', query: 'query1' },
+                callback: function () {}
+              }
+            ],
+            button: [
+              {
+                definition: { id: 'button1', query: 'query1', _debug_type: 'button' },
+                callback: function () {},
+
+              }
+            ]
+          };
+
+          kibiMeta.flushRelationalButtonsFromQueue();
+
+          expect(kibiMeta.queues.dashboard.length).to.equal(1);
+          expect(kibiMeta.queues.button.length).to.equal(0);
+        });
+
+
+        it('should flush queues when changing the route from dashboard to another app', function () {
+          // manually populate queues
+          kibiMeta.queues = {
+            dashboard: [
+              {
+                definition: { id: 'dash1', query: 'query1' },
+                callback: function () {}
+              }
+            ],
+            button: [
+              {
+                definition: { id: 'button1', query: 'query1' },
+                callback: function () {}
+              }
+            ]
+          };
+          const current = {
+            $$route: {
+              originalPath: '/dashboard/:id'
+            }
+          };
+          const next = {
+            $$route: {
+              originalPath: '/discover'
+            }
+          };
+
+          $rootScope.$emit('$routeChangeStart', next, current);
+
+          expect(kibiMeta.queues.dashboard.length).to.equal(0);
+          expect(kibiMeta.queues.button.length).to.equal(0);
+        });
+
+        it('should NOT flush queues when changing the route from dashboard to dasboard app', function () {
+          // manually populate queues
+          kibiMeta.queues = {
+            dashboard: [
+              {
+                definition: { id: 'dash1', query: 'query1' },
+                callback: function () {}
+              }
+            ],
+            button: [
+              {
+                definition: { id: 'button1', query: 'query1' },
+                callback: function () {}
+              }
+            ]
+          };
+          const current = {
+            $$route: {
+              originalPath: '/dashboard/:id'
+            }
+          };
+          const next = {
+            $$route: {
+              originalPath: '/dashboard/:id'
+            }
+          };
+
+          $rootScope.$emit('$routeChangeStart', next, current);
+
+          expect(kibiMeta.queues.dashboard.length).to.equal(1);
+          expect(kibiMeta.queues.button.length).to.equal(1);
+        });
+
         it('should not make next request after flushing the queue', function (done) {
           const expectedMeta1 = { hits: { total: 11 } };
           const expectedMeta2 = { hits: { total: 22 } };

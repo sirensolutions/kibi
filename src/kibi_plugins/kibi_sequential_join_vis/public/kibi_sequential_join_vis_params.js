@@ -15,7 +15,7 @@ uiModules
     link: function ($scope) {
 
       const notify = createNotifier({
-        location: 'Kibi Relational filter params'
+        location: 'Siren Relational filter params'
       });
 
       $scope.focused = [];

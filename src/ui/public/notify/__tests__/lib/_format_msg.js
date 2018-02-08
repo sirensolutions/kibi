@@ -20,14 +20,14 @@ describe('formatMsg', function () {
       });
     });
 
-    describe('Kibi Relational filter', function () {
+    describe('Siren Relational filter', function () {
 
       it('should correctly format error with unauthorized in the message', function () {
         const actual = formatMsg({
           message: 'bla bla unauthorized bla bla'
-        }, 'Kibi Relational filter');
+        }, 'Siren Relational filter');
 
-        expect(actual).to.equal('Kibi Relational filter: one or more relations refer to unauthorized data.');
+        expect(actual).to.equal('Siren Relational filter: one or more relations refer to unauthorized data.');
       });
 
       describe('Shield', function () {
@@ -39,9 +39,9 @@ describe('formatMsg', function () {
               },
               status: 403
             }
-          }, 'Kibi Relational filter');
+          }, 'Siren Relational filter');
 
-          const msg = 'Kibi Relational filter: one or more relations refer to unauthorized data.';
+          const msg = 'Siren Relational filter: one or more relations refer to unauthorized data.';
           expect(actual).to.equal(msg);
         });
 
@@ -53,9 +53,9 @@ describe('formatMsg', function () {
               },
               status: 500
             }
-          }, 'Kibi Relational filter');
+          }, 'Siren Relational filter');
 
-          const msg = 'Kibi Relational filter: could not load a Relational filter visualization.';
+          const msg = 'Siren Relational filter: could not load a Relational filter visualization.';
           expect(actual).to.equal(msg);
         });
 
@@ -70,9 +70,9 @@ describe('formatMsg', function () {
               },
               status: 403
             }
-          }, 'Kibi Relational filter');
+          }, 'Siren Relational filter');
 
-          let msg = 'Kibi Relational filter: one or more relations refer to unauthorized data.';
+          let msg = 'Siren Relational filter: one or more relations refer to unauthorized data.';
           expect(actual).to.equal(msg);
 
           actual = formatMsg({
@@ -108,9 +108,9 @@ describe('formatMsg', function () {
               },
               status: 500
             }
-          }, 'Kibi Relational filter');
+          }, 'Siren Relational filter');
 
-          const msg = 'Kibi Relational filter: could not load a Relational filter visualization.';
+          const msg = 'Siren Relational filter: could not load a Relational filter visualization.';
           expect(actual).to.equal(msg);
         });
       });

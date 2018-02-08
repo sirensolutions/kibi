@@ -76,7 +76,7 @@ export function formatMsg(err, from) {
     // Search Guard
     if ((err.body.status === 403 && err.body.error.type === 'security_exception')) {
       switch (from) {
-        case 'Kibi Relational filter':
+        case 'Siren Relational filter':
           rtn = `${from}: ${errors.RELATIONS_ON_UNAUTHORIZED_DATA}`;
           break;
         case 'Visualize':
@@ -90,17 +90,17 @@ export function formatMsg(err, from) {
           }
           break;
       }
-    } else if (err.body.status === 500 && err.body.error.type === 'exception' && from === 'Kibi Relational filter') {
+    } else if (err.body.status === 500 && err.body.error.type === 'exception' && from === 'Siren Relational filter') {
       rtn = `${from}: ${errors.GENERIC_RELATIONAL_FILTER_ERROR}`;
     }
   } else if (err.data) {
     // Shield or Search Guard
     if (contains(Object.keys(err.data), 'error')) {
-      if ((err.data.status === 403 && err.data.error.type === 'security_exception') && from === 'Kibi Relational filter') {
+      if ((err.data.status === 403 && err.data.error.type === 'security_exception') && from === 'Siren Relational filter') {
         rtn = `${from}: ${errors.RELATIONS_ON_UNAUTHORIZED_DATA}`;
       } else if  (err.data.status === 403 && err.data.error.type === 'security_exception' && from === 'Kibi Navbar helper') {
         rtn = `${from}: ${errors.SEARCHES_ON_UNAUTHORIZED_DATA}`;
-      } else if (err.data.status === 500 && err.data.error.type === 'exception' && from === 'Kibi Relational filter') {
+      } else if (err.data.status === 500 && err.data.error.type === 'exception' && from === 'Siren Relational filter') {
         rtn = `${from}: ${errors.GENERIC_RELATIONAL_FILTER_ERROR}`;
       }
     }
@@ -116,7 +116,7 @@ export function formatMsg(err, from) {
         rtn = errors.VISUALIZATIONS_ON_UNAUTHORIZED_DATA;
       } else if (from === 'Enhanced search results') {
         rtn = errors.ENH_VISUALIZATION_ON_UNAUTHORIZED_DATA;
-      } else if (from === 'Kibi Relational filter') {
+      } else if (from === 'Siren Relational filter') {
         rtn = `${from}: ${errors.RELATIONS_ON_UNAUTHORIZED_DATA}`;
       } else if (message.search('indices:data/read/coordinate-msearch') !== -1 && from !== 'Courier Fetch Error') {
         rtn = errors.SEARCHES_ON_UNAUTHORIZED_DATA;

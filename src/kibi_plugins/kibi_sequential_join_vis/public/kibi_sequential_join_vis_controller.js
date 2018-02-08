@@ -24,7 +24,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const edit = onVisualizePage();
 
   const notify = createNotifier({
-    location: 'Kibi Relational filter'
+    location: 'Siren Relational filter'
   });
   const appState = getAppState();
 

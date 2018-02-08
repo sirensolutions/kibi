@@ -303,25 +303,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         }
 
         if (!edit) {
-          let getButtonDefs;
-          const kacConfiguration = chrome.getInjected('kacConfiguration');
-          if (kacConfiguration && kacConfiguration.acl && kacConfiguration.acl.enabled === true) {
-            getButtonDefs = savedDashboards.find().then((dashboards) => {
-              // iterate over the original definitions and remove the ones that depend on missing dashboards
-              return _.filter(originalButtonDefs, (btn) => {
-                // sourceDashboardId is optional
-                if (btn.sourceDashboardId && !_.find(dashboards.hits, 'id', btn.sourceDashboardId)) {
-                  return false;
-                }
-                if (!_.find(dashboards.hits, 'id', btn.targetDashboardId)) {
-                  return false;
-                }
-                return true;
-              });
-            });
-          } else {
-            getButtonDefs = Promise.resolve(originalButtonDefs);
-          }
+          let getButtonDefs = Promise.resolve(originalButtonDefs);
 
           return getButtonDefs.then((buttonDefs) => {
             const dashboardIds = [ currentDashboardId ];

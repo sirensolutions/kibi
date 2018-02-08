@@ -471,17 +471,15 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       // assign data to $scope.buttons once the promises are done
       const updateSourceCount = function (currentDashboardId, relationId) {
         const virtualButton = {
-          id: 'virtual-button',
+          id: this.sourceIndexPatternId + this.targetIndexPatternId + this.sourceField + this.sourceField,
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
           targetField: this.sourceField,
           targetIndexPatternId: this.sourceIndexPatternId,
           targetDashboardId: currentDashboardId,
+          indexRelationId: relationId,
           type: 'INDEX_PATTERN'
         };
-        if (relationId) {
-          virtualButton.indexRelationId = relationId;
-        }
 
         return _addButtonQuery.call(self, [ virtualButton ], this.targetDashboardId)
         .then(results => {

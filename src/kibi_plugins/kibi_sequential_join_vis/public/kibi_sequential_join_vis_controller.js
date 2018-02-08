@@ -340,11 +340,10 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
           sourceIndexPatternId: this.targetIndexPatternId,
           targetField: this.sourceField,
           targetIndexPatternId: this.sourceIndexPatternId,
-          targetDashboardId: currentDashboardId
+          targetDashboardId: currentDashboardId,
+          indexRelationId: relationId
         };
-        if (relationId) {
-          virtualButton.indexRelationId = relationId;
-        }
+
 
         return _addButtonQuery.call(self, [ virtualButton ], this.targetDashboardId)
         .then(results => {

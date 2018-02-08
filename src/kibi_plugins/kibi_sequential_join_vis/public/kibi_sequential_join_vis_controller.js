@@ -40,10 +40,12 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
 
   const buttonMetaCallback = function (button, meta) {
     if (button.forbidden) {
+      button.targetCount = ''; // set to empty string to hide spinner
       button.warning = 'Access to an index referred by this button is forbidden.';
       return;
     }
     if (meta.error) {
+      button.targetCount = ''; // set to empty string to hide spinner
       const error = JSON.stringify(meta.error, null, ' ');
       if (error.match(/ElasticsearchSecurityException/)) {
         button.warning = 'Access to an index referred by this button is forbidden.';
@@ -58,7 +60,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       return;
     }
     button.targetCount = meta.hits.total;
-    button.warning = '';
+    button.warning = ''; // set to empty string to hide any previous warning
     if (isJoinPruned(meta)) {
       button.isPruned = true;
       button.warning = 'Notice: This is a sample of the results because join operation was pruned';
@@ -88,8 +90,12 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
           definition: definition,
           callback: function (error, meta) {
             if (error) {
-              notify.error(error);
+              buttonMetaCallback(result.button, { error });
             }
+            if (meta) {
+              buttonMetaCallback(result.button, meta);
+            }
+
             if (scope && scope.multiSearchData) {
               const queryParts = result.button.query.split('\n');
               const stats = {
@@ -98,15 +104,14 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
                 meta: {
                   label: result.button.label
                 },
-                response: meta,
+                response: meta ? meta : error,
                 query: JSON.parse(queryParts[1])
               };
-              if (isJoinPruned(meta)) {
+              if (meta && isJoinPruned(meta)) {
                 stats.pruned = true;
               }
               $scope.multiSearchData.add(stats);
             }
-            buttonMetaCallback(result.button, meta);
           }
         });
       }

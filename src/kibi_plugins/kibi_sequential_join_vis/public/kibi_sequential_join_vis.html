@@ -9,7 +9,7 @@
     ng-class="button.targetCount == 0 ? 'btn disabled-btn-relational' : 'btn btn-relational'"
     >
       {{button.label}}
-      <span ng-show="button.targetCount !== undefined"> ({{button.targetCount}})</span>
+      <span ng-show="button.targetCount !== undefined && button.targetCount !== ''"> ({{button.targetCount}})</span>
       <span
         class="warning"
         ng-if="!!button.warning"

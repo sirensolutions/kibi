@@ -4,7 +4,7 @@ import { uiModules } from 'ui/modules';
 import { countStrategyValidator } from 'ui/kibi/meta/strategy_validator';
 import { extractHighestTaskTimeoutFromMsearch } from 'ui/kibi/helpers/extract_highest_task_timeout_from_msearch';
 
-function KibiMetaProvider(createNotifier, kibiState, es, config) {
+function KibiMetaProvider(createNotifier, kibiState, es, config, $rootScope) {
 
   const notify = createNotifier({
     location: 'Kibi meta service'
@@ -57,15 +57,41 @@ function KibiMetaProvider(createNotifier, kibiState, es, config) {
       this._validateStrategy(relFilterStrategy);
       this.setStrategy(relFilterStrategy);
       this.relFilterStrategyName = relFilterStrategy.name;
+
+      $rootScope.$on('$routeChangeStart', (event, next, current) => {
+        // here check if we are leaving dashboard app to another app where the
+        // dashboard panel nor the relational buttons is visible
+        // it is safe to flush all queues
+        if (current && current.$$route.originalPath.indexOf('/dashboard') === 0 &&
+            next && next.$$route.originalPath.indexOf('/dashboard') !== 0) {
+          this.flushQueues();
+          if (console.debug) { // eslint-disable-line no-console
+            console.debug('Flushing kibiMeta queues'); // eslint-disable-line no-console
+          }
+        }
+      });
     }
 
     flushCache() {
       this.cache.reset();
     }
 
+    // should be called when leaving from dashboard -> another app
     flushQueues() {
       each(this.queues, (o, key) => {
         this.queues[key] = [];
+      });
+    }
+
+    // should be called when destroying the relational buttons visualisation
+    flushRelationalButtonsFromQueue() {
+      each(this.queues, (o, key) => {
+        for (let i = this.queues[key].length - 1; i >= 0; i--) {
+          const obj = this.queues[key][i];
+          if (obj.definition._debug_type === 'button') {
+            this.queues[key].splice(i, 1);
+          }
+        }
       });
     }
 

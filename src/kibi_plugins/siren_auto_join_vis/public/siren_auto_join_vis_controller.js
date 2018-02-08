@@ -295,10 +295,10 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   const _constructButtons = $scope._constructButtons = function () {
     return ontologyClient.getRelations().then((relations) => {
       return getNewButtons(relations, []).then((newButtons) => {
-        const originalButtonDefs = _.filter(newButtons,
+        const buttonDefs = _.filter(newButtons,
           btn => relationsHelper.validateRelationIdWithRelations(btn.indexRelationId, relations));
 
-        const difference = newButtons.length - originalButtonDefs.length;
+        const difference = newButtons.length - buttonDefs.length;
         if (!edit && difference === 1) {
           notify.warning(difference + ' button refers to a non existing relation');
         } else if (!edit && difference > 1) {
@@ -306,41 +306,19 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         }
 
         if (!edit) {
-          let getButtonDefs;
-          const kacConfiguration = chrome.getInjected('kacConfiguration');
-          if (kacConfiguration && kacConfiguration.acl && kacConfiguration.acl.enabled === true) {
-            getButtonDefs = savedDashboards.find().then((dashboards) => {
-              // iterate over the original definitions and remove the ones that depend on missing dashboards
-              return _.filter(originalButtonDefs, (btn) => {
-                // sourceDashboardId is optional
-                if (btn.sourceDashboardId && !_.find(dashboards.hits, 'id', btn.sourceDashboardId)) {
-                  return false;
-                }
-                if (!_.find(dashboards.hits, 'id', btn.targetDashboardId)) {
-                  return false;
-                }
-                return true;
-              });
-            });
-          } else {
-            getButtonDefs = Promise.resolve(originalButtonDefs);
-          }
+          const dashboardIds = [ currentDashboardId ];
+          _.each(buttonDefs, function (button) {
+            if (!_.contains(dashboardIds, button.targetDashboardId)) {
+              dashboardIds.push(button.targetDashboardId);
+            }
+          });
 
-          return getButtonDefs.then((buttonDefs) => {
-            const dashboardIds = [ currentDashboardId ];
-            _.each(buttonDefs, function (button) {
-              if (!_.contains(dashboardIds, button.targetDashboardId)) {
-                dashboardIds.push(button.targetDashboardId);
-              }
-            });
-
-            return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, false)
-            .then((metas) => {
-              return {
-                metas,
-                buttonDefs
-              };
-            });
+          return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, false)
+          .then((metas) => {
+            return {
+              metas,
+              buttonDefs
+            };
           })
           .then(({ metas, buttonDefs }) => {
             let currentDashboardIndex;
@@ -448,7 +426,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           })
           .catch(notify.error);
         } else {
-          $scope.buttons = sirenSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs, relations);
+          $scope.buttons = sirenSequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations);
         }
       });
     });

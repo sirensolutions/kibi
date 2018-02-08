@@ -469,14 +469,19 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     .then((buttons) => {
       // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
       // assign data to $scope.buttons once the promises are done
-      const updateSourceCount = function (currentDashboardId, callback) {
+      const updateSourceCount = function (currentDashboardId, relationId) {
         const virtualButton = {
+          id: 'virtual-button',
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
           targetField: this.sourceField,
           targetIndexPatternId: this.sourceIndexPatternId,
-          targetDashboardId: currentDashboardId
+          targetDashboardId: currentDashboardId,
+          type: 'INDEX_PATTERN'
         };
+        if (relationId) {
+          virtualButton.indexRelationId = relationId;
+        }
 
         return _addButtonQuery.call(self, [ virtualButton ], this.targetDashboardId)
         .then(results => {

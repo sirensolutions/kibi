@@ -71,7 +71,7 @@
             >
               <h4 class="panel-title">
                 {{subButton.label}}
-                <span ng-show="subButton.targetCount !== undefined"> ({{subButton.targetCount}})</span>
+                <span ng-show="subButton.targetCount !== undefined && subButton.targetCount !== ''"> ({{subButton.targetCount}})</span>
                 <span
                   class="warning"
                   ng-if="!!subButton.warning"
@@ -104,7 +104,7 @@
             >
               <h4 class="panel-title">
                 {{altSubButton.label}}
-                <span ng-show="altSubButton.targetCount !== undefined"> ({{altSubButton.targetCount}})</span>
+                <span ng-show="altSubButton.targetCount !== undefined && altSubButton.targetCount !== ''"> ({{altSubButton.targetCount}})</span>
                 <span
                   class="warning"
                   ng-if="!!altSubButton.warning"
@@ -133,7 +133,7 @@
           >
             <h4 class="panel-title">
               <em>{{ key }}</em> {{ subButton.label }}
-              <span ng-show="subButton.targetCount !== undefined"> ({{subButton.targetCount}})</span>
+              <span ng-show="subButton.targetCount !== undefined && subButton.targetCount !== ''"> ({{subButton.targetCount}})</span>
               <span
                 class="warning"
                 ng-if="!!subButton.warning"

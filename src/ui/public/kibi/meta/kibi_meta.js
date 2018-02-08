@@ -295,19 +295,26 @@ function KibiMetaProvider(createNotifier, kibiState, es, config, $rootScope) {
       .msearch(payload)
       .then(data => {
         strategy._requestInProgress--;
-        each(data.responses, (hit, i) => {
+
+        for (let i = 0; i < data.responses.length; i++) {
+          const hit = data.responses[i];
           const o = toProcess[i];
-          if (this.cache) {
+          if (this.cache && !hit.error) {
             this.cache.set(o.definition.query, hit);
           }
 
           o._callbackCounter = this._updateCounter(o.definition.id, 'callback');
           if (o._sentCounter < o._callbackCounter) {
             // do not execute callback from this old request which have just arrived;
-            return;
+            continue;
+          }
+
+          if (hit.error) {
+            o.callback(hit.error);
+            continue;
           }
           o.callback(null, hit);
-        });
+        };
 
         // maybe move this to finally
         if (queue.length > 0) {

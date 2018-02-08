@@ -471,7 +471,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       // assign data to $scope.buttons once the promises are done
       const updateSourceCount = function (currentDashboardId, relationId) {
         const virtualButton = {
-          id: this.sourceIndexPatternId + this.targetIndexPatternId + this.sourceField + this.sourceField,
+          id: this.sourceIndexPatternId + this.targetIndexPatternId + this.sourceField + this.targetField,
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
           targetField: this.sourceField,

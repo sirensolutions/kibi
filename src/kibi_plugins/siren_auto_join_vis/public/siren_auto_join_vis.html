@@ -12,7 +12,7 @@
        ng-mouseleave="hoverOut()"
     >
       <h4 class="panel-title">
-        {{ getButtonLabel(button) }}
+        {{ getButtonLabel(button, false) }}
         <span
           class="warning"
           ng-if="!!button.warning"
@@ -33,7 +33,7 @@
                      is-open="visibility.buttons[button.id]"
                      >
       <accordion-heading>
-        {{ getButtonLabel(button) }}
+        {{ getButtonLabel(button, true) }}
         <img
           ng-if="vis.params.layout === 'normal' && visibility.buttons[button.id] && !button.checkBox"
           class="dashboard-disabled"

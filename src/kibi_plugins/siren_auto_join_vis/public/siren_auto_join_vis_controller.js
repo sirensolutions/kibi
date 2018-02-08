@@ -43,8 +43,11 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     return config.get('siren:enableAllRelBtnCounts');
   };
 
-  $scope.getButtonLabel = function (button) {
-    const count = button.targetCount ? button.targetCount : 0;
+  $scope.getButtonLabel = function (button, addApproximate) {
+    let count = button.targetCount ? button.targetCount : 0;
+    if (addApproximate) {
+      count = '~' + count;
+    }
     return button.label.replace('{0}', count);
   };
 
@@ -250,7 +253,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         promises.push(ontologyClient.getEntityById(rel.range.id)
           .then((virtualEntity) => {
             button.id = rel.id + '-ve-' + rel.range.id;
-            button.label = rel.directLabel + ' (~{0} ' + virtualEntity.label + ')';
+            button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
             newButtons.push(button);
           })
         );
@@ -276,7 +279,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                 const clonedButton = _.clone(button);
                 clonedButton.targetDashboardId = compatibleDashboard.id;
                 clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
-                clonedButton.label = rel.directLabel + ' (~{0} ' + compatibleDashboard.title + ')';
+                clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
                 newButtons.push(clonedButton);
               });
             });

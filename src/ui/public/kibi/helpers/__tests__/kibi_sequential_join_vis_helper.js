@@ -310,12 +310,13 @@ describe('Kibi Components', function () {
             range: {
               id: 'index2',
               field: 'f2'
-            }
+            },
+            inverseOf: 'inverse-of-some-uuid'
           }
         ];
 
         beforeEach(() => {
-          init();
+          init({ relations: relations });
           index = 'index1';
           buttonDefs = [ button1 ];
 

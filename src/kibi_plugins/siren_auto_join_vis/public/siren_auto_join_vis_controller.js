@@ -425,7 +425,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           })
           .catch(notify.error);
         } else {
-          const unFilteredButtons = sirenSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs, relations);
+          const unFilteredButtons = sirenSequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations);
           const filteredButtons = _.filter(unFilteredButtons, (button) => {
             return button.domainIndexPattern === indexPatternId;
           });

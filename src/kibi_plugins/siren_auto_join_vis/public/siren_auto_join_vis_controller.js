@@ -498,9 +498,24 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           if (button.type === 'INDEX_PATTERN') {
             button.updateSourceCount = updateSourceCount;
           } else {
-            _.each(button.sub, (subButton) => {
-              subButton.updateSourceCount = updateSourceCount;
-            });
+            if (button.sub) {
+              for (const key in button.sub) {
+                if (button.sub.hasOwnProperty(key)) {
+                  _.each(button.sub[key], (subButton) => {
+                    subButton.updateSourceCount = updateSourceCount;
+                  });
+                }
+              }
+            }
+            if (button.altSub) {
+              for (const key in button.altSub) {
+                if (button.altSub.hasOwnProperty(key)) {
+                  _.each(button.altSub[key], (subButton) => {
+                    subButton.updateSourceCount = updateSourceCount;
+                  });
+                }
+              }
+            }
           }
           // Returns the count of documents involved in the join
           $scope.buttons[button.btnIndex] = button;

@@ -147,7 +147,7 @@ describe('Kibi meta service', function () {
       });
     });
 
-    describe('all responces OK', function () {
+    describe('all responses OK', function () {
 
       describe('single msearch call', function () {
 
@@ -514,7 +514,63 @@ describe('Kibi meta service', function () {
         });
       });
 
-      describe('test cache', function () {
+      describe('cache error', function () {
+
+        beforeEach(function () {
+          kibiMeta.updateStrategy('dashboards', 'batchSize', 1);
+        });
+
+        afterEach(function () {
+          kibiMeta.updateStrategy('dashboards', 'batchSize', 2);
+        });
+
+        it('should not cache error response', function (done) {
+          const expectedMeta1 = { error: 'ERROR' };
+          const expectedMeta2 = { hits: { total: 22 } };
+
+          msearchStub.onCall(0).returns(Promise.resolve({ responses: [ expectedMeta1 ] }));
+          msearchStub.onCall(1).returns(Promise.resolve({ responses: [ expectedMeta2 ] }));
+          const callback1Spy = sinon.spy();
+          const callback2Spy = sinon.spy();
+          const query1 = '{"index":["index_A"]}\nquery1';
+          const definitions = [
+            {
+              definition: { id: 'dash1', query: query1 },
+              callback: callback1Spy
+            },
+            {
+              definition: { id: 'dash1', query: query1 },
+              callback: callback2Spy
+            }
+          ];
+
+          kibiMeta.getMetaForDashboards(definitions);
+
+          pollUntil(
+            function () {
+              return callback1Spy.called && callback2Spy.called;
+            },
+            2000, 2,
+            function (err) {
+              if (err) {
+                done(err);
+              }
+              sinon.assert.calledTwice(msearchStub);
+              expect(msearchStub.getCall(0).args[0]).to.eql({ body: query1, getMeta: 'dashboards__dashboard' });
+              expect(msearchStub.getCall(1).args[0]).to.eql({ body: query1, getMeta: 'dashboards__dashboard' });
+              sinon.assert.calledOnce(callback1Spy);
+              sinon.assert.calledWith(callback1Spy, 'ERROR');
+              sinon.assert.calledOnce(callback2Spy);
+              sinon.assert.calledWith(callback2Spy, null, expectedMeta2);
+              sinon.assert.callOrder(callback1Spy, callback2Spy);
+              done();
+            }
+          );
+        });
+      });
+
+      describe('cache no errors', function () {
+
         it('default policy - 3 definitions to trigger two msearch calls, response OK, third def identical to first one', function (done) {
           const expectedMeta1 = { hits: { total: 11 } };
           const expectedMeta2 = { hits: { total: 22 } };
@@ -644,7 +700,7 @@ describe('Kibi meta service', function () {
       });
     });
 
-    describe('single msearch fired twice, responces are coming out of order', function () {
+    describe('single msearch fired twice, responses are coming out of order', function () {
 
       beforeEach(function () {
         kibiMeta.updateStrategy('dashboards', 'parallelRequests', 2);

@@ -198,6 +198,9 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
       const oldValue = indexPattern.fields;
       const newValue = input || oldValue || [];
       indexPattern.fields = new FieldList(indexPattern, newValue);
+    })
+    .catch(err => {
+      notify.error('Error while initializing fields', err);
     });
   }
 

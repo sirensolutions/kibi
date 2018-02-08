@@ -343,13 +343,10 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
               dashboardIdIndexPair
             );
 
-            // disable buttons until buttons are ready
-            _.each(buttons, function (button) {
-              button.disabled = true;
-            });
-
-            // retain the buttons order
             for (let i = 0; i < buttons.length; i++) {
+              // disable buttons until buttons are ready
+              buttons[i].disabled = true;
+              // retain the buttons order
               buttons[i].btnIndex = i;
             }
             if (!buttons.length) {

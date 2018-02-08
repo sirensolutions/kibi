@@ -14,7 +14,7 @@ import Migration from 'kibiutils/lib/migrations/migration';
 const DASHBOARD_STRATEGY_KEY = 'siren:countFetchingStrategyDashboards';
 const BUTTON_STRATEGY_KEY = 'siren:countFetchingStrategyRelationalFilters';
 
-export default class Migration18 extends Migration {
+export default class Migration19 extends Migration {
 
   constructor(configuration) {
     super(configuration);

@@ -6,7 +6,8 @@ import 'ui/kibi/components/ontology_client/ontology_client';
 
 uiModules
 .get('kibana/siren_auto_join_vis')
-.directive('sirenAutoJoinVisParams', function (createNotifier, ontologyClient, savedDashboards, savedSearches, indexPatterns) {
+.directive('sirenAutoJoinVisParams', function ($rootScope, createNotifier, ontologyClient, savedDashboards,
+                                               savedSearches, indexPatterns) {
   return {
     restrict: 'E',
     template,
@@ -22,6 +23,7 @@ uiModules
         $scope.filteredButtons = _.filter($scope.buttons, (button) => {
           return button.domainIndexPattern === $scope.filterIndexPattern.id || !button.domainIndexPattern;
         });
+        $rootScope.$broadcast('siren:auto-join-params:filter:indexpattern', $scope.filterIndexPattern.id);
       };
 
       /**

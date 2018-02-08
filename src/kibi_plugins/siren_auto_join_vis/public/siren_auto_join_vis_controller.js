@@ -186,8 +186,10 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   );
 
   const _collectUpdateCountsRequest = function (buttons, dashboardId) {
-    if (edit || !buttons || !buttons.length) {
+    if (!buttons || !buttons.length) {
       return Promise.resolve([]);
+    } else if (edit) {
+      return Promise.resolve(buttons);
     }
     delayExecutionHelper.addEventData({
       buttons: buttons,
@@ -292,7 +294,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     });
   };
 
-  const _constructButtons = $scope._constructButtons = function () {
+  const _constructButtons = $scope._constructButtons = function (indexPatternId) {
     return ontologyClient.getRelations().then((relations) => {
       return getNewButtons(relations, []).then((newButtons) => {
         const buttonDefs = _.filter(newButtons,
@@ -423,26 +425,26 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           })
           .catch(notify.error);
         } else {
-          $scope.buttons = sirenSequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations);
+          const unFilteredButtons = sirenSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs, relations);
+          const filteredButtons = _.filter(unFilteredButtons, (button) => {
+            return button.domainIndexPattern === indexPatternId;
+          });
+          return filteredButtons;
         }
       });
     });
   };
 
   /*
-   * Update counts in reaction to events
+   * Update counts in reaction to events.
+   * Filter buttons by indexPatternId === domainIndexPattern (used in edit mode)
    */
-
-  const updateButtons = function (reason) {
+  const updateButtons = function (reason, indexPatternId) {
     if (!kibiState.isSirenJoinPluginInstalled()) {
       notify.error(
         'This version of Siren Relational filter requires the Federate plugin for Elasticsearch. '
         + 'Please install it and restart Siren Investigate.'
       );
-      return;
-    }
-
-    if (edit) {
       return;
     }
 
@@ -452,8 +454,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     const self = this;
 
     let promise;
-    if (!$scope.buttons || !$scope.buttons.length) {
-      promise = _constructButtons.call(self);
+    if (!$scope.buttons || !$scope.buttons.length || edit) {
+      promise = _constructButtons.call(self, indexPatternId);
     } else {
       promise = Promise.resolve($scope.buttons);
     }
@@ -462,7 +464,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     .then((buttons) => {
       // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
       // assign data to $scope.buttons once the promises are done
-      $scope.buttons = new Array(buttons.length);
       const updateSourceCount = function (currentDashboardId, callback) {
         const virtualButton = {
           sourceField: this.targetField,
@@ -480,17 +481,22 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         .catch(notify.error);
       };
 
-      for (let i = 0; i < buttons.length; i++) {
-        const button = buttons[i];
-        if (button.type === 'INDEX_PATTERN') {
-          button.updateSourceCount = updateSourceCount;
-        } else {
-          _.each(button.sub, (subButton) => {
-            subButton.updateSourceCount = updateSourceCount;
-          });
+      if (edit) {
+        $scope.buttons = buttons;
+      } else {
+        $scope.buttons = new Array(buttons.length);
+        for (let i = 0; i < buttons.length; i++) {
+          const button = buttons[i];
+          if (button.type === 'INDEX_PATTERN') {
+            button.updateSourceCount = updateSourceCount;
+          } else {
+            _.each(button.sub, (subButton) => {
+              subButton.updateSourceCount = updateSourceCount;
+            });
+          }
+          // Returns the count of documents involved in the join
+          $scope.buttons[button.btnIndex] = button;
         }
-        // Returns the count of documents involved in the join
-        $scope.buttons[button.btnIndex] = button;
       }
     })
     .catch(notify.error);
@@ -594,6 +600,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   };
 
   const sirenDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
+  let editFilterButtonsOff;
+  if (edit) {
+    editFilterButtonsOff = $rootScope.$on('siren:auto-join-params:filter:indexpattern', (event, indexPatternId) => {
+      updateButtons('siren:auto-join-params:filter:indexpattern', indexPatternId);
+    });
+  }
 
   $scope.$listen(kibiState, 'save_with_changes', function (diff) {
     if (diff.indexOf(kibiState._properties.dashboards) !== -1) {
@@ -652,6 +664,9 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     delayExecutionHelper.cancel();
     sirenDashboardChangedOff();
     removeAutorefreshHandler();
+    if (editFilterButtonsOff) {
+      editFilterButtonsOff();
+    }
     kibiMeta.flushRelationalButtonsFromQueue();
   });
 
@@ -663,13 +678,10 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     dashboardGroups.resetGroupHighlight();
   };
 
-  // init
-  updateButtons('init');
-
-  if (edit) {
-    $scope.$watch('vis.params.buttons', function () {
-      _constructButtons();
-    }, true);
+  // init if not in edit mode
+  // in edit mode an event will be filred from the configuration panel to init buttons.
+  if (!edit) {
+    updateButtons('init');
   }
 };
 

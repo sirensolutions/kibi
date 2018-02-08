@@ -185,8 +185,14 @@ export function IndexPatternsMapperProvider(Private, Promise, es, config, kbnInd
     if (err.status === 403) {
       return Promise.reject(new IndexPatternAuthorizationError(indexPattern));
     } else if (err.status >= 400) {
+      let message = err.message;
+      // kibi: be more specific for 500 from jdbc datasources
+      if (err.status === 500 && _.get(err, 'body.error.caused_by.reason')) {
+        message = err.body.error.caused_by.reason;
+      }
+      // kibi: end
       // transform specific error type
-      return Promise.reject(new IndexPatternMissingIndices(err.message));
+      return Promise.reject(new IndexPatternMissingIndices(message));
     } else {
       // rethrow all others
       throw err;

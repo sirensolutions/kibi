@@ -12,7 +12,7 @@ export default class IndexPatternModel extends Model {
       timeFieldName: Joi.string(),
       notExpandable: Joi.boolean(),
       intervalName: Joi.string(),
-      sourceFiltering: Joi.object().default({}),
+      sourceFilters: Joi.string(),
       paths: Joi.object().default({}),
       fields: Joi.object().default({}),
       fieldFormatMap: Joi.string(),

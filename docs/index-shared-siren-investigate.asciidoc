@@ -1,9 +1,9 @@
 :toc: right
 :docinfo: shared
 
-:version:                5.6.5
+:version:                10.0.0-beta-1
 :logstash-version:       {version}
-:elasticsearch-version:  {version}
+:elasticsearch-version:  5.6.7
 :kibana-version:         {version}
 :vanguard-version:       {version}
 :kibi-version:           {version}
@@ -17,7 +17,7 @@
 
 :java-version: 1.8
 
-:federate-version: 5.6.6-10.0.0
+:federate-version: {elasticsearch-version}-{version}
 :federate-website: https://docs.support.siren.io/5.6.6-10.0.0/federate/
 
 :kibana-announcement: https://www.elastic.co/blog/kibana-5-6-3-released

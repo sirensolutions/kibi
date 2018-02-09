@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { find, sortBy, each, noop } from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import EntityRelationsTemplate from './entity_relations.html';
@@ -6,7 +6,7 @@ import 'plugins/investigate_core/ui/directives/entity_select/entity_select';
 import '../advanced_options/advanced_options';
 
 uiModules.get('apps/management')
-.directive('entityRelations', function (createNotifier, ontologyClient, kbnUrl) {
+.directive('entityRelations', function ($rootScope, $timeout, createNotifier, ontologyClient, kbnUrl, confirmModalPromise) {
   const notify = createNotifier();
 
   return {
@@ -15,18 +15,20 @@ uiModules.get('apps/management')
     scope: false,
     link: function ($scope) {
       $scope.relations = [];
+      // Cache the first selectedMenuItem from the eid tree (top left -  not the dropdown in the config)
+      let cachedSelectedMenuItem = $scope.selectedMenuItem || null;
       const relationLabelPairMap = [];
 
       // init relations
       ontologyClient.getRelationsByDomain($scope.entity.id)
       .then((relations) => {
-        _.find($scope.editSections, { index: 'entityRelations' }).count = relations.length; // Update the tab count
+        find($scope.editSections, { index: 'entityRelations' }).count = relations.length; // Update the tab count
 
         // sort relations
         let sortedRelations = relations;
         if (relations && relations.length && relations[0].domain.field) {
           //sort by id, as it is built with index/field
-          sortedRelations = _.sortBy(relations, function (rel) {
+          sortedRelations = sortBy(relations, function (rel) {
             return [rel.domain.id, rel.domain.field, rel.range.id, rel.range.field];
           });
         }
@@ -40,7 +42,7 @@ uiModules.get('apps/management')
 
       ontologyClient.getUniqueRelationLabelPairs()
       .then((uniqueRelationLabelPairs) => {
-        _.each(uniqueRelationLabelPairs, function (pair) {
+        each(uniqueRelationLabelPairs, function (pair) {
           relationLabelPairMap[pair.directLabel] = pair.inverseLabel;
         });
       });
@@ -48,10 +50,120 @@ uiModules.get('apps/management')
       ontologyClient.getEntities()
       .then((entities) => {
         $scope.typeMap = {};
-        _.each(entities, (entity) => {
+        each(entities, (entity) => {
           $scope.typeMap[entity.id] = entity.type;
         });
       });
+
+      $scope.isSaveDisabled = function () {
+        if($scope.entityForm) {
+          return $scope.entityForm.$pristine;
+        }
+      };
+
+      // declare the deregister function
+      let deregisterLocationChangeStartListener;
+
+      // helper function ro re-register the listener
+      function registerListener() {
+        deregisterLocationChangeStartListener = $rootScope.$on('$locationChangeStart', confirmIfFormDirty);
+      };
+
+      // If the user attempts to close the browser or navigate to e.g. Timelion/Access Control/Sentinl
+      window.onbeforeunload = function (e) {
+        if($scope.entityForm && $scope.entityForm.$dirty) {
+          // This text needs to be set and returned from the function
+          // but is never displayed for security reasons.
+          // e.g. https://www.chromestatus.com/feature/5349061406228480
+          const dialogText = "Not going to be rendered.";
+          e.returnValue = dialogText;
+          return dialogText;
+        }
+      };
+
+      let handled = false;
+
+      function confirmIfFormDirty(event, next, current) {
+        if (!handled) {
+          handled = true;
+          // Check if staying on the same page but different entity within the page
+          const regEx = /\/management\/siren\/indexesandrelations\/([^\?\&\/]*)/;
+          const tabCheck = current.match(regEx);
+          const targetCheck = next.match(regEx);
+          let tabName = '';
+          if (tabCheck && tabCheck.length > 1) {
+            tabName = tabCheck[1];
+          } else {
+            handled = false;
+            return;
+          }
+          // If attempting to change entity
+          if (targetCheck === null || targetCheck.length < 2 || targetCheck[1] !== tabName) {
+            // If the user has changed the form
+            if($scope.entityForm && $scope.entityForm.$dirty) {
+              // prevent a digest cycle error by pushing the routeChangeHandling
+              // and the deregister of the $locationChangeStart listener to the next digest cycle
+              $timeout(() => {
+                deregisterLocationChangeStartListener();
+                const handleRouteChange = function () {
+                  handled = false;
+                  // Allow the navigation to take place
+                  window.location.href = next;
+                };
+
+                const unsavedChangesModal = confirmModalPromise(
+                'You have unsaved changes in the relational configuration. Are you sure you want to leave and lose the changes?',
+                  {
+                    confirmButtonText: 'confirm',
+                    cancelButtonText: 'cancel'
+                  }
+                )
+                .then(handleRouteChange)
+                .catch(error => {
+                  if(error !== undefined) {
+                    throw error;
+                  }
+                  // Navigation has been cancelled by the user in the modal
+                  // If there is no cachedSelectedMenuItem, cache it.
+                  if(!cachedSelectedMenuItem) {
+                    cachedSelectedMenuItem = Object.assign({}, $scope.selectedMenuItem, { id: tabName });
+                  } else {
+                    // If the user selected a new EID on the eid tree on the left but cancelled the navigation
+                    // the selectedMenuItem should be set back to the cached menu item
+                    if($scope.selectedMenuItem && cachedSelectedMenuItem.id !== $scope.selectedMenuItem.id) {
+                      $scope.updateSelectedMenuItem(cachedSelectedMenuItem);
+                    }
+                  }
+                  $timeout(() => {
+                    handled = false;
+                    // The user cancelled the navigation, so stay on the same page explicitly
+                    window.location.href = current;
+                    // We have deregistered the $locationChangeStart listener by now, so register a new one
+                    registerListener();
+                  }, 0);
+                });
+              }, 0);
+              // This is actually the initial prevention of navigation to allow the comfirm modal appear.
+              // event.preventDefault *should* work with a change to e.g. Dashboard/Discover but doesn't
+              // so we need to set the window.location.href as well
+              event.preventDefault();
+              window.location.href = current;
+            } else {
+              handled = false;
+            }
+          } else {
+            handled = false;
+          }
+        } else {
+          // If there is already a function handling the routeChange, just stay on the same page and wait
+          event.preventDefault();
+          window.location.href = current;
+        }
+      }
+
+      registerListener();
+
+      $scope.$on('$destroy', deregisterLocationChangeStartListener);
 
       $scope.saveRelations = function () {
         /**
@@ -60,7 +172,7 @@ uiModules.get('apps/management')
         function areValidRelations(menuItem, relations) {
           let check = true;
 
-          _.each(relations, (rel) => {
+          each(relations, (rel) => {
             if (menuItem && menuItem.type === 'INDEX_PATTERN') {
               if (!rel || !rel.domain || !rel.range || !rel.domain.field || !rel.range.id) {
                 check = false;
@@ -78,6 +190,7 @@ uiModules.get('apps/management')
               return false;
             }
           });
+          $scope.entityForm.$setPristine();
           return check;
         };
 
@@ -87,13 +200,17 @@ uiModules.get('apps/management')
           return ontologyClient.deleteByDomainOrRange(id).then(() => {
             return ontologyClient.insertRelations($scope.relations).then(() => {
               notify.info('Relations saved.');
-              _.find($scope.editSections, { index: 'entitiesRelations' }).count = $scope.relations.length; // Update the tab count
+              find($scope.editSections, { index: 'entitiesRelations' }).count = $scope.relations.length; // Update the tab count
             });
           });
         } else {
           notify.warning('Some of the relations are not complete, please check them again.');
           return Promise.resolve();
         }
+      };
+
+      $scope.setDirty = function () {
+        $scope.entityForm.$setDirty();
       };
 
       // this method automatically assigns inverseLabel when the user sets the directLabel if it is not set already or vice versa

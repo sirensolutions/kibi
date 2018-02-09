@@ -14,7 +14,7 @@
     <div class="col-lg-1">
     </div>
   </div>
-
+  <form name="entityForm">
   <div class="row relation vertical-center"
        ng-repeat="relation in relations"
   >
@@ -124,10 +124,12 @@
                                model="relations"
                                aria-label="Delete"
                                tooltip="Delete relation"
-                               tooltip-popup-delay="200">
+                               tooltip-popup-delay="200"
+                               post-action="setDirty()">
       </kibi-array-param-remove>
     </div>
 </div>
+</form>
 <kibi-array-param-add label="relation"
                         ng-if="relations"
                         model="relations"

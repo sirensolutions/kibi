@@ -94,6 +94,11 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
     }
   };
 
+  // This function is here to be called in entity_relations.js (as that directive inherits this scope)
+  $scope.updateSelectedMenuItem = function (newSelectedMenuItem) {
+    $scope.selectedMenuItem = newSelectedMenuItem;
+  };
+
   // Needed until we migrate the panels to use the new generic "entity"
   $scope.$watch('selectedMenuItem.id', (itemId) => {
     if (itemId && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== itemId)) {

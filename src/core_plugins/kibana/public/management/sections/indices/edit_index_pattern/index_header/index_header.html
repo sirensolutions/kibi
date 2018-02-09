@@ -35,8 +35,9 @@
       ng-click="save()"
       aria-label="Save"
       tooltip="Save"
-      class="kuiButton kuiButton--basic"
+      class="kuiButton kuiButton--basic dark-grey-on-disabled"
       data-test-subj="saveButton"
+      ng-disabled="isSaveDisabled()"
     >
       <span class="sr-only">Save</span>
       <span

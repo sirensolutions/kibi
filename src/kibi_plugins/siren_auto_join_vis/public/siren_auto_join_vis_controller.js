@@ -206,11 +206,43 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     return Promise.resolve(buttons);
   };
 
+  /**
+   *  Compose the cardinality query for EID buttons using the current dashboard filters.
+   */
+  const _getCardinalityQuery = function (button) {
+    const currentDashboardId = kibiState._getCurrentDashboardId();
+    return kibiState.getState(currentDashboardId).then(({ index, filters, queries, time }) => {
+
+      function omitDeep(obj, omitKey) {
+        delete obj[omitKey];
+
+        _.each(obj, function (val, key) {
+          if (val && typeof (val) === 'object') {
+            obj[key] = omitDeep(val, omitKey);
+          }
+        });
+
+        return obj;
+      }
+
+      // Removes the $state object from filters if present, as it will break the count query.
+      const cleanedFilters = omitDeep(filters, '$state');
+      const queryDef = queryBuilder(cleanedFilters, queries, time);
+
+      queryDef._source = false;
+      queryDef.size = 0;
+      queryDef.aggregations = { distinct_field : { cardinality : { field : button.sourceField } } };
+
+      return {
+        index: button.sourceIndexPatternId,
+        body: queryDef
+      };
+    });
+  };
+
   const _updateCardinalityCounts = function (buttons) {
-    console.log('REDUCE');
     return Promise.reduce(buttons, (buttons, button) => {
       if (button.type === 'VIRTUAL_ENTITY') {
-        console.log('have to recalculate EID button cardinality count');
         return _getCardinalityQuery(button)
         .then((cardinalityQuery) => {
           return es.search(cardinalityQuery)
@@ -319,40 +351,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     });
     return Promise.all(promises).then(() => {
       return newButtons;
-    });
-  };
-
-  /**
-   *  Compose the cardinality query for EID buttons using the current dashboard filters.
-   */
-  const _getCardinalityQuery = function (button) {
-    const currentDashboardId = kibiState._getCurrentDashboardId();
-    return kibiState.getState(currentDashboardId).then(({index, filters, queries, time}) => {
-
-      function omitDeep(obj, omitKey) {
-        delete obj[omitKey];
-
-        _.each(obj, function (val, key) {
-          if (val && typeof (val) === 'object') {
-            obj[key] = omitDeep(val, omitKey);
-          }
-        });
-
-        return obj;
-      }
-
-      // Removes the $state object from filters if present, as it will break the count query.
-      const cleanedFilters = omitDeep(filters, '$state');
-      const queryDef = queryBuilder(cleanedFilters, queries, time);
-
-      queryDef._source = false;
-      queryDef.size = 0;
-      queryDef.aggregations = { distinct_field : { cardinality : { field : button.sourceField } } };
-
-      return {
-        index: button.sourceIndexPatternId,
-        body: queryDef
-      };
     });
   };
 

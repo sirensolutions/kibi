@@ -8,11 +8,15 @@ import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_
 // kibi: imports
 import angular from 'angular';
 import 'ui/kibi/state_management/kibi_state';
+import { MarkFiltersBySelectedEntitiesFactory } from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 // kibi: ends
 
 export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config, kibiState) {
   const EventEmitter = Private(EventsProvider);
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
+
+  // kibi: added some helpers
+  const markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesFactory);
 
   const queryFilter = new EventEmitter();
 
@@ -362,11 +366,34 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
 
         // save states and emit the required events
         saveState();
-        queryFilter.emit('update')
-        .then(function () {
+        // kibi: added by kibi to mark filters which depends on selected entities
+        const prevDependsOnSelectedEntitiesDisabled = Promise.resolve(
+          _.map(appFilters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled)
+        );
+        const markFilters = prevDependsOnSelectedEntitiesDisabled.then(() => markFiltersBySelectedEntities(appFilters));
+        Promise.all([
+          prevDependsOnSelectedEntitiesDisabled,
+          markFilters
+        ])
+        // kibi: disable/enable filters that are dependent on the selected entity
+        .then(([ prev, filters ]) => {
+          _.each(appFilters, (filter, i) => {
+            if (prev[i] !== undefined && prev[i] !== filter.meta.dependsOnSelectedEntitiesDisabled &&
+                !filter.meta.disabled === filter.meta.dependsOnSelectedEntitiesDisabled) {
+              // HERE we changed
+              queryFilter.toggleFilter(filter);
+            }
+          });
+        })
+        .then(() => {
+          saveState();
+          queryFilter.emit('update');
+        })
+        .then(() => {
           if (!doFetch) return;
           queryFilter.emit('fetch');
         });
+        // kibi: end
 
         // iterate over each state type, checking for changes
         function getActions() {

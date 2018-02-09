@@ -18,7 +18,6 @@ export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable
 // kibi: imports
 import 'ui/kibi/directives/kibi_entity_clipboard';
 import 'ui/kibi/styles/explanation';
-import { MarkFiltersBySelectedEntitiesFactory } from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 // kibi: end
 
@@ -31,9 +30,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
   const filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
   const changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-
-  // kibi: added some helpers
-  const markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesFactory);
 
   const notify = createNotifier({
     location: 'Kibi Navigation Bar'
@@ -219,13 +215,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
       function updateFilters() {
         const filters = queryFilter.getFilters();
 
-        // kibi: this is mark the filter as entity dependent
-        const prevDependsOnSelectedEntitiesDisabled = Promise.resolve(
-          _.map(filters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled)
-        );
-        const markFilters = prevDependsOnSelectedEntitiesDisabled.then(() => markFiltersBySelectedEntities(filters));
-        // kibi: end
-
         mapAndFlattenFilters(filters).then(function (results) {
           // used to display the current filters in the state
           $scope.filters = _.sortBy(results, function (filter) {
@@ -238,20 +227,6 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
         })
         .then(function (explanations) {
           return joinExplanation.initQtip(explanations);
-        })
-        // kibi: added by kibi to mark filters which depends on selected entities
-        .then(() => Promise.all([
-          prevDependsOnSelectedEntitiesDisabled,
-          markFilters
-        ]))
-        // kibi: disable/enable filters that are dependent on the selected entity
-        .then(([ prev, filters ]) => {
-          _.each(filters, (filter, i) => {
-            if (prev[i] !== undefined && prev[i] !== filter.meta.dependsOnSelectedEntitiesDisabled &&
-                !filter.meta.disabled === filter.meta.dependsOnSelectedEntitiesDisabled) {
-              $scope.toggleFilter(filter);
-            }
-          });
         })
         .then(() => {
           $scope.$emit('filterbar:updated');

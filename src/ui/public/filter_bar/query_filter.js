@@ -8,11 +8,15 @@ import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_
 // kibi: imports
 import angular from 'angular';
 import 'ui/kibi/state_management/kibi_state';
+import { MarkFiltersBySelectedEntitiesFactory } from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
 // kibi: ends
 
 export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config, kibiState) {
   const EventEmitter = Private(EventsProvider);
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
+
+  // kibi: added some helpers
+  const markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesFactory);
 
   const queryFilter = new EventEmitter();
 
@@ -360,13 +364,29 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
         getActions();
         if (!doUpdate) return;
 
-        // save states and emit the required events
-        saveState();
-        queryFilter.emit('update')
-        .then(function () {
+        // kibi: added by kibi to mark filters which depends on selected entities
+        const prevFilters = _.map(appFilters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled);
+        return markFiltersBySelectedEntities(appFilters)
+        // kibi: disable/enable filters that are dependent on the selected entity
+        .then((filters) => {
+          _.each(appFilters, (filter, i) => {
+            if (prevFilters[i] !== undefined && prevFilters[i] !== filter.meta.dependsOnSelectedEntitiesDisabled &&
+                !filter.meta.disabled === filter.meta.dependsOnSelectedEntitiesDisabled) {
+              // HERE we changed
+              queryFilter.toggleFilter(filter);
+            }
+          });
+        })
+        .then(() => {
+          // save states and emit the required events
+          saveState();
+          queryFilter.emit('update');
+        })
+        .then(() => {
           if (!doFetch) return;
           queryFilter.emit('fetch');
         });
+        // kibi: end
 
         // iterate over each state type, checking for changes
         function getActions() {

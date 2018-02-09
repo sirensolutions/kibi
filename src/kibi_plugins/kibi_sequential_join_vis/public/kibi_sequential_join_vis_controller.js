@@ -371,7 +371,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   });
 
   $scope.$listen(appState, 'save_with_changes', function (diff) {
-    if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
+    if (diff.indexOf('query') === -1) {
       return;
     }
     updateButtons.call(this, 'AppState changes');

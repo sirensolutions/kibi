@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import chrome from 'ui/chrome';
+import Promise from 'bluebird';
 import { uiModules } from 'ui/modules';
 import { IndexPatternAuthorizationError } from 'ui/errors';
 
@@ -11,6 +12,7 @@ import { KibiSequentialJoinVisHelperFactory } from 'ui/kibi/helpers/kibi_sequent
 import { RelationsHelperFactory }  from 'ui/kibi/helpers/relations_helper';
 import { DelayExecutionHelperFactory } from 'ui/kibi/helpers/delay_execution_helper';
 import { SearchHelper } from 'ui/kibi/helpers/search_helper';
+import { QueryBuilderFactory } from 'ui/kibi/helpers/query_builder';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
 
 function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, getAppState, globalState, createNotifier,
@@ -18,6 +20,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   const DelayExecutionHelper = Private(DelayExecutionHelperFactory);
   const searchHelper = new SearchHelper(kbnIndex);
   const edit = onVisualizePage();
+  const queryBuilder = Private(QueryBuilderFactory);
 
   const notify = createNotifier({
     location: 'Siren Automatic Relational filter'
@@ -204,6 +207,58 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   };
 
   /**
+   *  Compose the cardinality query for EID buttons using the current dashboard filters.
+   */
+  const _getCardinalityQuery = function (button) {
+    const currentDashboardId = kibiState._getCurrentDashboardId();
+    return kibiState.getState(currentDashboardId).then(({ index, filters, queries, time }) => {
+
+      function omitDeep(obj, omitKey) {
+        delete obj[omitKey];
+
+        _.each(obj, function (val, key) {
+          if (val && typeof (val) === 'object') {
+            obj[key] = omitDeep(val, omitKey);
+          }
+        });
+
+        return obj;
+      }
+
+      // Removes the $state object from filters if present, as it will break the count query.
+      const cleanedFilters = omitDeep(filters, '$state');
+      const queryDef = queryBuilder(cleanedFilters, queries, time);
+
+      queryDef._source = false;
+      queryDef.size = 0;
+      queryDef.aggregations = { distinct_field : { cardinality : { field : button.sourceField } } };
+
+      return {
+        index: button.sourceIndexPatternId,
+        body: queryDef
+      };
+    });
+  };
+
+  const _updateCardinalityCounts = function (buttons) {
+    return Promise.reduce(buttons, (buttons, button) => {
+      if (button.type === 'VIRTUAL_ENTITY') {
+        return _getCardinalityQuery(button)
+        .then((cardinalityQuery) => {
+          return es.search(cardinalityQuery)
+          .then((esResult) => {
+            button.targetCount = esResult.aggregations.distinct_field.value;
+            buttons.push(button);
+            return buttons;
+          });
+        });
+      }
+      buttons.push(button);
+      return buttons;
+    }, []);
+  };
+
+  /**
    * Add the alternative menu hierarchy where you use dashboard and then select one of the available relations
    */
   const addAlternativeSubHierarchy = function (buttons) {
@@ -370,59 +425,43 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
             const subButtonPromises = [];
             _.each(buttons, (button) => {
               if (button.type === 'VIRTUAL_ENTITY') {
-                const cardinalityQuery = {
-                  index: button.sourceIndexPatternId,
-                  body: {
-                    size : 0,
-                    aggs : {
-                      distinct_field : { cardinality : { field : button.sourceField } }
-                    }
-                  }
-                };
-
                 subButtonPromises.push(
-                  es.search(cardinalityQuery)
-                  .then((esResult) => {
-                    // button.targetCount = esResult.count;
-                    button.targetCount = esResult.aggregations.distinct_field.value;
+                  ontologyClient.getRelationsByDomain(button.targetIndexPatternId).then((relationsByDomain) => {
                     button.sub = {};
+                    return Promise.all([
+                      savedDashboards.find(),
+                      savedSearches.find()
+                    ])
+                    .then(([savedDashboards, savedSearches]) => {
+                      _.each(relationsByDomain, (relByDomain) => {
+                        if (relByDomain.range.id !== button.sourceIndexPatternId) {
+                          // filter the savedSearch with the same indexPattern
+                          const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
+                            const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
+                            return searchSource.index === relByDomain.range.id;
+                          });
 
-                    return ontologyClient.getRelationsByDomain(button.targetIndexPatternId).then((relationsByDomain) => {
-                      return Promise.all([
-                        savedDashboards.find(),
-                        savedSearches.find()
-                      ])
-                      .then(([savedDashboards, savedSearches]) => {
-                        _.each(relationsByDomain, (relByDomain) => {
-                          if (relByDomain.range.id !== button.sourceIndexPatternId) {
-                            // filter the savedSearch with the same indexPattern
-                            const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
-                              const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
-                              return searchSource.index === relByDomain.range.id;
+                          _.each(compatibleSavedSearches, (compatibleSavedSearch) => {
+                            const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
+                              return savedDashboard.savedSearchId === compatibleSavedSearch.id;
                             });
+                            _.each(compatibleDashboards, (compatibleDashboard) => {
+                              const subButton = sirenSequentialJoinVisHelper.constructSubButton(button,
+                                compatibleDashboard, relByDomain);
 
-                            _.each(compatibleSavedSearches, (compatibleSavedSearch) => {
-                              const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
-                                return savedDashboard.savedSearchId === compatibleSavedSearch.id;
-                              });
-                              _.each(compatibleDashboards, (compatibleDashboard) => {
-                                const subButton = sirenSequentialJoinVisHelper.constructSubButton(button,
-                                  compatibleDashboard, relByDomain);
+                              sirenSequentialJoinVisHelper.addClickHandlerToButton(subButton);
 
-                                sirenSequentialJoinVisHelper.addClickHandlerToButton(subButton);
-
-                                const key = relByDomain.directLabel;
-                                if (!button.sub[key]) {
-                                  button.sub[key] = [];
-                                }
-                                if ($scope.btnCountsEnabled()) {
-                                  subButton.showSpinner = true;
-                                }
-                                button.sub[key].push(subButton);
-                              });
+                              const key = relByDomain.directLabel;
+                              if (!button.sub[key]) {
+                                button.sub[key] = [];
+                              }
+                              if ($scope.btnCountsEnabled()) {
+                                subButton.showSpinner = true;
+                              }
+                              button.sub[key].push(subButton);
                             });
-                          }
-                        });
+                          });
+                        }
                       });
                     });
                   })
@@ -476,6 +515,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       promise = Promise.resolve($scope.buttons);
     }
     promise
+    .then((buttons) => _updateCardinalityCounts.call(self, buttons))
     .then((buttons) => _collectUpdateCountsRequest.call(self, buttons, currentDashboardId))
     .then((buttons) => {
       // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
@@ -648,7 +688,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   });
 
   $scope.$listen(appState, 'save_with_changes', function (diff) {
-    if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
+    if (diff.indexOf('query') === -1) {
       return;
     }
     updateButtons.call(this, 'AppState changes');

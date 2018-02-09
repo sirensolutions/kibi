@@ -219,7 +219,7 @@ describe('Kibi Automatic Join Visualization Controller', function () {
         expect(buttons[0].indexRelationId).to.be.eql('virtual-entity-uuid');
         expect(buttons[0].targetIndexPatternId).to.be.eql('virtualEntity');
         expect(buttons[0].type).to.be.eql('VIRTUAL_ENTITY');
-        expect(buttons[0].targetCount).to.be.eql(300);
+        expect(buttons[0].targetCount).to.be.eql(undefined);
 
         const subButton = buttons[0].sub['inverse another virtual label'];
         expect(subButton).to.have.length(1);

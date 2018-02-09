@@ -364,21 +364,13 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
         getActions();
         if (!doUpdate) return;
 
-        // save states and emit the required events
-        saveState();
         // kibi: added by kibi to mark filters which depends on selected entities
-        const prevDependsOnSelectedEntitiesDisabled = Promise.resolve(
-          _.map(appFilters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled)
-        );
-        const markFilters = prevDependsOnSelectedEntitiesDisabled.then(() => markFiltersBySelectedEntities(appFilters));
-        Promise.all([
-          prevDependsOnSelectedEntitiesDisabled,
-          markFilters
-        ])
+        const prevFilters = _.map(appFilters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled);
+        return markFiltersBySelectedEntities(appFilters)
         // kibi: disable/enable filters that are dependent on the selected entity
-        .then(([ prev, filters ]) => {
+        .then((filters) => {
           _.each(appFilters, (filter, i) => {
-            if (prev[i] !== undefined && prev[i] !== filter.meta.dependsOnSelectedEntitiesDisabled &&
+            if (prevFilters[i] !== undefined && prevFilters[i] !== filter.meta.dependsOnSelectedEntitiesDisabled &&
                 !filter.meta.disabled === filter.meta.dependsOnSelectedEntitiesDisabled) {
               // HERE we changed
               queryFilter.toggleFilter(filter);
@@ -386,6 +378,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
           });
         })
         .then(() => {
+          // save states and emit the required events
           saveState();
           queryFilter.emit('update');
         })

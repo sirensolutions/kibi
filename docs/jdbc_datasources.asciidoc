@@ -3,13 +3,13 @@
 
 == Setting up Siren to work with JDBC datasources.
 
-Siren can analyze data by querying directly remote datasources via JDBC.
+Siren can analyze data by directly querying remote datasources via JDBC.
 
-To be able to do this one needs to:
+To do this:
 
-- <<configuring-federate-with-jdbc, Configure the Federate backend with the JDBC drivers that you’ll be using>>
-- <<configuring-federate-with-jdbc, Create a “JDBC Datasource” from within the Siren Investigate UI>>
-- <<configuring-federate-with-jdbc, Create a Virtual Index from a JDBC datasource>>
+- <<configuring-federate-with-jdbc, Configure the Federate backend with the JDBC drivers that you will be using>>
+- <<configuring-investigate-datasource, Create a "JDBC Datasource" from within the Siren Investigate UI>>
+- <<configuring-virtual-index, Create a Virtual Index from a JDBC datasource>>
 
 At this point the Virtual Index is effectively identical to a regular index i.e. one that is natively in Elasticsearch.
 
@@ -20,7 +20,7 @@ To configure the Federate JDBC connector:
 
 - Stop the elasticsearch cluster
 - Install Siren federate on each elasticsearch node. Instruction are available here:
-- Choose one node in the cluster and edit the elasticsearch.yml adding the parameter: node.attr.connector.jdbc: true
+- Choose one node in the cluster and edit the elasticsearch.yml adding the parameter: `node.attr.connector.jdbc: true`
 - In the same elasticsearch node, add the jdbc driver (jar file) in the folder ES_FOLDER/plugins/siren-federate. The supported jdbc drivers are reported in the table below, with the url from where the drivers can be downloaded.
 - Restart elasticsearch
 
@@ -81,7 +81,7 @@ To configure the Federate JDBC connector:
 [[configuring-investigate-datasource]]
 == Siren Investigate Datasource Configuration
 
-Using Siren Investigate, go to “Management/Datasource”
+Using Siren Investigate, go to **Management/Datasource**
 
 image::images/jdbc/select_datasource.png["Navigate to Management/Datasource",align="center"]
 
@@ -93,19 +93,28 @@ Fill in the connection parameters, then press Save in the top right corner
 
 image::images/jdbc/fill_in_connection_params.png["Fill in connection parameters",align="center"]
 
-In this step, the user can check the configuration pressing the button “Test Connection”. If the settings are properly configured, this is the result:
+Check the configuration by pressing **Test Connection**. If the settings are properly configured, this is the result:
 
 image::images/jdbc/test_connection.png["Test connection",align="center"]
 
-Press on “Yes, take me there” to map a table from the DB into an index pattern, as reported in the image below:
+Press **Yes, take me there** to map a table from the DB into an index pattern, as reported in the image below:
+
+[[configuring-virtual-index]]
 
 image::images/jdbc/virtual_index_configuration.png["Virtual Index Configuration",align="center"]
 
-The “Virtual Index name” must be lowercase, the “Resource name” is the name of the table in the database. Once the Virtual Index is configured, press Save in the top right corner.
-The screenshot below shows what the user should see after saving. Press “Yes take me there” to map the index to this virtual index.
+The **Virtual Index name** must be lowercase, the **Resource name** is the name of the table in the database. Once the Virtual Index is configured, press Save in the top right corner.
+The screenshot below shows what the user should see after saving. Press **Yes take me there** to map the index to this virtual index.
 
 image::images/jdbc/virtual_index_success.png["Virtual Index Configuration Success",align="center"]
 
-Press “Add Index Pattern” and fill in the name with the same name used for the Virtual Index, in this example “indexfromdb”, and press “Create”.
+Press **Add Index Pattern** and fill in the name with the same name used for the Virtual Index, in this example **indexfromdb**, and press **Create**.
 
 image::images/jdbc/index_pattern_configuration.png["Index Pattern Configuration",align="center"]
+
+From this point, **indexfromdb** is a normal index pattern and it can be used in Discovery, Visualize etc.
+
+== Known Limitations
+
+- Cross Backend join currently supports only integer keys
+- Cross Backend support has very different scalability according to the direction of the Join, a join which involves sending IDs to a remote system will be possibly hundreds of times less scalable (e.g. thousands vs millions) to one where the IDs are fetched from a remote system.

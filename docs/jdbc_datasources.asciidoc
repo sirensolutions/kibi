@@ -1,0 +1,111 @@
+[[jdbc_datasources]]
+= JDBC Datasources
+
+== Setting up Siren to work with JDBC datasources.
+
+Siren can analyze data by querying directly remote datasources via JDBC.
+
+To be able to do this one needs to:
+
+- <<configuring-federate-with-jdbc, Configure the Federate backend with the JDBC drivers that you’ll be using>>
+- <<configuring-federate-with-jdbc, Create a “JDBC Datasource” from within the Siren Investigate UI>>
+- <<configuring-federate-with-jdbc, Create a Virtual Index from a JDBC datasource>>
+
+At this point the Virtual Index is effectively identical to a regular index i.e. one that is natively in Elasticsearch.
+
+[[configuring-federate-with-jdbc]]
+== Configuring the Federate Backend with JDBC Driver
+
+To configure the Federate JDBC connector:
+
+- Stop the elasticsearch cluster
+- Install Siren federate on each elasticsearch node. Instruction are available here:
+- Choose one node in the cluster and edit the elasticsearch.yml adding the parameter: node.attr.connector.jdbc: true
+- In the same elasticsearch node, add the jdbc driver (jar file) in the folder ES_FOLDER/plugins/siren-federate. The supported jdbc drivers are reported in the table below, with the url from where the drivers can be downloaded.
+- Restart elasticsearch
+
+.List of supported JDBC drivers
+|===
+|Name |JDBC class | Default port| Download Page Link if not included
+
+
+|PostgreSQL
+|org.postgresql.Driver
+|5432
+|https://jdbc.postgresql.org/download.html
+
+|MySQL
+|com.mysql.jdbc.Driver
+|3306
+|https://dev.mysql.com/downloads/connector/
+
+|Microsoft SQL Server 2017
+|com.microsoft.sqlserver.jdbc.SQLServerDriver
+|1433
+|https://www.microsoft.com/en-us/download/details.aspx?id=55539
+
+|Sybase ASE 15.7+
+|com.sybase.jdbc4.jdbc.SybDriver OR net.sourceforge.jtds.jdbc.Driver
+|5000
+|
+
+|Oracle 12c+
+|oracle.jdbc.OracleDriver
+|1521
+|http://www.oracle.com/technetwork/database/features/jdbc/default-2280470.html
+
+|Presto
+|com.facebook.presto.jdbc.PrestoDriver
+|8080
+|https://repo1.maven.org/maven2/com/facebook/presto/presto-jdbc/0.192/presto-jdbc-0.192.jar
+
+
+|Spark SQL 2.2+
+|com.simba.spark.jdbc4.Driver OR com.simba.spark.jdbc4.DataSource OR com.simba.spark.jdbc41.Driver OR com.simba.spark.jdbc41.DataSource
+|
+|https://www.simba.com/product/spark-drivers-with-sql-connector/
+
+|Dremio
+|com.dremio.jdbc.Driver
+|
+|https://download.siren.io/dremio-jdbc-driver-1.4.4-201801230630490666-6d69d32.jar
+
+|Impala
+|com.cloudera.impala.jdbc41.Driver
+|21050
+|https://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-42.html
+
+|===
+
+
+[[configuring-investigate-datasource]]
+== Siren Investigate Datasource Configuration
+
+Using Siren Investigate, go to “Management/Datasource”
+
+image::images/jdbc/select_datasource.png["Navigate to Management/Datasource",align="center"]
+
+Select the JDBC choice in the dropdown
+
+image::images/jdbc/select_jdbc_option.png["Select JDBC option",align="center"]
+
+Fill in the connection parameters, then press Save in the top right corner
+
+image::images/jdbc/fill_in_connection_params.png["Fill in connection parameters",align="center"]
+
+In this step, the user can check the configuration pressing the button “Test Connection”. If the settings are properly configured, this is the result:
+
+image::images/jdbc/test_connection.png["Test connection",align="center"]
+
+Press on “Yes, take me there” to map a table from the DB into an index pattern, as reported in the image below:
+
+image::images/jdbc/virtual_index_configuration.png["Virtual Index Configuration",align="center"]
+
+The “Virtual Index name” must be lowercase, the “Resource name” is the name of the table in the database. Once the Virtual Index is configured, press Save in the top right corner.
+The screenshot below shows what the user should see after saving. Press “Yes take me there” to map the index to this virtual index.
+
+image::images/jdbc/virtual_index_success.png["Virtual Index Configuration Success",align="center"]
+
+Press “Add Index Pattern” and fill in the name with the same name used for the Virtual Index, in this example “indexfromdb”, and press “Create”.
+
+image::images/jdbc/index_pattern_configuration.png["Index Pattern Configuration",align="center"]

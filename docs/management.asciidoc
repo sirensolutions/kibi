@@ -20,8 +20,7 @@ include::management/relations.asciidoc[]
 [[siren-investigate-settings-datasources]]
 == Datasources
 
-For an overview of datasources, please read the <<external_datasources>>
-chapter.
+For an overview of datasources, please read the <<jdbc_datasources>> and <<external_datasources>> chapters.
 
 
 [[siren-investigate-settings_queries]]

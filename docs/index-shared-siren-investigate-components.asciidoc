@@ -1,5 +1,7 @@
 include::relational_filter.asciidoc[]
 
+include::jdbc_datasources.asciidoc[]
+
 include::external_datasources.asciidoc[]
 
 include::kibi_gremlin_server.asciidoc[]

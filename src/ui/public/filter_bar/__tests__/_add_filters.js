@@ -21,7 +21,11 @@ describe('add filters', function () {
 
       // kibi: provide 'kibiState' service
       $provide.service('kibiState', function () {
-        return new MockState({ filters: [] });
+        return new MockState({
+          _getCurrentDashboardId: _.noop,
+          isSelectedEntityDisabled: _.constant(false),
+          getEntityURI: _.noop
+        });
       });
 
       appState = new MockState({ filters: [] });

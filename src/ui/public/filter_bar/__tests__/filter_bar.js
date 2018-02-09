@@ -31,7 +31,7 @@ describe('Filter Bar Directive', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
 
-    // kibi: added by kibi
+      // kibi: added by kibi
       $provide.service('kibiState', function () {
         return new MockState({
           _getCurrentDashboardId: _.noop,

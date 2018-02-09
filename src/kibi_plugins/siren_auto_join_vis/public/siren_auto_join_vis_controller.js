@@ -469,13 +469,16 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     .then((buttons) => {
       // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
       // assign data to $scope.buttons once the promises are done
-      const updateSourceCount = function (currentDashboardId, callback) {
+      const updateSourceCount = function (currentDashboardId, relationId) {
         const virtualButton = {
+          id: 'virtual-button' + this.sourceIndexPatternId + this.targetIndexPatternId + this.sourceField + this.targetField,
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
           targetField: this.sourceField,
           targetIndexPatternId: this.sourceIndexPatternId,
-          targetDashboardId: currentDashboardId
+          targetDashboardId: currentDashboardId,
+          indexRelationId: relationId,
+          type: 'INDEX_PATTERN'
         };
 
         return _addButtonQuery.call(self, [ virtualButton ], this.targetDashboardId)
@@ -495,9 +498,24 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           if (button.type === 'INDEX_PATTERN') {
             button.updateSourceCount = updateSourceCount;
           } else {
-            _.each(button.sub, (subButton) => {
-              subButton.updateSourceCount = updateSourceCount;
-            });
+            if (button.sub) {
+              for (const key in button.sub) {
+                if (button.sub.hasOwnProperty(key)) {
+                  _.each(button.sub[key], (subButton) => {
+                    subButton.updateSourceCount = updateSourceCount;
+                  });
+                }
+              }
+            }
+            if (button.altSub) {
+              for (const key in button.altSub) {
+                if (button.altSub.hasOwnProperty(key)) {
+                  _.each(button.altSub[key], (subButton) => {
+                    subButton.updateSourceCount = updateSourceCount;
+                  });
+                }
+              }
+            }
           }
           // Returns the count of documents involved in the join
           $scope.buttons[button.btnIndex] = button;

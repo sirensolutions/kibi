@@ -2,7 +2,8 @@ import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import { QueryBuilderFactory } from 'ui/kibi/helpers/query_builder';
 import _ from 'lodash';
 
-export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private, Promise, createNotifier) {
+export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private, Promise, createNotifier,
+                                                   ontologyClient, kibiMeta) {
   const queryBuilder = Private(QueryBuilderFactory);
   const relationsHelper = Private(RelationsHelperFactory);
 
@@ -100,8 +101,39 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
 
           // create the alias for the filter
           alias = alias.replace(/\$DASHBOARD/g, title);
-          alias = alias.replace(/\$COUNT/g, button.targetCount);
           button.joinSeqFilter.meta.alias = alias;
+          if (alias.indexOf('$COUNT') !== -1) {
+            button.joinSeqFilter.meta.alias_tmpl = alias;
+            return ontologyClient.getRelationById(button.indexRelationId)
+            .then((rel) => {
+              return button.updateSourceCount(currentDashboardId, rel.inverseOf)
+              .then(results => {
+                return new Promise((fulfill, reject) => {
+                // here we expect only 1 result
+                  const metaDefinitions = [{
+                    definition: results[0].button,
+                    callback: (error, meta) => {
+                      if (error) {
+                        notify.error(error);
+                        return reject(error);
+                      }
+                      if (button.isPruned) {
+                        button.joinSeqFilter.meta.isPruned = true;
+                        button.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total + '(*)');
+                      } else {
+                        button.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total);
+                      }
+                      switchToDashboard.apply(button);
+                      fulfill(meta.hits.total);
+                    }
+                  }];
+                  kibiMeta.getMetaForRelationalButtons(metaDefinitions);
+                });
+              });
+            });
+          } else {
+            switchToDashboard.apply(button);
+          }
           switchToDashboard.apply(button);
         } else {
           button.joinSeqFilter.meta.alias_tmpl = '';

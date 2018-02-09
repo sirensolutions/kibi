@@ -1,3 +1,5 @@
+include::indexes_and_relations.asciidoc[]
+
 include::relational_filter.asciidoc[]
 
 include::jdbc_datasources.asciidoc[]

@@ -1,0 +1,169 @@
+[[indexes_and_relations]]
+
+= Indexes and Relations
+
+image::images/indexes_and_relations/indexes_and_relations.png["Indexes and Relations",align="center"]
+
+In Indexes and Relation you can define relationships between your data tables,
+on the local Siren Elasticsearch nodes or mapped remotely to JDBC databases,
+and from there you will be able to create dashboards where you can have
+"relational pivoting" buttons (going from the set of currently selected records
+to the set of connected records in another table).
+
+Operations that you can do
+
+- Configure which Elasticsearch Index(es) or Virtual Index(es) you are going
+  to have available inside Siren Investigate. With Elasticsearch indexes, you can also create new "scripted fields".
+- Define relations among these Indexes. This effectively defines a data model,
+  also known as ontology (this effectively makes it so that "Indexes" are now
+  treated as "Classes" and the records can be seen as "Entities") .
+  The ontology also specifies properties of these indexes/classes e.g.
+  icons, labels etc
+- Define "Entity Identifiers": these are Classes of strings or integers you
+  might have here and there in the data representing an entity which are
+  "well understood as such" but you do not (yet?) have a specific index listing
+  them.
+  Typical Entity identifiers are things like IP Address:
+  It’s an entity (and you want to join on it) but you don’t have an
+  "index of all the IPs".
+  Other examples are normalized phone numbers, hashfunctions, userids,
+  name of locations or cities, tags or labels etc.
+
+In summary, from now on with "Classes" we will refer to either Index Patterns or
+EIDs and for Entities we’ll refer to either the individual records that are in
+Index Patterns or the individual EID values (e.g. an IP addresses)
+
+== Creating an Index Pattern.
+
+Just use the `Add Index Pattern` button.
+
+== Creating relationships
+
+Relationships are defined from a Class to other Classes
+(But it is not possible to define a relationships between 2 EIDs).
+
+In case of Index Patterns one typically defines
+A relationship is defined as a join operation between two indices with
+the following fields:
+
+- The Left Field: the field of the local index to join on;
+- Right Class: (the EID or Index pattern) to connect to;
+- Right Field (only if the Right Class is an Index Pattern): the field of the right index to join with; and
+- Label: the label of the relation.
+
+image::images/indexes_and_relations/creating_relations.png["Indexes and Relations",align="center"]
+
+
+New relations are created with the `Add Relation` button. Relations do NOT need
+to be created in both originating and target classes as they appear
+automatically in both edit screens when created.
+
+Pressing the visualize data model as a graph button will show it in a visual
+representation where the currently selected class is highlighted, e.g. in this case
+
+image::images/indexes_and_relations/relations_graph_tab.png["Relations Graph",align="center"]
+
+== How to use Entity Identifiers
+
+Siren 10 introduces the concept of an "Entity Identifier" (EID).
+Previously, in Siren, to be able to join between two indexes you had to
+specify that there existed a direct connection between them. e.g.
+if you had 2 logs which could be connected by the IP value,
+you would have specified a direct connection, thus creating a relational
+button between the two.
+
+But what if you have many indexes having IPs (or anything else: MAC Addresses,
+User IDs, URLs, Port Numbers, Transaction IDs, etc) that are in multiple roles
+(Source IP, Destination IP) and it might be useful to join from any of these
+roles and indexes to any other role and index?
+
+Our new relational model allows this. Automatically.
+
+For example, in this configuration, we have defined the IP concept as an EID
+and tied it in with other indexes where "IPs" show up. For each connection,
+we specify the name of the relation that describes the role of the IP in that
+index (Is it the "source" IP in that log or the "blocked" IP?).
+
+image::images/indexes_and_relations/relations_graph_2.png["Relations Graph",align="center"]
+
+With just this configuration, you can now have buttons that explore the ontology
+and show you all possible matches across your data. At this point,
+one click and you’ll be pivoting to the target dashboard, with the right
+relational filter applied.
+
+For example, to see the records of the Apache logs where the Agent IP matches
+the Destination IP in the current log, just navigate from "Destination IP"
+as per the picture:
+
+image::images/indexes_and_relations/automatic_rel_buttons.png["Automatic relational buttons",align="center"]
+
+EIDs are obviously great for anything that identifies "things" across indexes
+but does not have an index per se (otherwise, you’d pivot to it).
+Things like Phone Numbers, but also Tags, Labels from standalone indexes, etc.
+In practice a single excel spreadsheet can be seen as a "knowledge graph"
+if you consider labels as identifiers that interconnect records.
+Here is an example with EIDs (Tissue and Organism) in a Life Science deployment.
+
+image::images/indexes_and_relations/knowledge_graph.png["Knowledge Graph",align="center"]
+
+Note that the automatic connections between dashboards are seen when using the
+new relational button. The old one will still require manual inputs on which
+relation to show where.
+
+image::images/indexes_and_relations/visualize_screen.png["Visualise",align="center"]
+
+Again, this is how the new relational button appears in action.
+
+image::images/indexes_and_relations/automatic_rel_buttons.png["Automatic relational buttons",align="center"]
+
+== How to name relations
+
+It is well known that naming is a very hard problem in any domain.
+In Siren naming entities and relationships wrong will result in hard to
+navigate dashboards.
+
+When naming things one must put oneselves into the shoes of the user in the
+moment where the relational navigation is performed. Say that i am looking at
+"companies", how would i refer to "investments" ?
+
+A possibly natural way is to say a "company" received and "investment".
+On the other hand if i am thinking of investment, i can say it has been
+"secured by" a company.
+
+In the UI, look at the directions of the arrows and think of the sentences
+"X relationship Y and Y relationship X", for example.
+
+image::images/indexes_and_relations/inverse_relation.png["How to name relations",align="center"]
+
+In this case we’re using two different verbs, but often the simple solution
+is to use active/passive e.g. "saw" and "seen by".
+Sometimes the inverse is the same property is the same e.g.
+"brother of" or "spouse".
+
+As a rule of thumb , it is always best to keep things quite short.
+E.g. "source" "is source of" and the like.
+
+
+== The Automatic Relational Button component.
+
+The automatic relational button component typically requires no configuration
+and can be reused across any dashboard
+(there is no need to create different ones for different dashboards).
+
+By default, it will show all the possible relationships to any dashboard
+which has an associated "saved search" which is based on an Index Pattern
+which is relationally connected to the Index pattern which is associated to
+the Saved Search underneath the current dashboard.
+
+It is really much much simpler than it sounds. :) just drop this component
+into a dashboard which is associated with a Saved Search and it will show you
+all the possible relational connections with other dashboards which have
+related entities.
+
+=== Visibility settings
+
+In the component setting one, can change the visibility status of each individual
+connection at multiple levels.
+
+The 3 state eye component allows to specify "never show", "always show" or
+"inherit show from the previous".

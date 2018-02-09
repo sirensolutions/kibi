@@ -335,7 +335,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       $scope.buttons = new Array(buttons.length);
       const updateSourceCount = function (currentDashboardId, relationId) {
         const virtualButton = {
-          id: this.sourceIndexPatternId + this.targetIndexPatternId + this.sourceField + this.targetField,
+          id: 'virtual-button' + this.sourceIndexPatternId + this.targetIndexPatternId + this.sourceField + this.targetField,
           sourceField: this.targetField,
           sourceIndexPatternId: this.targetIndexPatternId,
           targetField: this.sourceField,

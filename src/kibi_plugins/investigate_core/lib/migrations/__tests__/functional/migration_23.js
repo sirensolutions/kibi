@@ -73,7 +73,7 @@ describe('investigate_core/migrations/functional', function () {
 
         const mapping = await configuration.client.indices.getMapping({ type: 'dashboard', index: indexName });
         const dashboardMapping = mapping[indexName].mappings.dashboard;
-        const defaultRefreshIntervalMapping = await migration.getDefaultRefreshIntervalMapping();
+        const defaultRefreshIntervalMapping = migration.getDefaultRefreshIntervalMapping();
 
         expect(dashboardMapping.properties.refreshInterval).to.eql(defaultRefreshIntervalMapping);
 

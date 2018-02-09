@@ -17,6 +17,10 @@
           class="warning"
           ng-if="!!button.warning"
           title="{{button.warning}}">(*)</span>
+        <span ng-if="button.targetCount === undefined && button.showSpinner" class="siren-spinner">
+          <div class="cube1"></div>
+          <div class="cube2"></div>
+        </span>
         <span class="go-to-dashboard">
           <i class="fa fa-arrow-right"></i>
         </span>
@@ -76,6 +80,10 @@
                   class="warning"
                   ng-if="!!subButton.warning"
                   title="{{subButton.warning}}">(*)</span>
+                <span ng-if="subButton.targetCount === undefined && subButton.showSpinner" class="siren-spinner">
+                  <div class="cube1"></div>
+                  <div class="cube2"></div>
+                </span>
                 <span class="go-to-dashboard">
                   <i class="fa fa-arrow-right"></i>
                 </span>
@@ -109,6 +117,10 @@
                   class="warning"
                   ng-if="!!altSubButton.warning"
                   title="{{altSubButton.warning}}">(*)</span>
+                <span ng-if="altSubButton.targetCount === undefined && altSubButton.showSpinner" class="siren-spinner">
+                  <div class="cube1"></div>
+                  <div class="cube2"></div>
+                </span>
                 <span class="go-to-dashboard">
                   <i class="fa fa-arrow-right"></i>
                 </span>
@@ -141,6 +153,10 @@
                 class="warning"
                 ng-if="!!subButton.warning"
                 title="{{subButton.warning}}">(*)</span>
+              <span ng-if="subButton.targetCount === undefined && subButton.showSpinner" class="siren-spinner">
+                <div class="cube1"></div>
+                <div class="cube2"></div>
+              </span>
               <span class="go-to-dashboard">
                 <i class="fa fa-arrow-right"></i>
               </span>

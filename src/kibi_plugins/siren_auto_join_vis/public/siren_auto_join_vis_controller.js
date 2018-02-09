@@ -482,9 +482,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   /*
    * Update counts in reaction to events.
    * Filter buttons by indexPatternId === domainIndexPattern (used in edit mode)
-   *
-   * We throttle this function because adding a filter to the dashboard triggers a double update,
-   * one for 'AppState' and one for 'filters' change.
    */
   const updateButtons = function (reason, indexPatternId) {
     if (!kibiState.isSirenJoinPluginInstalled()) {
@@ -686,7 +683,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     updateButtons.call(this, 'AppState changes');
   });
 
-  $scope.$listen(queryFilter, 'update', function (test) {
+  $scope.$listen(queryFilter, 'update', function () {
     updateButtons.call(this, 'filters change');
   });
 

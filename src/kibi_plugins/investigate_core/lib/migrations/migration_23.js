@@ -60,7 +60,7 @@ export default class Migration23 extends Migration {
   /**
    * Exposes the default refreshInterval mapping object
    */
-  async getDefaultRefreshIntervalMapping() {
+  getDefaultRefreshIntervalMapping() {
     return this._defaultRefreshIntervalMapping;
   }
 
@@ -86,7 +86,7 @@ export default class Migration23 extends Migration {
     const mapping = dashboardMapping[this._index].mappings;
 
     if(this._isUpgradeable(mapping) !== 0) {
-      mapping.dashboard.properties.refreshInterval = await this.getDefaultRefreshIntervalMapping();
+      mapping.dashboard.properties.refreshInterval = this.getDefaultRefreshIntervalMapping();
 
       await this._client.indices.putMapping({
         index: this._index,

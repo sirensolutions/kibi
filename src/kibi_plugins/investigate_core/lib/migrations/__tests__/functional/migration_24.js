@@ -4,8 +4,8 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'sinon';
 import requirefrom from 'requirefrom';
-import Migration from '../../migration_23';
-import Scenario from './scenarios/migration_23/scenario';
+import Migration from '../../migration_24';
+import Scenario from './scenarios/migration_24/scenario';
 import url from 'url';
 
 const serverConfig = requirefrom('test')('server_config');
@@ -38,11 +38,11 @@ describe('investigate_core/migrations/functional', function () {
     await scenarioManager.reload(Scenario);
   });
 
-  describe('Investigate Core - Migration 23 - Functional test', function () {
+  describe('Investigate Core - Migration 24 - Functional test', function () {
     let warningSpy;
     let configuration;
 
-    describe('refreshInterval missing from index mapping', function () {
+    describe('sourceFilters missing from index mapping', function () {
       const indexName = '.siren2';
 
       beforeEach(() => {
@@ -71,18 +71,18 @@ describe('investigate_core/migrations/functional', function () {
         let result = await migration.upgrade();
         expect(result).to.be(1);
 
-        const mapping = await configuration.client.indices.getMapping({ type: 'dashboard', index: indexName });
-        const dashboardMapping = mapping[indexName].mappings.dashboard;
-        const defaultRefreshIntervalMapping = migration.getDefaultRefreshIntervalMapping();
+        const mapping = await configuration.client.indices.getMapping({ type: 'index-pattern', index: indexName });
+        const indexPatternMapping = mapping[indexName].mappings['index-pattern'];
+        const defaultIndexPatternMapping = await migration.getDefaultSourceFiltersMapping();
 
-        expect(dashboardMapping.properties.refreshInterval).to.eql(defaultRefreshIntervalMapping);
+        expect(indexPatternMapping.properties.sourceFilters).to.eql(defaultIndexPatternMapping);
 
         result = await migration.count();
         expect(result).to.be(0);
       });
     });
 
-    describe('refreshInterval exists in mapping', function () {
+    describe('sourceFilters exists in mapping', function () {
       const indexName = '.siren1';
 
       beforeEach(() => {

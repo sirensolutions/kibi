@@ -29,7 +29,7 @@ describe('saved_objects_api/functional', function () {
       paths: {
         type: 'text'
       },
-      sourceFiltering: {
+      sourceFilters: {
         type: 'text'
       },
       timeFieldName: {
@@ -48,19 +48,19 @@ describe('saved_objects_api/functional', function () {
       return helper.testCreation();
     }));
 
-    it('should index a visualization correctly.', wrapAsync(async () => {
+    it('should index an index-pattern correctly.', wrapAsync(async () => {
       return helper.testIndexing();
     }));
 
-    it('should create mappings when creating a visualization if they do not exist.', wrapAsync(async () => {
+    it('should create mappings when creating an index-pattern if they do not exist.', wrapAsync(async () => {
       return helper.testMappingsCreation(expectedMapping);
     }));
 
-    it('should create mappings when indexing a visualization if they do not exist.', wrapAsync(async () => {
+    it('should create mappings when indexing an index-pattern if they do not exist.', wrapAsync(async () => {
       return helper.testMappingsIndexing(expectedMapping);
     }));
 
-    it('should not create mappings when creating a visualization if they already exist.', wrapAsync(async () => {
+    it('should not create mappings when creating an index-pattern if they already exist.', wrapAsync(async () => {
       return helper.testSkipMappings();
     }));
 

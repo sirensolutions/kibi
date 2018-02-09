@@ -1,0 +1,10 @@
+== Siren Investigate 10.0.0
+
+[float]
+=== Siren Investigate Changes
+
+Fixed: 
+
+Changed:
+
+`Plugins`

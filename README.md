@@ -1,4 +1,4 @@
-# Siren Investigate 10.0-SNAPSHOT
+# Siren Investigate 10.0.0-beta-1
 
 Siren Investigate extends Kibana 5.6.5 with data intelligence features; the core feature of
 Siren Investigate is the capability to join and filter data from multiple Elasticsearch

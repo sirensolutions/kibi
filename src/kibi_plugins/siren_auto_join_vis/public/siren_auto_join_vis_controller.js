@@ -215,6 +215,10 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         if (!button.altSub[subButton.label]) {
           button.altSub[subButton.label] = [];
         }
+        if ($scope.btnCountsEnabled()) {
+          altSubButton.showSpinner = true;
+        }
+
         button.altSub[subButton.label].push(altSubButton);
       });
     };
@@ -362,7 +366,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                 `No button has a source index matching the current dashboard index: ${currentDashboardIndex}.`;
             }
 
-            // populate subButtons for EID buttons
+            // populate subButtons for EID buttons and add spinner flag
             const subButtonPromises = [];
             _.each(buttons, (button) => {
               if (button.type === 'VIRTUAL_ENTITY') {
@@ -411,6 +415,9 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                                 if (!button.sub[key]) {
                                   button.sub[key] = [];
                                 }
+                                if ($scope.btnCountsEnabled()) {
+                                  subButton.showSpinner = true;
+                                }
                                 button.sub[key].push(subButton);
                               });
                             });
@@ -420,6 +427,10 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                     });
                   })
                 );
+              } else {
+                if ($scope.btnCountsEnabled()) {
+                  button.showSpinner = true;
+                }
               }
             });
 

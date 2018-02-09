@@ -5,7 +5,7 @@ The {kibi-name} server reads properties from the `siren.yml` file on startup. Th
 on `localhost:{kibi-default-port}`. To change the host or port number, or connect to Elasticsearch running on a different machine,
 you'll need to update your `siren.yml` file. You can also enable SSL and set a variety of other options.
 
-External datasource configuration is documented in the <<external_datasources>> chapter,
+External datasource configuration is documented in the <<jdbc_datasources>> and <<external_datasources>> chapters,
 while access control configuration is documented in the <<searchguard_integration>> chapter.
 
 .Environment Variable Placeholders

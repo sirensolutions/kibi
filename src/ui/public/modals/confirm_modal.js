@@ -54,6 +54,8 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     confirmScope.confirmButtonText = options.confirmButtonText;
     confirmScope.cancelButtonText = options.cancelButtonText;
     confirmScope.title = options.title;
+    // kibi: options.messageAsHtml added by kibi
+    confirmScope.messageAsHtml = options.messageAsHtml;
     confirmScope.onConfirm = () => {
       destroy();
       options.onConfirm();

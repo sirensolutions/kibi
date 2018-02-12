@@ -357,7 +357,12 @@ export function QuickDashboardProvider(
         savedDashId = dashId;
       })
       .then(() => dashboardGroups.computeGroups('Quick Dashboard added'))
-      .then(() => dashboardGroups.updateMetadataOfDashboardIds([ savedDashId ], true))
+      .then(groups => dashboardGroups.updateMetadataOfDashboardIds(_(groups)
+        .filter(group => !group.collapsed || group.virtual)
+        .map('dashboards')
+        .flatten()
+        .map('id')
+        .value()))
       .then(() => args);
   }
 

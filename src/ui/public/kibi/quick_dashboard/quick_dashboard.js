@@ -208,15 +208,24 @@ export function QuickDashboardProvider(
 
     return savedDashboards.get('')
       .then(dash => {
-        // Borrowing dashboardState from the dashboard app, but we
+        // Borrowing dashState from the dashboard app, but we
         // don't want its state changes to taint the discover app state,
         // so saveState() will be overridden
-
         const dashState = new DashboardState(dash, AppState);
-        dashState.appState.timeRestore = false;
         dashState.saveState = _.noop;
 
         dashState.setTitle(userSpecs.title);
+        dashState.appState.timeRestore = false;
+
+        // Filters are copied from current, but they will be moved to the
+        // assigned saved search - so they must be cleared on the dashState
+        // to avoid duplication
+        const query = { query_string: { analyze_wildcard: true, query: '*' } };
+        const filters = [];
+
+        dashState.appState.query = query;
+        dashState.appState.filters = filters;
+        dashState.applyFilters(query, filters);
 
         args.dashboard = dash;
         args.dashState = dashState;
@@ -249,12 +258,13 @@ export function QuickDashboardProvider(
   }
 
   function saveVisualizations(args) {
-    const { savedVises } = args;
+    const { savedVises, savedSearch } = args;
 
     return Promise.all(savedVises.map(sVis => {
       // There *MUST NOT* be a 'duplicate title' popup at this stage.
       // We'll be simulating a previous save.
       sVis.lastSavedTitle = sVis.title;
+      sVis.savedSearchId = savedSearch.id;
 
       return sVis.save();
     }))
@@ -393,13 +403,10 @@ export function QuickDashboardProvider(
       .then(() => args);
   }
 
-  function applyFilters(args) {
-    const { dashState, query, filters, timeFilter } = args;
+  function applyTimeFilter(args) {
+    const { dashState, timeFilter } = args;
 
-    // Filters are applied by in the dashboard app state.
-    dashState.applyFilters(query, filters);
-
-    // Time filters, instead, are saved in the kibiState.
+    // Time filter will be retained. It's saved in the kibiState.
     kibiState._saveTimeForDashboardId(
       dashState.savedDashboard.id,
       timeFilter.time.mode, timeFilter.time.from, timeFilter.time.to);
@@ -466,9 +473,9 @@ export function QuickDashboardProvider(
       .then(() => progressMap([
         { fn: makeEmptyDashboard, text: 'Making new Dashboard' },
         { fn: makeVisualizations, text: 'Making Visualizations', countFn: makeVisSteps },
+        { fn: saveSavedSearch,    text: 'Saving Saved Search' },
         { fn: saveVisualizations, text: 'Saving Visualizations' },
         { fn: fillDashboard,      text: 'Compiling Dashboard' },
-        { fn: saveSavedSearch,    text: 'Saving Saved Search' },
         { fn: saveDashboard,      text: 'Saving Dashboard' }
       ], {
         title: 'Populating Dashboard...',
@@ -477,7 +484,7 @@ export function QuickDashboardProvider(
         countMap: op => op.countFn ? op.countFn(args) : 1
       }).then(() => args))
       .then(removeDupDashboard)
-      .then(applyFilters)
+      .then(applyTimeFilter)
       .then(openDashboardPage)
       .catch(err => undoSaves(args)
         .then(() => { err && notify.error(err); }));

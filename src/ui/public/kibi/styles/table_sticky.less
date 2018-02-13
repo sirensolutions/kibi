@@ -1,0 +1,18 @@
+@import "~ui/styles/variables/colors.less";
+
+
+/*
+ * Sticky header that degrades gracefully if no browser support is present
+ */
+
+table.table-sticky {
+  border-collapse: separate;
+
+  th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    border-bottom: 1px solid @gray13;
+  }
+}
+

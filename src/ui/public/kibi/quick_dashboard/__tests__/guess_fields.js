@@ -1,13 +1,13 @@
 import { GuessFieldsProvider } from '../guess_fields';
 
 import { QuickDashModalsProvider } from '../quickdash_modals';
-import { ProgressMapProvider } from '../progress_map';
 import { QuickDashMakeVisProvider } from '../make_visualizations';
 
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import { promiseMapSeries } from '../commons';
+import { ProgressMapProvider } from 'ui/kibi/modals/progress_map';
+import { promiseMapSeries } from 'ui/kibi/utils/promise';
 
 import { IndexedArray } from 'ui/indexed_array';
 

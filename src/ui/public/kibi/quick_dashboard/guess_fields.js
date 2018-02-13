@@ -1,8 +1,10 @@
 import * as visTypes from './vistypes';
 import { QuickDashModalsProvider } from './quickdash_modals';
-import { ProgressMapProvider } from './progress_map';
-import { promiseMapSeries, fieldSpec, queryIsAnalyzed } from './commons';
 import { QuickDashMakeVisProvider } from './make_visualizations';
+
+import { ProgressMapProvider } from 'ui/kibi/modals/progress_map';
+import { fieldSpec, queryIsAnalyzed } from 'ui/kibi/utils/field';
+import { promiseMapSeries } from 'ui/kibi/utils/promise';
 
 import _ from 'lodash';
 
@@ -152,7 +154,7 @@ export function GuessFieldsProvider(
     const { type } = field;
     if(type !== 'string') { return type; }
 
-    return queryIsAnalyzed(mappings, index, field)
+    return queryIsAnalyzed(mappings, field)
       .then(analyzed => analyzed ? 'text' : 'keyword');
   }
 
@@ -413,8 +415,8 @@ export function GuessFieldsProvider(
 
     return progressMap(operations, {
       title: 'Autoselect Top 10',
-      textMap: (op, o, progress) => op.textMap(op.val, progress),
-      valueMap: (op, o, progress) => op.valueMap(op.val, progress)
+      valueMap: (op, o, progress) => op.valueMap(op.val, progress),
+      stepMap: (op, o, progress) => op.textMap(op.val),
     })
     .then(() => args);
   }

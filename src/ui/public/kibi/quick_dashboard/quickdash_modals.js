@@ -1,13 +1,13 @@
 import createTemplate from './create_modal.html';
 import titleConflictTemplate from './title_conflict_modal.html';
 import guessReportTemplate from './guess_report.html';
-import progressTemplate from './progress_modal.html';
 import experimentalWarningTemplate from './experimental_warning.html';
 
 import './create_modal.less';
 import './guess_report.less';
+import 'ui/kibi/styles/table_sticky.less';
 
-import { BaseModalProvider } from './base_modal';
+import { BaseModalProvider } from 'ui/kibi/modals/base_modal';
 
 import _ from 'lodash';
 
@@ -68,10 +68,6 @@ export function QuickDashModalsProvider(Private) {
 
     guessReport(opts) {
       return baseModal(guessReportTemplate, opts);
-    },
-
-    progress(opts) {
-      return baseModal(progressTemplate, opts);
     }
   };
 }

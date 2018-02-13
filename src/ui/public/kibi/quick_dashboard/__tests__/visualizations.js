@@ -148,6 +148,7 @@ function initTest() {
     name: 'field',
     displayName: 'field',
     type: undefined,
+    esType: undefined,
     aggregatable: true,
     visualizable: true
   };
@@ -161,6 +162,8 @@ function initTest() {
       initialSet: [ field ]
     })
   };
+
+  field.indexPattern = field2.indexPattern = indexPattern;
 
   uniqueEsResp = _.cloneDeep(baseEsResp);
   termsEsResp = _.cloneDeep(baseEsResp);
@@ -176,6 +179,7 @@ describe('QuickDashboard Visualization Tests', function () {
     it('Returns nulls for unknown field types', function () {
       field.name = 'unknownField';
       field.type = 'unknown';
+      field.esType = 'unknown';
 
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
@@ -187,8 +191,9 @@ describe('QuickDashboard Visualization Tests', function () {
     it('Returns nulls for not-aggregatable fields', function () {
       field.aggregatable = false;
 
-      function doTest(fieldType) {
+      function doTest(fieldType, fieldEsType = fieldType) {
         field.type = fieldType;
+        field.esType = fieldEsType;
 
         return visBuilder(indexPattern, [ field ])
           .then(vises => {
@@ -198,11 +203,11 @@ describe('QuickDashboard Visualization Tests', function () {
       }
 
       return Promise.resolve()
-        .then(doTest('string'))
-        .then(doTest('number'))
-        .then(doTest('date'))
-        .then(doTest('boolean'))
-        .then(doTest('geo_point'));
+        .then(() => doTest('string'))
+        .then(() => doTest('number', 'long'))
+        .then(() => doTest('date'))
+        .then(() => doTest('boolean'))
+        .then(() => doTest('geo_point'));
     });
   });
 
@@ -211,6 +216,7 @@ describe('QuickDashboard Visualization Tests', function () {
       uniqueEsResp.aggregations.result.value = 5;
 
       field.type = 'string';
+      field.esType = 'string';
 
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
@@ -228,9 +234,11 @@ describe('QuickDashboard Visualization Tests', function () {
 
       field.name = 'textField';
       field.type = 'string';
+      field.esType = 'text';
 
       field2.name = 'analyzedStringField';
       field2.type = 'string';
+      field2.esType = 'string';
 
       return visBuilder(indexPattern, [ field, field2 ])
         .then(vises => {
@@ -249,9 +257,11 @@ describe('QuickDashboard Visualization Tests', function () {
 
       field.name = 'notAnalyzedStringField';
       field.type = 'string';
+      field2.esType = 'string';
 
       field2.name = 'keywordField';
       field2.type = 'string';
+      field2.esType = 'keyword';
 
       return visBuilder(indexPattern, [ field, field2 ])
         .then(vises => {
@@ -270,9 +280,11 @@ describe('QuickDashboard Visualization Tests', function () {
 
       field.name = 'notAnalyzedStringField';
       field.type = 'string';
+      field.esType = 'string';
 
       field2.name = 'keywordField';
       field2.type = 'string';
+      field2.esType = 'keyword';
 
       return visBuilder(indexPattern, [ field, field2 ])
         .then(vises => {
@@ -288,6 +300,7 @@ describe('QuickDashboard Visualization Tests', function () {
       uniqueEsResp.aggregations.result.value = 5;
 
       field.type = 'number';
+      field.esType = 'float';
 
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
@@ -298,6 +311,7 @@ describe('QuickDashboard Visualization Tests', function () {
 
     it('Returns histogram otherwise', function () {
       field.type = 'number';
+      field.esType = 'long';
 
       function doTest(uniques) {
         return function () {
@@ -312,16 +326,17 @@ describe('QuickDashboard Visualization Tests', function () {
       }
 
       return Promise.resolve()
-        .then(doTest(50))
-        .then(doTest(500))
-        .then(doTest(5e3))
-        .then(doTest(5e4));
+        .then(() => doTest(50))
+        .then(() => doTest(500))
+        .then(() => doTest(5e3))
+        .then(() => doTest(5e4));
     });
   });
 
   describe('Date fields', function () {
     it('Returns line chart', function () {
       field.type = 'date';
+      field.esType = 'date';
 
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
@@ -334,6 +349,7 @@ describe('QuickDashboard Visualization Tests', function () {
   describe('Bool fields', function () {
     it('Returns pie chart', function () {
       field.type = 'boolean';
+      field.esType = 'boolean';
 
       return visBuilder(indexPattern, [ field ])
         .then(vises => {
@@ -346,6 +362,7 @@ describe('QuickDashboard Visualization Tests', function () {
   describe('GeoPoint fields', function () {
     it('Returns tile_map chart', function () {
       field.type = 'geo_point';
+      field.esType = 'geo_point';
 
       return visBuilder(indexPattern, [ field ])
         .then(vises => {

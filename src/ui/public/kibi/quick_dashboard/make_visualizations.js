@@ -1,8 +1,10 @@
+import * as visTypes from './vistypes';
+
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import { promiseMapSeries, fieldSpec, queryIsAnalyzed } from './commons';
-import * as visTypes from './vistypes';
+import { fieldSpec, queryIsAnalyzed } from 'ui/kibi/utils/field';
+import { promiseMapSeries } from 'ui/kibi/utils/promise';
 
 import _ from 'lodash';
 
@@ -314,7 +316,7 @@ export function QuickDashMakeVisProvider(
 
       return Promise.all([
         evalTermsAgg(index, field, TERM_ELEMENT_COUNT_4_TABLE, query),
-        queryIsAnalyzed(mappings, index, field)
+        queryIsAnalyzed(mappings, field)
       ])
       .then(([termsEval, isAnalyzed]) => {
         // Use tagcloud if type is analyzed
@@ -515,36 +517,31 @@ export function QuickDashMakeVisProvider(
           return Promise.reject(0);
         }
 
-        let output;
+        if(!field.aggregatable) {
+          return null;
+        }
 
         switch (field.type) {
           case 'number':
-            output = analyzeNumber(index, field, query);
-            break;
+            return analyzeNumber(index, field, query);
 
           case 'string':
           case 'text':
           case 'keyword':
-            output = analyzeString(index, field, query);
-            break;
+            return analyzeString(index, field, query);
 
           case 'date':
-            output = analyzeDate(index, fields, field, query);
-            break;
+            return analyzeDate(index, fields, field, query);
 
           case 'boolean':
-            output = createVis(index, field, visTypes.PIE, 'terms', { size: 2 });
-            break;
+            return createVis(index, field, visTypes.PIE, 'terms', { size: 2 });
 
           case 'geo_point':
-            output = createVis(index, field, visTypes.TILE_MAP, 'geohash_grid');
-            break;
+            return createVis(index, field, visTypes.TILE_MAP, 'geohash_grid');
 
           default:
-            output = null;
+            return null;
         }
-
-        return output;
       })
       .then(vises => options.addSirenDataTable && hasSirenDataTable()
         ? addSirenDataTable(index, fields, vises, progress)

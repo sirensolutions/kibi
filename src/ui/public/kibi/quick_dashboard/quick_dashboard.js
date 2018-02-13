@@ -1,7 +1,8 @@
 import { QuickDashModalsProvider } from './quickdash_modals.js';
 import { QuickDashMakeVisProvider } from './make_visualizations';
-import { ProgressMapProvider } from './progress_map';
 import { panelsLayout } from './panels_layout';
+
+import { ProgressMapProvider } from 'ui/kibi/modals/progress_map';
 
 import { DashboardStateProvider } from 'plugins/kibana/dashboard/dashboard_state';
 import { createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
@@ -501,7 +502,7 @@ export function QuickDashboardProvider(
       .then(makeFilteringQuery)
       .then(() => progressMap([
         { fn: makeEmptyDashboard, text: 'Making new Dashboard' },
-        { fn: makeVisualizations, text: 'Making Visualizations', countFn: makeVisSteps },
+        { fn: makeVisualizations, countFn: makeVisSteps },
         { fn: saveSavedSearch,    text: 'Saving Saved Search' },
         { fn: saveVisualizations, text: 'Saving Visualizations' },
         { fn: fillDashboard,      text: 'Compiling Dashboard' },
@@ -509,8 +510,7 @@ export function QuickDashboardProvider(
       ], {
         title: 'Populating Dashboard...',
         valueMap: (op, o, progress) => op.fn(args, progress),
-        textMap: 'text',
-        countMap: op => op.countFn ? op.countFn(args) : 1
+        stepMap: op => op.text || op.countFn(args)
       }).then(() => args))
       .then(removeDupDashboard)
       .then(applyTimeFilter)

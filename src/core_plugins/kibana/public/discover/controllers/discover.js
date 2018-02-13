@@ -591,7 +591,7 @@ function discoverController($scope, config, courier, $route, $window, createNoti
     const timeField = index.fields.byName[index.timeFieldName];
     const fields = _.without(index.fields, timeField);
 
-    return guessFields(index, fields)
+    return guessFields(index, fields, { savedSearch })
       .then(guessedFields => {
         if(!guessedFields) { return; }
 

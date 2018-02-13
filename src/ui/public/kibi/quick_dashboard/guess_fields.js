@@ -92,32 +92,23 @@ export function GuessFieldsProvider(
       });
   }
 
-  function querySamplesAndDocsCount(index, field) {
-    const { timeFieldName } = index;
-
+  function querySamplesAndDocsCount(index, field, query) {
     const request = {
       index: index.id,
       ignore_unavailable: true,
       body: {
         size: 50,
-        query: {
-          bool: {
-            must: [{ exists: fieldSpec(field) }],
-            must_not: []
-          }
-        }
+        query: _.cloneDeep(query)
       },
     };
 
-    if(timeFieldName) {
-      // Values not associated to time are never displayed in charts
-      const timeField = index.fields.byName[timeFieldName];
-      request.body.query.bool.must.push({ exists: fieldSpec(timeField) });
-    }
+    const { must, must_not } = request.body.query.bool;
+
+    must.push({ exists: fieldSpec(field) });
 
     if(field.type === 'string') {
       // No empty strings
-      request.body.query.bool.must_not.push({ term: { [field.name]: '' } });
+      must_not.push({ term: { [field.name]: '' } });
     }
 
     return es.search(request)
@@ -127,12 +118,13 @@ export function GuessFieldsProvider(
       }));
   }
 
-  function queryUniquesCount(index, field) {
+  function queryUniquesCount(index, field, query) {
     const request = {
       index: index.id,
       ignore_unavailable: true,
       body: {
         size: 0,
+        query,
         aggs: {
           result: {
             cardinality: _.assign({
@@ -147,8 +139,9 @@ export function GuessFieldsProvider(
       .then(resp => resp.aggregations.result.value);
   }
 
-  function querySavedVis(index, field) {
+  function querySavedVis(index, field, query) {
     return visMaker.makeSavedVisualizations(index, [ field ], {
+      query,
       addSirenDataTable: false,
       addSirenMultiChart: false
     })
@@ -369,8 +362,22 @@ export function GuessFieldsProvider(
     return args;
   }
 
+  function makeFilteringQuery(args) {
+    const { savedSearch } = args;
+
+    const queryPromise = savedSearch
+      ? savedSearch.searchSource._flatten().then(req => req.body.query)
+      : Promise.resolve({ bool: { must: [], must_not: [] } });
+
+    return queryPromise
+      .then(query => {
+        args.query = query;
+        return args;
+      });
+  }
+
   function makeQueries(args) {
-    const { index, workStats } = args;
+    const { index, query, workStats } = args;
 
     const fieldQueryFunctions = [
       querySamplesAndDocsCount,
@@ -386,10 +393,12 @@ export function GuessFieldsProvider(
     function fieldValueMap(fieldStats, progress) {
       const { field } = fieldStats;
 
-      return promiseMapSeries(fieldQueryFunctions, fn => fn(index, field, progress))
-        .then(([ { docsCount, samples }, uniquesCount, sVis, dataType ]) => {
-          _.assign(fieldStats, { docsCount, uniquesCount, sVis, samples, dataType });
-        });
+      return promiseMapSeries(fieldQueryFunctions,
+        fn => fn(index, field, query, progress)
+      )
+      .then(([ { docsCount, samples }, uniquesCount, sVis, dataType ]) => {
+        _.assign(fieldStats, { docsCount, uniquesCount, sVis, samples, dataType });
+      });
     }
 
     const operations = [{
@@ -520,6 +529,7 @@ export function GuessFieldsProvider(
 
   return function guessFields(index, fields, options = {}) {
     _.defaults(options, {
+      savedSearch: null,
       takeCount: 10,
       interleaveByDatatype: true,
       showReport: true
@@ -541,6 +551,7 @@ export function GuessFieldsProvider(
 
     return Promise.resolve(args)
       .then(filterAcceptableFields)
+      .then(makeFilteringQuery)
       .then(makeQueries)
       .then(makeScoreHelpers)
       .then(makeScores)

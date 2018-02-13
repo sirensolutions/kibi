@@ -203,6 +203,28 @@ export function QuickDashboardProvider(
     return args;
   }
 
+  function makeFilteringQuery(args) {
+    const { indexPattern, savedSearch, timeFilter, userSpecs } = args;
+
+    return savedSearch.searchSource._flatten()
+      .then(req => req.body.query)
+      .then(query => {
+        if(!userSpecs.storeTimeWithDashboard) {
+          const { timeFieldName } = indexPattern;
+
+          query.bool.must = _.filter(query.bool.must, clause =>
+            !clause.range || !clause.range[timeFieldName]);
+        }
+
+        return query;
+      })
+      .then(query => {
+        args.query = query;
+        return args;
+      });
+  }
+
+
   function makeEmptyDashboard(args) {
     const { userSpecs } = args;
 
@@ -243,9 +265,10 @@ export function QuickDashboardProvider(
   }
 
   function makeVisualizations(args, progress) {
-    const { indexPattern, fields, userSpecs } = args;
+    const { indexPattern, fields, query, userSpecs } = args;
 
     return visMaker.makeSavedVisualizations(indexPattern, fields, {
+      query,
       addSirenMultiChart: userSpecs.addSirenMultiChart,
       progress
     })
@@ -475,6 +498,7 @@ export function QuickDashboardProvider(
       .then(askUserSpecs)
       .then(checkDuplicateTitle)
       .then(retrieveFields)
+      .then(makeFilteringQuery)
       .then(() => progressMap([
         { fn: makeEmptyDashboard, text: 'Making new Dashboard' },
         { fn: makeVisualizations, text: 'Making Visualizations', countFn: makeVisSteps },

@@ -66,32 +66,20 @@ export function QuickDashMakeVisProvider(
   }
 
 
-  function searchAgg(index, aggs) {
-    const { timeFieldName } = index;
-
-    const request = {
+  function searchAgg(index, aggs, query) {
+    return es.search({
       index: index.id,
       ignore_unavailable: true,
-      body: { size: 0, aggs }
-    };
-
-    if(timeFieldName) {
-      // All siren searches are filtered by the timeField if that is present.
-      //
-      // All hits without timeField value will therefore never be recovered in
-      // any visualization - they must be filtered out from evaluations.
-      //
-      // NOTE: Time fields are *NOT* an exception.
-
-      const timeField = index.fields.byName[timeFieldName];
-      request.body.query = { exists: fieldSpec(timeField) };
-    }
-
-    return es.search(request);
+      body: {
+        size: 0,
+        query,
+        aggs
+      }
+    });
   }
 
-  function evalUniqueCount(index, field) {
-    const request = {
+  function evalUniqueCount(index, field, query) {
+    const aggs = {
       result: {
         cardinality: _.assign({
           // Unique count is always checked against low values (10), and
@@ -102,24 +90,24 @@ export function QuickDashMakeVisProvider(
       }
     };
 
-    return searchAgg(index, request)
+    return searchAgg(index, aggs, query)
       .then(resp => resp.aggregations.result.value);
   };
 
-  function evalNumericRange(index, field) {
+  function evalNumericRange(index, field, query) {
     const fSpec = fieldSpec(field);
 
-    const request = {
+    const aggs = {
       min: { min: fSpec },
       max: { max: fSpec }
     };
 
-    return searchAgg(index, request)
+    return searchAgg(index, aggs, query)
       .then(resp => [ resp.aggregations.min.value, resp.aggregations.max.value ]);
   }
 
-  function evalHistoInterval(index, field) {
-    return evalNumericRange(index, field)
+  function evalHistoInterval(index, field, query) {
+    return evalNumericRange(index, field, query)
       .then(range => {
         const floatInterval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
 
@@ -148,7 +136,7 @@ export function QuickDashMakeVisProvider(
       });
   }
 
-  function evalDateInterval(index, field) {
+  function evalDateInterval(index, field, query) {
     const { timeFieldName } = index;
 
     if(field.name === timeFieldName) {
@@ -160,7 +148,7 @@ export function QuickDashMakeVisProvider(
 
     // Other datetime fields must be analyzed manually
 
-    return evalNumericRange(index, field)
+    return evalNumericRange(index, field, query)
       .then(range => {
         const interval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
 
@@ -235,10 +223,10 @@ export function QuickDashMakeVisProvider(
     return current;
   }
 
-  function evalAgg(index, agg) {
+  function evalAgg(index, agg, query) {
     // Evaluate how many buckets it takes to cover 90% of the documents
 
-    return searchAgg(index, { result: agg })
+    return searchAgg(index, { result: agg }, query)
       .then(resp => {
         const buckets = _(resp.aggregations.result.buckets)
           .map('doc_count')
@@ -255,30 +243,30 @@ export function QuickDashMakeVisProvider(
       });
   }
 
-  function evalHistoAgg(index, field, interval) {
+  function evalHistoAgg(index, field, interval, query) {
     return evalAgg(index, {
       histogram: _.assign({
         interval
       }, fieldSpec(field))
-    });
+    }, query);
   }
 
-  function evalTermsAgg(index, field, size) {
+  function evalTermsAgg(index, field, size, query) {
     return evalAgg(index, {
       terms: _.assign({
         size,
         order: { _count: 'desc' }
       }, fieldSpec(field))
-    });
+    }, query);
   }
 
 
-  function analyzeNumber(index, field) {
+  function analyzeNumber(index, field, query) {
     if(!field.aggregatable) { return null; }
 
     const retVis = createVis.bind(null, index, field);
 
-    return evalUniqueCount(index, field).then(unique => {
+    return evalUniqueCount(index, field, query).then(unique => {
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
         return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
@@ -287,9 +275,9 @@ export function QuickDashMakeVisProvider(
       // Otherwise, use a histogram
       let interval;
 
-      return evalHistoInterval(index, field)
+      return evalHistoInterval(index, field, query)
         .then(itl => interval = itl)
-        .then(() => evalHistoAgg(index, field, interval))
+        .then(() => evalHistoAgg(index, field, interval, query))
         .then(({ relativeCutoff }) => {
           const params = {
             categoryAxes: [{
@@ -313,19 +301,19 @@ export function QuickDashMakeVisProvider(
     });
   }
 
-  function analyzeString(index, field) {
+  function analyzeString(index, field, query) {
     if(!field.aggregatable) { return null; }
 
     const retVis = createVis.bind(null, index, field);
 
-    return evalUniqueCount(index, field).then(unique => {
+    return evalUniqueCount(index, field, query).then(unique => {
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
         return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
       }
 
       return Promise.all([
-        evalTermsAgg(index, field, TERM_ELEMENT_COUNT_4_TABLE),
+        evalTermsAgg(index, field, TERM_ELEMENT_COUNT_4_TABLE, query),
         queryIsAnalyzed(mappings, index, field)
       ])
       .then(([termsEval, isAnalyzed]) => {
@@ -358,7 +346,7 @@ export function QuickDashMakeVisProvider(
     });
   }
 
-  function analyzeDate(index, fields, dateField) {
+  function analyzeDate(index, fields, dateField, query) {
     if(!dateField.aggregatable) { return null; }
 
     // Will show a single timeline with all numeric fields on it as distinct lines
@@ -368,7 +356,7 @@ export function QuickDashMakeVisProvider(
 
     return Promise.all([
       newDefaultVis(index, visTypes.LINE),
-      evalDateInterval(index, dateField)
+      evalDateInterval(index, dateField, query)
     ])
     .then(([sVis, intervalParams]) => {
       const aggs = [{
@@ -514,14 +502,13 @@ export function QuickDashMakeVisProvider(
   return {
     makeSavedVisualizations(index, fields, options = {}) {
       _.defaults(options, {
+        query: {},
         addSirenDataTable: true,
         addSirenMultiChart: true,
-
         progress: { notifyStart: _.constant(true) }
       });
 
-      const { progress } = options;
-
+      const { query, progress } = options;
 
       return promiseMapSeries(fields, field => {
         if(!progress.notifyStart(`Analyzing field "${field.displayName}"`)) {
@@ -532,17 +519,17 @@ export function QuickDashMakeVisProvider(
 
         switch (field.type) {
           case 'number':
-            output = analyzeNumber(index, field);
+            output = analyzeNumber(index, field, query);
             break;
 
           case 'string':
           case 'text':
           case 'keyword':
-            output = analyzeString(index, field);
+            output = analyzeString(index, field, query);
             break;
 
           case 'date':
-            output = analyzeDate(index, fields, field);
+            output = analyzeDate(index, fields, field, query);
             break;
 
           case 'boolean':

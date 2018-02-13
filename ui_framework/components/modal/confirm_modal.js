@@ -17,9 +17,10 @@ const CONFIRM_MODAL_BUTTONS = [
   CONFIRM_BUTTON,
   CANCEL_BUTTON,
 ];
-
+// kibi: messageAsHtml added by kibi
 export function KuiConfirmModal({
     message,
+    messageAsHtml,
     title,
     onCancel,
     onConfirm,
@@ -57,8 +58,8 @@ export function KuiConfirmModal({
           : null
       }
       <KuiModalBody>
-        <KuiModalBodyText data-test-subj="confirmModalBodyText">
-          { message }
+        <KuiModalBodyText data-test-subj="confirmModalBodyText" messageAsHtml={ messageAsHtml }>
+         { message }
         </KuiModalBodyText>
       </KuiModalBody>
 
@@ -86,6 +87,8 @@ export function KuiConfirmModal({
 
 KuiConfirmModal.propTypes = {
   message: PropTypes.string,
+  // kibi: messageAsHtml added by kibi
+  messageAsHtml: PropTypes.string,
   title: PropTypes.string,
   cancelButtonText: PropTypes.string,
   confirmButtonText: PropTypes.string,

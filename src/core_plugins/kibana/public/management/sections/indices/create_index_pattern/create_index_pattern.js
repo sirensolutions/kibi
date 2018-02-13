@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import angular from 'angular';
 import { IndexPatternMissingIndices, NoAccessToFieldStats } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
@@ -9,12 +10,13 @@ import { uiModules } from 'ui/modules';
 import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { pickCreateButtonText } from './pick_create_button_text';
-
+// kibi: imported IndexPatternAuthorizationError
+import { IndexPatternAuthorizationError } from 'ui/errors';
 // kibi: removed route '/management/kibana/index'
 
 uiModules.get('apps/management')
 .controller('managementIndicesCreate', function ($scope, $routeParams, kbnUrl, Private, Notifier, indexPatterns,
-  es, config, Promise, $translate, ontologyClient) {
+  es, config, Promise, $translate, ontologyClient, confirmModal, savedSearches, courier) {
   const notify = new Notifier();
   // kibi: removed RefreshKibanaIndex as in Kibi refresh is done by saved object API
   const intervals = indexPatterns.intervals;
@@ -278,6 +280,10 @@ uiModules.get('apps/management')
     this.showAdvancedOptions = !!!this.showAdvancedOptions;
   };
 
+  this.changeClassLabel = () => {
+    this.formValues.classLabel = this.formValues.name;
+  };
+
   this.createIndexPattern = () => {
     const {
       name,
@@ -285,6 +291,7 @@ uiModules.get('apps/management')
       nameIsPattern,
       nameInterval,
       // kibi: added following new properties
+      classLabel,
       shortDescription,
       longDescription,
       icon,
@@ -327,10 +334,10 @@ uiModules.get('apps/management')
       indexPatterns.cache.clear(id);
 
       // kibi: added entity creation in the ontology model
-      return ontologyClient.insertEntity(id, id, 'INDEX_PATTERN', icon, color, shortDescription, longDescription,
+      return ontologyClient.insertEntity(id, classLabel, 'INDEX_PATTERN', icon, color, shortDescription, longDescription,
         null, null)
       .then(() => {
-        kbnUrl.change(`/management/siren/indexesandrelations/${id}`);
+        $scope.createSavedSearchModal(id, classLabel);
         // force loading while kbnUrl.change takes effect
         loadingCount = Infinity;
       });
@@ -344,6 +351,93 @@ uiModules.get('apps/management')
       loadingCount -= 1;
     });
   };
+
+  // kibi: if user confirm modal for creating saved search, run this function
+  $scope.createSavedSearchModal = function (indexPatternId, classLabel) {
+    return savedSearches.find()
+    .then(savedSearchObjs => {
+      const savedSearch = _.find(savedSearchObjs.hits, 'title', classLabel);
+      if (savedSearch) {
+        const searchSource = angular.fromJson(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
+        if (searchSource.index === indexPatternId) {
+          const confirmModalOptions = {
+            title: 'Success!',
+            confirmButtonText: 'Yes, Go to Discovery',
+            cancelButtonText: 'No, will do later',
+            onConfirm: () => kbnUrl.change(`/discover/${savedSearch.id}/`),
+            onCancel: () => kbnUrl.change(`/management/siren/indexesandrelations/${indexPatternId}`),
+            messageAsHtml: true
+          };
+          confirmModal(
+            '<p>The index pattern <i>' + indexPatternId + '</i>  was created. <br/> I have morover created a <b>core Saved search</b>' +
+            ' (<i>' + classLabel + '</i> ). Do you want to go to Discovery and give a first look at it? <br/><br/> <b>Note</b>: you will ' +
+            ' have to return here later if you want to set relationships between this index pattern and other datasets</p>',
+            confirmModalOptions
+          );
+        } else {
+          const confirmModalOptions = {
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            onConfirm: () => {
+              return savedSearches.delete(savedSearch.id)
+              .then($scope.createSavedSearch(indexPatternId, classLabel))
+              .catch(err => err.notify);
+            },
+            onCancel: () => kbnUrl.change(`/management/siren/indexesandrelations/${indexPatternId}`),
+            messageAsHtml: true
+          };
+          confirmModal(
+            '<p>Warning, there already exists a saved search named <b>' + classLabel + '</b> which is NOT based on index pattern <b>' +
+            indexPatternId + '</b> Should i overwrite the existing?<br><br> <b>Important:</b> If you do not overwrite now you will have ' +
+            'to later manually associate a default saved search to this index pattern </p>',
+            confirmModalOptions
+          );
+        }
+      } else {
+        $scope.createSavedSearch(indexPatternId, classLabel);
+      }
+    });
+  };
+
+  $scope.createSavedSearch = function (indexPatternId, classLabel) {
+    const indexPatternPromise = courier.indexPatterns.get(indexPatternId);
+    const savedSearchPromise = savedSearches.get();
+
+    return Promise.all([indexPatternPromise, savedSearchPromise])
+    .then(responses => {
+      const indexPattern = responses[0];
+      const savedSearch = responses[1];
+
+      savedSearch.columns = ['_source'];
+      savedSearch.searchSource
+        .set('index', indexPattern)
+        .highlightAll(true)
+        .version(true)
+        .size(config.get('discover:sampleSize'))
+        .sort([indexPattern.timeFieldName, 'desc'])
+        .query(null);
+      savedSearch.title = classLabel;
+      return savedSearch.save()
+      .then(function (id) {
+        const confirmModalOptions = {
+          title: 'Success!',
+          confirmButtonText: 'Yes, Go to Discovery',
+          cancelButtonText: 'No, will do later',
+          onConfirm: () => kbnUrl.change(`/discover/${id}`),
+          onCancel: () =>  kbnUrl.change(`/management/siren/indexesandrelations/${indexPattern}`),
+          messageAsHtml: true
+        };
+        confirmModal(
+          '<p>The index pattern <i>' + indexPatternId + '</i>  was created. <br/> I have morover created a <b>core Saved search</b>' +
+          ' (<i>' + classLabel + '</i> ). Do you want to go to Discovery and give a first look at it? <br/><br/> <b>Note</b>: you will ' +
+          ' have to return here later if you want to set relationships between this index pattern and other datasets</p>',
+          confirmModalOptions
+        );
+      })
+      .catch(notify.error);
+    });
+  };
+  // kibi: end
 
   $scope.$watchMulti([
     'controller.formValues.nameIsPattern',

@@ -46,6 +46,7 @@
             class="kuiTextInput kuiTextInput--large"
             data-test-subj="createIndexPatternNameInput"
             ng-model="controller.formValues.name"
+            ng-change="controller.changeClassLabel()"
             ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
             validate-index-name
             allow-wildcard
@@ -276,6 +277,33 @@
           </div>
         </div>
       </div>
+
+      <!-- kibi: class label  input field -->
+      <div class="kuiVerticalRhythm">
+        <label
+          class="kuiLabel kuiVerticalRhythmSmall"
+        >
+          Class Label
+        </label>
+        <p
+          class="kuiSubText kuiVerticalRhythmSmall"
+          ng-if="!controller.formValues.nameIsPattern"
+        >
+          Important: how will this group of records be called e.g. "People", "Molecules", "OSSEC" etc . This is also the name of the default Saved Search that will be created for this Index Pattern
+        </p> 
+        <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+          <input
+            class="kuiTextInput kuiTextInput--large"
+            data-test-subj="createIndexPatternShortDescriptionInput"
+            ng-model="controller.formValues.classLabel"
+            ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+            name="classLabel"
+            type="text"
+            required
+          />
+        </div>
+      </div>
+      <!-- kibi: end-->
 
       <!-- Short description input field -->
       <div class="kuiVerticalRhythm">

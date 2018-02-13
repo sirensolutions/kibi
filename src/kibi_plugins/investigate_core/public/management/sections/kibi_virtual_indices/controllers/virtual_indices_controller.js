@@ -62,7 +62,7 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
       title: 'Index created!',
       confirmButtonText: 'Yes, take me there',
       cancelButtonText: 'No, will do later',
-      onConfirm: () => kbnUrl.change('/management/siren/indexesandrelations/', {}),
+      onConfirm: () => kbnUrl.change('/management/siren/indexesandrelations/create/' + $scope.virtualIndex.id, {}),
       onCancel: noop
     };
     const index = {

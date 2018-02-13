@@ -13,6 +13,12 @@ import './create_eid';
 import 'angular-ui-tree';
 
 uiRoutes
+.when('/management/siren/indexesandrelations/create/:indexPatternName', {
+  template,
+  reloadOnSearch: false,
+});
+
+uiRoutes
 .when('/management/siren/indexesandrelations/:entityId/:tab?', {
   template: template,
   resolve: {
@@ -80,6 +86,10 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
 
   $scope.createNewIndexPattern = function () {
     $scope.state.section = 'create_ip';
+  };
+
+  if($route.current.$$route.originalPath.includes('/create/') && $route.current.params.indexPatternName) {
+    $scope.createNewIndexPattern();
   };
 
   $scope.createNewVirtualEntity = function () {

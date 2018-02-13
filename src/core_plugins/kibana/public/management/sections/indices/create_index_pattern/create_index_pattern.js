@@ -43,6 +43,11 @@ uiModules.get('apps/management')
 
   this.showAdvancedOptions = false;
 
+  // fills index-pattern name based on query param.
+  if ($routeParams.indexPatternName) {
+    this.formValues.name = $routeParams.indexPatternName;
+  }
+
   // fills index-pattern ID based on query param.
   if ($routeParams.id) {
     this.formValues.id = decodeURIComponent($routeParams.id);

@@ -343,7 +343,7 @@ export function GuessFieldsProvider(
     report.sort = sortContext({
       acceptable:   fieldStats => fieldStats.acceptable,
       type:         fieldStats => fieldStats.dataType || fieldStats.field.type,
-      name:         fieldStats => fieldStats.field.displayName,
+      name:         fieldStats => fieldStats.field.displayName.toLowerCase(),
       score:        fieldStats => fieldStats.score,
       chart:        fieldStats => fieldStats.sVis && fieldStats.sVis.vis.type.title,
       notes:        fieldStats => fieldStats.notes.join()

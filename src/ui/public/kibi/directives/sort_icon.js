@@ -39,15 +39,26 @@ export function sortContext(sorters) {
 
   let result;
 
-  function set(list, status) {
+  function setStatus(list, status) {
     _.forEach(result, srt => srt.status = 2);
     this.status = status;
 
-    return _.sortByOrder(list, this.sorter, this.order);
+    return (status === 2)
+      ? list
+      : _.sortByOrder(list, this.sorter, this.order);
+  }
+
+  function setOrder(list, order) {
+    const status = sortOrder.indexOf(order);
+    return (status < 0) ? list : this.setStatus(list, status);
   }
 
   function toggle(list) {
-    return this.set(list, +!this.status);
+    return this.setStatus(list, +!this.status);
+  }
+
+  function setUnordered() {
+    this.status = 2;
   }
 
   return result = _.mapValues(sorters, sorter => ({
@@ -55,7 +66,9 @@ export function sortContext(sorters) {
     status: 2,
     get order() { return sortOrder[this.status]; },
     get iconClass() { return iconClass[this.status]; },
-    'set': set,
-    toggle
+    setStatus,
+    setOrder,
+    toggle,
+    setUnordered
   }));
 };

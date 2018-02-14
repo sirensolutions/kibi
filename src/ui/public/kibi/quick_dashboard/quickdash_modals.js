@@ -1,10 +1,11 @@
 import createTemplate from './create_modal.html';
 import titleConflictTemplate from './title_conflict_modal.html';
+import generateReportTemplate from './generate_report.html';
 import guessReportTemplate from './guess_report.html';
 import experimentalWarningTemplate from './experimental_warning.html';
 
 import './create_modal.less';
-import './guess_report.less';
+import './report.less';
 
 import 'ui/kibi/directives/tristate_checkbox';
 import 'ui/kibi/directives/sort_icon';
@@ -67,6 +68,10 @@ export function QuickDashModalsProvider(Private) {
 
     titleConflict(opts) {
       return baseModal(titleConflictTemplate, opts);
+    },
+
+    generateReport(opts) {
+      return baseModal(generateReportTemplate, opts);
     },
 
     guessReport(opts) {

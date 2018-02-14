@@ -1,23 +1,21 @@
-<div class="kibi-guess-fields-report kibi-report kuiModal">
+<div class="kibi-quickdash-report kibi-report kuiModal">
   <div class="kuiModalHeader">
     <div class="kuiModalHeader__title">
-      Autoselect Top 10 &ndash; Report
+      Generate Dashboard &ndash; Report
     </div>
   </div>
 
   <div class="kuiModalBody">
-    <h3 ng-if="!stats.length">No field found</h3>
-    <table ng-if="stats.length" class="table-sticky table-striped">
+    <table class="table-sticky table-striped">
       <thead>
         <tr>
           <th style="width: 1px">
             <tristate-checkbox ng-model="computed.allSelected" />
           </th>
           <th sort-icon rows="stats" sort-by="sort.type">Type</th>
-          <th sort-icon rows="stats" sort-by="sort.name">Name</th>
+          <th sort-icon rows="stats" sort-by="sort.field">Field</th>
+          <th sort-icon rows="stats" sort-by="sort.visName">Vis Name</th>
           <th sort-icon rows="stats" sort-by="sort.chart">Chart</th>
-          <th sort-icon rows="stats" sort-by="sort.score">Score</th>
-          <th sort-icon rows="stats" sort-by="sort.notes">Notes</th>
         </tr>
       </thead>
       <tbody>
@@ -25,11 +23,9 @@
           <td><input type="checkbox" ng-model="fieldStats.selected"></td>
           <td><field-name field="fieldStats.typeField" /></td>
           <td>{{fieldStats.field.displayName}}</td>
+          <td><input type="text" ng-model="fieldStats.sVis.title"
+            ng-change="sort.visName.setUnordered()"></td>
           <td>{{fieldStats.sVis.vis.type.title}}</td>
-          <td>{{fieldStats.scoreStr}}</td>
-          <td>
-            <div ng-repeat="note in fieldStats.notes">{{note}}</div>
-          </td>
         </tr>
       </tbody>
     </table>
@@ -37,8 +33,13 @@
 
   <div class="kuiModalFooter">
     <button class="btn btn-primary" aria-label="Ok"
-      ng-click="onConfirm()">
+      ng-click="onConfirm(true)">
       Ok
+    </button>
+    <button class="kuiButton kuiButton--primary"
+      ng-click="onCancel()"
+      aria-label="Cancel">
+      Cancel
     </button>
   </div>
 </div>

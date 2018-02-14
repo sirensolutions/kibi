@@ -4,6 +4,9 @@ import { panelsLayout } from './panels_layout';
 
 import { ProgressMapProvider } from 'ui/kibi/modals/progress_map';
 
+import { sortContext } from 'ui/kibi/directives/sort_icon';
+import { allSelected } from 'ui/kibi/directives/tristate_checkbox';
+
 import { DashboardStateProvider } from 'plugins/kibana/dashboard/dashboard_state';
 import { createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
 
@@ -281,6 +284,39 @@ export function QuickDashboardProvider(
     });
   }
 
+  function showReport(args) {
+    const { fields, savedVises } = args;
+
+    const stats = _.map(savedVises, function (sVis, s) {
+      const field = fields[s];
+      const typeField = field && _.assign({}, field, { name: '' });
+
+      return { sVis, field, typeField, selected: true };
+    });
+
+    const sort = sortContext({
+      type:     fieldStats => fieldStats.field && fieldStats.field.type,
+      field:    fieldStats =>
+        fieldStats.field && fieldStats.field.displayName.toLowerCase(),
+      visName:  fieldStats =>
+        fieldStats.sVis && fieldStats.sVis.title.toLowerCase(),
+      chart:    fieldStats => fieldStats.sVis && fieldStats.sVis.vis.type.title
+    });
+
+    return quickDashModals.generateReport({
+      stats: stats.slice(),                         // Slicing to preserve original sort
+      sort,
+      computed: allSelected(stats)
+    })
+    .show()
+    .then(ok => ok || Promise.reject(0))
+    .then(function filterSelectedVises() {
+      args.savedVises = _(stats).filter('selected').map('sVis').value();
+      return args.savedVises.length
+        ? args : Promise.reject(0);
+    });
+  }
+
   function saveVisualizations(args) {
     const { savedVises, savedSearch } = args;
 
@@ -493,6 +529,11 @@ export function QuickDashboardProvider(
       dashboardEntries: flattenDashboardGroups(dashboardGroups)
     }, args);
 
+    const progressOpts = {
+      valueMap: (op, o, progress) => op.fn(args, progress),
+      stepMap: op => op.text || op.countFn(args)
+    };
+
     return Promise.resolve(args)
       .then(showExperimentalWarning)
       .then(makeDefaultTitle)
@@ -500,18 +541,21 @@ export function QuickDashboardProvider(
       .then(checkDuplicateTitle)
       .then(retrieveFields)
       .then(makeFilteringQuery)
+      .then(makeEmptyDashboard)
       .then(() => progressMap([
-        { fn: makeEmptyDashboard, text: 'Making new Dashboard' },
         { fn: makeVisualizations, countFn: makeVisSteps },
+      ], _.assign({
+        title: 'Generating Visualizations...',
+      }, progressOpts)).then(() => args))
+      .then(showReport)
+      .then(() => progressMap([
         { fn: saveSavedSearch,    text: 'Saving Saved Search' },
         { fn: saveVisualizations, text: 'Saving Visualizations' },
         { fn: fillDashboard,      text: 'Compiling Dashboard' },
         { fn: saveDashboard,      text: 'Saving Dashboard' }
-      ], {
-        title: 'Populating Dashboard...',
-        valueMap: (op, o, progress) => op.fn(args, progress),
-        stepMap: op => op.text || op.countFn(args)
-      }).then(() => args))
+      ], _.assign({
+        title: 'Saving Dashboard...',
+      }, progressOpts)).then(() => args))
       .then(removeDupDashboard)
       .then(applyTimeFilter)
       .then(openDashboardPage)

@@ -104,7 +104,7 @@ export class SavedObjectsClient {
     return {
       id: hit._id,
       type: hit._type,
-      version: null, // kibi: no version
+      version: hit._version ? hit._version : null, // kibi: no version
       attributes: hit._source
     };
   }

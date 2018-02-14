@@ -237,7 +237,14 @@ function discoverController($scope, config, courier, $route, $window, createNoti
     sampleSize: config.get('discover:sampleSize'),
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.ip.list,
+    indexPatternList: _.map($route.current.locals.ip.list, ip => {
+      //kibi: we have to remove the reference to the _client as it is causing max stack calls
+      // when choosing and index-pattern
+      // it should be safe to delete this reference here as we are not calling indexPattern.save function
+      delete ip._client;
+      return ip;
+      // kibi: end
+    }),
     timefilter: $scope.timefilter
   };
 

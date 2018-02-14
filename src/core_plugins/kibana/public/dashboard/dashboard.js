@@ -295,17 +295,28 @@ app.directive('dashboardApp', function (createNotifier, $injector) {
         $scope.dashboardViewMode = newMode;
       }
 
+      // kibi: added by kibi
+      $scope.currentState = {};
+      // kibi: end
       const onChangeViewMode = (newMode) => {
         const isPageRefresh = newMode === dashboardState.getViewMode();
         const isLeavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
         const willLoseChanges = isLeavingEditMode && dashboardState.getIsDirty(timefilter);
 
         if (!willLoseChanges) {
+          // kibi: if user switch to edit mode store these information
+          if (newMode === 'edit') {
+            $scope.currentState.currentQuery = dashboardState.getQuery();
+            $scope.currentState.currentAppFilters = filterBar.getAppFilters();
+            $scope.currentState.currentGlobalFilters = filterBar.getGlobalFilters();
+            $scope.currentState.currentTime = angular.copy(timefilter.time);
+          }
+          // kibi: end
           updateViewMode(newMode);
           return;
         }
 
-        function revertChangesAndExitEditMode() {
+        function revertChangesAndExitEditMode(filterBar) {
           dashboardState.resetState();
 
           // kibi: Ensure dashboard counts update on exiting edit mode
@@ -319,14 +330,21 @@ app.directive('dashboardApp', function (createNotifier, $injector) {
           // This is only necessary for new dashboards, which will default to Edit mode.
           updateViewMode(DashboardViewMode.VIEW);
 
-           // kibi: hard reset of the timepicker is removed.
-           // if time of dashboard is changed but not saved, there is no need to remove changed time
+          // kibi: switch back to old state
+          filterBar.removeAll();
+          return filterBar.addFilters($scope.currentState.currentAppFilters)
+          .then(filterBar.addFilters($scope.currentState.currentGlobalFilters, true))
+          .then(() => {
+            dashboardState.applyFilters($scope.currentState.currentQuery, filterBar.getAppFilters());
+            timefilter.time = $scope.currentState.currentTime;
+          });
+          // kibi: end
         }
 
         confirmModal(
           getUnsavedChangesWarningMessage(dashboardState.getChangedFilterTypes(timefilter)),
           {
-            onConfirm: revertChangesAndExitEditMode,
+            onConfirm: () => revertChangesAndExitEditMode(filterBar),
             onCancel: _.noop,
             confirmButtonText: 'Yes, lose changes',
             cancelButtonText: 'No, keep working',

@@ -1,4 +1,4 @@
-import { find, sortBy, each, noop } from 'lodash';
+import { find, sortBy, each, noop, get, isArray } from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import EntityRelationsTemplate from './entity_relations.html';
@@ -282,6 +282,53 @@ uiModules.get('apps/management')
           info += relation.timeout;
         }
         return info;
+      };
+    }
+  };
+})
+.directive('kibiRelationsSearchBar', () => {
+  return {
+    restrict: 'A',
+    scope: true,
+    link: function (scope, element, attrs) {
+
+      scope.searchRelations = function () {
+        const relations = get(scope, attrs.kibiRelationsSearchBarPath);
+        const searchString = scope[attrs.ngModel];
+
+        if (!searchString || searchString.length < 2) {
+          relations.forEach((relation) => relation.$$hidden = false);
+          return;
+        }
+
+        const search = function (obj, searchString) {
+          let result;
+          for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+              if (typeof obj[key] === 'object' && obj[key] !== null || isArray(obj[key]) && obj[key].length) {
+                result = search(obj[key], searchString);
+                if (result) {
+                  return result;
+                }
+              }
+              if (typeof obj[key] === 'string') {
+                const found = obj[key].match(new RegExp(searchString, 'gi'));
+                if (found && found.length) {
+                  return true;
+                }
+              }
+            }
+          }
+          return result;
+        };
+
+        relations.forEach((relation) => {
+          if (search(relation, searchString)) {
+            relation.$$hidden = false;
+          } else {
+            relation.$$hidden = true;
+          }
+        });
       };
     }
   };

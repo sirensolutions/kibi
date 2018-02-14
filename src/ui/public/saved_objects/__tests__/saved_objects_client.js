@@ -12,6 +12,12 @@ describe('SavedObjectsClient', () => {
     attributes: { title: 'Example title' },
     version: 2
   };
+  const docHit = {
+    _id: 'AVwSwFxtcMV38qjDZoQg',
+    _type: 'config',
+    _source: { title: 'Example title' },
+    _version: 2
+  };
 
   let savedObjectsClient;
   let $http;
@@ -22,7 +28,7 @@ describe('SavedObjectsClient', () => {
   beforeEach(() => {
     // kibi: added by kibi
     savedObjectApi = {
-      get:  sinon.stub().returns(Promise.resolve(doc)),
+      get:  sinon.stub().returns(Promise.resolve(docHit)),
       delete: sinon.stub().returns(Promise.resolve({ data: 'api-response' })),
       update: sinon.stub().returns(Promise.resolve({ data: 'api-response' })),
       index: sinon.stub().returns(Promise.resolve({ data: 'api-response' })),
@@ -210,7 +216,7 @@ describe('SavedObjectsClient', () => {
 
     it('makes HTTP call', () => {
       const attributes = { foo: 'Foo', bar: 'Bar' };
-      const body = { attributes, version: 2 };
+      const body = { doc: attributes, version: 2 };
       const options = { version: 2 };
 
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);

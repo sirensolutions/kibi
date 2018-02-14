@@ -3,6 +3,8 @@ import { QuickDashModalsProvider } from './quickdash_modals';
 import { QuickDashMakeVisProvider } from './make_visualizations';
 
 import { ProgressMapProvider } from 'ui/kibi/modals/progress_map';
+import { sortContext } from 'ui/kibi/directives/sort_icon';
+import { allSelected } from 'ui/kibi/directives/tristate_checkbox';
 import { fieldSpec, queryIsAnalyzed } from 'ui/kibi/utils/field';
 import { promiseMapSeries } from 'ui/kibi/utils/promise';
 
@@ -335,7 +337,24 @@ export function GuessFieldsProvider(
 
   // Reporting
 
+  function makeReportSortContext(args) {
+    const { report } = args;
+
+    report.sort = sortContext({
+      acceptable:   fieldStats => fieldStats.acceptable,
+      type:         fieldStats => fieldStats.dataType || fieldStats.field.type,
+      name:         fieldStats => fieldStats.field.displayName,
+      score:        fieldStats => fieldStats.score,
+      chart:        fieldStats => fieldStats.sVis && fieldStats.sVis.vis.type.title,
+      notes:        fieldStats => fieldStats.notes.join()
+    });
+
+    return args;
+  }
+
   function prepareStatsForReporting(args) {
+    const { sort } = args.report;
+
     args.stats.forEach(fieldStats => {
       fieldStats.scoreStr = '' + _.round(fieldStats.score, 3);
 
@@ -345,12 +364,13 @@ export function GuessFieldsProvider(
       if(fieldStats.dataType === 'text') { fieldStats.notes.push('Analyzed'); }
     });
 
-    args.stats = _.sortByAll(args.stats,
-      fieldStats => -fieldStats.acceptable,
-      fieldStats => fieldStats.dataType || fieldStats.field.type,
-      fieldStats => -fieldStats.score,
-      fieldStats => fieldStats.field.displayName);
+    const sorters = _.map([
+      sort.acceptable, sort.type, sort.score, sort.name
+    ], 'sorter');
 
+    const orders = ['desc', 'asc', 'desc', 'asc'];
+
+    args.stats = _.sortByOrder(args.stats, sorters, orders);
     return args;
   }
 
@@ -514,15 +534,22 @@ export function GuessFieldsProvider(
   function showReport(args) {
     if(!args.showReport) { return args; }
 
+    args.report = {};
+
+    makeReportSortContext(args);
     prepareStatsForReporting(args);
 
-    return quickDashModals.guessReport({ stats: args.stats })
-      .show()
-      .then(() => args);
+    return quickDashModals.guessReport({
+      stats: args.stats,
+      sort: args.report.sort,
+      computed: allSelected(args.stats)
+    })
+    .show()
+    .then(() => args);
   }
 
   function toResult(args) {
-    return _(args.workStats)
+    return _(args.stats)
       .filter('selected')
       .map('field')
       .value();

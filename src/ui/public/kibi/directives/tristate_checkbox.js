@@ -1,5 +1,7 @@
 import { uiModules } from 'ui/modules';
 
+import _ from 'lodash';
+
 
 /*
  * Simple tri-state checkbox using the native 'indeterminate' property
@@ -43,3 +45,18 @@ uiModules
     }
   };
 });
+
+export function allSelected(entries) {
+  function selNum(entry) { return +entry.selected; }
+
+  return {
+    get allSelected() {
+      const selCount = _.sum(entries, selNum);
+      return selCount && (1 + (selCount !== entries.length));
+    },
+
+    set allSelected(value) {
+      entries.forEach(entry => { entry.selected = value; });
+    }
+  };
+};

@@ -5,6 +5,9 @@ import experimentalWarningTemplate from './experimental_warning.html';
 
 import './create_modal.less';
 import './guess_report.less';
+
+import 'ui/kibi/directives/tristate_checkbox';
+import 'ui/kibi/directives/sort_icon';
 import 'ui/kibi/styles/table_sticky.less';
 
 import { BaseModalProvider } from 'ui/kibi/modals/base_modal';

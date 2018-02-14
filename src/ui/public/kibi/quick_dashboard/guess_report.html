@@ -10,17 +10,19 @@
     <table ng-if="stats.length" class="table-sticky table-striped">
       <thead>
         <tr>
-          <th><i class="fa fa-check"></i></th>
-          <th>Type</th>
-          <th>Name</th>
-          <th>Chart</th>
-          <th>Score</th>
-          <th>Notes</th>
+          <th style="width: 1px">
+            <tristate-checkbox ng-model="computed.allSelected" />
+          </th>
+          <th sort-icon rows="stats" sort-by="sort.type">Type</th>
+          <th sort-icon rows="stats" sort-by="sort.name">Name</th>
+          <th sort-icon rows="stats" sort-by="sort.chart">Chart</th>
+          <th sort-icon rows="stats" sort-by="sort.score">Score</th>
+          <th sort-icon rows="stats" sort-by="sort.notes">Notes</th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="fieldStats in stats">
-          <td><i class="fa fa-check" ng-show="fieldStats.selected"></i></td>
+          <td><input type="checkbox" ng-model="fieldStats.selected"></td>
           <td><field-name field="fieldStats.typeField" /></td>
           <td>{{fieldStats.field.displayName}}</td>
           <td>{{fieldStats.sVis.vis.type.title}}</td>

@@ -82,7 +82,7 @@ uiRoutes
             dashboardId = defaultDashboard.id;
           } else if (!defaultDashboard) {
             notify.error(`The default dashboard with id "${defDashConfig}" does not exist.` +
-            ` Please correct the "kibi:defaultDashboardId" parameter in advanced settings`);
+            ` Please correct the "siren:defaultDashboardId" parameter in advanced settings`);
           }
           kbnUrl.redirect(`/dashboard/${dashboardId}`);
           return Promise.halt();

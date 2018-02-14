@@ -104,7 +104,7 @@ export class SavedObjectsClient {
     return {
       id: hit._id,
       type: hit._type,
-      version: null, // kibi: no version
+      version: hit._version,
       attributes: hit._source
     };
   }
@@ -147,6 +147,10 @@ export class SavedObjectsClient {
       index: this._kbnIndex,
       type: type,
       id: id
+    })
+    .then((resp) => {
+      const o = this._toSavedObjectOptions(resp);
+      return this.createSavedObject(o);
     });
     // kibi: end
   }
@@ -189,7 +193,7 @@ export class SavedObjectsClient {
     }
 
     const body = {
-      attributes,
+      doc: attributes,
       version
     };
 

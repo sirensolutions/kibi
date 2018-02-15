@@ -199,8 +199,30 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     } else if (edit) {
       return Promise.resolve(buttons);
     }
+    const buttonsToDo = _.reduce(buttons, (total, button) => {
+      if (button.type === 'VIRTUAL_ENTITY') {
+        for (const key in button.sub) {
+          if (button.sub.hasOwnProperty(key)) {
+            _.each(button.sub[key], (btn) => {
+              console.log('add subButton to update count');
+              total.push(btn);
+            });
+          }
+        }
+        for (const key in button.altSub) {
+          if (button.altSub.hasOwnProperty(key)) {
+            _.each(button.altSub[key], (btn) => {
+              total.push(btn);
+            });
+          }
+        }
+      } else {
+        total.push(button);
+      }
+      return total;
+    }, []);
     delayExecutionHelper.addEventData({
-      buttons: buttons,
+      buttons: buttonsToDo,
       dashboardId: dashboardId
     });
     return Promise.resolve(buttons);

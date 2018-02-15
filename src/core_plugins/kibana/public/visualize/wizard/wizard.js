@@ -207,7 +207,16 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
 
   $scope.indexPattern = {
     selection: null,
-    list: $route.current.locals.indexPatterns
+    list: _.map($route.current.locals.indexPatterns, ip => {
+      // return simpler object for search as the indexPattern holds reference to _client which was causing
+      // max call stack when filtering the list of index-patterns
+      return {
+        type: ip.type,
+        attributes: ip.attributes,
+        id: ip.id
+      };
+      // kibi: end
+    })
   };
 
   $scope.makeUrl = function (pattern) {

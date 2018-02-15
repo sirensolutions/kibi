@@ -76,7 +76,8 @@ function getLastSavedSearchNumber(savedSearches, title) {
 
 export function QuickDashboardProvider(
     Private, createNotifier, kbnUrl, AppState, kibiState, dashboardGroups,
-    savedDashboardGroups, savedDashboards, savedSearches, savedVisualizations) {
+    savedDashboardGroups, savedDashboards, savedSearches, savedVisualizations,
+    $timeout) {
 
   const DashboardState = Private(DashboardStateProvider);
   const visMaker = Private(QuickDashMakeVisProvider);
@@ -239,19 +240,7 @@ export function QuickDashboardProvider(
         // so saveState() will be overridden
         const dashState = new DashboardState(dash, AppState);
         dashState.saveState = _.noop;
-
         dashState.setTitle(userSpecs.title);
-        dashState.appState.timeRestore = false;
-
-        // Filters are copied from current, but they will be moved to the
-        // assigned saved search - so they must be cleared on the dashState
-        // to avoid duplication
-        const query = { query_string: { analyze_wildcard: true, query: '*' } };
-        const filters = [];
-
-        dashState.appState.query = query;
-        dashState.appState.filters = filters;
-        dashState.applyFilters(query, filters);
 
         args.dashboard = dash;
         args.dashState = dashState;
@@ -476,7 +465,27 @@ export function QuickDashboardProvider(
       dashState.savedDashboard.id,
       timeFilter.time.mode, timeFilter.time.from, timeFilter.time.to);
 
-    return args;
+    kibiState.save(true, true);                           // replace=true, silent=true
+
+    // We have to wait for the url to update. This is required to actually save
+    // the kibiState.
+    return $timeout()
+      .then(() => {
+        // Filters are copied from current, but they will be moved to the
+        // assigned saved search - so they must be cleared on the dashState
+        // to avoid duplication.
+        //
+        // Also, appState assignments must be done *after* the kibiState url has
+        // changed, since changing url restores the saved appState.
+        const query = { query_string: { analyze_wildcard: true, query: '*' } };
+        const filters = [];
+
+        dashState.appState.query = query;
+        dashState.appState.filters = filters;
+
+        dashState.applyFilters(query, filters);
+      })
+      .then(() => args);
   }
 
   function openDashboardPage({ dashState }) {

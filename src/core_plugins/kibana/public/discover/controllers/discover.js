@@ -240,9 +240,28 @@ function discoverController($scope, config, courier, $route, $window, createNoti
     indexPatternList: _.map($route.current.locals.ip.list, ip => {
       //kibi: we have to remove the reference to the _client as it is causing max stack calls
       // when choosing and index-pattern
-      // it should be safe to delete this reference here as we are not calling indexPattern.save function
-      delete ip._client;
-      return ip;
+      const clonned = _.cloneDeep(ip);
+      delete clonned._client;
+      // adding methods lost while clonning as they are on __proto__
+      clonned.get = function (key) {
+        return _.get(this.attributes, key);
+      };
+      clonned.set = function (key, value) {
+        return _.set(this.attributes, key, value);
+      };
+      clonned.has = function (key) {
+        return _.has(this.attributes, key);
+      };
+      // save and delete methods are not used used in discover
+      // adding this exceptions to be able to quickly identify the cause
+      // if something change in the future
+      clonned.save = function () {
+        throw new Error('save method not supported due to removed _client reference');
+      };
+      clonned.delete = function () {
+        throw new Error('save method not supported due to removed _client reference');
+      };
+      return clonned;
       // kibi: end
     }),
     timefilter: $scope.timefilter

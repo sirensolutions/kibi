@@ -26,9 +26,14 @@
 
   .panel-buttons {
     a .panel-title {
+      position: relative;
+      font-size: 14px;
 
       .go-to-dashboard {
-        float: right;
+        position: absolute;
+        top: 50%;
+        margin-top: -11px;
+        right: 10px;
 
         i {
           font-size: 14px;
@@ -39,7 +44,7 @@
       color: #FFF;
       background-color: @btn-relational-bg;
       margin-bottom: 1px;
-      padding: 4px 10px;
+      padding: 4px 10px 5px 10px;
     }
   }
 

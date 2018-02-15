@@ -11,7 +11,7 @@
        ng-mouseover="hoverIn(button)"
        ng-mouseleave="hoverOut()"
     >
-      <h4 class="panel-title">
+      <div class="panel-title">
         {{ getButtonLabel(button, false) }}
         <span
           class="warning"
@@ -21,10 +21,10 @@
           <div class="cube1"></div>
           <div class="cube2"></div>
         </span>
-        <span class="go-to-dashboard">
+        <div class="go-to-dashboard">
           <i class="fa fa-arrow-right"></i>
-        </span>
-      </h4>
+        </div>
+      </div>
     </a>
   </div>
 
@@ -73,7 +73,7 @@
                ng-mouseover="hoverIn(subButton)"
                ng-mouseleave="hoverOut()"
             >
-              <h4 class="panel-title">
+              <div class="panel-title">
                 {{subButton.label}}
                 <span ng-show="subButton.targetCount !== undefined && subButton.targetCount !== ''"> ({{subButton.targetCount}})</span>
                 <span
@@ -84,10 +84,10 @@
                   <div class="cube1"></div>
                   <div class="cube2"></div>
                 </span>
-                <span class="go-to-dashboard">
+                <div class="go-to-dashboard">
                   <i class="fa fa-arrow-right"></i>
-                </span>
-              </h4>
+                </div>
+              </div>
             </a>
           </div>
         </accordion-group>
@@ -110,7 +110,7 @@
                ng-mouseover="hoverIn(altSubButton)"
                ng-mouseleave="hoverOut()"
             >
-              <h4 class="panel-title">
+              <div class="panel-title">
                 {{altSubButton.label}}
                 <span ng-show="altSubButton.targetCount !== undefined && altSubButton.targetCount !== ''"> ({{altSubButton.targetCount}})</span>
                 <span
@@ -121,10 +121,10 @@
                   <div class="cube1"></div>
                   <div class="cube2"></div>
                 </span>
-                <span class="go-to-dashboard">
+                <div class="go-to-dashboard">
                   <i class="fa fa-arrow-right"></i>
-                </span>
-              </h4>
+                </div>
+              </div>
             </a>
           </div>
         </accordion-group>
@@ -146,7 +146,7 @@
              ng-mouseover="hoverIn(subButton)"
              ng-mouseleave="hoverOut()"
           >
-            <h4 class="panel-title">
+            <div class="panel-title">
               <em>{{ key }}</em> {{ subButton.label }}
               <span ng-show="subButton.targetCount !== undefined && subButton.targetCount !== ''"> ({{subButton.targetCount}})</span>
               <span
@@ -157,10 +157,10 @@
                 <div class="cube1"></div>
                 <div class="cube2"></div>
               </span>
-              <span class="go-to-dashboard">
+              <div class="go-to-dashboard">
                 <i class="fa fa-arrow-right"></i>
-              </span>
-            </h4>
+              </div>
+            </div>
           </a>
         </div>
       </accordion>

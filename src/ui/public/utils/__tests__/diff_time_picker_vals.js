@@ -6,7 +6,7 @@ import { UtilsDiffTimePickerValsProvider } from 'ui/utils/diff_time_picker_vals'
 describe('Diff Time Picker Values', function () {
   let diffTimePickerValues;
 
-  // kibi: $rootScope is added for 'kibiTimePrecision'
+  // kibi: $rootScope is added for 'sirenTimePrecision'
   let $rootScope;
 
   beforeEach(ngMock.module('kibana'));
@@ -66,7 +66,7 @@ describe('Diff Time Picker Values', function () {
     });
 
     it('should be equal because of the precision', function () {
-      $rootScope.kibiTimePrecision = 'h';
+      $rootScope.sirenTimePrecision = 'h';
 
       const rangeAfrom = {
         from: moment('2014-01-01T06:06:06.666Z'),

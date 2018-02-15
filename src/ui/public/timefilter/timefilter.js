@@ -10,6 +10,7 @@ import { uiModules } from 'ui/modules';
 
 // kibi: imports
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
+import dateMath from '@elastic/datemath';
 
 uiRoutes
 .addSetupWork(function (timefilter) {
@@ -18,8 +19,9 @@ uiRoutes
 
 uiModules
 .get('kibana')
-.service('timefilter', function (Private, globalState, $rootScope, config) {
+.service('timefilter', function (Private, globalState, $rootScope, config, createNotifier) {
   const Events = Private(EventsProvider);
+  const notify = createNotifier();
 
   function convertISO8601(stringTime) {
     const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
@@ -61,6 +63,13 @@ uiModules
 
     $rootScope.$$timefilter = self;
 
+    const p = config.get('siren:timePrecision');
+    if (p && dateMath.units.indexOf(p) === -1) {
+      notify.error('siren:timePrecision valid values are: ' + dateMath.units);
+    } else {
+      $rootScope.sirenTimePrecision = p;
+    }
+
     $rootScope.$watchMulti([
       '$$timefilter.time',
       '$$timefilter.time.from',
@@ -94,8 +103,8 @@ uiModules
 
   Timefilter.prototype.getBounds = function () {
     return {
-      min: parseWithPrecision(this.time.from, false, $rootScope.kibiTimePrecision),
-      max: parseWithPrecision(this.time.to, true, $rootScope.kibiTimePrecision)
+      min: parseWithPrecision(this.time.from, false, $rootScope.sirenTimePrecision),
+      max: parseWithPrecision(this.time.to, true, $rootScope.sirenTimePrecision)
     };
   };
 

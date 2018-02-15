@@ -36,7 +36,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       onIntervalSelect: '&'
     },
     template: html,
-    controller: function ($scope) {
+    controller: function ($scope, $rootScope) {
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
       $scope.modes = ['quick', 'relative', 'absolute'];
       $scope.activeTab = $scope.activeTab || 'filter';
@@ -141,9 +141,9 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
             $scope.absolute.from = parseWithPrecision(
               $scope.from || moment().subtract('minutes', 15),
               false,
-              $scope.kibiTimePrecision
+              $rootScope.sirenTimePrecision
             );
-            $scope.absolute.to = parseWithPrecision($scope.to || moment(), true, $scope.kibiTimePrecision);
+            $scope.absolute.to = parseWithPrecision($scope.to || moment(), true, $rootScope.sirenTimePrecision);
             break;
         }
 

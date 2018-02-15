@@ -676,8 +676,8 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
         filter = {
           range : {
             [timefield.name]: {
-              gte: parseWithPrecision(time.from, false, $rootScope.kibiTimePrecision).valueOf(),
-              lte: parseWithPrecision(time.to, true, $rootScope.kibiTimePrecision).valueOf(),
+              gte: parseWithPrecision(time.from, false, $rootScope.sirenTimePrecision).valueOf(),
+              lte: parseWithPrecision(time.to, true, $rootScope.sirenTimePrecision).valueOf(),
               format: 'epoch_millis'
             }
           }
@@ -719,8 +719,8 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     }
 
     return {
-      min: parseWithPrecision(timeFrom, false, $rootScope.kibiTimePrecision),
-      max: parseWithPrecision(timeTo, true, $rootScope.kibiTimePrecision)
+      min: parseWithPrecision(timeFrom, false, $rootScope.sirenTimePrecision),
+      max: parseWithPrecision(timeTo, true, $rootScope.sirenTimePrecision)
     };
   };
 

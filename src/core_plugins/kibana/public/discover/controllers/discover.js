@@ -140,7 +140,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($scope, config, courier, $route, $window, createNotifier,
+function discoverController($scope, $rootScope, config, courier, $route, $window, createNotifier,
   AppState, timefilter, Promise, Private, kbnUrl) {
 
   const Vis = Private(VisProvider);
@@ -541,8 +541,8 @@ function discoverController($scope, config, courier, $route, $window, createNoti
 // kibi: use parseWithPrecision()
   $scope.updateTime = function () {
     $scope.timeRange = {
-      from: parseWithPrecision(timefilter.time.from, false, $scope.kibiTimePrecision),
-      to: parseWithPrecision(timefilter.time.to, true, $scope.kibiTimePrecision)
+      from: parseWithPrecision(timefilter.time.from, false, $rootScope.sirenTimePrecision),
+      to: parseWithPrecision(timefilter.time.to, true, $rootScope.sirenTimePrecision)
     };
   };
 

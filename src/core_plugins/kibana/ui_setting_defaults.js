@@ -1,5 +1,6 @@
 import { merge } from 'lodash';
 import moment from 'moment-timezone';
+import dateMath from '@elastic/datemath';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
@@ -319,7 +320,7 @@ export function getUiSettingDefaults() {
     'siren:timePrecision' : {
       type: 'string',
       value: 's',
-      description: 'Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y'
+      description: 'Set to generate time filters with certain precision. Possible values are: ' + dateMath.units
     },
     'siren:zoom' : {
       value: 1.0,

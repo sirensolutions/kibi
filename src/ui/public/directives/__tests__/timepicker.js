@@ -361,6 +361,8 @@ describe('timepicker directive', function () {
     it('should present a timeframe of 15 minutes ago to now if scope.from and scope.to are not set', function () {
       delete $scope.from;
       delete $scope.to;
+      // kibi: we need to disable sirenTimePrecision
+      $parentScope.sirenTimePrecision = undefined;
       $scope.setMode('absolute');
       $scope.$digest();
 

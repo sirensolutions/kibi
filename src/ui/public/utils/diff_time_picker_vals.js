@@ -12,10 +12,10 @@ export function UtilsDiffTimePickerValsProvider($rootScope) {
   return function (rangeA, rangeB) {
     if (_.isObject(rangeA) && _.isObject(rangeB)) {
       // kibi: support the time precision when comparing times
-      roundWithPrecision(rangeA.to, $rootScope.kibiTimePrecision);
-      roundWithPrecision(rangeB.to, $rootScope.kibiTimePrecision);
-      roundWithPrecision(rangeA.from, $rootScope.kibiTimePrecision);
-      roundWithPrecision(rangeB.from, $rootScope.kibiTimePrecision);
+      roundWithPrecision(rangeA.to, $rootScope.sirenTimePrecision);
+      roundWithPrecision(rangeB.to, $rootScope.sirenTimePrecision);
+      roundWithPrecision(rangeA.from, $rootScope.sirenTimePrecision);
+      roundWithPrecision(rangeB.from, $rootScope.sirenTimePrecision);
       // kibi: end
 
       if (

@@ -9,7 +9,7 @@ const module = uiModules.get('kibana');
 // kibi: imports
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 
-module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
+module.directive('prettyDuration', function ($rootScope, config, quickRanges, timeUnits) {
   return {
     restrict: 'E',
     scope: {
@@ -71,7 +71,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
               display[time] = 'now';
             } else {
               // kibi: use 'parseWithPrecision' instead of 'dateMath.parse'
-              const tryParse = parseWithPrecision($scope[time], time === 'to' ? true : false, $scope.kibiTimePrecision);
+              const tryParse = parseWithPrecision($scope[time], time === 'to' ? true : false, $rootScope.sirenTimePrecision);
               display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
             }
           }

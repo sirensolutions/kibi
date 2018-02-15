@@ -21,7 +21,7 @@ export function VislibVisualizationsTimeMarkerProvider($rootScope) {
       this.times = (times.length) ? times.map(function (d) {
         // kibi: add support for time precision
         return {
-          'time': parseWithPrecision(d.time, false, $rootScope.kibiTimePrecision),
+          'time': parseWithPrecision(d.time, false, $rootScope.sirenTimePrecision),
           'class': d.class || 'time-marker',
           'color': d.color || '#c80000',
           'opacity': d.opacity || 0.3,

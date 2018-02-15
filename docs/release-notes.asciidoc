@@ -53,3 +53,4 @@ include::release-notes/releasenotes_0.3.2.asciidoc[]
 include::release-notes/releasenotes_0.3.1.asciidoc[]
 
 include::release-notes/releasenotes_0.3.0.asciidoc[]
+

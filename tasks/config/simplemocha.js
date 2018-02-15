@@ -19,6 +19,7 @@ module.exports = grunt => ({
       'plugins/**/lib/**/__tests__/**/*.js', // kibi: Support execution of mocha tests in plugins
       'tasks/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
+      '!**/__tests__/fixtures/**/*',
       '!src/**/public/**',
       '!**/_*.js',
       '!plugins/**/public/**', // kibi: Support execution of mocha tests in plugins

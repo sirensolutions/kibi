@@ -200,7 +200,10 @@ uiModules.get('apps/management')
           return ontologyClient.deleteByDomainOrRange(id).then(() => {
             return ontologyClient.insertRelations($scope.relations).then(() => {
               notify.info('Relations saved.');
-              find($scope.editSections, { index: 'entitiesRelations' }).count = $scope.relations.length; // Update the tab count
+              find($scope.editSections, { index: 'entityRelations' }).count = $scope.relations.length; // Update the tab count
+              if ($scope.isRelationalGraphVisible) {
+                $scope.relationalGraphControl.reload();
+              }
             });
           });
         } else {

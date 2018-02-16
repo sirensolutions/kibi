@@ -78,6 +78,9 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
   $scope.state = { section: 'entity_panel' };
   $scope.indexPattern = $route.current.locals.selectedEntity;
 
+  // This object will contain the relational graph control functions (for now just reload)
+  $scope.relationalGraphControl = {};
+
   const notify = createNotifier({
     location: 'Queries Editor'
   });

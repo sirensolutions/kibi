@@ -23,7 +23,8 @@
           <td><input type="checkbox" ng-model="fieldStats.selected"></td>
           <td><field-name field="fieldStats.typeField" /></td>
           <td>{{fieldStats.field.displayName}}</td>
-          <td><input type="text" ng-model="fieldStats.sVis.title"
+          <td><input type="text" title="{{fieldStats.sVis.title}}"
+            ng-model="fieldStats.sVis.title"
             ng-change="sort.visName.setUnordered()"></td>
           <td>{{fieldStats.sVis.vis.type.title}}</td>
         </tr>

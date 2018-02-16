@@ -17,20 +17,24 @@ import _ from 'lodash';
 
 // Test Data
 
-const baseEsResp = {
-  hits: {
-    total: 1000,
-    hits: null
-  },
-  aggregations: {
-    result: {
-      value: 10,
-      buckets: _.times(10, () => ({ doc_count: 100 }))
+function flatEsResp(docsCount = 1000, uniquesCount = 10) {
+  return {
+    hits: {
+      total: docsCount,
+      hits: null
     },
-    min: { value: 0 },
-    max: { value: 1 }
-  }
-};
+    aggregations: {
+      result: {
+        value: uniquesCount,
+        buckets: _.times(uniquesCount, () => ({
+          doc_count: Math.floor(docsCount / uniquesCount)
+        }))
+      },
+      min: { value: 0 },
+      max: { value: 1 }
+    }
+  };
+}
 
 let index;
 let field;
@@ -70,7 +74,7 @@ function init() {
 
   allFields = [ field, field2, field3 ];
 
-  samplesEsResps  = _.times(3).map(() => _.cloneDeep(baseEsResp));
+  samplesEsResps  = _.times(3, () => flatEsResp());
   uniqueEsResps   = _.cloneDeep(samplesEsResps);
   termsEsResps    = _.cloneDeep(samplesEsResps);
   histoEsResps    = _.cloneDeep(samplesEsResps);
@@ -116,8 +120,8 @@ const mappings = {
                 name: 'field3',
                 type: 'number'
               },
-              idField: {
-                name: 'idField',
+              keywordField: {
+                name: 'keywordField',
                 type: 'keyword'
               },
             }
@@ -150,10 +154,10 @@ function flattenObject(obj) {
 }
 
 const es = {
-  search(request) {
-    const { aggs } = request.body;
+  search({ body }) {
+    const { aggs } = body;
 
-    const fieldName = flattenObject(request).field;
+    const fieldName = flattenObject(body).field;
     const allFieldNames = _.map(allFields, 'name');
 
     const f = _.indexOf(allFieldNames, fieldName);
@@ -176,6 +180,14 @@ const es = {
       default:
         throw 'Unexpected aggregation request';
     }
+  },
+
+  msearch({ body }) {
+    const bodies = body.filter((val, v) => v % 2);
+    return Promise.all(bodies.map(oneBody =>
+      es.search({ body: oneBody })
+    ))
+    .then(responses => ({ responses }));
   }
 };
 
@@ -263,9 +275,26 @@ describe('QuickDash Guess Fields Tests', function () {
   });
 
   it('Discards fields without data', function () {
-    samplesEsResps[0].hits.total = 0;
-    samplesEsResps[0].hits.hits = [];
-    uniqueEsResps[0].aggregations.result.value = 0;
+    samplesEsResps = uniqueEsResps = termsEsResps =
+      [ flatEsResp(0) ];
+
+    return guess([ field ]).then(resFields => {
+      expect(resFields.length).to.be(0);
+    });
+  });
+
+  it('Discards id fields', function () {
+    field.name = 'keywordField';
+    field.type = 'keyword';
+
+    const total = 1000;
+
+    samplesEsResps = uniqueEsResps = termsEsResps =
+      [ flatEsResp(total, total) ];
+
+    samplesEsResps[0].hits.hits = _.times(total, () => ({
+      _source: { keywordField: 'someValue' }
+    }));
 
     return guess([ field ]).then(resFields => {
       expect(resFields.length).to.be(0);
@@ -273,7 +302,11 @@ describe('QuickDash Guess Fields Tests', function () {
   });
 
   it('Discards fields with a single term', function () {
-    uniqueEsResps[0].aggregations.result.value = 1;
+    field.name = 'keywordField';
+    field.type = 'keyword';
+
+    samplesEsResps = uniqueEsResps = termsEsResps =
+      [ flatEsResp(1000, 1) ];
 
     return guess([ field ]).then(resFields => {
       expect(resFields.length).to.be(0);
@@ -290,26 +323,6 @@ describe('QuickDash Guess Fields Tests', function () {
       expect(resFields[0]).to.be(field2);
       expect(resFields[1]).to.be(field);
       expect(resFields[2]).to.be(field3);
-    });
-  });
-
-  it('Penalizes id fields', function () {
-    field.name = 'idField';
-    field.type = 'keyword';
-
-    const { total } = uniqueEsResps[0].hits;
-
-    samplesEsResps[0].hits.hits = _.times(total, () => ({
-      _source: { idField: 'someValue' }
-    }));
-    uniqueEsResps[0].aggregations.result.value = total;
-    termsEsResps[0].aggregations.result.buckets =
-      _.times(total, () => ({ doc_count: 1 }));
-
-    return guess([ field, field2 ]).then(resFields => {
-      expect(resFields.length).to.be(2);
-      expect(resFields[0]).to.be(field2);
-      expect(resFields[1]).to.be(field);
     });
   });
 

@@ -40,7 +40,7 @@ export default function (program) {
     }
   }
 
-  async function upgrade(options, config) {
+  async function runUpgrade(options, config) {
     merge(
       config,
       {
@@ -92,10 +92,6 @@ export default function (program) {
 
     await kbnServer.close();
     process.exit(0);
-  }
-
-  async function runUpgrade(options, config) {
-    await upgrade(options, config);
   }
 
   async function processCommand(options) {

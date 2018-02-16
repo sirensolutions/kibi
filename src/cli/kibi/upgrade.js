@@ -102,7 +102,7 @@ export default function (program) {
       catch (e) { null; }
     }
 
-    if (options.y) {
+    if (options.yes) {
       return runUpgrade(options, config);
     }
 
@@ -125,7 +125,7 @@ export default function (program) {
       'Upgrade saved objects'
     )
     .option('--dev', 'Run the upgrade using development mode configuration')
-    .option('--y', 'Run the upgrade without asking backup')
+    .option('-y, --yes', 'Run the upgrade without asking backup')
     .option(
       '-c, --config <path>',
       'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',

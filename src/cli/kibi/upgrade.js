@@ -6,6 +6,7 @@ import { resolve } from 'path';
 import { fromRoot } from '../../utils/from_root';
 import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';
 import MigrationLogger from 'kibiutils/lib/migrations/migration_logger';
+import readline from 'readline';
 
 const pathCollector = function () {
   const paths = [];
@@ -39,15 +40,7 @@ export default function (program) {
     }
   }
 
-  async function upgrade(options) {
-
-    const config = readYamlConfig(options.config);
-
-    if (options.dev) {
-      try { merge(config, readYamlConfig(fromRoot('config/investigate.dev.yml'))); }
-      catch (e) { null; }
-    }
-
+  async function upgrade(options, config) {
     merge(
       config,
       {
@@ -101,8 +94,33 @@ export default function (program) {
     process.exit(0);
   }
 
+  async function runUpgrade(options, config) {
+    await upgrade(options, config);
+  }
+
   async function processCommand(options) {
-    await upgrade(options);
+    const config = readYamlConfig(options.config);
+
+    if (options.dev) {
+      try { merge(config, readYamlConfig(fromRoot('config/investigate.dev.yml'))); }
+      catch (e) { null; }
+    }
+
+    if (options.y) {
+      return runUpgrade(options, config);
+    }
+
+    const indexName = (config.kibana && config.kibana.index) || '.siren';
+
+    const rl = readline.createInterface(process.stdin, process.stdout);
+    rl.question('Have you backup your ' + indexName + ' index? [N/y] ', function (resp) {
+      const yes = resp.toLowerCase().trim()[0] === 'y';
+      rl.close();
+
+      if (yes) {
+        return runUpgrade(options, config);
+      }
+    });
   }
 
   program
@@ -111,6 +129,7 @@ export default function (program) {
       'Upgrade saved objects'
     )
     .option('--dev', 'Run the upgrade using development mode configuration')
+    .option('--y', 'Run the upgrade without asking backup')
     .option(
       '-c, --config <path>',
       'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',

@@ -482,10 +482,12 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   KibiState.prototype._getCurrentDashboardId = function () {
     const dash = _.get($route, 'current.locals.dash');
 
-    if (!dash) {
+    if (dash) {
       if (dash.locked) {
         return;
       }
+      return dash.id;
+    } else {
       // try to get the dashboard id from the current params
       const params = _.get($route, 'current.params');
       if (params && params.id) {
@@ -493,7 +495,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       }
       return;
     }
-    return dash.id;
   };
 
   /**

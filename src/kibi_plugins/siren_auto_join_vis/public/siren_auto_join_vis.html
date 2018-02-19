@@ -33,7 +33,7 @@
   >
     <accordion-group ng-repeat="button in buttons"
                      ng-if="button.type === 'VIRTUAL_ENTITY' && (vis.params.visibility[button.id] === undefined
-                            || vis.params.visibility[button.id].button !== false) && button.sub && button.sub.length"
+                            || vis.params.visibility[button.id].button !== false) && button.hasSub"
                      is-open="visibility.buttons[button.id]"
                      >
       <accordion-heading>

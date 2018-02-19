@@ -455,6 +455,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                 subButtonPromises.push(
                   ontologyClient.getRelationsByDomain(button.targetIndexPatternId).then((relationsByDomain) => {
                     button.sub = {};
+                    button.hasSub = false;
                     return Promise.all([
                       savedDashboards.find(),
                       savedSearches.find()
@@ -485,6 +486,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
                               if ($scope.btnCountsEnabled()) {
                                 subButton.showSpinner = true;
                               }
+                              button.hasSub = true;
                               button.sub[key].push(subButton);
                             });
                           });

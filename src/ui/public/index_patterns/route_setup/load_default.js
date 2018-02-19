@@ -51,7 +51,7 @@ module.exports = function (opts) {
         return kibiDefaultIndexPattern.getDefaultIndexPattern(patterns, undefined, defaultId)
         .then(indexPattern => {
           if (!indexPattern.id) {
-            kbnUrl.change('/management/siren/indexesandrelations/create/', {});
+            return kbnUrl.change('/management/siren/indexesandrelations/create/', {});
           };
           rootSearchSource.getGlobalSource().set('index', indexPattern);
           notify.log('index pattern set to', indexPattern.id);

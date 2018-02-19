@@ -15,6 +15,9 @@ kibana:
 kibi_core: 
   admin: 'ted'
 kibi_access_control.sentinl.foo: 'bar'
+sentinl:
+  sentinl:
+    results: 50
 `;
 
 const mockKibiDevYml = `
@@ -114,6 +117,11 @@ describe('Migrate Kibi Config', () => {
         // kibi_core should have changed to investigate_core
         expect(contents).to.have.property('investigate_core');
         expect(contents).to.not.have.property('kibi_core');
+        // sentinl.sentinl.results should change to sentinl.es.results
+        expect(contents.sentinl).to.have.property('es');
+        expect(contents.sentinl.es).to.have.property('results');
+        expect(contents.sentinl.es.results).to.equal(50);
+        expect(contents.sentinl).to.not.have.property('sentinl');
       });
 
       const options = {

@@ -482,7 +482,10 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   KibiState.prototype._getCurrentDashboardId = function () {
     const dash = _.get($route, 'current.locals.dash');
 
-    if (!dash || dash.locked) {
+    if (!dash) {
+      if (dash.locked) {
+        return;
+      }
       // try to get the dashboard id from the current params
       const params = _.get($route, 'current.params');
       if (params && params.id) {

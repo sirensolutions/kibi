@@ -1,8 +1,10 @@
 import { safeLoad, safeDump } from 'js-yaml';
 import { readFileSync as read, writeFileSync as write, renameSync as rename } from 'fs';
 import { fromRoot } from '../../utils';
-import { has } from 'lodash';
+import { has, get, isEmpty } from 'lodash';
 import { replacementMap, valueReplacementMap, settingsForRemovalIfNotCustomMap } from './kibi_to_siren_migration_maps';
+import unset from '../../ui/public/kibi/lodash4/unset';
+import set from '../../ui/public/kibi/lodash4/set';
 
 // The keys to be replaced are set as keys in the replacementMap map
 // The new keys to replace the old keys with are the values
@@ -69,6 +71,29 @@ function readFileContents(path) {
   }
 }
 
+function getParentKey(path) {
+  const parts = path.split('.');
+  if (parts.length > 1) {
+    parts.pop();
+  }
+  const parentKey = parts.join('.');
+  if (path === parentKey) {
+    return null;
+  }
+  return parentKey;
+}
+
+function checkAndClearParentObjectIfEmpty(o, key) {
+  const parentPath = getParentKey(key);
+  if (parentPath) {
+    const parentValue = get(o, parentPath);
+    if (isEmpty(parentValue)) {
+      unset(o, parentPath);
+      checkAndClearParentObjectIfEmpty(o, parentPath);
+    }
+  }
+}
+
 function migrateKibiYml({ config: path , dev }) {
   //check if replacing dev yamls
   const newPath = fromRoot(`config/investigate${(dev) ? '.dev' : ''}.yml`);
@@ -86,20 +111,13 @@ Please ensure you are running the correct command and the config path is correct
   // including nested config options
   // retains the nesting and order of properties
   Object.keys(replacementMap).map(key => {
-    function _replaceKeys(obj, oldKey = '', newKey = '') {
-      // if the key (possibly nested) is in the object
-      // and is at the current level of nesting
-      if (has(obj, oldKey) && obj.hasOwnProperty(oldKey)) {
-        obj = Object.assign({}, renamePropAtSpecificPoint(obj, oldKey, newKey));
-      // if the key is not at the current level of nesting, look in the next level down
-      } else if (has(obj, oldKey)) {
-        const children = Object.keys(obj);
-        children.map(childKey => obj[childKey] = _replaceKeys(obj[childKey], getChildKey(oldKey), newKey));
-      }
-      return obj;
-    }
 
-    contents = _replaceKeys(contents, key, replacementMap[key]);
+    if (has(contents, key)) {
+      const value = get(contents, key);
+      unset(contents, key);
+      checkAndClearParentObjectIfEmpty(contents, key);
+      set(contents, replacementMap[key], value);
+    }
   });
 
   // Set the old defaults into the migrated config.

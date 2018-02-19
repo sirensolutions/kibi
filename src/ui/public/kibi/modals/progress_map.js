@@ -165,5 +165,3 @@ export function ProgressMapProvider(Private) {
     .finally(() => progressModal.scope.onConfirm());
   };
 }
-
-

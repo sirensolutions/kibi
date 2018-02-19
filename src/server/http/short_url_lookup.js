@@ -14,11 +14,25 @@ export default function (server) {
     }
   }
 
+  async function getUrlDoc(urlId, req) {
+    // kibi: use the saved objects API to get the URL
+    try {
+      const savedObjectsClient = req.getSavedObjectsClient();
+      return await savedObjectsClient.get('url', urlId, req);
+    } catch (error) {
+      return null;
+    }
+    // kibi: end
+  }
+
   return {
     async generateUrlId(url, req, sirenSession = {}) {
       const id = crypto.createHash('md5').update(url).digest('hex');
       const savedObjectsClient = req.getSavedObjectsClient();
       const { isConflictError } = savedObjectsClient.errors;
+
+      const urlDoc = await  getUrlDoc(id, req);
+      if (urlDoc) return id;
 
       try {
         // kibi: pass request object to method

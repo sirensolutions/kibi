@@ -483,6 +483,11 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     const dash = _.get($route, 'current.locals.dash');
 
     if (!dash || dash.locked) {
+      // try to get the dashboard id from the current pathParams
+      const pathParams = _.get($route, 'current.pathParams');
+      if (pathParams && pathParams.id) {
+        return pathParams.id;
+      }
       return;
     }
     return dash.id;

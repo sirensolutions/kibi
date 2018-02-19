@@ -1,8 +1,12 @@
 import * as visTypes from './vistypes';
 import { QuickDashModalsProvider } from './quickdash_modals';
-import { ProgressMapProvider } from './progress_map';
-import { promiseMapSeries, fieldSpec, queryIsAnalyzed } from './commons';
 import { QuickDashMakeVisProvider } from './make_visualizations';
+
+import { ProgressMapProvider } from 'ui/kibi/modals/progress_map';
+import { sortContext } from 'ui/kibi/directives/sort_icon';
+import { allSelected } from 'ui/kibi/directives/tristate_checkbox';
+import { fieldSpec, queryIsAnalyzed } from 'ui/kibi/utils/field';
+import { promiseMapSeries } from 'ui/kibi/utils/promise';
 
 import _ from 'lodash';
 
@@ -33,6 +37,13 @@ export function GuessFieldsProvider(
   const quickDashModals = Private(QuickDashModalsProvider);
 
   const notify = createNotifier({ location: 'Guess Fields' });
+
+  const samplesCount  = 50;
+  const termsCount    = 50;
+
+  const termsHighRatioCut   = 0.95;
+  const termsLowRatioScore  = 0.2;
+  const termsLowRatioCut    = 0.05;
 
 
   // Filtering
@@ -79,6 +90,61 @@ export function GuessFieldsProvider(
 
   // Queries
 
+  function msearchRequest(index, body) {
+    return [{
+      index: index.id,
+      ignore_unavailable: true
+    }, body];
+  }
+
+  function samplesRequest(index, field, query) {
+    const body = {
+      size: samplesCount,
+      query: _.cloneDeep(query)
+    };
+
+    const { must, must_not } = body.query.bool;
+
+    must.push({ exists: fieldSpec(field) });
+
+    if(field.type === 'string') {
+      // No empty strings
+      must_not.push({ term: { [field.name]: '' } });
+    }
+
+    return msearchRequest(index, body);
+  }
+
+  function samplesResolve(resp) {
+    return {
+      nonEmptyDocsCount: resp.hits.total,
+      samples: _.map(resp.hits.hits, '_source'),
+    };
+  }
+
+  function termsRequest(index, field, query) {
+    return msearchRequest(index, {
+      size: 0,
+      query,
+      aggs: {
+        result: {
+          terms: _.assign({
+            size: termsCount,
+            order: { _count: 'desc' }
+          }, fieldSpec(field))
+        }
+      }
+    });
+  }
+
+  function termsResolve(resp) {
+    return {
+      docsCount: resp.hits.total,
+      terms: resp.aggregations.result.buckets
+    };
+  }
+
+
   function queryRelated(args) {
     const { index } = args;
 
@@ -92,75 +158,56 @@ export function GuessFieldsProvider(
       });
   }
 
-  function querySamplesAndDocsCount(index, field) {
-    const { timeFieldName } = index;
+  const termTypes = _.indexBy(['boolean', 'keyword', 'ip']);
 
-    const request = {
-      index: index.id,
-      ignore_unavailable: true,
-      body: {
-        size: 50,
-        query: {
-          bool: {
-            must: [{ exists: fieldSpec(field) }],
-            must_not: []
-          }
-        }
-      },
-    };
+  function queryDataType(args, fieldStats) {
+    const { field } = fieldStats;
+    const { type } = field;
 
-    if(timeFieldName) {
-      // Values not associated to time are never displayed in charts
-      const timeField = index.fields.byName[timeFieldName];
-      request.body.query.bool.must.push({ exists: fieldSpec(timeField) });
-    }
+    if(type !== 'string') { return fieldStats.dataType = type; }
 
-    if(field.type === 'string') {
-      // No empty strings
-      request.body.query.bool.must_not.push({ term: { [field.name]: '' } });
-    }
-
-    return es.search(request)
-      .then(resp => ({
-        docsCount: resp.hits.total,
-        samples: _.map(resp.hits.hits, '_source')
-      }));
+    return queryIsAnalyzed(mappings, field)
+      .then(analyzed =>
+        fieldStats.dataType = analyzed ? 'text' : 'keyword');
   }
 
-  function queryUniquesCount(index, field) {
-    const request = {
-      index: index.id,
-      ignore_unavailable: true,
-      body: {
-        size: 0,
-        aggs: {
-          result: {
-            cardinality: _.assign({
-              precision_threshold: 20
-            }, fieldSpec(field))
-          }
-        }
-      }
-    };
+  function queryFieldStats(args, fieldStats) {
+    const { index, query } = args;
+    const { field } = fieldStats;
 
-    return es.search(request)
-      .then(resp => resp.aggregations.result.value);
+    const requests = [{
+      body: samplesRequest(index, field, query),
+      resolve: samplesResolve
+    }];
+
+    if(termTypes[fieldStats.dataType]) {
+      requests.push({
+        body: termsRequest(index, field, query),
+        resolve: termsResolve
+      });
+    }
+
+    const body = _(requests)
+      .map('body')
+      .flatten()
+      .value();
+
+    return es.msearch({ body })
+      .then(allResp => allResp.responses.reduce(function (result, resp, r) {
+        return Object.assign(result, requests[r].resolve(resp));
+      }, fieldStats));
   }
 
-  function querySavedVis(index, field) {
+  function querySavedVis(args, fieldStats) {
+    const { index, query } = args;
+    const { field } = fieldStats;
+
     return visMaker.makeSavedVisualizations(index, [ field ], {
+      query,
       addSirenDataTable: false,
       addSirenMultiChart: false
     })
-    .then(savedVises => savedVises[0]);
-  }
-
-  function queryDataType(index, field) {
-    const { type } = field;
-    if(type !== 'string') { return type; }
-
-    return queryIsAnalyzed(mappings, index, field)
-      .then(analyzed => analyzed ? 'text' : 'keyword');
+    .then(savedVises => fieldStats.sVis = savedVises[0]);
   }
 
 
@@ -212,15 +259,45 @@ export function GuessFieldsProvider(
 
   function scoreDocsCount(fieldStats) {
     // Fields with more non-empty documents should score higher
-
-    return (fieldStats.docsCount <= 1)
-      ? 0 : (1 + Math.log(fieldStats.docsCount));
+    return (fieldStats.nonEmptyDocsCount <= 1)
+      ? 0 : (1 + Math.log(fieldStats.nonEmptyDocsCount));
   }
 
-  function scoreUniquesCount(fieldStats) {
-    if(fieldStats.uniquesCount <= 1) {
-      fieldStats.notes.push('Field has only one term');
-      return 0;
+  function scoreTerms(fieldStats) {
+    if(fieldStats.terms) {
+      if(fieldStats.terms.length <= 1) {
+        fieldStats.notes.push('Field has only one term');
+        return 0;
+      }
+
+      if(fieldStats.terms[0].doc_count === 1) {
+        fieldStats.notes.push('All values are unique');
+        return 0;
+      }
+
+      const biggestTermRelSize = fieldStats.terms[0].doc_count / fieldStats.docsCount;
+
+      if(biggestTermRelSize >= termsHighRatioCut) {
+        const perc = Math.floor(100 * biggestTermRelSize);
+        fieldStats.notes.push(`Same term in ${perc}% of documents`);
+        return 0;
+      }
+
+      const termsRelSize = _.sum(fieldStats.terms, 'doc_count') / fieldStats.docsCount;
+
+      if(termsRelSize <= termsLowRatioScore) {
+        const perc = Math.max(1, Math.ceil(100 * termsRelSize));
+        fieldStats.notes.push(`Less than ${perc}% of documents in 50 terms`);
+
+        return Math.max(0,
+          (termsRelSize - termsLowRatioCut) /
+          (termsLowRatioScore - termsLowRatioCut));
+      }
+
+      if(biggestTermRelSize / termsRelSize >= termsHighRatioCut) {
+        fieldStats.notes.push('Flat distribution after one big term');
+        return 0;
+      }
     }
 
     return 1;
@@ -330,7 +407,7 @@ export function GuessFieldsProvider(
   const scoreFunctions = [
     { weight: 1, fn: scoreName },
     { weight: 1, fn: scoreDocsCount },
-    { weight: 1, fn: scoreUniquesCount },
+    { weight: 1, fn: scoreTerms },
     { weight: 1, fn: scoreGeneratedVis },
     { weight: 1, fn: scoreUnusualSamples },
     { weight: 1, fn: scoreStringTermsAdequacy },
@@ -340,7 +417,24 @@ export function GuessFieldsProvider(
 
   // Reporting
 
+  function makeReportSortContext(args) {
+    const { report } = args;
+
+    report.sort = sortContext({
+      acceptable:   fieldStats => fieldStats.acceptable,
+      type:         fieldStats => fieldStats.dataType || fieldStats.field.type,
+      name:         fieldStats => fieldStats.field.displayName.toLowerCase(),
+      score:        fieldStats => fieldStats.score,
+      chart:        fieldStats => fieldStats.sVis && fieldStats.sVis.vis.type.title,
+      notes:        fieldStats => fieldStats.notes.join()
+    });
+
+    return args;
+  }
+
   function prepareStatsForReporting(args) {
+    const { sort } = args.report;
+
     args.stats.forEach(fieldStats => {
       fieldStats.scoreStr = '' + _.round(fieldStats.score, 3);
 
@@ -350,12 +444,13 @@ export function GuessFieldsProvider(
       if(fieldStats.dataType === 'text') { fieldStats.notes.push('Analyzed'); }
     });
 
-    args.stats = _.sortByAll(args.stats,
-      fieldStats => -fieldStats.acceptable,
-      fieldStats => fieldStats.dataType || fieldStats.field.type,
-      fieldStats => -fieldStats.score,
-      fieldStats => fieldStats.field.displayName);
+    const sorters = _.map([
+      sort.acceptable, sort.type, sort.score, sort.name
+    ], 'sorter');
 
+    const orders = ['desc', 'asc', 'desc', 'asc'];
+
+    args.stats = _.sortByOrder(args.stats, sorters, orders);
     return args;
   }
 
@@ -369,14 +464,31 @@ export function GuessFieldsProvider(
     return args;
   }
 
+  function makeFilteringQuery(args) {
+    const { savedSearch } = args;
+
+    const queryDefault = { bool: { must: [], must_not: [] } };
+
+    const queryPromise = savedSearch
+      ? savedSearch.searchSource._flatten().then(req => req.body.query)
+      : Promise.resolve(queryDefault);
+
+    return queryPromise
+      .then(query => {
+        if(query.match_all) { query = queryDefault; }
+
+        args.query = query;
+        return args;
+      });
+  }
+
   function makeQueries(args) {
-    const { index, workStats } = args;
+    const { index, query, workStats } = args;
 
     const fieldQueryFunctions = [
-      querySamplesAndDocsCount,
-      queryUniquesCount,
-      querySavedVis,
-      queryDataType
+      queryDataType,
+      queryFieldStats,
+      querySavedVis
     ];
 
     function fieldTextMap(fieldStats) {
@@ -384,12 +496,9 @@ export function GuessFieldsProvider(
     }
 
     function fieldValueMap(fieldStats, progress) {
-      const { field } = fieldStats;
-
-      return promiseMapSeries(fieldQueryFunctions, fn => fn(index, field, progress))
-        .then(([ { docsCount, samples }, uniquesCount, sVis, dataType ]) => {
-          _.assign(fieldStats, { docsCount, uniquesCount, sVis, samples, dataType });
-        });
+      return promiseMapSeries(fieldQueryFunctions,
+        fn => fn(args, fieldStats, progress)
+      );
     }
 
     const operations = [{
@@ -404,8 +513,8 @@ export function GuessFieldsProvider(
 
     return progressMap(operations, {
       title: 'Autoselect Top 10',
-      textMap: (op, o, progress) => op.textMap(op.val, progress),
-      valueMap: (op, o, progress) => op.valueMap(op.val, progress)
+      valueMap: (op, o, progress) => op.valueMap(op.val, progress),
+      stepMap: (op, o, progress) => op.textMap(op.val),
     })
     .then(() => args);
   }
@@ -493,7 +602,7 @@ export function GuessFieldsProvider(
 
   function makeSelection(args) {
     _.chain(args.workStats)
-      .take(10)
+      .take(args.takeCount)
       .forEach(fieldStats => { fieldStats.selected = true; })
       .commit();
 
@@ -503,11 +612,22 @@ export function GuessFieldsProvider(
   function showReport(args) {
     if(!args.showReport) { return args; }
 
+    const { stats } = args;
+    args.report = {};
+
+    makeReportSortContext(args);
     prepareStatsForReporting(args);
 
-    return quickDashModals.guessReport({ stats: args.stats })
-      .show()
-      .then(() => args);
+    return quickDashModals.guessReport({
+      stats,
+      sort: args.report.sort,
+      computed: allSelected(stats)
+    })
+    .show()
+    .then(() => {
+      args.workStats = stats;
+      return args;
+    });
   }
 
   function toResult(args) {
@@ -520,6 +640,7 @@ export function GuessFieldsProvider(
 
   return function guessFields(index, fields, options = {}) {
     _.defaults(options, {
+      savedSearch: null,
       takeCount: 10,
       interleaveByDatatype: true,
       showReport: true
@@ -541,6 +662,7 @@ export function GuessFieldsProvider(
 
     return Promise.resolve(args)
       .then(filterAcceptableFields)
+      .then(makeFilteringQuery)
       .then(makeQueries)
       .then(makeScoreHelpers)
       .then(makeScores)

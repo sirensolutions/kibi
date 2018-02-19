@@ -1,7 +1,11 @@
 import { QuickDashModalsProvider } from './quickdash_modals.js';
 import { QuickDashMakeVisProvider } from './make_visualizations';
-import { ProgressMapProvider } from './progress_map';
 import { panelsLayout } from './panels_layout';
+
+import { ProgressMapProvider } from 'ui/kibi/modals/progress_map';
+
+import { sortContext } from 'ui/kibi/directives/sort_icon';
+import { allSelected } from 'ui/kibi/directives/tristate_checkbox';
 
 import { DashboardStateProvider } from 'plugins/kibana/dashboard/dashboard_state';
 import { createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
@@ -72,7 +76,8 @@ function getLastSavedSearchNumber(savedSearches, title) {
 
 export function QuickDashboardProvider(
     Private, createNotifier, kbnUrl, AppState, kibiState, dashboardGroups,
-    savedDashboardGroups, savedDashboards, savedSearches, savedVisualizations) {
+    savedDashboardGroups, savedDashboards, savedSearches, savedVisualizations,
+    $timeout) {
 
   const DashboardState = Private(DashboardStateProvider);
   const visMaker = Private(QuickDashMakeVisProvider);
@@ -203,19 +208,38 @@ export function QuickDashboardProvider(
     return args;
   }
 
+  function makeFilteringQuery(args) {
+    const { indexPattern, savedSearch, timeFilter, userSpecs } = args;
+
+    return savedSearch.searchSource._flatten()
+      .then(req => req.body.query)
+      .then(query => {
+        if(!userSpecs.storeTimeWithDashboard) {
+          const { timeFieldName } = indexPattern;
+
+          query.bool.must = _.filter(query.bool.must, clause =>
+            !clause.range || !clause.range[timeFieldName]);
+        }
+
+        return query;
+      })
+      .then(query => {
+        args.query = query;
+        return args;
+      });
+  }
+
+
   function makeEmptyDashboard(args) {
     const { userSpecs } = args;
 
     return savedDashboards.get('')
       .then(dash => {
-        // Borrowing dashboardState from the dashboard app, but we
+        // Borrowing dashState from the dashboard app, but we
         // don't want its state changes to taint the discover app state,
         // so saveState() will be overridden
-
         const dashState = new DashboardState(dash, AppState);
-        dashState.appState.timeRestore = false;
         dashState.saveState = _.noop;
-
         dashState.setTitle(userSpecs.title);
 
         args.dashboard = dash;
@@ -234,9 +258,10 @@ export function QuickDashboardProvider(
   }
 
   function makeVisualizations(args, progress) {
-    const { indexPattern, fields, userSpecs } = args;
+    const { indexPattern, fields, query, userSpecs } = args;
 
     return visMaker.makeSavedVisualizations(indexPattern, fields, {
+      query,
       addSirenMultiChart: userSpecs.addSirenMultiChart,
       progress
     })
@@ -248,13 +273,47 @@ export function QuickDashboardProvider(
     });
   }
 
+  function showReport(args) {
+    const { fields, savedVises } = args;
+
+    const stats = _.map(savedVises, function (sVis, s) {
+      const field = fields[s];
+      const typeField = field && _.assign({}, field, { name: '' });
+
+      return { sVis, field, typeField, selected: true };
+    });
+
+    const sort = sortContext({
+      type:     fieldStats => fieldStats.field && fieldStats.field.type,
+      field:    fieldStats =>
+        fieldStats.field && fieldStats.field.displayName.toLowerCase(),
+      visName:  fieldStats =>
+        fieldStats.sVis && fieldStats.sVis.title.toLowerCase(),
+      chart:    fieldStats => fieldStats.sVis && fieldStats.sVis.vis.type.title
+    });
+
+    return quickDashModals.generateReport({
+      stats: stats.slice(),                         // Slicing to preserve original sort
+      sort,
+      computed: allSelected(stats)
+    })
+    .show()
+    .then(ok => ok || Promise.reject(0))
+    .then(function filterSelectedVises() {
+      args.savedVises = _(stats).filter('selected').map('sVis').value();
+      return args.savedVises.length
+        ? args : Promise.reject(0);
+    });
+  }
+
   function saveVisualizations(args) {
-    const { savedVises } = args;
+    const { savedVises, savedSearch } = args;
 
     return Promise.all(savedVises.map(sVis => {
       // There *MUST NOT* be a 'duplicate title' popup at this stage.
       // We'll be simulating a previous save.
       sVis.lastSavedTitle = sVis.title;
+      sVis.savedSearchId = savedSearch.id;
 
       return sVis.save();
     }))
@@ -347,7 +406,12 @@ export function QuickDashboardProvider(
         savedDashId = dashId;
       })
       .then(() => dashboardGroups.computeGroups('Quick Dashboard added'))
-      .then(() => dashboardGroups.updateMetadataOfDashboardIds([ savedDashId ], true))
+      .then(groups => dashboardGroups.updateMetadataOfDashboardIds(_(groups)
+        .filter(group => !group.collapsed || group.virtual)
+        .map('dashboards')
+        .flatten()
+        .map('id')
+        .value()))
       .then(() => args);
   }
 
@@ -393,18 +457,35 @@ export function QuickDashboardProvider(
       .then(() => args);
   }
 
-  function applyFilters(args) {
-    const { dashState, query, filters, timeFilter } = args;
+  function applyTimeFilter(args) {
+    const { dashState, timeFilter } = args;
 
-    // Filters are applied by in the dashboard app state.
-    dashState.applyFilters(query, filters);
-
-    // Time filters, instead, are saved in the kibiState.
+    // Time filter will be retained. It's saved in the kibiState.
     kibiState._saveTimeForDashboardId(
       dashState.savedDashboard.id,
       timeFilter.time.mode, timeFilter.time.from, timeFilter.time.to);
 
-    return args;
+    kibiState.save(true, true);                           // replace=true, silent=true
+
+    // We have to wait for the url to update. This is required to actually save
+    // the kibiState.
+    return $timeout()
+      .then(() => {
+        // Filters are copied from current, but they will be moved to the
+        // assigned saved search - so they must be cleared on the dashState
+        // to avoid duplication.
+        //
+        // Also, appState assignments must be done *after* the kibiState url has
+        // changed, since changing url restores the saved appState.
+        const query = { query_string: { analyze_wildcard: true, query: '*' } };
+        const filters = [];
+
+        dashState.appState.query = query;
+        dashState.appState.filters = filters;
+
+        dashState.applyFilters(query, filters);
+      })
+      .then(() => args);
   }
 
   function openDashboardPage({ dashState }) {
@@ -457,27 +538,35 @@ export function QuickDashboardProvider(
       dashboardEntries: flattenDashboardGroups(dashboardGroups)
     }, args);
 
+    const progressOpts = {
+      valueMap: (op, o, progress) => op.fn(args, progress),
+      stepMap: op => op.text || op.countFn(args)
+    };
+
     return Promise.resolve(args)
       .then(showExperimentalWarning)
       .then(makeDefaultTitle)
       .then(askUserSpecs)
       .then(checkDuplicateTitle)
       .then(retrieveFields)
+      .then(makeFilteringQuery)
+      .then(makeEmptyDashboard)
       .then(() => progressMap([
-        { fn: makeEmptyDashboard, text: 'Making new Dashboard' },
-        { fn: makeVisualizations, text: 'Making Visualizations', countFn: makeVisSteps },
+        { fn: makeVisualizations, countFn: makeVisSteps },
+      ], _.assign({
+        title: 'Generating Visualizations...',
+      }, progressOpts)).then(() => args))
+      .then(showReport)
+      .then(() => progressMap([
+        { fn: saveSavedSearch,    text: 'Saving Saved Search' },
         { fn: saveVisualizations, text: 'Saving Visualizations' },
         { fn: fillDashboard,      text: 'Compiling Dashboard' },
-        { fn: saveSavedSearch,    text: 'Saving Saved Search' },
         { fn: saveDashboard,      text: 'Saving Dashboard' }
-      ], {
-        title: 'Populating Dashboard...',
-        valueMap: (op, o, progress) => op.fn(args, progress),
-        textMap: 'text',
-        countMap: op => op.countFn ? op.countFn(args) : 1
-      }).then(() => args))
+      ], _.assign({
+        title: 'Saving Dashboard...',
+      }, progressOpts)).then(() => args))
       .then(removeDupDashboard)
-      .then(applyFilters)
+      .then(applyTimeFilter)
       .then(openDashboardPage)
       .catch(err => undoSaves(args)
         .then(() => { err && notify.error(err); }));

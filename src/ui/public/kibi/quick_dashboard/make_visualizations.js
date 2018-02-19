@@ -1,8 +1,10 @@
+import * as visTypes from './vistypes';
+
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import { promiseMapSeries, fieldSpec, queryIsAnalyzed } from './commons';
-import * as visTypes from './vistypes';
+import { fieldSpec, queryIsAnalyzed } from 'ui/kibi/utils/field';
+import { promiseMapSeries } from 'ui/kibi/utils/promise';
 
 import _ from 'lodash';
 
@@ -18,8 +20,9 @@ export function QuickDashMakeVisProvider(
   const AggConfigs = Private(VisAggConfigsProvider);
   const visTypesRegistry = Private(VisTypesRegistryProvider);
 
-  const TERM_ELEMENT_COUNT = 35;
-  const TERM_ELEMENT_COUNT_4_TABLE = 100;
+  const TERMS_COUNT_PIE = 30;
+  const TERMS_COUNT_HISTOGRAM = 50;
+  const TERMS_COUNT_TABLE = 100;
   const NUMERIC_HISTO_BUCKETS_COUNT = 150;
 
   const aggSchemasByVisType = {
@@ -35,8 +38,8 @@ export function QuickDashMakeVisProvider(
     return savedVisualizations.get({ indexPattern, type });
   }
 
-  function configureVis(sVis, field, aggs, params) {
-    sVis.title = `${field.displayName}`;
+  function configureVis(sVis, field, aggs, params, title) {
+    sVis.title = (title || '$$').replace('$$', field.displayName);
 
     if(aggs) { sVis.visState.aggs = new AggConfigs(sVis.vis, aggs); }
 
@@ -45,7 +48,7 @@ export function QuickDashMakeVisProvider(
     return sVis;
   }
 
-  function createVis(indexPattern, field, type, agg, xParams, params) {
+  function createVis(indexPattern, field, type, agg, xParams, params, title) {
     return newDefaultVis(indexPattern, type)
       .then(sVis => {
         const aggs = [{
@@ -61,37 +64,25 @@ export function QuickDashMakeVisProvider(
 
         params = _.merge({}, defaultParamsByVisType[type] || {}, params);
 
-        return configureVis(sVis, field, aggs, params);
+        return configureVis(sVis, field, aggs, params, title);
       });
   }
 
 
-  function searchAgg(index, aggs) {
-    const { timeFieldName } = index;
-
-    const request = {
+  function searchAgg(index, aggs, query) {
+    return es.search({
       index: index.id,
       ignore_unavailable: true,
-      body: { size: 0, aggs }
-    };
-
-    if(timeFieldName) {
-      // All siren searches are filtered by the timeField if that is present.
-      //
-      // All hits without timeField value will therefore never be recovered in
-      // any visualization - they must be filtered out from evaluations.
-      //
-      // NOTE: Time fields are *NOT* an exception.
-
-      const timeField = index.fields.byName[timeFieldName];
-      request.body.query = { exists: fieldSpec(timeField) };
-    }
-
-    return es.search(request);
+      body: {
+        size: 0,
+        query,
+        aggs
+      }
+    });
   }
 
-  function evalUniqueCount(index, field) {
-    const request = {
+  function evalUniqueCount(index, field, query) {
+    const aggs = {
       result: {
         cardinality: _.assign({
           // Unique count is always checked against low values (10), and
@@ -102,24 +93,24 @@ export function QuickDashMakeVisProvider(
       }
     };
 
-    return searchAgg(index, request)
+    return searchAgg(index, aggs, query)
       .then(resp => resp.aggregations.result.value);
   };
 
-  function evalNumericRange(index, field) {
+  function evalNumericRange(index, field, query) {
     const fSpec = fieldSpec(field);
 
-    const request = {
+    const aggs = {
       min: { min: fSpec },
       max: { max: fSpec }
     };
 
-    return searchAgg(index, request)
+    return searchAgg(index, aggs, query)
       .then(resp => [ resp.aggregations.min.value, resp.aggregations.max.value ]);
   }
 
-  function evalHistoInterval(index, field) {
-    return evalNumericRange(index, field)
+  function evalHistoInterval(index, field, query) {
+    return evalNumericRange(index, field, query)
       .then(range => {
         const floatInterval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
 
@@ -148,7 +139,7 @@ export function QuickDashMakeVisProvider(
       });
   }
 
-  function evalDateInterval(index, field) {
+  function evalDateInterval(index, field, query) {
     const { timeFieldName } = index;
 
     if(field.name === timeFieldName) {
@@ -160,7 +151,7 @@ export function QuickDashMakeVisProvider(
 
     // Other datetime fields must be analyzed manually
 
-    return evalNumericRange(index, field)
+    return evalNumericRange(index, field, query)
       .then(range => {
         const interval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
 
@@ -235,10 +226,10 @@ export function QuickDashMakeVisProvider(
     return current;
   }
 
-  function evalAgg(index, agg) {
+  function evalAgg(index, agg, query) {
     // Evaluate how many buckets it takes to cover 90% of the documents
 
-    return searchAgg(index, { result: agg })
+    return searchAgg(index, { result: agg }, query)
       .then(resp => {
         const buckets = _(resp.aggregations.result.buckets)
           .map('doc_count')
@@ -255,41 +246,42 @@ export function QuickDashMakeVisProvider(
       });
   }
 
-  function evalHistoAgg(index, field, interval) {
+  function evalHistoAgg(index, field, interval, query) {
     return evalAgg(index, {
       histogram: _.assign({
         interval
       }, fieldSpec(field))
-    });
+    }, query);
   }
 
-  function evalTermsAgg(index, field, size) {
+  function evalTermsAgg(index, field, size, query) {
     return evalAgg(index, {
       terms: _.assign({
         size,
         order: { _count: 'desc' }
       }, fieldSpec(field))
-    });
+    }, query);
   }
 
 
-  function analyzeNumber(index, field) {
+  function analyzeNumber(index, field, query) {
     if(!field.aggregatable) { return null; }
 
     const retVis = createVis.bind(null, index, field);
 
-    return evalUniqueCount(index, field).then(unique => {
+    return evalUniqueCount(index, field, query).then(unique => {
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
-        return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
+        return retVis(visTypes.PIE, 'terms', { size: TERMS_COUNT_PIE }, null,
+          `$$ - Top ${TERMS_COUNT_PIE} Terms by Count`);
       }
 
       // Otherwise, use a histogram
       let interval;
 
-      return evalHistoInterval(index, field)
+      return evalHistoInterval(index, field, query)
         .then(itl => interval = itl)
-        .then(() => evalHistoAgg(index, field, interval))
+        .then(() => evalHistoAgg(index, field, interval, query))
         .then(({ relativeCutoff }) => {
           const params = {
             categoryAxes: [{
@@ -308,31 +300,34 @@ export function QuickDashMakeVisProvider(
             params.valueAxes = [{ scale: { type: 'square root' } }];
           }
 
-          return retVis('histogram', 'histogram', { interval }, params);
+          return retVis('histogram', 'histogram', { interval }, params,
+            '$$ - Histogram of Counts');
         });
     });
   }
 
-  function analyzeString(index, field) {
+  function analyzeString(index, field, query) {
     if(!field.aggregatable) { return null; }
 
     const retVis = createVis.bind(null, index, field);
 
-    return evalUniqueCount(index, field).then(unique => {
+    return evalUniqueCount(index, field, query).then(unique => {
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
-        return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
+        return retVis(visTypes.PIE, 'terms', { size: TERMS_COUNT_PIE }, null,
+          `$$ - Top ${TERMS_COUNT_PIE} Terms by Count`);
       }
 
       return Promise.all([
-        evalTermsAgg(index, field, TERM_ELEMENT_COUNT_4_TABLE),
-        queryIsAnalyzed(mappings, index, field)
+        evalTermsAgg(index, field, TERMS_COUNT_TABLE, query),
+        queryIsAnalyzed(mappings, field)
       ])
       .then(([termsEval, isAnalyzed]) => {
         // Use tagcloud if type is analyzed
         if(isAnalyzed) {
           const params = (termsEval.relativeCutoff < 0.1) ? { scale: 'log' } : {};
-          return retVis(visTypes.TAGCLOUD, 'terms', { size: TERM_ELEMENT_COUNT }, params);
+          return retVis(visTypes.TAGCLOUD, 'terms', { size: TERMS_COUNT_PIE }, params,
+            `$$ - Top ${TERMS_COUNT_PIE} Tags by Count`);
         }
 
 
@@ -340,7 +335,8 @@ export function QuickDashMakeVisProvider(
 
         // Use pie for 90% of the dataset in <= 10 terms
         if(cutoffIdx < 10) {
-          return retVis(visTypes.PIE, 'terms', { size: TERM_ELEMENT_COUNT });
+          return retVis(visTypes.PIE, 'terms', { size: TERMS_COUNT_PIE }, null,
+            `$$ - Top ${TERMS_COUNT_PIE} Terms by Count`);
         }
 
         // Use histogram for 90% of the dataset in <= 50 terms
@@ -349,16 +345,18 @@ export function QuickDashMakeVisProvider(
             ? { valueAxes: [{ scale: { type: 'log' } }] }
             : {};
 
-          return retVis('histogram', 'terms', { size: 50 }, params);
+          return retVis('histogram', 'terms', { size: TERMS_COUNT_HISTOGRAM }, params,
+            `$$ - Top ${TERMS_COUNT_HISTOGRAM} Terms by Count`);
         }
 
         // Use table otherwise
-        return retVis(visTypes.TABLE, 'terms', { size: TERM_ELEMENT_COUNT_4_TABLE });
+        return retVis(visTypes.TABLE, 'terms', { size: TERMS_COUNT_TABLE }, null,
+          `$$ - List by Count`);
       });
     });
   }
 
-  function analyzeDate(index, fields, dateField) {
+  function analyzeDate(index, fields, dateField, query) {
     if(!dateField.aggregatable) { return null; }
 
     // Will show a single timeline with all numeric fields on it as distinct lines
@@ -368,7 +366,7 @@ export function QuickDashMakeVisProvider(
 
     return Promise.all([
       newDefaultVis(index, visTypes.LINE),
-      evalDateInterval(index, dateField)
+      evalDateInterval(index, dateField, query)
     ])
     .then(([sVis, intervalParams]) => {
       const aggs = [{
@@ -400,7 +398,8 @@ export function QuickDashMakeVisProvider(
         }, defaultSerieParams)))
       };
 
-      return configureVis(sVis, dateField, aggs, params);
+      return configureVis(sVis, dateField, aggs, params,
+        'Documents Count and Numeric Averages by $$');
     });
   }
 
@@ -514,50 +513,46 @@ export function QuickDashMakeVisProvider(
   return {
     makeSavedVisualizations(index, fields, options = {}) {
       _.defaults(options, {
+        query: {},
         addSirenDataTable: true,
         addSirenMultiChart: true,
-
         progress: { notifyStart: _.constant(true) }
       });
 
-      const { progress } = options;
-
+      const { query, progress } = options;
 
       return promiseMapSeries(fields, field => {
         if(!progress.notifyStart(`Analyzing field "${field.displayName}"`)) {
           return Promise.reject(0);
         }
 
-        let output;
+        if(!field.aggregatable) {
+          return null;
+        }
 
         switch (field.type) {
           case 'number':
-            output = analyzeNumber(index, field);
-            break;
+            return analyzeNumber(index, field, query);
 
           case 'string':
           case 'text':
           case 'keyword':
-            output = analyzeString(index, field);
-            break;
+            return analyzeString(index, field, query);
 
           case 'date':
-            output = analyzeDate(index, fields, field);
-            break;
+            return analyzeDate(index, fields, field, query);
 
           case 'boolean':
-            output = createVis(index, field, visTypes.PIE, 'terms', { size: 2 });
-            break;
+            return createVis(index, field, visTypes.PIE, 'terms', { size: 2 },
+              '$$ - Values by Count');
 
           case 'geo_point':
-            output = createVis(index, field, visTypes.TILE_MAP, 'geohash_grid');
-            break;
+            return createVis(index, field, visTypes.TILE_MAP, 'geohash_grid', null, null,
+              '$$ - Locations Map');
 
           default:
-            output = null;
+            return null;
         }
-
-        return output;
       })
       .then(vises => options.addSirenDataTable && hasSirenDataTable()
         ? addSirenDataTable(index, fields, vises, progress)

@@ -20,7 +20,7 @@ module.exports = function (opts) {
 
   // kibi: indexPatterns and kibiDefaultIndexPattern are added
   uiRoutes
-  .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config, kibiDefaultIndexPattern, indexPatterns) {
+  .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config, kibiDefaultIndexPattern, indexPatterns, kbnUrl) {
     const rootSearchSource = Private(RootSearchSourceProvider);
     const getIds = Private(IndexPatternsGetProvider)('id');
     const route = _.get($route, 'current.$$route');
@@ -42,8 +42,6 @@ module.exports = function (opts) {
         if (patterns.length === 1) {
           defaultId = patterns[0];
           // kibi: do not try to delete the default as user might not have rights to do so
-        } else {
-          throw new NoDefaultIndexPattern();
         }
 
         // kibi:
@@ -52,6 +50,9 @@ module.exports = function (opts) {
         notify.event('loading default index pattern');
         return kibiDefaultIndexPattern.getDefaultIndexPattern(patterns, undefined, defaultId)
         .then(indexPattern => {
+          if (!indexPattern.id) {
+            return kbnUrl.change('/management/siren/indexesandrelations/create/', {});
+          };
           rootSearchSource.getGlobalSource().set('index', indexPattern);
           notify.log('index pattern set to', indexPattern.id);
         });

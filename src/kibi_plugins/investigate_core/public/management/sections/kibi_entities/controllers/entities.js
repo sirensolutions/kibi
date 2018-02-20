@@ -13,7 +13,7 @@ import './create_eid';
 import 'angular-ui-tree';
 
 uiRoutes
-.when('/management/siren/indexesandrelations/create/:indexPatternName', {
+.when('/management/siren/indexesandrelations/create/:indexPatternName?', {
   template,
   reloadOnSearch: false,
 });
@@ -63,7 +63,12 @@ uiRoutes
     redirect: function ($location, kibiDefaultIndexPattern) {
       // kibi: use our service to get default indexPattern
       return kibiDefaultIndexPattern.getDefaultIndexPattern().then(defaultIndex => {
-        const path = `/management/siren/indexesandrelations/${defaultIndex.id}`;
+        let path;
+        if (defaultIndex.id) {
+          path = `/management/siren/indexesandrelations/${defaultIndex.id}`;
+        } else {
+          path = `/management/siren/indexesandrelations/create/`;
+        };
         $location.path(path).replace();
       }).catch(err => {
         const path = '/management/siren/indexesandrelations';
@@ -91,7 +96,7 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
     $scope.state.section = 'create_ip';
   };
 
-  if($route.current.$$route.originalPath.includes('/create/') && $route.current.params.indexPatternName) {
+  if($route.current.$$route.originalPath.includes('/create/')) {
     $scope.createNewIndexPattern();
   };
 

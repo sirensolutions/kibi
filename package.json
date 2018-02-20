@@ -126,7 +126,6 @@
     "commander": "2.8.1",
     "css-loader": "0.28.1",
     "d3": "3.5.6",
-    "dragula": "3.7.0",
     "elasticsearch": "13.0.1",
     "elasticsearch-browser": "13.0.1",
     "encode-uri-query": "1.0.0",
@@ -237,7 +236,8 @@
     "d3-cloud": "sirensolutions/d3-cloud#v1.2.1-kibi-5.4.0",
     "@spalger/filesaver": "1.1.2",
     "babel-plugin-relative-import": "1.0.3",
-    "angular-ui-tree": "2.22.6"
+    "angular-ui-tree": "2.22.6",
+    "dragula": "sirensolutions/dragula#3.7.0-investigate-5.6.4"
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.6.1",

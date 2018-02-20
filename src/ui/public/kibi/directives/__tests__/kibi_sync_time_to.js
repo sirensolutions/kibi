@@ -175,7 +175,7 @@ describe('Kibi Components', function () {
         spyApplyRelative = directiveScope.applyRelative = sinon.spy();
         spyApplyAbsolute = directiveScope.applyAbsolute = sinon.spy();
 
-        sinon.stub(kibiState, '_getCurrentDashboardId').returns(timeBasedDashboards[0].id);
+        sinon.stub(kibiState, 'getCurrentDashboardId').returns(timeBasedDashboards[0].id);
         if (syncedDashboards) {
           sinon.stub(kibiState, 'getSyncedDashboards').returns(syncedDashboards);
         }

@@ -75,7 +75,9 @@ function init({
     kibiState = _kibiState_;
     kibiMeta = _kibiMeta_;
     sequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
-    sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
+    sinon.stub(kibiState, 'getCurrentDashboardId').returns(currentDashboardId);
+    const dashboard = currentDashboardId ? { id: currentDashboardId } : null;
+    sinon.stub(kibiState, 'getDashboardOnView').returns(dashboard);
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
     saveAppStateStub = sinon.stub(kibiState, 'saveAppState').returns(Promise.resolve());
 
@@ -110,7 +112,7 @@ describe('Kibi Components', function () {
 
     it('should not do anything when a button is clicked in the config window', function () {
       init({
-        currentDashboardId: ''
+        currentDashboardId: null
       });
       const relations = [
         {

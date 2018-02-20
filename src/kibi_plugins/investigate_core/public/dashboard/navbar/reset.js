@@ -6,7 +6,7 @@ NavBarExtensionsRegistryProvider.register(function (kibiState) {
     key: 'reset',
     order: 1,
     run() {
-      kibiState.resetFiltersQueriesTimes(kibiState._getCurrentDashboardId());
+      kibiState.resetFiltersQueriesTimes(kibiState.getCurrentDashboardId());
     },
     tooltip() {
       return 'Reset the time, filters, and queries from this dashboard to their default saved state';

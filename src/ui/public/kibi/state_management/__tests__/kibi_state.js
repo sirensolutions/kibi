@@ -356,12 +356,12 @@ describe('State Management', function () {
     describe('getCurrentDashboardId', function () {
       it('getCurrentDashboardId', function () {
         init({ currentDashboardId: 'dashboard1' });
-        expect(kibiState._getCurrentDashboardId()).to.equal('dashboard1');
+        expect(kibiState.getCurrentDashboardId()).to.equal('dashboard1');
       });
 
       it('getCurrentDashboardId when not on dashboard', function () {
         init({ currentDashboardId: null, currentPath: '/notdashboard/xxx' });
-        expect(kibiState._getCurrentDashboardId()).to.equal(undefined);
+        expect(kibiState.getCurrentDashboardId()).to.equal(undefined);
       });
     });
 

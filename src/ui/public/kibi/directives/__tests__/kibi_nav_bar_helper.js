@@ -66,7 +66,8 @@ describe('Kibi Directives', function () {
         joinExplanation = _joinExplanation_;
         $rootScope = _$rootScope_;
         kibiNavBarHelper = Private(KibiNavBarHelperFactory);
-        sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard1');
+        sinon.stub(kibiState, 'getCurrentDashboardId').returns('dashboard1');
+        sinon.stub(kibiState, 'getDashboardOnView').returns({ id: 'dashboard1' });
         timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.resolve([ 'id' ]));
 
         getBashPathStub = sinon.stub(chrome, 'getBasePath').returns('');
@@ -240,9 +241,13 @@ describe('Kibi Directives', function () {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
         let counter = 0;
         kibiState.on('save_with_changes', function (diff) {
-          counter++;
           if (diff[0] === kibiState._properties.groups) {
-            expect(stub.calledWith([ 'dashboard1' ], `KibiState change ${JSON.stringify([ 'g' ], null, ' ')}`)).to.be(true);
+            try {
+              expect(stub.calledWith([ 'dashboard1' ], `KibiState change ${JSON.stringify([ 'g' ], null, ' ')}`)).to.be(true);
+              counter++;
+            } catch(err) {
+              done(err);
+            }
           }
           if (counter === 1) {
             done();

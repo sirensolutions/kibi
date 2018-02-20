@@ -17,8 +17,8 @@ uiModules
     const kibiState = $injector.get('kibiState');
     const dashboardHelper = Private(DashboardHelperFactory);
 
-    let currentDashId = kibiState._getCurrentDashboardId();
-    const dashboardsFromState = kibiState.getSyncedDashboards(kibiState._getCurrentDashboardId());
+    let currentDashId = kibiState.getCurrentDashboardId();
+    const dashboardsFromState = kibiState.getSyncedDashboards(currentDashId);
 
     $scope.allSelected = false;
     $scope.dashboardGroups = [];
@@ -73,10 +73,10 @@ uiModules
     };
 
     $scope.$watch(function () {
-      return kibiState._getCurrentDashboardId();
+      return kibiState.getCurrentDashboardId();
     }, function () {
       populateDashboards();
-      currentDashId = kibiState._getCurrentDashboardId();
+      currentDashId = kibiState.getCurrentDashboardId();
     });
 
     $scope.$watch('dashboards', function (dashboardGroups) {

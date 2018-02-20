@@ -373,9 +373,9 @@ uiModules
     selectDashboard(dashboardId) {
       $timeout.cancel(lastSelectDashboardEventTimer);
 
-      const currentDashboardId = kibiState._getCurrentDashboardId();
+      const currentDashboardId = kibiState.getCurrentDashboardId();
       // only update meta if we stay on the same dashboard
-      // in other cases the meta will be triggered by a watcher kibiState._getCurrentDashboardId
+      // in other cases the meta will be triggered by a watcher kibiState.getCurrentDashboardId
       const updateMeta = currentDashboardId === dashboardId ? true : false;
 
       // we need this timeout to allow ui event handler take place.
@@ -490,7 +490,7 @@ uiModules
     }
 
     setActiveGroupFromUrl() {
-      const currentDashboardId = kibiState._getCurrentDashboardId();
+      const currentDashboardId = kibiState.getCurrentDashboardId();
 
       _.each(this.getGroups(), group => {
         group.active = false;

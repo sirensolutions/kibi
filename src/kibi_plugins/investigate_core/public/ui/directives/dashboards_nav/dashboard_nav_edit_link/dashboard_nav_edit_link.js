@@ -138,10 +138,16 @@ uiModules
         }
       };
 
-      $scope.dashboardLoaded = kibiState._getCurrentDashboardId();
+      const dash = kibiState.getDashboardOnView();
+      if (dash) {
+        $scope.dashboardLoaded = dash.id;
+      }
 
       $rootScope.$on('$routeChangeSuccess', () => {
-        $scope.dashboardLoaded = kibiState._getCurrentDashboardId();
+        const dash = kibiState.getDashboardOnView();
+        if (dash) {
+          $scope.dashboardLoaded = dash.id;
+        }
         $scope.updateSavingState({ value: false });
       });
 

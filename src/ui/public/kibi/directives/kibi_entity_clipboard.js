@@ -95,7 +95,7 @@ uiModules.get('kibana')
         /*
         * remove filters which depends on selected entities
         */
-        const currentDashboardId = kibiState._getCurrentDashboardId();
+        const currentDashboardId = kibiState.getCurrentDashboardId();
         const appState = getAppState();
 
         // check the pinned filters

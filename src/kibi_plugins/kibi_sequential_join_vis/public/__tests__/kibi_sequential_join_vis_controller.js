@@ -100,7 +100,7 @@ describe('Kibi Sequential Join Visualization Controller', function () {
 
     ngMock.inject(function (_kibiState_, _$rootScope_, $controller) {
       kibiState = _kibiState_;
-      kibiState._getCurrentDashboardId = sinon.stub().returns(currentDashboardId);
+      kibiState.getCurrentDashboardId = sinon.stub().returns(currentDashboardId);
       kibiState.isSirenJoinPluginInstalled = sinon.stub().returns(true);
 
       $rootScope = _$rootScope_;

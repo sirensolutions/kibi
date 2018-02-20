@@ -204,7 +204,7 @@ function init({
     dashboardGroups = _dashboardGroups_;
     config = _config_;
     chromeGetBasePathStub = sinon.stub(chrome, 'getBasePath').returns('');
-    sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
+    sinon.stub(kibiState, 'getCurrentDashboardId').returns(currentDashboardId);
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
     setSelectedDashboardIdStub = sinon.stub(kibiState, 'setSelectedDashboardId');
     config.set('siren:defaultDashboardId','Articles');

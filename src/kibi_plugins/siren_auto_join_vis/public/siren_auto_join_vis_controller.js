@@ -29,7 +29,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
   const relationsHelper = Private(RelationsHelperFactory);
   const sirenSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
-  const currentDashboardId = kibiState._getCurrentDashboardId();
+  const currentDashboardId = kibiState.getCurrentDashboardId();
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -237,7 +237,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
    *  Compose the cardinality query for EID buttons using the current dashboard filters.
    */
   const _getCardinalityQuery = function (button) {
-    const currentDashboardId = kibiState._getCurrentDashboardId();
+    const currentDashboardId = kibiState.getCurrentDashboardId();
     return kibiState.getState(currentDashboardId).then(({ index, filters, queries, time }) => {
 
       function omitDeep(obj, omitKey) {
@@ -728,7 +728,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   });
 
   $scope.$listen(globalState, 'save_with_changes', function (diff) {
-    const currentDashboard = kibiState._getCurrentDashboardId();
+    const currentDashboard = kibiState.getDashboardOnView();
     if (!currentDashboard) {
       return;
     }
@@ -754,7 +754,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   const removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', (event) => {
     if ((timefilter.refreshInterval.display !== 'Off')
         && (timefilter.refreshInterval.pause === false)) {
-      const currentDashboard = kibiState._getCurrentDashboardId();
+      const currentDashboard = kibiState.getDashboardOnView();
       if (!currentDashboard) {
         return;
       }

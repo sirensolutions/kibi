@@ -128,7 +128,7 @@ describe('Kibi Components', function () {
         config.set('timepicker:timeDefaults', defaultTime);
         timefilter.time = defaultTime;
         kibiState = _kibiState_;
-        sinon.stub(kibiState, '_getCurrentDashboardId').returns('empty-dashboard');
+        sinon.stub(kibiState, 'getCurrentDashboardId').returns('empty-dashboard');
         sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
         queryBuilder = Private(QueryBuilderFactory);
       });

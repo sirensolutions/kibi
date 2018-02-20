@@ -7,7 +7,8 @@ import chrome from 'ui/chrome';
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
 
-import { SavedObjectNotFound } from 'ui/errors';
+// kibi: DashboardAuthorizationError is added by kibi
+import { SavedObjectNotFound, DashboardAuthorizationError } from 'ui/errors';
 import { getDashboardTitle, getDashBoardTitleMaxLength, getUnsavedChangesWarningMessage } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
@@ -67,6 +68,9 @@ uiRoutes
               kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
               notify.error(
                 'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
+            } else if (error instanceof DashboardAuthorizationError) {
+              notify.error('Dashboard ' + id + '. ' + error.message);
+              throw error;
             } else {
               throw error;
             }

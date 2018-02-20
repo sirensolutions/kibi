@@ -58,6 +58,9 @@ uiRoutes
             }).catch(function (err) {
               if (err.message === 'Could not locate object of type: dashboard. (id: ' + defDashConfig + ')') {
                 fulfill(null);
+              } else if (err.message === 'Request denied by ACL.') {
+                err.message = 'Default dashboard ' + defDashConfig + '. ' + err.message;
+                reject(err);
               } else {
                 reject(err);
               }

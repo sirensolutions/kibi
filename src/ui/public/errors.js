@@ -317,4 +317,10 @@ export class NoAccessToFieldStats extends KbnError {
     }
   }
 }
+
+export class DashboardAuthorizationError extends KbnError {
+  constructor(message) {
+    super(message);
+  }
+}
 // kibi: end

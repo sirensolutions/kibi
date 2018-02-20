@@ -318,7 +318,7 @@ export class NoAccessToFieldStats extends KbnError {
   }
 }
 
-export class DashboardAuthorizationError extends KbnError {
+export class SavedObjectAuthorizationError extends KbnError {
   constructor(message) {
     super(message);
   }

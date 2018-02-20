@@ -11,8 +11,8 @@
 
 import angular from 'angular';
 import _ from 'lodash';
-// kibi: DashboardAuthorizationError is added by kibi
-import { SavedObjectNotFound, DashboardAuthorizationError } from 'ui/errors';
+// kibi: SavedObjectAuthorizationError is added by kibi
+import { SavedObjectNotFound, SavedObjectAuthorizationError } from 'ui/errors';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
@@ -241,7 +241,7 @@ export function SavedObjectProvider(
       this._source = _.cloneDeep(resp._source);
 
       if (resp.status === 403 && resp.type === 'security_exception') {
-        throw new DashboardAuthorizationError(resp.reason);
+        throw new SavedObjectAuthorizationError(resp.reason);
       };
 
       if (resp.found != null && !resp.found) throw new SavedObjectNotFound(esType, this.id);

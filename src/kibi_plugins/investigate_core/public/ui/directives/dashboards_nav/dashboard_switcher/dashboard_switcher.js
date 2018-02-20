@@ -55,7 +55,11 @@ uiModules
         });
       };
 
-      $scope.$watch(kibiState.getCurrentDashboardId, id => {
+      // Don't try to make this shorter (by removing the wrapper)
+      // or the 'this' used in the kibi state will be wrong, producing errors.
+      $scope.$watch(() => {
+        return kibiState.getCurrentDashboardId();
+      }, id => {
         if (id) {
           dashboardGroups.getGroups().forEach(group => {
             group.dashboards.forEach(dash => dash.$$highlight = false);

@@ -13,6 +13,7 @@ import { DashboardConstants } from './dashboard_constants';
 import 'ui/kibi/directives/kibi_select'; // added as it is needed by src/plugins/kibana/public/dashboard/partials/save_dashboard.html
 import 'ui/kibi/session/siren_session'; // added to make sirenSession service available
 import 'ui/filter_bar/join_explanation'; // provides explanations of queries and filters to tooltips
+import { SavedObjectAuthorizationError } from '../../../../ui/public/errors';
 // kibi: end
 
 SavedObjectRegistryProvider.register(savedDashboardRegister);
@@ -58,6 +59,9 @@ uiRoutes
             }).catch(function (err) {
               if (err.message === 'Could not locate object of type: dashboard. (id: ' + defDashConfig + ')') {
                 fulfill(null);
+              } else if (err instanceof SavedObjectAuthorizationError) {
+                err.message = 'Default dashboard ' + defDashConfig + '. ' + err.message;
+                reject(err);
               } else {
                 reject(err);
               }

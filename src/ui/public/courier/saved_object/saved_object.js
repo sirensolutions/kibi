@@ -11,8 +11,8 @@
 
 import angular from 'angular';
 import _ from 'lodash';
-
-import { SavedObjectNotFound } from 'ui/errors';
+// kibi: SavedObjectAuthorizationError is added by kibi
+import { SavedObjectNotFound, SavedObjectAuthorizationError } from 'ui/errors';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
@@ -239,6 +239,10 @@ export function SavedObjectProvider(
 
     this.applyESResp = (resp) => {
       this._source = _.cloneDeep(resp._source);
+
+      if (resp.status === 403 && resp.type === 'security_exception') {
+        throw new SavedObjectAuthorizationError(resp.reason);
+      };
 
       if (resp.found != null && !resp.found) throw new SavedObjectNotFound(esType, this.id);
 

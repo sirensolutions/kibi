@@ -432,6 +432,36 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   };
 
   /**
+   * Returns the current dashboard if exists and not locked.
+   */
+  KibiState.prototype.getDashboardOnView = function () {
+    const dash = _.get($route, 'current.locals.dash');
+
+    if(!dash || dash.locked) {
+      return;
+    }
+    return dash;
+  };
+
+  /**
+   * Returns the current dashboard id.
+   */
+  KibiState.prototype.getCurrentDashboardId = function () {
+    const dash = getDashboardOnView();
+
+    if (dash) {
+      return dash.id;
+    } else {
+      // try to get the dashboard id from the current params
+      const params = _.get($route, 'current.params');
+      if (params && params.id) {
+        return params.id;
+      }
+      return;
+    }
+  };
+
+  /**
    * Sets a property-value pair for the given dashboard
    *
    * @param dashboardId the ID of the dashboard
@@ -473,27 +503,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     // if yes delete the whole dashboard object
     if (Object.keys(this[this._properties.dashboards][dashboardId]).length === 0) {
       delete this[this._properties.dashboards][dashboardId];
-    }
-  };
-
-  /**
-   * Returns the current dashboard
-   */
-  KibiState.prototype._getCurrentDashboardId = function () {
-    const dash = _.get($route, 'current.locals.dash');
-
-    if (dash) {
-      if (dash.locked) {
-        return;
-      }
-      return dash.id;
-    } else {
-      // try to get the dashboard id from the current params
-      const params = _.get($route, 'current.params');
-      if (params && params.id) {
-        return params.id;
-      }
-      return;
     }
   };
 

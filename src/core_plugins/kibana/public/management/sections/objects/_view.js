@@ -113,9 +113,9 @@ uiModules.get('apps/management')
       savedObjectsClient.get(service.type, $routeParams.id)
       .then(function (obj) {
         $scope.obj = obj;
-        $scope.link = service.urlFor(obj._id); // kibi: use "_id" instead of "id"
+        $scope.link = service.urlFor(obj.id);
 
-        const fields =  _.reduce(obj._source, createField, []); // kibi: use _source instead of attributes
+        const fields =  _.reduce(obj.attributes, createField, []);
         if (service.Class) readObjectClass(fields, service.Class);
 
         // sorts twice since we want numerical sort to prioritize over name,

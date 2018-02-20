@@ -236,7 +236,7 @@ uiModules.get('apps/management')
 
       function redirectHandler(action) {
         // kibi: removed esAdmin.indices.refresh
-        const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
+        const msg = 'You successfully ' + action + ' the "' + $scope.obj.attributes.title + '" ' + $scope.title.toLowerCase() + ' object';
         $location.path('/management/siren/objects').search({
           _a: rison.encode({
             tab: serviceObj.title

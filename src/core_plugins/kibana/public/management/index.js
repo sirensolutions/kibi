@@ -55,7 +55,7 @@ uiModules
         });
       }
 
-      // kibi: Gets the federate version from the elasticsearchPlugins list
+      // kibi: Gets the Federate version from the elasticsearchPlugins list
       // for display on the management landing page
       const getPluginVersion = function (plugins) {
         if (plugins) {

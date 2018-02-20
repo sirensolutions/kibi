@@ -46,6 +46,7 @@ uiModules.get('apps/management')
   // fills index-pattern name based on query param.
   if ($routeParams.indexPatternName) {
     this.formValues.name = $routeParams.indexPatternName;
+    this.formValues.classLabel = $routeParams.indexPatternName;
   }
 
   // fills index-pattern ID based on query param.

@@ -62,7 +62,8 @@ uiModules
           return true;
         },
         mirrorContainer: $el.parent().get(0),
-        removeOnSpill: false
+        removeOnSpill: false,
+        grabDelay: 200
       });
 
       drake.on('drag', markDragging(true));

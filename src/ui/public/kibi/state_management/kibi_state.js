@@ -8,7 +8,6 @@ import { onManagementPage, onDashboardPage, onVisualizePage } from 'ui/kibi/util
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { StateProvider } from 'ui/state_management/state';
-import { RelationsHelperFactory } from 'ui/kibi/helpers/relations_helper';
 import { getAppUrl, getBasePath } from 'ui/chrome';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
@@ -23,7 +22,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     elasticsearchPlugins, $location, config, Private, createNotifier) {
   const State = Private(StateProvider);
   const notify = createNotifier({ location: 'Kibi State' });
-  const relationsHelper = Private(RelationsHelperFactory);
   const decorateQuery = Private(DecorateQueryProvider);
 
   _.class(KibiState).inherits(State);

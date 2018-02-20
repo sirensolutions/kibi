@@ -256,9 +256,9 @@ module.directive('filterBar', function (Private, Promise, getAppState, kibiState
 
       // kibi: listen to changes to the kibiState
       $scope.$listen(kibiState, 'save_with_changes', (diff) => {
-        const currentDashboardId = kibiState._getCurrentDashboardId();
+        const currentDashboard = kibiState.getDashboardOnView();
 
-        if (!currentDashboardId) {
+        if (!currentDashboard) {
           $scope.showKibiEntityClipboard = false;
           return;
         }

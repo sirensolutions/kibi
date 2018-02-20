@@ -77,11 +77,12 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
   KibiSequentialJoinVisHelper.prototype.addClickHandlerToButton = function (button) {
     button.click = function (updateOnClick = false) {
       let alias = button.filterLabel || '... related to ($COUNT) from $DASHBOARD';
-      const currentDashboardId = kibiState._getCurrentDashboardId();
+      const currentDashboard = kibiState.getDashboardOnView();
 
-      if (!currentDashboardId) {
+      if (!currentDashboard) {
         return Promise.resolve();
       }
+      const currentDashboardId = currentDashboard.id;
       let dashboardTitle = Promise.resolve();
       if (_.contains(alias, '$DASHBOARD')) {
         dashboardTitle = savedDashboards.find().then(dashboards => _.get(_.find(dashboards.hits, 'id', currentDashboardId), 'title'));

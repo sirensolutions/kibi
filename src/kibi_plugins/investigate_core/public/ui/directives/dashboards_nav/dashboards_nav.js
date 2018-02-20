@@ -311,10 +311,13 @@ uiModules
         dashboardsNavState.setScrollbarPos(event.target.scrollTop);
       });
 
-      $scope.dashboardLoaded = kibiState._getCurrentDashboardId();
-      $scope.$watch(kibiState._getCurrentDashboardId, id => {
-        $scope.dashboardLoaded = id;
-        if (id) {
+      const dash = kibiState.getDashboardOnView();
+      if (dash) {
+        $scope.dashboardLoaded = dash.id;
+      }
+      $scope.$watch(kibiState.getDashboardOnView, dash => {
+        if (dash) {
+          $scope.dashboardLoaded = dash.id;
           $timeout(() => {
             if ($scope.dashboardLoaded) {
               const dashboard = $element.find('.active');

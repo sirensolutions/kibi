@@ -22,7 +22,7 @@ describe('add filters', function () {
       // kibi: provide 'kibiState' service
       $provide.service('kibiState', function () {
         return new MockState({
-          _getCurrentDashboardId: _.noop,
+          getCurrentDashboardId: _.noop,
           isSelectedEntityDisabled: _.constant(false),
           getEntityURI: _.noop
         });

@@ -87,7 +87,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       if (this.isFilterOutdated(filter)) {
         let message;
 
-        if (dashboardId === this._getCurrentDashboardId() && appState && !_.findWhere(appState.filters, filter)) {
+        if (dashboardId === this.getCurrentDashboardId() && appState && !_.findWhere(appState.filters, filter)) {
           // the filter is not in the appState, the KibiState is then dirty
           message = `The Kibi state contains filters that rely on outdated API. Please clean it, either by going to ${getAppUrl()},
             or by switching to another dashboard.`;
@@ -152,7 +152,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       f: fromStr,
       t: toStr
     });
-    if (changed && this._getCurrentDashboardId() !== dashboardId) {
+    if (changed && this.getCurrentDashboardId() !== dashboardId) {
       // do not emit the event if the time changed is for the current dashboard since this is taken care of by the globalState
       const newTime = this._getDashboardProperty(dashboardId, this._properties.time);
       this.emit('time', dashboardId, newTime, oldTime);
@@ -445,9 +445,10 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
   /**
    * Returns the current dashboard id.
+   * Don't use this function to check if we are on a dashboard. Please use getDashboardOnView instead.
    */
   KibiState.prototype.getCurrentDashboardId = function () {
-    const dash = getDashboardOnView();
+    const dash = this.getDashboardOnView();
 
     if (dash) {
       return dash.id;
@@ -592,7 +593,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   KibiState.prototype._getFilters = function (dashboardId, appState, metas, { pinned, disabled }) {
     let filters;
 
-    if (appState && this._getCurrentDashboardId() === dashboardId) {
+    if (appState && this.getCurrentDashboardId() === dashboardId) {
       filters = _.cloneDeep(validateStateFilters(appState));
     } else {
       const kibiStateFilters = this._getDashboardProperty(dashboardId, this._properties.filters);
@@ -632,7 +633,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       }
     });
 
-    if (appState && this._getCurrentDashboardId() === dashboardId) {
+    if (appState && this.getCurrentDashboardId() === dashboardId) {
       if (appState.query) {
         query = _.cloneDeep(appState.query);
       }
@@ -672,7 +673,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       to: timeDefaults.to
     };
 
-    if (dashboardId === this._getCurrentDashboardId()) {
+    if (dashboardId === this.getCurrentDashboardId()) {
       time.mode = timefilter.time.mode;
       time.from = timefilter.time.from;
       time.to = timefilter.time.to;
@@ -725,7 +726,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     let timeFrom = timeDefaults.from;
     let timeTo = timeDefaults.to;
 
-    if (dashboardId === this._getCurrentDashboardId()) {
+    if (dashboardId === this.getCurrentDashboardId()) {
       timeFrom = timefilter.time.from;
       timeTo = timefilter.time.to;
     } else {
@@ -954,16 +955,17 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
    * Saves the AppState to the KibiState
    */
   KibiState.prototype.saveAppState = function () {
-    const currentDashboardId = this._getCurrentDashboardId();
+    const currentDashboard = this.getDashboardOnView();
     const appState = getAppState();
     const options = {
       pinned: false,
       disabled: true
     };
 
-    if (!appState || !currentDashboardId) {
+    if (!appState || !currentDashboard) {
       return Promise.resolve(false);
     }
+    const currentDashboardId = currentDashboard.id;
     return Promise.all([
       this._getFilters(currentDashboardId, appState, null, options),
       this._getQueries(currentDashboardId, appState, null),

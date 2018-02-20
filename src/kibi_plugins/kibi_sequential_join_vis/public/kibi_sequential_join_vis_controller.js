@@ -30,7 +30,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
 
   const relationsHelper = Private(RelationsHelperFactory);
   const kibiSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
-  const currentDashboardId = kibiState._getCurrentDashboardId();
+  const currentDashboardId = kibiState.getCurrentDashboardId();
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -382,7 +382,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   });
 
   $scope.$listen(globalState, 'save_with_changes', function (diff) {
-    const currentDashboard = kibiState._getCurrentDashboardId();
+    const currentDashboard = kibiState.getDashboardOnView();
     if (!currentDashboard) {
       return;
     }
@@ -402,7 +402,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', (event) => {
     if ((timefilter.refreshInterval.display !== 'Off')
         && (timefilter.refreshInterval.pause === false)) {
-      const currentDashboard = kibiState._getCurrentDashboardId();
+      const currentDashboard = kibiState.getDashboardOnView();
       if (!currentDashboard) {
         return;
       }

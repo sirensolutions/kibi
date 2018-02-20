@@ -380,7 +380,7 @@ class DashboardState {
    * dashboard.
    */
   saveDashboard(toJson, timeFilter) {
-    // kibi: lock the dashboard so kibi_state._getCurrentDashboardId ignore the change for a moment
+    // kibi: lock the dashboard so kibi_state.getDashboardOnView ignore the change for a moment
     this.savedDashboard.locked = true;
     this.saveState();
 

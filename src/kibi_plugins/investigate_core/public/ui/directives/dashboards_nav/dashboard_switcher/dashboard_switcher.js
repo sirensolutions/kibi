@@ -55,7 +55,7 @@ uiModules
         });
       };
 
-      $scope.$watch(kibiState._getCurrentDashboardId, id => {
+      $scope.$watch(kibiState.getCurrentDashboardId, id => {
         if (id) {
           dashboardGroups.getGroups().forEach(group => {
             group.dashboards.forEach(dash => dash.$$highlight = false);
@@ -147,7 +147,7 @@ uiModules
       });
 
       $scope.$listen(queryFilter, 'update', function () {
-        const currentDashboardId = kibiState._getCurrentDashboardId();
+        const currentDashboardId = kibiState.getCurrentDashboardId();
         if (currentDashboardId) {
           kibiNavBarHelper.updateAllCounts([currentDashboardId], 'filters change');
         }

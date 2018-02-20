@@ -52,7 +52,7 @@ describe('Kibi Components', function () {
         kibiState = _kibiState_;
         kibiState.setEntityURI(selectedEntity);
         kibiState.disableSelectedEntity(entityDisabled);
-        sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
+        sinon.stub(kibiState, 'getCurrentDashboardId').returns(currentDashboardId);
 
         $rootScope = _$rootScope_;
         $compile('<kibi-entity-clipboard></kibi-entity-clipboard>')($rootScope);

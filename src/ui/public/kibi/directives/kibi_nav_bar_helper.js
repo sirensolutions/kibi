@@ -43,15 +43,15 @@ export function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState,
         return;
       }
       // when appState changed get connected and selected dashboards
-      const currentDashboard = kibiState._getCurrentDashboardId();
+      const currentDashboard = kibiState.getDashboardOnView();
       if (!currentDashboard) {
         return;
       }
-      this.updateAllCounts([currentDashboard], 'AppState change ' + angular.toJson(diff));
+      this.updateAllCounts([currentDashboard.id], 'AppState change ' + angular.toJson(diff));
     };
 
     const updateCountsOnGlobalStateChange = function (diff) {
-      const currentDashboard = kibiState._getCurrentDashboardId();
+      const currentDashboard = kibiState.getDashboardOnView();
       if (!currentDashboard) {
         return;
       }
@@ -60,7 +60,7 @@ export function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState,
         // the pinned filters changed, update counts on all selected dashboards
         this.updateAllCounts(null, 'GlobalState pinned filters change');
       } else if (diff.indexOf('time') !== -1) {
-        this.updateAllCounts([currentDashboard], 'GlobalState time changed');
+        this.updateAllCounts([currentDashboard.id], 'GlobalState time changed');
       } else if (diff.indexOf('refreshInterval') !== -1) {
         // force the count update to refresh all tabs count
         this.updateAllCounts(null, 'GlobalState refreshInterval changed', true);
@@ -76,12 +76,12 @@ export function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState,
 
     const updateCountsOnKibiStateChange = function (diff) {
       // when kibiState changes get connected and selected dashboards
-      const currentDashboard = kibiState._getCurrentDashboardId();
+      const currentDashboard = kibiState.getDashboardOnView();
       if (!currentDashboard) {
         return;
       }
       if (diff.indexOf(kibiState._properties.groups) !== -1 || diff.indexOf(kibiState._properties.dashboards) !== -1) {
-        this.updateAllCounts([currentDashboard], `KibiState change ${JSON.stringify(diff, null, ' ')}`);
+        this.updateAllCounts([currentDashboard.id], `KibiState change ${JSON.stringify(diff, null, ' ')}`);
       }
     };
 
@@ -101,7 +101,7 @@ export function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState,
     $rootScope.$on('courier:searchRefresh', (event) => {
       if ((timefilter.refreshInterval.display !== 'Off')
           && (timefilter.refreshInterval.pause === false)) {
-        const currentDashboard = kibiState._getCurrentDashboardId();
+        const currentDashboard = kibiState.getDashboardOnView();
         if (!currentDashboard) {
           return;
         }

@@ -47,7 +47,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     expect(response).to.eql(clientResponse);
   });
 
-  it('calls upon savedObjectClient.get', async () => {
+  it('calls upon savedObjectsClient.get', async () => {
     const request = {
       method: 'GET',
       url: '/api/saved_objects/index-pattern/logstash-*'

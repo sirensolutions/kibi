@@ -75,8 +75,8 @@ export function IndexPatternsMapperProvider(Private, Promise, es, config, kbnInd
         )
         // kibi: end
         .then(function (resp) {
-          if (resp.found && resp._source.fields) {
-            fieldCache.set(id, JSON.parse(resp._source.fields));
+          if (resp.found && resp.attributes.fields) {
+            fieldCache.set(id, JSON.parse(resp.attributes.fields));
           }
           return self.getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true });
         });

@@ -251,7 +251,8 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
       return {
         meta: {
           alias: label,
-          version: 2
+          version: 2,
+          key: button.targetField
         },
         join_sequence: [ relation ]
       };

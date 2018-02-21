@@ -295,16 +295,12 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
         {
           pattern: button.sourceIndexPatternId,
           path: button.sourceField,
-          indices: sourceIndices,
-          // default siren-federate parameters
-          termsEncoding: 'long'
+          indices: sourceIndices
         },
         {
           pattern: button.targetIndexPatternId,
           path: button.targetField,
-          indices: targetIndices,
-          // default siren-federate parameters
-          termsEncoding: 'long'
+          indices: targetIndices
         }
       ]
     };

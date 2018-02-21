@@ -741,8 +741,7 @@ describe('Join query builder', function () {
       targetIndices: [ 'i2' ],
       targetPath: 'id2',
       limit: 10,
-      orderBy: '_doc',
-      termsEncoding: 'integer'
+      orderBy: '_doc'
     });
     const expected = [
       {
@@ -751,7 +750,6 @@ describe('Join query builder', function () {
           on: [ 'id1', 'id2' ],
           limit: 10,
           orderBy: '_doc',
-          termsEncoding: 'integer',
           request: {
             query: {
               bool: {

@@ -47,7 +47,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   };
 
   $scope.getButtonLabel = function (button, addApproximate) {
-    let count = button.targetCount ? button.targetCount : 0;
+    let count = button.targetCount ? button.targetCount : '?';
     if (addApproximate) {
       count = '~' + count;
     }
@@ -634,6 +634,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           _.each(button.sub, (subButtons, rel) => {
             if (visibleRelations.has(rel)) {
               _.each(subButtons, (subButton) => {
+                delete subButton.targetCount;
                 if (!subButton.joinExecuted) {
                   acc.push(subButton);
                 }
@@ -643,6 +644,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           _.each(button.altSub, (subButtons, dashboardName) => {
             if (visibleDashboards.has(dashboardName)) {
               _.each(subButtons, (subButton) => {
+                delete subButton.targetCount;
                 if (!subButton.joinExecuted) {
                   acc.push(subButton);
                 }

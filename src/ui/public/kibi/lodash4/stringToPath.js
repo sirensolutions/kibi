@@ -1,4 +1,4 @@
-import memoizeCapped from './memoizeCapped.js'
+const memoizeCapped = require('./memoizeCapped.js');
 
 const charCodeOfDot = '.'.charCodeAt(0)
 const reEscapeChar = /\\(\\)?/g
@@ -41,4 +41,4 @@ const stringToPath = memoizeCapped((string) => {
   return result
 })
 
-export default stringToPath
+module.exports = stringToPath;

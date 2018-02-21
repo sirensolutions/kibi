@@ -1,5 +1,5 @@
-import Hash from './Hash.js'
-import ListCache from './ListCache.js'
+const Hash = require('./Hash.js');
+const ListCache = require('./ListCache.js');
 
 /**
  * Gets the data for `map`.
@@ -117,4 +117,4 @@ class MapCache {
   }
 }
 
-export default MapCache
+module.exports = MapCache;

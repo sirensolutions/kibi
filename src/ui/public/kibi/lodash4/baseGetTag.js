@@ -36,4 +36,4 @@ function baseGetTag(value) {
   return result
 }
 
-export default baseGetTag
+module.exports = baseGetTag;

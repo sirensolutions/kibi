@@ -1,4 +1,4 @@
-import getTag from './getTag.js'
+const getTag = require('./getTag.js');
 
 /**
  * Checks if `value` is classified as a `Symbol` primitive or object.
@@ -20,4 +20,4 @@ function isSymbol(value) {
   return type == 'symbol' || (type == 'object' && value != null && getTag(value) == '[object Symbol]')
 }
 
-export default isSymbol
+module.exports = isSymbol;

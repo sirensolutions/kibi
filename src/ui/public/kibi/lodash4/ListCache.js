@@ -1,4 +1,4 @@
-import assocIndexOf from './assocIndexOf.js'
+const assocIndexOf = require('./assocIndexOf.js');
 
 class ListCache {
 
@@ -100,4 +100,4 @@ class ListCache {
   }
 }
 
-export default ListCache
+module.exports = ListCache;

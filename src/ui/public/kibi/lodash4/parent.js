@@ -1,5 +1,5 @@
-import baseGet from './baseGet.js'
-import slice from './slice.js'
+const baseGet = require('./baseGet.js');
+const slice = require('./slice.js');
 
 /**
  * Gets the parent value at `path` of `object`.
@@ -13,4 +13,4 @@ function parent(object, path) {
   return path.length < 2 ? object : baseGet(object, slice(path, 0, -1))
 }
 
-export default parent
+module.exports = parent;

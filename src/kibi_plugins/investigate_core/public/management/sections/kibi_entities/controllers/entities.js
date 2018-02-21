@@ -79,7 +79,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management', ['kibana', 'ui.tree'])
-.controller('entities', function ($scope, $route, $injector, kbnUrl, createNotifier) {
+.controller('entities', function ($scope, $route, kbnUrl, createNotifier) {
   $scope.state = { section: 'entity_panel' };
   $scope.indexPattern = $route.current.locals.selectedEntity;
 
@@ -89,8 +89,6 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
   const notify = createNotifier({
     location: 'Queries Editor'
   });
-
-  const isRelationalGraphAvailable = $injector.has('sirenRelationalGraphDirective');
 
   $scope.createNewIndexPattern = function () {
     $scope.state.section = 'create_ip';
@@ -102,14 +100,6 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
 
   $scope.createNewVirtualEntity = function () {
     $scope.state.section = 'create_eid';
-  };
-
-  $scope.toggleRelationalGraph = function () {
-    if (isRelationalGraphAvailable) {
-      $scope.isRelationalGraphVisible = !$scope.isRelationalGraphVisible;
-    } else {
-      notify.warning('Siren Relational Graph not available, please install the Siren Graph Browser');
-    }
   };
 
   // This function is here to be called in entity_relations.js (as that directive inherits this scope)

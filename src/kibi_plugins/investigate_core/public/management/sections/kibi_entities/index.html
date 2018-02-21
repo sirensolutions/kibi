@@ -51,7 +51,6 @@
             set-default="setDefaultPattern()"
             refresh-fields="refreshFields()"
             delete="removeEntity()"
-            toggle-graph="toggleRelationalGraph()"
           ></kbn-management-index-header>
 
           <kbn-management-index-header
@@ -61,7 +60,6 @@
             save="saveRelations()"
             is-save-disabled="isSaveDisabled()"
             delete="removeEntity()"
-            toggle-graph="toggleRelationalGraph()"
           ></kbn-management-index-header>
 
           <kbn-management-index-header
@@ -70,7 +68,6 @@
             entity="indexPattern"
             save="saveEntityOptions()"
             delete="removeEntity()"
-            toggle-graph="toggleRelationalGraph()"
           ></kbn-management-index-header>
 
           <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">

@@ -1,7 +1,7 @@
-<div class="kuiBar kuiVerticalRhythm">
+<div class="kuiBar kuiVerticalRhythm index-header">
   <div class="kuiBarSection">
     <!-- Index pattern name -->
-    <h1
+    <!-- <h1
       class="kuiTitle kuiVerticalRhythm"
       css-truncate
       data-test-subj="indexPatternTitle"
@@ -12,24 +12,34 @@
         class="kuiIcon fa-star"
       ></span>
       {{ entity.id }}
-    </h1>
+    </h1> -->
+    <!-- Kibi: added tabs to switch betwenn entity details and relational graph -->
+    <div class="kuiTabs kuiVerticalRhythm">
+      <button
+        class="kuiTab"
+        ng-class="{ 'kuiTab-isSelected': headerTab === 'details' }"
+        title="Details: {{ entity.id }}"
+        ng-click="changeHeaderTab('details')"
+      >
+        Details:
+        <span
+          aria-hidden="true"
+          ng-if="defaultIndex === entity.id"
+          class="kuiIcon fa-star"
+        ></span>{{ entity.id }}
+      </button>
+      <button
+        class="kuiTab"
+        ng-class="{ 'kuiTab-isSelected': headerTab === 'graph' }"
+        title="Graph View"
+        ng-click="changeHeaderTab('graph')"
+      >
+        Graph View
+      </button>
+    </div>
   </div>
 
   <div class="kuiBarSection">
-    <button
-      ng-if="toggleGraph"
-      ng-click="toggleGraph()"
-      aria-label="Toggle relational graph"
-      tooltip="Toggle relational graph"
-      class="kuiButton kuiButton--basic"
-      data-test-subj="toggleRelationGraphButton"
-    >
-      <span class="sr-only">Toggle relational graph</span>
-      <span
-        aria-hidden="true"
-        class="kuiIcon fak-graph"
-      ></span>
-    </button>
     <button
       ng-if="save"
       ng-click="save()"
@@ -99,4 +109,11 @@
       ></span>
     </button>
   </div>
+
+  <!-- Kibi: added relational graph container -->
+  <!-- <div
+    data-test-subj="relationalGraphContainer"
+    class="kuiViewContent siren-relational-graph-container"
+  >
+  </div> -->
 </div>

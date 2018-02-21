@@ -1,7 +1,26 @@
-.dark-grey-on-disabled {
-  &[disabled] {
-    background-color: #ffffff;
-    color: #b7b7b7;
-    border: #cdcdcd 0.5px solid;
+.index-header {
+  .dark-grey-on-disabled {
+    &[disabled] {
+      background-color: #ffffff;
+      color: #b7b7b7;
+      border: #cdcdcd 0.5px solid;
+    }
+  }
+
+  .kuiBarSection {
+    margin-right: 0;
+
+    .kuiTabs {
+      width: 100%;
+    }
+  }
+
+  .kuiBarSection:last-child {
+    position: absolute;
+    right: 15px;
+  }
+
+  .siren-relational-graph-container {
+    background-color: blue;
   }
 }

@@ -156,16 +156,14 @@ describe('Kibi Components', function () {
                 path: 'companies',
                 indices: [
                   'article'
-                ],
-                termsEncoding: 'long',
+                ]
               },
               {
                 pattern: 'company',
                 path: 'id',
                 indices: [
                   'company'
-                ],
-                termsEncoding: 'long'
+                ]
               }
             ],
           }
@@ -199,7 +197,6 @@ describe('Kibi Components', function () {
                 indices: [
                   'article'
                 ],
-                termsEncoding: 'long',
                 queries: [
                   {
                     query: {
@@ -231,8 +228,7 @@ describe('Kibi Components', function () {
                 path: 'id',
                 indices: [
                   'company'
-                ],
-                termsEncoding: 'long'
+                ]
               }
             ]
           }

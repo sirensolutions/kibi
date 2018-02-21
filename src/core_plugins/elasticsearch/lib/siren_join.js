@@ -79,7 +79,7 @@ export default function sirenJoin(server) {
     }
 
     // check element of the sequence
-    const relationFields = [ 'pattern', 'queries', 'path', 'indices', 'types', 'type', 'orderBy', 'limit', 'termsEncoding' ];
+    const relationFields = [ 'pattern', 'queries', 'path', 'indices', 'types', 'type', 'orderBy', 'limit' ];
     _.each(sequence, function (element, index) {
       if (element.group) {
         if (index !== 0) {
@@ -180,7 +180,7 @@ export default function sirenJoin(server) {
   }
 
   function _superGraph(relations) {
-    const relationFields = [ 'pattern', 'path', 'indices', 'types', 'orderBy', 'limit', 'termsEncoding' ];
+    const relationFields = [ 'pattern', 'path', 'indices', 'types', 'orderBy', 'limit' ];
 
     return _(relations)
     .each((relation) => {
@@ -217,10 +217,6 @@ export default function sirenJoin(server) {
         clone.orderBy = targetRel.orderBy;
         if (!clone.orderBy) {
           delete clone.orderBy;
-        }
-        clone.termsEncoding = targetRel.termsEncoding;
-        if (!clone.termsEncoding) {
-          delete clone.termsEncoding;
         }
         clone.limit = targetRel.limit;
         if (!clone.limit || clone.limit === -1) {

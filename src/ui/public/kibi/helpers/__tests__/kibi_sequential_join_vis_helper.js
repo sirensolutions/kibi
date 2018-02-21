@@ -618,10 +618,8 @@ describe('Kibi Components', function () {
               }
             }
           });
-          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
           expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
-          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
         });
       });
 
@@ -679,10 +677,8 @@ describe('Kibi Components', function () {
               }
             }
           });
-          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
           expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
-          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
         });
       });
 
@@ -722,32 +718,8 @@ describe('Kibi Components', function () {
               }
             }
           });
-          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
           expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
-          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
-        });
-      });
-
-      it('should set the default siren-federate parameters', function () {
-        init({ indexPatterns, savedDashboards, savedSearches, relations });
-
-        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
-        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
-        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
-
-        const button = {
-          sourceField: 'fa',
-          sourceIndexPatternId: 'ia',
-          targetField: 'fb',
-          targetIndexPatternId: 'ib'
-        };
-        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
-          sinon.assert.called(timeBasedIndicesStub);
-          expect(rel.join_sequence).to.have.length(1);
-          expect(rel.join_sequence[0].relation).to.have.length(2);
-          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
-          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
         });
       });
 

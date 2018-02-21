@@ -31,7 +31,6 @@ function addSourceTypes(query, types) {
  *
  * @param orderBy orderBy join parameter
  * @param limit limit join parameter
- * @param termsEncoding termsEncoding join parameter
  * @param sourcePath join path in the source index
  * @param targetPath join path in the target index
  * @param targetIndices indices to join on
@@ -40,7 +39,7 @@ function addSourceTypes(query, types) {
  * @returns this JoinBuilder instance
  */
 class JoinBuilder {
-  constructor({ orderBy, limit, termsEncoding, type, sourcePath, targetIndices, targetTypes, targetPath }) {
+  constructor({ orderBy, limit, type, sourcePath, targetIndices, targetTypes, targetPath }) {
     const join = {
       indices: targetIndices,
       on: [ sourcePath, targetPath ],
@@ -74,9 +73,6 @@ class JoinBuilder {
     if (orderBy) {
       join.orderBy = orderBy;
     }
-    if (termsEncoding) {
-      join.termsEncoding = termsEncoding;
-    }
     if (limit && limit > -1) {
       join.limit = limit;
     }
@@ -88,10 +84,9 @@ class JoinBuilder {
   /**
    * addJoin adds a join query to be nested in the parent one
    */
-  addJoin({ orderBy, limit, termsEncoding, type, sourceTypes, sourcePath, targetIndices, negate, targetTypes, targetPath }) {
+  addJoin({ orderBy, limit, type, sourceTypes, sourcePath, targetIndices, negate, targetTypes, targetPath }) {
     const joinBuilder = new JoinBuilder({
       orderBy,
-      termsEncoding,
       type,
       sourcePath,
       targetIndices,
@@ -205,11 +200,10 @@ export default class Builder {
   /**
    * addJoin adds a join query
    */
-  addJoin({ orderBy, limit, termsEncoding, type, sourceTypes, sourcePath, targetIndices, targetTypes, targetPath }) {
+  addJoin({ orderBy, limit, type, sourceTypes, sourcePath, targetIndices, targetTypes, targetPath }) {
     const joinBuilder = new JoinBuilder({
       orderBy,
       limit,
-      termsEncoding,
       type,
       sourcePath,
       targetIndices,

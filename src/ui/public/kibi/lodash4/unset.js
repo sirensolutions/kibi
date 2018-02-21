@@ -1,4 +1,4 @@
-import baseUnset from './baseUnset.js'
+const baseUnset = require('./baseUnset.js');
 
 /**
  * Removes the property at `path` of `object`.
@@ -27,7 +27,7 @@ import baseUnset from './baseUnset.js'
  * // => { 'a': [{ 'b': {} }] }
  */
 function unset(object, path) {
-  return object == null ? true : baseUnset(object, path)
+  return object == null ? true : baseUnset(object, path);
 }
 
-export default unset
+module.exports = unset;

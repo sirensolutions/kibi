@@ -1,4 +1,4 @@
-import baseGetTag from './baseGetTag.js'
+const baseGetTag = require('./baseGetTag.js');
 
 /** `Object#toString` result references. */
 const dataViewTag = '[object DataView]'
@@ -48,4 +48,4 @@ if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag) ||
   }
 }
 
-export default getTag
+module.exports = getTag;

@@ -1,4 +1,4 @@
-import memoize from './memoize.js'
+const memoize = require('./memoize.js');
 
 /** Used as the maximum memoize cache size. */
 const MAX_MEMOIZE_SIZE = 500
@@ -23,4 +23,4 @@ function memoizeCapped(func) {
   return result
 }
 
-export default memoizeCapped
+module.exports = memoizeCapped;

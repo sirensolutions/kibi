@@ -1,7 +1,7 @@
-import castPath from './castPath.js'
-import last from './last.js'
-import parent from './parent.js'
-import toKey from './toKey.js'
+const castPath = require('./castPath.js');
+const last = require('./last.js');
+const parent = require('./parent.js');
+const toKey = require('./toKey.js');
 
 /**
  * The base implementation of `unset`.
@@ -17,4 +17,4 @@ function baseUnset(object, path) {
   return object == null || delete object[toKey(last(path))]
 }
 
-export default baseUnset
+module.exports = baseUnset;

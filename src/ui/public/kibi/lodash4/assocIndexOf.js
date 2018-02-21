@@ -1,4 +1,4 @@
-import eq from './eq.js'
+const eq = require('./eq.js');
 
 /**
  * Gets the index at which the `key` is found in `array` of key-value pairs.
@@ -18,4 +18,4 @@ function assocIndexOf(array, key) {
   return -1
 }
 
-export default assocIndexOf
+module.exports = assocIndexOf;

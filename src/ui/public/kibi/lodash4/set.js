@@ -1,4 +1,4 @@
-import baseSet from './baseSet.js'
+const baseSet = require('./baseSet.js');
 
 /**
  * Sets the value at `path` of `object`. If a portion of `path` doesn't exist,
@@ -28,7 +28,7 @@ import baseSet from './baseSet.js'
  * // => 5
  */
 function set(object, path, value) {
-  return object == null ? object : baseSet(object, path, value)
+  return object == null ? object : baseSet(object, path, value);
 }
 
-export default set
+module.exports = set;

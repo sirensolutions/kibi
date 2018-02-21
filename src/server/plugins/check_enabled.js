@@ -33,7 +33,7 @@ export default async function (kbnServer, server, config) {
       if (!forcedOverride[plugin.id](enabledInConfig)) {
         plugins.disable(plugin);
       }
-    } else if (!enabledInConfig) {
+    } else if (enabledInConfig === false) {
       plugins.disable(plugin);
     }
   }

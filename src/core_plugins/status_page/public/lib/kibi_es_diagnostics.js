@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const angular = require('angular');
-const saveAs = require('@spalger/filesaver').saveAs;
+import { saveAs } from '@elastic/filesaver';
 const esUrls = require('./kibi_es_apis_calls');
 import chrome from 'ui/chrome';
 import { notify } from 'ui/notify';

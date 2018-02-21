@@ -1,4 +1,4 @@
-import { saveAs } from '@spalger/filesaver';
+import { saveAs } from '@elastic/filesaver';
 import { isObject, map } from 'lodash';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 

@@ -12,6 +12,11 @@
 
     .kuiTabs {
       width: 100%;
+
+      .entity-label {
+        font-size: 15px;
+        font-weight: 900;
+      }
     }
   }
 
@@ -20,7 +25,15 @@
     right: 15px;
   }
 
-  .siren-relational-graph-container {
-    background-color: blue;
+  .relational-graph-container {
+    margin: 5px 0;
+    overflow: hidden;
+
+    .relational-graph {
+      border: 1px solid #ddd;
+      height: 500px;
+      overflow: hidden;
+      position: relative;
+    }
   }
 }

@@ -47,146 +47,147 @@
           <!-- Header -->
           <kbn-management-index-header
             ng-if="state.tab === 'indexedFields' ||  state.tab === 'scriptedFields' || state.tab === 'sourceFilters'"
-            entity="indexPattern"
+            entity="selectedMenuItem"
             set-default="setDefaultPattern()"
             refresh-fields="refreshFields()"
             delete="removeEntity()"
+            get-selected-tab="getHeaderTab"
           ></kbn-management-index-header>
 
           <kbn-management-index-header
             ng-if="state.tab === 'entityRelations'"
             set-default="setDefaultPattern()"
-            entity="indexPattern"
+            entity="selectedMenuItem"
             save="saveRelations()"
             is-save-disabled="isSaveDisabled()"
             delete="removeEntity()"
+            get-selected-tab="getHeaderTab"
           ></kbn-management-index-header>
 
           <kbn-management-index-header
             ng-if="state.tab === 'indexOptions'"
             set-default="setDefaultPattern()"
-            entity="indexPattern"
+            entity="selectedMenuItem"
             save="saveEntityOptions()"
             delete="removeEntity()"
+            get-selected-tab="getHeaderTab"
           ></kbn-management-index-header>
 
-          <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
-            <span class="label label-success">
-              <i class="fa fa-clock-o"></i> Configured time field: {{indexPattern.timeFieldName}}
-            </span>
-          </p>
-
-          <p class="kuiText kuiVerticalRhythm"
-             ng-if="entity && entity.type === 'INDEX_PATTERN'"
+          <div class="entity-details-container"
+               ng-show="headerTab === 'details'"
           >
-            This page lists every field in the <strong>{{entity.id}}</strong>
-            index and the field's associated core type as recorded by Elasticsearch.
-            While this list allows you to view the core type of each field, changing
-            field types must be done using Elasticsearch's
-            <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
-              Mapping API
-              <i aria-hidden="true" class="fa-link fa"></i>
-            </a>
-          </p>
-          <p class="kuiText kuiVerticalRhythm"
-             ng-if="entity && entity.type === 'VIRTUAL_ENTITY'"
-          >
-            This page lists the options and relations of the <strong>{{entity.id}}</strong> entity identifier.
-          </p>
-
-
-          <!-- Alerts -->
-          <div
-            ng-if="entity.timeFieldName && entity.intervalName"
-            class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
-          >
-            <div class="kuiInfoPanelHeader">
-              <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
-              <span class="kuiInfoPanelHeader__title">
-                Repeating index pattern
+            <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
+              <span class="label label-success">
+                <i class="fa fa-clock-o"></i> Configured time field: {{indexPattern.timeFieldName}}
               </span>
-            </div>
+            </p>
 
-            <div class="kuiInfoPanelBody">
-              <div class="kuiInfoPanelBody__message">
-                This index uses a <strong>time-based index pattern</strong> which repeats <span ng-bind="::entity.getInterval().display"></span>
-              </div>
-            </div>
-          </div>
-
-          <div
-            ng-if="conflictFields.length"
-            class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
-          >
-            <div class="kuiInfoPanelHeader">
-              <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
-              <span class="kuiInfoPanelHeader__title">
-                Mapping conflict
-              </span>
-            </div>
-
-            <div class="kuiInfoPanelBody">
-              <div class="kuiInfoPanelBody__message">
-                {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.
-              </div>
-            </div>
-          </div>
-
-          <!-- Relational Graph -->
-          <siren-relational-graph is-visible="isRelationalGraphVisible"
-                                  selected="selectedMenuItem"
-                                  control="relationalGraphControl">
-          </siren-relational-graph>
-
-          <!-- Tabs -->
-          <div class="kuiTabs kuiVerticalRhythm">
-            <button
-              class="kuiTab"
-              ng-repeat="editSection in editSections"
-              ng-class="{ 'kuiTab-isSelected': state.tab === editSection.index }"
-              title="{{ editSection.title }}"
-              ng-click="changeTab(editSection)"
-              data-test-subj="tab-{{ editSection.index }}"
+            <p class="kuiText kuiVerticalRhythm"
+               ng-if="entity && entity.type === 'INDEX_PATTERN'"
             >
-              {{ editSection.title }}
-              <span
-                data-test-subj="tab-count-{{ editSection.index }}"
-                ng-if="editSection.count !== undefined && editSection.count !== null"
+              This page lists every field in the <strong>{{entity.id}}</strong>
+              index and the field's associated core type as recorded by Elasticsearch.
+              While this list allows you to view the core type of each field, changing
+              field types must be done using Elasticsearch's
+              <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
+                Mapping API
+                <i aria-hidden="true" class="fa-link fa"></i>
+              </a>
+            </p>
+            <p class="kuiText kuiVerticalRhythm"
+               ng-if="entity && entity.type === 'VIRTUAL_ENTITY'"
+            >
+              This page lists the options and relations of the <strong>{{entity.id}}</strong> entity identifier.
+            </p>
+
+
+            <!-- Alerts -->
+            <div
+              ng-if="entity.timeFieldName && entity.intervalName"
+              class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
+            >
+              <div class="kuiInfoPanelHeader">
+                <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+                <span class="kuiInfoPanelHeader__title">
+                  Repeating index pattern
+                </span>
+              </div>
+
+              <div class="kuiInfoPanelBody">
+                <div class="kuiInfoPanelBody__message">
+                  This index uses a <strong>time-based index pattern</strong> which repeats <span ng-bind="::entity.getInterval().display"></span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              ng-if="conflictFields.length"
+              class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
+            >
+              <div class="kuiInfoPanelHeader">
+                <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+                <span class="kuiInfoPanelHeader__title">
+                  Mapping conflict
+                </span>
+              </div>
+
+              <div class="kuiInfoPanelBody">
+                <div class="kuiInfoPanelBody__message">
+                  {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="kuiTabs kuiVerticalRhythm">
+              <button
+                class="kuiTab"
+                ng-repeat="editSection in editSections"
+                ng-class="{ 'kuiTab-isSelected': state.tab === editSection.index }"
+                title="{{ editSection.title }}"
+                ng-click="changeTab(editSection)"
+                data-test-subj="tab-{{ editSection.index }}"
               >
-                ({{ editSection.count }})
-              </span>
-            </button>
+                {{ editSection.title }}
+                <span
+                  data-test-subj="tab-count-{{ editSection.index }}"
+                  ng-if="editSection.count !== undefined && editSection.count !== null"
+                >
+                  ({{ editSection.count }})
+                </span>
+              </button>
+            </div>
+
+            <!-- Tab content -->
+            <index-options
+              ng-show="state.tab === 'indexOptions'"
+              entity="indexPattern"
+              save="saveEntityOptions"
+              class="fields index-options"
+            ></index-options>
+
+            <indexed-fields-table
+              ng-if="entity.type === 'INDEX_PATTERN'"
+              ng-show="state.tab === 'indexedFields'"
+              class="fields indexed-fields"
+            ></indexed-fields-table>
+
+            <scripted-fields-table
+              ng-if="selectedMenuItem.type === 'INDEX_PATTERN' && state.tab === 'scriptedFields'"
+              class="fields scripted-fields"
+            ></scripted-fields-table>
+
+            <source-filters-table
+              ng-if="selectedMenuItem.type === 'INDEX_PATTERN' && state.tab === 'sourceFilters'"
+              index-pattern="indexPattern"
+              class="fields source-filters"
+            ></source-filters-table>
+
+            <entity-relations
+              ng-show="state.tab === 'entityRelations'"
+              class="fields index-options"
+            ></entity-relations>
           </div>
-
-          <!-- Tab content -->
-          <index-options
-            ng-show="state.tab === 'indexOptions'"
-            entity="indexPattern"
-            save="saveEntityOptions"
-            class="fields index-options"
-          ></index-options>
-
-          <indexed-fields-table
-            ng-if="entity.type === 'INDEX_PATTERN'"
-            ng-show="state.tab === 'indexedFields'"
-            class="fields indexed-fields"
-          ></indexed-fields-table>
-
-          <scripted-fields-table
-            ng-if="selectedMenuItem.type === 'INDEX_PATTERN' && state.tab === 'scriptedFields'"
-            class="fields scripted-fields"
-          ></scripted-fields-table>
-
-          <source-filters-table
-            ng-if="selectedMenuItem.type === 'INDEX_PATTERN' && state.tab === 'sourceFilters'"
-            index-pattern="indexPattern"
-            class="fields source-filters"
-          ></source-filters-table>
-
-          <entity-relations
-            ng-show="state.tab === 'entityRelations'"
-            class="fields index-options"
-          ></entity-relations>
         </div>
       </div>
     </div>

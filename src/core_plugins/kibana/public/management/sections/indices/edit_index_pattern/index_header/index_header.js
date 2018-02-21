@@ -15,7 +15,9 @@ uiModules
       // kibi: indexPattern property replaced by entity, added save function
       entity: '=',
       save: '&',
-      isSaveDisabled: '&'
+      isSaveDisabled: '&',
+      // Kibi: added getSelectedTab to get the active tab
+      getSelectedTab:  '='
     },
     link: function ($scope, $el, attrs) {
       $scope.delete = attrs.delete ? $scope.delete : null;
@@ -27,14 +29,16 @@ uiModules
       config.bindToScope($scope, 'defaultIndex');
 
       // Kibi: added to handle the tabs (index details and relational graph)
-      $scope.headerTab = 'details';
+      $scope.selectedTab = 'details';
+      $scope.getSelectedTab($scope.selectedTab);
       const isRelationalGraphAvailable = $injector.has('sirenRelationalGraphDirective');
 
-      $scope.changeHeaderTab = (tabName) => {
-        $scope.headerTab = tabName;
-
+      $scope.changeSelectedTab = (tabName) => {
         if (!isRelationalGraphAvailable && tabName === 'graph') {
           notify.warning('Siren Relational Graph not available, please install the Siren Graph Browser');
+        } else {
+          $scope.selectedTab = tabName;
+          $scope.getSelectedTab(tabName);
         }
       };
     }

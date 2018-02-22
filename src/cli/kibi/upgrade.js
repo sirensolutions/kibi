@@ -109,7 +109,7 @@ export default function (program) {
     const indexName = (config.kibana && config.kibana.index) || '.siren';
 
     const rl = readline.createInterface(process.stdin, process.stdout);
-    rl.question('Have you backup your ' + indexName + ' index? [N/y] ', function (resp) {
+    rl.question('Have you backed up your ' + indexName + ' index? [N/y] ', function (resp) {
       const yes = resp.toLowerCase().trim()[0] === 'y';
       rl.close();
 

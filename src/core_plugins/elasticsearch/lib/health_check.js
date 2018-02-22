@@ -156,9 +156,9 @@ module.exports = function (plugin, server, { mappings }) {
           .then(() => ensureEsVersion(server, kibiVersion.get(), 'admin'));
         }
       })
-      .then(config.get(CONNECTOR_CLUSTER_PROPERTY))
-      .then(config.get(SECURITY_CLUSTER_PROPERTY))
-      .then(config.get(ALERT_CLUSTER_PROPERTY));
+      .then(pingCustomCluster(CONNECTOR_CLUSTER_PROPERTY))
+      .then(pingCustomCluster(SECURITY_CLUSTER_PROPERTY))
+      .then(pingCustomCluster(ALERT_CLUSTER_PROPERTY));
 
     return healthCheck
     .then(() => server.expose('latestHealthCheckResults', results))

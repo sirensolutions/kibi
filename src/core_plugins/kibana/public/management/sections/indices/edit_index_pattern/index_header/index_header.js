@@ -3,7 +3,7 @@ import template from './index_header.html';
 import './index_header.less';
 uiModules
 .get('apps/management')
-.directive('kbnManagementIndexHeader', function ($injector, config) {
+.directive('kbnManagementIndexHeader', function ($injector, config, createNotifier) {
   return {
     restrict: 'E',
     template,
@@ -20,6 +20,10 @@ uiModules
       getSelectedTab:  '='
     },
     link: function ($scope, $el, attrs) {
+      const notify = createNotifier({
+        location: 'Entities Management'
+      });
+
       $scope.delete = attrs.delete ? $scope.delete : null;
       // kibi: added save to enable saving of changes
       $scope.save = attrs.save ? $scope.save : null;

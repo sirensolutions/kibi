@@ -201,7 +201,7 @@ uiModules.get('apps/management')
       };
 
       $scope.submit = function () {
-        const source = _.cloneDeep($scope.obj._source);
+        const source = _.cloneDeep($scope.obj.attributes);
 
         _.each($scope.fields, function (field) {
           let value = field.value;

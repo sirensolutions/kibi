@@ -3,7 +3,7 @@ import template from './index_header.html';
 import './index_header.less';
 uiModules
 .get('apps/management')
-.directive('kbnManagementIndexHeader', function ($injector, config, createNotifier) {
+.directive('kbnManagementIndexHeader', function ($injector, config, createNotifier, kbnUrl) {
   return {
     restrict: 'E',
     template,
@@ -17,7 +17,9 @@ uiModules
       save: '&',
       isSaveDisabled: '&',
       // Kibi: added getSelectedTab to get the active tab
-      getSelectedTab:  '='
+      getSelectedTab:  '=',
+      // Kibi: added activeTab
+      activeTab: '='
     },
     link: function ($scope, $el, attrs) {
       const notify = createNotifier({
@@ -33,7 +35,11 @@ uiModules
       config.bindToScope($scope, 'defaultIndex');
 
       // Kibi: added to handle the tabs (index details and relational graph)
-      $scope.selectedTab = 'details';
+      if ($scope.activeTab === 'graph' || $scope.activeTab === 'detauls') {
+        $scope.selectedTab = $scope.activeTab;
+      } else {
+        $scope.selectedTab = 'details';
+      }
       $scope.getSelectedTab($scope.selectedTab);
       const isRelationalGraphAvailable = $injector.has('sirenRelationalGraphDirective');
 
@@ -43,6 +49,7 @@ uiModules
         } else {
           $scope.selectedTab = tabName;
           $scope.getSelectedTab(tabName);
+          kbnUrl.change(`/management/siren/indexesandrelations/${$scope.entity.id}/${tabName}`);
         }
       };
     }

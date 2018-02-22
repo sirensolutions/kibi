@@ -157,7 +157,10 @@ uiModules.get('apps/management')
 
   $timeout(() => {
     if ($route.current.locals.activeTab) {
-      $scope.changeTab(_.find($scope.editSections, 'title', $route.current.locals.activeTab));
+      const tab = _.find($scope.editSections, 'title', $route.current.locals.activeTab);
+      if (tab) {
+        $scope.changeTab(tab);
+      }
     }
   });
 });

@@ -91,9 +91,14 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
     $scope.state.section = 'create_ip';
   };
 
-  if($route.current.$$route.originalPath.includes('/create/')) {
+  if ($route.current.$$route.originalPath.includes('/create/')) {
     $scope.createNewIndexPattern();
-  };
+  }
+
+  const activeTab = $route.current.locals.activeTab;
+  if (activeTab === 'graph' || activeTab === 'details') {
+    $scope.headerTab = activeTab;
+  }
 
   $scope.createNewVirtualEntity = function () {
     $scope.state.section = 'create_eid';
@@ -107,7 +112,11 @@ uiModules.get('apps/management', ['kibana', 'ui.tree'])
   // Needed until we migrate the panels to use the new generic "entity"
   $scope.$watch('selectedMenuItem.id', (itemId) => {
     if (itemId && (!$route.current.locals.selectedEntity || $route.current.locals.selectedEntity.id !== itemId)) {
-      kbnUrl.change(`/management/siren/indexesandrelations/${itemId}`);
+      if (activeTab) {
+        kbnUrl.change(`/management/siren/indexesandrelations/${itemId}/${activeTab}`);
+      } else {
+        kbnUrl.change(`/management/siren/indexesandrelations/${itemId}`);
+      }
     } else {
       const entity = $route.current.locals.selectedEntity;
       if (entity && (!$scope.entity || $scope.entity.id !== entity.id || $scope.entity.type !== entity.type)) {

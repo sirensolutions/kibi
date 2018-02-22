@@ -1,102 +1,109 @@
-<div class="kuiBar kuiVerticalRhythm">
-  <div class="kuiBarSection">
-    <!-- Index pattern name -->
-    <h1
-      class="kuiTitle kuiVerticalRhythm"
-      css-truncate
-      data-test-subj="indexPatternTitle"
-    >
-      <span
-        aria-hidden="true"
-        ng-if="defaultIndex === entity.id"
-        class="kuiIcon fa-star"
-      ></span>
-      {{ entity.id }}
-    </h1>
+<div class="index-header">
+  <div class="kuiBar kuiVerticalRhythm">
+    <div class="kuiBarSection">
+      <!-- Kibi: added tabs to switch betwenn entity details and relational graph -->
+      <div class="kuiTabs kuiVerticalRhythm">
+        <button
+          class="kuiTab"
+          ng-class="{ 'kuiTab-isSelected': selectedTab === 'details' }"
+          title="Details: {{ entity.id }}"
+          ng-click="changeSelectedTab('details')"
+        >
+          Details:
+          <span
+            aria-hidden="true"
+            ng-if="defaultIndex === entity.id"
+            class="kuiIcon fa-star"
+          ></span>
+          <span class="entity-label">
+            {{ entity.id }}
+          </span>
+        </button>
+        <button
+          class="kuiTab"
+          ng-class="{ 'kuiTab-isSelected': selectedTab === 'graph' }"
+          title="Graph View"
+          ng-click="changeSelectedTab('graph')"
+        >
+          Graph View
+        </button>
+      </div>
+    </div>
+
+    <div class="kuiBarSection">
+      <button
+        ng-if="save"
+        ng-click="save()"
+        aria-label="Save"
+        tooltip="Save"
+        class="kuiButton kuiButton--basic dark-grey-on-disabled"
+        data-test-subj="saveButton"
+        ng-disabled="isSaveDisabled()"
+      >
+        <span class="sr-only">Save</span>
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-floppy-o"
+        ></span>
+      </button>
+      <button
+        ng-if="setDefault"
+        ng-click="setDefault()"
+        tooltip="Set as default index"
+        class="kuiButton kuiButton--basic"
+        data-test-subj="setDefaultIndexPatternButton"
+      >
+        <span class="sr-only">Set as default index</span>
+        <ispan
+          aria-hidden="true"
+          class="kuiIcon fa-star"
+        ></span>
+      </button>
+      <button
+        ng-if="refreshFields"
+        ng-click="refreshFields()"
+        tooltip="Refresh field list"
+        class="kuiButton kuiButton--basic"
+      >
+        <span class="sr-only">Reload field list</span>
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-refresh"
+        ></span>
+      </button>
+      <button
+        ng-if="delete && entity.type === 'INDEX_PATTERN'"
+        ng-click="delete()"
+        aria-label="Remove index pattern"
+        tooltip="Remove index pattern"
+        class="kuiButton kuiButton--danger"
+        data-test-subj="deleteIndexPatternButton"
+      >
+        <span class="sr-only">Remove index pattern</span>
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-trash"
+        ></span>
+      </button>
+      <button
+        ng-if="delete && entity.type === 'VIRTUAL_ENTITY'"
+        ng-click="delete()"
+        aria-label="Remove entity identifier"
+        tooltip="Remove entity identifier"
+        class="kuiButton kuiButton--danger"
+        data-test-subj="deleteIndexPatternButton"
+      >
+        <span class="sr-only">Remove entity identifier</span>
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-trash"
+        ></span>
+      </button>
+    </div>
   </div>
 
-  <div class="kuiBarSection">
-    <button
-      ng-if="toggleGraph"
-      ng-click="toggleGraph()"
-      aria-label="Toggle relational graph"
-      tooltip="Toggle relational graph"
-      class="kuiButton kuiButton--basic"
-      data-test-subj="toggleRelationGraphButton"
-    >
-      <span class="sr-only">Toggle relational graph</span>
-      <span
-        aria-hidden="true"
-        class="kuiIcon fak-graph"
-      ></span>
-    </button>
-    <button
-      ng-if="save"
-      ng-click="save()"
-      aria-label="Save"
-      tooltip="Save"
-      class="kuiButton kuiButton--basic dark-grey-on-disabled"
-      data-test-subj="saveButton"
-      ng-disabled="isSaveDisabled()"
-    >
-      <span class="sr-only">Save</span>
-      <span
-        aria-hidden="true"
-        class="kuiIcon fa-floppy-o"
-      ></span>
-    </button>
-    <button
-      ng-if="setDefault"
-      ng-click="setDefault()"
-      tooltip="Set as default index"
-      class="kuiButton kuiButton--basic"
-      data-test-subj="setDefaultIndexPatternButton"
-    >
-      <span class="sr-only">Set as default index</span>
-      <ispan
-        aria-hidden="true"
-        class="kuiIcon fa-star"
-      ></span>
-    </button>
-    <button
-      ng-if="refreshFields"
-      ng-click="refreshFields()"
-      tooltip="Refresh field list"
-      class="kuiButton kuiButton--basic"
-    >
-      <span class="sr-only">Reload field list</span>
-      <span
-        aria-hidden="true"
-        class="kuiIcon fa-refresh"
-      ></span>
-    </button>
-    <button
-      ng-if="delete && entity.type === 'INDEX_PATTERN'"
-      ng-click="delete()"
-      aria-label="Remove index pattern"
-      tooltip="Remove index pattern"
-      class="kuiButton kuiButton--danger"
-      data-test-subj="deleteIndexPatternButton"
-    >
-      <span class="sr-only">Remove index pattern</span>
-      <span
-        aria-hidden="true"
-        class="kuiIcon fa-trash"
-      ></span>
-    </button>
-    <button
-      ng-if="delete && entity.type === 'VIRTUAL_ENTITY'"
-      ng-click="delete()"
-      aria-label="Remove entity identifier"
-      tooltip="Remove entity identifier"
-      class="kuiButton kuiButton--danger"
-      data-test-subj="deleteIndexPatternButton"
-    >
-      <span class="sr-only">Remove entity identifier</span>
-      <span
-        aria-hidden="true"
-        class="kuiIcon fa-trash"
-      ></span>
-    </button>
-  </div>
+  <!-- Kibi: added relational graph -->
+  <siren-relational-graph is-visible="selectedTab === 'graph'"
+                          selected="entity">
+  </siren-relational-graph>
 </div>

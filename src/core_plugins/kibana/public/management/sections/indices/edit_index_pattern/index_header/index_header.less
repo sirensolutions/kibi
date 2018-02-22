@@ -1,7 +1,39 @@
-.dark-grey-on-disabled {
-  &[disabled] {
-    background-color: #ffffff;
-    color: #b7b7b7;
-    border: #cdcdcd 0.5px solid;
+.index-header {
+  .dark-grey-on-disabled {
+    &[disabled] {
+      background-color: #ffffff;
+      color: #b7b7b7;
+      border: #cdcdcd 0.5px solid;
+    }
+  }
+
+  .kuiBarSection {
+    margin-right: 0;
+
+    .kuiTabs {
+      width: 100%;
+
+      .entity-label {
+        font-size: 15px;
+        font-weight: 900;
+      }
+    }
+  }
+
+  .kuiBarSection:last-child {
+    position: absolute;
+    right: 15px;
+  }
+
+  .relational-graph-container {
+    margin: 5px 0;
+    overflow: hidden;
+
+    .relational-graph {
+      border: 1px solid #ddd;
+      height: 500px;
+      overflow: hidden;
+      position: relative;
+    }
   }
 }

@@ -3,7 +3,7 @@ import template from './index_header.html';
 import './index_header.less';
 uiModules
 .get('apps/management')
-.directive('kbnManagementIndexHeader', function (config) {
+.directive('kbnManagementIndexHeader', function ($injector, config, createNotifier) {
   return {
     restrict: 'E',
     template,
@@ -16,18 +16,35 @@ uiModules
       entity: '=',
       save: '&',
       isSaveDisabled: '&',
-      toggleGraph: '&'
+      // Kibi: added getSelectedTab to get the active tab
+      getSelectedTab:  '='
     },
     link: function ($scope, $el, attrs) {
+      const notify = createNotifier({
+        location: 'Entities Management'
+      });
+
       $scope.delete = attrs.delete ? $scope.delete : null;
       // kibi: added save to enable saving of changes
       $scope.save = attrs.save ? $scope.save : null;
       $scope.isSaveDisabled = attrs.isSaveDisabled ? $scope.isSaveDisabled : null;
-      // kibi: added toggleGraph to enable/disable the relational graph
-      $scope.toggleGraph = attrs.toggleGraph ? $scope.toggleGraph : null;
       $scope.setDefault = attrs.setDefault ? $scope.setDefault : null;
       $scope.refreshFields = attrs.refreshFields ? $scope.refreshFields : null;
       config.bindToScope($scope, 'defaultIndex');
+
+      // Kibi: added to handle the tabs (index details and relational graph)
+      $scope.selectedTab = 'details';
+      $scope.getSelectedTab($scope.selectedTab);
+      const isRelationalGraphAvailable = $injector.has('sirenRelationalGraphDirective');
+
+      $scope.changeSelectedTab = (tabName) => {
+        if (!isRelationalGraphAvailable && tabName === 'graph') {
+          notify.warning('Siren Relational Graph not available, please install the Siren Graph Browser');
+        } else {
+          $scope.selectedTab = tabName;
+          $scope.getSelectedTab(tabName);
+        }
+      };
     }
   };
 });

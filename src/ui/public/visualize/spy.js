@@ -9,7 +9,6 @@ uiModules
   .directive('visualizeSpy', function (Private, $compile) {
 
     const spyModes = Private(SpyModesRegistryProvider);
-    const defaultMode = spyModes.inOrder[0].name;
 
     return {
       restrict: 'E',
@@ -25,6 +24,11 @@ uiModules
         $scope.isModeAllowed = function (mode) {
           return !mode.allowSpyMode || mode.allowSpyMode($scope.vis.type);
         };
+        // kibi: get default mode which is allowed
+        const defaultMode = _.filter(spyModes.inOrder, function (mode) {
+          return $scope.isModeAllowed(mode);
+        })[0].name;
+        // kibi: end
 
         function getSpyObject(name) {
           name = _.isUndefined(name) ? $scope.spy.mode.name : name;

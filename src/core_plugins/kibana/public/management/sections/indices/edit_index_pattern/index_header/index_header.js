@@ -35,7 +35,7 @@ uiModules
       config.bindToScope($scope, 'defaultIndex');
 
       // Kibi: added to handle the tabs (index details and relational graph)
-      if ($scope.activeTab === 'graph' || $scope.activeTab === 'detauls') {
+      if ($scope.activeTab === 'graph' || $scope.activeTab === 'details') {
         $scope.selectedTab = $scope.activeTab;
       } else {
         $scope.selectedTab = 'details';

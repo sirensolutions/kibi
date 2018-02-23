@@ -25,6 +25,7 @@ uiModules.get('apps/management')
   // Configure the new index pattern we're going to create.
   this.formValues = {
     name: config.get('indexPattern:placeholder'),
+    classLabel: config.get('indexPattern:placeholder'),
     nameIsPattern: false,
     expandWildcard: false,
     nameInterval: _.find(intervals, { name: 'daily' }),

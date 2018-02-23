@@ -22,5 +22,9 @@ export default {
   // the stanza itself is also removed
   settingsForRemovalIfNotCustomMap: {
     'investigate_core.gremlin_server.path':                   { oldVal: 'gremlin_server/gremlin-es2-server.jar' }
-  }
+  },
+
+  settingsForRemoval: [
+    'sentinl.sentinl.history'
+  ]
 };

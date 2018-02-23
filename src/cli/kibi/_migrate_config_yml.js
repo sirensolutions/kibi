@@ -2,9 +2,11 @@ import { safeLoad, safeDump } from 'js-yaml';
 import { readFileSync as read, writeFileSync as write, renameSync as rename } from 'fs';
 import { fromRoot } from '../../utils';
 import { has, get, isEmpty } from 'lodash';
-import { replacementMap, valueReplacementMap, settingsForRemovalIfNotCustomMap } from './kibi_to_siren_migration_maps';
+import { replacementMap, valueReplacementMap, settingsForRemovalIfNotCustomMap, settingsForRemoval } from './kibi_to_siren_migration_maps';
+import  validateConfig from './validate_config';
 import unset from '../../ui/public/kibi/lodash4/unset';
 import set from '../../ui/public/kibi/lodash4/set';
+import moment from 'moment';
 
 // The keys to be replaced are set as keys in the replacementMap map
 // The new keys to replace the old keys with are the values
@@ -39,6 +41,19 @@ import set from '../../ui/public/kibi/lodash4/set';
 // settings that are to be removed *if the user has not customised them*
 // i.e. if the gremlin_server.path is gremlin_server/gremlin-es2-server.jar
 // in the config, we remove it. if it has been customised, it is not removed
+function readFileContents(path) {
+  let fileContents;
+  try {
+    fileContents = read(path, 'utf8');
+    return fileContents;
+  } catch (e) {
+    if (e.code !== 'ENOENT') {
+      throw e;
+    }
+
+    return false;
+  }
+}
 
 function getChildKey(key) {
   return key.substr(key.indexOf('.') + 1);
@@ -58,17 +73,6 @@ function renamePropAtSpecificPoint(obj, keyToChange, newKeyname) {
   });
 
   return newObj;
-}
-
-function readFileContents(path) {
-  let fileContents;
-  try {
-    fileContents = read(path, 'utf8');
-    return fileContents;
-  } catch (e) {
-    if(e.code !== 'ENOENT') throw (e);
-    return false;
-  }
 }
 
 function getParentKey(path) {
@@ -94,18 +98,16 @@ function checkAndClearParentObjectIfEmpty(o, key) {
   }
 }
 
-function migrateKibiYml({ config: path , dev }) {
-  //check if replacing dev yamls
-  const newPath = fromRoot(`config/investigate${(dev) ? '.dev' : ''}.yml`);
-  if (dev) path = fromRoot('config/kibi.dev.yml');
-  const fileContents = readFileContents(path);
-  if (!fileContents) {
-    throw(`\nNo kibi.yml found to migrate,
-This command will migrate your kibi.yml to investigate.yml and update settings
-Please ensure you are running the correct command and the config path is correct (if set)`);
-  };
+function migrateSettings(contents) {
 
-  let contents = safeLoad(fileContents);
+  // Remove any obsolete keys first in case there are nested obsolete keys
+  // that need to be removed before the parent nodes are renamed.
+  settingsForRemoval.map(key => {
+    if (has(contents, key)) {
+      unset(contents, key);
+      checkAndClearParentObjectIfEmpty(contents, key);
+    }
+  });
 
   // Take the map of old:new keys and convert each config setting in place
   // including nested config options
@@ -170,11 +172,34 @@ Please ensure you are running the correct command and the config path is correct
     contents = Object.assign({}, removeOldSettingIfNotCustom(contents, key.split('.'), settingsForRemovalIfNotCustomMap[key]));
   });
 
+  return contents;
+}
+
+function migrateConfigYml({ config: path, dev }) {
+      //check if replacing dev yamls
+  let contents;
+  const newPath = fromRoot(`config/investigate${(dev) ? '.dev' : ''}.yml`);
+  if (dev) path = fromRoot('config/kibi.dev.yml');
+  const kibiContents = readFileContents(path);
+  if (kibiContents) { // There is a kibi.yml
+    contents = migrateSettings(safeLoad(kibiContents));
+  } else { // there is no kibi.yml
+    const investigateContents = readFileContents(newPath);
+    if (investigateContents && !validateConfig(newPath)) { // There is an investigate.yml but it's out of date
+      path = newPath;
+      contents = migrateSettings(safeLoad(investigateContents));
+    } else { // There is no kibi.yml and no investigate.yml
+      throw(`\nNo config file found to migrate,
+This command will migrate your investigate.yml to update settings
+Please ensure you are running the correct command and the config path is correct (if set)`);
+    }
+  }
+
   const newYml = safeDump(contents);
   // rename kibi.yml to kibi.yml.pre10
-  rename(path, `${path}.pre10`);
+  rename(path, `${path}.backup.${moment(new Date()).format('YYYY-MM-DD-HHmmss')}`);
   // write yaml output as investigate.yml
   write(newPath, newYml, { encoding: 'utf8' });
 }
 
-export default migrateKibiYml;
+export default migrateConfigYml;

@@ -1,6 +1,6 @@
 const mockFs = require('mock-fs');
 import { fromRoot } from '../../../utils';
-import migrateKibiYml from '../_migrate_kibi_yml';
+import migrateKibiYml from '../_migrate_config_yml';
 import fs from 'fs';
 import jsYaml from 'js-yaml';
 import expect from 'expect.js';
@@ -18,6 +18,7 @@ kibi_access_control.sentinl.foo: 'bar'
 sentinl:
   sentinl:
     results: 50
+    history: 10
 `;
 
 const mockKibiDevYml = `
@@ -64,31 +65,35 @@ kibi_core:
 kibi_access_control.sentinl.foo: 'bar'
 `;
 
+const mockInvestigateYml = `
+kibana:
+  index: '.defaultGremlinIndex'
+kibi_core: 
+  admin: 'alex'
+  gremlin_server:
+    path: 'gremlin_server/gremlin-es2-server.jar'
+kibi_access_control.sentinl.foo: 'bar'
+sentinl:
+  sentinl:
+    history: 10
+`;
 const configFolderPath = fromRoot('config');
 const mockConfigStructure = {};
 mockConfigStructure[configFolderPath] = {
   'kibi.yml': mockKibiYml,
+  'investigate.yml': mockInvestigateYml,
   'kibi.dev.yml': mockKibiDevYml,
   'kibi.gremlin.yml':mockKibiYmlWithGremlinPath,
   'kibi.custom.gremlin.yml': mockKibiYmlWithGremlinSettingsIncludingCustomPath,
   'kibi.defaulturl.gremlin.yml': mockKibiYmlWithGremlinSettingsIncludingDefaultUrl
 };
 
-describe('Migrate Kibi Config', () => {
-  beforeEach(() => {
-    mockFs(mockConfigStructure,
-      {
-        createCwd: false,
-        createTmp: false
-      });
-  });
-
+describe('Migrate Config Yaml', () => {
   afterEach(function () {
-    mockFs.restore();
-
     if(mockSafeDump) {
       mockSafeDump.restore();
     }
+    mockFs.restore();
   });
 
   it('should backup and replace the kibi.yml config file', (done) => {
@@ -97,11 +102,40 @@ describe('Migrate Kibi Config', () => {
       dev: false
     };
 
+    mockFs({ [`${configFolderPath}`]: { 'kibi.yml': mockKibiYml } });
     migrateKibiYml(options);
+
     //it should have written the file as investigate.yml
     expect(fs.accessSync(`${configFolderPath}/investigate.yml`)).to.be(undefined);
     // it should have backed up the old kibi.yml
-    expect(fs.accessSync(`${configFolderPath}/kibi.yml.pre10`)).to.be(undefined);
+    const checkFilenameWithDateRegexp = new RegExp(/kibi.(dev.)?yml.backup.[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}/);
+
+    expect(fs.readdirSync(configFolderPath).filter(filename => {
+      return checkFilenameWithDateRegexp.test(filename);
+    }).length).to.equal(1);
+    // it should have removed the old kibi.yml
+    expect(() => fs.accessSync(`${configFolderPath}/kibi.yml`)).to.throwError();
+
+    done();
+  });
+
+  it('should backup and replace the investigate.yml config file', (done) => {
+    const options = {
+      config: `${configFolderPath}/investigate.yml`,
+      dev: false
+    };
+
+    mockFs({ [`${configFolderPath}`]: { 'investigate.yml': mockInvestigateYml } });
+    migrateKibiYml(options);
+
+    //it should have written the file as investigate.yml
+    expect(fs.accessSync(`${configFolderPath}/investigate.yml`)).to.be(undefined);
+    // it should have backed up the old kibi.yml
+    const checkFilenameWithDateRegexp = new RegExp(/investigate.(dev.)?yml.backup.[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}/);
+
+    expect(fs.readdirSync(configFolderPath).filter(filename => {
+      return checkFilenameWithDateRegexp.test(filename);
+    }).length).to.equal(1);
     // it should have removed the old kibi.yml
     expect(() => fs.accessSync(`${configFolderPath}/kibi.yml`)).to.throwError();
 
@@ -110,6 +144,9 @@ describe('Migrate Kibi Config', () => {
 
   describe('replacementMap', () => {
     it('should replace only the settings in the map to the new values', (done) => {
+
+      mockFs({ [`${configFolderPath}`]: { 'kibi.yml': mockKibiYml } });
+
       mockSafeDump = sinon.stub(jsYaml, 'safeDump', contents => {
         // kibi_access_control should have changed to investigate_access_control
         expect(contents).to.have.property('investigate_access_control');
@@ -137,6 +174,8 @@ describe('Migrate Kibi Config', () => {
 
   describe('valueReplacementMap', () => {
     it('should insert the old defaults explicitly if not changed by the user', (done) => {
+      mockFs({ [`${configFolderPath}`]: { 'kibi.yml': mockKibiYml } });
+
       mockSafeDump = sinon.stub(jsYaml, 'safeDump', contents => {
         // investigate_access_control.sirenalert.username should have been added with the value 'sentinl'
         expect(contents).to.have.property('investigate_access_control');
@@ -160,6 +199,7 @@ describe('Migrate Kibi Config', () => {
     });
 
     it('should replace the settings in the map to the new values for the dev.yml if invoked with --dev flag', (done) => {
+      mockFs({ [`${configFolderPath}`]: { 'kibi.dev.yml': mockKibiYml } });
       const writeFileSyncStub = sinon.stub(fs, 'writeFileSync', (filepath, encoding) => {
         if (path.dirname(filepath) === fromRoot('config')) {
           expect(path.basename(filepath)).to.equal('investigate.dev.yml');
@@ -186,6 +226,7 @@ describe('Migrate Kibi Config', () => {
 
   describe('settingsForRemovalIfNotCustomMap', () => {
     it('should remove any setting that is set to the old default and leave other settings in that stanza', (done) => {
+      mockFs({ [`${configFolderPath}`]: { 'kibi.yml': mockKibiYmlWithGremlinSettingsIncludingDefaultUrl } });
       mockSafeDump = sinon.stub(jsYaml, 'safeDump', contents => {
         expect(contents).to.have.property('investigate_core');
         // as there are no properties of the gremlin_server left (they were all old default values that have been rolled into Investigate)
@@ -198,7 +239,7 @@ describe('Migrate Kibi Config', () => {
       });
 
       const options = {
-        config: `${configFolderPath}/kibi.defaulturl.gremlin.yml`,
+        config: `${configFolderPath}/kibi.yml`,
         dev: false
       };
 
@@ -208,6 +249,7 @@ describe('Migrate Kibi Config', () => {
     });
 
     it('should remove any setting that is set to the old default and remove the stanza if empty', (done) => {
+      mockFs({ [`${configFolderPath}`]: { 'kibi.yml': mockKibiYmlWithGremlinPath } });
       mockSafeDump = sinon.stub(jsYaml, 'safeDump', contents => {
         expect(contents).to.have.property('investigate_core');
         // as there are no properties of the gremlin_server left (they were all old default values that have been rolled into Investigate)
@@ -216,7 +258,7 @@ describe('Migrate Kibi Config', () => {
       });
 
       const options = {
-        config: `${configFolderPath}/kibi.gremlin.yml`,
+        config: `${configFolderPath}/kibi.yml`,
         dev: false
       };
 
@@ -226,6 +268,7 @@ describe('Migrate Kibi Config', () => {
     });
 
     it('should not remove the setting if customized and leave the stanza if any custom settings', (done) => {
+      mockFs({ [`${configFolderPath}`]: { 'kibi.yml': mockKibiYmlWithGremlinSettingsIncludingCustomPath } });
       mockSafeDump = sinon.stub(jsYaml, 'safeDump', contents => {
         expect(contents).to.have.property('investigate_core');
         //just checking the other values were not affected
@@ -242,7 +285,7 @@ describe('Migrate Kibi Config', () => {
       });
 
       const options = {
-        config: `${configFolderPath}/kibi.custom.gremlin.yml`,
+        config: `${configFolderPath}/kibi.yml`,
         dev: false
       };
 
@@ -252,15 +295,17 @@ describe('Migrate Kibi Config', () => {
     });
   });
 
-  it('should return with a warning if no kibi.yml', () => {
+  it('should return with a warning if no kibi.yml', (done) => {
+    mockFs({ [`${configFolderPath}`]: { } });
     const options = {
       config: `${configFolderPath}/notkibi.yml`,
       dev: false
     };
 
-    expect(() => migrateKibiYml(options)).to.throwException(`\nNo kibi.yml found to migrate,
-    This command will migrate your kibi.yml to investigate.yml and update settings
+    expect(() => migrateKibiYml(options)).to.throwException(`\nNo config file found to migrate,
+    This command will migrate your investigate.yml to update settings
     Please ensure you are running the correct command and the config path is correct (if set)`);
-  });
 
+    done();
+  });
 });

@@ -1,10 +1,10 @@
-import _migrateKibiYml from './_migrate_kibi_yml';
+import migrateConfigYml from './_migrate_config_yml';
 import { fromRoot } from '../../utils';
 
 export default function (program) {
   async function processCommand(options) {
     try {
-      await _migrateKibiYml(options);
+      await migrateConfigYml(options);
     } catch(e) {
       process.stderr.write(`${e}\n`);
       process.exit(1);

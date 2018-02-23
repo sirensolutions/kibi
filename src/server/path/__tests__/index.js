@@ -8,8 +8,9 @@ const fakeConfigStructure = {};
 fakeConfigStructure[fromRoot('config')] = {
   'investigate.yml': ''
 };
+
 fakeConfigStructure[fromRoot('data')] = {
-  'fakedate': ''
+  'fakedata': ''
 };
 
 describe('Default path finder', function () {
@@ -27,38 +28,5 @@ describe('Default path finder', function () {
   it('should find a data directory', () => {
     const dataPath = path.getData();
     expect(() => accessSync(dataPath, R_OK)).to.not.throwError();
-  });
-
-  describe('if kibi.yml in the config folder', () => {
-    beforeEach(() => {
-      const fileStructureWithKibiYml = {};
-      fileStructureWithKibiYml[fromRoot('config')] = {
-        'kibi.yml': ''
-      };
-      mockFs(fileStructureWithKibiYml);
-    });
-
-    afterEach(mockFs.restore);
-
-    it('should throw an error', () => {
-      expect(() => path.getConfig()).to.throwException();
-    });
-  });
-
-  describe('if investigate.yml in the config folder but old config settings in yml', () => {
-    beforeEach(() => {
-      const fileStructureWithKibiYml = {};
-      const fakeYml = `kibi_core:\n\t\tusername: 'bob'`;
-      fileStructureWithKibiYml[fromRoot('config')] = {
-        'investigate.yml': fakeYml
-      };
-      mockFs(fileStructureWithKibiYml);
-    });
-
-    afterEach(mockFs.restore);
-
-    it('should throw an error', () => {
-      expect(() => path.getConfig()).to.throwException();
-    });
   });
 });

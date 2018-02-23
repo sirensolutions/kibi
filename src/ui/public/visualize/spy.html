@@ -24,7 +24,7 @@
         ng-change="onSpyModeChange()"
       >
         <option
-          ng-repeat="mode in modes.inOrder"
+          ng-repeat="mode in modes.inOrder | filter:isModeAllowed"
           value="{{mode.name}}"
         >
           {{mode.display}}

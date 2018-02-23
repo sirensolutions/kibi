@@ -26,6 +26,10 @@
           <td>{{ item.type || '*' }}</td>
         </tr>
         <tr>
+          <td>Total Duration</td>
+          <td>{{ item.duration || '*' }}</td>
+        </tr>
+        <tr>
           <td colspan="2">
             <button class="btn btn-xs" ng-click="showRawRequest = !showRawRequest">Raw Request</button>
             <pre ng-show="showRawRequest">{{item.query | json}}</pre>

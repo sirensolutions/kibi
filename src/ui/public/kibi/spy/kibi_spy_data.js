@@ -40,7 +40,8 @@ export function KibiSpyDataFactory(Promise, $http) {
         throw Error('Query should be an object: ' + query);
       }
 
-      this.data.push({ index, type, query, response, meta, pruned });
+      const duration = response.took + response.planner.took_in_millis;
+      this.data.push({ index, type, query, response, meta, pruned, duration });
     }
 
     /**

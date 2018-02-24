@@ -13,7 +13,9 @@ sentinl:
 
 const mockInvestigateYmlWithoutOldKeys = `
 investigate_core:
-  admin: bobdole
+  admin_role: bobdole
+  gremlin_server:
+    path: path/to/gremlin.server
 `;
 
 const configFolderPath = fromRoot('config');

@@ -876,7 +876,9 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
         // here add the one for which the meta is missing
         _.each(dashboardIds, dashId => {
           if (!statesMap[dashId]) {
-            statesMap[dashId] = {};
+            statesMap[dashId] = {
+              error: new Error('Missing metadata')
+            };
           }
         });
 

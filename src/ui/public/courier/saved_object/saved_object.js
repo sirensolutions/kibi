@@ -242,9 +242,11 @@ export function SavedObjectProvider(
 
       if (resp.status === 403 && resp.type === 'security_exception') {
         throw new SavedObjectAuthorizationError(esType, this.id, resp.reason);
-      };
+      }
 
-      if (resp.found != null && !resp.found) throw new SavedObjectNotFound(esType, this.id);
+      if (resp.found != null && !resp.found) {
+        throw new SavedObjectNotFound(esType, this.id);
+      }
 
       const meta = resp._source.kibanaSavedObjectMeta || {};
       delete resp._source.kibanaSavedObjectMeta;

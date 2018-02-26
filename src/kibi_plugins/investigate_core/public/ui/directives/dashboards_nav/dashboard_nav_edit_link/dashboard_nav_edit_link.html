@@ -69,7 +69,7 @@
                 <div class="cube2"></div>
               </div>
             </span>
-            </span>
+
             <!--filters indicator-->
             <span ng-if="group.selected.filterIconMessage && group.selected.dirty" aria-hidden="true">
               <i class="fa fa-filter"
@@ -80,6 +80,10 @@
             <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
                   data-placement="bottom"
                   title="Notice: This is a sample of the results because join operation was pruned"> *
+            </span>
+            <!--error indicator-->
+            <span ng-if="group.selected.error" aria-hidden="true" data-toggle="tooltip"
+                  data-placement="bottom"><i class="fa fa-exclamation-triangle"/>
             </span>
           </div>
           <div
@@ -132,6 +136,10 @@
               <span ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
                     data-placement="bottom"
                     title="Notice: This is a sample of the results because join operation was pruned"> *
+              </span>
+              <!--error indicator-->
+              <span ng-if="dashboard.error" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom"><i class="fa fa-exclamation-triangle"/>
               </span>
             </div>
           </div>

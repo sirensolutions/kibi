@@ -1,9 +1,10 @@
 import { safeLoad, safeDump } from 'js-yaml';
 import { readFileSync as read, writeFileSync as write, renameSync as rename } from 'fs';
 import { fromRoot } from '../../utils';
+import { basename, dirname } from 'path';
 import { has, get, isEmpty } from 'lodash';
 import { replacementMap, valueReplacementMap, settingsForRemovalIfNotCustomMap, settingsForRemoval } from './kibi_to_siren_migration_maps';
-import  validateConfig from './validate_config';
+import { validateYml } from './validate_config';
 import unset from '../../ui/public/kibi/lodash4/unset';
 import set from '../../ui/public/kibi/lodash4/set';
 import moment from 'moment';
@@ -178,14 +179,17 @@ function migrateSettings(contents) {
 function migrateConfigYml({ config: path, dev }) {
       //check if replacing dev yamls
   let contents;
-  const newPath = fromRoot(`config/investigate${(dev) ? '.dev' : ''}.yml`);
-  if (dev) path = fromRoot('config/kibi.dev.yml');
+  // Handle custom config paths. If the user passes a custom config filepath in,
+  // replace its contents but leave its name intact.
+  const pathIsDefault = basename(path) === 'kibi.yml' || basename(path) === 'investigate.yml';
+  const newPath = pathIsDefault ? `${dirname(path)}/investigate.${(dev) ? 'dev.' : ''}yml` : path;
+  if (dev) path = pathIsDefault ? `${dirname(path)}/${basename(path, '.yml')}.dev.yml` : path;
   const kibiContents = readFileContents(path);
   if (kibiContents) { // There is a kibi.yml
     contents = migrateSettings(safeLoad(kibiContents));
   } else { // there is no kibi.yml
     const investigateContents = readFileContents(newPath);
-    if (investigateContents && !validateConfig(newPath)) { // There is an investigate.yml but it's out of date
+    if (investigateContents && !validateYml(newPath)) { // There is an investigate.yml but it's out of date
       path = newPath;
       contents = migrateSettings(safeLoad(investigateContents));
     } else { // There is no kibi.yml and no investigate.yml
@@ -198,7 +202,7 @@ Please ensure you are running the correct command and the config path is correct
   const newYml = safeDump(contents);
   // rename kibi.yml to kibi.yml.pre10
   rename(path, `${path}.backup.${moment(new Date()).format('YYYY-MM-DD-HHmmss')}`);
-  // write yaml output as investigate.yml
+  // write yaml output as investigate.yml (or as the user-defined custom filename)
   write(newPath, newYml, { encoding: 'utf8' });
 }
 

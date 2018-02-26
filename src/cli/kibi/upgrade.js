@@ -1,12 +1,15 @@
 import KbnServer from '../../server/kbn_server';
 import Promise from 'bluebird';
 import { merge } from 'lodash';
+import { validateInvestigateYml } from '../../cli/kibi/validate_config';
+import migrateConfigYml from './_migrate_config_yml';
 import readYamlConfig from '../serve/read_yaml_config';
 import { resolve } from 'path';
 import { fromRoot } from '../../utils/from_root';
 import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';
 import MigrationLogger from 'kibiutils/lib/migrations/migration_logger';
 import readline from 'readline';
+import { basename } from 'path';
 
 const pathCollector = function () {
   const paths = [];
@@ -95,28 +98,46 @@ export default function (program) {
   }
 
   async function processCommand(options) {
-    const config = readYamlConfig(options.config);
+    const configPath = (options.dev) ? fromRoot('config/investigate.dev.yml') : options.config;
+    const configFilename = basename(configPath);
+    if (!validateInvestigateYml(configPath, options.dev)) {
+      const rl = readline.createInterface(process.stdin, process.stdout);
+      rl.question(`Your config file \`${configFilename}\` has some obsolete configuration settings.\n
+    You must run \`bin/investigate upgrade-config\` to migrate your ${configFilename} settings
+    Please be aware that this command removes all comments in the ${configFilename}
+    but the original file (with comments) is preserved as ${configFilename}.backup.{YYYY-MM-DD-HHmmss}\n
+    Would you like to migrate the configuration automatically? [N/y]\n\n`, function (resp) {
+        const yes = resp.toLowerCase().trim()[0] === 'y';
+        rl.close();
 
-    if (options.dev) {
-      try { merge(config, readYamlConfig(fromRoot('config/investigate.dev.yml'))); }
-      catch (e) { null; }
-    }
+        if (yes) {
+          return migrateConfigYml({ config: configPath, dev: options.dev });
+        }
+      });
+    } else {
+      const config = readYamlConfig(options.config);
 
-    if (options.yes) {
-      return runUpgrade(options, config);
-    }
+      if (options.dev) {
+        try { merge(config, readYamlConfig(fromRoot('config/investigate.dev.yml'))); }
+        catch (e) { null; }
+      }
 
-    const indexName = (config.kibana && config.kibana.index) || '.siren';
-
-    const rl = readline.createInterface(process.stdin, process.stdout);
-    rl.question('Have you backed up your ' + indexName + ' index? [N/y] ', function (resp) {
-      const yes = resp.toLowerCase().trim()[0] === 'y';
-      rl.close();
-
-      if (yes) {
+      if (options.yes) {
         return runUpgrade(options, config);
       }
-    });
+
+      const indexName = (config.kibana && config.kibana.index) || '.siren';
+
+      const rl = readline.createInterface(process.stdin, process.stdout);
+      rl.question('Have you backed up your ' + indexName + ' index? [N/y] ', function (resp) {
+        const yes = resp.toLowerCase().trim()[0] === 'y';
+        rl.close();
+
+        if (yes) {
+          return runUpgrade(options, config);
+        }
+      });
+    }
   }
 
   program

@@ -142,6 +142,38 @@ describe('Migrate Config Yaml', () => {
     done();
   });
 
+  it('should backup and replace a custom config file into a custom folder', (done) => {
+    const options = {
+      config: `${configFolderPath}-boo/foo.yml`,
+      dev: false
+    };
+
+    mockFs({
+      [`${configFolderPath}-boo`]: { 'foo.yml': mockInvestigateYml },
+      [`${configFolderPath}`] : {}
+    });
+
+    migrateKibiYml(options);
+
+    //it should have written the file as investigate.yml
+    expect(fs.accessSync(`${configFolderPath}-boo/foo.yml`)).to.be(undefined);
+    // it should have backed up the old kibi.yml
+    const checkFilenameWithDateRegexp = new RegExp(/foo.(dev.)?yml.backup.[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}/);
+
+    expect(fs.readdirSync(configFolderPath + '-boo').filter(filename => {
+      return checkFilenameWithDateRegexp.test(filename);
+    }).length).to.equal(1);
+
+    expect(fs.readdirSync(configFolderPath).filter(filename => {
+      return checkFilenameWithDateRegexp.test(filename);
+    }).length).to.equal(0);
+
+    // it should have removed the old kibi.yml
+    expect(() => fs.accessSync(`${configFolderPath}-boo/kibi.yml`)).to.throwError();
+
+    done();
+  });
+
   describe('replacementMap', () => {
     it('should replace only the settings in the map to the new values', (done) => {
 
@@ -212,6 +244,7 @@ describe('Migrate Config Yaml', () => {
       });
 
       const options = {
+        config: `${configFolderPath}/kibi.yml`,
         dev: true
       };
 

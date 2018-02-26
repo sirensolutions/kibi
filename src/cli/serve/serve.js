@@ -6,9 +6,9 @@ import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
 import readYamlConfig from './read_yaml_config';
 import readline from 'readline';
-import validateYml from '../../cli/kibi/validate_config';
+import { validateInvestigateYml, getConfigYmlPath } from '../../cli/kibi/validate_config';
 import migrateConfigYml from '../../cli/kibi/_migrate_config_yml';
-
+import { basename } from 'path';
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 import migrationLogger from 'kibiutils/lib/migrations/migration_logger';
 
@@ -150,10 +150,19 @@ module.exports = function (program) {
 
   command
   .action(async function (opts) {
-    function getConfigYmlPath(filename, dev) {
-      return fromRoot(`config/${filename}${(dev) ? '.dev' : ''}.yml`);
+    if (opts.dev && !opts.ignoreDevYml) {
+      try {
+        const kbnDevConfig = fromRoot('config/investigate.dev.yml'); // kibi: renamed kibana to investigate
+        if (statSync(kbnDevConfig).isFile()) {
+          opts.config.push(kbnDevConfig);
+        }
+      } catch (err) {
+      // ignore, kibana.dev.yml does not exist
+      }
     }
-
+    const configPath = (opts.dev) ? fromRoot('config/investigate.dev.yml') : opts.config[0];
+    const configFilename = basename(configPath);
+    const configFilenameNoExt = basename(configPath, '.yml');
     function checkKibiYmlExists(dev) {
       const kibiYmlPath = getConfigYmlPath('kibi', dev);
       try {
@@ -164,24 +173,8 @@ module.exports = function (program) {
       }
     }
 
-    function validateInvestigateYml(dev) {
-      const investigateYmlPath = getConfigYmlPath('investigate', dev);
-
-      return validateYml(investigateYmlPath);
-    }
-
-    if (!checkKibiYmlExists(opts.dev) && validateInvestigateYml(opts.dev)) {
+    if (!checkKibiYmlExists(opts.dev) && validateInvestigateYml(configPath, opts.dev)) {
       // kibi: added extra condition !opts.ignoreDevYml
-      if (opts.dev && !opts.ignoreDevYml) {
-        try {
-          const kbnDevConfig = fromRoot('config/investigate.dev.yml'); // kibi: renamed kibana to investigate
-          if (statSync(kbnDevConfig).isFile()) {
-            opts.config.push(kbnDevConfig);
-          }
-        } catch (err) {
-        // ignore, kibana.dev.yml does not exist
-        }
-      }
 
       const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
       const settings = getCurrentSettings();
@@ -237,22 +230,21 @@ module.exports = function (program) {
         rl.close();
 
         if (yes) {
-          return migrateConfigYml({ config: opts.config, dev: opts.dev });
+          return migrateConfigYml({ config: configPath, dev: opts.dev });
         }
       });
-    } else if(!validateInvestigateYml(opts.dev)) {
-
+    } else if(!validateInvestigateYml(configPath, opts.dev)) {
       const rl = readline.createInterface(process.stdin, process.stdout);
-      rl.question(`Your config file \`config/investigate.yml\` has some obsolete configuration settings.\n
-    You must run \`bin/investigate upgrade-config\` to migrate your investigate.yml settings
-    Please be aware that this command removes all comments in the investigate.yml
-    but the original file (with comments) is preserved as investigate.yml.backup.{YYYY-MM-DD-HHmmss}\n
+      rl.question(`Your config file \`${configFilename}\` has some obsolete configuration settings.\n
+    You must run \`bin/investigate upgrade-config\` to migrate your ${configFilename} settings
+    Please be aware that this command removes all comments in the ${configFilename}
+    but the original file (with comments) is preserved as ${configFilename}.backup.{YYYY-MM-DD-HHmmss}\n
     Would you like to migrate the configuration automatically? [N/y]\n\n`, function (resp) {
         const yes = resp.toLowerCase().trim()[0] === 'y';
         rl.close();
 
         if (yes) {
-          return migrateConfigYml({ config: opts.config, dev: opts.dev });
+          return migrateConfigYml({ config: configPath, dev: opts.dev });
         }
       });
     }

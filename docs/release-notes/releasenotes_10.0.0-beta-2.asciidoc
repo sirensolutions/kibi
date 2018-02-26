@@ -11,7 +11,7 @@ Added:
 * Added a user confirmation to the CLI upgrade procedure to check if the user has backed up their `.siren` index.
 * Investigate now handles empty index patterns more gracefully.
 * The relational graph in the `Indexes and Relations` section is moved to a tab.
-* Request `Total Duration` time added to Spy Panel.
+* Total Duration time of a request is now displayed on the Spy Panel.
 
 Fixed: 
 
@@ -20,7 +20,7 @@ Fixed:
 * Relations with no destination other than the EID are not listed in the automatic relational buttons.
 * Fixed a crash when filtering visualisations.
 * Added support for `siren:timePrecision` back in.
-* Dashboard share URL shortener now generating shortened URLs correctly.
+* URL shortener in Dashboard Share panel now generating shortened URLs correctly.
 * Fixed intermittent error where dashboard ID was not passed correctly to relational buttons.
 * Allow creation of index pattern directly from create virtual index page without manually editing index pattern name.
 * Fixed bug in saving dashboard in Saved Objects after making no changes.
@@ -59,7 +59,7 @@ Fixed:
 ===== License
 
 * The check for a valid license is now cached for an hour, leading to improved performance when navigating between routes.
-* An error is shown if a user without permissions to upload a license attempts to upload one.
+* If a user without permissions attempts to upload a license then an error is shown.
 
 ===== Gremlin Server
 

@@ -81,6 +81,10 @@
                   data-placement="bottom"
                   title="Notice: This is a sample of the results because join operation was pruned"> *
             </span>
+            <!--error indicator-->
+            <span ng-if="group.selected.error" aria-hidden="true" data-toggle="tooltip"
+                  data-placement="bottom"><i class="fa fa-times"/>
+            </span>
           </div>
           <div
             class="action dashboards-nav-edit-link-dragbar"

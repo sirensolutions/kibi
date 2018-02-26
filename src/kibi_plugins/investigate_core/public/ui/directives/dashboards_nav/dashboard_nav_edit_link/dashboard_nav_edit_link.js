@@ -338,10 +338,13 @@ uiModules
         } else {
           const group = $scope.group;
           title = group.title;
+          error = group.selected.error;
           if (group.selected) {
             filterMessage = group.selected.filterIconMessage;
           }
-          if (group.virtual && group.selected.count !== undefined) {
+          if (group.virtual && group.selected.error !== undefined) {
+            title += ' Error: ' + error;
+          } else if (group.virtual && group.selected.count !== undefined) {
             title += ' (' + kibiHumanReadableHelper.formatNumber(group.selected.count, '0,000') + ')';
           }
         }

@@ -241,7 +241,7 @@ export function SavedObjectProvider(
       this._source = _.cloneDeep(resp._source);
 
       if (resp.status === 403 && resp.type === 'security_exception') {
-        throw new SavedObjectAuthorizationError(resp.reason);
+        throw new SavedObjectAuthorizationError(esType, this.id, resp.reason);
       };
 
       if (resp.found != null && !resp.found) throw new SavedObjectNotFound(esType, this.id);

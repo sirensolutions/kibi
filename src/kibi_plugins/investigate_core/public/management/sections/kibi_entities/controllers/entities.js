@@ -35,7 +35,13 @@ uiRoutes
               return _.assign(indexPattern, virtualEntity);
             });
           } else {
-            return virtualEntity;
+            if (virtualEntity) {
+              return virtualEntity;
+            } else {
+              createNotifier().error(`Index pattern ${$route.current.params.entityId} cannot be found`);
+              kbnUrl.redirect('/management/siren/indexesandrelations');
+              return Promise.halt();
+            }
           }
         });
       })

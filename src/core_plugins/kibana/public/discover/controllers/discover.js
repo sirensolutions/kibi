@@ -31,7 +31,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { getDefaultQuery } from 'ui/parse_query';
 // kibi: imports
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
-import { IndexPatternAuthorizationError } from 'ui/errors';
+import { IndexPatternAuthorizationError, SavedObjectAuthorizationError } from 'ui/errors';
 import { QuickDashboardProvider } from 'ui/kibi/quick_dashboard/quick_dashboard';
 import { GuessFieldsProvider } from 'ui/kibi/quick_dashboard/guess_fields';
 // kibi: end
@@ -101,11 +101,11 @@ uiRoutes
             // unable to fetch the index pattern for any other reason
             let message;
             if (error instanceof IndexPatternAuthorizationError) {
-              message = `Access to index pattern ${id} is forbidden.`;
+              message =  error.message;
             } else {
               message = `Could not fetch index pattern. Cause: ${id} ${JSON.stringify(error)}`;
             }
-            createNotifier().error(message);
+            createNotifier().warning(message);
             kbnUrl.redirect('/discover');
             return Promise.halt();
           });
@@ -118,7 +118,14 @@ uiRoutes
       .catch(error => {
         // kibi: redirect if access to index pattern in saved search is forbidden
         if (error instanceof IndexPatternAuthorizationError) {
-          createNotifier().warning(`Access to index pattern in search ${$route.current.params.id} is forbidden.`);
+          createNotifier().warning(error.message);
+          kbnUrl.redirect('/discover');
+          return Promise.halt();
+        }
+
+        // kibi: redirect if access to saved search is forbidden
+        if (error instanceof SavedObjectAuthorizationError) {
+          createNotifier().warning(error.message);
           kbnUrl.redirect('/discover');
           return Promise.halt();
         }

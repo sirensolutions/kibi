@@ -204,9 +204,9 @@ export class SavedObjectNotFound extends KbnError {
 export class IndexPatternAuthorizationError extends KbnError {
   constructor(indexPattern) {
     if (indexPattern) {
-      super(`Index pattern ${indexPattern.id} matches indices you do not have access to`);
+      super(`No access to index pattern ${indexPattern.id}: Request denied by ACL`);
     } else {
-      super(`An index pattern matches indices you do not have access to`);
+      super(`No access to index pattern: Request denied by ACL`);
     }
   }
 }
@@ -319,8 +319,9 @@ export class NoAccessToFieldStats extends KbnError {
 }
 
 export class SavedObjectAuthorizationError extends KbnError {
-  constructor(message) {
-    super(message);
+  constructor(type, id, message) {
+    super(`No access to ${type} ${id}: ` + message);
+
   }
 }
 // kibi: end

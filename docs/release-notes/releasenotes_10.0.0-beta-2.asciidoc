@@ -26,13 +26,13 @@ Fixed:
 * Fixed bug in saving dashboard in Saved Objects after making no changes.
 * Spy panel now only listed permitted modes.
 * *Auto dashboard generation*
-**  Visualisations created with Generate Dashboard weren't associated to the saved search, now they are
-**  Storing the time in the dashboard now causes the generated visualizations to fit the target time interval
-**  Fixes issues with sidebar dash counts after a generation, like neverending spinners
-**  Added a report for Generate, that allows users to change visualization titles
-**  Both Autoselect and Generate reports allow sorting by column and selection of output items
-**  Improved filtering of common undesired distributions in Autoselect
-**  More descriptive visualization names in Generate
+**  Visualisations created with Generate Dashboard weren't associated to the saved search, now they are.
+**  Storing the time in the dashboard now causes the generated visualizations to fit the target time interval.
+**  Fixes issues with sidebar dash counts after a generation, like neverending spinners.
+**  Added a report for Generate, that allows users to change visualization titles.
+**  Both Autoselect and Generate reports allow sorting by column and selection of output items.
+**  Improved filtering of common undesired distributions in Autoselect.
+**  More descriptive visualization names in Generate.
 
 * Minor UI fixes:
     ** Dashboard sidebar click and drag functionality improved.
@@ -45,8 +45,8 @@ Fixed:
 ===== Graph Browser
 
 * Graph browser functions have moved into a sidebar which allow listing, display and manipulation of the data and filters in tabular format.
-* Select edge script now works when relation count = 1
-* Graph browser now handles nested index patterns and multiple entities matching an index pattern
+* Select edge script now works when relation count = 1.
+* Graph browser now handles nested index patterns and multiple entities matching an index pattern.
 * A button is added to show inverse relations on the graph.
 * Changes in the graph now persist when navigating to other tabs.
 * Arrows are added to the relations for Entities unless the labels for both relationships are the same.

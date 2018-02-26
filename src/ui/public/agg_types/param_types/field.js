@@ -83,7 +83,7 @@ export function AggTypesParamTypesFieldProvider(Private, $filter) {
     if (!field) {
       throw new SavedObjectNotFound(
         // kibi: improved the error message
-        'index-pattern-field', 'Could not found field: ' + fieldName + ' in ' + indexPattern.id + ' index pattern'
+        'index-pattern-field', 'Could not find field: ' + fieldName + ' in ' + indexPattern.id + ' index pattern'
       );
     }
 

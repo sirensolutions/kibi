@@ -108,12 +108,10 @@ uiModules
         delete dashboard.error;
         dashboard.count = meta.hits.total;
       } else if (_.contains(Object.keys(meta), 'error') && meta.error.reason) {
-        //notify.error('Error: ' + meta.error.reason);
         dashboard.error = meta.error.reason;
         dashboard.count = '';
         return Promise.resolve();
       } else if (_.contains(Object.keys(meta), 'error') && meta.error.message) {
-        //notify.error('Error: ' + meta.error.message);
         dashboard.error = meta.error.message;
         dashboard.count = '';
         return Promise.resolve();

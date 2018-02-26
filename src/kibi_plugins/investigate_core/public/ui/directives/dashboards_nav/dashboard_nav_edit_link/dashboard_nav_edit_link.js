@@ -323,12 +323,16 @@ uiModules
 
       $scope.addTooltip = function (event, reference, isDashboard, includeFilters = false) {
         let title;
+        let error;
         let filterMessage = null;
         if (isDashboard) {
           const dashboard = $scope.group.dashboards[+reference];
           title = dashboard.title;
+          error = dashboard.error;
           filterMessage = dashboard.filterIconMessage;
-          if (dashboard.count !== undefined) {
+          if (dashboard.error !== undefined) {
+            title += ' Error: ' + error;
+          } else if (dashboard.count !== undefined) {
             title += ' (' + kibiHumanReadableHelper.formatNumber(dashboard.count, '0,000') + ')';
           }
         } else {

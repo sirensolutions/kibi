@@ -105,10 +105,18 @@ uiModules
 
     _dashboardMetadataCallback(dashboard, meta, filters, queries, dirty) {
       if (!_.contains(Object.keys(meta), 'error')) {
+        delete dashboard.error;
         dashboard.count = meta.hits.total;
       } else if (_.contains(Object.keys(meta), 'error') && meta.error.reason) {
-        notify.error('Error: ' + meta.error.reason);
+        //notify.error('Error: ' + meta.error.reason);
+        dashboard.error = meta.error.reason;
         dashboard.count = '';
+        return Promise.resolve();
+      } else if (_.contains(Object.keys(meta), 'error') && meta.error.message) {
+        //notify.error('Error: ' + meta.error.message);
+        dashboard.error = meta.error.message;
+        dashboard.count = '';
+        return Promise.resolve();
       }
       dashboard.isPruned = isJoinPruned(meta);
       dashboard.dirty = dirty;
@@ -227,9 +235,8 @@ uiModules
                   queries: [],
                   indices: [],
                   indexPattern: null,
-                  error: true
+                  error: error
                 });
-
               } else {
                 const index = results[dashboardId].index;
                 const filters = results[dashboardId].filters;
@@ -312,6 +319,14 @@ uiModules
 
               _clearAllMeta(d);
 
+              // if there was an error in metadata do not even try to fetch the counts
+              if (foundDashboardMetadata.error) {
+                self._dashboardMetadataCallback(d, { error: foundDashboardMetadata.error }).then(() => {
+                  self.emit('dashboardsMetadataUpdated', [d.id]);
+                });
+                return;
+              }
+
               metaDefinitions.push({
                 definition: {
                   id: foundDashboardMetadata.dashboardId,
@@ -319,7 +334,9 @@ uiModules
                 },
                 callback: function (error, meta) {
                   if (error) {
-                    notify.error('Could not update metadata for dashboard ' + d.id, error);
+                    self._dashboardMetadataCallback(d, { error: error }).then(() => {
+                      self.emit('dashboardsMetadataUpdated', [d.id]);
+                    });
                     return;
                   }
                   self._dashboardMetadataCallback(d, meta,

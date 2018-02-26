@@ -13,9 +13,12 @@ import 'ui/kibi/meta/kibi_meta';
 // kibi: end
 
 uiRoutes
-.addSetupWork($injector => {
-  if ($injector.has('kibiState')) {
-    $injector.get('dashboardGroups').init();
+.addSetupWork(function loadDasboardGroups($injector, $location) {
+  // kibi: if it is kibana app then initialize this service
+  if($location.absUrl().includes('app/kibana')) {
+    if ($injector.has('kibiState')) {
+      $injector.get('dashboardGroups').init();
+    }
   }
 });
 

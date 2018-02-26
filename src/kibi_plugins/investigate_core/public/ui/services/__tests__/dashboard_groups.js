@@ -876,11 +876,13 @@ describe('Kibi Services', function () {
 
       it('dashboard exist and it references an unknown saved search', function () {
 
+        // dashboard dashboardX refers to non existing saved searcvh
+        // dashboard time-testing-4 refers to existing saved searcvh
         return dashboardGroups._getDashboardsMetadata([ 'dashboardX', 'time-testing-4' ])
         .then(function (metas) {
           expect(metas.length).to.equal(2);
 
-          let meta = metas[0];
+          let meta = _.find(metas, meta => meta.dashboardId === 'time-testing-4');
           let expectedQuery =
             '{"index":["time-testing-4"],"ignore_unavailable": true}\n' +
             '{"query":{"bool":{"must":[{"query_string":{"query":"*","analyze_wildcard":true}},{},' +
@@ -896,22 +898,14 @@ describe('Kibi Services', function () {
           expect(queryParts[0]).to.eql(expectedQueryParts[0]);
           expect(fixTime(queryParts[1])).to.eql(fixTime(expectedQueryParts[1]));
 
-          meta = metas[1];
-          expectedQuery =
-            '{"index":["time-testing-4"],"ignore_unavailable": true}\n' +
-            '{"query":{"bool":{"must":[],"must_not":[]}},"size":0}\n';
-          expectedQueryParts = expectedQuery.split('\n');
-          queryParts = meta.query.split('\n');
 
+          meta = _.find(metas, meta => meta.dashboardId === 'dashboardX');
           expect(meta.dashboardId).to.equal('dashboardX');
-          expect(meta.indexPattern).to.equal(undefined);
-          // TODO: why this one is returned here ?? default one ??
-          // https://github.com/sirensolutions/kibi-internal/issues/3739
-          expect(meta.indices).to.eql(['time-testing-4']);
-          expect(meta.filters).to.eql(undefined);
-          expect(meta.queries).to.eql(undefined);
-          expect(queryParts[0]).to.eql(expectedQueryParts[0]);
-          expect(queryParts[1]).to.eql(expectedQueryParts[1]);
+          expect(meta.indexPattern).to.equal(null);
+          expect(meta.indices).to.eql([]);
+          expect(meta.filters).to.eql([]);
+          expect(meta.queries).to.eql([]);
+          expect(meta.query).to.equal(undefined);
 
           expect(Notifier.prototype._notifs).to.have.length(1);
           expect(Notifier.prototype._notifs[0].type).to.be('warning');
@@ -927,9 +921,9 @@ describe('Kibi Services', function () {
 
           expect(metas.length).to.equal(2);
 
-          let meta = metas[0];
+          let meta = _.find(metas, meta => meta.dashboardId === 'search-ste');
 
-          expect(meta.error).to.equal(true);
+          expect(meta.error.message).to.equal('Could not find object with id: search-ste');
           expect(meta.dashboardId).to.equal('search-ste');
           expect(meta.indexPattern).to.equal(null);
           expect(meta.indices).to.eql([]);
@@ -937,7 +931,7 @@ describe('Kibi Services', function () {
           expect(meta.queries).to.eql([]);
           expect(meta.query).to.eql(undefined);
 
-          meta = metas[1];
+          meta = _.find(metas, meta => meta.dashboardId === 'time-testing-4');
           const expectedQuery =
             '{"index":["time-testing-4"],"ignore_unavailable": true}\n' +
             '{"query":{"bool":{"must":[{"query_string":{"query":"*","analyze_wildcard":true}},{},' +

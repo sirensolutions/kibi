@@ -13,11 +13,16 @@ export function DashboardHelperFactory($timeout, kbnUrl, kibiState, savedDashboa
     .then((savedDashboardsRes) => {
       const dashboards = _.filter(savedDashboardsRes.hits, (hit) => !!hit.savedSearchId);
       const promisses = _.map(dashboards, (dash) => {
-        return savedSearches.get(dash.savedSearchId);
+        return savedSearches.get(dash.savedSearchId).catch(err => {
+          return {
+            cannotRetrieved: true,
+            id: dash.savedSearchId
+          };
+        });
       });
       return Promise.all(promisses).then((savedSearchesRes) => {
         _.each(savedSearchesRes, (savedSearch) => {
-          if (!savedSearch.searchSource.index().isTimeBased()) {
+          if (savedSearch.cannotRetrieved  || !savedSearch.searchSource.index().isTimeBased()) {
             _.remove(dashboards, 'savedSearchId', savedSearch.id);
           }
         });

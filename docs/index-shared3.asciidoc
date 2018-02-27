@@ -8,3 +8,5 @@ include::visualize.asciidoc[]
 include::dashboard.asciidoc[]
 
 include::timelion.asciidoc[]
+
+include::sentinl.asciidoc[]

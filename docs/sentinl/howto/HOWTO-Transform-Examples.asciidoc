@@ -1,0 +1,34 @@
+[[sentinl-transform]]
+=== Transform
+
+[[siren-alert-nuggets]]
+SIREN ALERT Nuggets
+^^^^^^^^^^^^^^^^^^^
+
+Random nuggets for recurring challenges
+
+[[dot-field-selection-transform-for-percentile-objects]]
+Dot Field Selection Transform for Percentile objects
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+[source,json]
+----
+"transform": {
+  "script": {
+    "script": "payload = JSON.parse(JSON.stringify(payload).split('95.0').join('95'));"
+  }
+}
+----
+
+[[bucket-cloning]]
+Bucket Cloning
+^^^^^^^^^^^^^^
+
+[source,json]
+----
+"transform": {
+  "script": {
+    "script": "payload.aggregations.metrics.buckets.forEach(function(e){ e.ninetieth_surprise.value = e.ninetieth_surprise.values['95.0'] })"
+  }
+}
+----

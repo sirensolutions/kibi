@@ -1,0 +1,53 @@
+The SIREN ALERT infrastructure is integrated in the Siren Platform but can also be used standalone.
+
+When used standalone, it is called Sentinl.
+
+In this section we will refer to Sentinl as a synonym of SIREN ALERT.
+
+[[kibana-alerting-reporting]]
+== Alerting & Reporting
+
+____________________________
+Watching your data, 24/7/365
+____________________________
+
+'''''
+
+*SIREN ALERT* extends _Siren Investigate and Kibana_ with *Alerting* and
+*Reporting* functionality to monitor, notify and report on data series
+changes using standard queries, programmable validators and a variety of
+configurable actions - Think of it as a free an independent
+https://www.elastic.co/guide/en/watcher/current/introduction.html["Watcher"]
+and https://www.elastic.co/products/reporting["Reporting"] alternative,
+further extended and expanded by the unique Siren Investigate features
+
+*SIREN ALERT* is also designed to simplify the process of creating and
+managing alerts and reports in Siren Investigate/Kibana via its
+integrated App and Spy integration.
+
+'''''
+
+[[new-to-siren-alert-and-watchers]]
+== New to SIREN ALERT and Watchers?
+
+No Fear! Check out our SIREN ALERT
+https://www.slideshare.net/secret/gobTp9S3omqn9a[presentation] to get
+started off right!
+
+include::Introduction.asciidoc[]
+
+include::Installation.asciidoc[]
+
+include::Config-Example.asciidoc[]
+
+include::Tutorial.asciidoc[]
+
+include::Watcher.asciidoc[]
+
+include::Authentication.asciidoc[]
+
+include::Howto.asciidoc[]
+
+include::Troubleshoot.asciidoc[]
+
+include::FAQ.asciidoc[]

@@ -1,0 +1,13 @@
+[[manual]]
+=== Manual in Dashboard
+
+In order to display *SIREN ALERT* alarms in Siren Investigate/Kibana:
+
+* Switch to `Discover` tab
+* Create and Save a search table for `watcher_alarms-*` with any desired
+column
+* Switch to `Dashboard` tab
+* Add a new Search Widget using the `Search` tab and selecting the saved
+query
+
+'''''

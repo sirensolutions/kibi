@@ -1,0 +1,38 @@
+[[using-the-wizard]]
+=== Wizard
+
+SIREN ALERT provides a built-in wizard to assist forming proper watchers
+using a _step-by-step_ sequence
+
+[[step-1-new-watcher]]
+Step 1: New Watcher
+^^^^^^^^^^^^^^^^^^^
+
+The first step is to give our Watcher a name and choose an execution
+frequency
+
+Step 2: Input Query
+^^^^^^^^^^^^^^^^^^^
+
+The input query is the focal part of
+our watcher. Make sure time-range fields are dynamic.
+
+Step 3: Condition
+^^^^^^^^^^^^^^^^^
+
+Condition is used as a gate to validate if the results
+received back are worth processing.
+
+Step 4: Transform
+^^^^^^^^^^^^^^^^^
+Our data might need adjustments or post processing. Process our payload using a
+javascript expression/script.
+
+Step 5: Actions
+^^^^^^^^^^^^^^^^
+Our data is ready! Let's form a notification using the mustache templating language
+
+Step 6: Expert Mode
+^^^^^^^^^^^^^^^^^^^
+
+Here's our fully formed SIREN ALERT JSON watcher in its naked beauty...

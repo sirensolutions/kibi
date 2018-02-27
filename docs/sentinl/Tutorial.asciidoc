@@ -1,0 +1,139 @@
+[[proof-of-concept-beginners-tutorial]]
+== Tutorial
+
+This tutorial will illustrate a working example of *SIREN ALERT* for
+alerting
+
+_WARNING: This guide is a work-in-progress and should not be used as-is
+in production!_
+
+[[requirements]]
+=== Requirements
+
+* Elasticsearch + Siren Investigate or Kibana 5.x
+* shell + curl to execute commands
+
+[[setup]]
+=== Setup
+
+Before starting, download and install the latest dev version of the
+plugin using the README instructions.
+
+[[dataset]]
+=== Dataset
+
+To illustrate the logic and elements involved with _SIREN ALERT_ we will
+generate some random data and insert it to Elasticsearch. Our sample
+JSON object will report a UTC `@timestamp` and `mos` value per each
+interval:
+
+The following BASH script will produce our entries for a realistic
+example:
+
+....
+#!/bin/bash
+INDEX=`date +"%Y.%m.%d"`
+SERVER="http://127.0.0.1:9200/mos-$INDEX/mos/"
+
+echo "Press [CTRL+C] to stop.."
+while :
+do
+    header="Content-Type: application/json"
+    timestamp=`TZ=UTC date +"%Y-%m-%dT%T.%3N"`
+    mos=$(( ( RANDOM % 5 )  + 1 ))
+    mystring="{\"mos\":${mos},\"@timestamp\":\"${timestamp}\"}"
+    echo $mystring;
+    curl -sS -i -XPOST -H "$header" -d "$mystring" "$SERVER"
+    sleep 5
+done
+....
+
+* Save the file as `elasticgen.sh` and execute it for a few minutes
+
+[[watcher-rule]]
+=== Watcher rule
+
+To illustrate the trigger logic, we will create an alert for an
+aggregation against the data we just created.
+
+The basic SIREN ALERT example will use simple parameters:
+
+* Run each 60 seconds
+* Target the daily mos-* index with query aggregation
+* Trip condition when aggregations.avg.value < 3
+* Email action with details
+
+....
+curl -XPUT http://127.0.0.1:9200/watcher/watch/mos -d'
+{
+  "trigger": {
+    "schedule" : { "later" : "every 1 minute"  }
+  },
+  "input" : {
+    "search" : {
+      "request" : {
+        "indices" : [ "<mos-{now/d}>", "<mos-{now/d-1d}>"  ],
+        "body" : {
+          "query" : {
+            "filtered" : {
+              "query": {
+                "query_string": {
+                  "query": "mos:*",
+                  "analyze_wildcard": true
+                }
+              },
+              "filter" : { "range" : { "@timestamp" : { "from" : "now-5m"  } } }
+            }
+          },
+           "aggs": {
+             "avg": {
+               "avg": {
+                 "field": "mos"
+               }
+             }
+           }
+        }
+      }
+    }
+  },
+  "condition" : {
+    "script" : {
+      "script" : "payload.aggregations.avg.value < 3"
+    }
+  },
+  "transform" : {},
+  "actions" : {
+    "email_admin" : {
+    "throttle_period" : "15m",
+    "email" : {
+      "to" : "mos@qxip.net",
+      "from" : "sirenalert@qxip.net",
+      "subject" : "Low MOS Detected: {{payload.aggregations.avg.value}} ",
+      "priority" : "high",
+      "body" : "Low MOS Detected:\n {{payload.aggregations.avg.value}} average with {{payload.aggregations.count.value}} measurements in 5 minutes"
+    }
+    }
+  }
+}'
+....
+
+[[extending-logic]]
+=== Extending Logic
+
+The basic Watcher can be extended and improved following the same logic
+used with the stock _Watcher, for example by using `transform` to insert
+detections back in ES. An interesting set of examples is available
+https://www.elastic.co/blog/implementing-a-statistical-anomaly-detector-part-3[here]
+
+[[alarm-triggering]]
+=== Alarm Triggering
+
+SIREN ALERT will automatically fetch and schedule jobs, executing the
+watcher queries according to the `trigger.schedule` parameter,
+validating their results according to the provided `condition.script`
+
+[[check-output]]
+=== Check output
+
+Assuming all data and scripts are correctly executed, you should start
+seeing output in SIREN ALERT `Alarms` tab and in Elasticsearch `watcher_alarms-today:day:time` index.

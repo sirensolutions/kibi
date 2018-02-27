@@ -1,0 +1,20 @@
+== HOWTO
+include::howto/HOWTO-Alerts-in-Dashboard.asciidoc[]
+
+include::howto/HOWTO-Alerts-in-Nagios-NRDP.asciidoc[]
+
+include::howto/HOWTO-Create-Reports.asciidoc[]
+
+include::howto/HOWTO-Form-Watchers-from-SPY-Panel.asciidoc[]
+
+include::howto/HOWTO-Kibana-Annotations.asciidoc[]
+
+include::howto/HOWTO-Sentinl-and-SearchGuard.asciidoc[]
+
+include::howto/HOWTO-Transform-Examples.asciidoc[]
+
+include::howto/HOWTO-Anomaly-Detection.asciidoc[]
+
+include::howto/HOWTO-Statistical-Anomaly-Detector.asciidoc[]
+
+include::howto/HOWTO-Outlier-Detection.asciidoc[]

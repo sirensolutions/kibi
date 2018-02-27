@@ -1,0 +1,3 @@
+[[sentinl]]
+= Siren Alert
+include::sentinl/index.asciidoc[]

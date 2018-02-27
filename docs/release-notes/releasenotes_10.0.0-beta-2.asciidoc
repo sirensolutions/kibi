@@ -1,0 +1,78 @@
+== Siren Investigate 10.0.0-beta-2
+
+[float]
+=== Siren Investigate Changes
+
+Added:
+
+* Now the system offers to automatically add a saved search when creating an index pattern.
+* After index creation, the user is now taken to the new index's edit page for modification, if needed.
+* EID buttons now reflect changes to counts in the data e.g. after applying a filter.
+* Added a user confirmation to the CLI upgrade procedure to check if the user has backed up their `.siren` index.
+* Investigate now handles empty index patterns more gracefully.
+* The relational graph in the `Indexes and Relations` section is moved to a tab.
+* Total Duration time of a request is now displayed on the Spy Panel.
+
+Fixed: 
+
+* Text filter to search relations and edit relational buttons now responds to text input.
+* Now the date is reset when the user cancels an edit in a saved dashboard.
+* Relations with no destination other than the EID are not listed in the automatic relational buttons.
+* Fixed a crash when filtering visualisations.
+* Added support for `siren:timePrecision` back in.
+* URL shortener in Dashboard Share panel now generating shortened URLs correctly.
+* Fixed intermittent error where dashboard ID was not passed correctly to relational buttons.
+* Allow creation of index pattern directly from create virtual index page without manually editing index pattern name.
+* Fixed bug in saving dashboard in Saved Objects after making no changes.
+* Spy panel now only listed permitted modes.
+* Users trying to access dashboards or index patterns without ACL permissions are shown more graceful errors.
+* The dashboard sidebar and relational buttons now show warning symbols when attempting to get counts from un-authorized dashboards.
+* Fixed bug when 500 error returned if attempting to edit an index pattern without permissions.
+* Config file validation check now runs when the `upgrade` CLI command is run.
+* Config file migration now accepts custom config files/folders.
+
+* *Auto dashboard generation*
+**  Visualisations created with Generate Dashboard weren't associated to the saved search, now they are.
+**  Storing the time in the dashboard now causes the generated visualizations to fit the target time interval.
+**  Fixes issues with sidebar dash counts after a generation, like neverending spinners.
+**  Added a report for Generate, that allows users to change visualization titles.
+**  Both Autoselect and Generate reports allow sorting by column and selection of output items.
+**  Improved filtering of common undesired distributions in Autoselect.
+**  More descriptive visualization names in Generate.
+
+* Minor UI fixes:
+    ** Dashboard sidebar click and drag functionality improved.
+    ** Siren Investigate logo quality improved.
+    ** Sidebar scrollbar colour was changed to match theme.
+    ** Position of `Home` tooltip on logo was fixed.
+
+==== Plugins
+
+===== Graph Browser
+
+* Graph browser functions have moved into a sidebar which allow listing, display and manipulation of the data and filters in tabular format.
+* Select edge script now works when relation count = 1.
+* Graph browser now handles nested index patterns and multiple entities matching an index pattern.
+* A button is added to show inverse relations on the graph.
+* Changes in the graph now persist when navigating to other tabs.
+* Arrows are added to the relations for Entities unless the labels for both relationships are the same.
+
+===== Access Control
+
+* Fixed a bug when deleting a duplicated rule has no effect.
+* Now an error shows on the login page if there is no connection to Elasticsearch.
+
+===== License
+
+* The check for a valid license is now cached for an hour, leading to improved performance when navigating between routes.
+* If a user without permissions attempts to upload a license then an error is shown.
+
+===== Gremlin Server
+
+* The gremlin server will now shutdown if the connection to Elasticsearch is not available.
+
+===== Scatterplot
+
+* The text in the legend no longer overflows the legend box.
+* The color picker is now back beside the hex colour input box.
+

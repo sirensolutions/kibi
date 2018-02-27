@@ -23,7 +23,9 @@ module.exports = function () {
         'BSD-3-Clause',
         'BSD 3-Clause',
         'BSD-like',
+        'CC0-1.0', // kibi: license for spdx-license-ids
         'CC-BY',
+        'CC-BY-3.0', // kibi: license for spdx-exceptions
         'CC-BY-4.0',
         'ISC',
         'MIT',
@@ -61,9 +63,7 @@ module.exports = function () {
         'jison@0.4.13': ['MIT'],
         'nomnom@1.5.2': ['MIT'],
         'jsonify@0.0.0': ['MIT'],
-        'js-base64@2.3.1': ['BSD-3-Clause'],
-        'spdx-exceptions@2.1.0': ['CC-BY-3.0'],
-        'spdx-license-ids@2.0.1': ['CC0-1.0']
+        'js-base64@2.3.1': ['BSD-3-Clause']
         // kibi: end
       }
     }

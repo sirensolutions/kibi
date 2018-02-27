@@ -23,7 +23,9 @@ module.exports = function () {
         'BSD-3-Clause',
         'BSD 3-Clause',
         'BSD-like',
+        'CC0-1.0', // kibi: license for spdx-license-ids
         'CC-BY',
+        'CC-BY-3.0', // kibi: license for spdx-exceptions
         'CC-BY-4.0',
         'ISC',
         'MIT',

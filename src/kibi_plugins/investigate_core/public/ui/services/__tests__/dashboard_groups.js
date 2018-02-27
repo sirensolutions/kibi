@@ -883,12 +883,12 @@ describe('Kibi Services', function () {
           expect(metas.length).to.equal(2);
 
           let meta = _.find(metas, meta => meta.dashboardId === 'time-testing-4');
-          let expectedQuery =
+          const expectedQuery =
             '{"index":["time-testing-4"],"ignore_unavailable": true}\n' +
             '{"query":{"bool":{"must":[{"query_string":{"query":"*","analyze_wildcard":true}},{},' +
             '{"range":{"date":{"gte":1508140856342,"lte":1508141756343,"format":"epoch_millis"}}}],"must_not":[]}},"size":0}\n';
-          let expectedQueryParts = expectedQuery.split('\n');
-          let queryParts = meta.query.split('\n');
+          const expectedQueryParts = expectedQuery.split('\n');
+          const queryParts = meta.query.split('\n');
 
           expect(meta.dashboardId).to.equal('time-testing-4');
           expect(meta.indexPattern).to.equal('time-testing-4');

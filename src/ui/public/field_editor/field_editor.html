@@ -3,7 +3,7 @@
     <p>
       <i class="fa fa-danger text-danger"></i>
       <strong>Scripting disabled:</strong>
-      All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Kibana.
+      All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Siren Investigate.
     </p>
   </div>
   <div ng-if="editor.creating" class="form-group">
@@ -33,7 +33,7 @@
       </h4>
       <p>
         <span class="text-capitalize">{{editor.field.lang}}</span> is deprecated and support will be removed in the
-        next major version of Kibana and Elasticsearch. We recommend using
+        next major version of Siren Investigate and Elasticsearch. We recommend using
         <a target="_window" ng-href="{{editor.docLinks.painless}}">Painless <i class="fa-link fa"></i></a>
         for new scripted fields.
       </p>
@@ -156,7 +156,7 @@
         </p>
 
         <p>
-          Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!
+          Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Siren Investigate to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!
         </p>
       </div>
     </div>
@@ -168,7 +168,7 @@
         </h4>
 
         <p>
-          By default, Kibana scripted fields use <a target="_window" ng-href="{{editor.docLinks.painless}}">Painless <i class="fa-link fa"></i></a>, a simple and secure scripting language designed specifically for use with Elasticsearch.  To access values in the document use the following format:
+          By default, Siren Investigate scripted fields use <a target="_window" ng-href="{{editor.docLinks.painless}}">Painless <i class="fa-link fa"></i></a>, a simple and secure scripting language designed specifically for use with Elasticsearch.  To access values in the document use the following format:
         </p>
 
         <p><code>doc['some_field'].value</code></p>
@@ -178,11 +178,11 @@
         </p>
 
         <p>
-          Kibana currently imposes one special limitation on the painless scripts you write. They cannot contain named functions.
+          Siren Investigate currently imposes one special limitation on the painless scripts you write. They cannot contain named functions.
         </p>
 
         <p>
-          Coming from an older version of Kibana? The <a target="_window" ng-href="{{editor.docLinks.luceneExpressions}}">Lucene Expressions <i class="fa-link fa"></i></a> you know and love are still available. Lucene expressions are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations.
+          Coming from an older version of Siren Investigate? The <a target="_window" ng-href="{{editor.docLinks.luceneExpressions}}">Lucene Expressions <i class="fa-link fa"></i></a> you know and love are still available. Lucene expressions are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations.
         </p>
 
         <p>

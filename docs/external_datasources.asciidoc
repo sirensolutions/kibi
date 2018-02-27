@@ -1,60 +1,36 @@
 [[external_datasources]]
-= External Datasources
+= Legacy REST datasources
 
-{kibi-name} provides visualizations and aggregations to integrate data from external
-datasources. This section explains how to setup datasources and configure
-<<datasource-queries, queries>> and <<datasource-templates, query templates>>.
+{kibi-name} provides visualizations and aggregations to integrate data from
+REST APIs. This section explains how to configure <<datasource-queries,
+queries>> and <<datasource-templates, query templates>>.
 
 [float]
 == Configuration
 
-To create a new external datasource navigate to "Settings/Datasources"
-First fill the datasource title and name then pick one of the types
-{kibi-name} supports:
+To create a new external datasource navigate to "Settings/Datasources".
 
-* REST
-* SQLite
-* MySQL
-* PostgreSQL
+First fill the datasource title and name then select `REST`, then
+set the following parameters:
 
-After selecting the datasource type, additional parameters will appear.
-Below is a list of additional mandatory parameters for each datasource type:
+* `timeout`: connection timeout in milliseconds.
+* `cache_enabled`: enable server side cache for this datasource.
+* `max_age`: the max age of an object in the cache, in milliseconds.
+* `url`: the URL of the REST API.
+* `response_type`: API results format, currently {kibi-name} supports only *JSON*.
+* `username`: if set, the username to specify in HTTP Basic credentials.
+* `password`: optional password to specify in HTTP Basic credentials if a username is set.
+* `auth_token`: optional token to set in Token Authentication headers.
 
-*Common Parameters*
-
-* timeout - connection timeout in milliseconds
-* cache_enabled - enable server side cache for this datasource
-* max_age - the max age of an object in the cache, in milliseconds
-
-To control the maximum number of query results kept in cache, set the `kibi_core.datasource_cache_size` parameter in siren.yml.
-
-[NOTE]
-A {kibi-name} restart is required to apply changes to siren.yml configuration file.
-
-*REST*
-
-* url - an URL of rest API endpoint
-* response_type - API results format, currently {kibi-name} supports only *JSON*
-* username (optional) - username with access to the API
-* password (optional) - corresponding password
-* auth_token (optional) - token used in Token Authentication
-
-*SQLite*
-
-* db_file_path - path to database file
-
-*MySQL, PostgreSQL*
-
-* host - hostname
-* dbname - database name
-* username - username with read access to the database
-* password - corresponding password
+To control the maximum number of query results kept in cache, set the
+`investigate_core.datasource_cache_size` parameter in `investigate.yml` and
+restart {kibi-name}.
 
 [float]
 == Parameters encryption
 
 Sensitive datasource parameters like passwords are encrypted before being
-stored in the `.siren` index.
+stored in the backend.
 
 Before creating datasources containing sensitive parameters, make sure to set
 a custom encryption key by running the `replace_encryption_key` command:
@@ -64,15 +40,15 @@ a custom encryption key by running the `replace_encryption_key` command:
 bin/investigate replace_encryption_key [options] <current_key> <new_key> <new_cipher>
 ----
 
-* **<current_key>** a base64 encoded string containing the current encryption key.
-* **<new_key>** a base64 encoded string containing the new encryption key.
-* **<new_cipher>** the cipher algorithm to use (currently only AES-GCM is supported).
+* `current_key`: a base64 encoded string containing the current encryption key.
+* `new_key`: a base64 encoded string containing the new encryption key.
+* `new_cipher`: the cipher algorithm to use (currently only AES-GCM is supported).
 
-The current encryption key can be read from the `siren.yml` file in the
+The current encryption key can be read from the `investigate.yml` file in the
 `datasource_encryption_key` parameter.
 
 Keys can have a length of 16, 24 or 32 bytes; a quick way to encode a plaintext
-string to base64 is to use the `base64` utility from the coreutils package:
+string to base64 is to use the `base64` utility from the `coreutils` package:
 
 [source,bash]
 ----
@@ -87,20 +63,21 @@ running the {kibi-name} process.
 [[entity_selection]]
 == Datasource entity selection
 
-Selected Entities can be used to as source of parameters for queries
-Each selected entity is uniquely identified by an URI:
+Selected Entities can be used as source of parameters for queries. Each
+selected entity is uniquely identified by an URI:
 
-- `INDEX/TYPE/ID` where INDEX is an index pattern, TYPE is a type of a document, and ID is document ID
+- `INDEX/TYPE/ID` where INDEX is an index pattern, TYPE is a type of a
+  document, and ID is document ID.
 
 As explained in the following sections, queries on external datasources can
-extract variables from the selected entity URI; in order to allow the user
-to select an entity, you must add an <<enhanced_search_results>> visualization
-to a dashboard and configure at least one <<click-handlers, click handler>>
-to select an entity.
+extract variables from the selected entity URI; in order to allow the user to
+select an entity, you must add an <<enhanced_search_results>> visualization to
+a dashboard and configure at least one <<click-handlers, click handler>> to
+select an entity.
 
-Once the visualization is configured, clicking on the cell will display
-a purple box in the filter bar, and the variables stored in the entity URI
-will be available to queries and query templates.
+Once the visualization is configured, clicking on the cell will display a
+purple box in the filter bar, and the variables stored in the entity URI will
+be available to queries and query templates.
 
 The screenshot below shows the effect of clicking on a cell configured with an
 entity selection handler; after selecting an entity, the _Company Info_
@@ -127,15 +104,15 @@ To create a new query, click to the _"Settings/Queries"_ tab.
 
 You need then to set the following fields to define a query:
 
-* _Title_: the title of the query.
-* _Datasource_: the name of a configured datasource.
+* _Title_: the title of the query. 
+* _Datasource_: the name of a configured datasource.  
 * _Results query_: the query declaration.
 
 You may also set a description for the query and one or more tags.
 
-Below is an example configuration of a query on a SQL database
-called *Top 50 companies (HR count)* that returns the Top 50 companies by
-number of employees in a table called `company`.
+Below is an example configuration of a query on a SQL database called *Top 50
+companies (HR count)* that returns the Top 50 companies by number of employees
+in a table called `company`.
 
 image::images/external_sources/queries_editor_sql1.png["Configuration of a SQL endpoint",align="center"]
 

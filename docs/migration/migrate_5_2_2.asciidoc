@@ -4,10 +4,9 @@
 [float]
 === Upgrading Elasticsearch
 
-Kibi is compatible with Elasticsearch {elasticsearch-version}; this section
-provides a summary of the upgrade procedure described at
-{elastic-ref}/setup-upgrade.html[Upgrading Elasticsearch] with Kibi and Search
-Guard specific notes.
+This section provides a summary of the upgrade procedure described at
+{elastic-ref}setup-upgrade.html[Upgrading Elasticsearch] with {kibi-name} and
+Search Guard specific notes.
 
 It is also recommended to read the
 {elastic-ref}/breaking-changes-5.0.html[Breaking Changes in 5.0] section of the
@@ -16,9 +15,9 @@ Elasticearch documentation.
 [float]
 ==== Pre-requisites
 
-It is recommended to have a backup of the indices in the cluster;
-if running a production cluster, you will need to request an updated license
-for Siren Federate.
+It is recommended to have a snapshot of the indices in the cluster; if running
+a production cluster, you will need to request an updated license for Siren
+Federate.
 
 [float]
 ===== Search Guard configuration backup
@@ -176,6 +175,7 @@ plugins can be removed by using the `elasticsearch-plugin` command, e.g.:
 
 If installed, the following plugins must be removed:
 
+- `siren-vanguard`
 - `siren-join`
 - `license-siren`
 - `kopf`
@@ -214,7 +214,7 @@ The plugin can be installed from Maven Central using `elasticsearch-plugin`:
 In addition, the compatible version of any commercial Search Guard add-on will
 have to be downloaded and copied to the `plugins/search-guard-5` directory; the
 following list provides links to the download page of all the add-ons commonly
-used in Kibi instances:
+used in {kibi-name} instances:
 
 - {searchguard-management-api-ref}[REST Management API] 
 - {searchguard-dlsfls-ref}[Document/Field Level security module]
@@ -359,15 +359,15 @@ $ curl -uadmin:password --cacert ca.pem https://elasticsearch.local:9200/_cat/re
 ----
 
 Once the cluster has recovered, you will need to modify the Search Guard
-configuration to adjust Kibi specific permissions as described in the next
+configuration to adjust Investigate specific permissions as described in the next
 section.
 
 [float]
 === Search Guard configuration changes
 
-This section describes all the Kibi specific changes required to the Search
-Guard configuration files; it is advised to backup the files in the retrieved
-configuration directory before making changes.
+This section describes all the {kibi-name} specific changes required to the
+Search Guard configuration files; it is advised to backup the files in the
+retrieved configuration directory before making changes.
 
 Once the files have been modified, the updated configuration can
 be loaded to the cluster using `sgadmin`.
@@ -458,7 +458,7 @@ INDEX:
 
 ----
 
-Add the `CLUSTER_COMPOSITE_OPS_RO` and `CLUSTER_COMPOSITE_OPS` roles:
+Add or update the `CLUSTER_COMPOSITE_OPS_RO` and `CLUSTER_COMPOSITE_OPS` roles as follows:
 
 [source,yaml]
 ----
@@ -478,44 +478,54 @@ CLUSTER_COMPOSITE_OPS:
 
 Remove the `KIBI_MSEARCH` role.
 
-Add the `KIBI_COMPOSITE` role:
+Add/update the `SIREN_COMPOSITE` role with the following definition:
+
+[source,yaml]
+----
+SIREN_COMPOSITE:
+  - "indices:siren/mplan*"
+----
+
+If present, replace the `KIBI_COMPOSITE` role with the following definition for
+backwards compatibility.
 
 [source,yaml]
 ----
 KIBI_COMPOSITE:
-  - "indices:siren/mplan*"
+  - SIREN_COMPOSITE
 ----
 
-Replace `KIBI_CLUSTER`, `KIBI_READONLY` and `KIBI_READWRITE` with the following
-definitions:
+Add the `SIREN_CLUSTER`, `SIREN_READONLY` and `SIREN_READWRITE` roles with the
+following definitions:
 
 [source,yaml]
 ----
-KIBI_CLUSTER:
-  - "indices:data/read/scroll"
-  - "cluster:internal/data/transfer/*"
+SIREN_CLUSTER:
+  - "cluster:data/read/lock/create"
+  - "cluster:siren/internal*"
+  - "cluster:admin/plugin/siren/license/get"
+  - "indices:data/read/scroll*"
   - "indices:data/read/msearch*"
   - "indices:siren/mplan*"
-  - "cluster:admin/plugin/siren/license/get"
   - CLUSTER_COMPOSITE_OPS_RO
 
-KIBI_READONLY:
+SIREN_READONLY:
   - "indices:data/read/field_stats*"
   - "indices:data/read/field_caps*"
   - "indices:data/read/get*"
   - "indices:data/read/mget*"
   - "indices:data/read/search*"
-  - "indices:siren/mplan"
-  - "indices:siren/plan"
-  - "indices:siren/task/search"
+  - "indices:siren/mplan*"
+  - "indices:siren/plan*"
+  - "indices:admin/get*"
   - "indices:admin/mappings/get*"
   - "indices:admin/mappings/fields/get*"
   - "indices:admin/validate/query*"
-  - "indices:admin/get*"
   - "indices:admin/version/get*"
-  - KIBI_COMPOSITE
+  - "indices:data/siren/connector/*"
+  - SIREN_COMPOSITE
 
-KIBI_READWRITE:
+SIREN_READWRITE:
   - "indices:admin/exists*"
   - "indices:admin/mapping/put*"
   - "indices:admin/refresh*"
@@ -523,7 +533,22 @@ KIBI_READWRITE:
   - "indices:data/write/index*"
   - "indices:data/write/update*"
   - "indices:data/write/bulk*"
-  - KIBI_READONLY
+  - SIREN_READONLY
+----
+
+If present, replace `KIBI_CLUSTER`, `KIBI_READONLY` and `KIBI_READWRITE` with
+the following definitions for backwards compatibility.
+
+[source,yaml]
+----
+KIBI_CLUSTER:
+  - SIREN_CLUSTER
+
+KIBI_READONLY:
+  - SIREN_READONLY
+
+KIBI_READWRITE:
+  - SIREN_READWRITE
 ----
 
 If you defined additional action groups, you will need to verify that the
@@ -536,12 +561,11 @@ permissions work as expected in Search Guard 5.
 ===== kibiserver
 
 Replace the `kibiserver` role with the following; **make sure to set the
-correct names for the main kibi (`.kibi` by default) and access control
-(`.kibiaccess` by default) indices if using a custom configuration**.
+correct names for the main {kibi-name} (`.siren` by default) and access control
+(`.sirenaccess` by default) indices if using a custom configuration**.
 
 [source,yaml]
 ----
-# Permissions for the Kibi server process.
 kibiserver:
   cluster:
       - cluster:monitor/nodes/info
@@ -549,7 +573,7 @@ kibiserver:
       - cluster:monitor/main
       - cluster:monitor/state
       - cluster:monitor/nodes/stats
-      - KIBI_CLUSTER
+      - SIREN_CLUSTER
       - CLUSTER_COMPOSITE_OPS
   indices:
     '*':
@@ -564,10 +588,11 @@ kibiserver:
 ----
 
 [float]
-===== sentinl
+===== Siren Alert
 
-Sentinl is automatically enabled in Kibi 5; if you do not need alerting it
-is possible to disable the plugin by putting the following in `kibi.yml`:
+Siren Alert (previously known as Sentinl) is automatically enabled in
+{kibi-name}; if you do not need alerting, it is possible to disable the plugin
+by putting the following in `investigate.yml`:
 
 [source,yaml]
 ----
@@ -576,29 +601,26 @@ sentinl:
     false
 ----
 
-If you were previously using Sentinl, replace the `sentinl` role with the
-following; **make sure to set the correct names for watcher and watcher_alarms
-indices if using a custom configuration**.
-
-Replace the `sentinl` role with the following; **make sure to set the correct
-names for watcher and watcher_alarms indices if using a custom configuration**.
+If you want to use the alerting features, check that a user named `sentinl` is
+defined as described in the example below; **make sure to set the correct names
+for watcher and watcher_alarms indices if using a custom configuration**.
 
 [source,yaml]
 ----
-# Permissions for a Sentinl user.
+# Permissions for a Siren Alert / Sentinl user.
 sentinl:
   cluster:
     - "indices:data/write/bulk*"
     - "indices:admin/template/*"
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
   indices:
     'watcher_alarms*':
       '*':
-        - KIBI_READWRITE
+        - SIREN_READWRITE
         - CREATE_INDEX
     '/(watcher|watcher_alarms)/':
       '*':
-        - KIBI_READWRITE
+        - SIREN_READWRITE
         - CREATE_INDEX
 ----
 
@@ -632,15 +654,15 @@ sentinl:
         - KIBI_READONLY
 ----
 
-
 [float]
-===== Kibi user roles
+===== {kibi-name} user roles
 
-In each Kibi user role:
+In each existing user role with access to {kibi-name}:
  
-- replace `KIBI_MSEARCH` with `KIBI_COMPOSITE`.
-- remove the following permission on the Kibi index (`.kibi` by default) from
-  each user role that has it:
+- replace `KIBI_MSEARCH` with `SIREN_COMPOSITE`.
+- replace `KIBI_COMPOSITE` with `SIREN_COMPOSITE`.
+- remove the following permission on the main {kibi-name} index (which was
+  named `.kibi` in previous versions) from each user role that has it:
 
 [source,yaml]
 ----
@@ -650,14 +672,16 @@ In each Kibi user role:
         - "indices:data/read/coordinate-search"
 ----
 
-If you are using the Kibi access control plugin and want to enable ACLs on Kibi
-saved objects (which restricts access to saved objects), ensure that Kibi users
-**do not** have access to the Kibi index (`.kibi` by default), otherwise they
-might be able to peek at saved objects by issuing custom Elasticsearch queries.
+If you are using the {kibi-name} access control plugin and want to enable
+access control rules on saved objects, ensure that {kibi-name} users **do not**
+have access to the {kibi-name} index (which was set to `.kibi` in previous
+releases), otherwise they might be able to peek at saved objects by issuing
+custom Elasticsearch queries.
 
-Access to the `.kibi` index was usually granted by the following lines in
-previous Kibi releases; these can be removed when using ACLs as the .kibi index
-will be accessed only by the `kibiserver` role:
+Access to the {kibi-name} index was usually granted by the following lines in
+previous releases; these must be removed to use access control rules
+effectively as the configuration index will be managed exclusively by the
+`kibiserver` role:
 
 ```
 '?kibi':
@@ -672,8 +696,24 @@ will be accessed only by the `kibiserver` role:
 ```
 
 If there are users with read access to all indices (`*`), they will be able to
-see the Kibi index as well; if you need to hide it, you should replace the
-wildcard with a list of rules for each index.
+search the {kibi-name} index as well; if you need to hide it, you should
+replace the wildcard with an explicit list of indices.
+
+*License management*
+
+To grant a role the permission to upload an {kibi-name} license from the UI,
+ensure that the user has the `cluster:admin/plugin/siren/license/*`
+permission, e.g.:
+
+[source,yaml]
+----
+sirenadmin:
+  cluster:
+    - SIREN_CLUSTER
+    - 'cluster:admin/siren/connector/*'
+    - 'cluster:admin/plugin/siren/license/*'
+  ...
+----
 
 *Monitoring*
 
@@ -683,12 +723,10 @@ and `INDICES_MONITOR` permissions to its role, e.g.:
 
 [source,yaml]
 ----
-# Permissions for a Kibi administrator (read-write access to the .kibi index).
-kibiadmin:
+# Permissions for an administrator
+sirenadmin:
   cluster:
-    - KIBI_CLUSTER
-    - cluster:admin/plugin/siren/license/put
-    - CLUSTER_MONITOR
+    ...
   indices:
     '*':
       '*':
@@ -701,6 +739,11 @@ kibiadmin:
       '*':
         - KIBI_READWRITE
 ----
+
+*JDBC datasources management*
+
+For information on how to setup Search Guard for JDBC datasources support
+see the <<jdbc_datasources>> section after the upgrade.
 
 [float]
 ===== marvel / X-Pack monitoring
@@ -730,7 +773,7 @@ monitoring:
 ----
 
 [float]
-==== Loading the modified configuration
+==== Loading the updated configuration
 
 To load the modified configuration run sgadmin as follows:
 
@@ -771,51 +814,16 @@ Arguments:
 - `p`: Elasticsearch transport port.
 
 [float]
-=== License
+=== {kibi-name}
 
-You will need to upload your license once the cluster is up and running.
-
-==== In Kibi
-To upload the license in Kibi, navigate to the management section.
-
-image::images/management_no-license.jpg[]
-
-This page will show the license has not been installed.
-
-Click on `License` and select `Upload Licence`
+Before upgrading {kibi-name}, make sure to perform the following steps:
  
-image::images/license_page_before_install.jpg[] 
-
-Once you have selected your license and it has been uploaded, the page will show the license details.
-
-image::images/license_page_after_install.jpg[]
-
-==== Via CLI
-To upload the license you can use curl as follows:
-
-[source,bash]
-----
-curl http://localhost:9220/_siren/license -XPUT -T license.sig
-----
-
-If your cluster is protected by Search Guard, remember to specify credentials:
-
-[source,bash]
-----
-curl -uadmin:password --cacert=ca.pem https://localhost:9220/_siren/license -XPUT -T license.sig
-----
-
-[float]
-=== Kibi
-
-Before upgrading Kibi, make sure to perform the following steps:
- 
-- backup the `.kibi` index.
-- backup the Kibi configuration file (`config/kibi.yml`)
+- backup the configuration index (`.kibi` by default).
+- backup the configuration file (`config/kibi.yml`)
 
 Then perform the following steps:
 
-- extract the new Kibi version to a new directory.
+- extract {kibi-name} to a new directory.
 - copy the previous configuration file to the `config` directory of the new
   installation.
 - copy the files from the `data` directory in your old installation of the new
@@ -824,7 +832,8 @@ Then perform the following steps:
   installation.
 - update the configuration as described in the next sections.
 - reinstall third party plugins after checking the notes in the next sections.
-- execute `bin/kibi upgrade`.
+- execute `bin/investigate upgrade-config`.
+- execute `bin/investigate upgrade`.
 - start the new installation.
 
 [float]
@@ -833,8 +842,8 @@ Then perform the following steps:
 [float]
 ===== Server SSL support
 
-If SSL support was enabled in the previous Kibi installation, you will need to
-update `kibi.yml` as follows:
+If SSL support was enabled in the previous installation, you will need to
+update `investigate.yml` as follows:
 
 - add `server.ssl.enabled: true` 
 - replace `server.ssl.cert` with `server.ssl.certificate`
@@ -851,32 +860,33 @@ If your cluster is protected by Search Guard, you will need to rename
 
 
 [float]
-===== Kibi access control ACL
+===== Access control rules
 
-If you want to enable Kibi Access Control ACL, you will need to:
+If you want to enable access control rules on saved objects, you will need to:
 
-- add `acl.enabled: true` to the `kibi_access_control` section;
-- specify the Search Guard role that will have administrative access to the ACL configuration
-  in `admin_role` (`.kibiadmin` by default);
-- specify the name of the index where access control rules will be stored (`.kibiaccess` by default).
+- add `acl.enabled: true` to the `investigate_access_control` section;
+- specify the Search Guard role that will have administrative access to the ACL
+  configuration in `admin_role` (`.sirenadmin` by default);
+- specify the name of the index where access control rules will be stored
+  (`.sirenaccess` by default).
 
 E.g.:
 
 [source,yaml]
 ----
-kibi_access_control:
+investigate_access_control:
   acl:
     enabled: true
-    index: kibiaccess
-  admin_role: kibiadmin
+    index: .sirenaccess
+  admin_role: sirenadmin
 ----
 
-Once ACLs are enabled, you will need to login with a user having the role specified in
-`admin_role` and visit Access Control -> ACL to create Kibi roles with the desired
-permissions.
+Once ACLs are enabled, you will need to login with a user having the role
+specified in `admin_role` and visit Access Control -> ACL to create {kibi-name}
+roles with the desired permissions.
 
-For more informations about Kibi Access Control ACL, please check the
-<<searchguard_integration>> chapter.
+For more informations about access control rules on saved objects, please check
+the <<searchguard_integration>> chapter.
 
 [float]
 ===== Sense
@@ -893,19 +903,18 @@ console.proxyConfig:
       ca: "pki/searchguard/ca.pem"
 ----
 
-
 [float]
 ==== Third party plugins
 
 The following plugins have been discontinued:
 
-- `kibi_wordcloud`: Kibi now supports the Tag Cloud visualization introduced in
-  Kibana 5. Existing Kibi Word Cloud visualizations will be migrated to Tag
-  Cloud visualizations by the upgrade procedure.
+- `kibi_wordcloud`: {kibi-name} now supports the Tag Cloud visualization
+  introduced in Kibana 5. Existing Word Cloud visualizations will be migrated
+  to Tag Cloud visualizations by the upgrade procedure.
 - `heatmap`: the heatmap plugin for Kibana 4.x has been integrated into Kibana
-  5 and thus is available in Kibi.  Existing Heatmap visualizations will be
-  upgraded by a Kibi migration; the color palette will be set to `Greens` as
-  most of the palettes in the original plugin were not ported to Kibana 5.
+  5 and thus is available in {kibi-name}.  Existing Heatmap visualizations will
+  be upgraded automatically, although the color palette will be set to `Greens`
+  as most of the palettes in the original plugin were not ported to Kibana 5.
 
 [float]
 ==== Handling of text fields in upgraded indices
@@ -958,8 +967,8 @@ curl -XPUT http://elasticsearch.local:9200/article/_mapping/article - d'
 
 After enabling fielddata on an existing text field, you'll have to refresh all
 the index patterns containing the field by going to Management/Index Patterns
-in Kibi, opening each pattern and clicking on the refresh button; once the
-index pattern is refreshed, the field should appear as aggregatable.
+in {kibi-name}, opening each pattern and clicking on the refresh button; once
+the index pattern is refreshed, the field should appear as aggregatable.
 
 image::images/refresh.png["Refreshing an index pattern",align="center"]
 
@@ -970,6 +979,43 @@ For more information please refer to the following links:
 
 - {elastic-ref}/fielddata.html[text datatype documentation]
 - {elastic-ref}/fielddata.html[fielddata documentation]
+
+[float]
+=== License
+
+You will need to upload your license once the cluster is up and running.
+
+[float]
+==== From {kibi-name}
+To upload the license from {kibi-name}, navigate to the management section.
+
+image::images/management_no-license.jpg[]
+
+This page will show the license has not been installed.
+
+Click on `License` and select `Upload Licence`
+ 
+image::images/license_page_before_install.jpg[] 
+
+Once you have selected your license and it has been uploaded, the page will show the license details.
+
+image::images/license_page_after_install.jpg[]
+
+[float]
+==== Via CLI
+To upload the license you can use curl as follows:
+
+[source,bash]
+----
+curl http://localhost:9220/_siren/license -XPUT -T license.sig
+----
+
+If your cluster is protected by Search Guard, remember to specify credentials:
+
+[source,bash]
+----
+curl -uadmin:password --cacert=ca.pem https://localhost:9220/_siren/license -XPUT -T license.sig
+----
 
 [[breaking-changes-5.4.0]]
 == Breaking changes in Kibi and Kibana 5.4.0

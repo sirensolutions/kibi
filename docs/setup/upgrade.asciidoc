@@ -1,7 +1,9 @@
 [[upgrade]]
 == Upgrading from a Previous Version
 
-NOTE: Before upgrading make sure to check the <<breaking-changes>> section.
+NOTE: Before upgrading make sure to check the <<breaking-changes>> section;
+for information on how to upgrade from Kibi 4.x , make sure to read the
+<<migration>> section.
 
 An existing {kibi-name} installation can be upgraded as follows:
 

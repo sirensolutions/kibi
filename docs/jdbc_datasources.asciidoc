@@ -1,120 +1,591 @@
 [[jdbc_datasources]]
 = JDBC Datasources
 
-== Setting up Siren to work with JDBC datasources.
+== Setting up {kibi-name} to work with JDBC datasources.
 
-Siren can analyze data by directly querying remote datasources via JDBC.
+{kibi-name} can analyze data by directly querying remote JDBC datasources
+using the Siren Federate plugin.
 
-To do this:
+To create dashboards on JDBC datasources you'll need to:
 
-- <<configuring-federate-with-jdbc, Configure the Federate backend with the JDBC drivers that you will be using>>
-- <<configuring-investigate-datasource, Create a "JDBC Datasource" from within the Siren Investigate UI>>
-- <<configuring-virtual-index, Create a Virtual Index from a JDBC datasource>>
+- <<siren-federate-configuration, prepare the Federate plugin to connect to
+  your datasource>>;
+- <<configuring-investigate-datasource, configure the connection to the
+  datasource from {kibi-name}>>;
+- <<configuring-virtual-index, create virtual indices for your tables>>.
 
-At this point the Virtual Index is effectively identical to a regular index i.e. one that is natively in Elasticsearch.
+You can then configure index patterns on your virtual indices, display them in
+Discover and configure dashboards and visualizations for the
+<<supported-jdbc-aggregations, supported aggregations.>>
 
-[[configuring-federate-with-jdbc]]
-== Configuring the Federate Backend with JDBC Driver
+[[siren-federate-configuration]]
+== Siren Federate plugin configuration
 
-To configure the Federate JDBC connector:
+The Federate plugin stores its configuration in two Elasticsearch indices:
 
-- Stop the elasticsearch cluster
-- Install Siren federate on each elasticsearch node. Instruction are available here:
-- Choose one node in the cluster and edit the elasticsearch.yml adding the parameter: `node.attr.connector.jdbc: true`
-- In the same elasticsearch node, add the jdbc driver (jar file) in the folder ES_FOLDER/plugins/siren-federate. The supported jdbc drivers are reported in the table below, with the url from where the drivers can be downloaded.
-- Restart elasticsearch
+- `.siren-federate-datasources`: used to store the JDBC configuration
+  parameters of remote datasources.
+- `.siren-federate-indices`: used to store the configuration parameters of
+  virtual indices.
+
+It is recommended to restrict access to these indices only to the Federate
+user, as explained later in the document.
+
+=== Settings
+
+In order to send queries to virtual indices the Elasticsearch cluster must
+contain at least one node enabled to issue queries over JDBC; it is advised to
+use a coordinating only node for this role, athough this is not a requirement
+for testing purposes.
+
+==== JDBC node settings
+In order to enable JDBC on a node where the Siren Federate plugin is installed,
+add the following setting to `elasticsearch.yml`:
+
+[source,yaml]
+----
+node.attr.connector.jdbc: true
+----
+
+Then, copy the JDBC driver for your remote datasource and its dependencies to
+the `siren-federate` plugin directory; see the <<siren-federate-jdbc-compat>>
+section for a list of compatible drivers and supported dependencies.
+
+==== Configuration settings
+
+===== Encryption
+
+JDBC passwords are encrypted by default using a predefined 128 bit AES key;
+before creating datasources, it is advised to generate a custom key by running
+the `keygen.sh` script included in the `siren-federate` plugin directory as
+follows:
+
+[source,yaml]
+----
+bash plugins/siren-federate/tools/keygen.sh -s 128
+----
+
+The command will output a random base64 key; it is also possible to generate
+keys longer than 128 bit if your JVM supports it.
+
+To use the custom key, the following parameters must be set in
+`elasticsearch.yml` on master nodes and on all the JDBC nodes:
+
+- `siren.connector.encryption.enabled`: `true` by default, can be set to
+  `false` to disable JDBC password encryption.
+- `siren.connector.encryption.secret_key`: a base64 encoded AES key used to
+  encrypt JDBC passwords.
+
+Example `elasticsearch.yml` settings for a master node with a custom encryption
+key:
+
+[source,yaml]
+----
+siren.connector.encryption.secret_key: "1zxtIE6/EkAKap+5OsPWRw=="
+----
+
+Example `elasticsearch.yml` settings for a JDBC node with a custom encryption
+key:
+
+[source,yaml]
+----
+siren.connector.encryption.secret_key: "1zxtIE6/EkAKap+5OsPWRw=="
+node.attr.connector.jdbc: true
+----
+
+Restart the nodes after changing the configuration to apply the settings.
+
+===== Cluster wide settings
+
+The following parameters can be set in `elasticsearch.yml` on JDBC nodes
+or by using the Elasticsearch cluster update settings API:
+
+- `siren.connector.timeout.query`: the maximum execution time for JDBC queries,
+  in seconds (`30` by default).
+- `siren.connector.enable_union_aggregations`: `true` by default, can be set to
+  false to disable the use of unions in nested aggregations.
+
+==== Authentication
+
+===== The Federate server role
+
+If your cluster is protected by Search Guard or Elastic X-Pack, it is required
+to define a role with access to the Federate indices and internal operations
+and to create a user having this role.
+
+For interoperability with these plugins, whenever a virtual index is created
+the Federate plugin creates a concrete Elasticsearch index with the same name
+as the virtual index; when starting up, the Federate plugin will check for
+missing concrete indices and will attempt to create them automatically.
+
+Sample Search Guard role definition:
+
+[source,yaml]
+----
+federateserver:
+  cluster:
+    - "indices:admin/aliases"
+  indices:
+    ?siren-federate-datasources:
+      '*':
+        - ALL
+    ?siren-federate-indices:
+      '*':
+        - ALL
+    ?siren-federate-target:
+      '*':
+        - ALL
+----
+
+Sample X-Pack role definition:
+
+[source,json]
+----
+{
+  "cluster": [
+    "monitor",
+    "cluster:admin/siren/connector"
+  ],
+  "indices" : [
+    {
+      "names" : [ "*" ],
+      "privileges" : [ "create_index" ]
+    },
+    {
+      "names" : [ ".siren-federate-*" ],
+      "privileges" : [ "all", "indices:admin/siren/connector" ]
+    }
+  ]
+}
+----
+
+Example `elasticsearch.yml` settings for a master node in a cluster with
+authentication:
+
+[source,yaml]
+----
+siren.connector.username: connector
+siren.connector.password: password
+siren.connector.encryption.secret_key: "1zxtIE6/EkAKap+5OsPWRw=="
+----
+
+Example `elasticsearch.yml` settings for a JDBC node in a cluster with
+authentication:
+
+[source,yaml]
+----
+siren.connector.username: connector
+siren.connector.password: password
+siren.connector.encryption.secret_key: "1zxtIE6/EkAKap+5OsPWRw=="
+node.attr.connector.jdbc: true
+----
+
+Restart the nodes after setting the appropriate configuration parameters.
+
+===== Administrative role
+
+In order to manage datasources and virtual indices, it is required to
+grant the `cluster:admin/siren/connector/*` permissions at the cluster
+level.
+
+In addition, the user must have the `indices:admin/siren/connector/*` and
+`indices:data/siren/connector/*` permissions on all the index names that he's
+allowed to define, in addition to create, write, read and search permissions.
+
+Write permissions are required because when a virtual index is defined the
+plugin will create a concrete Elasticsearch index with the same name for
+interoperability with authentication plugins, unless such index already
+exists.
+
+Example Search Guard role allowed to manage virtual indices starting
+with `db-`:
+
+[source,yaml]
+----
+sirenadmin:
+  cluster:
+    - SIREN_CLUSTER
+    - cluster:admin/plugin/siren/license/put
+    - cluster:admin/plugin/siren/license/get
+    - cluster:admin/siren/connector/*
+  indices:
+    'db-*':
+      '*':
+        - SIREN_READWRITE
+        - indices:admin/create
+        - indices:admin/siren/connector/*
+    'article':
+      '*':
+        - SIREN_READONLY
+----
+
+Example X-Pack role allowed to manage virtual indices starting with `db-`:
+
+[source,json]
+----
+{
+  "cluster": [
+    "cluster:admin/siren/connector"
+    "cluster:admin/plugin/siren/license",
+    "cluster:siren/internal",
+    "manage"
+  ],
+  "indices" : [
+    {
+      "names" : [ "*" ],
+      "privileges" : [ "indices:siren/mplan" ]
+    },
+    {
+      "names" : [ "db-*" ],
+      "privileges" : [
+        "read",
+        "view_index_metadata",
+        "indices:data/siren",
+        "indices:siren",
+        "indices:admin/version/get",
+        "indices:admin/get",
+        "indices:admin/siren/connector"
+      ]
+    }
+  ]
+}
+----
+
+===== Search role
+
+In order to search virtual indices, users must have the
+`indices:data/siren/connector/*` permissions on these indices in addition to
+standard standard read and search permissions.
+
+Example Search Guard role allowed to search virtual indices starting with
+`db-`:
+
+[source,yaml]
+----
+sirenauser:
+  cluster:
+    - KIBI_CLUSTER
+  indices:
+    '*':
+      '*':
+        SIREN_COMPOSITE
+    'db-*':
+      '*':
+        - KIBI_READONLY
+        - indices:admin/siren/connector/*
+    'article':
+      '*':
+        - KIBI_READONLY
+----
+
+Example X-Pack role allowed to manage virtual indices starting with `db-`:
+
+[source,json]
+----
+{
+  "cluster": [
+    "cluster:admin/siren/connector"
+    "cluster:admin/plugin/siren/license",
+    "cluster:siren/internal",
+    "manage"
+  ],
+  "indices" : [
+    {
+      "names" : [ "*" ],
+      "privileges" : [ "indices:siren/mplan" ]
+    },
+    {
+      "names" : [ "db-*" ],
+      "privileges" : [
+        "read",
+        "view_index_metadata",
+        "indices:data/siren",
+        "indices:siren",
+        "indices:admin/version/get",
+        "indices:admin/get",
+        "indices:admin/siren/connector"
+      ]
+    }
+  ]
+}
+----
+[[siren-federate-jdbc-compat]]
+=== JDBC driver installation and compatibility
+
+The JDBC driver for your remote datasource and its dependencies must be copied to
+the `siren-federate` plugin directory of JDBC nodes; it is not required nor
+recommended to copy these drivers to nodes which are not enabled to execute
+queries.
+
+Whenever the plugin is upgraded, drivers must be copied again into the
+`siren-federate` plugin directory.
 
 .List of supported JDBC drivers
 |===
-|Name |JDBC class | Default port| Download Page Link if not included
+|Name |JDBC class |Notes
 
 
 |PostgreSQL
 |org.postgresql.Driver
-|5432
-|https://jdbc.postgresql.org/download.html
-
+|Download the latest JDBC 4.2 driver from
+ https://jdbc.postgresql.org/download.html and copy the
+ `postgresql-<version>.jar` file to the `siren-federate` plugin directory.
 |MySQL
 |com.mysql.jdbc.Driver
-|3306
-|https://dev.mysql.com/downloads/connector/
+|Download the latest GA release from
+ https://dev.mysql.com/downloads/connector/j/, extract it, then copy
+ `mysql-connector-java-<version>.jar` to the `siren-federate` plugin directory.
 
-|Microsoft SQL Server 2017
+ When writing the JDBC connection string, set the `useLegacyDatetimeCode`
+ parameter to false to avoid issues when converting timestamps.
+|Microsoft SQL Server 2014 or greater
 |com.microsoft.sqlserver.jdbc.SQLServerDriver
-|1433
-|https://www.microsoft.com/en-us/download/details.aspx?id=55539
-
+|Download `sqljdbc_<version>_enu.tar.gz` from
+ https://www.microsoft.com/en-us/download/details.aspx?id=55539, extract it,
+ then copy `mssql-jdbc-<version>.jre8.jar` to the `siren-federate` plugin
+ directory.
 |Sybase ASE 15.7+
-|com.sybase.jdbc4.jdbc.SybDriver OR net.sourceforge.jtds.jdbc.Driver
-|5000
-|
+|com.sybase.jdbc4.jdbc.SybDriver
 
+ OR
+
+ net.sourceforge.jtds.jdbc.Driver
+|To use the FreeTDS driver, download the latest version from
+ https://sourceforge.net/projects/jtds/files/, extract it, then copy
+ `jtds-<version>.jar` to the `siren-federate` plugin directory.
+
+ To use the jConnect driver, copy `jConnect-<version>.jar` from your ASE
+ directory to the `siren-federate` plugin directory.
 |Oracle 12c+
 |oracle.jdbc.OracleDriver
-|1521
-|http://www.oracle.com/technetwork/database/features/jdbc/default-2280470.html
-
+|Download the latest `ojdbc8.jar` from 
+ http://www.oracle.com/technetwork/database/features/jdbc/jdbc-ucp-122-3110062.html
+ and copy it to the `siren-federate` plugin directory.
 |Presto
 |com.facebook.presto.jdbc.PrestoDriver
-|8080
-|https://repo1.maven.org/maven2/com/facebook/presto/presto-jdbc/0.192/presto-jdbc-0.192.jar
-
-
+|Download the latest JDBC driver from https://prestodb.io/docs/current/installation/jdbc.html
+ and copy it to the `siren-federate` plugin directory.
 |Spark SQL 2.2+
-|com.simba.spark.jdbc4.Driver OR com.simba.spark.jdbc4.DataSource OR com.simba.spark.jdbc41.Driver OR com.simba.spark.jdbc41.DataSource
-|
-|https://www.simba.com/product/spark-drivers-with-sql-connector/
+|com.simba.spark.jdbc41.Driver
+|The Magnitude JDBC driver for Spark can be purchased at
+ https://www.simba.com/product/spark-drivers-with-sql-connector/; once
+ downloaded, extract the bundle, then extract the JDBC 4.1 archive and copy the
+ following jars to the `siren-federate` plugin directory:
 
+ `SparkJDBC41.jar`
+
+ `commons-codec-<version>.jar`
+
+ `hive_metastore.jar`
+
+ `hive_service.jar`
+
+ `libfb303-<version>.jar`
+
+ `libthrift-<version>.jar`
+
+ `ql.jar`
+
+ `TCLIServiceClient.jar`
+
+ `zookeeper-<version>.jar`
+
+ In addition, copy your license file to the `siren-federate` plugin directory.
 |Dremio
 |com.dremio.jdbc.Driver
-|
-|https://download.siren.io/dremio-jdbc-driver-1.4.4-201801230630490666-6d69d32.jar
-
+|Download the jar at https://download.siren.io/dremio-jdbc-driver-1.4.4-201801230630490666-6d69d32.jar
+ and copy it to the `siren-federate` plugin directory.
 |Impala
 |com.cloudera.impala.jdbc41.Driver
-|21050
-|https://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-42.html
+|Download the latest JDBC bundle from
+ https://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-42.html, extract
+ the bundle, the extract the JDBC 4.1 archive and copy the following jars to the
+ `siren-federate` plugin directory:
+
+ `ImpalaJDBC41.jar`
+
+ `commons-codec-<version>.jar`
+
+ `hive_metastore.jar`
+
+ `hive_service.jar`
+
+ `libfb303-<version>.jar`
+
+ `libthrift-<version>.jar`
+
+ `ql.jar`
+
+ `TCLIServiceClient.jar`
+
+ `zookeeper-<version>.jar`
 
 |===
 
+Restart the JDBC node after copying the drivers.
 
 [[configuring-investigate-datasource]]
-== Siren Investigate Datasource Configuration
+== {kibi-name} Datasource Configuration
 
-Using Siren Investigate, go to **Management/Datasource**
+Open {kibi-name} in your browser, then go to **Management/Datasource**:
 
 image::images/jdbc/select_datasource.png["Navigate to Management/Datasource",align="center"]
 
-Select the JDBC choice in the dropdown
+Select the JDBC choice in the dropdown:
 
 image::images/jdbc/select_jdbc_option.png["Select JDBC option",align="center"]
 
-Fill in the connection parameters, then press Save in the top right corner
+The datasource configuration supports the following parameters:
+
+- `Database name`: the name of the default database / catalog on the remote
+  datasource (usually optional).
+- `Datasource name`: the name of the datasource (e.g. `mysql-sales`)
+- `Driver class`: the JDBC driver class name (e.g. `com.mysql.jdbc.Driver`)
+- `Username` and `Password`: the credentials of the user that will be used by
+  the plugin to open connections.
+- `Timezone`: if date and timestamp fields are stored in a timezone different
+  that UTC, specifying this parameter will instruct the plugin to convert dates
+  and times to/from the specified timezone when performing queries and
+  retrieving results.
+- `Connection string`: the JDBC connection string; see the
+  <<siren-federate-jdbc-compat>> section for information about database
+  specific connection string parameters.
+
+Fill in the required parameters, then press Save in the top right corner.
 
 image::images/jdbc/fill_in_connection_params.png["Fill in connection parameters",align="center"]
 
-Check the configuration by pressing **Test Connection**. If the settings are properly configured, this is the result:
+Check the configuration by pressing **Test Connection**. If the settings are
+properly configured you should get the following feedback:
 
 image::images/jdbc/test_connection.png["Test connection",align="center"]
 
-Press **Yes, take me there** to map a table from the DB into an index pattern, as reported in the image below:
+Press **Yes, take me there** to map a table from the DB to a virtual index, as
+displayed in the image below:
 
 [[configuring-virtual-index]]
 
 image::images/jdbc/virtual_index_configuration.png["Virtual Index Configuration",align="center"]
 
-The **Virtual Index name** must be lowercase, the **Resource name** is the name of the table in the database. Once the Virtual Index is configured, press Save in the top right corner.
-The screenshot below shows what the user should see after saving. Press **Yes take me there** to map the index to this virtual index.
+The virtual index configuration supports the following parameters:
+
+- `Datasource name`: the name of an existing datasource.
+- `Resource name`: the name of a table or view on the remote datasource.
+- `Virtual index name`: the name of the virtual index; this must be a valid
+  lowercase Elasticsearch index name. It is recommended to start virtual
+  indices with a common prefix to simplify handling of permissions.
+- `Primary key`: the name of a unique column; if a virtual index has no primary
+  key it will be possible to perform aggregations, however visualizations that
+  require a unique identifier such as the graph browser will not be useable on
+  the index.
+- `Catalog` and `Schema`: the catalog and schema containing the table specified
+  before; these are usually required only if the connection does not specify a
+  default catalog or schema.
+
+Once the virtual index is configured, press Save in the top right corner; press
+**Yes take me there** to create an index pattern pointing to the virtual index.
 
 image::images/jdbc/virtual_index_success.png["Virtual Index Configuration Success",align="center"]
 
-Press **Add Index Pattern** and fill in the name with the same name used for the Virtual Index, in this example **indexfromdb**, and press **Create**.
+Press **Add Index Pattern** and fill in the name with the same name used for
+the Virtual Index, in this example **indexfromdb**, and press **Create**.
 
 image::images/jdbc/index_pattern_configuration.png["Index Pattern Configuration",align="center"]
 
-From this point, **indexfromdb** is a normal index pattern and it can be used in Discovery, Visualize etc.
+From this point, the **indexfromdb** index pattern can be used in Discovery,
+Visualize etc.
+
+== Operations on virtual indices
+
+The plugin supports the following operations on virtual indices:
+
+- get mapping
+- get field capabilities
+- search
+- msearch
+- get
+- mget
+
+Search requests involving a mixture of virtual and normal Elasticsearch indices
+(e.g. when using a wildcard) are not supported and will be rejected; it is
+however possible to issue msearch requests containing requests on normal
+Elasticsearch indices and virtual indices.
+
+When creating a virtual index, the plugin will create an empty Elasticsearch
+index for interoperability with Search Guard and X-Pack; if an Elasticsearch
+index with the same name as the virtual index already exists and it is not
+empty, the virtual index creation will fail.
+
+When deleting a virtual index, the corresponding Elasticsearch index will
+not be removed.
+
+== Type conversion
+
+The plugin converts JDBC types to their closest Elasticsearch equivalent:
+
+- String types are handled as `keyword` fields.
+- Boolean types are handled as `boolean` fields.
+- Date and timestamp are handled as `date` fields.
+- Integer types are handld as `long` fields.
+- Floating point types are handled as `double` fields.
+
+Complex JDBC types which are not recognized by the plugin are skipped during
+query processing and resultset fetching.
+
+== Supported search queries
+
+The plugin supports the following queries:
+
+- match_all
+- term
+- terms
+- range
+- exists
+- prefix
+- wildcard
+- ids
+- bool
+
+At this time the plugin provides no support for datasource specific full text
+search functions, so all these queries will work as if they were issued against
+`keyword` fields.
+
+[[supported-jdbc-aggregations]]
+== Supported aggregations
+
+Currently the plugin provides support for the following aggregations:
+
+Metric:
+
+- Average
+- Cardinality
+- Max
+- Min
+- Sum
+
+Bucket:
+
+- Date histogram
+- Histogram
+- Date range
+- Range
+- Terms
+- Filters
+
+Only terms aggregations can be nested inside a parent bucket aggregation.
 
 == Known Limitations
 
-- Cross Backend join currently supports only integer keys
-- Cross Backend support has very different scalability according to the direction of the Join, a join which involves sending IDs to a remote system will be possibly hundreds of times less scalable (e.g. thousands vs millions) to one where the IDs are fetched from a remote system.
+- Cross backend join currently supports only integer keys.
+- Cross backend support has very different scalability according to the
+  direction of the Join, a join which involves sending IDs to a remote system
+  will be possibly hundreds of times less scalable (e.g. thousands vs millions)
+  to one where the keys are fetched from a remote system.
+- Only terms aggregations can be nested inside a parent bucket aggregation.
+- The `missing` parameter in bucket aggregations is not supported.
+- Scripted fields are not supported.
+- When issuing queries containing string comparisons, the plugin does not force
+  a specific collation, if a table behind a virtual indices uses a case
+  insensitive collation, string comparisons will be case insensitive.
+- Wildcards on virtual index names are not supported in any API.
+- Currently cross cluster searches on virtual indices are not supported.

@@ -25,6 +25,12 @@ Fixed:
 * Allow creation of index pattern directly from create virtual index page without manually editing index pattern name.
 * Fixed bug in saving dashboard in Saved Objects after making no changes.
 * Spy panel now only listed permitted modes.
+* Users trying to access dashboards or index patterns without ACL permissions are shown more graceful errors.
+* The dashboard sidebar and relational buttons now show warning symbols when attempting to get counts from un-authorized dashboards.
+* Fixed bug when 500 error returned if attempting to edit an index pattern without permissions.
+* Config file validation check now runs when the `upgrade` CLI command is run.
+* Config file migration now accepts custom config files/folders.
+
 * *Auto dashboard generation*
 **  Visualisations created with Generate Dashboard weren't associated to the saved search, now they are.
 **  Storing the time in the dashboard now causes the generated visualizations to fit the target time interval.

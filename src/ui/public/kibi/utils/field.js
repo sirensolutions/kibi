@@ -10,11 +10,37 @@ export function fieldSpec(field) {
     : { field: field.name };
 }
 
+export function queryEsType(mappings, field) {
+  if(field.esType) { return Promise.resolve(field.esType); }
+
+  // NOTE: Mappings *promises* are cached, so asking once per field
+  //       and in full concurrency (Promise.all) is ok
+
+  return mappings.getMapping(field.indexPattern.id)
+    .then(indexMaps => {
+      let esType;
+
+      _.forOwn(indexMaps, indexMap => {
+        _.forOwn(indexMap.mappings, typeMap => {
+          const prop = typeMap.properties[field.name];
+          if(!prop) { return; }
+
+          esType = prop.type;
+          return false;
+        });
+
+        return !esType;
+      });
+
+      return esType;
+    });
+}
+
 /**
  * Returns a promise to whether the input field is analyzed text.
  */
 export function queryIsAnalyzed(mappings, field) {
-  if(field.esType !== 'string') {
+  if(field.esType && field.esType !== 'string') {
     return Promise.resolve(field.esType === 'text');
   }
 
@@ -28,12 +54,7 @@ export function queryIsAnalyzed(mappings, field) {
   // to exclude `string`, and the entire function should be
   // de-promisified.
 
-  // NOTE: Mappings *promises* are cached, so asking once per field
-  //       and in full concurrency (Promise.all) is ok
-
-  const { indexPattern } = field;
-
-  return mappings.getMapping(indexPattern.id)
+  return mappings.getMapping(field.indexPattern.id)
     .then(indexMaps =>
       _.some(indexMaps, indexMap =>
         _.some(indexMap.mappings, typeMap => {

@@ -3,7 +3,7 @@ import * as visTypes from './vistypes';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import { fieldSpec, queryIsAnalyzed } from 'ui/kibi/utils/field';
+import { fieldSpec, queryEsType, queryIsAnalyzed } from 'ui/kibi/utils/field';
 import { promiseMapSeries } from 'ui/kibi/utils/promise';
 
 import _ from 'lodash';
@@ -23,7 +23,7 @@ export function QuickDashMakeVisProvider(
   const TERMS_COUNT_PIE = 30;
   const TERMS_COUNT_HISTOGRAM = 50;
   const TERMS_COUNT_TABLE = 100;
-  const NUMERIC_HISTO_BUCKETS_COUNT = 150;
+  const NUMERIC_HISTO_BUCKETS_COUNT = 50;
 
   const aggSchemasByVisType = {
     [visTypes.TABLE]: 'bucket'
@@ -110,33 +110,36 @@ export function QuickDashMakeVisProvider(
   }
 
   function evalHistoInterval(index, field, query) {
-    return evalNumericRange(index, field, query)
-      .then(range => {
-        const floatInterval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
+    return Promise.all([
+      evalNumericRange(index, field, query),
+      queryEsType(mappings, field)
+    ])
+    .then(([ range, esType ]) => {
+      const floatInterval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
 
-        // We want to convert the pure floating point interval to a somewhat
-        // readable form, rounding *up* to the nearest two-digit multiple of a power
-        // of 10.
-        //
-        // Also, imposing a minimum precision of 0 (value = 1) for integers
-        // and 6 (value = 1e-6) for floats.
+      // We want to convert the pure floating point interval to a somewhat
+      // readable form, rounding *up* to the nearest two-digit multiple of a power
+      // of 10.
+      //
+      // Also, imposing a minimum precision of 0 (value = 1) for integers
+      // and 6 (value = 1e-6) for floats.
 
-        let minExp;
+      let minExp;
 
-        switch(field.esType) {
-          case 'long': case 'integer': case 'short': case 'byte':
-            minExp = 0;
-            break;
+      switch(esType) {
+        case 'long': case 'integer': case 'short': case 'byte':
+          minExp = 0;
+          break;
 
-          default:
-            minExp = -6;
-        }
+        default:
+          minExp = -6;
+      }
 
-        let exp = Math.floor(Math.log10(floatInterval)) - 1;
-        exp = Math.max(exp, minExp);
+      let exp = Math.floor(Math.log10(floatInterval)) - 1;
+      exp = Math.max(exp, minExp);
 
-        return _.ceil(floatInterval, -exp);
-      });
+      return _.ceil(floatInterval, -exp);
+    });
   }
 
   function evalDateInterval(index, field, query) {
@@ -292,7 +295,7 @@ export function QuickDashMakeVisProvider(
             }]
           };
 
-          if(relativeCutoff < 0.1) {     // 10% of the buckets have 90% of the documents
+          if(relativeCutoff < 0.1) {      // 10% of the buckets have 90% of the documents
 
             // Some buckets are bound to have a far greater count than the rest.
             // This means that a non-linear scale is best, to shorten the gap.

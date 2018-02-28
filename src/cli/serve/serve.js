@@ -1,12 +1,12 @@
 import _ from 'lodash';
-import { statSync, accessSync } from 'fs';
+import { statSync } from 'fs';
 import { isWorker } from 'cluster';
 import { resolve } from 'path';
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
 import readYamlConfig from './read_yaml_config';
 import readline from 'readline';
-import { validateInvestigateYml, getConfigYmlPath } from '../../cli/kibi/validate_config';
+import { validateInvestigateYml, getConfigYmlPath, checkConfigYmlExists } from '../../cli/kibi/validate_config';
 import migrateConfigYml from '../../cli/kibi/_migrate_config_yml';
 import { basename } from 'path';
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
@@ -160,20 +160,12 @@ module.exports = function (program) {
       // ignore, kibana.dev.yml does not exist
       }
     }
+
     const configPath = (opts.dev) ? fromRoot('config/investigate.dev.yml') : opts.config[0];
     const configFilename = basename(configPath);
     const configFilenameNoExt = basename(configPath, '.yml');
-    function checkKibiYmlExists(dev) {
-      const kibiYmlPath = getConfigYmlPath('kibi', dev);
-      try {
-        accessSync(kibiYmlPath);
-        return true;
-      } catch(e) {
-        return false;
-      }
-    }
 
-    if (!checkKibiYmlExists(opts.dev) && validateInvestigateYml(configPath, opts.dev)) {
+    if (!checkConfigYmlExists('kibi', opts.dev) && validateInvestigateYml(configPath, opts.dev)) {
       // kibi: added extra condition !opts.ignoreDevYml
 
       const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
@@ -219,7 +211,7 @@ module.exports = function (program) {
 
       return kbnServer;
 
-    } else if(checkKibiYmlExists(opts.dev)) {
+    } else if(checkConfigYmlExists('kibi', opts.dev)) {
       const rl = readline.createInterface(process.stdin, process.stdout);
       rl.question(`kibi.yml found in config folder.\n
       Please run bin/investigate upgrade-config to migrate your kibi.yml to investigate.yml
@@ -248,8 +240,6 @@ module.exports = function (program) {
         }
       });
     }
-
-
   });
 };
 

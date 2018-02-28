@@ -1,15 +1,15 @@
 import KbnServer from '../../server/kbn_server';
 import Promise from 'bluebird';
 import { merge } from 'lodash';
-import { validateInvestigateYml } from '../../cli/kibi/validate_config';
+import { validateInvestigateYml, getConfigYmlPath, checkConfigYmlExists, getConfigFilename } from '../../cli/kibi/validate_config';
 import migrateConfigYml from './_migrate_config_yml';
 import readYamlConfig from '../serve/read_yaml_config';
-import { resolve } from 'path';
+import { resolve, basename } from 'path';
 import { fromRoot } from '../../utils/from_root';
 import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';
 import MigrationLogger from 'kibiutils/lib/migrations/migration_logger';
 import readline from 'readline';
-import { basename } from 'path';
+import { existsSync } from 'fs';
 
 const pathCollector = function () {
   const paths = [];
@@ -98,19 +98,54 @@ export default function (program) {
   }
 
   async function processCommand(options) {
-    const configPath = (options.dev) ? fromRoot('config/investigate.dev.yml') : options.config;
-    const configFilename = basename(configPath);
+    let configFilename;
+    let configPath;
+
+    if ((options.config.match(/.*investigate.yml$/) === null)) {
+      if(!existsSync(options.config)) {
+        process.stderr.write('\nYour custom config file (' + options.config + ') was not found.\n\n' +
+        'Please check the --config option filepath and try again.\n\n');
+        process.exit(1);
+      } else {
+        configFilename = basename(options.config);
+        configPath = options.config;
+      }
+    } else {
+      // If there is no kibi.yml and no investigate.yml
+      if (!checkConfigYmlExists('investigate', options.dev) && !checkConfigYmlExists('kibi', options.dev)) {
+        process.stderr.write('\nNo config file found. ' +
+        'Please ensure you have a kibi.yml or investigate.yml in the \`\/config\` folder.\n\n' +
+        'If you have renamed the investigate.yml or kibi.yml, ' +
+        'please revert the renaming and run \`bin/investigate upgrade\` again.\n\n');
+        process.exit(1);
+        // if there is no investigate.yml but there is a kibi.yml
+      } else if (!checkConfigYmlExists('investigate', options.dev) && checkConfigYmlExists('kibi', options.dev)) {
+        options.config = getConfigYmlPath('kibi', options.dev);
+        configFilename = getConfigFilename('kibi', options.dev);
+        configPath = (options.dev) ? fromRoot(`config/${configFilename}`) : options.config;
+      } else { // there is an investigate.yml
+        configFilename = getConfigFilename('investigate', options.dev);
+        configPath = (options.dev) ? fromRoot(`config/${configFilename}`) : options.config;
+      }
+    }
+
     if (!validateInvestigateYml(configPath, options.dev)) {
       const rl = readline.createInterface(process.stdin, process.stdout);
-      rl.question(`Your config file \`${configFilename}\` has some obsolete configuration settings.\n
+      rl.question(`\nYour config file \`${configFilename}\` has some obsolete configuration settings.\n
     You must run \`bin/investigate upgrade-config\` to migrate your ${configFilename} settings
     Please be aware that this command removes all comments in the ${configFilename}
-    but the original file (with comments) is preserved as ${configFilename}.backup.{YYYY-MM-DD-HHmmss}\n
-    Would you like to migrate the configuration automatically? [N/y]\n\n`, function (resp) {
+    ${(configFilename === 'kibi.yml')
+      ? `and renames ${configFilename} to investigate.yml but the original file (with comments) 
+    is preserved as ${configFilename}.backup.{YYYY-MM-DD-HHmmss}\n`
+      : `but the original file (with comments) is preserved as ${configFilename}.backup.{YYYY-MM-DD-HHmmss}\n`
+    }
+    Would you like to migrate the configuration automatically? [N/y] `, function (resp) {
         const yes = resp.toLowerCase().trim()[0] === 'y';
+        process.stderr.write('\n');
         rl.close();
 
         if (yes) {
+          process.stderr.write('\n');
           return migrateConfigYml({ config: configPath, dev: options.dev });
         }
       });

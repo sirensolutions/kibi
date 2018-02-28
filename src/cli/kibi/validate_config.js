@@ -1,5 +1,5 @@
 import { safeLoad, safeDump } from 'js-yaml';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { replacementMap,
          settingsForRemoval } from '../../cli/kibi/kibi_to_siren_migration_maps';
 import { has } from 'lodash';
@@ -20,13 +20,24 @@ const getConfigYmlPath = (filename, dev) => {
   return fromRoot(`config/${filename}${(dev) ? '.dev' : ''}.yml`);
 };
 
+const getConfigFilename = (filename, dev) => {
+  return `${filename}${(dev) ? '.dev' : ''}.yml`;
+};
+
 const validateInvestigateYml = (configFilePath = null, dev) => {
   const investigateYmlPath = configFilePath || getConfigYmlPath('investigate', dev);
 
   return validateYml(investigateYmlPath);
 };
 
+function checkConfigYmlExists(filename, dev) {
+  const kibiYmlPath = getConfigYmlPath(filename, dev);
+  return existsSync(kibiYmlPath);
+}
+
 export default {
+  checkConfigYmlExists,
+  getConfigFilename,
   getConfigYmlPath,
   validateInvestigateYml,
   validateYml

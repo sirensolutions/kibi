@@ -5,6 +5,7 @@ import guessReportTemplate from './guess_report.html';
 
 import './create_modal.less';
 import './report.less';
+import './quickdash_report.less';
 
 import 'ui/kibi/directives/tristate_checkbox';
 import 'ui/kibi/directives/sort_icon';

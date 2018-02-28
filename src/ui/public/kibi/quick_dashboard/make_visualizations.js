@@ -273,7 +273,7 @@ export function QuickDashMakeVisProvider(
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
         return retVis(visTypes.PIE, 'terms', { size: TERMS_COUNT_PIE }, null,
-          `$$ - Top ${TERMS_COUNT_PIE} Terms by Count`);
+          `Top ${TERMS_COUNT_PIE} $$`);
       }
 
       // Otherwise, use a histogram
@@ -301,7 +301,7 @@ export function QuickDashMakeVisProvider(
           }
 
           return retVis('histogram', 'histogram', { interval }, params,
-            '$$ - Histogram of Counts');
+            'Histogram of $$');
         });
     });
   }
@@ -315,7 +315,7 @@ export function QuickDashMakeVisProvider(
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
         return retVis(visTypes.PIE, 'terms', { size: TERMS_COUNT_PIE }, null,
-          `$$ - Top ${TERMS_COUNT_PIE} Terms by Count`);
+          `Top ${TERMS_COUNT_PIE} $$`);
       }
 
       return Promise.all([
@@ -327,7 +327,7 @@ export function QuickDashMakeVisProvider(
         if(isAnalyzed) {
           const params = (termsEval.relativeCutoff < 0.1) ? { scale: 'log' } : {};
           return retVis(visTypes.TAGCLOUD, 'terms', { size: TERMS_COUNT_PIE }, params,
-            `$$ - Top ${TERMS_COUNT_PIE} Tags by Count`);
+            `Top ${TERMS_COUNT_PIE} $$`);
         }
 
 
@@ -336,7 +336,7 @@ export function QuickDashMakeVisProvider(
         // Use pie for 90% of the dataset in <= 10 terms
         if(cutoffIdx < 10) {
           return retVis(visTypes.PIE, 'terms', { size: TERMS_COUNT_PIE }, null,
-            `$$ - Top ${TERMS_COUNT_PIE} Terms by Count`);
+            `Top ${TERMS_COUNT_PIE} $$`);
         }
 
         // Use histogram for 90% of the dataset in <= 50 terms
@@ -346,12 +346,12 @@ export function QuickDashMakeVisProvider(
             : {};
 
           return retVis('histogram', 'terms', { size: TERMS_COUNT_HISTOGRAM }, params,
-            `$$ - Top ${TERMS_COUNT_HISTOGRAM} Terms by Count`);
+            `Top ${TERMS_COUNT_HISTOGRAM} $$`);
         }
 
         // Use table otherwise
         return retVis(visTypes.TABLE, 'terms', { size: TERMS_COUNT_TABLE }, null,
-          `$$ - List by Count`);
+          `List of $$`);
       });
     });
   }
@@ -399,7 +399,7 @@ export function QuickDashMakeVisProvider(
       };
 
       return configureVis(sVis, dateField, aggs, params,
-        'Documents Count and Numeric Averages by $$');
+        'Documents count and numeric averages by $$');
     });
   }
 
@@ -544,11 +544,11 @@ export function QuickDashMakeVisProvider(
 
           case 'boolean':
             return createVis(index, field, visTypes.PIE, 'terms', { size: 2 },
-              '$$ - Values by Count');
+              '$$ values');
 
           case 'geo_point':
             return createVis(index, field, visTypes.TILE_MAP, 'geohash_grid', null, null,
-              '$$ - Locations Map');
+              '$$ locations map');
 
           default:
             return null;

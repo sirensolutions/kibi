@@ -2,7 +2,6 @@ import createTemplate from './create_modal.html';
 import titleConflictTemplate from './title_conflict_modal.html';
 import generateReportTemplate from './generate_report.html';
 import guessReportTemplate from './guess_report.html';
-import experimentalWarningTemplate from './experimental_warning.html';
 
 import './create_modal.less';
 import './report.less';
@@ -60,10 +59,6 @@ export function QuickDashModalsProvider(Private) {
       updateNewSearchTitle = _.debounce(updateNewSearchTitle, 200);
 
       return modal;
-    },
-
-    experimentalWarning(opts) {
-      return baseModal(experimentalWarningTemplate, opts);
     },
 
     titleConflict(opts) {

@@ -30,7 +30,8 @@ uiModules
   };
 
   OntologyClient.prototype._decodeUrl = function (str) {
-    const encodedUrl = str.replace(/%21/g, '!')
+    const encodedUrl = str
+    .replace(/%21/g, '!')
     .replace(/%27/g, '\'')
     .replace(/'%28'/g, '(')
     .replace(/%29/g, ')')
@@ -378,15 +379,15 @@ uiModules
    * Updates the properties of an entity.
    */
   OntologyClient.prototype.updateEntity = function (entity) {
-    const encodedId = this._encodeUrl(entity.id);
-    entity.id = encodedId;
-    if (entity.longDescription) {
-      entity.longDescription = this._encodeUrl(entity.longDescription);
+    const clonedEntity = _.cloneDeep(entity);
+    clonedEntity.id = this._encodeUrl(clonedEntity.id);
+    if (clonedEntity.longDescription) {
+      clonedEntity.longDescription = this._encodeUrl(clonedEntity.longDescription);
     }
     return this._executeSchemaUpdateAndClearCache({
-      path: '/schema/entity/' + encodedId,
+      path: '/schema/entity/' + clonedEntity.id,
       method: 'PUT',
-      data: entity
+      data: clonedEntity
     });
   };
 

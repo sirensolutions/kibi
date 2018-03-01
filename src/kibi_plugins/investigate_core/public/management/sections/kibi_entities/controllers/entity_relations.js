@@ -222,6 +222,19 @@ uiModules.get('apps/management')
         }
       };
 
+      $scope.bindOnBlur = ($select, labelType) => {
+        const setLabelIfMissing = function (relation, labelType) {
+          if ($scope.relationLabels.indexOf(relation) === -1) {
+            $scope.relationLabels.push(relation);
+            $scope.setOppositeLabel(relation, 'inverse');
+          }
+        };
+
+        $select.searchInput.on('blur', () => {
+          setLabelIfMissing($select.search, labelType);
+        });
+      };
+
       // this method automatically refresh suggestion list during user input
       $scope.refreshSuggestions = function ($select) {
         const search = $select.search;
@@ -239,8 +252,7 @@ uiModules.get('apps/management')
         if (!search) {
           //use the predefined list
           $select.items = list;
-        }
-        else {
+        } else {
           //manually add user input and set selection
           if($scope.relationLabels.indexOf(search) === -1) {
             list.concat(search);

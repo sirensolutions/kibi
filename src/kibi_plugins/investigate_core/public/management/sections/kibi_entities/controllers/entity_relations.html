@@ -55,11 +55,17 @@
         <ui-select
           ng-model="relation.directLabel"
           on-select="setOppositeLabel(relation, 'inverse')"
+          ng-click="bindOnBlur($select, 'direct')"
         >
           <ui-select-match>
             {{$select.selected}}
           </ui-select-match>
-          <ui-select-choices repeat="label in relationLabels | filter:$select.search | orderBy:label" refresh="refreshSuggestions($select)" refresh-delay="0">
+          <ui-select-choices
+            repeat="label in relationLabels | filter:$select.search | orderBy:label"
+            refresh="refreshSuggestions($select)"
+            refresh-delay="0"
+            on-blur="setLabelIfMissing($select.search, 'inverse')"
+          >
             <div ng-bind-html="label | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>
@@ -67,11 +73,17 @@
         <ui-select
           ng-model="relation.inverseLabel"
           on-select="setOppositeLabel(relation, 'direct')"
+          ng-click="bindOnBlur($select, 'inverse')"
         >
           <ui-select-match>
             {{$select.selected}}
           </ui-select-match>
-          <ui-select-choices repeat="label in relationLabels | filter:$select.search | orderBy:label" refresh="refreshSuggestions($select)" refresh-delay="0">
+          <ui-select-choices
+            repeat="label in relationLabels | filter:$select.search | orderBy:label"
+            refresh="refreshSuggestions($select)"
+            refresh-delay="0"
+            on-blur="setLabelIfMissing($select.search, 'direct')"
+          >
             <div ng-bind-html="label | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>

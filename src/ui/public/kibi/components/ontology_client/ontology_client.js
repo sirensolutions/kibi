@@ -379,15 +379,15 @@ uiModules
    * Updates the properties of an entity.
    */
   OntologyClient.prototype.updateEntity = function (entity) {
-    const clonnedEntity = _.cloneDeep(entity);
-    clonnedEntity.id = this._encodeUrl(clonnedEntity.id);
-    if (clonnedEntity.longDescription) {
-      clonnedEntity.longDescription = this._encodeUrl(clonnedEntity.longDescription);
+    const clonedEntity = _.cloneDeep(entity);
+    clonedEntity.id = this._encodeUrl(clonedEntity.id);
+    if (clonedEntity.longDescription) {
+      clonedEntity.longDescription = this._encodeUrl(clonedEntity.longDescription);
     }
     return this._executeSchemaUpdateAndClearCache({
-      path: '/schema/entity/' + clonnedEntity.id,
+      path: '/schema/entity/' + clonedEntity.id,
       method: 'PUT',
-      data: clonnedEntity
+      data: clonedEntity
     });
   };
 

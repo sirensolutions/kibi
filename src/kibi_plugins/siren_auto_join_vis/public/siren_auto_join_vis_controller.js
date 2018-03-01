@@ -288,7 +288,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   /**
    * Add the alternative menu hierarchy where you use dashboard and then select one of the available relations
    */
-  const addAlternativeSubHierarchy = function (buttons) {
+  const _addAlternativeSubHierarchy = function (buttons) {
     const addAltSubButtons = (subButtons, label, button) => {
       _.each(subButtons, (subButton) => {
         const altSubButton = _.clone(subButton);
@@ -357,6 +357,71 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     return buttons;
   };
 
+  const _addSubButtons = function (buttons, relations, compatibleSavedSearchesMap, compatibleDashboardsMap) {
+    _.each(buttons, (button) => {
+      if (button.type === 'VIRTUAL_ENTITY') {
+        const relationsByDomain = _.filter(relations, rel => rel.domain.id === button.targetIndexPatternId);
+
+        button.sub = {};
+        button.hasSub = false;
+
+        _.each(relationsByDomain, relByDomain => {
+          if (relByDomain.range.id !== button.sourceIndexPatternId) {
+            // filter the savedSearch with the same indexPattern
+            const compatibleSavedSearches = compatibleSavedSearchesMap[relByDomain.range.id];
+            _.each(compatibleSavedSearches, compatibleSavedSearch => {
+              const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
+              _.each(compatibleDashboards, compatibleDashboard => {
+                const subButton = sirenSequentialJoinVisHelper.constructSubButton(
+                  button,
+                  compatibleDashboard,
+                  relByDomain
+                );
+                sirenSequentialJoinVisHelper.addClickHandlerToButton(subButton);
+
+                const key = relByDomain.directLabel;
+                if (!button.sub[key]) {
+                  button.sub[key] = [];
+                }
+                if ($scope.btnCountsEnabled()) {
+                  subButton.showSpinner = true;
+                }
+                button.hasSub = true;
+                button.sub[key].push(subButton);
+              });
+            });
+          }
+        });
+      } else {
+        if ($scope.btnCountsEnabled()) {
+          button.showSpinner = true;
+        }
+      }
+    });
+  };
+
+  const _createCompatibleSavedSearchesMap = function (savedSearches) {
+    const compatibleSavedSearchesMap = {};
+    _.each(savedSearches, savedSearch => {
+      const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
+      if (!compatibleSavedSearchesMap[searchSource.index]) {
+        compatibleSavedSearchesMap[searchSource.index] = [];
+      }
+      compatibleSavedSearchesMap[searchSource.index].push(savedSearch);
+    });
+    return compatibleSavedSearchesMap;
+  };
+
+  const _createCompatibleDashboardsMap = function (savedDashboards) {
+    const compatibleDashboardsMap = {};
+    _.each(savedDashboards, savedDashboard => {
+      if (!compatibleDashboardsMap[savedDashboard.savedSearchId]) {
+        compatibleDashboardsMap[savedDashboard.savedSearchId] = [];
+      }
+      compatibleDashboardsMap[savedDashboard.savedSearchId].push(savedDashboard);
+    });
+    return compatibleDashboardsMap;
+  };
 
   const constructButtons = $scope.constructButtons = function (indexPatternId) {
     return Promise.all([
@@ -371,24 +436,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       const entities = res[3];
 
       // build maps once to avoid doing the lookups inside the loop
-      const compatibleSavedSearchesMap = {};
-      const compatibleDashboardsMap = {};
-
-      _.each(savedSearches, savedSearch => {
-        const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
-        if (!compatibleSavedSearchesMap[searchSource.index]) {
-          compatibleSavedSearchesMap[searchSource.index] = [];
-        }
-        compatibleSavedSearchesMap[searchSource.index].push(savedSearch);
-      });
-
-      _.each(savedDashboards, savedDashboard => {
-        if (!compatibleDashboardsMap[savedDashboard.savedSearchId]) {
-          compatibleDashboardsMap[savedDashboard.savedSearchId] = [];
-        }
-        compatibleDashboardsMap[savedDashboard.savedSearchId].push(savedDashboard);
-      });
-
+      const compatibleSavedSearchesMap = _createCompatibleSavedSearchesMap(savedSearches);
+      const compatibleDashboardsMap = _createCompatibleDashboardsMap(savedDashboards);
       const newButtons = _getButtons(relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap);
 
       const buttonDefs = _.filter(
@@ -454,49 +503,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
           }
 
           // populate subButtons for EID buttons and add spinner flag
-          _.each(buttons, (button) => {
-            if (button.type === 'VIRTUAL_ENTITY') {
-              const relationsByDomain = _.filter(relations, rel => rel.domain.id === button.targetIndexPatternId);
-
-              button.sub = {};
-              button.hasSub = false;
-
-              _.each(relationsByDomain, relByDomain => {
-                if (relByDomain.range.id !== button.sourceIndexPatternId) {
-                  // filter the savedSearch with the same indexPattern
-                  const compatibleSavedSearches = compatibleSavedSearchesMap[relByDomain.range.id];
-                  _.each(compatibleSavedSearches, compatibleSavedSearch => {
-                    const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
-                    _.each(compatibleDashboards, compatibleDashboard => {
-                      const subButton = sirenSequentialJoinVisHelper.constructSubButton(
-                        button,
-                        compatibleDashboard,
-                        relByDomain
-                      );
-                      sirenSequentialJoinVisHelper.addClickHandlerToButton(subButton);
-
-                      const key = relByDomain.directLabel;
-                      if (!button.sub[key]) {
-                        button.sub[key] = [];
-                      }
-                      if ($scope.btnCountsEnabled()) {
-                        subButton.showSpinner = true;
-                      }
-                      button.hasSub = true;
-                      button.sub[key].push(subButton);
-                    });
-                  });
-                }
-              });
-
-            } else {
-              if ($scope.btnCountsEnabled()) {
-                button.showSpinner = true;
-              }
-            }
-          });
-
-          addAlternativeSubHierarchy(buttons);
+          _addSubButtons(buttons, relations, compatibleSavedSearchesMap, compatibleDashboardsMap);
+          _addAlternativeSubHierarchy(buttons);
           return buttons;
         })
         .catch(notify.error);

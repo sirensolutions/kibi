@@ -68,10 +68,8 @@ describe('Kibi Automatic Join Visualization Controller', function () {
     }
   ];
 
-  function init({ currentDashboardId = 'db', relations = [], entityById = {} } = {}) {
+  function init({ currentDashboardId = 'db', relations = [], entities = [] } = {}) {
     ngMock.module('kibana/siren_auto_join_vis', $provide => {
-      // $provide.constant('kacConfiguration', { acl: { enabled: enableAcl } });
-
       $provide.service('getAppState', function () {
         return () => new MockState({ filters: [] });
       });
@@ -89,9 +87,13 @@ describe('Kibi Automatic Join Visualization Controller', function () {
             });
             return Promise.resolve(filtered);
           },
+          getEntities: (id) => {
+            return entities;
+          },
           getEntityById: (id) => {
-            if (entityById[id]) {
-              return Promise.resolve(entityById[id]);
+            const found = _.find(entities, 'id', id);
+            if (found) {
+              return Promise.resolve(found);
             } else {
               return Promise.resolve();
             }
@@ -163,7 +165,7 @@ describe('Kibi Automatic Join Visualization Controller', function () {
         }
       ];
 
-      init({ relations: relations });
+      init({ relations });
       $scope._constructButtons()
       .then((buttons) => {
         expect(buttons).to.have.length(1);
@@ -205,13 +207,13 @@ describe('Kibi Automatic Join Visualization Controller', function () {
           range: { id: 'ih', field: 'fh', type: 'INDEX_PATTERN' }
         }
       ];
-      const entityById = {
-        virtualEntity: {
+      const entities = [
+        {
           id: 'virtualEntity',
           label: 'a virtual entity'
         }
-      };
-      init({ relations: relations, entityById: entityById });
+      ];
+      init({ relations, entities });
       $scope._constructButtons()
       .then((buttons) => {
         expect(buttons).to.have.length(1);

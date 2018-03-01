@@ -5,6 +5,8 @@
 
 Added:
 
+* Added Elasticsearch 5.6.8 compatibility.
+* Added an JDBC datasource browser that allows the user to browse the datasource that is used when creating a virtual index and to select which table to import.
 * Now the system offers to automatically add a saved search when creating an index pattern.
 * After index creation, the user is now taken to the new index's edit page for modification, if needed.
 * EID buttons now reflect changes to counts in the data e.g. after applying a filter.
@@ -12,6 +14,8 @@ Added:
 * Investigate now handles empty index patterns more gracefully.
 * The relational graph in the `Indexes and Relations` section is moved to a tab.
 * Total Duration time of a request is now displayed on the Spy Panel.
+* Added config file migration for investigate.ymls to allow migration between post-10 versions.
+* Added migrations for custom configuration .ymls or .ymls in custom folders.
 
 Fixed: 
 
@@ -30,6 +34,10 @@ Fixed:
 * Fixed bug when 500 error returned if attempting to edit an index pattern without permissions.
 * Config file validation check now runs when the `upgrade` CLI command is run.
 * Config file migration now accepts custom config files/folders.
+* The timefilter dashboard sync panel is now shown even if the user is denied access to the dashboard by ACL.
+* Fixed a crash when clicking on colorpicker in Timeseries visualization configuration.
+* Now returning an error if there is no config file in the config folder.
+* Newly created relation labels are available for selection in other relations without a save.
 
 * *Auto dashboard generation*
 **  Visualisations created with Generate Dashboard weren't associated to the saved search, now they are.

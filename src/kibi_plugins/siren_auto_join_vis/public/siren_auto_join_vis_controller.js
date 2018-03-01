@@ -47,8 +47,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   };
 
   $scope.getButtonLabel = function (button, addApproximate) {
-    let count = button.targetCount ? button.targetCount : '?';
-    if (addApproximate) {
+    let count = button.targetCount !== undefined ? button.targetCount : '?';
+    if (addApproximate && button.targetCount !== undefined) {
       count = '~' + count;
     }
     return button.label.replace('{0}', count);

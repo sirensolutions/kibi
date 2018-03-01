@@ -148,6 +148,68 @@ describe('Kibi Automatic Join Visualization Controller', function () {
 
   noDigestPromises.activateForSuite();
 
+  describe('getButtonLabel', function () {
+
+    const label = 'Correct count is {0}';
+    const data = [
+      {
+        button: {
+          label,
+          targetCount: undefined
+        },
+        addApproximate: false,
+        expectedLabel: 'Correct count is ?'
+      },
+      {
+        button: {
+          label,
+          targetCount: 0
+        },
+        addApproximate: false,
+        expectedLabel: 'Correct count is 0'
+      },
+      {
+        button: {
+          label,
+          targetCount: 10
+        },
+        addApproximate: false,
+        expectedLabel: 'Correct count is 10'
+      },
+      {
+        button: {
+          label,
+          targetCount: undefined
+        },
+        addApproximate: true,
+        expectedLabel: 'Correct count is ?'
+      },
+      {
+        button: {
+          label,
+          targetCount: 0
+        },
+        addApproximate: true,
+        expectedLabel: 'Correct count is ~0'
+      },
+      {
+        button: {
+          label,
+          targetCount: 10
+        },
+        addApproximate: true,
+        expectedLabel: 'Correct count is ~10'
+      }
+    ];
+
+    _.each(data, (entry) => {
+      it('should compute correct label: ' + entry.expectedLabel, function () {
+        init({});
+        expect($scope.getButtonLabel(entry.button, entry.addApproximate)).to.equal(entry.expectedLabel);
+      });
+    });
+  });
+
   describe('_constructButtons', function () {
     it('should build the buttons - with index patterns', function (done) {
       const relations = [

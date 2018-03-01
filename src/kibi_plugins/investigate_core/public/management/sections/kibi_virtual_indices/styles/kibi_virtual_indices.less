@@ -1,3 +1,18 @@
+@import (reference) "~ui/kibi/styles/kibi_variables";
+@import (reference) "~ui/styles/mixins";
+
 #virtual_indices_editor {
   margin-left: 25px;
+}
+
+.virtual_indices_editor {
+
+  .datasource-tree-wrapper {
+    height: 350px;
+    border: 1px solid @kibi-light-border;
+    overflow: scroll;
+    border-radius: @siren-radius;
+    .unselectable();
+  }
+
 }

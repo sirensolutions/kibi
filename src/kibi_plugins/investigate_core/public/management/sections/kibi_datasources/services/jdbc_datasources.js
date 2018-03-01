@@ -62,6 +62,23 @@ uiModules
       });
     }
 
+    getMetadata(datasourceName, catalog, schema) {
+      if (!datasourceName) {
+        return Promise.resolve([]);
+      }
+      return $http({
+        url: `${this.datasourceBaseUrl}/${datasourceName}/_metadata`,
+        method: 'POST',
+        params: {
+          catalog,
+          schema
+        }
+      })
+      .then(res => {
+        return res.data;
+      });
+    }
+
   }
 
   return new JdbcDatasources();

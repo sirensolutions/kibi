@@ -224,6 +224,8 @@ function formatStack(err) {
     stackMsg = err.body.err + '\n\n' + stackMsg;
   } else if (err.error && err.error.stack) {
     stackMsg = err.error.stack;
+  } else if (err.data) {
+    stackMsg = JSON.stringify(err.data);
   }
   // kibi: end
 

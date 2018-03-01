@@ -1,10 +1,9 @@
-import { find, noop } from 'lodash';
+import { find, noop, sortBy } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import '../styles/kibi_virtual_indices.less';
 import '../styles/saved_virtual_indices_finder.less';
 import template from 'plugins/investigate_core/management/sections/kibi_virtual_indices/index.html';
-import { CONFIRM_BUTTON, CANCEL_BUTTON } from 'ui_framework/components/modal/confirm_modal';
 
 uiRoutes
 .when('/management/siren/virtualindices', {
@@ -15,46 +14,174 @@ uiRoutes
   template,
   reloadOnSearch: false,
   resolve: {
-    virtualIndex: function ($route, courier, jdbcDatasources) {
-      //first try to get it from _siren/connector
+    virtualIndex: function ($route, courier, jdbcDatasources, kbnUrl, createNotifier) {
+      const notify = createNotifier({
+        location: 'Virtual indices editor'
+      });
       return jdbcDatasources.getVirtualIndex($route.current.params.id)
-      .then(virtualIndex => {
-        return virtualIndex;
-      })
-      .catch(err => {
-        courier.redirectWhenMissing({
-          virtualIndex: '/management/siren/virtualindices'
-        });
+      .catch(error => {
+        if (error.status === 404) {
+          notify.error(`Virtual index ${$route.current.params.id} not found.`);
+        } else {
+          notify.error(error);
+        }
+        kbnUrl.redirect('/management/siren/virtualindices');
       });
     }
   }
 });
 
-function controller($scope, $route, jdbcDatasources, createNotifier, es, confirmModal, $element, kbnUrl) {
+function controller($scope, $route, jdbcDatasources, createNotifier, confirmModal, $element, kbnUrl) {
+
+  $scope.virtualIndex = {};
+
+  const notify = createNotifier({
+    location: 'Virtual indices editor'
+  });
+
+  const resetBrowser = function () {
+    $scope.displayDatasourceBrowser = false;
+
+    $scope.datasourceMetadata = {
+      name: '',
+      toggled: false,
+      children: []
+    };
+  };
+  resetBrowser();
+
+  const selectResource = function (node) {
+    $scope.virtualIndex.key = null;
+    $scope.virtualIndex.resource = node.name;
+    if (node.catalog !== '') {
+      $scope.virtualIndex.catalog = node.catalog;
+    } else {
+      $scope.virtualIndex.catalog = null;
+    }
+    if (node.schema !== '') {
+      $scope.virtualIndex.schema = node.schema;
+    } else {
+      $scope.virtualIndex.schema = null;
+    }
+  };
+
+  const loadResources = function (node) {
+    const datasourceName = $scope.datasource;
+    return jdbcDatasources.getMetadata($scope.datasource, node.catalog, node.name)
+      .then(metadata => {
+        if (datasourceName !== $scope.datasource) {
+          return;
+        }
+        const catalogResult = find(metadata.catalogs, result => result.name === node.catalog);
+        if (!catalogResult) {
+          return [];
+        }
+
+        const schemaResult = find(catalogResult.schemas, result => result.name === node.name);
+        if (schemaResult) {
+          return sortBy(schemaResult.resources.map(schema => ({
+            schema: node.name,
+            catalog: node.catalog,
+            name: schema.name,
+            toggleFunction: selectResource,
+            type: 'resource'
+          })), node => node.name);
+        }
+        return [];
+      })
+      .catch(error => {
+        if (datasourceName !== $scope.datasource) {
+          return;
+        }
+        notify.error(error);
+        throw error;
+      });
+  };
+
+  const loadSchemas = function (node) {
+    const datasourceName = $scope.datasource;
+    return jdbcDatasources.getMetadata($scope.datasource, node.name)
+    .then(metadata => {
+      if (datasourceName !== $scope.datasource) {
+        return;
+      }
+      const catalogResult = find(metadata.catalogs, result => result.name === node.name);
+      if (catalogResult) {
+        return sortBy(catalogResult.schemas.map(schema => ({
+          name: schema.name,
+          type: 'schema',
+          catalog: node.name,
+          toggled: false,
+          loaded: false,
+          childrenFunction: loadResources,
+          children: []
+        })), node => node.name);
+      }
+      return [];
+    })
+    .catch(error => {
+      if (datasourceName !== $scope.datasource) {
+        return;
+      }
+      notify.error(error);
+      throw error;
+    });
+  };
+
+  const loadCatalogs = function (node) {
+    const datasourceName = $scope.datasource;
+    return jdbcDatasources.getMetadata(datasourceName)
+    .then(metadata => {
+      if (datasourceName !== $scope.datasource) {
+        return;
+      }
+      return sortBy(metadata.catalogs.map(catalog => ({
+        name: catalog.name,
+        type: 'catalog',
+        toggled: false,
+        childrenFunction: loadSchemas,
+        children: []
+      })), node => node.name);
+    })
+    .catch(error => {
+      if (datasourceName !== $scope.datasource) {
+        return;
+      }
+      notify.error(error);
+      throw error;
+    });
+  };
+
+  $scope.$watch('datasource', datasourceName => {
+    if (!datasourceName) {
+      resetBrowser();
+      return;
+    }
+    $scope.displayDatasourceBrowser = true;
+    $scope.datasourceMetadata = {
+      name: datasourceName,
+      type: 'datasource',
+      childrenFunction: loadCatalogs,
+      loaded: false,
+      children: [],
+      toggled: false
+    };
+  });
 
   $scope.isNew = true;
   if ($route.current.locals.virtualIndex) {
     $scope.virtualIndex = $route.current.locals.virtualIndex._source;
     $scope.virtualIndex.id = $route.current.locals.virtualIndex._id;
+    $scope.datasource = $scope.virtualIndex.datasource;
     $scope.isNew = false;
   }
-
-  const notify = createNotifier({
-    location: 'Virtual Index Pattern Editor'
-  });
 
   $scope.isValid = function () {
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };
 
   $scope.isDeleteValid = function () {
-    return $scope.virtualIndex && $scope.virtualIndex.id;
-  };
-
-  const fetchVirtualIndices = function () {
-    jdbcDatasources.listVirtualIndices().then(virtualIndexPatterns => {
-      $scope.virtualIndexPatterns = virtualIndexPatterns;
-    });
+    return !$scope.isNew;
   };
 
   $scope.saveObject = function () {
@@ -68,7 +195,7 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
     const index = {
       _id: $scope.virtualIndex.id,
       _source: {
-        datasource: $scope.datasource._id ? $scope.datasource._id : $scope.datasource,
+        datasource: $scope.datasource,
         resource: $scope.virtualIndex.resource,
         key: $scope.virtualIndex.key,
         catalog: $scope.virtualIndex.catalog,
@@ -100,8 +227,11 @@ function controller($scope, $route, jdbcDatasources, createNotifier, es, confirm
   $scope.jdbcDatasources = [];
   jdbcDatasources.list().then(datasources => {
     $scope.jdbcDatasources = datasources;
-    if ($scope.virtualIndex) {
-      $scope.datasource = find($scope.jdbcDatasources, '_id', $scope.virtualIndex.datasource);
+    if (!$scope.isNew) {
+      const result = find($scope.jdbcDatasources, '_id', $scope.virtualIndex.datasource);
+      if (result) {
+        $scope.datasource = result._id;
+      }
     }
   });
 
@@ -149,10 +279,7 @@ uiModules
         if (match) {
           return false;
         }
-        if (input.toLowerCase() !== input) {
-          return false;
-        }
-        return true;
+        return input.toLowerCase() === input;
       };
 
       ngModel.$validators.indexNameInput = function (modelValue, viewValue) {

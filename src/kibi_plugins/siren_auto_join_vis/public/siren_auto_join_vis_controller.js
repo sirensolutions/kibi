@@ -320,74 +320,66 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     });
   };
 
-  const getNewButtons = function (relations, existingButtons) {
-    const relationsWithNoButton = [];
-    const newButtons = [];
-    const promises = [];
-    _.each(relations, (rel) => {
-      const button = _.find(existingButtons, (button) => {
-        return button.indexRelationId === rel.id;
-      });
-      if (!button && rel.domain.type === 'INDEX_PATTERN') {
-        relationsWithNoButton.push(rel);
-      }
-    });
+  const getButtons = function (relations) {
+    return Promise.all([
+      savedDashboards.find(),
+      savedSearches.find(),
+      ontologyClient.getEntities()
+    ])
+    .then(res => {
+      const savedDashboards = res[0].hits;
+      const savedSearches = res[1].hits;
+      const entities = res[2];
 
-    _.each(relationsWithNoButton, (rel) => {
-      const button = {
-        indexRelationId: rel.id,
-        domainIndexPattern: rel.domain.id,
-        sourceDashboardId: null,
-        targetDashboardId: null,
-        status: 'default'
-      };
-      if (rel.range.type === 'VIRTUAL_ENTITY') {
-        button.type = 'VIRTUAL_ENTITY';
-        promises.push(ontologyClient.getEntityById(rel.range.id)
-          .then((virtualEntity) => {
-            button.id = rel.id + '-ve-' + rel.range.id;
-            button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
-            newButtons.push(button);
-          })
-        );
-      } else if (rel.range.type === 'INDEX_PATTERN') {
-        button.type = 'INDEX_PATTERN';
+      const buttons = [];
 
-        promises.push(
-          Promise.all([
-            savedDashboards.find(),
-            savedSearches.find()
-          ])
-          .then(([savedDashboards, savedSearches]) => {
-            const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
-              const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
-              return searchSource.index === rel.range.id;
+      _(relations)
+      .filter(rel => rel.domain.type === 'INDEX_PATTERN')
+      .each(rel => {
+        const button = {
+          indexRelationId: rel.id,
+          domainIndexPattern: rel.domain.id,
+          sourceDashboardId: null,
+          targetDashboardId: null,
+          status: 'default'
+        };
+
+        if (rel.range.type === 'VIRTUAL_ENTITY') {
+          const virtualEntity = _.find(entities, 'id', rel.range.id);
+          button.type = 'VIRTUAL_ENTITY';
+          button.id = rel.id + '-ve-' + rel.range.id;
+          button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
+          buttons.push(button);
+        } else if (rel.range.type === 'INDEX_PATTERN') {
+          button.type = 'INDEX_PATTERN';
+          const compatibleSavedSearches = _.filter(savedSearches, savedSearch => {
+            const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
+            return searchSource.index === rel.range.id;
+          });
+          _.each(compatibleSavedSearches, compatibleSavedSearch => {
+            const compatibleDashboards = _.filter(savedDashboards, savedDashboard => {
+              return savedDashboard.savedSearchId === compatibleSavedSearch.id;
             });
-
-            _.each(compatibleSavedSearches, (compatibleSavedSearch) => {
-              const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
-                return savedDashboard.savedSearchId === compatibleSavedSearch.id;
-              });
-              _.each(compatibleDashboards, (compatibleDashboard) => {
-                const clonedButton = _.clone(button);
-                clonedButton.targetDashboardId = compatibleDashboard.id;
-                clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
-                clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
-                newButtons.push(clonedButton);
-              });
+            _.each(compatibleDashboards, compatibleDashboard => {
+              const clonedButton = _.clone(button);
+              clonedButton.targetDashboardId = compatibleDashboard.id;
+              clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
+              clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
+              buttons.push(clonedButton);
             });
-          })
-        );
-      }
-    });
-    return Promise.all(promises).then(() => {
-      return newButtons;
+          });
+        }
+      })
+      .value();
+
+      return buttons;
     });
   };
 
+
   const _constructButtons = $scope._constructButtons = function (indexPatternId) {
     return ontologyClient.getRelations().then((relations) => {
-      return getNewButtons(relations, []).then((newButtons) => {
+      return getButtons(relations).then((newButtons) => {
         const buttonDefs = _.filter(newButtons,
           btn => relationsHelper.validateRelationIdWithRelations(btn.indexRelationId, relations));
 

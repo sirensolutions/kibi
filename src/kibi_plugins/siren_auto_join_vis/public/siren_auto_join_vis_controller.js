@@ -320,22 +320,60 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     });
   };
 
-  const getButtons = function (relations) {
+  const _getButtons = function (relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap) {
+    const buttons = [];
+    _.each(relations, rel => {
+      if (rel.domain.type === 'INDEX_PATTERN') {
+        const button = {
+          type: rel.range.type,
+          indexRelationId: rel.id,
+          domainIndexPattern: rel.domain.id,
+          sourceDashboardId: null,
+          targetDashboardId: null,
+          status: 'default'
+        };
+
+        if (button.type === 'VIRTUAL_ENTITY') {
+          const virtualEntity = _.find(entities, 'id', rel.range.id);
+          button.id = rel.id + '-ve-' + rel.range.id;
+          button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
+          buttons.push(button);
+        } else if (button.type === 'INDEX_PATTERN') {
+          const compatibleSavedSearches = compatibleSavedSearchesMap[rel.range.id];
+          _.each(compatibleSavedSearches, compatibleSavedSearch => {
+            const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
+            _.each(compatibleDashboards, compatibleDashboard => {
+              const clonedButton = _.clone(button);
+              clonedButton.targetDashboardId = compatibleDashboard.id;
+              clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
+              clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
+              buttons.push(clonedButton);
+            });
+          });
+        }
+      }
+    });
+
+    return buttons;
+  };
+
+
+  const constructButtons = $scope.constructButtons = function (indexPatternId) {
     return Promise.all([
+      ontologyClient.getRelations(),
       savedDashboards.find(),
       savedSearches.find(),
       ontologyClient.getEntities()
-    ])
-    .then(res => {
-      const savedDashboards = res[0].hits;
-      const savedSearches = res[1].hits;
-      const entities = res[2];
-
-      const buttons = [];
+    ]).then(res => {
+      const relations = res[0];
+      const savedDashboards = res[1].hits;
+      const savedSearches = res[2].hits;
+      const entities = res[3];
 
       // build maps once to avoid doing the lookups inside the loop
       const compatibleSavedSearchesMap = {};
       const compatibleDashboardsMap = {};
+
       _.each(savedSearches, savedSearch => {
         const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
         if (!compatibleSavedSearchesMap[searchSource.index]) {
@@ -351,174 +389,122 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         compatibleDashboardsMap[savedDashboard.savedSearchId].push(savedDashboard);
       });
 
-      _.each(relations, rel => {
-        if (rel.domain.type === 'INDEX_PATTERN') {
-          const button = {
-            type: rel.range.type,
-            indexRelationId: rel.id,
-            domainIndexPattern: rel.domain.id,
-            sourceDashboardId: null,
-            targetDashboardId: null,
-            status: 'default'
-          };
+      const newButtons = _getButtons(relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap);
 
-          if (button.type === 'VIRTUAL_ENTITY') {
-            const virtualEntity = _.find(entities, 'id', rel.range.id);
-            button.id = rel.id + '-ve-' + rel.range.id;
-            button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
-            buttons.push(button);
-          } else if (button.type === 'INDEX_PATTERN') {
-            const compatibleSavedSearches = compatibleSavedSearchesMap[rel.range.id];
-            _.each(compatibleSavedSearches, compatibleSavedSearch => {
-              const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
-              _.each(compatibleDashboards, compatibleDashboard => {
-                const clonedButton = _.clone(button);
-                clonedButton.targetDashboardId = compatibleDashboard.id;
-                clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
-                clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
-                buttons.push(clonedButton);
-              });
-            });
+      const buttonDefs = _.filter(
+        newButtons,
+        btn => relationsHelper.validateRelationIdWithRelations(btn.indexRelationId, relations)
+      );
+
+      const difference = newButtons.length - buttonDefs.length;
+      if (!edit && difference === 1) {
+        notify.warning(difference + ' button refers to a non existing relation');
+      } else if (!edit && difference > 1) {
+        notify.warning(difference + ' buttons refer to a non existing relation');
+      }
+
+      if (!edit) {
+        const dashboardIds = [ currentDashboardId ];
+        _.each(buttonDefs, button => {
+          if (!_.contains(dashboardIds, button.targetDashboardId)) {
+            dashboardIds.push(button.targetDashboardId);
           }
-        }
-      });
+        });
 
-      return buttons;
-    });
-  };
+        return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, false)
+        .then(metas => {
+          return {
+            metas,
+            buttonDefs
+          };
+        })
+        .then(({ metas, buttonDefs }) => {
+          let currentDashboardIndex;
+          const dashboardIdIndexPair = new Map();
 
-
-  const _constructButtons = $scope._constructButtons = function (indexPatternId) {
-    return ontologyClient.getRelations().then((relations) => {
-      return getButtons(relations).then((newButtons) => {
-        const buttonDefs = _.filter(newButtons,
-          btn => relationsHelper.validateRelationIdWithRelations(btn.indexRelationId, relations));
-
-        const difference = newButtons.length - buttonDefs.length;
-        if (!edit && difference === 1) {
-          notify.warning(difference + ' button refers to a non existing relation');
-        } else if (!edit && difference > 1) {
-          notify.warning(difference + ' buttons refer to a non existing relation');
-        }
-
-        if (!edit) {
-          const dashboardIds = [ currentDashboardId ];
-          _.each(buttonDefs, function (button) {
-            if (!_.contains(dashboardIds, button.targetDashboardId)) {
-              dashboardIds.push(button.targetDashboardId);
+          for (let i = 0; i < metas.length; i++) {
+            dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
+            if (metas[i].savedDash.id === currentDashboardId) {
+              currentDashboardIndex = metas[i].savedSearchMeta.index;
             }
-          });
+          }
 
-          return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, false)
-          .then((metas) => {
-            return {
-              metas,
-              buttonDefs
-            };
-          })
-          .then(({ metas, buttonDefs }) => {
-            let currentDashboardIndex;
-            const dashboardIdIndexPair = new Map();
+          if (!currentDashboardIndex) {
+            return [];
+          }
 
-            for (let i = 0; i < metas.length; i++) {
-              dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
-              if (metas[i].savedDash.id === currentDashboardId) {
-                currentDashboardIndex = metas[i].savedSearchMeta.index;
-              }
-            }
+          const buttons = sirenSequentialJoinVisHelper.constructButtonsArray(
+            buttonDefs,
+            relations,
+            currentDashboardIndex,
+            currentDashboardId,
+            dashboardIdIndexPair
+          );
 
-            if (!currentDashboardIndex) {
-              return [];
-            }
+          for (let i = 0; i < buttons.length; i++) {
+            // disable buttons until buttons are ready
+            buttons[i].disabled = true;
+            // retain the buttons order
+            buttons[i].btnIndex = i;
+          }
+          if (!buttons.length) {
+            $scope.vis.error =
+              `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
+              `No button has a source index matching the current dashboard index: ${currentDashboardIndex}.`;
+          }
 
-            const buttons = sirenSequentialJoinVisHelper.constructButtonsArray(
-              buttonDefs,
-              relations,
-              currentDashboardIndex,
-              currentDashboardId,
-              dashboardIdIndexPair
-            );
+          // populate subButtons for EID buttons and add spinner flag
+          _.each(buttons, (button) => {
+            if (button.type === 'VIRTUAL_ENTITY') {
+              const relationsByDomain = _.filter(relations, rel => rel.domain.id === button.targetIndexPatternId);
 
-            for (let i = 0; i < buttons.length; i++) {
-              // disable buttons until buttons are ready
-              buttons[i].disabled = true;
-              // retain the buttons order
-              buttons[i].btnIndex = i;
-            }
-            if (!buttons.length) {
-              $scope.vis.error =
-                `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
-                `No button has a source index matching the current dashboard index: ${currentDashboardIndex}.`;
-            }
+              button.sub = {};
+              button.hasSub = false;
 
-            // populate subButtons for EID buttons and add spinner flag
-            const subButtonPromises = [];
-            _.each(buttons, (button) => {
-              if (button.type === 'VIRTUAL_ENTITY') {
-                subButtonPromises.push(
-                  ontologyClient.getRelationsByDomain(button.targetIndexPatternId).then((relationsByDomain) => {
-                    button.sub = {};
-                    button.hasSub = false;
-                    return Promise.all([
-                      savedDashboards.find(),
-                      savedSearches.find()
-                    ])
-                    .then(([savedDashboards, savedSearches]) => {
-                      _.each(relationsByDomain, (relByDomain) => {
-                        if (relByDomain.range.id !== button.sourceIndexPatternId) {
-                          // filter the savedSearch with the same indexPattern
-                          const compatibleSavedSearches = _.filter(savedSearches.hits, (savedSearch) => {
-                            const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
-                            return searchSource.index === relByDomain.range.id;
-                          });
+              _.each(relationsByDomain, relByDomain => {
+                if (relByDomain.range.id !== button.sourceIndexPatternId) {
+                  // filter the savedSearch with the same indexPattern
+                  const compatibleSavedSearches = compatibleSavedSearchesMap[relByDomain.range.id];
+                  _.each(compatibleSavedSearches, compatibleSavedSearch => {
+                    const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
+                    _.each(compatibleDashboards, compatibleDashboard => {
+                      const subButton = sirenSequentialJoinVisHelper.constructSubButton(
+                        button,
+                        compatibleDashboard,
+                        relByDomain
+                      );
+                      sirenSequentialJoinVisHelper.addClickHandlerToButton(subButton);
 
-                          _.each(compatibleSavedSearches, (compatibleSavedSearch) => {
-                            const compatibleDashboards = _.filter(savedDashboards.hits, (savedDashboard) => {
-                              return savedDashboard.savedSearchId === compatibleSavedSearch.id;
-                            });
-                            _.each(compatibleDashboards, (compatibleDashboard) => {
-                              const subButton = sirenSequentialJoinVisHelper.constructSubButton(button,
-                                compatibleDashboard, relByDomain);
-
-                              sirenSequentialJoinVisHelper.addClickHandlerToButton(subButton);
-
-                              const key = relByDomain.directLabel;
-                              if (!button.sub[key]) {
-                                button.sub[key] = [];
-                              }
-                              if ($scope.btnCountsEnabled()) {
-                                subButton.showSpinner = true;
-                              }
-                              button.hasSub = true;
-                              button.sub[key].push(subButton);
-                            });
-                          });
-                        }
-                      });
+                      const key = relByDomain.directLabel;
+                      if (!button.sub[key]) {
+                        button.sub[key] = [];
+                      }
+                      if ($scope.btnCountsEnabled()) {
+                        subButton.showSpinner = true;
+                      }
+                      button.hasSub = true;
+                      button.sub[key].push(subButton);
                     });
-                  })
-                );
-              } else {
-                if ($scope.btnCountsEnabled()) {
-                  button.showSpinner = true;
+                  });
                 }
-              }
-            });
+              });
 
-            return Promise.all(subButtonPromises).then(() => {
-              addAlternativeSubHierarchy(buttons);
-              return buttons;
-            });
-          })
-          .catch(notify.error);
-        } else {
-          const unFilteredButtons = sirenSequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations);
-          const filteredButtons = _.filter(unFilteredButtons, (button) => {
-            return button.domainIndexPattern === indexPatternId;
+            } else {
+              if ($scope.btnCountsEnabled()) {
+                button.showSpinner = true;
+              }
+            }
           });
-          return filteredButtons;
-        }
-      });
+
+          addAlternativeSubHierarchy(buttons);
+          return buttons;
+        })
+        .catch(notify.error);
+      } else {
+        const unFilteredButtons = sirenSequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations);
+        const filteredButtons = _.filter(unFilteredButtons, button => button.domainIndexPattern === indexPatternId);
+        return filteredButtons;
+      }
     });
   };
 
@@ -542,7 +528,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
     let promise;
     if (!$scope.buttons || !$scope.buttons.length || edit) {
-      promise = _constructButtons.call(self, indexPatternId);
+      promise = constructButtons.call(self, indexPatternId);
     } else {
       promise = Promise.resolve($scope.buttons);
     }

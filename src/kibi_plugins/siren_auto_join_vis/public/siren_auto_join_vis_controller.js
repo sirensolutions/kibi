@@ -333,44 +333,55 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
       const buttons = [];
 
-      _(relations)
-      .filter(rel => rel.domain.type === 'INDEX_PATTERN')
-      .each(rel => {
-        const button = {
-          indexRelationId: rel.id,
-          domainIndexPattern: rel.domain.id,
-          sourceDashboardId: null,
-          targetDashboardId: null,
-          status: 'default'
-        };
-
-        if (rel.range.type === 'VIRTUAL_ENTITY') {
-          const virtualEntity = _.find(entities, 'id', rel.range.id);
-          button.type = 'VIRTUAL_ENTITY';
-          button.id = rel.id + '-ve-' + rel.range.id;
-          button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
-          buttons.push(button);
-        } else if (rel.range.type === 'INDEX_PATTERN') {
-          button.type = 'INDEX_PATTERN';
-          const compatibleSavedSearches = _.filter(savedSearches, savedSearch => {
-            const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
-            return searchSource.index === rel.range.id;
-          });
-          _.each(compatibleSavedSearches, compatibleSavedSearch => {
-            const compatibleDashboards = _.filter(savedDashboards, savedDashboard => {
-              return savedDashboard.savedSearchId === compatibleSavedSearch.id;
-            });
-            _.each(compatibleDashboards, compatibleDashboard => {
-              const clonedButton = _.clone(button);
-              clonedButton.targetDashboardId = compatibleDashboard.id;
-              clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
-              clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
-              buttons.push(clonedButton);
-            });
-          });
+      // build maps once to avoid doing the lookups inside the loop
+      const compatibleSavedSearchesMap = {};
+      const compatibleDashboardsMap = {};
+      _.each(savedSearches, savedSearch => {
+        const searchSource = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
+        if (!compatibleSavedSearchesMap[searchSource.index]) {
+          compatibleSavedSearchesMap[searchSource.index] = [];
         }
-      })
-      .value();
+        compatibleSavedSearchesMap[searchSource.index].push(savedSearch);
+      });
+
+      _.each(savedDashboards, savedDashboard => {
+        if (!compatibleDashboardsMap[savedDashboard.savedSearchId]) {
+          compatibleDashboardsMap[savedDashboard.savedSearchId] = [];
+        }
+        compatibleDashboardsMap[savedDashboard.savedSearchId].push(savedDashboard);
+      });
+
+      _.each(relations, rel => {
+        if (rel.domain.type === 'INDEX_PATTERN') {
+          const button = {
+            type: rel.range.type,
+            indexRelationId: rel.id,
+            domainIndexPattern: rel.domain.id,
+            sourceDashboardId: null,
+            targetDashboardId: null,
+            status: 'default'
+          };
+
+          if (button.type === 'VIRTUAL_ENTITY') {
+            const virtualEntity = _.find(entities, 'id', rel.range.id);
+            button.id = rel.id + '-ve-' + rel.range.id;
+            button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
+            buttons.push(button);
+          } else if (button.type === 'INDEX_PATTERN') {
+            const compatibleSavedSearches = compatibleSavedSearchesMap[rel.range.id];
+            _.each(compatibleSavedSearches, compatibleSavedSearch => {
+              const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
+              _.each(compatibleDashboards, compatibleDashboard => {
+                const clonedButton = _.clone(button);
+                clonedButton.targetDashboardId = compatibleDashboard.id;
+                clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
+                clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
+                buttons.push(clonedButton);
+              });
+            });
+          }
+        }
+      });
 
       return buttons;
     });

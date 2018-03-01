@@ -149,7 +149,7 @@ Sample X-Pack role definition:
   "indices" : [
     {
       "names" : [ "*" ],
-      "privileges" : [ "create_index" ]
+      "privileges" : [ "create_index", "indices:data/read/get", "indices:admin/siren/connector" ]
     },
     {
       "names" : [ ".siren-federate-*" ],
@@ -214,9 +214,9 @@ sirenadmin:
         - SIREN_READWRITE
         - indices:admin/create
         - indices:admin/siren/connector/*
-    'article':
+    '*':
       '*':
-        - SIREN_READONLY
+        - SIREN_COMPOSITE
 ----
 
 Example X-Pack role allowed to manage virtual indices starting with `db-`:
@@ -239,6 +239,7 @@ Example X-Pack role allowed to manage virtual indices starting with `db-`:
       "names" : [ "db-*" ],
       "privileges" : [
         "read",
+        "create_index",
         "view_index_metadata",
         "indices:data/siren",
         "indices:siren",
@@ -257,12 +258,11 @@ In order to search virtual indices, users must have the
 `indices:data/siren/connector/*` permissions on these indices in addition to
 standard standard read and search permissions.
 
-Example Search Guard role allowed to search virtual indices starting with
-`db-`:
+Example Search Guard role allowed to search virtual indices starting with `db-`:
 
 [source,yaml]
 ----
-sirenauser:
+sirenuser:
   cluster:
     - KIBI_CLUSTER
   indices:
@@ -272,22 +272,17 @@ sirenauser:
     'db-*':
       '*':
         - KIBI_READONLY
-        - indices:admin/siren/connector/*
-    'article':
-      '*':
-        - KIBI_READONLY
+        - indices:data/siren/connector/*
 ----
 
-Example X-Pack role allowed to manage virtual indices starting with `db-`:
+Example X-Pack role allowed to search virtual indices starting with `db-`:
 
 [source,json]
 ----
 {
   "cluster": [
-    "cluster:admin/siren/connector"
-    "cluster:admin/plugin/siren/license",
-    "cluster:siren/internal",
-    "manage"
+    "cluster:admin/plugin/siren/license/get",
+    "cluster:siren/internal"
   ],
   "indices" : [
     {
@@ -302,13 +297,13 @@ Example X-Pack role allowed to manage virtual indices starting with `db-`:
         "indices:data/siren",
         "indices:siren",
         "indices:admin/version/get",
-        "indices:admin/get",
-        "indices:admin/siren/connector"
+        "indices:admin/get"
       ]
     }
   ]
 }
 ----
+
 [[siren-federate-jdbc-compat]]
 === JDBC driver installation and compatibility
 

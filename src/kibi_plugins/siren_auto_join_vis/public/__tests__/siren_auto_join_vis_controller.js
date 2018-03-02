@@ -210,7 +210,7 @@ describe('Kibi Automatic Join Visualization Controller', function () {
     });
   });
 
-  describe('_constructButtons', function () {
+  describe('constructButtons', function () {
     it('should build the buttons - with index patterns', function (done) {
       const relations = [
         {
@@ -228,7 +228,7 @@ describe('Kibi Automatic Join Visualization Controller', function () {
       ];
 
       init({ relations });
-      $scope._constructButtons()
+      $scope.constructButtons()
       .then((buttons) => {
         expect(buttons).to.have.length(1);
         expect(buttons[0].domainIndexPattern).to.be.eql('ib');
@@ -276,7 +276,7 @@ describe('Kibi Automatic Join Visualization Controller', function () {
         }
       ];
       init({ relations, entities });
-      $scope._constructButtons()
+      $scope.constructButtons()
       .then((buttons) => {
         expect(buttons).to.have.length(1);
         expect(buttons[0].domainIndexPattern).to.be.eql('ib');

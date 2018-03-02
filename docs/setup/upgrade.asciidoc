@@ -8,7 +8,7 @@ for information on how to upgrade from Kibi 4.x , make sure to read the
 An existing {kibi-name} installation can be upgraded as follows:
 
 - backup the `.siren` index.
-- backup the {kibi-name} configuration file (`config/siren.yml`)
+- backup the {kibi-name} configuration file (`config/investigate.yml`)
 - backup the `.sirenaccess` if ACL (Access Control Layer) is enabled.
 - {elastic-ref}/setup-upgrade.html[upgrade Elasticsearch];
 - before restarting each Elasticsearch node, make sure to install a compatible version of the
@@ -41,7 +41,7 @@ You can know more about its options by executing the following:
 $ ./bin/investigate backup --help
 ----
 
-For example, the following line will dump in `<MY_FOLDER>` the `.siren` index and the `.sirenaccess` index if the option `investigate_access_control.acl.enabled` is true in `siren.yml`:
+For example, the following line will dump in `<MY_FOLDER>` the `.siren` index and the `.sirenaccess` index if the option `investigate_access_control.acl.enabled` is true in `investigate.yml`:
 
 [source,shell]
 ----
@@ -60,7 +60,7 @@ You can know more about its options by executing the following:
 $ ./bin/investigate restore --help
 ----
 
-For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.sirenaccess` as well if the option `investigate_access_control.acl.enabled` is true in `siren.yml`:
+For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.sirenaccess` as well if the option `investigate_access_control.acl.enabled` is true in `investigate.yml`:
 
 [source,shell]
 ----

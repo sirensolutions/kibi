@@ -22,7 +22,7 @@ and can be stopped by pressing `Ctrl-C`.
 [[windows-configuring]]
 ==== Configuring {kibi-name} via Config File
 
-{kibi-name} loads its configuration from the `$KIBI_HOME/config/siren.yml`
+{kibi-name} loads its configuration from the `$INVESTIGATE_HOME/config/investigate.yml`
 file by default. The format of this config file is explained in
 <<settings>>.
 
@@ -41,7 +41,7 @@ directories so that you do not delete important data later on.
 |=======================================================================
 | Type | Description | Default Location | Setting
 | home
-  | {kibi-name} home directory or `%KIBI_HOME%`
+  | {kibi-name} home directory or `%INVESTIGATE_HOME%`
  d| Directory created by unpacking the archive; in demo distributions, the
     directory is `kibi`.
  d|
@@ -49,28 +49,28 @@ directories so that you do not delete important data later on.
 | bin
   | Binary scripts including `kibi` to start the {kibi-name} server
     and `kibi-plugin` to install plugins
-  | %KIBI_HOME%\bin
+  | %INVESTIGATE_HOME%\bin
  d|
 
 | config
-  | Configuration files including `siren.yml`
-  | %KIBI_HOME%\config
+  | Configuration files including `investigate.yml`
+  | %INVESTIGATE_HOME%\config
  d|
 
 | data
   | The location of the data files written to disk by {kibi-name} and its plugins
-  | %KIBI_HOME%\data
+  | %INVESTIGATE_HOME%\data
  d|
 
 | optimize
   | Transpiled source code. Certain administrative actions, e.g., `plugin install`,
     result in the source code being retranspiled on the fly.
-  | %KIBI_HOME%\optimize
+  | %INVESTIGATE_HOME%\optimize
  d|
 
 | plugins
   | The location of the plugin files. Each plugin will be contained in a subdirectory.
-  | %KIBI_HOME%\plugins
+  | %INVESTIGATE_HOME%\plugins
  d|
 
 |=======================================================================

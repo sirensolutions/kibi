@@ -115,7 +115,7 @@ bin/investigate plugin --install username/sample-plugin --timeout 1m
 ==== Plugins and Custom {kibi-name} Configurations
 
 Use the `-c` or `--config` options to specify the path to the configuration file used to start {kibi-name}. By default, {kibi-name}
-uses the configuration file `config/siren.yml`. When you change your installed plugins, the `bin/investigate plugin` command
+uses the configuration file `config/investigate.yml`. When you change your installed plugins, the `bin/investigate plugin` command
 restarts the {kibi-name} server. When you are using a customized configuration file, you must specify the
 path to that configuration file each time you use the `bin/investigate plugin` command.
 

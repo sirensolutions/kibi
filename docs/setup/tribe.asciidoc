@@ -14,7 +14,7 @@ the tribe node and administrative actions (such as saving a dashboard) will be s
 [[tribe-configuration]]
 === Configuring {kibi-name} for tribe nodes
 
-Tribe nodes take all of the same configuration options used when configuring Elasticsearch in `siren.yml`.
+Tribe nodes take all of the same configuration options used when configuring Elasticsearch in `investigate.yml`.
 Tribe options are prefixed with `elasticsearch.tribe` and at a minimum requires a url:
 [source,text]
 ----

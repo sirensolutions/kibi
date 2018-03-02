@@ -4,7 +4,7 @@
 The **{kibi-name} Gremlin Server** component is a backend component required by the <<graph_browser,{kibi-name} Graph Browser>>
 visualisation.
 
-In order to enable the Gremlin Server, make sure that `siren.yml` contains
+In order to enable the Gremlin Server, make sure that `investigate.yml` contains
 the following configuration:
 
 ```yml

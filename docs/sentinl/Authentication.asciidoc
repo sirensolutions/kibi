@@ -20,7 +20,7 @@ Access Controll app. For example, default investigate.yml
 +
 ....
 # Access Control configuration
-kibi_access_control:
+investigate_access_control:
   enabled: true
   cookie:
 password: "12345678123456781234567812345678"
@@ -54,7 +54,7 @@ sentinl:
       user_index: 'sentinl_users'
       user_type: 'user' 
       verify_certificate: false
-      path_to_pem: '/home/kibi/.pem/sentinl.pem'
+      path_to_pem: '/home/platform/.pem/sentinl.pem'
       encryption:
         algorithm: 'aes256'
         key: 'b9726b04608ac48ecb0b6918214ade54'

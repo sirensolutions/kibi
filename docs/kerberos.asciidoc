@@ -390,12 +390,12 @@ temporarily in `sg_config.yml` and upload it to the cluster using `sgadmin`.
 === {kibi-name} configuration
 
 To enable SPNEGO support in {kibi-name}, set the
-`kibi_access_control.backends.searchguard.authenticator` option to
+`investigate_access_control.backends.searchguard.authenticator` option to
 `http-negotiate`, in `siren.yml` e.g.:
 
 [source,yaml]
 ----
-kibi_access_control:
+investigate_access_control:
   #... existing options
   backends:
     searchguard:
@@ -409,5 +409,5 @@ using a user defined in Search Guard.
 When SPNEGO support is enabled, cookie based authentication will be disabled;
 if you need to provide both authentications for different networks, it is
 possible to start an additional {kibi-name} instance with
-`kibi_access_control.backend.searchguard.authenticator` set to `http-basic` or
+`investigate_access_control.backend.searchguard.authenticator` set to `http-basic` or
 not set at all.

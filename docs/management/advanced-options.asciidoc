@@ -97,16 +97,15 @@ Markdown.
 
 .{kibi-name} Specific Settings Reference
 [horizontal]
-`kibi:splitTabs` :: Set to true to split dashboard tabs on two lines.
-`kibi:timePrecision` :: Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y.
-`kibi:relations` :: Relations between index patterns and dashboards.
-`kibi:joinLimit` :: Maximum number of unique source values in a relation returned to filter the target documents
-`kibi:session_cookie_expire`:: Set duration of cookie session (in seconds).
-`kibi:enableAllDashboardsCounts`:: Enable counts on all dashboards.
-`kibi:enableAllRelBtnCounts`:: Enable counts on all relational buttons.
-`kibi:defaultDashboardTitle`:: The dashboard that is displayed when clicking on the Dashboard tab for the first time.
-`kibi:graphUseWebGl`  :: Set to false to disable WebGL rendering
-`kibi:graphExpansionLimit`  :: Limit the number of elements to retrieve during the graph expansion.
-`kibi:graphMaxConcurrentCalls`  :: Limit the number of concurrent calls done by the Graph Browser.
-`kibi:graphRelationFetchLimit`  :: Limit the number of relations to retrieve after the graph expansion.
-`kibi:shieldAuthorizationWarning`  :: Set to true to show all authorization warnings.
+`siren:timePrecision` :: Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y.
+`siren:relations` :: Relations between index patterns and dashboards.
+`siren:joinLimit` :: Maximum number of unique source values in a relation returned to filter the target documents
+`siren:session_cookie_expire`:: Set duration of cookie session (in seconds).
+`siren:enableAllDashboardsCounts`:: Enable counts on all dashboards.
+`siren:enableAllRelBtnCounts`:: Enable counts on all relational buttons.
+`siren:defaultDashboardTitle`:: The dashboard that is displayed when clicking on the Dashboard tab for the first time.
+`siren:graphUseWebGl`  :: Set to false to disable WebGL rendering
+`siren:graphExpansionLimit`  :: Limit the number of elements to retrieve during the graph expansion.
+`siren:graphMaxConcurrentCalls`  :: Limit the number of concurrent calls done by the Graph Browser.
+`siren:graphRelationFetchLimit`  :: Limit the number of relations to retrieve after the graph expansion.
+`siren:shieldAuthorizationWarning`  :: Set to true to show all authorization warnings.

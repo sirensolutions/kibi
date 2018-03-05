@@ -43,7 +43,7 @@ with multiple groups of data coming from different indices.
 - The <<kibi_box_plot,Box Plot>> visualization, which displays a box plot chart
   from the data.
 
-- The <<kibi_horizontal_bar_chart,Kibi Horizontal Bar Chart>> visualization,
+- The <<kibi_horizontal_bar_chart,Horizontal Bar Chart>> visualization,
   which displays a horizontal bar chart.
 
 - The <<kibi_multi_chart,Multi Chart>> visualization, which displays

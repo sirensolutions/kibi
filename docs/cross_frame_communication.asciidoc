@@ -21,11 +21,11 @@ a promise fulfilled with the URL.
 
 **Sample usage**:
 
-Put the following code in the container page, replacing `kibiframe` with
+Put the following code in the container page, replacing `investigateframe` with
 the ID of the frame in which {kibi-name} is embedded:
 
 ```
-document.getElementById('kibiframe')
+document.getElementById('investigateframe')
 .contentWindow
 .sireninvestigate
 .generateShortUrl(true, true)
@@ -38,7 +38,7 @@ document.getElementById('kibiframe')
 
 ```
 
-If possible, it is recommended to purge old documents of type `url` from the `.kibi`
+If possible, it is recommended to purge old documents of type `url` from the `.siren`
 index periodically; old documents can be identified by looking at the `createDate` attribute.
 
 [float]
@@ -54,11 +54,11 @@ once the token has been sent to the backend.
 
 **Sample usage**:
 
-Put the following code in the container page, replacing `kibiframe` with the ID
+Put the following code in the container page, replacing `investigateframe` with the ID
 of the frame in which {kibi-name} is embedded:
 
 ```
-document.getElementById('kibiframe')
+document.getElementById('investigateframe')
 .contentWindow
 .sireninvestigate
 .setJWTToken(`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraWJpdXNlciJ9.kZhLu15FwxrX4hPE1ciyzw_NufZ_oH7aSGpLZHachPg`)

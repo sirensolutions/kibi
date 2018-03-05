@@ -1385,7 +1385,7 @@ These errors appear for five seconds as a yellow toaster at the top of the
 screen.
 
 Authorization errors can be hidden by changing the value of the
-*kibi:shieldAuthorizationWarning* setting: click on the _Settings_ tab, then on
+*siren:shieldAuthorizationWarning* setting: click on the _Settings_ tab, then on
 _Advanced_ tab, and uncheck the setting to hide authorization errors messages.
 Regardless of this setting, all authorization errors will still be reported as
 warnings in the logs.
@@ -1423,7 +1423,7 @@ investigate_access_control:
   backend: xpack
 ----
 
-Next, replace the sirenserver role with the following settings; If using a custom configuration, replace the kibi (default: .siren) and access control (default: .sirenaccess) indices with your index names
+Next, replace the sirenserver role with the following settings; If using a custom configuration, replace the siren (default: .siren) and access control (default: .sirenaccess) indices with your index names
 
 [source, json]
 {

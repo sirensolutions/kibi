@@ -579,10 +579,10 @@ kibiserver:
     '*':
       '*':
         - indices:admin/get
-    '?kibi':
+    '?siren':
       '*':
         - ALL
-    '?kibiaccess':
+    '?sirenaccess':
       '*':
         - ALL
 ----
@@ -636,22 +636,22 @@ sentinl:
   cluster:
     - "indices:data/write/bulk*"
     - "indices:admin/template/*"
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
   indices:
     'watcher_alarms*':
       '*':
-        - KIBI_READWRITE
+        - SIREN_READWRITE
         - CREATE_INDEX
     '/(watcher|watcher_alarms)/':
       '*':
-        - KIBI_READWRITE
+        - SIREN_READWRITE
         - CREATE_INDEX
     'readings':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
     'logs*':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
 ----
 
 [float]

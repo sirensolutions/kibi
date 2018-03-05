@@ -25,16 +25,16 @@ Here we assume letsencrypt has been used to provide the certificate.
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
-    server_name kibi.example.com;
+    server_name siren.example.com;
 
     root /var/www/html;
     index index.html index.htm;
 
-    ssl_certificate /etc/letsencrypt/live/kibi.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/kibi.example.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/siren.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/siren.example.com/privkey.pem;
 
-    access_log /var/log/nginx/kibi-ssl.access.log;
-    error_log /var/log/nginx/kibi-ssl.error.log error;
+    access_log /var/log/nginx/siren-ssl.access.log;
+    error_log /var/log/nginx/siren-ssl.error.log error;
 
     include snippets/ssl-params.conf;
 
@@ -92,18 +92,18 @@ Here we assume letsencrypt has been used to provide the certificate.
 
 ```
 <VirtualHost *:443>
-    ServerName kibi.example.com
+    ServerName siren.example.com
     DocumentRoot /var/www/html
     DirectoryIndex index.html index.htm
 
-    CustomLog /var/log/apache2/kibi-ssl.access.log combined
-    ErrorLog /var/log/apache2/kibi-ssl.error.log
+    CustomLog /var/log/apache2/siren-ssl.access.log combined
+    ErrorLog /var/log/apache2/siren-ssl.error.log
 
     SSLEngine on
     SSLStrictSNIVHostCheck off
-    SSLCertificateFile /etc/letsencrypt/live/kibi.example.com/fullchain.pem
-    SSLCertificateKeyFile /etc/letsencrypt/live/kibi.example.com/privkey.pem
-    SSLCACertificateFile /etc/letsencrypt/live/kibi.example.com/chain.pem
+    SSLCertificateFile /etc/letsencrypt/live/siren.example.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/siren.example.com/privkey.pem
+    SSLCACertificateFile /etc/letsencrypt/live/siren.example.com/chain.pem
 
     <location / >
         ProxyPass http://127.0.0.1:5606
@@ -214,7 +214,7 @@ HTTPS must be enabled in Gremlin Server to secure requests from {kibi-name}, eve
 if {kibi-name} is configured behind a reverse SSL proxy.
 
 To enable HTTPS in the Gremlin Server, set the following parameters in the
-`kibi_core.gremlin_server` section of the `config/siren.yml` file:
+`investigate_core.gremlin_server` section of the `config/siren.yml` file:
 
 - **url**: the URL of the Gremlin Server endpoint; make sure that the protocol is set to `https`.
 - **ssl.key_store**: the path to the Gremlin Server certificate in Java KeyStore format.
@@ -228,7 +228,7 @@ E.g.:
 
 [source,yaml]
 ----
-kibi_core:
+investigate_core:
   gremlin_server:
     url: https://127.0.0.1:8061
     ssl:

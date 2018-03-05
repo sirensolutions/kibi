@@ -69,10 +69,10 @@ These variables can be set with +docker-compose+ like this:
 ["source","yaml",subs="attributes"]
 ----------------------------------------------------------
 services:
-  kibi:
+  investigate:
     image: {docker-image}
     environment:
-      SERVER_NAME: kibi.example.org
+      SERVER_NAME: siren.example.org
       ELASTICSEARCH_URL: http://elasticsearch.example.org
 ----------------------------------------------------------
 
@@ -80,11 +80,11 @@ Since environment variables are translated to CLI arguments, they take
 precedence over settings configured in `siren.yml`.
 
 ==== Docker defaults
-The default settings when using the `siren-kibi` image (standalone {kibi-name} image) are:
+The default settings when using the `siren-investigate` image (standalone {kibi-name} image) are:
 
 [horizontal]
 `elasticsearch.url`:: `http://localhost:9220`
 `server.basepath`:: `""`
-`kibi.index`:: `.siren`
+`kibana.index`:: `.siren`
 
 endif::[]

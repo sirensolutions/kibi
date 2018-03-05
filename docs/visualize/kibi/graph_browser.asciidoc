@@ -7,7 +7,7 @@ image::images/graph_browser/graph_browser_example.png["Graph Browser Example", t
 
 [float]
 === Configuration
-To configure the visualization select a compatible datasource (typically the provided _Kibi Gremlin Server_ datasource)
+To configure the visualization select a compatible datasource (typically the provided _Gremlin Server_ datasource)
 
 image::images/graph_browser/config_source.png["Source configuration", title="Source configuration", align="center"]
 
@@ -65,8 +65,8 @@ To configure a vertex, press the image:images/graph_browser/add_vertex.png[Add V
  * *Index Pattern Type* - the index pattern type of the documents you want to configure
  
  * *Icon Type* - the type of icon you want to use
- ** *Font awesome* - the icon will be selected using the vector icons from https://fortawesome.github.io/Font-Awesome/[Font Awesome]
- ** *Parameterized Relative Path* - the icon will be selected from the configured relative path. The relative path points to `<kibi_root>/installedPlugins/kibi_graph_browser_vis/public/icons/`. You can create subfolders to better organize your custom icons. + 
+ ** *Font awesome* - the icon will be selected using the vector icons from https://fontawesome.github.io/Font-Awesome/[Font Awesome]
+ ** *Parameterized Relative Path* - the icon will be selected from the configured relative path. The relative path points to `<investigate_root>/installedPlugins/graph_browser_vis/public/icons/`. You can create subfolders to better organize your custom icons. +
  Examples:
  *** If the icon filename is stored inside your document, you can use a parameterized relative path. This label: `/set1/@[_doc][iconType]@.png` will be evaluated using the `iconType` field of the document.
 

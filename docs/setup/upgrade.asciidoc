@@ -41,7 +41,7 @@ You can know more about its options by executing the following:
 $ ./bin/investigate backup --help
 ----
 
-For example, the following line will dump in `<MY_FOLDER>` the `.siren` index and the `.sirenaccess` index if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
+For example, the following line will dump in `<MY_FOLDER>` the `.siren` index and the `.sirenaccess` index if the option `investigate_access_control.acl.enabled` is true in `siren.yml`:
 
 [source,shell]
 ----
@@ -60,7 +60,7 @@ You can know more about its options by executing the following:
 $ ./bin/investigate restore --help
 ----
 
-For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.sirenaccess` as well if the option `kibi_access_control.acl.enabled` is true in `siren.yml`:
+For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.sirenaccess` as well if the option `investigate_access_control.acl.enabled` is true in `siren.yml`:
 
 [source,shell]
 ----
@@ -89,8 +89,8 @@ $ bin/investigate upgrade
   log   [17:58:33.494] [info][status][plugin:elasticsearch] Status changed from uninitialized to yellow - Waiting for Elasticsearch
   log   [17:58:36.127] [info][migrations] Executing migration "Upgrade scripts from version 1 to version 2"
   log   [17:58:36.141] [info][migrations] Executed migration "Upgrade scripts from version 1 to version 2"
-  log   [17:58:36.142] [info][migrations] Executing migration "Upgrade kibi graph browser visualization to version 2."
-  log   [17:58:36.157] [info][migrations] Executed migration "Upgrade kibi graph browser visualization to version 2."
+  log   [17:58:36.142] [info][migrations] Executing migration "Upgrade graph browser visualization to version 2."
+  log   [17:58:36.157] [info][migrations] Executed migration "Upgrade graph browser visualization to version 2."
   log   [17:58:36.158] [info][migrations] Executing migration "Upgrade saved queries from version 1 to version 2"
   log   [17:58:36.242] [info][migrations] Executed migration "Upgrade saved queries from version 1 to version 2"
   log   [17:58:36.242] [info][migrations] Executing migration "Upgrade saved templates from version 1 to version 2"

@@ -14,7 +14,7 @@ It is possible to use environment variable placeholders in configuration
 settings. The syntax of placeholders is `${ENV_VARIABLE_NAME}`.
 
 For example, to set `elasticsearch.url` to the value of the environment
-variable `ES_URL`, edit `config_kibi.yml` as follows:
+variable `ES_URL`, edit `config/investigate.yml` as follows:
 
 [source,yaml]
 ----
@@ -137,4 +137,4 @@ To send *no* client-side headers, set this value to [] (an empty list).
 `elasticsearch.tribe.customHeaders:`:: *Default: `{}`* - Header names and values to send to Elasticsearch. Any custom headers
 cannot be overwritten by client-side headers, regardless of the `elasticsearch.tribe.requestHeadersWhitelist` configuration.
 
-`kibi_core.default_dashboard_title`:: *Default: not set* - The dashboard that is displayed when clicking on the Dashboard tab for the first time. This property is deprecated starting from {kibi-name} 4.6.4-4, it was moved to advanced_settings (<<advanced-options,Setting Advanced Options>>)
+`investigate_core.default_dashboard_title`:: *Default: not set* - The dashboard that is displayed when clicking on the Dashboard tab for the first time. This property is deprecated starting from {kibi-name} 4.6.4-4, it was moved to advanced_settings (<<advanced-options,Setting Advanced Options>>)

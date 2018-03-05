@@ -54,8 +54,10 @@ Fixed:
     ** Sidebar scrollbar colour was changed to match theme.
     ** Position of `Home` tooltip on logo was fixed.
 
+[float]
 ==== Plugins
 
+[float]
 ===== Graph Browser
 
 * Graph browser functions have moved into a sidebar which allow listing, display and manipulation of the data and filters in tabular format.
@@ -65,20 +67,24 @@ Fixed:
 * Changes in the graph now persist when navigating to other tabs.
 * Arrows are added to the relations for Entities unless the labels for both relationships are the same.
 
+[float]
 ===== Access Control
 
 * Fixed a bug when deleting a duplicated rule has no effect.
 * Now an error shows on the login page if there is no connection to Elasticsearch.
 
+[float]
 ===== License
 
 * The check for a valid license is now cached for an hour, leading to improved performance when navigating between routes.
 * If a user without permissions attempts to upload a license then an error is shown.
 
+[float]
 ===== Gremlin Server
 
 * The gremlin server will now shutdown if the connection to Elasticsearch is not available.
 
+[float]
 ===== Scatterplot
 
 * The text in the legend no longer overflows the legend box.

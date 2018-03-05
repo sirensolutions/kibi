@@ -88,6 +88,7 @@ image::images/graph_browser/vertex_config.png["Vertex Configuration", title="Ver
 
 Once your {kibi-name} Graph Browser visualization is ready, you can start your investigations. 
 
+[float]
 ==== Toolbar
 You have several operations available:
 
@@ -154,6 +155,7 @@ image::images/graph_browser/save_graph.png["Save Graph", title="Save Graph", ali
  
 image::images/graph_browser/open_graph.png["Open Graph", title="Open Graph", align="center"]
  
+[float]
 ==== Shortcuts
 
 The Graph Browser supports some shortcuts:
@@ -165,6 +167,7 @@ The Graph Browser supports some shortcuts:
  * `ARROWS`: move the selected elements in the input direction
  * Mouse Wheel: changes the zoom level of the graph
 
+[float]
 ==== Sidebar
 
 image::images/graph_browser/sidebar.png["Sidebar", title="Sidebar", align="center"]

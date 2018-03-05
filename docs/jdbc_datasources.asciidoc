@@ -264,14 +264,14 @@ Example Search Guard role allowed to search virtual indices starting with `db-`:
 ----
 sirenuser:
   cluster:
-    - KIBI_CLUSTER
+    - SIREN_CLUSTER
   indices:
     '*':
       '*':
         SIREN_COMPOSITE
     'db-*':
       '*':
-        - KIBI_READONLY
+        - SIREN_READONLY
         - indices:data/siren/connector/*
 ----
 

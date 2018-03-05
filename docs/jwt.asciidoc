@@ -167,12 +167,12 @@ tokens using the signing key defined in `sg_config.yml`.
 === {kibi-name} configuration
 
 To enable JWT support in {kibi-name}, set the
-`kibi_access_control.backends.searchguard.authenticator` option to
+`investigate_access_control.backends.searchguard.authenticator` option to
 `http-jwt`, in `siren.yml` e.g.:
 
 [source,yaml]
 ----
-kibi_access_control:
+investigate_access_control:
   #... existing options
   backends:
     searchguard:
@@ -184,11 +184,11 @@ Then restart {kibi-name} and open it in a browser; you should get a blank page a
 URL should end with `login`.
 
 To test JWT authentication, open your browser console (`CTRL+SHITF+I` on Chrome
-and Firefox) and call `setJWTToken` of the `kibi` object, e.g.:
+and Firefox) and call `setJWTToken` of the `sireninvestigate` object, e.g.:
 
 [source,javascript]
 ----
-.kibi
+.sireninvestigate
 .setJWTToken(yourtoken)
 .then(function() {
   console.log('JWT token set.');

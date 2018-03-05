@@ -5,7 +5,7 @@ A coordinate map displays a geographic area overlaid with circles keyed to the d
 
 NOTE: By default, {kibi-name} uses the http://www.openstreetmap.org/[Open Street Maps service]
 to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
-in `siren.yml`.
+in `investigate.yml`.
 
 === Configuration
 

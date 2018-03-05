@@ -168,7 +168,7 @@ tokens using the signing key defined in `sg_config.yml`.
 
 To enable JWT support in {kibi-name}, set the
 `investigate_access_control.backends.searchguard.authenticator` option to
-`http-jwt`, in `siren.yml` e.g.:
+`http-jwt`, in `investigate.yml` e.g.:
 
 [source,yaml]
 ----

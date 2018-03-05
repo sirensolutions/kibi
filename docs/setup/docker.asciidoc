@@ -77,7 +77,7 @@ services:
 ----------------------------------------------------------
 
 Since environment variables are translated to CLI arguments, they take
-precedence over settings configured in `siren.yml`.
+precedence over settings configured in `investigate.yml`.
 
 ==== Docker defaults
 The default settings when using the `siren-investigate` image (standalone {kibi-name} image) are:

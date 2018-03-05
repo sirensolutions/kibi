@@ -32,7 +32,7 @@ cd kibana-{version}-linux-x86_64/ <2>
 --------------------------------------------
 <1> Compare the SHA produced by `sha1sum` or `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha1[published SHA].
-<2> This directory is known as `$KIBANA_HOME`.
+<2> This directory is known as `$INVESTIGATE_HOME`.
 
 endif::[]
 
@@ -59,7 +59,7 @@ cd kibana/ <2>
 --------------------------------------------
 <1> Compare the SHA produced by `sha1sum` or `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86.tar.gz.sha1[published SHA].
-<2> This directory is known as `$KIBANA_HOME`.
+<2> This directory is known as `$INVESTIGATE_HOME`.
 
 endif::[]
 
@@ -86,7 +86,7 @@ cd kibana-{version}-darwin-x86_64/ <2>
 --------------------------------------------
 <1> Compare the SHA produced by `sha1sum` or `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha1[published SHA].
-<2> This directory is known as `$KIBANA_HOME`.
+<2> This directory is known as `$INVESTIGATE_HOME`.
 
 endif::[]
 
@@ -110,7 +110,7 @@ standard output (`stdout`), and can be stopped by pressing `Ctrl-C`.
 [[targz-configuring]]
 ==== Configuring {kibi-name} via Config File
 
-{kibi-name} loads its configuration from the `$KIBI_HOME/config/siren.yml`
+{kibi-name} loads its configuration from the `$INVESTIGATE_HOME/config/investigate.yml`
 file by default. The format of this config file is explained in
 <<settings>>.
 
@@ -129,25 +129,25 @@ directories so that you do not delete important data later on.
 |=======================================================================
 | Type | Description | Default Location | Setting
 | home
-  | {kibi-name} home directory or `$KIBI_HOME`
+  | {kibi-name} home directory or `$INVESTIGATE_HOME`
  d| Directory created by unpacking the archive; in demo distributions,
-    the directory is `kibi`.
+    the directory is `siren-investigate`.
  d|
 
 | bin
   | Binary scripts including `kibi` to start the {kibi-name} server
     and `kibi-plugin` to install plugins
-  | $KIBI_HOME\bin
+  | $INVESTIGATE_HOME\bin
  d|
 
 | config
-  | Configuration files including `siren.yml`
+  | Configuration files including `investigate.yml`
   | $KIBI\config
  d|
 
 | data
   | The location of the data files written to disk by {kibi-name} and its plugins
-  | $KIBI_HOME\data
+  | $INVESTIGATE_HOME\data
  d|
 
 | optimize

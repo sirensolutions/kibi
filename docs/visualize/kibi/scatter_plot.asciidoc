@@ -8,7 +8,7 @@ in four different modes: _Straight_, _Significant terms_, _Any aggregator_, _Fil
 === Straight
 image::images/scatter_plot/straight_mode.png["Straight",align="center"]
 
-This mode doesn't use aggregates, it pulls the data directly from Elasticsearch using the {elastic-ref}query-dsl-function-score-query.html[Random scoring method] to get a random sample of records.
+This mode doesn't use aggregates, it pulls the data directly from Elasticsearch using the {elastic-ref}/query-dsl-function-score-query.html[Random scoring method] to get a random sample of records.
 
  * *X values* - The value can be String, Date or Numeric. Select a field from the drop-down.
  * *Y values* - The field value can be String, Date or Numeric. Select a field from the drop-down.

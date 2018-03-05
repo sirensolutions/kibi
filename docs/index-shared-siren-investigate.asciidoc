@@ -1,31 +1,25 @@
 :toc: right
 :docinfo: shared
 
-:version:                5.6.5
+:version:                10.0.0
 :logstash-version:       {version}
-:elasticsearch-version:  {version}
-:kibana-version:         {version}
-:vanguard-version:       {version}
-:kibi-version:           {version}
+:elasticsearch-version:  5.6.8
+:kibana-version:         5.6.7
 :kibi-name:       Siren Investigate
 :kibi-version: {version}
-:kibi-ref: http://siren.solutions/kibi/docs/current/
 :kibi-default-port: 5606
 :start-url: http://localhost:5606
 :download-ref: https://support.siren.io
 :branch: 5.6
 
-:java-version: 1.8
+:federate-version: 5.6.8-10.0.0
+:federate-website: https://docs.support.siren.io/5.6.8-10.0.0-beta-2/federate/
 
-:federate-version: 5.6.6-10.0.0
-:federate-website: https://docs.support.siren.io/5.6.6-10.0.0/federate/
-
-:kibana-announcement: https://www.elastic.co/blog/kibana-5-6-3-released
+:kibana-announcement: https://www.elastic.co/blog/kibana-6-1-3-and-5-6-7-released
 :kibana-ref: https://www.elastic.co/guide/en/kibana/{branch}
 :logstash-ref: https://www.elastic.co/guide/en/logstash/
 
-:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
-:es-ref: {elastic-ref}
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/{branch}
 :xpack-ref:            https://www.elastic.co/guide/en/x-pack/{branch}
 :icons: font
 :es-default-port: 9220
@@ -50,8 +44,6 @@
 release-state can be: released | prerelease | unreleased
 //////////
 :release-state:  released
-:compatible-es-versions: >=5.4.3
-:es-compability-table-ref: https://github.com/sirensolutions/kibi/blob/master/README.md#compatibility-table-kibi--elasticsearch
 
 
 

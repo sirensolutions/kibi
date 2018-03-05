@@ -31,8 +31,8 @@ field. A field is suitable if the field exists and is sortable in the index
 pattern the context is based on.
 
 While not required, it is recommended to only
-use fields which have {ref}/doc-values.html[doc values] enabled to achieve
-good performance and avoid unnecessary {ref}/modules-fielddata.html[field 
+use fields which have {elastic-ref}/doc-values.html[doc values] enabled to achieve
+good performance and avoid unnecessary {elastic-ref}/modules-fielddata.html[field 
 data] usage. Common examples for suitable fields include log line numbers,
 monotonically increasing counters and high-precision timestamps.
 --

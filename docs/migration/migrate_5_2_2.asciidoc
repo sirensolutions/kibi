@@ -5,7 +5,7 @@
 === Upgrading Elasticsearch
 
 This section provides a summary of the upgrade procedure described at
-{elastic-ref}setup-upgrade.html[Upgrading Elasticsearch] with {kibi-name} and
+{elastic-ref}/setup-upgrade.html[Upgrading Elasticsearch] with {kibi-name} and
 Search Guard specific notes.
 
 It is also recommended to read the
@@ -98,7 +98,7 @@ curl -uadmin:password --cacert ca.pem -XPUT https://elasticsearch.local:9200/_cl
 ----
 
 For a faster recovery, you can optionally stop any indexing activity and issue
-a {elastic-ref}indices-synced-flush.html[synced flush] request as follows:
+a {elastic-ref}/indices-synced-flush.html[synced flush] request as follows:
 
 [source,bash]
 ----
@@ -142,7 +142,7 @@ to:
 
 Any index level setting (settings starting with `index`) declared in
 `elasticsearch.yml` must be removed from the file; these settings have now to
-be declared in {elastic-ref}indices-templates.html[Index templates].
+be declared in {elastic-ref}/indices-templates.html[Index templates].
 
 The following settings must be removed if present:
 
@@ -153,12 +153,12 @@ The following settings must be removed if present:
 
 If you were starting Elasticsearch using custom systemd/init.d/supervisor
 scripts, make sure to check the
-{elastic-ref}breaking_50_packaging.html[packaging breaking changes] section of
+{elastic-ref}/breaking_50_packaging.html[packaging breaking changes] section of
 the Elasticsearch documentation as several environment variables have now to be
 set in the `jvm.options` file.
 
 It is also recommended to verify your custom scripts and system properties
-against the updated {elastic-ref}system-config.html[Important System
+against the updated {elastic-ref}/system-config.html[Important System
 Configuration] documentation.
 
 [float]
@@ -237,7 +237,7 @@ not set in `elasticsearch.yml`.
 
 Wait for cluster to reach the Yellow status; if not using Search Guard, you can
 check the status of the cluster by issuing a requests with curl to
-{elastic-ref}cat-health.html[_cat/health], e.g.:
+{elastic-ref}/cat-health.html[_cat/health], e.g.:
 
 [source,bash]
 ----
@@ -1113,7 +1113,7 @@ It should now be defined as follows (with a space between ### and the title):
 via a generic JSON editor. If users took advantage of any deprecated Elasticsearch
 features in this way, then they will cause errors in Kibana since they're removed
 from Elasticsearch 5.0. Check the Elasticsearch
-{es-ref}/breaking_50_search_changes.html#_deprecated_queries_removed[breaking changes]
+{elastic-ref}/breaking_50_search_changes.html#_deprecated_queries_removed[breaking changes]
 documentation for more details.
 
 *Impact*: Discover, Visualize, and Dashboard will error for any saved objects that

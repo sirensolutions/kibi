@@ -10,7 +10,7 @@ An existing {kibi-name} installation can be upgraded as follows:
 - backup the `.siren` index.
 - backup the {kibi-name} configuration file (`config/siren.yml`)
 - backup the `.sirenaccess` if ACL (Access Control Layer) is enabled.
-- {es-ref}setup-upgrade.html[upgrade Elasticsearch];
+- {elastic-ref}/setup-upgrade.html[upgrade Elasticsearch];
 - before restarting each Elasticsearch node, make sure to install a compatible version of the
   {federate-website}#compatibility[Siren Federate] plugin and access control plugins if required.
 - download and extract the new {kibi-name} version.
@@ -24,7 +24,7 @@ An existing {kibi-name} installation can be upgraded as follows:
 === Backing up and Restoring the {kibi-name} Indices.
 
 Before upgrading it is strongly recommended to have a backup of the `.siren` index; the recommended way to perform regular backups of
-Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapshot and restore modules].
+Elasticsearch indexes is through the {elastic-ref}/modules-snapshots.html[snapshot and restore modules].
 
 {kibi-name} ships with a command line interface for creating dumps of the `.siren` index and, in case the `ACL` is enabled, the `.sirenaccess` index as well.
 An index dump is composed of two parts: its mappings and its data.

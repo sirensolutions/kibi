@@ -242,8 +242,8 @@ setting the following line in `config/jvm.options`:
 ----
 
 For information on where to set/modify this variable please refer to
-{elastic-ref}settings.html[Running as a service on Linux] or
-{elastic-ref}windows.html#windows-service[Running as a service on Windows].
+{elastic-ref}/settings.html[Running as a service on Linux] or
+{elastic-ref}/windows.html#windows-service[Running as a service on Windows].
 
 [float]
 ==== Cluster restart

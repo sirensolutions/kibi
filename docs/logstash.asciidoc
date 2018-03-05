@@ -49,7 +49,7 @@ they allow you to define how fields are matched by the search engine and set the
 type (string, dates, numbers, locations etc.).
 
 NOTE: for detailed documentation about indices and mappings we recommend
-reading the {elastic-ref}index.html[Elasticsearch Reference].
+reading the {elastic-ref}/index.html[Elasticsearch Reference].
 
 Let's define a simple mapping to describe a company. The mapping will define
 the following fields:

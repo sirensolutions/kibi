@@ -3,7 +3,7 @@
 You can search the indices that match the current index pattern by entering
 your search criteria in the Query bar. You can perform a simple text search,
 use the Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[
-query syntax], or use the full JSON-based {ref}/query-dsl.html[Elasticsearch
+query syntax], or use the full JSON-based {elastic-ref}/query-dsl.html[Elasticsearch
 Query DSL].
 
 When you submit a search request, the histogram, Documents table, and Fields
@@ -38,7 +38,7 @@ codes and have an extension of `php` or `html`, you could enter `status:[400 TO
 
 NOTE: These examples use the Lucene query syntax. You can also submit queries
 using the Elasticsearch Query DSL. For examples, see
-{ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax]
+{elastic-ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax]
 in the Elasticsearch Reference.
 
 [float]

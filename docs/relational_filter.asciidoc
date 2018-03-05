@@ -105,7 +105,7 @@ This panel provides two kinds data: information about the query behind the relat
 [float]
 ==== Multi Search
 
-This pane presents information about the {elastic-ref}search-multi-search.html[msearch] request executed to perform the joins. A relational filter corresponds to one query of the msearch.
+This pane presents information about the {elastic-ref}/search-multi-search.html[msearch] request executed to perform the joins. A relational filter corresponds to one query of the msearch.
 
 On the top, the time reported in `Multi search request duration` informs on how long the msearch request took. There is also additional information about each query of the msearch:
 

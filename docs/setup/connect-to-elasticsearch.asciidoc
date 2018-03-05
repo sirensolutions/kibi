@@ -54,7 +54,7 @@ Getting Started>> tutorial.
 [float]
 [[kibana-dynamic-mapping]]
 === {kibi-name} and Elasticsearch Dynamic Mapping
-By default, Elasticsearch enables {elastic-ref}dynamic-mapping.html[dynamic mapping] for fields. {kibi-name} needs
+By default, Elasticsearch enables {elastic-ref}/dynamic-mapping.html[dynamic mapping] for fields. {kibi-name} needs
 dynamic mapping to use fields in visualizations correctly, as well as to manage the `.siren` index
 where saved searches, visualizations, and dashboards are stored.
 

@@ -57,7 +57,7 @@ articles.
 
 NOTE: Besides simple text, queries in the search bar can be written using the
 Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query
-syntax], or {elastic-ref}query-dsl.html[Elasticsearch Query DSL].
+syntax], or {elastic-ref}/query-dsl.html[Elasticsearch Query DSL].
 
 == Filters
 Visualizations can be used to create filters. For example, you can see all the

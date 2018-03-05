@@ -19,7 +19,7 @@
 :kibana-ref: https://www.elastic.co/guide/en/kibana/{branch}
 :logstash-ref: https://www.elastic.co/guide/en/logstash/
 
-:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/{branch}
 :xpack-ref:            https://www.elastic.co/guide/en/x-pack/{branch}
 :icons: font
 :es-default-port: 9220

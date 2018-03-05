@@ -31,7 +31,7 @@ uiRoutes
   }
 });
 
-function controller($scope, $route, jdbcDatasources, createNotifier, confirmModal, $element, kbnUrl) {
+function controller($scope, $route, jdbcDatasources, createNotifier, confirmModal, $element, kbnUrl, mappings) {
 
   $scope.virtualIndex = {};
 
@@ -208,6 +208,7 @@ function controller($scope, $route, jdbcDatasources, createNotifier, confirmModa
         notify.info('Saved virtual index ' + index._id);
       } else if (res.updated === true) {
         notify.info('Saved virtual index ' + index._id);
+        mappings.clearCache();
       }
       confirmModal(
         'If you want to use this index data in the UI you should now add it in the “Indexes and Relationship” configuration.\n\n' +

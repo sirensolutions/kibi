@@ -28,6 +28,7 @@ relationships have been defined. You can add a new relationship by clicking on t
 
 image::images/relations_settings/indices_settings_5.png["Graph of Index Patterns",align="center"]
 
+[float]
 [[kibi-join-limit]]
 ==== Join Limit
 Clicking the image:images/EditVis.png["Edit pencil"] opens the advanced setting for each relation 
@@ -46,6 +47,7 @@ These are used for displaying counts on relational buttons, for the content disp
 Setting the limit here to -1 here sets the limit to the default `kibi:joinLimit` set in the {kibi-name} Advanced Settings 
 and setting the limit to 0 here disables the limit entirely.
 
+[float]
 ===== Example
 - Index Pattern `A` has 100 documents and Index Pattern `B` has 50 documents
 - The documents of `A` are filtered by adding a relation with `B`
@@ -59,6 +61,7 @@ and setting the limit to 0 here disables the limit entirely.
   returned from `B`
 - The final number of documents returned is always limited by the Elasticsearch `size` parameter
 
+[float]
 [[kibi-join-type]]
 ==== Join Type
 Siren Federate provides three types of join algorithms; the plugin will try to pick the best algorithm
@@ -70,6 +73,7 @@ for a given join automatically, however you can force the selection by choosing 
 
 A detailed description of each algorithm can be found in the Siren Federate plugin documentation.  
 
+[float]
 ==== Index Patterns Management Icon
 A relation is also indicated on the <<index-patterns,Index Patterns>> Management application thanks
 to the image:images/relations_settings/index_relation_icon.png["Index

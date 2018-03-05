@@ -1,8 +1,11 @@
 [[logstash]]
 = Loading Data into Elasticsearch
 
+[partintro]
+--
 This chapter contains basic information on how to load data into Elasticsearch
 for evaluation purposes.
+--
 
 == From a SQL Database using Logstash
 
@@ -229,6 +232,7 @@ the loaded fields:
 
 image::images/logstash/company-minimal-expand.png["Viewing all the fields in a document",align="center"]
 
+[float]
 === Script to Load the Demo Data
 
 The complete demo data loading process can be repeated by running the

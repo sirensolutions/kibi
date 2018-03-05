@@ -1,5 +1,8 @@
 [[development]]
 = Contributing
 
+[partintro]
+--
 For up-to-date documentation on how to contribute to Kibana and/or develop Kibana
 plugins (compatible with {kibi-name}) please refer to the {kibana-ref}/development.html[Kibana documentation].
+--

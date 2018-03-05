@@ -32,7 +32,7 @@ function KibiDefaultIndexPatternProvider(Private, indexPatterns) {
       // use the patterns if passed
       if (patterns instanceof Array) {
         promise = Promise.resolve(patterns).then(patterns => {
-          return map(patterns, p => p.id);
+          return map(patterns, p => p.id || p);
         });
       } else if (patterns === undefined) {
         promise = getIds();

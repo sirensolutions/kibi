@@ -7,10 +7,8 @@ function KibiDefaultIndexPatternProvider(Private, indexPatterns) {
 
   const getIds = Private(IndexPatternsGetProvider)('id');
 
-  const _loadIndexPattern = function (patterns, indexPattern, defaultId) {
-    const indexPatternId = indexPattern || defaultId;
-
-    return indexPatterns.get(indexPatternId)
+  const _loadIndexPattern = function (patterns, defaultId) {
+    return indexPatterns.get(defaultId)
     // Everything ok it will return the pattern else
     .catch(err => {
       if (err instanceof IndexPatternAuthorizationError) {
@@ -27,12 +25,12 @@ function KibiDefaultIndexPatternProvider(Private, indexPatterns) {
 
   class KibiDefaultIndexPattern {
 
-    async getDefaultIndexPattern(patterns, indexPatternId, defaultId) {
+    async getDefaultIndexPattern(patterns, defaultId) {
       let promise;
       // use the patterns if passed
       if (patterns instanceof Array) {
         promise = Promise.resolve(patterns).then(patterns => {
-          return map(patterns, p => p.id || p);
+          return map(patterns, p => p.id);
         });
       } else if (patterns === undefined) {
         promise = getIds();
@@ -40,11 +38,11 @@ function KibiDefaultIndexPatternProvider(Private, indexPatterns) {
 
 
       return promise.then(function (patterns) {
-        if (!indexPatternId && !defaultId && patterns.length > 0) {
+        if (!defaultId && patterns.length > 0) {
           defaultId = patterns[0];
         }
 
-        return _loadIndexPattern(patterns, indexPatternId, defaultId);
+        return _loadIndexPattern(patterns, defaultId);
       });
     }
 

@@ -48,7 +48,7 @@ module.exports = function (opts) {
         // set the default indexPattern as it is required by the route
         // handle authorization errors
         notify.event('loading default index pattern');
-        return kibiDefaultIndexPattern.getDefaultIndexPattern(patterns, undefined, defaultId)
+        return kibiDefaultIndexPattern.getDefaultIndexPattern(undefined, defaultId)
         .then(indexPattern => {
           if (!indexPattern.id) {
             return kbnUrl.change('/management/siren/indexesandrelations/create/', {});

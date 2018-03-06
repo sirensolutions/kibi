@@ -9,7 +9,7 @@ The relative position and angle of the axes is typically uninformative.
 
 image::images/radar_visualization.png["Radar chart visualization",align="center"]
 
-image::images/radar_settings_5.png["Radar chart settings",align="center"]
+image::images/radar_settings.png["Radar chart settings",align="center"]
 
 
 The radar chart is also known as web chart, spider chart, star chart.

@@ -220,12 +220,12 @@ Open {start-url} in your browser, click on the **Management** tab then on **Inde
 Deselect _Index contains time-based events_, then write `company-minimal` in
 the _Index name or pattern_ field:
 
-image::images/logstash/company-minimal-index_5.png["Adding the company-minimal index",align="center"]
+image::images/logstash/company-minimal-index.png["Adding the company-minimal index",align="center"]
 
 Click on _Create_ to create the index reference, then click on the
 _Discover_ tab and select _company-minimal_ in the dark grey dropdown:
 
-image::images/logstash/company-minimal-discover-dd_5.png["Discovering the company-minimal index",align="center"]
+image::images/logstash/company-minimal-discover-dd.png["Discovering the company-minimal index",align="center"]
 
 Click on the right arrow at the beginning of each row to expand it and see all
 the loaded fields:

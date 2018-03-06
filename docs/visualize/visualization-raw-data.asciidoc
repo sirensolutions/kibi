@@ -15,27 +15,19 @@ in the table by clicking on the table headers at the top of each column.
 
 .Request
 
-image:images/visualize/vis-spy/spy-panel-request.png[]
-
 The raw request used to query the server, presented in JSON format.
 
 .Response
 
-image:images/visualize/vis-spy/spy-panel-response.png[]
-
 The raw response from the server, presented in JSON format.
 
 .Statistics
-
-image:images/visualize/vis-spy/spy-panel-stats.png[]
 
 A summary of the statistics related to the request and the response, presented as a data grid. The data
 grid includes the query duration, the request duration, the total number of records found on the server, and the
 index pattern used to make the query.
 
 .Debug
-
-image:images/visualize/vis-spy/spy-panel-debug.png[]
 
 The visualization saved state presented in JSON format.
 

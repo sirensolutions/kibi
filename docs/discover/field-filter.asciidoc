@@ -80,7 +80,7 @@ field. However, this is not recommended for extremely large datasets, as it can 
 
 To modify a filter, hover over it and click one of the action buttons.
 
-image::images/filter-allbuttons_5.png[]
+image::images/filter-allbuttons.png[]
 
 &nbsp;
 

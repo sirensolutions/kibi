@@ -3,11 +3,11 @@
 When you create a filter anywhere in {kibi-name}, the filter conditions display in an oval under the search text
 entry box:
 
-image::images/filter-sample_5.png[]
+image::images/filter-sample.png[]
 
 Hovering on the filter oval displays the following icons:
 
-image::images/filter-allbuttons_5.png[]
+image::images/filter-allbuttons.png[]
 
 Enable Filter image:images/filter-enable.png[]:: Click this icon to disable the filter without removing it. You can
 enable the filter again later by clicking the icon again. Disabled filters are displayed with a striped shaded color.

@@ -187,7 +187,7 @@ image::images/getting_started/selecting_filter_queryoncompanies.png["Filter dash
 
 Then you will see only the companies mentioned in the articles which are also in the top 500 by number of employees:
 
-image::images/getting_started/query_vis_filterbar_5.png["Filter dashboard using a SQL query result",align="center"]
+image::images/getting_started/query_vis_filterbar.png["Filter dashboard using a SQL query result",align="center"]
 
 == Datasource Entity Selection
 

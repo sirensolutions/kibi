@@ -989,7 +989,7 @@ You will need to upload your license once the cluster is up and running.
 ==== From {kibi-name}
 To upload the license from {kibi-name}, navigate to the management section.
 
-image::images/management_no-license.jpg[]
+image::images/management_no-license.png[]
 
 This page will show the license has not been installed.
 

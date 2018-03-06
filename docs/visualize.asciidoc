@@ -111,7 +111,7 @@ For example, if you're indexing Apache server logs, you could build a horizontal
 that shows the distribution of incoming requests by geographic location by
 specifying a terms aggregation on the `geo.src` field:
 
-image::images/bar-terms-agg_5.png[]
+image::images/bar-terms-agg.png[]
 
 The y-axis shows the number of requests received from each country, and the
 countries are displayed across the x-axis.
@@ -130,7 +130,7 @@ For example, you could add a terms sub aggregation on the `geo.dest` field to
 a vertical bar chart to see the locations those requests were
 targeting.
 
-image::images/bar-terms-subagg_5.png[]
+image::images/bar-terms-subagg.png[]
 
 For more information about working with sub aggregations, see
 https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,

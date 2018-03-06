@@ -990,7 +990,7 @@ administrative role, click on the apps button, then click on **Access control**
 and finally on **Authentication**.
 
 ._The Access control app_
-image::images/access_control/acl_app_5.png["The Access control app",align="center"]
+image::images/access_control/acl_app.png["The Access control app",align="center"]
 
 If you get an error upon opening the Authentication app,
 most probably the client certificate does not contain
@@ -1011,7 +1011,7 @@ during the initial Search Guard setup or an authorization error if the
 certificate is incorrect:
 
 ._Browsing Search Guard roles_
-image::images/access_control/sgroles_5.png["Browsing Search Guard roles",align="center"]
+image::images/access_control/sgroles.png["Browsing Search Guard roles",align="center"]
 
 === Saved objects access control
 
@@ -1110,7 +1110,7 @@ Once roles are configured, restart {kibi-name}; if permissions are configured co
 you will be see an **ACL** section in the **Access control** application.
 
 ._The ACL section_
-image::images/access_control/acl_section_5.png["The ACL section",align="center"]
+image::images/access_control/acl_section.png["The ACL section",align="center"]
 
 ==== {kibi-name} roles and rules
 
@@ -1183,10 +1183,10 @@ Each rule is defined by three parameters:
 - **Context**: the saved object type on which the permission must be enforced.
 
 ._The Create role button_
-image::images/access_control/create_role_button_5.png["The Create role button",align="center"]
+image::images/access_control/create_role_button.png["The Create role button",align="center"]
 
 ._Saving a role_
-image::images/access_control/saving_role_5.png["Saving a role",align="center"]
+image::images/access_control/saving_role.png["Saving a role",align="center"]
 
 ==== Object permissions
 

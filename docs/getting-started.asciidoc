@@ -45,15 +45,15 @@ documents stored in a specific index or returned by a <<save-search,saved search
 Each dashboard is represented by a tab containing the dashboard title and
 the number of documents available to visualizations.
 
-image::images/getting_started/demo_overview_5.png["The articles dashboard",align="center"]
+image::images/getting_started/demo_overview.png["The articles dashboard",align="center"]
 
 You can quickly search specific articles through the search input in the
 navigation bar. For example, let's find all the articles written about
 _wireless_ or _wifi_:
 
-image::images/getting_started/demo_dashboard_search_5.png["The dashboard search bar",align="center"]
+image::images/getting_started/demo_dashboard_search.png["The dashboard search bar",align="center"]
 
-We can immediately see that there are 10370 articles about those topics and
+We can immediately see that there are 11595 articles about those topics and
 all the visualizations are refreshed to aggregate data for this subset of
 articles.
 
@@ -67,9 +67,9 @@ articles about _wireless_ or _wifi_ published by TechCrunch by clicking on
 the _TechCrunch_ slice inside the _Articles by Source_ <<pie-chart, pie chart>>
 visualization:
 
-image::images/getting_started/demo_pie_slice_5.png["Clicking on a pie slice",align="center"]
+image::images/getting_started/demo_pie_slice.png["Clicking on a pie slice",align="center"]
 
-image::images/getting_started/demo_pie_filter_5.png["The dashboard with the filter on the slice applied",align="center"]
+image::images/getting_started/demo_pie_filter.png["The dashboard with the filter on the slice applied",align="center"]
 
 NOTE: To disable a filter, just move the mouse over it and click on the
 checkbox icon; you can disable all the filters applied to the dashboard by
@@ -79,28 +79,28 @@ please read the <<_filters, filters>> chapter.
 == Relational Filters
 The <<relational_filter, Relational Filter>> visualization allows to
 create cross-dashboard filters. For example, by looking below at the _Companies_
-button in the dashboard, you can see that there are 342 companies mentioned in
+button in the dashboard, you can see that there are 470 companies mentioned in
 the TechCrunch articles about _wireless_ or _wifi_.
 
-image::images/getting_started/demo_companies_dashboard_overview_5.png["Relational filter from Articles to Companies",align="center"]
+image::images/getting_started/demo_companies_dashboard_overview.png["Relational filter from Articles to Companies",align="center"]
 
 The relational filter created by clicking on the button is displayed in the
 filter bar, and can be disabled or deleted just like any other filter. Moving
 the mouse over the filter will display the list of joined indices and their
 filters:
 
-image::images/getting_started/relational_filter_explanation_5.png["Relational filter in the filter bar",align="center"]
+image::images/getting_started/relational_filter_explanation.png["Relational filter in the filter bar",align="center"]
 
 Relational filter can be accumulated. For example, if you click on the
-`Investment rounds -->` button, you will see data about the 298 investment
-rounds related to a subset of 342 companies mentioned in the TechCrunch articles
+`Investment rounds -->` button, you will see data about the 351 investment
+rounds related to a subset of 470 companies mentioned in the TechCrunch articles
 about _wireless_ or _wifi_.
 
 Now Click on _Companies_ to go back to the Companies dashboard. To understand how to define a relational filter, first click on _Edit_ on the top right menu. Then click on the pencil icon
 inside the _Relational widget_ visualization heading - this will open the
 configuration editor:
 
-image::images/getting_started/relational_filter_config_5.png["Relational filter configuration",align="center", width="300"]
+image::images/getting_started/relational_filter_config.png["Relational filter configuration",align="center", width="300"]
 
 As you can see, it is possible to set two different values for the label displayed
 on the button and for the label displayed in the filter; it is also possible
@@ -149,12 +149,12 @@ displayed as columns in the table. The _buckets_ section defines the groups
 of Elasticsearch documents aggregated by metrics, displayed as row headers
 in the table.
 
-image::images/getting_started/dashboard_edit_query_vis_agg_5.png["Query on Companies configuration",align="center"]
+image::images/getting_started/dashboard_edit_query_vis_agg.png["Query on Companies configuration",align="center"]
 
 By expanding the _Split Rows_ section inside _buckets_ you can see how the
 queries are used to define groups of Elasticsearch documents. Scroll down to see the configuration of the fourth filter:
 
-image::images/getting_started/query_vis_filter_agg_5.png["Configuration of an external query terms filter",align="center"]
+image::images/getting_started/query_vis_filter_agg.png["Configuration of an external query terms filter",align="center"]
 
 The filter is configured to execute the query `Top 500 companies (HR count)`
 on the SQLite database and return the group of Elasticsearch documents from
@@ -196,9 +196,9 @@ and entities in <<external_datasources, external datasources>> in general) by
 clicking on its label in the _Companies Table_.
 
 The selected entity can be used as a parameter in <<datasource-queries, queries>>;
-for example, click on `Baidu` in _Companies Table_:
+for example, click on `Makeably` in _Companies Table_:
 
-image::images/getting_started/entity_selection_5.png["Entity selection",align="center", width="800"]
+image::images/getting_started/entity_selection.png["Entity selection",align="center", width="800"]
 
 Selecting an entity enables additional queries on external datasources. For
 example, in the _Query on Companies_ visualization you can see that, amongst
@@ -274,7 +274,7 @@ as the _URL field_, then click on the click the  *Apply Changes* button image:im
 You can test the click handler immediately by clicking on a cell displaying
 an homepage URL in the preview displayed on the right:
 
-image::images/getting_started/click_handler_url_5.png["URL click handler",align="center"]
+image::images/getting_started/click_handler_url.png["URL click handler",align="center"]
 
 [float]
 === Relational Column
@@ -305,12 +305,12 @@ displays the results of three SQL queries by rendering their results through
 templates; the queries take the selected entity ID as an input, thus the
 associated templates will be displayed only when an entity is selected.
 
-image::images/getting_started/templated_query_viewer_5.png["{kibi-name} query viewer example",align="center"]
+image::images/getting_started/templated_query_viewer.png["{kibi-name} query viewer example",align="center"]
 
 The association between the query and templates can be set in the visualization
 configuration:
 
-image::images/getting_started/templated_query_viewer_config_5.png["{kibi-name} query viewer configuration",align="center"]
+image::images/getting_started/templated_query_viewer_config.png["{kibi-name} query viewer configuration",align="center"]
 
 Query templates can be managed by clicking on the *Management* icon, then select *Advanced Settings* followed by *Templates*.
 

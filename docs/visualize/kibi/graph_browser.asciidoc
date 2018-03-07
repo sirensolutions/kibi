@@ -7,7 +7,8 @@ image::images/graph_browser/graph_browser_example.png["Graph Browser Example", t
 
 [float]
 === Configuration
-To configure the visualization select a compatible datasource (typically the provided _Gremlin Server_ datasource)
+==== Source
+To configure the visualization select a compatible datasource (typically the provided _Siren Gremlin Server_ datasource)
 
 image::images/graph_browser/config_source.png["Source configuration", title="Source configuration", align="center"]
 
@@ -16,12 +17,6 @@ image::images/graph_browser/config_source.png["Source configuration", title="Sou
 By ticking the image:images/graph_browser/tooltip_checkbox.png["Tooltip checkbox"] checkbox, you can enable node tooltips.
 
 image::images/graph_browser/tooltip.png["Tooltip", title="Tooltip", align="center"]
-
-[float]
-==== Relations
-By default the Graph Browser uses all the configured relations. In case you need to use only a subset of the relations, you can define it here.
-
-image::images/graph_browser/relations.png["Relations", title="Relations", align="center"]
 
 [float]
 ==== Scripts
@@ -63,21 +58,8 @@ To configure a vertex, press the image:images/graph_browser/add_vertex.png[Add V
 
  * *Index Pattern* - the index pattern containing the type of documents you want to configure
  * *Index Pattern Type* - the index pattern type of the documents you want to configure
- 
- * *Icon Type* - the type of icon you want to use
- ** *Font awesome* - the icon will be selected using the vector icons from https://fontawesome.github.io/Font-Awesome/[Font Awesome]
- ** *Parameterized Relative Path* - the icon will be selected from the configured relative path. The relative path points to `<investigate_root>/installedPlugins/graph_browser_vis/public/icons/`. You can create subfolders to better organize your custom icons. +
- Examples:
- *** If the icon filename is stored inside your document, you can use a parameterized relative path. This label: `/set1/@[_doc][iconType]@.png` will be evaluated using the `iconType` field of the document.
-
- 
- * *Label type* - the type of label you want to use
- ** *Document Field* - the label will be a document field. You can select one of the available fields from the dropdown
- ** *Parameterized Field* - the label will be the evaluation of this parameterized field. + 
- Examples:
- *** Simple label, with the same output as for the document field one: `Company: @doc[_source][companyName]@`
- *** You can compose the label using multiple fields: `@[_doc][company_name]@ from @[_doc][country]@`.
- *** To have a multi-line label just add a new line character (`\n`): `@[_doc][companyName]@ \n @[_doc][country]@`
+ * *Time Field* - whenever one or more time fields are available for the selected index pattern, this options appears and lets the user configure which field to use as the time for nodes
+ * *Geo Field* - similarly as for the time field, whenever one or more geo fields are available for the selected index pattern, this options appears and lets the user configure which field to use as the geographic location for nodes
  
 image::images/graph_browser/vertex_config.png["Vertex Configuration", title="Vertex Configuration", align="center"]
 
@@ -105,10 +87,7 @@ image::images/graph_browser/toolbar.png["Toolbar", title="Toolbar", align="cente
 image::images/graph_browser/remove_all.png["Remove All", title="Remove All", align="center"]
 
 [start=6]
- . *Expand* - This will expand the currently selected nodes. Right next to the _expand_ button there is a dropdown that shows advanced options for the expansion. The advanced options let you configure if you want to use the dashboard filters with the graph expansions. +
- Eg: You have a filter on the _Companies_ dashboard that filters out every non-US company. By using that filter within the graph browser you will expand only companies from within the US.
- 
-image::images/graph_browser/expand_filters.png["Expand with filters", title="Expand with filters", align="center"]
+ . *Expand* - This will expand the currently selected nodes. Right next to the _expand_ button there is a dropdown that shows advanced options for the expansion.
 
 [start=7]
  . *Highlight mode* - This toggle enables and disables the _Highlight mode_. The _Highlight mode_ moves to the background everything that is not selected and/or connected to a selected node/link.
@@ -168,15 +147,29 @@ The Graph Browser supports some shortcuts:
  * Mouse Wheel: changes the zoom level of the graph
 
 [float]
-==== Sidebar
+==== Navigation Bar
 
-image::images/graph_browser/sidebar.png["Sidebar", title="Sidebar", align="center"]
+image::images/graph_browser/navigation_bar.png["Navigation Bar", title="Navigation Bar", align="center"]
 
-The sidebar allows you to:
+The navigation bar allows you to:
 
  . Move the graph view in the clicked direction
  . Switch between:
  * *Arrow* - allows you to select elements
  * *Hand* - allows you to move the graph regardless of selected elements
  . Allows you to change the zoom level
+
+[float]
+==== Side Bar
+===== *Lenses*
+Todo
+
+===== *Select*
+Todo
+
+===== *Expand*
+Todo
+
+===== *Data*
+Todo
 

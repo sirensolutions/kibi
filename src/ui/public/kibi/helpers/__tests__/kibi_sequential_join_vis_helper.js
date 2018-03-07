@@ -335,7 +335,7 @@ describe('Kibi Components', function () {
           kibiMeta.getMetaForRelationalButtons.restore();
         });
 
-        it('should set the default filter label if no custom is set', function () {
+        it('should set the default filter label to n/a if no custom is set', function () {
           const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
@@ -352,7 +352,7 @@ describe('Kibi Components', function () {
           button.targetCount = 123;
 
           return button.click().then(() => {
-            expect(button.joinSeqFilter.meta.alias).to.eql('... related to (123) from dashboard 1');
+            expect(button.joinSeqFilter.meta.alias).to.eql('... related to (n/a) from dashboard 1');
           });
         });
 
@@ -375,7 +375,7 @@ describe('Kibi Components', function () {
 
 
           return button.click().then(() => {
-            expect(button.joinSeqFilter.meta.alias).to.eql('My custom label with placeholders 123 dashboard 1');
+            expect(button.joinSeqFilter.meta.alias).to.eql('My custom label with placeholders n/a dashboard 1');
           });
         });
 
@@ -419,7 +419,7 @@ describe('Kibi Components', function () {
           button.targetCount = 123;
 
           return button.click().then(() => {
-            expect(button.joinSeqFilter.meta.alias).to.eql('My custom label 123');
+            expect(button.joinSeqFilter.meta.alias).to.eql('My custom label n/a');
           });
         });
 

@@ -6,7 +6,7 @@ To display the raw data behind the visualization, click the image:images/spy-ope
 
 Use the select input (highlighted below) to view detailed information about the raw data.
 
-image:images/spy-panel.png[]
+image:images/visualization/vis-spy/spy-panel.png[]
 
 .Table
 

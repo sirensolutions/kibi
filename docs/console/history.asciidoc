@@ -7,4 +7,4 @@ where you can see the old requests. You can also select a request here and it wi
 the current cursor position.
 
 .History Panel
-image::images/history.png["History Panel"]
+image::images/console/history.png["History Panel"]

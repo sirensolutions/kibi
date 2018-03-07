@@ -37,7 +37,7 @@ data] usage. Common examples for suitable fields include log line numbers,
 monotonically increasing counters and high-precision timestamps.
 --
 
-image::images/Discover-ContextView.png[Context View]
+image::images/discover/Discover-ContextView.png[Context View]
 
 NOTE: The number of documents displayed by default can be configured
 via the `context:defaultSize` setting in <<advanced-options, *Management >
@@ -52,14 +52,14 @@ To increase the number of displayed documents that are newer than the anchor
 document, click the *Load 5 more* button above the document list or enter the
 desired number into the input box right of the button.
 
-image::images/Discover-ContextView-SizePicker-Newer.png[]
+image::images/discover/Discover-ContextView-SizePicker-Newer.png[]
 {nbsp}
 
 To increase the number of displayed documents that are older than the anchor
 document, click the *Load 5 more* button below the document list or enter the
 desired number into the input box right of the button.
 
-image::images/Discover-ContextView-SizePicker-Older.png[]
+image::images/discover/Discover-ContextView-SizePicker-Older.png[]
 {nbsp}
 
 NOTE: The default number of documents loaded with each button click can be
@@ -83,4 +83,4 @@ New filters can be added via the *Add a filter* link in the filter bar, by
 clicking the filter icons appearing when hovering a field, or by expanding
 documents and clicking the filter icons in the table.
 
-image::images/Discover-ContextView-FilterMontage.png[]
+image::images/discover/Discover-ContextView-FilterMontage.png[]

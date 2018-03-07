@@ -59,7 +59,7 @@ fields are also added to the *Selected Fields* list.
 To rearrange the field columns, hover over the header of the column you want to move
 and click the *Move left* or *Move right* button.
 
-image:images/Discover-MoveColumn.jpg[Move Column]
+image:images/discover/Discover-MoveColumn.jpg[Move Column]
 
 [float]
 [[removing-columns]]

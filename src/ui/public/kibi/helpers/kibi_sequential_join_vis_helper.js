@@ -74,8 +74,16 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
     }).value();
   };
 
+  KibiSequentialJoinVisHelper.prototype.switchToDashboard = function (button) {
+    // add join_seq filter
+    kibiState.addFilter(button.targetDashboardId, button.joinSeqFilter);
+    // switch to target dashboard
+    kibiState.save(false, true);
+    kbnUrl.change('/dashboard/{{id}}', { id: button.targetDashboardId });
+  };
+
   KibiSequentialJoinVisHelper.prototype.addClickHandlerToButton = function (button) {
-    button.click = function (updateOnClick = false) {
+    button.click = (updateOnClick = false) => {
       let alias = button.filterLabel || '... related to ($COUNT) from $DASHBOARD';
       const currentDashboard = kibiState.getDashboardOnView();
 
@@ -92,14 +100,6 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
         kibiState.saveAppState()
       ]).then(([ title ]) => {
         if (button.joinSeqFilter) {
-          const switchToDashboard = function () {
-            // add join_seq Filter
-            kibiState.addFilter(button.targetDashboardId, button.joinSeqFilter);
-            // switch to target dashboard
-            kibiState.save(false, true);
-            kbnUrl.change('/dashboard/{{id}}', { id: button.targetDashboardId });
-          };
-
           // create the alias for the filter
           alias = alias.replace(/\$DASHBOARD/g, title);
           button.joinSeqFilter.meta.alias = alias;
@@ -110,12 +110,20 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
               return button.updateSourceCount(currentDashboardId, rel.inverseOf)
               .then(results => {
                 return new Promise((fulfill, reject) => {
-                // here we expect only 1 result
+                  // here we expect only 1 result
+
+                  // if the query is null, no counts should be fetched.
+                  if (results[0].button.query == null) {
+                    button.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, 'n/a');
+                    this.switchToDashboard(button);
+                    fulfill(0);
+                    return;
+                  }
+
                   const metaDefinitions = [{
                     definition: results[0].button,
                     callback: (error, meta) => {
                       if (error) {
-                        notify.error(error);
                         return reject(error);
                       }
                       if (button.isPruned) {
@@ -124,18 +132,22 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
                       } else {
                         button.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, meta.hits.total);
                       }
-                      switchToDashboard.apply(button);
+                      this.switchToDashboard(button);
                       fulfill(meta.hits.total);
                     }
                   }];
-                  kibiMeta.getMetaForRelationalButtons(metaDefinitions);
+                  try {
+                    kibiMeta.getMetaForRelationalButtons(metaDefinitions);
+                  } catch (err) {
+                    reject(err);
+                  }
                 });
-              });
+              })
+              .catch(notify.error);
             });
           } else {
-            switchToDashboard.apply(button);
+            this.switchToDashboard(button);
           }
-          switchToDashboard.apply(button);
         } else {
           button.joinSeqFilter.meta.alias_tmpl = '';
           // just redirect to the target dashboard

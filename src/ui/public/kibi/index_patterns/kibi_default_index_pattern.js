@@ -25,17 +25,8 @@ function KibiDefaultIndexPatternProvider(Private, indexPatterns) {
 
   class KibiDefaultIndexPattern {
 
-    async getDefaultIndexPattern(patterns, defaultId) {
-      let promise;
-      // use the patterns if passed
-      if (patterns instanceof Array) {
-        promise = Promise.resolve(patterns).then(patterns => {
-          return map(patterns, p => p.id);
-        });
-      } else if (patterns === undefined) {
-        promise = getIds();
-      }
-
+    async getDefaultIndexPattern(defaultId) {
+      const promise = getIds();
 
       return promise.then(function (patternIds) {
         if (!defaultId && patternIds.length > 0) {

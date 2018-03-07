@@ -1195,7 +1195,7 @@ on specific objects by visiting **Settings > Objects** and clicking on the
 permissions button next to an object:
 
 ._The object permissions button_
-image::images/access_control/object_perms_button_5.png["The object permissions button",align="center"]
+image::images/access_control/object_perms_button.png["The object permissions button",align="center"]
 
 The object permissions form allows to set the owner of the object and custom
 access rules.

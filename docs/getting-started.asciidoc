@@ -122,7 +122,7 @@ For example, in the _Query on Companies_ visualization you can see that 41 of
 the 96 companies have competitors and 8 of them are in the top 500 companies
 by number of employees:
 
-image::images/getting_started/demo_query_companies_5.png["SQL based aggregations",align="center"]
+image::images/getting_started/demo_query_companies.png["SQL based aggregations",align="center"]
 
 `Companies "With competitors"` and `Top 500 companies (HR count)` are <<datasource-queries, queries>>
 on the SQLite database. The records returned by the queries are used to filter
@@ -244,7 +244,7 @@ configured to display the following fields:
 - countrycode
 - Why Relevant? (a <<relational-column, relational column>>)
 
-image::images/getting_started/companies_table_5.png["Companies table",align="center"]
+image::images/getting_started/companies_table.png["Companies table",align="center"]
 
 By selecting *Edit* and then clicking on the pencil icon, you are brought to a view where you can choose which fields to display and
 customize the order of the columns. If the index is time based, the `Time` column will be always displayed.
@@ -284,9 +284,9 @@ is matched by a query on the SQLite database. The relational column reports on t
 
 In the example below, in the _Companies Table_, you can see that `Big Fish` is listed here because it has competitors.
 
-image::images/getting_started/relational_column_example_5.png["Relational column example",align="center"]
+image::images/getting_started/relational_column_example.png["Relational column example",align="center"]
 
-image::images/getting_started/relational_column_config_5.png["Relational column configuration",align="center"]
+image::images/getting_started/relational_column_config.png["Relational column configuration",align="center"]
 
 [float]
 === Saving the Visualization

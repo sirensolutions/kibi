@@ -35,25 +35,6 @@ To setup a Search Guard cluster, you will need to generate the following files:
 
 These files can be either Java KeyStore files or PKCS12 bundles.
 
-==== Sample certificates
-
-The {kibi-name}  demo distribution includes the following sample certificates in the
-_elasticsearch/config_ directory:
-
-- **truststore.jks**: a sample CA certificate chain.
-- **CN=localhost-keystore.jks**: a certificate for the bundled Elasticsearch
-  node, used for both transport and REST API encryption.
-
-The password of all Java keystores is `password`.
-
-In addition, the following certificates are included in the
-_siren-investigate/pki/searchguard_ directory:
-
-- **CN=sgadmin.crtfull.pem**: a certificate bundle
-  with administrative privileges over the Search Guard Management REST API.
-- **CN=sgadmin.key.pem**: the key of the administrative certificate.
-- **ca.pem**: the cluster CA certificate chain in PEM format.
-
 ==== Issuing certificates in an existing PKI infrastructure
 
 If your organization has a PKI infrastructure in place, you can generate

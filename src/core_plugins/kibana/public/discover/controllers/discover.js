@@ -81,7 +81,7 @@ uiRoutes
         if (exists) {
           idPromise = Promise.resolve(state.index);
         } else {
-          idPromise = kibiDefaultIndexPattern.getDefaultIndexPattern(savedObjects).then(indexPattern => indexPattern.id);
+          idPromise = kibiDefaultIndexPattern.getDefaultIndexPattern().then(indexPattern => indexPattern.id);
         }
         // kibi: end
 

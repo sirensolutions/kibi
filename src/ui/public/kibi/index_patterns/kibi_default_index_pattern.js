@@ -26,9 +26,8 @@ function KibiDefaultIndexPatternProvider(Private, indexPatterns) {
   class KibiDefaultIndexPattern {
 
     async getDefaultIndexPattern(defaultId) {
-      const promise = getIds();
 
-      return promise.then(function (patternIds) {
+      return getIds().then(function (patternIds) {
         if (!defaultId && patternIds.length > 0) {
           defaultId = patternIds[0];
         }

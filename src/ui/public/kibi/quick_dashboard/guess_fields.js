@@ -8,6 +8,7 @@ import { allSelected } from 'ui/kibi/directives/tristate_checkbox';
 import { fieldSpec, queryIsAnalyzed } from 'ui/kibi/utils/field';
 import { promiseMapSeries } from 'ui/kibi/utils/promise';
 
+import errors from 'request-promise/errors';
 import _ from 'lodash';
 
 
@@ -137,6 +138,30 @@ export function GuessFieldsProvider(
     });
   }
 
+  function evalMSearch(requests, evalResp) {
+    const body = _(requests)
+      .map('body')
+      .flatten()
+      .value();
+
+    return es.msearch({ body })
+      .then(allResp => {
+        const { responses } = allResp;
+        let error;
+
+        _.forEach(allResp.responses, (resp, r) => {
+          if(resp.error) {
+            error = Promise.reject(new errors.StatusCodeError(resp.status, resp));
+            return false;
+          }
+
+          evalResp(resp, r);
+        });
+
+        return error;
+      });
+  }
+
   function termsResolve(resp) {
     return {
       docsCount: resp.hits.total,
@@ -187,15 +212,8 @@ export function GuessFieldsProvider(
       });
     }
 
-    const body = _(requests)
-      .map('body')
-      .flatten()
-      .value();
-
-    return es.msearch({ body })
-      .then(allResp => allResp.responses.reduce(function (result, resp, r) {
-        return Object.assign(result, requests[r].resolve(resp));
-      }, fieldStats));
+    return evalMSearch(requests, (resp, r) =>
+      Object.assign(fieldStats, requests[r].resolve(resp)));
   }
 
   function querySavedVis(args, fieldStats) {

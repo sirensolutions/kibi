@@ -28,6 +28,7 @@ const baseEsResp = {
 let indexPattern;
 let field;
 let field2;
+let minMaxEsResp;
 let uniqueEsResp;
 let termsEsResp;
 
@@ -38,10 +39,17 @@ histoEsResp.aggregations.result.buckets =
 
 // Mocks
 
+class AggConfigs {
+  constructor(vis, config) {
+    this.vis = vis;
+    this.config = config;
+  }
+}
+
 const Private = function (provider) {
   switch(provider) {
     case VisAggConfigsProvider:
-      return () => {};
+      return AggConfigs;
 
     case VisTypesRegistryProvider:
       return additionalVisTypes;
@@ -78,8 +86,12 @@ const mappings = {
     return Promise.resolve({
       theIndex: {
         mappings: {
-          type: {
+          theType: {
             properties: {
+              longField: {
+                name: 'longField',
+                type: 'long'
+              },
               textField: {
                 name: 'textField',
                 type: 'text'
@@ -111,7 +123,7 @@ const es = {
     const aggs = request.body.aggs;
 
     if(aggs.min && aggs.max) {
-      return Promise.resolve(baseEsResp);
+      return Promise.resolve(minMaxEsResp);
     }
 
     switch(_.keys(aggs.result)[0]) {
@@ -159,12 +171,13 @@ function initTest() {
     timeFieldName: '',
     fields: new IndexedArray({
       index: ['name'],
-      initialSet: [ field ]
+      initialSet: [ field, field2 ]
     })
   };
 
   field.indexPattern = field2.indexPattern = indexPattern;
 
+  minMaxEsResp = _.cloneDeep(baseEsResp);
   uniqueEsResp = _.cloneDeep(baseEsResp);
   termsEsResp = _.cloneDeep(baseEsResp);
 }
@@ -234,11 +247,9 @@ describe('QuickDashboard Visualization Tests', function () {
 
       field.name = 'textField';
       field.type = 'string';
-      field.esType = 'text';
 
       field2.name = 'analyzedStringField';
       field2.type = 'string';
-      field2.esType = 'string';
 
       return visBuilder(indexPattern, [ field, field2 ])
         .then(vises => {
@@ -330,6 +341,21 @@ describe('QuickDashboard Visualization Tests', function () {
         .then(() => doTest(500))
         .then(() => doTest(5e3))
         .then(() => doTest(5e4));
+    });
+
+    it('Has histo interval >=1 for integer types', function () {
+      field.name = 'longField';
+      field.type = 'number';
+      minMaxEsResp.aggregations.min.value = -1;
+      minMaxEsResp.aggregations.max.value = 1;
+
+      return visBuilder(indexPattern, [ field ])
+        .then(vises => {
+          expect(vises.length).to.be(1);
+          expect(vises[0].type).to.be(visTypes.HISTOGRAM);
+          expect(vises[0].visState.aggs.config[1].params.interval)
+            .to.be(1);
+        });
     });
   });
 

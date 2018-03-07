@@ -54,6 +54,7 @@ function init() {
   };
 
   field = {
+    indexPattern: index,
     name: 'field',
     displayName: 'field',
     type: 'number',
@@ -63,11 +64,13 @@ function init() {
   };
 
   field2 = _.defaults({
+    indexPattern: index,
     name: 'field2',
     displayName: 'field2'
   }, field);
 
   field3 = _.defaults({
+    indexPattern: index,
     name: 'field3',
     displayName: 'field3'
   }, field);

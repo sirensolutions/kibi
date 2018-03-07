@@ -14,8 +14,8 @@
           </th>
           <th sort-icon rows="stats" sort-by="sort.type">Type</th>
           <th sort-icon rows="stats" sort-by="sort.field">Field</th>
+          <th sort-icon rows="stats" sort-by="sort.chart">Chart Type</th>
           <th sort-icon rows="stats" sort-by="sort.visName">Vis Name</th>
-          <th sort-icon rows="stats" sort-by="sort.chart">Chart</th>
         </tr>
       </thead>
       <tbody>
@@ -23,10 +23,11 @@
           <td><input type="checkbox" ng-model="fieldStats.selected"></td>
           <td><field-name field="fieldStats.typeField" /></td>
           <td>{{fieldStats.field.displayName}}</td>
-          <td><input type="text" title="{{fieldStats.sVis.title}}"
+          <td>{{fieldStats.sVis.vis.type.title}}</td>
+          <td><input type="text" class="quickdash-report-vis-title"
+            title="{{fieldStats.sVis.title}}"
             ng-model="fieldStats.sVis.title"
             ng-change="sort.visName.setUnordered()"></td>
-          <td>{{fieldStats.sVis.vis.type.title}}</td>
         </tr>
       </tbody>
     </table>

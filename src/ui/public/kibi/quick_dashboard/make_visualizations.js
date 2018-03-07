@@ -3,7 +3,7 @@ import * as visTypes from './vistypes';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import { fieldSpec, queryIsAnalyzed } from 'ui/kibi/utils/field';
+import { fieldSpec, queryEsType, queryIsAnalyzed } from 'ui/kibi/utils/field';
 import { promiseMapSeries } from 'ui/kibi/utils/promise';
 
 import _ from 'lodash';
@@ -23,7 +23,7 @@ export function QuickDashMakeVisProvider(
   const TERMS_COUNT_PIE = 30;
   const TERMS_COUNT_HISTOGRAM = 50;
   const TERMS_COUNT_TABLE = 100;
-  const NUMERIC_HISTO_BUCKETS_COUNT = 150;
+  const NUMERIC_HISTO_BUCKETS_COUNT = 50;
 
   const aggSchemasByVisType = {
     [visTypes.TABLE]: 'bucket'
@@ -110,33 +110,36 @@ export function QuickDashMakeVisProvider(
   }
 
   function evalHistoInterval(index, field, query) {
-    return evalNumericRange(index, field, query)
-      .then(range => {
-        const floatInterval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
+    return Promise.all([
+      evalNumericRange(index, field, query),
+      queryEsType(mappings, field)
+    ])
+    .then(([ range, esType ]) => {
+      const floatInterval = (range[1] - range[0]) / NUMERIC_HISTO_BUCKETS_COUNT;
 
-        // We want to convert the pure floating point interval to a somewhat
-        // readable form, rounding *up* to the nearest two-digit multiple of a power
-        // of 10.
-        //
-        // Also, imposing a minimum precision of 0 (value = 1) for integers
-        // and 6 (value = 1e-6) for floats.
+      // We want to convert the pure floating point interval to a somewhat
+      // readable form, rounding *up* to the nearest two-digit multiple of a power
+      // of 10.
+      //
+      // Also, imposing a minimum precision of 0 (value = 1) for integers
+      // and 6 (value = 1e-6) for floats.
 
-        let minExp;
+      let minExp;
 
-        switch(field.esType) {
-          case 'long': case 'integer': case 'short': case 'byte':
-            minExp = 0;
-            break;
+      switch(esType) {
+        case 'long': case 'integer': case 'short': case 'byte':
+          minExp = 0;
+          break;
 
-          default:
-            minExp = -6;
-        }
+        default:
+          minExp = -6;
+      }
 
-        let exp = Math.floor(Math.log10(floatInterval)) - 1;
-        exp = Math.max(exp, minExp);
+      let exp = Math.floor(Math.log10(floatInterval)) - 1;
+      exp = Math.max(exp, minExp);
 
-        return _.ceil(floatInterval, -exp);
-      });
+      return _.ceil(floatInterval, -exp);
+    });
   }
 
   function evalDateInterval(index, field, query) {
@@ -273,7 +276,7 @@ export function QuickDashMakeVisProvider(
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
         return retVis(visTypes.PIE, 'terms', { size: TERMS_COUNT_PIE }, null,
-          `$$ - Top ${TERMS_COUNT_PIE} Terms by Count`);
+          `Top ${TERMS_COUNT_PIE} $$`);
       }
 
       // Otherwise, use a histogram
@@ -292,7 +295,7 @@ export function QuickDashMakeVisProvider(
             }]
           };
 
-          if(relativeCutoff < 0.1) {     // 10% of the buckets have 90% of the documents
+          if(relativeCutoff < 0.1) {      // 10% of the buckets have 90% of the documents
 
             // Some buckets are bound to have a far greater count than the rest.
             // This means that a non-linear scale is best, to shorten the gap.
@@ -301,7 +304,7 @@ export function QuickDashMakeVisProvider(
           }
 
           return retVis('histogram', 'histogram', { interval }, params,
-            '$$ - Histogram of Counts');
+            'Histogram of $$');
         });
     });
   }
@@ -315,7 +318,7 @@ export function QuickDashMakeVisProvider(
       // Use pie if we can represent everything in 10 terms
       if(unique <= 10) {
         return retVis(visTypes.PIE, 'terms', { size: TERMS_COUNT_PIE }, null,
-          `$$ - Top ${TERMS_COUNT_PIE} Terms by Count`);
+          `Top ${TERMS_COUNT_PIE} $$`);
       }
 
       return Promise.all([
@@ -327,7 +330,7 @@ export function QuickDashMakeVisProvider(
         if(isAnalyzed) {
           const params = (termsEval.relativeCutoff < 0.1) ? { scale: 'log' } : {};
           return retVis(visTypes.TAGCLOUD, 'terms', { size: TERMS_COUNT_PIE }, params,
-            `$$ - Top ${TERMS_COUNT_PIE} Tags by Count`);
+            `Top ${TERMS_COUNT_PIE} $$`);
         }
 
 
@@ -336,7 +339,7 @@ export function QuickDashMakeVisProvider(
         // Use pie for 90% of the dataset in <= 10 terms
         if(cutoffIdx < 10) {
           return retVis(visTypes.PIE, 'terms', { size: TERMS_COUNT_PIE }, null,
-            `$$ - Top ${TERMS_COUNT_PIE} Terms by Count`);
+            `Top ${TERMS_COUNT_PIE} $$`);
         }
 
         // Use histogram for 90% of the dataset in <= 50 terms
@@ -346,12 +349,12 @@ export function QuickDashMakeVisProvider(
             : {};
 
           return retVis('histogram', 'terms', { size: TERMS_COUNT_HISTOGRAM }, params,
-            `$$ - Top ${TERMS_COUNT_HISTOGRAM} Terms by Count`);
+            `Top ${TERMS_COUNT_HISTOGRAM} $$`);
         }
 
         // Use table otherwise
         return retVis(visTypes.TABLE, 'terms', { size: TERMS_COUNT_TABLE }, null,
-          `$$ - List by Count`);
+          `List of $$`);
       });
     });
   }
@@ -399,7 +402,7 @@ export function QuickDashMakeVisProvider(
       };
 
       return configureVis(sVis, dateField, aggs, params,
-        'Documents Count and Numeric Averages by $$');
+        'Documents count and numeric averages by $$');
     });
   }
 
@@ -544,11 +547,11 @@ export function QuickDashMakeVisProvider(
 
           case 'boolean':
             return createVis(index, field, visTypes.PIE, 'terms', { size: 2 },
-              '$$ - Values by Count');
+              '$$ values');
 
           case 'geo_point':
             return createVis(index, field, visTypes.TILE_MAP, 'geohash_grid', null, null,
-              '$$ - Locations Map');
+              '$$ locations map');
 
           default:
             return null;

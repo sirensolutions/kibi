@@ -188,8 +188,7 @@ export default function (program) {
       }
 
       const doBackup = !options.dontBackup;
-      const date = new Date();
-      const folderPath = './src/cli/kibi/backup_' + date.toString();
+      const folderPath = './src/cli/kibi/backup_' + new Date().toString();
 
       if (doBackup) {
         const backupKibi = new BackupKibi(config, folderPath);

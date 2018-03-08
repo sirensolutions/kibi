@@ -1,6 +1,6 @@
 import KbnServer from '../../server/kbn_server';
 import Promise from 'bluebird';
-import fs from 'fs';
+import rimraf from 'rimraf';
 import { merge, has, get } from 'lodash';
 import { validateInvestigateYml, getConfigYmlPath, checkConfigYmlExists, getConfigFilename } from '../../cli/kibi/validate_config';
 import migrateConfigYml from './_migrate_config_yml';
@@ -23,27 +23,6 @@ const pathCollector = function () {
 };
 
 const pluginDirCollector = pathCollector();
-
-/**
- *  Delete backup folder
- *
- * @param {string} path path of folder
- */
-async function deleteBackupFolder(path) {
-  let files = [];
-  if (fs.existsSync(path)) {
-    files = fs.readdirSync(path);
-    files.forEach(function (file,index) {
-      const curPath = path + "/" + file;
-      if(fs.lstatSync(curPath).isDirectory()) { // recurse
-        deleteBackupFolder(curPath);
-      } else { // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
-};
 
 /**
  * The command to upgrade saved objects.
@@ -122,7 +101,7 @@ export default function (program) {
   }
 
   async function restoreFromBackupFiles(config, folderPath) {
-    process.stdout.write('Reverting investigate using backup files\n');
+    process.stdout.write('Reverting investigate using backup files from ' + folderPath + '\n');
     const restoreKibi = new RestoreKibi(config, folderPath);
     return await restoreKibi.restore();
   }
@@ -198,11 +177,13 @@ export default function (program) {
       const success = await runUpgrade(options, config);
       if (success) {
         if (doBackup && !options.keepBackup) {
-          await deleteBackupFolder(folderPath);
+          await rimraf.sync(folderPath);
         }
         process.exit(0);
       } else {
-        if (doBackup) {
+        if (!doBackup) {
+          process.exit(-1);
+        } else {
           const rl = readline.createInterface(process.stdin, process.stdout);
           rl.question('There is a error during upgrade process. Do you want to restore from backup files [N/y] ', async function (resp) {
             const yes = resp.toLowerCase().trim()[0] === 'y';
@@ -212,12 +193,11 @@ export default function (program) {
               await restoreFromBackupFiles(config,  folderPath);
             }
             if (!options.keepBackup) {
-              await deleteBackupFolder(folderPath);
+              await rimraf.sync(folderPath);
             }
             process.exit(-1);
           });
         }
-
       }
     }
   }

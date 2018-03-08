@@ -1,6 +1,7 @@
 import KbnServer from '../../server/kbn_server';
 import Promise from 'bluebird';
-import { merge } from 'lodash';
+import rimraf from 'rimraf';
+import { merge, has, get } from 'lodash';
 import { validateInvestigateYml, getConfigYmlPath, checkConfigYmlExists, getConfigFilename } from '../../cli/kibi/validate_config';
 import migrateConfigYml from './_migrate_config_yml';
 import readYamlConfig from '../serve/read_yaml_config';
@@ -10,6 +11,8 @@ import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';
 import MigrationLogger from 'kibiutils/lib/migrations/migration_logger';
 import readline from 'readline';
 import { existsSync } from 'fs';
+import BackupKibi from './_backup_kibi';
+import RestoreKibi from './_restore_kibi';
 
 const pathCollector = function () {
   const paths = [];
@@ -88,13 +91,19 @@ export default function (program) {
       } else {
         process.stdout.write('No objects upgraded.\n');
       }
+      await kbnServer.close();
+      return true;
     } catch (error) {
       process.stderr.write(`${error}\n`);
-      process.exit(1);
+      await kbnServer.close();
+      return false;
     }
+  }
 
-    await kbnServer.close();
-    process.exit(0);
+  async function restoreFromBackupFiles(config, folderPath) {
+    process.stdout.write('Reverting investigate using backup files from ' + folderPath + '\n');
+    const restoreKibi = new RestoreKibi(config, folderPath);
+    return await restoreKibi.restore();
   }
 
   async function processCommand(options) {
@@ -157,21 +166,39 @@ export default function (program) {
         catch (e) { null; }
       }
 
-      if (options.yes) {
-        return runUpgrade(options, config);
+      const doBackup = !options.dontBackup;
+      const folderPath = './src/cli/kibi/backup_' + new Date().toString();
+
+      if (doBackup) {
+        const backupKibi = new BackupKibi(config, folderPath);
+        await backupKibi.backup();
       }
 
-      const indexName = (config.kibana && config.kibana.index) || '.siren';
-
-      const rl = readline.createInterface(process.stdin, process.stdout);
-      rl.question('Have you backed up your ' + indexName + ' index? [N/y] ', function (resp) {
-        const yes = resp.toLowerCase().trim()[0] === 'y';
-        rl.close();
-
-        if (yes) {
-          return runUpgrade(options, config);
+      const success = await runUpgrade(options, config);
+      if (success) {
+        if (doBackup && !options.keepBackup) {
+          await rimraf.sync(folderPath);
         }
-      });
+        process.exit(0);
+      } else {
+        if (!doBackup) {
+          process.exit(-1);
+        } else {
+          const rl = readline.createInterface(process.stdin, process.stdout);
+          rl.question('There is a error during upgrade process. Do you want to restore from backup files [N/y] ', async function (resp) {
+            const yes = resp.toLowerCase().trim()[0] === 'y';
+            rl.close();
+
+            if (yes) {
+              await restoreFromBackupFiles(config,  folderPath);
+            }
+            if (!options.keepBackup) {
+              await rimraf.sync(folderPath);
+            }
+            process.exit(-1);
+          });
+        }
+      }
     }
   }
 
@@ -181,7 +208,8 @@ export default function (program) {
       'Upgrade saved objects'
     )
     .option('--dev', 'Run the upgrade using development mode configuration')
-    .option('-y, --yes', 'Run the upgrade without asking backup')
+    .option('--dont-backup', 'Run the upgrade without creating backup')
+    .option('--keep-backup', 'Don\'t delete backup files after upgrade process')
     .option(
       '-c, --config <path>',
       'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',

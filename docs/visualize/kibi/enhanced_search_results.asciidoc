@@ -7,6 +7,9 @@ a query on an Elasticsearch index, similar to the stock Discover table.
 In addition to column configuration, the visualization provides the following
 features:
 
+- to hide the time column - which represents a time field of the Elasticsearch index, check the _Hide time column_ checkbox
+- it is possible to set page size which is a count of rows displayed each page. Also to enable top paginator, check the _Show top paginator_ checkbox.
+- if you would like to use aliases in place of the column names in the data, see <<rename-columns>>.
 - it is possible to enable a column that indicates whether or not a search
 result is matched by a query on an external datasource. This is described in
 <<relational-column>>.
@@ -14,6 +17,24 @@ result is matched by a query on an external datasource. This is described in
 to open the URL displayed in a cell. This is described in <<click-handlers>>.
 
 image::images/enhanced_search_results/config_5.png["Configuration view of the Enhanced search results table",align="center"]
+
+[float]
+[[rename-columns]]
+=== Rename Columns
+
+It is possible to create an alias and set a minimum width for each column.
+
+To enable the rename columns, check the _Enable column rename_ checkbox.
+
+The screenshot below shows the rename columns section of the table.
+
+image::images/enhanced_search_results/alias.png["Rename columns",align="center"]
+
+In order to configure names of columns, you must set the following
+parameters:
+
+- _Alias_: the column alias that will be displayed as a column name.
+- _Min width_: Optional parameter to set the minimum width of the column.
 
 [float]
 [[relational-column]]

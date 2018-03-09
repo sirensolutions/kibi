@@ -57,9 +57,9 @@ elasticsearch:
 
 *Kibana or Siren Platform*
 
-There is a possibility to create multiple user credentials and assign these credentials to watchers, one credential per watcher. Thus authenticating each watcher separately. It is called impersonation. 
+It is possible to create multiple user credentials and assign these credentials to watchers, one credential per watcher, thereby authenticating each watcher separately. It is called impersonation. 
 
-1. Create credentials in Search Guard or X-Pack and assign permissions you need.
+1. Create credentials in Search Guard or X-Pack and assign the permissions you need.
 
 You need one user for Sentinl and one user per watcher.
 
@@ -80,11 +80,11 @@ sentinl:
 
 Set password as clear text in `password` property. The password can be put in encrypted form instead. Set password hash in `sha` property, now you can remove `password` option. 
 
-Use `sentinl/scripts/encryptPassword.js` script to obtain the hash. Edit variable `plainTextPassword` value, replacing `admin` with your password. Copy the generated hash and paste as the `sha` value. Also, you can change password hashing complexity tunning options inside `encryption`. https://nodejs.org/api/crypto.html[Node.js crypto library] is used to hash and unhash user password.
+Use `sentinl/scripts/encryptPassword.js` script to obtain the hash. Edit the value of the `plainTextPassword` variable, replacing `admin` with your password. Copy the generated hash and paste as the `sha` value. Also, you can change password hashing complexity by setting options inside `encryption`. https://nodejs.org/api/crypto.html[Node.js crypto library] is used to hash and unhash user password.
 
 3. Set watcher authentication 
 
-Create a sha hash of the watcher password using `encryptPassword.js`. Put it into `password` input field and username into `username` field. Note, these fields are visible only when the impersonation is enabled `impersonate: true`. The fields are one-way only, you can insert credentials but you don't see them. It is to prevent other Sentinl admins to see the credentials set by you.  
+Create a sha hash of the watcher password using `encryptPassword.js`. Put it into `password` input field and username into `username` field. Note, these fields are visible only when the impersonation is enabled `impersonate: true`. The fields are one-way only, you can insert credentials but you don't see them. It is to prevent other Sentinl admins from seeing the credentials.  
 image:https://user-images.githubusercontent.com/5389745/33998197-20f662b6-e0e7-11e7-8201-d22ec9937960.png[screenshot from 2017-12-14 15-52-04]
 
 [[authenticate-report]]

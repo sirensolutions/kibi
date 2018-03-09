@@ -286,141 +286,141 @@ mechanisms and backends; the above configuration:
 [source,yaml]
 ----
 UNLIMITED:
-  - "*"
+  - '*'
 
 ###### INDEX LEVEL ######
 
 INDICES_ALL:
-  - "indices:*"
+  - 'indices:*'
 
 # for backward compatibility
 ALL:
   - INDICES_ALL
 
 MANAGE:
-  - "indices:monitor/*"
-  - "indices:admin/*"
+  - 'indices:monitor/*'
+  - 'indices:admin/*'
 
 CREATE_INDEX:
-  - "indices:admin/create"
-  - "indices:admin/mapping/put"
+  - 'indices:admin/create'
+  - 'indices:admin/mapping/put'
 
 MANAGE_ALIASES:
-  - "indices:admin/aliases*"
+  - 'indices:admin/aliases*'
 
 # for backward compatibility
 MONITOR:
   - INDICES_MONITOR
 
 INDICES_MONITOR:
-  - "indices:monitor/*"
+  - 'indices:monitor/*'
 
 DATA_ACCESS:
-  - "indices:data/*"
+  - 'indices:data/*'
   - CRUD
 
 WRITE:
-  - "indices:data/write*"
-  - "indices:admin/mapping/put"
+  - 'indices:data/write*'
+  - 'indices:admin/mapping/put'
 
 READ:
-  - "indices:data/read*"
-  - "indices:admin/mappings/fields/get*"
+  - 'indices:data/read*'
+  - 'indices:admin/mappings/fields/get*'
 
 DELETE:
-  - "indices:data/write/delete*"
+  - 'indices:data/write/delete*'
 
 CRUD:
   - READ
   - WRITE
 
 SEARCH:
-  - "indices:data/read/search*"
-  - "indices:data/read/msearch*"
-  - "indices:siren/plan*"
-  - "indices:siren/mplan*"
+  - 'indices:data/read/search*'
+  - 'indices:data/read/msearch*'
+  - 'indices:siren/plan*'
+  - 'indices:siren/mplan*'
   - SUGGEST
 
 SUGGEST:
-  - "indices:data/read/suggest*"
+  - 'indices:data/read/suggest*'
 
 INDEX:
-  - "indices:data/write/index*"
-  - "indices:data/write/update*"
-  - "indices:admin/mapping/put"
-  - "indices:data/write/bulk*"
+  - 'indices:data/write/index*'
+  - 'indices:data/write/update*'
+  - 'indices:admin/mapping/put'
+  - 'indices:data/write/bulk*'
 
 GET:
-  - "indices:data/read/get*"
-  - "indices:data/read/mget*"
+  - 'indices:data/read/get*'
+  - 'indices:data/read/mget*'
 
 ###### CLUSTER LEVEL ######
 
 CLUSTER_ALL:
-  - "cluster:*"
+  - 'cluster:*'
 
 CLUSTER_MONITOR:
-  - "cluster:monitor/*"
+  - 'cluster:monitor/*'
 
 CLUSTER_COMPOSITE_OPS_RO:
-  - "indices:data/read/mget"
-  - "indices:data/read/msearch"
-  - "indices:siren/mplan"
-  - "indices:data/read/mtv"
-  - "indices:admin/aliases/exists*"
-  - "indices:admin/aliases/get*"
+  - 'indices:data/read/mget'
+  - 'indices:data/read/msearch'
+  - 'indices:siren/mplan'
+  - 'indices:data/read/mtv'
+  - 'indices:admin/aliases/exists*'
+  - 'indices:admin/aliases/get*'
 
 CLUSTER_COMPOSITE_OPS:
-  - "indices:data/write/bulk"
-  - "indices:admin/aliases*"
+  - 'indices:data/write/bulk'
+  - 'indices:admin/aliases*'
   - CLUSTER_COMPOSITE_OPS_RO
 
 ##### SIREN #####
 
 SIREN_CLUSTER:
-  - "indices:data/read/scroll"
-  - "cluster:data/read/lock/create"
-  - "indices:data/read/msearch*"
-  - "cluster:internal/data/create"
-  - "cluster:internal/data/transfer*"
-  - "cluster:internal/data/delete"
-  - "cluster:internal/data/update/metadata"
-  - "cluster:siren/internal*"
-  - "indices:siren/mplan*"
-  - "cluster:admin/plugin/siren/license/get"
+  - 'indices:data/read/scroll'
+  - 'cluster:data/read/lock/create'
+  - 'indices:data/read/msearch*'
+  - 'cluster:internal/data/create'
+  - 'cluster:internal/data/transfer*'
+  - 'cluster:internal/data/delete'
+  - 'cluster:internal/data/update/metadata'
+  - 'cluster:siren/internal*'
+  - 'indices:siren/mplan*'
+  - 'cluster:admin/plugin/siren/license/get'
   - CLUSTER_COMPOSITE_OPS_RO
 
 SIREN_COMPOSITE:
-  - "indices:siren/mplan*"
-  - "indices:siren/plan*"
-  - "indices:data/read/search-join"
-  - "indices:data/read/lock/release"
+  - 'indices:siren/mplan*'
+  - 'indices:siren/plan*'
+  - 'indices:data/read/search-join'
+  - 'indices:data/read/lock/release'
 
 SIREN_READONLY:
-  - "indices:data/read/field_stats*"
-  - "indices:data/read/field_caps*"
-  - "indices:data/read/get*"
-  - "indices:data/read/mget*"
-  - "indices:data/read/search*"
-  - "indices:data/read/lock*"
-  - "indices:siren/mplan"
-  - "indices:siren/plan"
-  - "indices:admin/mappings/get*"
-  - "indices:admin/mappings/fields/get*"
-  - "indices:admin/validate/query*"
-  - "indices:admin/get*"
-  - "indices:admin/version/get*"
-  - "indices:data/siren/connector/*"
+  - 'indices:data/read/field_stats*'
+  - 'indices:data/read/field_caps*'
+  - 'indices:data/read/get*'
+  - 'indices:data/read/mget*'
+  - 'indices:data/read/search*'
+  - 'indices:data/read/lock*'
+  - 'indices:siren/mplan'
+  - 'indices:siren/plan'
+  - 'indices:admin/mappings/get*'
+  - 'indices:admin/mappings/fields/get*'
+  - 'indices:admin/validate/query*'
+  - 'indices:admin/get*'
+  - 'indices:admin/version/get*'
+  - 'indices:data/siren/connector/*'
   - SIREN_COMPOSITE
 
 SIREN_READWRITE:
-  - "indices:admin/exists*"
-  - "indices:admin/mapping/put*"
-  - "indices:admin/refresh*"
-  - "indices:data/write/delete*"
-  - "indices:data/write/index*"
-  - "indices:data/write/update*"
-  - "indices:data/write/bulk*"
+  - 'indices:admin/exists*'
+  - 'indices:admin/mapping/put*'
+  - 'indices:admin/refresh*'
+  - 'indices:data/write/delete*'
+  - 'indices:data/write/index*'
+  - 'indices:data/write/update*'
+  - 'indices:data/write/bulk*'
   - SIREN_READONLY
 ----
 
@@ -539,7 +539,7 @@ sirenserver:
 # Permissions for the internal federate user
 federateserver:
   cluster:
-    - "indices:admin/aliases"
+    - 'indices:admin/aliases'
   indices:
     ?siren-federate-datasources:
       '*':
@@ -552,8 +552,8 @@ federateserver:
         - ALL
     '*':
       '*':
-        - "indices:admin/exists"
-        - "indices:admin/siren/connector/index/*"
+        - 'indices:admin/exists'
+        - 'indices:admin/siren/connector/index/*'
 
 # Permissions for a Investigate administrator
 sirenadmin:
@@ -847,7 +847,7 @@ format, e.g.:
 
 [source,yaml]
 ----
-elasticsearch.ssl.certificateAuthorities: [ "pki/searchguard/ca.pem" ]
+elasticsearch.ssl.certificateAuthorities: [ 'pki/searchguard/ca.pem' ]
 ----
 
 If you're using the certificates generated by the TLS generator service, the

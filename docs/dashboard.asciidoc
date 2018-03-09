@@ -169,31 +169,9 @@ visualization in the <<visualize,Visualize>> page.
 
 [float]
 [[dashboard-filters]]
-include::filter_pinning.asciidoc[]
+include::dashboard/filter_pinning.asciidoc[]
 
-[[dashboard-groups]]
-== Dashboard Groups
-
-Dashboards can be organized in dashboard groups.
-
-image::images/dashboard/Dashboardgroups.png["Dashboard Groups Panel",align="center"]
-
-If the dashboard is associated with a saved search, the count of documents on the dashboard is displayed next to the dashboard name.
-Two additional indicators that might be displayed are:
-
-* _Filters/Queries indicator_ - the filter icon is displayed if there are any filter or query currently applied on the dashboard
-* _Pruned joins indicator_ - a star symbol is displayed if any of the join operations was pruned.
-
-[[dashboard-groups-edit]]
-== Edit Dashboard Groups
-
-image::images/dashboard/CreateNewDashboardGroup.png["Dashboard Groups Panel",align="center"]
-
-In the left-hand dashboard panel, you can change the order of the dashboard groups and move dashboards between groups by dragging and dropping. Dashboard groups can be managed by clicking on the _Create new group_ icon in the dashboard panel, and by right clicking on the dashboard group name to get _Edit_ and _Delete_ options.
-
-image::images/dashboard/edit-individual-dashboard-group.png["Dashboard Group Edit Panel",align="center"]
-
-In edit, you can change the title of an existing group, set the icon to a custom image by inserting a URL or use a https://fortawesome.github.io/Font-Awesome/[Font Awesome] icon.
+include::dashboard/dashboard_groups.asciidoc[]
 
 [float]
 [[dash-autorefresh]]

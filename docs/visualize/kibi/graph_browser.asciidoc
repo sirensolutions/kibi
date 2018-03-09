@@ -8,7 +8,7 @@ image::images/graph_browser/graph_browser_example.png["Graph Browser Example", t
 [float]
 === Configuration
 ==== Source
-To configure the visualization select a compatible datasource (typically the provided _Siren Gremlin Server_ datasource)
+To configure the visualization, select a compatible datasource (typically the provided _Siren Gremlin Server_ datasource)
 
 image::images/graph_browser/config_source.png["Source configuration", title="Source configuration", align="center"]
 
@@ -58,8 +58,8 @@ To configure a vertex, press the image:images/graph_browser/add_vertex.png[Add V
 
  * *Index Pattern* - the index pattern containing the type of documents you want to configure
  * *Index Pattern Type* - the index pattern type of the documents you want to configure
- * *Time Field* - whenever one or more time fields are available for the selected index pattern, this options appears and lets the user configure which field to use as the time for nodes
- * *Geo Field* - similarly as for the time field, whenever one or more geo fields are available for the selected index pattern, this options appears and lets the user configure which field to use as the geographic location for nodes
+ * *Time Field* - whenever one or more time fields are available for the selected index pattern, this option appears and lets the user configure which field to use as the time for nodes
+ * *Geo Field* - similar to the time field, whenever one or more geo fields are available for the selected index pattern, this option appears and lets the user configure which field to use as the geographic location for nodes
  
 image::images/graph_browser/vertex_config.png["Vertex Configuration", title="Vertex Configuration", align="center"]
 
@@ -87,7 +87,7 @@ image::images/graph_browser/toolbar.png["Toolbar", title="Toolbar", align="cente
 image::images/graph_browser/remove_all.png["Remove All", title="Remove All", align="center"]
 
 [start=6]
- . *Expand* - This will expand the currently selected nodes. Right next to the _expand_ button there is a dropdown that shows advanced options for the expansion.
+ . *Expand* - This will expand the currently selected nodes. Right next to the _expand_ button, there is a dropdown that shows advanced options for the expansion.
 
 [start=7]
  . *Highlight mode* - This toggle enables and disables the _Highlight mode_. The _Highlight mode_ moves to the background everything that is not selected and/or connected to a selected node/link.

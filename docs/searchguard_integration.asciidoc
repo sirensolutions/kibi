@@ -555,7 +555,7 @@ federateserver:
         - 'indices:admin/exists'
         - 'indices:admin/siren/connector/index/*'
 
-# Permissions for a Investigate administrator
+# Permissions for a {kibi-name} administrator
 sirenadmin:
   cluster:
     - SIREN_CLUSTER
@@ -580,7 +580,7 @@ sirenadmin:
         - 'indices:data/siren/connector/mappings/get'
         - 'indices:admin/get'
 
-# Permissions for a Investigate regular user.
+# Permissions for a {kibi-name} regular user.
 sirenuser:
   cluster:
     - SIREN_CLUSTER

@@ -28,14 +28,14 @@ the number of unique values in a field. Select a field from the drop-down.
 
 The _buckets_ aggregations determine what information will come out in the diagram.
 
-You can do a maximum of two agregations at one time.
-The first aggregation will create the parent circles, while the second aggregation will create the children circles.
+You can do a maximum of two aggregations at one time.
+The first aggregation will create the parent circles, while the second aggregation will create the child circles.
 
-Parent circles look slightly different than the children ones.
-Parent circles have a thicker border and the label written in bold.
+Parent circles look slightly different to the children ones.
+Parent circles have a thicker border and the label is written in bold.
 
-The parents bubble are divided by colors.
-If you do a subaggregation (children) you will see a bubbles divided by family.
+The parents bubbles are divided by color.
+If you do a subaggregation (children), you will see the bubbles divided by family.
 Children are located near the parent and all have the same color.
 Families are united. If you drag a bubble, all members of the family will drag along.
 
@@ -44,13 +44,11 @@ image::images/bubble_diagram/aggregations.png["Aggregation configuration",align=
 [float]
 === Options
 
-In the diagram there are three options
+In the diagram there are two options
 
 image::images/bubble_diagram/options.png["Options configuration",align="center",]
 
 *Show Parents*:: If checked parent bubbles are visible when doing the subaggregation.
-
-*Hidden Label*:: If checked the labels are hidden.
 
 *Enable Zoom*:: Enables zoom on the page. To use the zoom you have to use the mouse wheel.
 
@@ -63,7 +61,7 @@ When you drag a circle, its family follows it.
 
 image::images/bubble_diagram/movement.png["bubbles Movement",align="center"]
 
-When moving the mouse over a circle a detailed information is shown in a tooltip.
+When moving the mouse over a circle, detailed information is shown in a tooltip.
 
 image::images/bubble_diagram/table.png["Detailed information on hover",align="center"]
 
@@ -72,7 +70,11 @@ image::images/bubble_diagram/table.png["Detailed information on hover",align="ce
 
 You can create filters by double-clicking on the bubbles.
 
-When you double-click a child, you will see the bubble itself and its parent.
+When you double-click a child, you will asked to confirm the application of the filter on the filter bar.
+
+image::images/bubble_diagram/apply_filter_confirmation.png["Filter Child",align="center"]
+
+Pressing `Apply Now` will set the filter and display the bubble itself and its parent.
 
 image::images/bubble_diagram/filter_child.png["Filter Child",align="center"]
 

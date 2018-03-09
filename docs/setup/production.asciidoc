@@ -22,7 +22,7 @@ they are not required by the system.
 {kibi-name} is compatible with Elastic x-pack and Search Guard to enable index
 and document level access control.
 
-For more information about the Enterprise Edition access control features
+For more information about access control features,
 please see the <<access_control, Access Control>> section.
 
 [float]

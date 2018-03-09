@@ -1,0 +1,7 @@
+[[navigation-sidebar]]
+=== Navigation Sidebar
+
+The leftmost sidebar is used to navigate between apps within Siren Investigate.
+
+It can be expanded or contracted using the expand/contract button image:images/sidebar/contract_button.png[Contract Button] at the bottom of the sidebar.
+

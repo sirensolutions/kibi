@@ -36,6 +36,8 @@ The password for all users is `password`.
 After starting Elasticsearch and {kibi-name}, as described in the <<setup, Setup chapter>>,
 start your web browser and navigate to {start-url}.
 
+include::sidebar/sidebar.asciidoc[]
+
 By default {kibi-name} displays the _Articles_ dashboard, <<dashboard, dashboards>>
 can be configured to display multiple <<visualize, visualizations>> on the
 documents stored in a specific index or returned by a <<save-search,saved search>> on an index pattern.

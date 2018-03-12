@@ -3,7 +3,7 @@
 
 [partintro]
 --
-Kibana currently has the following limitations.
+{kibi-name} currently has the following limitations.
 
 * <<nested-objects>>
 

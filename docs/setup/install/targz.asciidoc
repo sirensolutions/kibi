@@ -142,7 +142,7 @@ directories so that you do not delete important data later on.
 
 | config
   | Configuration files including `investigate.yml`
-  | $KIBI\config
+  | $INVESTIGATE_HOME\config
  d|
 
 | data
@@ -153,12 +153,12 @@ directories so that you do not delete important data later on.
 | optimize
   | Transpiled source code. Certain administrative actions, e.g., `plugin install`,
     result in the source code being retranspiled on the fly.
-  | $KIBI\optimize
+  | $INVESTIGATE_HOME\optimize
  d|
 
 | plugins
   | The location of the plugin files. Each plugin will be contained in a subdirectory.
-  | $KIBI\plugins
+  | $INVESTIGATE_HOME\plugins
  d|
 
 |=======================================================================

@@ -75,10 +75,10 @@ uiModules.get('apps/management')
         return $scope.selectedItems.length === $scope.currentTab.data.length;
       };
 
-      const getData = function (filterString) {
+      const getData = function (filter) {
         const services = savedObjectManagementRegistry.all().map(function (obj) {
           const service = $injector.get(obj.service);
-          return service.find(filterString, undefined, undefined, true).then(function (data) {
+          return service.find(filter, undefined, undefined, true).then(function (data) {
             return {
               service: service,
               serviceName: obj.service,

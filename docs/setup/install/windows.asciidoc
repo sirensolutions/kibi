@@ -13,7 +13,7 @@ The demo versions contain a pre-configured Elasticsearch cluster in addition to
 
 [source,sh]
 --------------------------------------------
-.\bin\kibi
+.\bin\investigate
 --------------------------------------------
 
 By default, {kibi-name} runs in the foreground, prints its logs to `STDOUT`,

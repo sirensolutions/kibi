@@ -17,7 +17,6 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
 
       _.each(tree.nodes, node => {
         if (node.type === TreeType.VIRTUAL_BUTTON) {
-          // TODO: check mode
           _.each(node.nodes, relNode => {
             if (relNode.visible) {
               _.each(relNode.nodes, buttonNode => {
@@ -39,14 +38,7 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
         }
       });
 
-      // TODO check if it has any difference for anothe layout
-      // if ($scope.vis.params.layout === 'normal') {
-
-      // } else if ($scope.vis.params.layout === 'light')
-
-      // }
       return visibleVirtualButtons;
-
     }
 
     createFirstLevelNodes(buttons) {

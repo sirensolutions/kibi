@@ -288,10 +288,11 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   // DASHBOARD
   // Because the VIRTUAL_BUTTON children can be arranged for two ways
   // relation first OR dashboards first
-  // each VIRTUAL_BUTTON leaf contain two properties
+  // each VIRTUAL_BUTTON tree node contain two properties
   // nodes AND alt_nodes
   // such structure will help to render and control the UI
-  // exemple structure
+  //
+  // Exemple structure:
   //
   // {
   //   type: BUTTON

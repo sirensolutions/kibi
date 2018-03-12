@@ -38,7 +38,8 @@ export default class Migration25 extends Migration {
   }
 
   static get description() {
-    return 'Remove siren:zoom, siren:enableAllDashboardsCounts, siren:shieldAuthorizationWarning from config object';
+    return 'Remove deprecated advanced settings: siren:zoom, siren:enableAllDashboardsCounts, ' +
+    'siren:shieldAuthorizationWarning from config object';
   }
 
   _getUpgradeableKeys(object) {

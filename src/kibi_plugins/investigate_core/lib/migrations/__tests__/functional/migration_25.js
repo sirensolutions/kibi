@@ -89,7 +89,7 @@ describe('investigate_core/migrations/functional', function () {
       }));
     });
 
-    describe(`should remove unnecessary settings - Scenario 3`, function () {
+    describe(`should only remove unnecessary settings not all settings `, function () {
       beforeEach(wrapAsync(async () => {
         await scenarioManager.reload(Scenario3);
       }));

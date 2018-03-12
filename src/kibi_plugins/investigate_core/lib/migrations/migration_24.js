@@ -12,7 +12,7 @@ import _ from 'lodash';
  *
  * - if not found, adds the sourceFilters mapping object
  */
-export default class Migration23 extends Migration {
+export default class Migration24 extends Migration {
 
   constructor(configuration) {
     super(configuration);

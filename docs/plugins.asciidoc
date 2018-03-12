@@ -60,7 +60,7 @@ NOTE: This command creates the specified directory if it does not already exist.
 === Installing Plugins with Linux packages
 
 The {kibi-name} server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
-want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
+want to make sure these commands are ran as the user `myuser`.  This user is already added for you as part of the package installation.
 
 [source,shell]
 $ sudo -u kibana bin/investigate-plugin install x-pack

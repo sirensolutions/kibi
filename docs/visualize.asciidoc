@@ -25,6 +25,19 @@ To create a visualization:
 . Click the *Create new visualization* button or the **+** button.
 . Choose the visualization type:
 +
+* *Siren Visualizations*
+[horizontal]
+<<kibi_box_plot,Siren Box Plot>>:: Display data in an x/y chart using upper and lower percentiles.
+<<bubble_diagram,Bubble Diagram>>:: Show data and parent/child relationships as bubbles.
+<<enhanced_search_results,Enhanced Search Results>>:: Show the documents matched by a query on an Elasticsearch index with enhanced features.
+<<graph_browser,Graph browser>>:: display Elasticsearch documents as nodes and Siren Investigate relations as links of a graph.
+<<kibi_multi_chart,Multichart>>:: A visualization in which you can switch between other visualizations at will.
+<<kibi_query_viewer,Query Viewer>>:: Display the results from multiple queries on external data sources using query templates.
+<<kibi_scatter_plot,Scatter Plot>>:: Show data in an x/y graph as scattered points.
+* *Siren Relational Visualizations*
+[horizontal]
+<<relational_filter,Relational Filter>>:: Configure the relational buttons to navigate between dashboards.
+<<automatic_relation_filter,Automatic Relational Filter>>:: Automatically build the relations between index patterns and entities and generate <<relational_filter, relational filter>> buttons.
 * *Basic charts*
 [horizontal]
 <<xy-chart,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
@@ -179,3 +192,5 @@ include::visualize/kibi/box_plot.asciidoc[]
 include::visualize/kibi/bubble_diagram.asciidoc[]
 
 include::visualize/kibi/horizontal_bar_chart.asciidoc[]
+
+include::visualize/kibi/automatic_relation.asciidoc[]

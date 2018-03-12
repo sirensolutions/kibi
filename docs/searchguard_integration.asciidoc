@@ -243,11 +243,11 @@ A Search Guard configuration directory contains the following files:
 - **sg_internal_users.yml**: the Search Guard internal users database.
 - **sg_roles_mapping.yml**: contains the mapping between users and roles.
 
-A sample configuration below is used for Elasticsearch with no data.
-Further examples are available in the _config/sgconfig_ directory in the Elasticsearch 
+A sample configuration below is used for Elasticsearch with no data, for example your own Elasticsearch or 
+using our no-data-no-security package. Further examples are available in 
+the _config/sgconfig_ directory in the Elasticsearch 
 instance included in the demo distribution; the contents of the
-files are explained in the next sections and can be used as a general
-guideline.
+files are explained in the next sections and can be used as a general guideline.
 
 For additional configuration options please refer to the official
 {searchguard-ref}#configuring-users-roles-and-permissions[Search Guard documentation].
@@ -518,7 +518,7 @@ federateserver:
       '*':
         - ALL
 
-# Permissions for a Investigate administrator
+# Permissions for a {kibi-name} administrator
 sirenadmin:
   cluster:
     - SIREN_CLUSTER
@@ -547,7 +547,7 @@ sirenadmin:
         - 'indices:data/siren/connector/mappings/get'
         - 'indices:admin/get'
 
-# Permissions for a Investigate regular user.
+# Permissions for a {kibi-name} regular user.
 sirenuser:
   cluster:
     - SIREN_CLUSTER

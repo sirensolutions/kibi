@@ -7,7 +7,9 @@ Add-on functionality for {kibi-name}/Kibana is implemented with plug-in modules.
 command to manage these modules. You can also install a plugin manually by moving the plugin file to the
 `plugins` directory and unpacking the plugin files into a new directory.
 
-Generally Kibana plugins are compatible with {kibi-name} provided that you are using the same baseline version (e.g. {kibi-name} 5.2.2-1 with a plugin designed for Kibana 5.2.2).
+Generally Kibana plugins are compatible with {kibi-name} provided the plugin is compatible with the Kibana version mentioned in the **Management** section.
+
+image::images/plugin-compatibility.png["Plugin Compatibility",align=center]
 
 [IMPORTANT]
 .Plugin compatibility

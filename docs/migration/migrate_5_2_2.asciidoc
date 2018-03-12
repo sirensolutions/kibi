@@ -966,7 +966,7 @@ curl -XPUT http://elasticsearch.local:9200/article/_mapping/article - d'
 ----
 
 After enabling fielddata on an existing text field, you'll have to refresh all
-the index patterns containing the field by going to Management/Index Patterns
+the index patterns containing the field by going to Management/Indexes And Relations
 in {kibi-name}, opening each pattern and clicking on the refresh button; once
 the index pattern is refreshed, the field should appear as aggregatable.
 

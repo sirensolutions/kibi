@@ -3,11 +3,31 @@
 
 A coordinate map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
 
-NOTE: By default, {kibi-name} uses the http://www.openstreetmap.org/[Open Street Maps service]
-to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
+NOTE: By default, {kibi-name} uses a demonstration Siren tilemap server  http://www.openstreetmap.org/[Open Street Maps] service
+to display map tiles. This server has limited features and it is highly recommended to update the tilemap settings to another tilemap
+provider that you have configured, especially in a production setting. 
+To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
 in `investigate.yml`.
 
 === Configuration
+
+[[tilemap-configuration]]
+==== Configuring External Tilemap Providers
+
+To configure your own tilemap provider, you can use existing https://wiki.openstreetmap.org/wiki/Tile_servers[free] or https://switch2osm.org/providers/[paid] tilemap providers or https://switch2osm.org/manually-building-a-tile-server-16-04-2-lts/[build and serve your own tilemap tiles].
+
+Once you have setup your own tilemap provider, configure these <<tilemap-settings, settings>> in `investigate.yml` to have map visualizations render these tiles.
+
+For example, to use an OpenStreetMap default provider, the configuration YAML settings would look like: 
+
+```
+tilemap:
+  url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  options:
+    attribution: '&copy; [OpenStreetMap]("http://www.openstreetmap.org/copyright")'
+    subdomains:
+      - a
+```
 
 ==== Data
 

@@ -26,7 +26,7 @@ The image below displays a graph of four index patterns, where three
 relationships have been defined. You can add a new relationship by clicking on the
 "_Add relation_" button.
 
-image::images/relations_settings/indices_settings_5.png["Graph of Index Patterns",align="center"]
+image::images/relations_settings/indices_settings.png["Graph of Index Patterns",align="center"]
 
 [float]
 [[kibi-join-limit]]

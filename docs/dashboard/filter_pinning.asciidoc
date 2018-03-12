@@ -3,16 +3,16 @@
 When you create a filter anywhere in {kibi-name}, the filter conditions display in an oval under the search text
 entry box:
 
-image::images/filter-sample_5.png[]
+image::images/filter/filter-sample.png[]
 
 Hovering on the filter oval displays the following icons:
 
-image::images/filter-allbuttons_5.png[]
+image::images/filter/filter-allbuttons.png[]
 
-Enable Filter image:images/filter-enable.png[]:: Click this icon to disable the filter without removing it. You can
+Enable Filter image:images/filter/filter-enable.png[]:: Click this icon to disable the filter without removing it. You can
 enable the filter again later by clicking the icon again. Disabled filters are displayed with a striped shaded color.
 
-Pin Filter image:images/filter-pin.png[]:: Click this icon to _pin_ a filter. Pinned filters persist across {kibi-name} tabs.
+Pin Filter image:images/filter/filter-pin.png[]:: Click this icon to _pin_ a filter. Pinned filters persist across {kibi-name} tabs.
 You can pin filters from the _Visualize_ tab, click on the _Discover_ or _Dashboard_ tabs, and those filters remain in
 place.
 
@@ -22,15 +22,15 @@ to a dashboard whose underlying index does not have a `name` field, let alone a 
 pattern in {kibi-name} is to use _Dashboard Groups_ to group together dashboard which are based on the same underlying index.
 In this case the user can safely pin and "drag along" a filter across dashboards in the same group.
 
-Toggle Filter image:images/filter-toggle.png[]:: Click this icon to _toggle_ a filter. By default, filters are inclusion
+Toggle Filter image:images/filter/filter-toggle.png[]:: Click this icon to _toggle_ a filter. By default, filters are inclusion
 filters, and are displayed in green. Only elements that match the filter are displayed. To change this to an exclusion
 filter, displaying only elements that _don't_ match, toggle the filter. Exclusion filters are displayed in red.
 
-Remove Filter image:images/filter-delete.png[]:: Click this icon to remove a filter entirely.
-Custom Filter image:images/filter-custom.png[]:: Click this icon to display a text field where you can customize the JSON
+Remove Filter image:images/filter/filter-delete.png[]:: Click this icon to remove a filter entirely.
+Custom Filter image:images/filter/filter-custom.png[]:: Click this icon to display a text field where you can customize the JSON
 representation of the filter and specify an alias to use for the filter name:
 +
-image::images/filter-custom-json.png[]
+image::images/filter/filter-custom-json.png[]
 +
 You can use a JSON filter representation to implement predicate logic, with `should` for OR, `must` for AND, and `must_not`
 for NOT:
@@ -100,5 +100,5 @@ for NOT:
 ==========
 Click the *Done* button to update the filter with your changes.
 
-To apply any of the filter actions to all the filters currently in place, click the image:images/filter-actions.png[]
+To apply any of the filter actions to all the filters currently in place, click the image:images/filter/filter-actions.png[]
 *Global Filter Actions* button and select an action.

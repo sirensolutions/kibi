@@ -2,9 +2,9 @@
 === History
 
 Console maintains a list of the last 500 requests that were successfully executed by Elasticsearch. The history
-is available by clicking the clock icon on the top right side of the window. The icons opens the history panel
+is available by clicking the `History` icon on the top right side of the window. The icons opens the history panel
 where you can see the old requests. You can also select a request here and it will be added to the editor at
 the current cursor position.
 
 .History Panel
-image::images/history.png["History Panel"]
+image::images/console/history.png["History Panel"]

@@ -7,4 +7,4 @@ percentage of documents contain each value.
 
 To view field data statistics, click the name of a field in the Fields list.
 
-image:images/filter-field.jpg[Field Statistics]
+image:images/filter/filter-field.jpg[Field Statistics]

@@ -1,0 +1,131 @@
+[[linux-zip-install]]
+=== Install {kibi-name} with `.zip`
+
+{kibi-name} is provided for Linux, Darwin and Windows as a `.zip` package. These packages
+are the easiest formats to use when trying out Siren Investigate.
+
+The latest stable version of Siren Investigate can be found on the {download-ref}[Siren Support Portal].
+Descriptions of the separate demonstration packages are also available there.
+
+[[install-linux64]]
+==== Download and install the Linux 64-bit package
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Siren Investigate has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+Once you have {download-ref}/support/solutions/articles/17000057493-get-your-license[obtained your license], you should have access to the {download-ref}[Siren Support Portal]'s download pages.
+The `siren-investigate` package can be downloaded from there, either by clicking the package link in the browser or, right click on the link, then
+use the copied link as `investigate-link` as follows:
+
+["source",sh,subs="attributes+"]
+--------------------------------------------
+wget {investigate-link}.zip
+sha1sum {kibi-package}-{version}-linux-x86_64.zip <1>
+unzip {kibi-package}-{version}-linux-x86_64.zip -d .
+cd {kibi-package}-{version}-linux-x86_64/ <2>
+--------------------------------------------
+<1> Compare the SHA produced by `sha1sum` or `shasum` with the published `sha1.txt` (found on the {kibi-name} download page on the {download-ref}[Siren Support Portal]).
+<2> This directory is known as `$INVESTIGATE_HOME`.
+
+endif::[]
+
+[[install-darwin64]]
+==== Download and install the Darwin package
+
+ifeval::["{release-state}"=="unreleased"]
+
+Version {version} of Kibana has not yet been released.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+Once you have {download-ref}/support/solutions/articles/17000057493-get-your-license[obtained your license], you should have access to the {download-ref}[Siren Support Portal]'s download pages.
+The `siren-investigate` package can be downloaded from there, either by clicking the package link in the browser or, right click on the link, then
+use the copied link as `investigate-link` as follows:
+
+["source",sh,subs="attributes+"]
+--------------------------------------------
+wget {investigate-link}.zip
+sha1sum {kibi-package}-{version}-darwin-x86_64.zip <1>
+unzip {kibi-package}-{version}-darwin-x86_64.zip -d .
+cd {kibi-package}-{version}-darwin-x86_64/ <2>
+--------------------------------------------
+<1> Compare the SHA produced by `sha1sum` or `shasum` with the published `sha1.txt` (found on the {kibi-name} download page on the {download-ref}[Siren Support Portal]).
+<2> This directory is known as `$INVESTIGATE_HOME`.
+
+endif::[]
+
+[[zip-running]]
+==== Running {kibi-name} from the Command Line
+
+{kibi-name} can be started from the command line as follows:
+
+[source,sh]
+--------------------------------------------
+./bin/investigate
+--------------------------------------------
+
+By default, {kibi-name} runs in the foreground, prints its logs to the
+standard output (`stdout`), and can be stopped by pressing `Ctrl-C`.
+
+[[zip-configuring]]
+==== Configuring {kibi-name} via Config File
+
+{kibi-name} loads its configuration from the `$INVESTIGATE_HOME/config/investigate.yml`
+file by default. The format of this config file is explained in
+<<settings>>.
+
+[[zip-layout]]
+==== Directory Layout of Linux/Darwin `.zip` Archives
+
+The `.zip` packages are entirely self-contained.
+
+This is very convenient because you do not have to create any directories to
+start using {kibi-name}, and uninstalling is as easy as removing the directory.
+However, it is advisable to change the default locations of the config and data
+directories so that you do not delete important data later on.
+
+
+[cols="<h,<,<m,<m",options="header",]
+|=======================================================================
+| Type | Description | Default Location | Setting
+| home
+  | {kibi-name} home directory or `$INVESTIGATE_HOME`
+ d| Directory created by unpacking the archive; in demo distributions,
+    the directory is `siren-investigate`.
+ d|
+
+| bin
+  | Binary scripts including `kibi` to start the {kibi-name} server
+    and `kibi-plugin` to install plugins
+  | $INVESTIGATE_HOME\bin
+ d|
+
+| config
+  | Configuration files including `investigate.yml`
+  | $INVESTIGATE_HOME\config
+ d|
+
+| data
+  | The location of the data files written to disk by {kibi-name} and its plugins
+  | $INVESTIGATE_HOME\data
+ d|
+
+| optimize
+  | Transpiled source code. Certain administrative actions, e.g., `plugin install`,
+    result in the source code being retranspiled on the fly.
+  | $INVESTIGATE_HOME\optimize
+ d|
+
+| plugins
+  | The location of the plugin files. Each plugin will be contained in a subdirectory.
+  | $INVESTIGATE_HOME\plugins
+ d|
+
+|=======================================================================

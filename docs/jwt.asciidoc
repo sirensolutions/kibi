@@ -146,7 +146,7 @@ Please note that in order to map roles set in the JWT token to Search Guard
 roles you will need to define a role mapping such as the following:
 
 ._JWT role mapping_
-image::images/access_control/jwtmapping_5.png["JWT role mapping",align="center"]
+image::images/access_control/jwtmapping.png["JWT role mapping",align="center"]
 
 
 === Verification

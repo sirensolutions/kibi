@@ -8,7 +8,7 @@ on allowing you to use the full power of Elasticsearch aggregation framework.
 Time Series Visual Builder allows you to combine an infinite number of
 aggregations and pipeline aggregations to display complex data in a meaningful way.
 
-image:images/tsvb-screenshot.png["Time Series Visual Builder Interface"]
+image:images/time-series-visual-builder/tsvb-screenshot.png["Time Series Visual Builder Interface"]
 
 === Featured Visualizations
 
@@ -25,7 +25,7 @@ and fill opacity. This visualization also supports time shifting to compare two
 time periods. This visualization also supports annotations which can be loaded from
 a seperate index based on a query.
 
-image:images/tsvb-timeseries.png["Time Series Visualization"]
+image:images/time-series-visual-builder/tsvb-timeseries.png["Time Series Visualization"]
 
 
 ==== Metric
@@ -34,7 +34,7 @@ A visualization for displaying the latest number in a series. This visualization
 supports 2 metrics; a primary metric and a secondary metric. The labels and
 backgrounds can be fully customizable based on a set of rules.
 
-image:images/tsvb-metric.png["Metric Visualization"]
+image:images/time-series-visual-builder/tsvb-metric.png["Metric Visualization"]
 
 
 ==== Top N
@@ -43,7 +43,7 @@ This is a horizontal bar chart where the y-axis is based on a series of metrics
 and the x-axis is the latest value in those series; sorted in descending order.
 The color of the bars are fully customizable based on set of rules.
 
-image:images/tsvb-top-n.png["Top N Visualization"]
+image:images/time-series-visual-builder/tsvb-top-n.png["Top N Visualization"]
 
 
 ==== Gauge
@@ -54,7 +54,7 @@ can customize the thicknesses of the inner and outer lines to achieve a desired
 design aesthetic. The color of the gauge and the text are fully customizable based
 on a set of rules.
 
-image:images/tsvb-gauge.png["Gauge Visualization"]
+image:images/time-series-visual-builder/tsvb-gauge.png["Gauge Visualization"]
 
 
 ==== Markdown
@@ -64,7 +64,7 @@ template syntax to customize the Markdown with data based on a set of series.
 This visualization also supports HTML markup along with the ability to define
 a custom stylesheet.
 
-image:images/tsvb-markdown.png["Markdown Visualization"]
+image:images/time-series-visual-builder/tsvb-markdown.png["Markdown Visualization"]
 
 
 === Interface Overview
@@ -89,7 +89,7 @@ can specify a mustache variable of `{{key}}` to substitute the term. For most
 visualizations you can also choose a color by clicking on the swatch, this will display
 the color picker.
 
-image:images/tsvb-data-tab-label.png["Label Example"]
+image:images/time-series-visual-builder/tsvb-data-tab-label.png["Label Example"]
 
 ===== Metrics
 
@@ -99,7 +99,7 @@ icon to the left of the metric. Metrics can be composed using pipeline aggregati
 A common use case is to create a metric with a "max" aggregation then create a "derivative"
 metric and choose the previous "max" metric as the source; this will create a rate.
 
-image:images/tsvb-data-tab-derivative-example.png["Derivative Example"]
+image:images/time-series-visual-builder/tsvb-data-tab-derivative-example.png["Derivative Example"]
 
 ===== Series Options
 
@@ -112,7 +112,7 @@ you can configure:
 * Index pattern, timestamp, and interval override
 
 
-image:images/tsvb-data-tab-series-options.png["Default Series Options"]
+image:images/time-series-visual-builder/tsvb-data-tab-series-options.png["Default Series Options"]
 
 For the Time Series visualization you can also configure:
 
@@ -122,7 +122,7 @@ For the Time Series visualization you can also configure:
 * Y-Axis options
 * Split color theme
 
-image:images/tsvb-data-tab-series-options-time-series.png["Time Series Series Options"]
+image:images/time-series-visual-builder/tsvb-data-tab-series-options-time-series.png["Time Series Series Options"]
 
 ===== Group By Controls
 
@@ -199,7 +199,7 @@ Visualization. You can configure the following options:
 * Format of message
 * Filtering options at the panel and global level
 
-image:images/tsvb-annotations.png["Annotation Tab"]
+image:images/time-series-visual-builder/tsvb-annotations.png["Annotation Tab"]
 
 ==== Markdown Tab
 
@@ -210,5 +210,5 @@ the mustache template variable into the markdown at the cursor position. The mus
 syntax uses the Handlebar.js processor which is an extended version of the Mustache
 template language.
 
-image:images/tsvb-markdown-tab.png["Markdown Tab"]
+image:images/time-series-visual-builder/tsvb-markdown-tab.png["Markdown Tab"]
 

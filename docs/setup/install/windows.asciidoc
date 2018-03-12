@@ -13,7 +13,7 @@ The demo versions contain a pre-configured Elasticsearch cluster in addition to
 
 [source,sh]
 --------------------------------------------
-.\bin\kibi
+.\bin\investigate
 --------------------------------------------
 
 By default, {kibi-name} runs in the foreground, prints its logs to `STDOUT`,
@@ -27,7 +27,7 @@ file by default. The format of this config file is explained in
 <<settings>>.
 
 [[windows-layout]]
-==== Directory Layout of `.zip` Archive
+==== Directory Layout of Windows `.zip` Archive
 
 The `.zip` package is entirely self-contained.
 

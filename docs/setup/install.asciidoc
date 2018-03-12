@@ -4,14 +4,12 @@
 {kibi-name} is provided in the following package formats:
 
 [horizontal]
-`tar.gz`/`zip`::
+`zip`::
 
-The `tar.gz` packages are provided for installation on Linux and Darwin and are
+The `zip` packages are provided for installation on Linux, Darwin and Windows and are
 the easiest choice for getting started with {kibi-name}.
 +
-The `zip` package is the only supported package for Windows.
-+
-<<targz>> or <<windows>>
+<<linux-zip-install>> or <<windows>>
 
 `docker`::
 
@@ -25,6 +23,6 @@ instructions.
 
 include::docker.asciidoc[]
 
-include::install/targz.asciidoc[]
+include::install/zip.asciidoc[]
 
 include::install/windows.asciidoc[]

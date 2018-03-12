@@ -77,7 +77,7 @@ Hovering over the blue filter displays an explanation. It indicates that the rel
 
 image::images/relational_filter/example_2.png["Relational filter explanation",align="center"]
 
-Next, we add a regular filter to the `Companies` dashboard by clicking on the image:images/PositiveFilter.jpg["Positive Filter"] in the `USA` row of the `Companies by Country` visualization.
+Next, we add a regular filter to the `Companies` dashboard by clicking on the image:images/filter/positive_filter.jpg["Positive Filter"] in the `USA` row of the `Companies by Country` visualization.
 
 image::images/relational_filter/example_3.png["Relational filter explanation",align="center"]
 

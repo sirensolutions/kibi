@@ -7,7 +7,9 @@ Add-on functionality for {kibi-name}/Kibana is implemented with plug-in modules.
 command to manage these modules. You can also install a plugin manually by moving the plugin file to the
 `plugins` directory and unpacking the plugin files into a new directory.
 
-Generally Kibana plugins are compatible with {kibi-name} provided that you are using the same baseline version (e.g. {kibi-name} 5.2.2-1 with a plugin designed for Kibana 5.2.2).
+Generally Kibana plugins are compatible with {kibi-name} provided the plugin is compatible with the Kibana version mentioned in the **Management** section.
+
+image::images/plugin-compatibility.png["Plugin Compatibility",align=center]
 
 [IMPORTANT]
 .Plugin compatibility
@@ -58,7 +60,7 @@ NOTE: This command creates the specified directory if it does not already exist.
 === Installing Plugins with Linux packages
 
 The {kibi-name} server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
-want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
+want to make sure these commands are ran as the user `myuser`.  This user is already added for you as part of the package installation.
 
 [source,shell]
 $ sudo -u kibana bin/investigate-plugin install x-pack

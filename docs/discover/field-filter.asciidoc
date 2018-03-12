@@ -14,12 +14,12 @@ To add a filter from the Fields list:
 . Click the name of the field you want to filter on. This displays the top
 five values for that field.
 +
-image::images/filter-field.jpg[]
+image::images/filter/filter-field.jpg[]
 . To add a positive filter, click the *Positive Filter* button
-image:images/PositiveFilter.jpg[Positive Filter].
+image:images/filter/positive_filter.jpg[Positive Filter].
 This includes only those documents that contain that value in the field.
 . To add a negative filter, click the *Negative Filter* button
-image:images/NegativeFilter.jpg[Negative Filter].
+image:images/filter/negative_filter.jpg[Negative Filter].
 This excludes documents that contain that value in the field.
 
 To add a filter from the Documents table:
@@ -30,11 +30,11 @@ table entry.
 +
 image::images/Expanded-Document.png[]
 . To add a positive filter, click the *Positive Filter* button
-image:images/PositiveFilter.jpg[Positive Filter Button] to the right of the
+image:images/filter/positive_filter.jpg[Positive Filter Button] to the right of the
 field name. This includes only those documents that contain that value in the
 field.
 . To add a negative filter, click the *Negative Filter* button
-image:images/NegativeFilter.jpg[Negative Filter Button] to the right of the
+image:images/filter/negative_filter.jpg[Negative Filter Button] to the right of the
 field name. This excludes documents that contain that value in the field.
 . To filter on whether or not documents contain the field, click the
 *Exists* button image:images/ExistsButton.jpg[Exists Button] to the right of the
@@ -44,14 +44,14 @@ To manually add a filter:
 
 . Click *Add Filter*. A popup will be displayed for you to create the filter.
 +
-image::images/add_filter.png[]
+image::images/filter/add_filter.png[]
 . Choose a field to filter by. This list of fields will include fields from the
 index pattern you are currently querying against.
 +
-image::images/add_filter_field.png[]
+image::images/filter/add_filter_field.png[]
 . Choose an operation for your filter.
 +
-image::images/add_filter_operator.png[]
+image::images/filter/add_filter_operator.png[]
 The following operators can be selected:
 [horizontal]
 `is`:: Filter where the value for the field matches the given value.
@@ -64,7 +64,7 @@ The following operators can be selected:
 `does not exist`:: Filter where no value is present for the field.
 . Choose the value(s) for your filter.
 +
-image::images/add_filter_value.png[]
+image::images/filter/add_filter_value.png[]
 . (Optional) Specify a label for the filter. If you specify a label, it will be
 displayed below the query bar instead of the filter definition.
 . Click *Save*. The filter will be applied to your search and be displayed below
@@ -80,22 +80,22 @@ field. However, this is not recommended for extremely large datasets, as it can 
 
 To modify a filter, hover over it and click one of the action buttons.
 
-image::images/filter-allbuttons_5.png[]
+image::images/filter/filter-allbuttons.png[]
 
 &nbsp;
 
-image:images/filter-enable.png[] Enable Filter :: Disable the filter without
+image:images/filter/filter-enable.png[] Enable Filter :: Disable the filter without
 removing it. Click again to reenable the filter. Diagonal stripes indicate
 that a filter is disabled.
-image:images/filter-pin.png[] Pin Filter :: Pin the filter. Pinned filters
+image:images/filter/filter-pin.png[] Pin Filter :: Pin the filter. Pinned filters
 persist when you switch contexts in {kibi-name}. For example, you can pin a filter
 in Discover and it remains in place when you switch to Visualize.
 Note that a filter is based on a particular index field--if the indices being
 searched don't contain the field in a pinned filter, it has no effect.
-image:images/filter-toggle.png[] Invert Filter :: Switch from a positive
+image:images/filter/filter-toggle.png[] Invert Filter :: Switch from a positive
 filter to a negative filter and vice-versa.
-image:images/filter-delete.png[] Remove Filter :: Remove the filter.
-image:images/filter-custom.png[] Edit Filter :: <<filter-edit, Edit the
+image:images/filter/filter-delete.png[] Remove Filter :: Remove the filter.
+image:images/filter/filter-custom.png[] Edit Filter :: <<filter-edit, Edit the
 filter>> definition.  Enables you to manually update the filter and
 specify a label for the filter.
 

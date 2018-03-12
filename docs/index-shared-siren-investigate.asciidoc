@@ -6,6 +6,7 @@
 :elasticsearch-version:  5.6.8
 :kibana-version:         5.6.7
 :kibi-name:       Siren Investigate
+:kibi-package:    siren-investigate
 :kibi-version: {version}
 :kibi-default-port: 5606
 :start-url: http://localhost:5606

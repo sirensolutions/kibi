@@ -339,20 +339,5 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
     });
   };
 
-  KibiSequentialJoinVisHelper.prototype.constructSubButton = function (parentButton, dashboard, relation) {
-    return {
-      id: relation.id + '-ip-' + dashboard.title,
-      indexRelationId: parentButton.indexRelationId,
-      label: dashboard.title,
-      sourceDashboardId: parentButton.sourceDashboardId,
-      sourceField: parentButton.sourceField,
-      sourceIndexPatternId: parentButton.sourceIndexPatternId,
-      targetDashboardId: dashboard.id,
-      targetField: relation.range.field,
-      targetIndexPatternId: relation.range.id,
-      type: 'INDEX_PATTERN'
-    };
-  };
-
   return new KibiSequentialJoinVisHelper();
 };

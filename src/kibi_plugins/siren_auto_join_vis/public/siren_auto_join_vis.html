@@ -2,171 +2,78 @@
      class="siren-auto-join-vis"
      ng-class="{loading: holder.activeFetch}"
      ng-if="vis.params">
-  <div class="panel-buttons">
-    <a ng-repeat="button in buttons"
-       ng-if="button.type === 'INDEX_PATTERN' && (vis.params.visibility[button.id] === undefined
-              || vis.params.visibility[button.id].button)"
-       ng-click="button.click(true)"
-       ng-disabled="button.disabled"
-       ng-mouseover="hoverIn(button)"
-       ng-mouseleave="hoverOut()"
+
+  <script type="text/ng-template" id="button_nodes_renderer.html">
+    <div
+      ui-tree-handle
+      class="siren-button"
+       ng-class="{
+         'siren-entity-children-indicator': node.nodes && (node.type === 'DASHBOARD' || node.type === 'RELATION'),
+         'siren-type-button': node.type === 'BUTTON',
+         'siren-type-virtual-button': node.type === 'VIRTUAL_BUTTON',
+         'siren-type-dashboard': node.type === 'DASHBOARD',
+         'siren-type-relation': node.type === 'RELATION',
+         active: node.id == selectedEntity.id,
+         clickable: node.type !== undefined
+      }"
     >
-      <div class="panel-title">
-        {{ getButtonLabel(button, false) }}
-        <span
-          class="warning"
-          ng-if="!!button.warning"
-          title="{{button.warning}}">(*)</span>
-        <span ng-if="button.targetCount === undefined && button.showSpinner" class="siren-spinner">
-          <div class="cube1"></div>
-          <div class="cube2"></div>
-        </span>
-        <div class="go-to-dashboard">
-          <i class="fa fa-arrow-right"></i>
+
+      <div ng-if="node.type === 'BUTTON'"
+           ng-click="node.button.click()">
+        <div class="siren-entity-icon {{node.icon}}" ng-if="node.icon"/>
+        <div class="siren-entity-label">
+          {{ getButtonLabel(node.button, false) }}
+          <span
+            class="warning"
+            ng-if="!!button.warning"
+            title="{{ button.warning }}">(*)</span>
+          <span ng-if="node.button.targetCount === undefined && node.button.showSpinner" class="siren-spinner">
+            <div class="cube1"></div>
+            <div class="cube2"></div>
+          </span>
+        </div>
+        <div class="siren-entity-go"><i class="fa fa-arrow-right"></i></div>
+      </div>
+
+      <div ng-if="node.type === 'VIRTUAL_BUTTON'">
+        <div class="siren-entity-content" ng-click="toggleNode(node)">
+          <div class="siren-entity-icon {{node.icon}}" ng-if="node.icon"/>
+          <div class="siren-entity-label">
+            {{ getButtonLabel(node.button, true) }}
+          </div>
+        </div>
+        <div class="siren-entity-sub-switch" ng-click="node.useAltNodes = !node.useAltNodes">
+          <img
+              ng-show="vis.params.layout === 'normal' && node.showChildren"
+              class="dashboard-disabled"
+              kbn-src="/plugins/kibana/assets/dashboard.svg"
+              tooltip="{{ node.useAltNodes ? 'Order by Relation' : 'Order by Dashboard' }}"
+              tooltip-append-to-body="1"
+          />
         </div>
       </div>
-    </a>
+
+      <div ng-if="node.type === 'DASHBOARD' || node.type === 'RELATION'"
+           ng-click="toggleNode(node)">
+        <div class="siren-entity-icon {{node.icon}}" ng-if="node.icon"/>
+        <div class="siren-entity-label">{{ node.label }}</div>
+      </div>
+
+    </div>
+
+    <ol ng-if="!node.useAltNodes" ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: !node.showChildren}">
+      <li ng-repeat="node in node.nodes" ui-tree-node ng-include="'button_nodes_renderer.html'"></li>
+    </ol>
+    <ol ng-if="node.useAltNodes" ui-tree-nodes="" ng-model="node.altNodes" ng-class="{hidden: !node.showChildren}">
+      <li ng-repeat="node in node.altNodes" ui-tree-node ng-include="'button_nodes_renderer.html'"></li>
+    </ol>
+  </script>
+
+  <div ui-tree data-nodrop-enabled="true" data-drag-enabled="false">
+    <ol ui-tree-nodes="" ng-model="tree.nodes" id="tree-root" class="siren-tree-root"">
+      <li ng-repeat="node in tree.nodes" ui-tree-node ng-include="'button_nodes_renderer.html'" class=""></li>
+    </ol>
   </div>
-
-  <accordion close-others="true"
-             ng-if="vis.params.layout !== 'compressed'"
-  >
-    <accordion-group ng-repeat="button in buttons"
-                     ng-if="button.type === 'VIRTUAL_ENTITY' && (vis.params.visibility[button.id] === undefined
-                            || vis.params.visibility[button.id].button !== false) && button.hasSub"
-                     is-open="visibility.buttons[button.id]"
-                     >
-      <accordion-heading>
-        {{ getButtonLabel(button, true) }}
-        <img
-          ng-if="vis.params.layout === 'normal' && visibility.buttons[button.id] && !button.checkBox"
-          class="dashboard-disabled"
-          kbn-src="/plugins/kibana/assets/dashboard.svg"
-          ng-click="toggleLayout(button, $event)"
-          tooltip="Order by Dashboard"
-          tooltip-append-to-body="1"
-        >
-        <img
-          ng-if="vis.params.layout === 'normal' && visibility.buttons[button.id] && button.checkBox"
-          class="dashboard-enabled"
-          kbn-src="/plugins/kibana/assets/dashboard.svg"
-          ng-click="toggleLayout(button, $event)"
-          tooltip="Order by Relation"
-          tooltip-append-to-body="1"
-        >
-      </accordion-heading>
-      <!-- normal view - relations view -->
-      <accordion close-others="true"
-                 ng-if="vis.params.layout === 'normal' && !button.checkBox"
-      >
-        <accordion-group heading="{{key}}"
-                         ng-repeat="(key, subButtons) in button.sub"
-                         ng-if="vis.params.visibility[button.id].relation[key].toggle !== false"
-                         is-open="visibility.subRelations[key]"
-        >
-          <div class="panel-buttons">
-            <a ng-repeat="subButton in subButtons"
-               ng-if="subButton.type === 'INDEX_PATTERN'
-                      && vis.params.visibility[button.id].relation[key].dashboard[subButton.label] !== false"
-               ng-click="subButton.click(true)"
-               ng-disabled="subButton.disabled"
-               ng-mouseover="hoverIn(subButton)"
-               ng-mouseleave="hoverOut()"
-            >
-              <div class="panel-title">
-                {{subButton.label}}
-                <span ng-show="subButton.targetCount !== undefined && subButton.targetCount !== ''"> ({{subButton.targetCount}})</span>
-                <span
-                  class="warning"
-                  ng-if="!!subButton.warning"
-                  title="{{subButton.warning}}">(*)</span>
-                <span ng-if="subButton.targetCount === undefined && subButton.showSpinner" class="siren-spinner">
-                  <div class="cube1"></div>
-                  <div class="cube2"></div>
-                </span>
-                <div class="go-to-dashboard">
-                  <i class="fa fa-arrow-right"></i>
-                </div>
-              </div>
-            </a>
-          </div>
-        </accordion-group>
-      </accordion>
-      <!-- end normal view  - relations view -->
-
-      <!-- normal view - dashboard view -->
-      <accordion close-others="true"
-                 ng-if="vis.params.layout === 'normal' && button.checkBox"
-      >
-        <accordion-group heading="{{key}}"
-                         ng-repeat="(key, altSubButtons) in button.altSub"
-                         is-open="visibility.altViewDashboards[key]"
-        >
-          <div class="panel-buttons">
-            <a ng-repeat="altSubButton in altSubButtons"
-               ng-if="altSubButton.type === 'INDEX_PATTERN'"
-               ng-click="altSubButton.click(true)"
-               ng-disabled="altSubButton.disabled"
-               ng-mouseover="hoverIn(altSubButton)"
-               ng-mouseleave="hoverOut()"
-            >
-              <div class="panel-title">
-                {{altSubButton.label}}
-                <span ng-show="altSubButton.targetCount !== undefined && altSubButton.targetCount !== ''"> ({{altSubButton.targetCount}})</span>
-                <span
-                  class="warning"
-                  ng-if="!!altSubButton.warning"
-                  title="{{altSubButton.warning}}">(*)</span>
-                <span ng-if="altSubButton.targetCount === undefined && altSubButton.showSpinner" class="siren-spinner">
-                  <div class="cube1"></div>
-                  <div class="cube2"></div>
-                </span>
-                <div class="go-to-dashboard">
-                  <i class="fa fa-arrow-right"></i>
-                </div>
-              </div>
-            </a>
-          </div>
-        </accordion-group>
-      </accordion>
-      <!-- normal view - dashboard view -->
-
-      <!-- light view -->
-      <accordion close-others="true"
-                 ng-if="vis.params.layout === 'light'"
-      >
-        <div class="panel-buttons"
-             ng-repeat="(key, subButtons) in button.sub"
-             ng-if="(vis.params.visibility[button.id].button || vis.params.visibility[button.id] === undefined)"
-        >
-          <a ng-repeat="subButton in subButtons"
-             ng-if="subButton.type === 'INDEX_PATTERN'"
-             ng-click="subButton.click(true)"
-             ng-disabled="subButton.disabled"
-             ng-mouseover="hoverIn(subButton)"
-             ng-mouseleave="hoverOut()"
-          >
-            <div class="panel-title">
-              <em>{{ key }}</em> {{ subButton.label }}
-              <span ng-show="subButton.targetCount !== undefined && subButton.targetCount !== ''"> ({{subButton.targetCount}})</span>
-              <span
-                class="warning"
-                ng-if="!!subButton.warning"
-                title="{{subButton.warning}}">(*)</span>
-              <span ng-if="subButton.targetCount === undefined && subButton.showSpinner" class="siren-spinner">
-                <div class="cube1"></div>
-                <div class="cube2"></div>
-              </span>
-              <div class="go-to-dashboard">
-                <i class="fa fa-arrow-right"></i>
-              </div>
-            </div>
-          </a>
-        </div>
-      </accordion>
-      <!-- end light view -->
-    </accordion-group>
-  </accordion>
 
   <div class="btn-get-current-dashb-btn-counts"
        ng-if="!btnCountsEnabled()"

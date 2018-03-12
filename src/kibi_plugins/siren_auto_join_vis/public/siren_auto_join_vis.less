@@ -1,7 +1,96 @@
 @import (reference) "~ui/kibi/styles/kibi";
 
+@auto_button_dashboard_background_color: #6079a2;
+
 .siren-auto-join-vis {
   width: 100%;
+
+
+  ol.siren-tree-root {
+    padding-left: 0;
+  }
+
+  ol.siren-tree-root > li{
+    padding-left: 0;
+  }
+
+  ol {
+    list-style: none;
+    padding-left: 8px;
+  }
+
+  li {
+    list-style: none;
+    padding-left: 8px;
+  }
+
+  .siren-button {
+    margin-bottom: 1px;
+    display: inline-block;
+    padding: 4px 5px 5px 10px;
+    width: 100%;
+    position: relative;
+  }
+
+  .siren-entity-children-indicator {
+    border-left: 4px @auto_button_dashboard_background_color solid;
+  }
+
+  .siren-entity-content {
+    display: inline-block;
+    width: 100%;
+  }
+
+  .siren-entity-icon {
+    display: inline-block;
+  }
+
+  .siren-entity-label {
+    display: inline-block;
+  }
+
+  .siren-type-button {
+    color: #fff;
+    background-color: #6079a2;
+    font-size: 14px;
+  }
+
+  .siren-type-virtual-button {
+    color: #222;
+    background-color: #e0e8f6;
+    font-size: 14px;
+  }
+
+  .siren-type-dashboard {
+    color: #222;
+    background-color: #e0e8f6;
+    font-size: 14px;
+  }
+
+  .siren-type-relation {
+    color: #222;
+    background-color: #e0e8f6;
+    font-size: 14px;
+  }
+
+  .siren-entity-go {
+    display: inline-block;
+    float: right;
+  }
+
+  .siren-entity-sub-switch {
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    display: block;
+    img {
+      background-color: #6079a2;
+      border-radius: 8px;
+      padding: 1px;
+      width: 17px;
+      height: 17px;
+    }
+  }
 
   button {
     margin: 1.5px;

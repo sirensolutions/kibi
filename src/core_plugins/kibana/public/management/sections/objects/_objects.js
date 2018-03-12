@@ -78,7 +78,7 @@ uiModules.get('apps/management')
       const getData = function (filter) {
         const services = savedObjectManagementRegistry.all().map(function (obj) {
           const service = $injector.get(obj.service);
-          return service.find(filter).then(function (data) {
+          return service.find(filter, undefined, undefined, true).then(function (data) {
             return {
               service: service,
               serviceName: obj.service,
@@ -136,12 +136,6 @@ uiModules.get('apps/management')
           service: service.serviceName,
           id: item.id
         };
-
-        // kibi: for sql_jdbc_new we open the dedicated editor
-        // as this is not real saved object
-        if (item.datasourceType && item.datasourceType === 'sql_jdbc_new') {
-          return kbnUrl.change(item.url.substr(1));
-        }
         // kibi: route is changed
         kbnUrl.change('/management/siren/objects/{{ service }}/{{ id }}', params);
       };

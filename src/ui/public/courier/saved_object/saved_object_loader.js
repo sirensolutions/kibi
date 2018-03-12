@@ -142,7 +142,7 @@ export class SavedObjectLoader {
    * @returns {Promise}
    */
 
-  find(searchString, removeReservedChars = true, size = 100) {
+  find(searchString, removeReservedChars = true, size = 100, doNotFetchJDBC = false) {
     if (!searchString) {
       searchString = null;
     }
@@ -179,7 +179,7 @@ export class SavedObjectLoader {
         hits: resp.hits.hits.map((hit) => this.mapHits(hit))
       };
 
-      if (this.type === 'datasource') {
+      if (this.type === 'datasource' && !doNotFetchJDBC) {
         return this.jdbcDatasources.list().then(datasources => {
           _.each(datasources, datasource => {
             result.hits.push(jdbcDatasourceTranslate.jdbcDatasourceToSavedDatasource(datasource));

@@ -94,8 +94,8 @@ small, <<resizing-containers,resize the container>>.
 
 == Reset all dashboards to their default state
 image:images/remove-all-filters.png[float="right",align="center"]
-One can save with dashboard some specific filters, a custom query or a certain time range.
-If you click on the *Reset* button in the toolbar panel, the temporary filters/queries/time set on **all** dashboards would be removed, reverted to a dashboard's default state with the saved filters/query/time.
+One can save with a dashboard some specific filters, a custom query or a certain time range.
+If you click on the image:images/reset-filters-icon.png[Reset filter icon] button in the toolbar panel, the temporary filters/queries/time set on **all** dashboards would be removed, reverted to a dashboard's default state with the saved filters/query/time.
 
 
 [[customizing-your-dashboard]]

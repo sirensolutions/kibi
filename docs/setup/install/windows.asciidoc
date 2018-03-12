@@ -27,7 +27,7 @@ file by default. The format of this config file is explained in
 <<settings>>.
 
 [[windows-layout]]
-==== Directory Layout of `.zip` Archive
+==== Directory Layout of Windows `.zip` Archive
 
 The `.zip` package is entirely self-contained.
 

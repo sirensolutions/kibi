@@ -78,15 +78,7 @@ uiModules.get('apps/management')
       const getData = function (filterString) {
         const services = savedObjectManagementRegistry.all().map(function (obj) {
           const service = $injector.get(obj.service);
-          return service.find(filterString).then(function (data) {
-            // siren: filter out jdbc datasources
-            if (service.lowercaseType === 'datasource') {
-              data.hits = filter(data.hits, hit => {
-                return hit.datasourceType !== 'sql_jdbc_new';
-              });
-              data.total = data.hits.length;
-            };
-            // siren: end
+          return service.find(filterString, undefined, undefined, true).then(function (data) {
             return {
               service: service,
               serviceName: obj.service,

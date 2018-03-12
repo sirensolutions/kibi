@@ -13,7 +13,7 @@ module.exports = [
   },
   {
     buildNum: '12345',
-    'siren:zoom': 'foo',
+    'siren:zoom': 0.8,
     'siren:enableAllDashboardsCounts': true,
     'siren:shieldAuthorizationWarning': true
   }

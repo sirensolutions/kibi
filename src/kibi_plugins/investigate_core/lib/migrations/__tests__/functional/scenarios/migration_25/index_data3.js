@@ -16,7 +16,7 @@ module.exports = [
     buildNum: '5432',
     'siren:relations': '{ "version": "2", "deepObj": { "a" : "b" } }',
     'dateFormat:tz': 'UTC',
-    'siren:zoom': 'foo',
+    'siren:zoom': 0.8,
     'siren:enableAllDashboardsCounts': true,
     'siren:shieldAuthorizationWarning': true
   }

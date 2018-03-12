@@ -12,15 +12,16 @@ import { KibiSequentialJoinVisHelperFactory } from 'ui/kibi/helpers/kibi_sequent
 import { RelationsHelperFactory }  from 'ui/kibi/helpers/relations_helper';
 import { DelayExecutionHelperFactory } from 'ui/kibi/helpers/delay_execution_helper';
 import { SearchHelper } from 'ui/kibi/helpers/search_helper';
-import { QueryBuilderFactory } from 'ui/kibi/helpers/query_builder';
+import { SirenAutoJoinHelperProvider } from './siren_auto_join_helper';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
+import treeHelper from './tree_helper';
 
 function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, getAppState, globalState, createNotifier,
   savedDashboards, savedSearches, dashboardGroups, kibiMeta, timefilter, es, ontologyClient) {
   const DelayExecutionHelper = Private(DelayExecutionHelperFactory);
   const searchHelper = new SearchHelper(kbnIndex);
   const edit = onVisualizePage();
-  const queryBuilder = Private(QueryBuilderFactory);
+  const sirenAutoJoinHelper = Private(SirenAutoJoinHelperProvider);
 
   const notify = createNotifier({
     location: 'Siren Automatic Relational filter'
@@ -33,18 +34,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
-  $scope.visibility = {
-    // Root buttons
-    buttons: {},
-    // Relations inside a button
-    subRelations: {},
-    // target dashboards for the alternative view
-    altViewDashboards: {}
-  };
-
-  $scope.btnCountsEnabled = function () {
-    return config.get('siren:enableAllRelBtnCounts');
-  };
 
   $scope.getButtonLabel = function (button, addApproximate) {
     let count = button.targetCount !== undefined ? button.targetCount : '?';
@@ -54,10 +43,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     return button.label.replace('{0}', count);
   };
 
-  $scope.toggleLayout = function (button, $event) {
-    $event.preventDefault();
-    $event.stopPropagation();
-    button.checkBox = !button.checkBox;
+  $scope.btnCountsEnabled = function () {
+    return config.get('siren:enableAllRelBtnCounts');
   };
 
   const buttonMetaCallback = function (button, meta) {
@@ -96,9 +83,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       // only make sense if query is there and not == null
       // query is null when counts disabled in advanced settings
       if (definition.query) {
-        const sourceDash = result.button.sourceDashboardId ? result.button.sourceDashboardId : '';
-        const targetDash = result.button.targetDashboardId ? result.button.targetDashboardId : '';
-
         metaDefinitions.push({
           definition: definition,
           callback: function (error, meta) {
@@ -123,7 +107,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
               if (meta && isJoinPruned(meta)) {
                 stats.pruned = true;
               }
-              $scope.multiSearchData.add(stats);
+              scope.multiSearchData.add(stats);
             }
           }
         });
@@ -193,132 +177,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
   );
 
-  const _collectUpdateCountsRequest = function (buttons, dashboardId) {
-    if (!buttons || !buttons.length) {
-      return Promise.resolve([]);
-    } else if (edit) {
-      return Promise.resolve(buttons);
-    }
-    const buttonsToUpdate = _.reduce(buttons, (total, button) => {
-      if (button.type === 'VIRTUAL_ENTITY') {
-        for (const key in button.sub) {
-          // update only visible buttons
-          if ($scope.visibility.subRelations[key]) {
-            if (button.sub.hasOwnProperty(key)) {
-              _.each(button.sub[key], (btn) => {
-                total.push(btn);
-              });
-            }
-          }
-        }
-        for (const key in button.altSub) {
-          // update only visible buttons
-          if ($scope.visibility.altViewDashboards[key]) {
-            if (button.altSub.hasOwnProperty(key)) {
-              _.each(button.altSub[key], (btn) => {
-                total.push(btn);
-              });
-            }
-          }
-        }
-      } else {
-        total.push(button);
-      }
-      return total;
-    }, []);
-    delayExecutionHelper.addEventData({
-      buttons: buttonsToUpdate,
-      dashboardId: dashboardId
-    });
-    return Promise.resolve(buttons);
-  };
-
-  /**
-   *  Compose the cardinality query for EID buttons using the current dashboard filters.
-   */
-  const _getCardinalityQuery = function (button) {
-    const currentDashboardId = kibiState.getCurrentDashboardId();
-    return kibiState.getState(currentDashboardId).then(({ index, filters, queries, time }) => {
-
-      function omitDeep(obj, omitKey) {
-        delete obj[omitKey];
-
-        _.each(obj, function (val, key) {
-          if (val && typeof (val) === 'object') {
-            obj[key] = omitDeep(val, omitKey);
-          }
-        });
-
-        return obj;
-      }
-
-      // Removes the $state object from filters if present, as it will break the count query.
-      const cleanedFilters = omitDeep(filters, '$state');
-      const queryDef = queryBuilder(cleanedFilters, queries, time);
-
-      queryDef._source = false;
-      queryDef.size = 0;
-      queryDef.aggregations = { distinct_field : { cardinality : { field : button.sourceField } } };
-
-      return {
-        index: button.sourceIndexPatternId,
-        body: queryDef
-      };
-    });
-  };
-
-  const _updateCardinalityCounts = function (buttons) {
-    return Promise.reduce(buttons, (buttons, button) => {
-      if (button.type === 'VIRTUAL_ENTITY') {
-        return _getCardinalityQuery(button)
-        .then((cardinalityQuery) => {
-          return es.search(cardinalityQuery)
-          .then((esResult) => {
-            button.targetCount = esResult.aggregations.distinct_field.value;
-            buttons.push(button);
-            return buttons;
-          });
-        });
-      }
-      buttons.push(button);
-      return buttons;
-    }, []);
-  };
-
-  /**
-   * Add the alternative menu hierarchy where you use dashboard and then select one of the available relations
-   */
-  const _addAlternativeSubHierarchy = function (buttons) {
-    const addAltSubButtons = (subButtons, label, button) => {
-      _.each(subButtons, (subButton) => {
-        const altSubButton = _.clone(subButton);
-        altSubButton.label = label;
-
-        if (!button.altSub[subButton.label]) {
-          button.altSub[subButton.label] = [];
-        }
-        if ($scope.btnCountsEnabled()) {
-          altSubButton.showSpinner = true;
-        }
-
-        button.altSub[subButton.label].push(altSubButton);
-      });
-    };
-
-    _.each(buttons, (button) => {
-      if (button.type === 'VIRTUAL_ENTITY') {
-        button.altSub = {};
-        const subButtons = button.sub;
-        if (subButtons) {
-          for (const key in subButtons) {
-            if (subButtons.hasOwnProperty(key)) {
-              addAltSubButtons(subButtons[key], key, button);
-            }
-          }
-        }
-      }
-    });
-  };
 
   const _getButtons = function (relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap) {
     const buttons = [];
@@ -357,49 +215,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     return buttons;
   };
 
-  const _addSubButtons = function (buttons, relations, compatibleSavedSearchesMap, compatibleDashboardsMap) {
-    _.each(buttons, (button) => {
-      if (button.type === 'VIRTUAL_ENTITY') {
-        const relationsByDomain = _.filter(relations, rel => rel.domain.id === button.targetIndexPatternId);
-
-        button.sub = {};
-        button.hasSub = false;
-
-        _.each(relationsByDomain, relByDomain => {
-          if (relByDomain.range.id !== button.sourceIndexPatternId) {
-            // filter the savedSearch with the same indexPattern
-            const compatibleSavedSearches = compatibleSavedSearchesMap[relByDomain.range.id];
-            _.each(compatibleSavedSearches, compatibleSavedSearch => {
-              const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
-              _.each(compatibleDashboards, compatibleDashboard => {
-                const subButton = sirenSequentialJoinVisHelper.constructSubButton(
-                  button,
-                  compatibleDashboard,
-                  relByDomain
-                );
-                sirenSequentialJoinVisHelper.addClickHandlerToButton(subButton);
-
-                const key = relByDomain.directLabel;
-                if (!button.sub[key]) {
-                  button.sub[key] = [];
-                }
-                if ($scope.btnCountsEnabled()) {
-                  subButton.showSpinner = true;
-                }
-                button.hasSub = true;
-                button.sub[key].push(subButton);
-              });
-            });
-          }
-        });
-      } else {
-        if ($scope.btnCountsEnabled()) {
-          button.showSpinner = true;
-        }
-      }
-    });
-  };
-
   const _createCompatibleSavedSearchesMap = function (savedSearches) {
     const compatibleSavedSearchesMap = {};
     _.each(savedSearches, savedSearch => {
@@ -423,7 +238,132 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     return compatibleDashboardsMap;
   };
 
-  const constructButtons = $scope.constructButtons = function (indexPatternId) {
+
+  const updateSourceCount = function (currentDashboardId, relationId) {
+    const virtualButton = {
+      id: 'virtual-button' + this.sourceIndexPatternId + this.targetIndexPatternId + this.sourceField + this.targetField,
+      sourceField: this.targetField,
+      sourceIndexPatternId: this.targetIndexPatternId,
+      targetField: this.sourceField,
+      targetIndexPatternId: this.sourceIndexPatternId,
+      targetDashboardId: currentDashboardId,
+      indexRelationId: relationId,
+      type: 'INDEX_PATTERN'
+    };
+
+    return _addButtonQuery.call(this, [ virtualButton ], this.targetDashboardId)
+    .then(results => {
+      updateCounts(results, $scope);
+      return results;
+    })
+    .catch(notify.error);
+  };
+
+
+
+  $scope.toggleNode = function (node) {
+    if (node.showChildren === false) {
+      // open children of these node
+      node.showChildren = !node.showChildren;
+      // close other opened siblings
+      node.closeOpenSiblings();
+    } else {
+      node.showChildren = !node.showChildren;
+    }
+    // here grab visible buttons and request count update
+
+    const buttons = sirenAutoJoinHelper.getVisibleVirtualEntitySubButtons($scope.tree);
+
+    _addButtonQuery(buttons, currentDashboardId)
+    .then(results => {
+      updateCounts(results, $scope);
+    });
+  };
+
+  // As buttons are shown on UI side as a tree
+  // we compute a tree like structure where some nodes can be of following type
+  // BUTTON
+  // VIRTUAL_BUTTON
+  // RELATION
+  // DASHBOARD
+  // Because the VIRTUAL_BUTTON children can be arranged for two ways
+  // relation first OR dashboards first
+  // each VIRTUAL_BUTTON tree node contain two properties
+  // nodes AND alt_nodes
+  // such structure will help to render and control the UI
+  //
+  // Exemple structure:
+  //
+  // {
+  //   type: BUTTON
+  //   id: 1,
+  //   label: button 1
+  //   showChildren: false
+  //   useAltNodes: false
+  //   button: {}
+  // },
+  // ...
+  // for 'normal' layout
+  // {
+  //   type: VIRTUAL_BUTTON
+  //   id: 2,
+  //   label: virt button 1
+  //   showChildren: true
+  //   useAltNodes: false   // START from here try to use this property to render the alternative nodes subtree
+  //   nodes: [
+  //     {
+  //       type: RELATION
+  //       id: 3
+  //       label: rel 1
+  //       showChildren: false
+  //       useAltNodes: false
+  //       nodes: [
+  //         // here all nodes are BUTTONS
+  //      ]
+  //     },
+  //     ...
+  //   ],
+  //   altNodes: [
+  //     {
+  //       type: DASHBOARD
+  //       id: 3
+  //       label: dash 1
+  //       showChildren: false
+  //       useAltNodes: false
+  //       nodes: [
+  //         // here all nodes are BUTTONS
+  //      ]
+  //     },
+  //     ...
+  //   ]
+  // }
+  //
+
+  // for 'light' layout
+  // {
+  //   type: VIRTUAL_BUTTON
+  //   id: 2,
+  //   label: virt button 1
+  //   showChildren: true
+  //   useAltNodes: false   // <-- there will be NO altNodes
+  //   nodes: [
+  //     {
+  //       type: BUTTON
+  //       id: 3
+  //       label: rel 1 dash 1 // <-- HERE we skip one level and generate the buttons directly
+  //       showChildren: false
+  //       useAltNodes: false
+  //       button: button
+  //       nodes: [] <-- HERE no nodes
+  //
+  //     },
+  //     ...
+  //   ],
+  //   altNodes: [] // <-- NO altNodes
+  // }
+
+
+  const constructTree = $scope.constructTree = function (indexPatternId) {
     return Promise.all([
       ontologyClient.getRelations(),
       savedDashboards.find(),
@@ -502,16 +442,33 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
               `No button has a source index matching the current dashboard index: ${currentDashboardIndex}.`;
           }
 
-          // populate subButtons for EID buttons and add spinner flag
-          _addSubButtons(buttons, relations, compatibleSavedSearchesMap, compatibleDashboardsMap);
-          _addAlternativeSubHierarchy(buttons);
-          return buttons;
+          const tree = sirenAutoJoinHelper.createFirstLevelNodes(buttons);
+          if ($scope.vis.params.layout === 'normal') {
+            sirenAutoJoinHelper.addNodesToTreeNormalLayout(
+              tree, relations,
+              compatibleSavedSearchesMap, compatibleDashboardsMap,
+              $scope.btnCountsEnabled()
+            );
+            treeHelper.addAlternativeNodesToTree(tree, $scope.btnCountsEnabled());
+          } else if ($scope.vis.params.layout === 'light') {
+            sirenAutoJoinHelper.addNodesToTreeLightLayout(
+              tree, relations,
+              compatibleSavedSearchesMap, compatibleDashboardsMap,
+              $scope.btnCountsEnabled()
+            );
+          }
+
+          $scope.tree = tree;
+          return tree;
         })
         .catch(notify.error);
       } else {
         const unFilteredButtons = sirenSequentialJoinVisHelper.constructButtonsArray(buttonDefs, relations);
         const filteredButtons = _.filter(unFilteredButtons, button => button.domainIndexPattern === indexPatternId);
-        return filteredButtons;
+
+        const tree = sirenAutoJoinHelper.createFirstLevelNodes(filteredButtons);
+        $scope.tree = tree;
+        return tree;
       }
     });
   };
@@ -519,6 +476,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   /*
    * Update counts in reaction to events.
    * Filter buttons by indexPatternId === domainIndexPattern (used in edit mode)
+   *
+   * As buttons are now shown as a tree we compute a tree of elelments
    */
   const updateButtons = function (reason, indexPatternId) {
     if (!kibiState.isSirenJoinPluginInstalled()) {
@@ -535,165 +494,21 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     const self = this;
 
     let promise;
-    if (!$scope.buttons || !$scope.buttons.length || edit) {
-      promise = constructButtons.call(self, indexPatternId);
+    if (!$scope.tree || !$scope.tree.nodes.length || edit) {
+      promise = constructTree.call(self, indexPatternId);
     } else {
-      promise = Promise.resolve($scope.buttons);
+      promise = Promise.resolve($scope.tree);
     }
     promise
-    .then((buttons) => _updateCardinalityCounts.call(self, buttons))
-    .then((buttons) => _collectUpdateCountsRequest.call(self, buttons, currentDashboardId))
-    .then((buttons) => {
-      // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
-      // assign data to $scope.buttons once the promises are done
-      const updateSourceCount = function (currentDashboardId, relationId) {
-        const virtualButton = {
-          id: 'virtual-button' + this.sourceIndexPatternId + this.targetIndexPatternId + this.sourceField + this.targetField,
-          sourceField: this.targetField,
-          sourceIndexPatternId: this.targetIndexPatternId,
-          targetField: this.sourceField,
-          targetIndexPatternId: this.sourceIndexPatternId,
-          targetDashboardId: currentDashboardId,
-          indexRelationId: relationId,
-          type: 'INDEX_PATTERN'
-        };
-
-        return _addButtonQuery.call(self, [ virtualButton ], this.targetDashboardId)
-        .then(results => {
-          updateCounts(results, $scope);
-          return results;
-        })
-        .catch(notify.error);
-      };
-
-      if (edit) {
-        $scope.buttons = buttons;
-      } else {
-        $scope.buttons = new Array(buttons.length);
-        for (let i = 0; i < buttons.length; i++) {
-          const button = buttons[i];
-          if (button.type === 'INDEX_PATTERN') {
-            button.updateSourceCount = updateSourceCount;
-          } else {
-            if (button.sub) {
-              for (const key in button.sub) {
-                if (button.sub.hasOwnProperty(key)) {
-                  _.each(button.sub[key], (subButton) => {
-                    subButton.updateSourceCount = updateSourceCount;
-                  });
-                }
-              }
-            }
-            if (button.altSub) {
-              for (const key in button.altSub) {
-                if (button.altSub.hasOwnProperty(key)) {
-                  _.each(button.altSub[key], (subButton) => {
-                    subButton.updateSourceCount = updateSourceCount;
-                  });
-                }
-              }
-            }
-          }
-          // Returns the count of documents involved in the join
-          $scope.buttons[button.btnIndex] = button;
-        }
-      }
-    })
+    .then(tree => sirenAutoJoinHelper.updateTreeCardinalityCounts(tree))
+    .then(tree => sirenAutoJoinHelper.updateTreeCountsRequest(tree, currentDashboardId, delayExecutionHelper, edit))
+    .then(tree => sirenAutoJoinHelper.addTreeSourceCounts(tree, updateSourceCount))
+    .then(tree => $scope.tree = tree)
     .catch(notify.error);
   };
 
-  /**
-   *  Returns the list of the currently visible virtual entity sub buttons.
-   */
-  const getVisibleVirtualEntitySubButtons = function (visibility) {
-    let returnButtons = [];
-
-    if ($scope.vis.params.layout === 'normal') {
-      const visibleRelations = new Set();
-      for (const prop in visibility.subRelations) {
-        if (visibility.subRelations.hasOwnProperty(prop)) {
-          if (visibility.subRelations[prop] === true) {
-            visibleRelations.add(prop);
-          }
-        }
-      }
-      const visibleDashboards = new Set();
-      for (const prop in visibility.altViewDashboards) {
-        if (visibility.altViewDashboards.hasOwnProperty(prop)) {
-          if (visibility.altViewDashboards[prop] === true) {
-            visibleDashboards.add(prop);
-          }
-        }
-      }
-      // gathering buttons that have to be computed
-      returnButtons = _.reduce($scope.buttons, (acc, button) => {
-        if (button.type === 'VIRTUAL_ENTITY') {
-          _.each(button.sub, (subButtons, rel) => {
-            if (visibleRelations.has(rel)) {
-              _.each(subButtons, (subButton) => {
-                delete subButton.targetCount;
-                if (!subButton.joinExecuted) {
-                  acc.push(subButton);
-                }
-              });
-            }
-          });
-          _.each(button.altSub, (subButtons, dashboardName) => {
-            if (visibleDashboards.has(dashboardName)) {
-              _.each(subButtons, (subButton) => {
-                delete subButton.targetCount;
-                if (!subButton.joinExecuted) {
-                  acc.push(subButton);
-                }
-              });
-            }
-          });
-        }
-        return acc;
-      }, []);
-    } else if ($scope.vis.params.layout === 'light') {
-      const visibleButtons = new Set();
-      for (const prop in visibility.buttons) {
-        if (visibility.buttons.hasOwnProperty(prop)) {
-          if (visibility.buttons[prop] === true) {
-            visibleButtons.add(prop);
-          }
-        }
-      }
-
-      // gathering buttons that have to be computed
-      returnButtons = _.reduce($scope.buttons, (acc, button) => {
-        if (button.type === 'VIRTUAL_ENTITY' && visibleButtons.has(button.id)) {
-          for (const prop in button.sub) {
-            if (button.sub.hasOwnProperty(prop)) {
-              acc.push.apply(acc, button.sub[prop]);
-            }
-          }
-        }
-        return acc;
-      }, []);
-    }
-
-    return returnButtons;
-  };
-
-  /**
-   *  Computes the counts for buttons in VIRTUAL_ENTITY buttons sub menu.
-   *  It used the passed visibility to compute only the currently shown.
-   */
-  const computeVisibleVirtualEntitySubButtonsCount = function (visibility) {
-    if (visibility) {
-      const buttons = getVisibleVirtualEntitySubButtons(visibility);
-
-      _addButtonQuery(buttons, currentDashboardId)
-      .then(results => {
-        updateCounts(results, $scope);
-      });
-    }
-  };
-
   $scope.getCurrentDashboardBtnCounts = function () {
-    const virtualEntityButtons = getVisibleVirtualEntitySubButtons($scope.visibility);
+    const virtualEntityButtons = sirenAutoJoinHelper.getVisibleVirtualEntitySubButtons($scope.tree);
     const allButtons = $scope.buttons.concat(virtualEntityButtons);
     _addButtonQuery(allButtons, currentDashboardId, true) // TODO take care about this true parameter
     .then(results => {
@@ -743,12 +558,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     }
   });
 
-  $scope.$watch('visibility', (newVal, oldVal) => {
-    if (newVal && !_.isEqual(newVal, oldVal)) {
-      computeVisibleVirtualEntitySubButtonsCount(newVal);
-    }
-  }, true);
-
   // when autoupdate is on we detect the refresh here
   const removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', (event) => {
     if ((timefilter.refreshInterval.display !== 'Off')
@@ -788,5 +597,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 };
 
 uiModules
-.get('kibana/siren_auto_join_vis', ['kibana'])
+.get('kibana/siren_auto_join_vis', ['kibana', 'ui.tree'])
 .controller('SirenAutoJoinVisController', controller);
+

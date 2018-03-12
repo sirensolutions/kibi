@@ -210,7 +210,7 @@ describe('Kibi Automatic Join Visualization Controller', function () {
     });
   });
 
-  describe('constructButtons', function () {
+  describe('constructTree', function () {
     it('should build the buttons - with index patterns', function (done) {
       const relations = [
         {
@@ -228,15 +228,16 @@ describe('Kibi Automatic Join Visualization Controller', function () {
       ];
 
       init({ relations });
-      $scope.constructButtons()
-      .then((buttons) => {
-        expect(buttons).to.have.length(1);
-        expect(buttons[0].domainIndexPattern).to.be.eql('ib');
-        expect(buttons[0].indexRelationId).to.be.eql('another-uuid');
-        expect(buttons[0].targetDashboardId).to.be.eql('dd');
-        expect(buttons[0].targetField).to.be.eql('fd');
-        expect(buttons[0].targetIndexPatternId).to.be.eql('id');
-        expect(buttons[0].type).to.be.eql('INDEX_PATTERN');
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(1);
+        const button = tree.nodes[0].button;
+        expect(button.domainIndexPattern).to.be.eql('ib');
+        expect(button.indexRelationId).to.be.eql('another-uuid');
+        expect(button.targetDashboardId).to.be.eql('dd');
+        expect(button.targetField).to.be.eql('fd');
+        expect(button.targetIndexPatternId).to.be.eql('id');
+        expect(button.type).to.be.eql('INDEX_PATTERN');
         done();
       })
       .catch(done);
@@ -276,32 +277,46 @@ describe('Kibi Automatic Join Visualization Controller', function () {
         }
       ];
       init({ relations, entities });
-      $scope.constructButtons()
-      .then((buttons) => {
-        expect(buttons).to.have.length(1);
-        expect(buttons[0].domainIndexPattern).to.be.eql('ib');
-        expect(buttons[0].indexRelationId).to.be.eql('virtual-entity-uuid');
-        expect(buttons[0].targetIndexPatternId).to.be.eql('virtualEntity');
-        expect(buttons[0].type).to.be.eql('VIRTUAL_ENTITY');
-        expect(buttons[0].targetCount).to.be.eql(undefined);
 
-        const subButton = buttons[0].sub['inverse another virtual label'];
-        expect(subButton).to.have.length(1);
-        expect(subButton[0].indexRelationId).to.be.eql('virtual-entity-uuid');
-        expect(subButton[0].targetIndexPatternId).to.be.eql('ih');
-        expect(subButton[0].targetField).to.be.eql('fh');
-        expect(subButton[0].sourceIndexPatternId).to.be.eql('ib');
-        expect(subButton[0].sourceField).to.be.eql('fb');
-        expect(subButton[0].type).to.be.eql('INDEX_PATTERN');
+      $scope.vis.params.layout = 'normal';
 
-        const altSubButton = buttons[0].altSub['Dashboard h'];
-        expect(altSubButton).to.have.length(1);
-        expect(altSubButton[0].indexRelationId).to.be.eql('virtual-entity-uuid');
-        expect(altSubButton[0].targetIndexPatternId).to.be.eql('ih');
-        expect(altSubButton[0].targetField).to.be.eql('fh');
-        expect(altSubButton[0].sourceIndexPatternId).to.be.eql('ib');
-        expect(altSubButton[0].sourceField).to.be.eql('fb');
-        expect(altSubButton[0].type).to.be.eql('INDEX_PATTERN');
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(1);
+        const firstNode = tree.nodes[0];
+
+        expect(firstNode.button.domainIndexPattern).to.be.eql('ib');
+        expect(firstNode.button.indexRelationId).to.be.eql('virtual-entity-uuid');
+        expect(firstNode.button.targetIndexPatternId).to.be.eql('virtualEntity');
+        expect(firstNode.button.type).to.be.eql('VIRTUAL_ENTITY');
+        expect(firstNode.button.targetCount).to.be.eql(undefined);
+
+        expect(firstNode.nodes.length).to.be.eql(1);
+        expect(firstNode.altNodes.length).to.be.eql(1);
+
+        const firstNodeRel = firstNode.nodes[0];
+        expect(firstNodeRel.label).to.equal('inverse another virtual label');
+        expect(firstNodeRel.nodes.length).to.be.eql(1);
+
+        const relButtonNode = firstNodeRel.nodes[0];
+        expect(relButtonNode.button.indexRelationId).to.be.eql('virtual-entity-uuid');
+        expect(relButtonNode.button.targetIndexPatternId).to.be.eql('ih');
+        expect(relButtonNode.button.targetField).to.be.eql('fh');
+        expect(relButtonNode.button.sourceIndexPatternId).to.be.eql('ib');
+        expect(relButtonNode.button.sourceField).to.be.eql('fb');
+        expect(relButtonNode.button.type).to.be.eql('INDEX_PATTERN');
+
+        const firstNodeDash = firstNode.altNodes[0];
+        expect(firstNodeDash.label).to.equal('Dashboard h ');
+        expect(firstNodeDash.nodes.length).to.be.eql(1);
+
+        const dashButtonNode = firstNodeDash.nodes[0];
+        expect(dashButtonNode.button.indexRelationId).to.be.eql('virtual-entity-uuid');
+        expect(dashButtonNode.button.targetIndexPatternId).to.be.eql('ih');
+        expect(dashButtonNode.button.targetField).to.be.eql('fh');
+        expect(dashButtonNode.button.sourceIndexPatternId).to.be.eql('ib');
+        expect(dashButtonNode.button.sourceField).to.be.eql('fb');
+        expect(dashButtonNode.button.type).to.be.eql('INDEX_PATTERN');
 
         done();
       })

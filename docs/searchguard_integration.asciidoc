@@ -1433,7 +1433,7 @@ to all virtual indices starting with `db-`:
       "privileges" : [
         "read",
         "view_index_metadata",
-        "indices:data/read/search-join"
+        "indices:data/read/search-join",
         "indices:siren",
         "indices:admin/version/get",
         "indices:admin/get"
@@ -1444,7 +1444,7 @@ to all virtual indices starting with `db-`:
       "privileges" : [
         "read",
         "view_index_metadata",
-        "indices:data/read/search-join"
+        "indices:data/read/search-join",
         "indices:data/siren",
         "indices:siren/plan",
         "indices:admin/version/get",
@@ -1478,7 +1478,7 @@ to manage external datasources and virtual indices starting with `db-`:
       "privileges" : [
         "read",
         "view_index_metadata",
-        "indices:data/read/search-join"
+        "indices:data/read/search-join",
         "indices:siren",
         "indices:admin/version/get",
         "indices:admin/get"
@@ -1490,7 +1490,7 @@ to manage external datasources and virtual indices starting with `db-`:
         "read",
         "create_index",
         "view_index_metadata",
-        "indices:data/read/search-join"
+        "indices:data/read/search-join",
         "indices:data/siren",
         "indices:siren",
         "indices:admin/version/get",

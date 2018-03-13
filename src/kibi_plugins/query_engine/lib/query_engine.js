@@ -158,20 +158,13 @@ QueryEngine.prototype.schema = function (path, options) {
   return rp(opts);
 };
 
-QueryEngine.prototype.gremlin = function (datasourceParams, options) {
-  // TODO: remove when https://github.com/sirensolutions/kibi-internal/issues/906 is fixed
-  const parsedTimeout = parseInt(datasourceParams.timeout);
-  if (isNaN(parsedTimeout)) {
-    return Promise.reject({
-      error: 'Invalid timeout',
-      message: 'Invalid timeout: ' + datasourceParams.timeout
-    });
-  }
+QueryEngine.prototype.gremlin = function (credentials, options) {
+  const gremlinUrl = this.config.get('investigate_core.gremlin_server.url');
 
   const gremlinOptions = {
     method: options.method | 'GET',
-    uri: datasourceParams.url,
-    timeout: parsedTimeout
+    uri: gremlinUrl + '/graph/queryBatch',
+    timeout: 10000 // fixed, as it is not configurable anyway
   };
 
   if (this.sslCA) {
@@ -180,10 +173,10 @@ QueryEngine.prototype.gremlin = function (datasourceParams, options) {
 
   _.assign(gremlinOptions, options);
   if (gremlinOptions.data) {
-    gremlinOptions.data.credentials = datasourceParams.credentials;
+    gremlinOptions.data.credentials = credentials;
   }
   if (gremlinOptions.json) {
-    gremlinOptions.json.credentials = datasourceParams.credentials;
+    gremlinOptions.json.credentials = credentials;
   }
 
   return rp(gremlinOptions);

@@ -164,33 +164,29 @@ module.exports = function (kibana) {
         method: 'POST',
         path: '/gremlin',
         handler: function (req, reply) {
-          queryEngine._getDatasourceFromEs(req.payload.params.datasourceId)
-            .then((datasource) => {
-              const config = server.config();
-              const params = JSON.parse(datasource.datasourceParams);
-              params.credentials = null;
-              if (config.has('xpack.security.cookieName')) {
-                const { username, password } = req.state[config.get('xpack.security.cookieName')];
-                params.credentials = { username, password };
-              }
-              if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
-                params.credentials = req.auth.credentials.proxyCredentials;
-              }
-              return queryEngine.gremlin(params, req.payload.params.options);
-            })
-            .then(reply)
-            .catch(errors.StatusCodeError, function (err) {
-              reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
-            })
-            .catch(errors.RequestError, function (err) {
-              if (err.error.code === 'ETIMEDOUT') {
-                reply(Boom.create(408, err.message, ''));
-              } else if (err.error.code === 'ECONNREFUSED') {
-                reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}` });
-              } else {
-                reply({ error: `An error occurred while sending a gremlin query: ${err.message}` });
-              }
-            });
+          const config = server.config();
+          let credentials = null;
+          if (config.has('xpack.security.cookieName')) {
+            const { username, password } = req.state[config.get('xpack.security.cookieName')];
+            credentials = { username, password };
+          }
+          if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+            credentials = req.auth.credentials.proxyCredentials;
+          }
+          return queryEngine.gremlin(credentials, req.payload.params.options)
+          .then(reply)
+          .catch(errors.StatusCodeError, function (err) {
+            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
+          })
+          .catch(errors.RequestError, function (err) {
+            if (err.error.code === 'ETIMEDOUT') {
+              reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}` });
+            } else {
+              reply({ error: `An error occurred while sending a gremlin query: ${err.message}` });
+            }
+          });
         }
       });
 

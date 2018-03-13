@@ -33,8 +33,8 @@ uiModules
     return this._makeRequestToServer('/getQueriesHtml', queryDefs, options);
   };
 
-  QueryEngineClient.prototype.gremlin = function (datasourceId, options) {
-    return $http.post(chrome.getBasePath() + '/gremlin', { params: { options, datasourceId } });
+  QueryEngineClient.prototype.gremlin = function (options) {
+    return $http.post(chrome.getBasePath() + '/gremlin', { params: { options } });
   };
 
   QueryEngineClient.prototype.gremlinPing = function (url) {

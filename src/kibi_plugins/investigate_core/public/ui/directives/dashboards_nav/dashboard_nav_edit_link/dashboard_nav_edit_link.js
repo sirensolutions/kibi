@@ -110,15 +110,16 @@ uiModules
         }
       };
 
-      $scope.selectDashboard = index => {
+      $scope.selectDashboard = dashboard => {
+        const dashboardId = dashboard ? dashboard.id : null;
         if ($scope.menuActionTriggered) {
           $scope.menuActionTriggered = false;
           return;
         }
-        if (index >= 0 || $scope.group.virtual) {
+        if (dashboardId || $scope.group.virtual) {
           let id;
-          if (index >= 0) {
-            id = $scope.group.dashboards[index].id;
+          if (dashboardId) {
+            id = dashboardId;
           } else {
             id = $scope.group.id;
           }

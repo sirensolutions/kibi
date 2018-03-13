@@ -637,8 +637,6 @@ sirenuser:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 logstash:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-CN=demouser:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 sirenalert:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 ----
@@ -686,10 +684,6 @@ sirenadmin:
 sirenuser:
   users:
     - sirenuser
-
-sirentransport:
-  users:
-    - 'CN=demouser'
 
 logstash:
   users:

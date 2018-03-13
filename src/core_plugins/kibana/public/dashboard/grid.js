@@ -220,17 +220,23 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
         $window.on('resize', safeLayout);
         $scope.$on('ready:vis', safeLayout);
         $scope.$on('globalNav:update', safeLayout);
+        $scope.$watch('hideBorders', hideBorders => {
+          if (hideBorders !== undefined) {
+            $scope.border = !$scope.hideBorders;
+          }
+        });
       }
 
       // tell gridster to add the panel, and create additional meatadata like $scope
       function addPanel(panel) {
         PanelUtils.initializeDefaults(panel, config); // kibi: pass config to PanelUtils
 
-        // kibi:'hide-borders' property is added
+        // kibi:'hide-borders' property and 'hide-border' ng class were added
         const panelHtml = `
             <li>
                 <dashboard-panel
                   remove="removePanel(${panel.panelIndex})"
+                  ng-class="{'hide-border': !border }"
                   panel="findPanelByPanelIndex(${panel.panelIndex}, panels)"
                   is-full-screen-mode="isFullScreenMode"
                   is-expanded="false"

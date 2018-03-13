@@ -119,6 +119,12 @@ dashboard-panel {
   overflow: auto; /* 1 */
   position: relative;
 
+  // kibi: hide-border was added
+  &.hide-border {
+    background: white;
+  }
+  // kibi: end
+
   .panel {
     margin: 3px; // kibi: keep space between panels
     // maintain the 100% height of the panel
@@ -130,11 +136,12 @@ dashboard-panel {
     flex-direction: column;
     justify-content: flex-start;
 
-    &.panel-border{
+    &.hide-border{
        // kibi: remove border: 1px solid #dedede;
        // kibi: remove border-radius: 4px
-       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
-       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) 0 0 0 rgba(0, 0, 0, 0.5);
+       // kibi: remove  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+       // kibi: remove box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) 0 0 0 rgba(0, 0, 0, 0.5);
+       border-color: white;
     }
 
     .panel-heading {

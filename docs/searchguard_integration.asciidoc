@@ -802,7 +802,7 @@ execute the following command:
 $ echo | openssl s_client -servername localhost -connect localhost:9220 -showcerts | openssl x509 -text -inform pem -text -noout
 ----
 
-[investigate-access-control-config]
+[[investigate-access-control-config]]
 === {kibi-name} access control configuration
 
 Edit `config/investigate.yml` and specify the credentials of the **sirenserver**
@@ -1301,23 +1301,6 @@ xpack.monitoring.exporters:
       truststore.password: password
 ----
 
-=== Handling of authorization errors
-
-If a dashboard is configured on an index on which you have no permission, all
-the visualizations loading data from the index will be empty and the custom
-warning message will be displayed at the top of the screen; in addition, the
-document count for the dashboard will display the message *Unauthorized*.
-
-If a dashboard is configured on an index on which you have permission to see
-only a subset of documents or fields, the visualizations will only process and
-display the data you're authorized to view.
-
-._A visualizations that loads unauthorized data._
-image::images/authorization-visualization-error.png["A visualization that loads unauthorized data.",align="left"]
-
-._A visualizations that refers to an unauthorized index._
-image::images/authorization-visualization-empty.png["A visualization that refers to an unauthorized index.",align="left"]
-
 === X-Pack security integration
 
 Create a `sirenserver` role with the following definition and map it
@@ -1453,6 +1436,15 @@ to all virtual indices starting with `db-`:
     }
   ]
 }
+----
+
+For administrative user please ensure you have `admin_role` configured in the `investigate_access_control` section 
+in `investigate.yml`. e.g
+
+[source,yaml]
+----
+investigate_access_control:
+  admin_role: sirenadmin
 ----
 
 Example administrative user with access to all indices starting with `data-`,

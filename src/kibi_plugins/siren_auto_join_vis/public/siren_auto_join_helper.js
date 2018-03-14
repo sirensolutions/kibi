@@ -262,13 +262,17 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
           if (node.useAltNodes) {
             _.each(node.altNodes, altNode => {
               _.each(altNode.nodes, buttonNode => {
-                buttonsToUpdate.push(buttonNode.button);
+                if (buttonNode.visible) {
+                  buttonsToUpdate.push(buttonNode.button);
+                }
               });
             });
           } else {
             _.each(node.nodes, normalNode => {
               _.each(normalNode.nodes, buttonNode => {
-                buttonsToUpdate.push(buttonNode.button);
+                if (buttonNode.visible) {
+                  buttonsToUpdate.push(buttonNode.button);
+                }
               });
             });
           }

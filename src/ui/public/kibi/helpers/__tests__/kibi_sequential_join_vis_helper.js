@@ -474,6 +474,11 @@ describe('Kibi Components', function () {
 
       it('should expand the time-based index pattern', function () {
         const currentDashboardId = 'dashboardA';
+        const currentDashboardState = {
+          filters: [],
+          queries: [],
+          time: null
+        };
         const button = {
           indexRelationId: 'some-uuid',
           sourceField: 'fa',
@@ -501,7 +506,7 @@ describe('Kibi Components', function () {
         timeBasedIndicesStub.withArgs('ia-*').returns([ 'ia-1', 'ia-2' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
-        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
+        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, currentDashboardId, button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
@@ -512,60 +517,69 @@ describe('Kibi Components', function () {
     });
 
     describe('getJoinSequenceFilter', function () {
-      let indexPatterns;
-      let savedDashboards;
-      let savedSearches;
-      let relations;
-
-      beforeEach(function () {
-        indexPatterns = [
-          {
+      const relations = [
+        {
+          id: 'some-uuid',
+          domain: {
             id: 'ia',
-            timeField: 'date',
-            fields: [
-              {
-                name: 'date',
-                type: 'string'
-              }
-            ]
+            field: 'fa'
+          },
+          range: {
+            id: 'ib',
+            field: 'fb'
           }
-        ];
-        savedDashboards = [
-          {
-            id: 'dashboardA',
-            title: 'dashboardA',
-            savedSearchId: 'searchA'
-          }
-        ];
-        savedSearches = [
-          {
-            id: 'searchA',
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({
-                index: 'ia',
-                query: { match: { a: 123 } },
-                filter: []
-              })
-            }
-          }
-        ];
-        relations = [
-          {
-            id: 'some-uuid',
-            domain: {
-              id: 'ia',
-              field: 'fa'
-            },
-            range: {
-              id: 'ib',
-              field: 'fb'
-            }
-          }
-        ];
-      });
+        }
+      ];
 
-      it('should build the join_sequence', function () {
+      it('should build a group if there is more than one join_sequnce filter in the dashboardState', function () {
         const currentDashboardId = 'dashboardA';
+        const currentDashboardState = {
+          filters: [
+            {
+              join_sequence: [
+                {
+                  relation: [
+                    {
+                      indices: ['index1'],
+                      path: 'path1',
+                      pattern: 'index*',
+                      queries: [ { query: { bool: { must: [] } } } ]
+                    },
+                    {
+                      indices: ['index2'],
+                      path: 'path2',
+                      pattern: 'index*'
+                    }
+                  ]
+                }
+              ],
+              meta: {}
+            },
+            {
+              join_sequence: [
+                {
+                  relation: [
+                    {
+                      indices: ['index3'],
+                      path: 'path3',
+                      pattern: 'index*',
+                      queries: [ { query: { bool: { must: [] } } } ]
+                    },
+                    {
+                      indices: ['index4'],
+                      path: 'path4',
+                      pattern: 'index*'
+                    }
+                  ]
+                }
+              ],
+              meta: {}
+            }
+          ],
+          queries: [],
+          time: null
+        };
+
         const button = {
           sourceField: 'fa',
           sourceIndexPatternId: 'ia',
@@ -573,51 +587,131 @@ describe('Kibi Components', function () {
           targetIndexPatternId: 'ib'
         };
 
-        init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches, relations });
+        init({ relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
-        appState.filters = [
-          {
-            term: {
-              field: 'aaa'
-            },
-            meta: {
-              disabled: false
-            }
-          }
-        ];
+        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, currentDashboardState, button).then((rel) => {
 
-        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
+          sinon.assert.called(timeBasedIndicesStub);
+          expect(rel.join_sequence).to.have.length(2);
+
+          // check if the two join_sequence were turned into group
+          expect(rel.join_sequence[0].group).to.have.length(2);
+
+          expect(rel.join_sequence[0].group[0][0].relation[0].indices).to.eql([ 'index1' ]);
+          expect(rel.join_sequence[0].group[0][0].relation[0].path).to.be('path1');
+          expect(rel.join_sequence[0].group[0][0].relation[0].queries[0].query.bool.must).to.have.length(0);
+          expect(rel.join_sequence[0].group[0][0].relation[1].indices).to.eql([ 'index2' ]);
+          expect(rel.join_sequence[0].group[0][0].relation[1].path).to.be('path2');
+
+          expect(rel.join_sequence[0].group[1][0].relation[0].indices).to.eql([ 'index3' ]);
+          expect(rel.join_sequence[0].group[1][0].relation[0].path).to.be('path3');
+          expect(rel.join_sequence[0].group[1][0].relation[0].queries[0].query.bool.must).to.have.length(0);
+          expect(rel.join_sequence[0].group[1][0].relation[1].indices).to.eql([ 'index4' ]);
+          expect(rel.join_sequence[0].group[1][0].relation[1].path).to.be('path4');
+
+          // check the new relation was added
+          expect(rel.join_sequence[1].relation).to.have.length(2);
+          expect(rel.join_sequence[1].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
+          expect(rel.join_sequence[1].relation[0].path).to.be(button.sourceField);
+          expect(rel.join_sequence[1].relation[0].queries[0].query.bool.must).to.have.length(0);
+          expect(rel.join_sequence[1].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
+          expect(rel.join_sequence[1].relation[1].path).to.be(button.targetField);
+        });
+      });
+
+      it('should add to existing join_sequence from dashboardState if there is only 1 join_sequence filter', function () {
+        const currentDashboardId = 'dashboardA';
+        const currentDashboardState = {
+          filters: [
+            {
+              join_sequence: [
+                {
+                  relation: [
+                    {
+                      indices: ['index1'],
+                      path: 'path1',
+                      pattern: 'index*',
+                      queries: [ { query: { bool: { must: [] } } } ]
+                    },
+                    {
+                      indices: ['index2'],
+                      path: 'path2',
+                      pattern: 'index*'
+                    }
+                  ]
+                }
+              ],
+              meta: {}
+            }
+          ],
+          queries: [],
+          time: null
+        };
+
+        const button = {
+          sourceField: 'fa',
+          sourceIndexPatternId: 'ia',
+          targetField: 'fb',
+          targetIndexPatternId: 'ib'
+        };
+
+        init({ relations });
+
+        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
+        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
+        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
+
+        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, currentDashboardState, button).then((rel) => {
+          sinon.assert.called(timeBasedIndicesStub);
+          expect(rel.join_sequence).to.have.length(2);
+
+          expect(rel.join_sequence[0].relation).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].indices).to.eql([ 'index1' ]);
+          expect(rel.join_sequence[0].relation[0].path).to.be('path1');
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(0);
+          expect(rel.join_sequence[0].relation[1].indices).to.eql([ 'index2' ]);
+          expect(rel.join_sequence[0].relation[1].path).to.be('path2');
+
+
+          expect(rel.join_sequence[1].relation).to.have.length(2);
+          expect(rel.join_sequence[1].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
+          expect(rel.join_sequence[1].relation[0].path).to.be(button.sourceField);
+          expect(rel.join_sequence[1].relation[0].queries[0].query.bool.must).to.have.length(0);
+          expect(rel.join_sequence[1].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
+          expect(rel.join_sequence[1].relation[1].path).to.be(button.targetField);
+        });
+      });
+
+
+      it('should build the join_sequence if there is no existing join_sequence in dashboardState', function () {
+        const currentDashboardId = 'dashboardA';
+        const currentDashboardState = {
+          filters: [],
+          queries: [],
+          time: null
+        };
+        const button = {
+          sourceField: 'fa',
+          sourceIndexPatternId: 'ia',
+          targetField: 'fb',
+          targetIndexPatternId: 'ib'
+        };
+        init({ relations });
+        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
+        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
+        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
+
+        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, currentDashboardState, button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.join_sequence[0].relation[0].path).to.be(button.sourceField);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(4);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({
-            term: {
-              field: 'aaa'
-            }
-          });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({
-            query_string: {
-              query: '*',
-              analyze_wildcard: true
-            }
-          });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[2]).to.be.eql({ match: { a: 123 } });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[3]).to.be.eql({
-            range: {
-              date: {
-                gte: parseWithPrecision(defaultTimeStart, false).valueOf(),
-                lte: parseWithPrecision(defaultTimeEnd, true).valueOf(),
-                format: 'epoch_millis'
-              }
-            }
-          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(0);
           expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
         });
@@ -625,6 +719,12 @@ describe('Kibi Components', function () {
 
       it('should build the join_sequence with the appropriate index types', function () {
         const currentDashboardId = 'dashboardA';
+        const dashbordAMeta = {
+          filters: [],
+          queries: [],
+          time: null
+        };
+
         const button = {
           sourceField: 'fa',
           sourceIndexPatternId: 'ia',
@@ -632,58 +732,26 @@ describe('Kibi Components', function () {
           targetIndexPatternId: 'ib',
         };
 
-        init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches, relations });
+        init({ relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
-        appState.filters = [
-          {
-            term: {
-              field: 'aaa'
-            },
-            meta: {
-              disabled: false
-            }
-          }
-        ];
-
-        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
+        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, dashbordAMeta, button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.join_sequence[0].relation[0].path).to.be(button.sourceField);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(4);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({
-            term: {
-              field: 'aaa'
-            }
-          });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({
-            query_string: {
-              query: '*',
-              analyze_wildcard: true
-            }
-          });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[2]).to.be.eql({ match: { a: 123 } });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[3]).to.be.eql({
-            range: {
-              date: {
-                gte: parseWithPrecision(defaultTimeStart, false).valueOf(),
-                lte: parseWithPrecision(defaultTimeEnd, true).valueOf(),
-                format: 'epoch_millis'
-              }
-            }
-          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(0);
           expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
         });
       });
 
-      it('should get the query from the search meta', function () {
-        init({ indexPatterns, savedDashboards, savedSearches, relations });
+      it('should get the query, filter and time from meta', function () {
+        init({ relations });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
@@ -695,25 +763,35 @@ describe('Kibi Components', function () {
           targetField: 'fb',
           targetIndexPatternId: 'ib'
         };
-        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+
+        const dashbordAMeta = {
+          filters: [ { match: { b: 123 } } ],
+          queries: [ { match: { a: 123 } } ],
+          time: {
+            range: {
+              date: {
+                format: 'epoch_millis',
+                gte: 1047648254000,
+                lte: 1521033854000
+              }
+            }
+          }
+        };
+
+        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', dashbordAMeta, button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.join_sequence[0].relation[0].path).to.be(button.sourceField);
           expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(3);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({
-            query_string: {
-              query: '*',
-              analyze_wildcard: true
-            }
-          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({ match: { b: 123 } });
           expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({ match: { a: 123 } });
           expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[2]).to.be.eql({
             range: {
               date: {
-                gte: parseWithPrecision(defaultTimeStart, false).valueOf(),
-                lte: parseWithPrecision(defaultTimeEnd, true).valueOf(),
+                gte: 1047648254000,
+                lte: 1521033854000,
                 format: 'epoch_millis'
               }
             }
@@ -738,7 +816,7 @@ describe('Kibi Components', function () {
             joinType: 'INNER_JOIN'
           }
         ];
-        init({ indexPatterns, savedSearches, savedDashboards, relations });
+        init({ relations });
 
         const button = {
           sourceField: 'fa',
@@ -746,12 +824,17 @@ describe('Kibi Components', function () {
           targetField: 'fb',
           targetIndexPatternId: 'ib'
         };
+        const dashbordAMeta = {
+          filters: [],
+          queries: [],
+          time: null
+        };
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
-        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then(rel => {
+        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', dashbordAMeta, button).then(rel => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].type).to.be('INNER_JOIN');

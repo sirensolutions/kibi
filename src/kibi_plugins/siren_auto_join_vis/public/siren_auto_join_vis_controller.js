@@ -272,7 +272,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     }
     // here grab visible buttons and request count update
 
-    const buttons = sirenAutoJoinHelper.getVisibleVirtualEntitySubButtons($scope.tree);
+    const buttons = sirenAutoJoinHelper.getVisibleVirtualEntitySubButtons($scope.tree, $scope.vis.params.layout);
 
     _addButtonQuery(buttons, currentDashboardId)
     .then(results => {
@@ -501,14 +501,26 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     }
     promise
     .then(tree => sirenAutoJoinHelper.updateTreeCardinalityCounts(tree))
-    .then(tree => sirenAutoJoinHelper.updateTreeCountsRequest(tree, currentDashboardId, delayExecutionHelper, edit))
+    .then(tree => {
+      if (!tree || !tree.nodes.length) {
+        return Promise.resolve({});
+      } else if (edit) {
+        return Promise.resolve(tree);
+      }
+      const buttonsToUpdate = sirenAutoJoinHelper.getButtonsToUpdateCounts(tree);
+      delayExecutionHelper.addEventData({
+        buttons: buttonsToUpdate,
+        dashboardId: currentDashboardId
+      });
+      return tree;
+    })
     .then(tree => sirenAutoJoinHelper.addTreeSourceCounts(tree, updateSourceCount))
     .then(tree => $scope.tree = tree)
     .catch(notify.error);
   };
 
   $scope.getCurrentDashboardBtnCounts = function () {
-    const virtualEntityButtons = sirenAutoJoinHelper.getVisibleVirtualEntitySubButtons($scope.tree);
+    const virtualEntityButtons = sirenAutoJoinHelper.getVisibleVirtualEntitySubButtons($scope.tree, $scope.vis.params.layout);
     const allButtons = $scope.buttons.concat(virtualEntityButtons);
     _addButtonQuery(allButtons, currentDashboardId, true) // TODO take care about this true parameter
     .then(results => {

@@ -11,30 +11,39 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
 
   class SirenAutoJoinHelper {
 
-    getVisibleVirtualEntitySubButtons(tree) {
+    getVisibleVirtualEntitySubButtons(tree, layout) {
 
       const visibleVirtualButtons = [];
 
       _.each(tree.nodes, node => {
         if (node.type === TreeType.VIRTUAL_BUTTON) {
-          _.each(node.nodes, relNode => {
-            if (relNode.visible) {
-              _.each(relNode.nodes, buttonNode => {
-                if (buttonNode.visible) {
-                  visibleVirtualButtons.push(buttonNode.button);
-                }
-              });
-            }
-          });
-          _.each(node.altNodes, dashNode => {
-            if (dashNode.visible) {
-              _.each(dashNode.nodes, buttonNode => {
-                if (buttonNode.visible) {
-                  visibleVirtualButtons.push(buttonNode.button);
-                }
-              });
-            }
-          });
+          // if normal layout
+          if (layout === 'normal') {
+            _.each(node.nodes, relNode => {
+              if (relNode.visible) {
+                _.each(relNode.nodes, buttonNode => {
+                  if (buttonNode.visible) {
+                    visibleVirtualButtons.push(buttonNode.button);
+                  }
+                });
+              }
+            });
+            _.each(node.altNodes, dashNode => {
+              if (dashNode.visible) {
+                _.each(dashNode.nodes, buttonNode => {
+                  if (buttonNode.visible) {
+                    visibleVirtualButtons.push(buttonNode.button);
+                  }
+                });
+              }
+            });
+          } else if (layout === 'light') {
+            _.each(node.nodes, dashRelNode => {
+              if (dashRelNode.visible) {
+                visibleVirtualButtons.push(dashRelNode.button);
+              }
+            });
+          }
         }
       });
 
@@ -244,13 +253,7 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
     };
 
 
-    updateTreeCountsRequest(tree, dashboardId, delayExecutionHelper, edit) {
-      if (!tree || !tree.nodes.length) {
-        return Promise.resolve({});
-      } else if (edit) {
-        return Promise.resolve(tree);
-      }
-
+    getButtonsToUpdateCounts(tree) {
       const buttonsToUpdate = [];
       _.each(tree.nodes, node => {
         if (node.type === TreeType.BUTTON) {
@@ -264,7 +267,7 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
             });
           } else {
             _.each(node.nodes, normalNode => {
-              _.each(node.nodes, buttonNode => {
+              _.each(normalNode.nodes, buttonNode => {
                 buttonsToUpdate.push(buttonNode.button);
               });
             });
@@ -273,12 +276,7 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
           throw 'Wrong type at first level of the tree';
         }
       });
-
-      delayExecutionHelper.addEventData({
-        buttons: buttonsToUpdate,
-        dashboardId: dashboardId
-      });
-      return tree;
+      return buttonsToUpdate;
     };
 
     addTreeSourceCounts(tree, updateSourceCount) {

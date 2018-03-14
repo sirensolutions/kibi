@@ -57,3 +57,4 @@ To import a set of objects:
 . Click *Open* after selecting the JSON file.
 . If any objects in the set would overwrite objects already present in {kibi-name}, confirm the overwrite.
 
+

@@ -26,20 +26,18 @@ To setup a Search Guard cluster, you will need to generate the following files:
 
 - A **truststore** file, common to all nodes, containing the CA certificate
   chain.
-- A **keystore** file, for each node, containing the certificate bundle for
-  the node.
+- A **keystore** file, for each node, containing the certificate for the node.
 - A **keystore** file, for each administrative user, containing a certificate
   bundle that identifies the user.
 - A **keystore** file containing an SSL certificate for the Elasticsearch HTTP
-  REST API.
+  server.
 
 These files can be either Java KeyStore files or PKCS12 bundles.
 
 ==== Issuing certificates in an existing PKI infrastructure
 
-If your organization has a PKI infrastructure in place, you can generate
-Java KeyStore files from a PEM bundle by using the _keytool_ command from
-the Java runtime, e.g.:
+If your organization has a PKI infrastructure in place, you can generate Java
+KeyStore files from a PEM bundle by using the `keytool` command, e.g.:
 
 [source,shell]
 ----
@@ -49,16 +47,18 @@ $ keytool  \
   -keystore truststore.jks
 ----
 
-The command will store the contents of the PEM bundle _ca.pem_ into a file
-named _truststore.jks_ in the current directory.
+The command will store the contents of `ca.pem` into a file named
+`truststore.jks` in the current directory.
 
 The same command can be used to convert certificates signed by your CA for
 nodes, administrative users and the REST API.
 
-Node certificates must include _oid:1.2.3.4.5.5_ as a Subject Alternative Name
-entry to work correctly with Search Guard; if you want to enable hostname
-verification, make sure that at least one Subject Alternative Name is equal to
-the DNS name of the node.
+Node certificates must include `oid:1.2.3.4.5.5` as a Subject Alternative Name
+entry to work correctly with Search Guard; for details on how to customize the
+OID, please consult the Search Guard documentation.
+
+If you want to enable hostname verification, make sure that at least one
+Subject Alternative Name is equal to the DNS name of the node.
 
 Client certificates for administrative users must contain a unique
 Distinguished Name to identify the user, e.g.:
@@ -67,14 +67,15 @@ Distinguished Name to identify the user, e.g.:
 CN=admin,DC=siren,DC=solutions
 ----
 
-Certificates for the REST API can be shared across multiple nodes by setting
-multiple hostnames in the Subject Alternative Name attribute or by using a
-wildcard certificate.
+Certificates for the Elasticsearch HTTP server can be used across multiple
+nodes by setting multiple hostnames in the Subject Alternative Name attribute
+or by using a wildcard certificate.
 
 ==== Issuing certificates using the TLS certificate generator
 
-Floragunn GmbH provides a {searchguard-tls-certificate-ref}[TLS certificate generation service] which can be used to create
-a bundle of certificates for evaluation purposes.
+Floragunn GmbH provides a {searchguard-tls-certificate-ref}[TLS certificate
+generation service] which can be used to create a bundle of certificates for
+evaluation purposes.
 
 To try the certificates in a single node setup, it is possible to just
 specify **localhost** as the first hostname and submit the form.
@@ -85,10 +86,14 @@ The bundle has the following contents:
   the keystores.
 - **truststore.jks**: the CA certificate chain in Keystore format.
 - **node-certificates**: the transport certificates for the nodes in several formats;
-  these certificates can also be used for the Elasticsearch REST API.
-- **client-certificates**: client certificates.
+  these certificates can also be used for the Elasticsearch HTTP server.
+- **client-certificates**: client certificates and private keys.
 - **root-ca**: the root CA bundle in PEM format.
 - **signing-ca**: the signing CA bundle in PEM format.
+
+In addition to the online generator, Floragunn provides a
+{searchguard-tls-tool-ref}[TLS tool] which can be used to manage a private
+certification authority.
 
 === Search Guard installation
 
@@ -103,13 +108,13 @@ Elasticsearch version please consult the
 $ bin/elasticsearch-plugin install -b com.floragunn:search-guard-5:<version>
 ----
 
-Then, copy the following files to the _config_ directory of each node:
+Then, copy the following files to the `config` directory of each node:
 
-- The truststore file (e.g. _truststore.jks_).
+- The truststore file (e.g. `truststore.jks`).
 - The keystore file containing the node certificate (e.g.
-  _CN=localhost-keystore.jks_)
-- The keystore file containing the certificate for the Elasticsearch REST API
-  if different than the node certificate.
+  `CN=localhost-keystore.jks`)
+- The keystore file containing the certificate for the Elasticsearch HTTP
+  server, only if different than the node certificate.
 
 Open the _config/elasticsearch.yml_ file and set the following Search Guard
 options:
@@ -158,15 +163,15 @@ E.g.:
 ----
 searchguard.ssl.transport.enabled: true
 searchguard.ssl.transport.truststore_filepath: truststore.jks
-searchguard.ssl.transport.truststore_password: password
+searchguard.ssl.transport.truststore_password: <password>
 searchguard.ssl.transport.keystore_filepath: CN=localhost-keystore.jks
-searchguard.ssl.transport.keystore_password: password
+searchguard.ssl.transport.keystore_password: <password>
 searchguard.ssl.transport.enforce_hostname_verification: false
 searchguard.ssl.http.enabled: true
 searchguard.ssl.http.keystore_filepath: CN=localhost-keystore.jks
-searchguard.ssl.http.keystore_password: password
+searchguard.ssl.http.keystore_password: <password>
 searchguard.ssl.http.truststore_filepath: truststore.jks
-searchguard.ssl.http.truststore_password: password
+searchguard.ssl.http.truststore_password: <password>
 searchguard.authcz.admin_dn:
   - CN=sgadmin
 searchguard.ssl.http.clientauth_mode: OPTIONAL
@@ -207,6 +212,27 @@ standalone version (`sgadmin-standalone.zip`) can be downloaded from
 Once a Search Guard enabled cluster has been initialized, `sgadmin` can be used
 to upload new configurations.
 
+=== Siren Investigate Certificates
+
+Here we give an example of where to store client certificates and keystores on Siren Investigate. 
+**Note**: These are examples for a fresh install using the TLS certificate generator.
+
+In _siren-investigate/pki_ (which was created earlier for https support) a new directory _searchguard_
+ was created with the following:
+
+- **CN=sgadmin.crtfull.pem**: a certificate bundle with administrative privileges over the 
+  Search Guard Management REST API. Copied from **client-certificates** in TLS certificate generator bundle. 
+- **CN=sgadmin.key.pem**: the key of the administrative certificate. Copied from **client-certificates** in 
+  TLS certificate generator bundle. 
+- **ca.pem**: the cluster CA certificate chain in PEM format. Copy of **root-ca.pem** from top level directory 
+  TLS certificate generator bundle. 
+- **CN=sgadmin-keystore.jks**: Keystore containing the admin certificate. Used with sgadmin. 
+  Copied from **client-certificates** in TLS certificate generator bundle. 
+                                 
+The password of all Java keystores can be found in the **README.txt** from top level directory 
+of TLS certificate generator bundle. 
+
+
 ==== Search Guard configuration
 
 A Search Guard configuration directory contains the following files:
@@ -217,10 +243,11 @@ A Search Guard configuration directory contains the following files:
 - **sg_internal_users.yml**: the Search Guard internal users database.
 - **sg_roles_mapping.yml**: contains the mapping between users and roles.
 
-A sample configuration is available in the _config/sgconfig_ directory in the
-Elasticsearch instance included in the demo distribution; the contents of the
-files are explained in the next sections and can be used as a general
-guideline.
+A sample configuration below is used for Elasticsearch with no data, for example your own Elasticsearch or 
+using our no-data-no-security package. Further examples are available in 
+the _config/sgconfig_ directory in the Elasticsearch 
+instance included in the demo distribution; the contents of the
+files are explained in the next sections and can be used as a general guideline.
 
 For additional configuration options please refer to the official
 {searchguard-ref}#configuring-users-roles-and-permissions[Search Guard documentation].
@@ -357,13 +384,22 @@ CLUSTER_COMPOSITE_OPS:
 
 SIREN_CLUSTER:
   - 'indices:data/read/scroll'
-  - 'indices:data/read/scroll/clear'
-  - 'cluster:internal/data/transfer/*'
+  - 'cluster:data/read/lock/create'
   - 'indices:data/read/msearch*'
+  - 'cluster:internal/data/create'
+  - 'cluster:internal/data/transfer*'
+  - 'cluster:internal/data/delete'
+  - 'cluster:internal/data/update/metadata'
+  - 'cluster:siren/internal*'
+  - 'indices:siren/mplan*'
+  - 'cluster:admin/plugin/siren/license/get'
   - CLUSTER_COMPOSITE_OPS_RO
 
 SIREN_COMPOSITE:
   - 'indices:siren/mplan*'
+  - 'indices:siren/plan*'
+  - 'indices:data/read/search-join'
+  - 'indices:data/read/lock/release'
 
 SIREN_READONLY:
   - 'indices:data/read/field_stats*'
@@ -371,13 +407,15 @@ SIREN_READONLY:
   - 'indices:data/read/get*'
   - 'indices:data/read/mget*'
   - 'indices:data/read/search*'
+  - 'indices:data/read/lock*'
+  - 'indices:siren/mplan'
   - 'indices:siren/plan'
-  - 'indices:siren/task/search'
   - 'indices:admin/mappings/get*'
   - 'indices:admin/mappings/fields/get*'
   - 'indices:admin/validate/query*'
   - 'indices:admin/get*'
   - 'indices:admin/version/get*'
+  - 'indices:data/siren/connector/*'
   - SIREN_COMPOSITE
 
 SIREN_READWRITE:
@@ -387,6 +425,7 @@ SIREN_READWRITE:
   - 'indices:data/write/delete*'
   - 'indices:data/write/index*'
   - 'indices:data/write/update*'
+  - 'indices:data/write/bulk*'
   - SIREN_READONLY
 ----
 
@@ -443,55 +482,16 @@ logstash:
         - CRUD
         - CREATE_INDEX
 
-# Permissions for an X-Pack monitoring agent.
-monitoring:
-  cluster:
-    - CLUSTER_MONITOR
-    - 'indices:admin/aliases'
-    - 'indices:admin/template/get'
-    - 'indices:admin/template/put'
-    - 'cluster:admin/ingest/pipeline/get'
-    - 'cluster:admin/ingest/pipeline/put'
-    - 'indices:data/write/bulk'
-  indices:
-    '?marvel*':
-      '*':
-        - ALL
-    '?monitoring*':
-      '*':
-        - ALL
-
-# Permissions for a Siren Alert user.
-sirenalert:
-  cluster:
-    - SIREN_CLUSTER
-    - 'indices:data/write/bulk*'
-    - 'indices:admin/template/*'
-  indices:
-    '*':
-      '*':
-        - SIREN_READONLY
-    'watcher_alarms*':
-      '*':
-        - SIREN_READWRITE
-        - CREATE_INDEX
-    '/(watcher|watcher_alarms)/':
-      '*':
-        - SIREN_READWRITE
-        - CREATE_INDEX
-
-# Permissions for the {kibi-name} server process.
+# Permissions for the Siren server process.
 sirenserver:
   cluster:
-    - cluster:admin/xpack/monitoring/bulk
-    - cluster:monitor/nodes/info
-    - cluster:monitor/xpack/info
-    - cluster:monitor/health
-    - cluster:monitor/main
-    - cluster:monitor/state
-    - cluster:monitor/nodes/stats
-    - SIREN_CLUSTER
-    - CLUSTER_COMPOSITE_OPS
+      - 'cluster:monitor/nodes/info'
+      - 'cluster:monitor/health'
+      - 'cluster:monitor/main'
+      - 'cluster:monitor/state'
+      - 'cluster:monitor/nodes/stats'
+      - SIREN_CLUSTER
+      - CLUSTER_COMPOSITE_OPS
   indices:
     '*':
       '*':
@@ -503,91 +503,82 @@ sirenserver:
       '*':
         - ALL
 
-# Permissions for a {kibi-name} administrator (read-write access to the .siren index).
+# Permissions for the internal federate user
+federateserver:
+  cluster:
+    - 'indices:admin/aliases'
+  indices:
+    ?siren-federate-datasources:
+      '*':
+        - ALL
+    ?siren-federate-indices:
+      '*':
+        - ALL
+    ?siren-federate-target:
+      '*':
+        - ALL
+
+# Permissions for a {kibi-name} administrator
 sirenadmin:
   cluster:
     - SIREN_CLUSTER
-    - cluster:admin/plugin/siren/license/put
+    - CLUSTER_MONITOR
+    - 'cluster:admin/plugin/siren/license/put'
+    - 'cluster:admin/plugin/siren/license/delete'
+    - 'indices:data/write/bulk'
+    - 'cluster:admin/siren/connector/*'
   indices:
-    '*':
+    'watcher_alarms*':
       '*':
         - SIREN_READONLY
-    '?siren':
+    'data-*':
+        - SIREN_READONLY
+    'db-*':
       '*':
         - SIREN_READWRITE
-    'watcher':
+        - indices:admin/create
+        - indices:admin/siren/connector/*
+    '*':
       '*':
-        - SIREN_READWRITE
+        - INDICES_MONITOR
+        - SIREN_COMPOSITE
+        - 'indices:admin/siren/connector/*'
+        - 'indices:data/siren/connector/get'
+        - 'indices:data/siren/connector/mappings/get'
+        - 'indices:admin/get'
 
-# Permissions for a {kibi-name} user (read only access to the .siren index).
+# Permissions for a {kibi-name} regular user.
 sirenuser:
   cluster:
     - SIREN_CLUSTER
   indices:
-    '?siren':
+    'watcher_alarms*':
       '*':
         - SIREN_READONLY
-    'watcher':
+    'data-*':
+        - SIREN_READONLY
+    'db-*':
+        - SIREN_READONLY
+    '*':
+      '*':
+        - SIREN_COMPOSITE
+
+# Permissions for a Siren Alert user.
+sirenalert:
+  cluster:
+    - 'indices:data/write/bulk'
+    - 'indices:admin/template/*'
+    - SIREN_CLUSTER
+  indices:
+    '*':
       '*':
         - SIREN_READONLY
     'watcher_alarms*':
       '*':
-        - SIREN_READONLY
-    'article':
-      '*':
-        - SIREN_READONLY
-    'investment':
-      '*':
-        - SIREN_READONLY
-    'company':
-      '*':
-        - SIREN_READONLY
-    'investor':
-      '*':
-        - SIREN_READONLY
-    '*':
-      '*':
-        - SIREN_COMPOSITE
+        - SIREN_READWRITE
+        - CREATE_INDEX
 
-# Permissions for a {kibi-name} user (read only), with no access to the investor index.
-sirennoinvestor:
-  cluster:
-    - SIREN_CLUSTER
-  indices:
-    '?siren':
-      '*':
-        - SIREN_READONLY
-    'article':
-      '*':
-        - SIREN_READONLY
-    'company':
-      '*':
-        - SIREN_READONLY
-    'investment':
-      '*':
-        - SIREN_READONLY
-    '*':
-      '*':
-        - SIREN_COMPOSITE
 ----
-
-The file defines the following roles:
-
-- **sg_all_access**: allows every action on the cluster.
-- **sg_readall**: allows to search data on all the indices in the cluster.
-- **logstash**: defines the permission for a Logstash client with all write and
-  creation privileges enabled on Logstash and Elastic Beats templates and
-  indices.
-- **sirenalert**: defines the permission for a Siren Alert user; the role is
-  not required if the Siren Alert plugin is not installed.
-- **monitoring**: defines the permissions for an X-Pack monitoring agent.
-- **sirenserver**: defines the permissions for the {kibi-name} server process.
-- **sirenadmin**: defines the permissions for a {kibi-name} user with read/write
-  access to the .siren index.
-- **sirenuser**: defines the permissions for a {kibi-name} user with readonly access
-  to all indices.
-- **sirennoinvestor**: defines the permissions for a {kibi-name} user with readonly
-  access to all the indices excluding _investor_.
 
 A permission is defined by the following syntax:
 
@@ -600,19 +591,43 @@ A permission is defined by the following syntax:
         - <list of permissions or action group names>
 ----
 
-The index name can contain the simple expansion characters _*_ and _?_ to match
+The index name can contain the simple expansion characters `*` and `?` to match
 any sequence of character/any single character; for further information about
 defining permissions, please refer to the
 {searchguard-ref}configuration_roles_permissions.html[Search Guard configuration
 documentation].
+
+The sample configuration above defines the following roles:
+
+- **sg_all_access**: allows every action on the cluster.
+- **sg_readall**: allows to search data on all the indices in the cluster.
+- **logstash**: defines the permission for a Logstash client with all write and
+  creation privileges enabled on Logstash and Elastic Beats templates and
+  indices.
+- **monitoring**: defines the permissions for an X-Pack monitoring agent.
+- **sirenserver**: defines the permissions for the {kibi-name} server process,
+  with read/write access to the internal {kibi-name} indices.
+- **sirenuser**: defines the permissions for a {kibi-name} user with readonly
+  access to all indices whose name starts with `data-*` and to the Siren Alert
+  alarm history (indices whose name starts with `watcher_alarms*`).
+- **sirenadmin**: defines the permissions for a {kibi-name} user that has the
+  same permissions as **sirenuser** and in addition can create virtual indices
+  whose name starts with `db`. This user has also additional permissions to
+  upload the Investigate license, get monitoring information from the cluster
+  and managed JDBC datasources.
+- **sirenalert**: defines the permission for the Siren Alert user; this role
+  has read access to all indices and is also authorized to create, search and
+  delete indices whose name starts with `watcher_alarms*` (the alarm history).
 
 **Users (sg_internal_users.yml)**
 
 [source,yaml]
 ----
 # Internal user database
-# The hash value is a bcrypt hash and can be generated with plugins/search-guard-5/tools/hash.sh
+# The hash value is a bcrypt hash and can be generated with plugin/tools/hash.sh
 admin:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+federateserver:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 sirenserver:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
@@ -620,25 +635,19 @@ sirenadmin:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 sirenuser:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-sirennoinvestor:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 logstash:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-CN=demouser:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 sirenalert:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-monitoring:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 ----
 
 The file defines the credentials for Search Guard internal users; passwords are
-stored as hashes in the _hash_ attribute beneath each username.
+stored as hashes in the `hash` attribute beneath each username.
 
-The password for all the accounts above is _password_.
+The password for all the accounts in the example is `password`.
 
 To change the password of a user, you will need to generate the corresponding
-hash; this can be done by executing the _plugins/search-guard-5/tools/hash.sh_
+hash; this can be done by executing the `plugins/search-guard-5/tools/hash.sh`
 script as follows:
 
 [source,bash]
@@ -646,8 +655,11 @@ script as follows:
 $ bash plugins/search-guard-5/tools/hash.sh -p password
 ----
 
-The script will output the hash for the password specified after the _-p_
+The script will output the hash for the password specified after the `-p`
 switch.
+
+It is also possible to change passwords for internal users from the Access
+Control application in the {kibi-name} UI once configured.
 
 **Role mappings (sg_roles_mapping.yml)**
 
@@ -656,6 +668,10 @@ switch.
 sg_all_access:
   users:
     - admin
+
+federateserver:
+  users:
+    - federateserver
 
 sirenserver:
   users:
@@ -669,10 +685,6 @@ sirenuser:
   users:
     - sirenuser
 
-sirennoinvestor:
-  users:
-    - sirennoinvestor
-
 logstash:
   users:
     - logstash
@@ -680,20 +692,24 @@ logstash:
 sirenalert:
   users:
     - sirenalert
-
-monitoring:
-  users:
-    - monitoring
 ----
 
-The file defines the assignment of roles to users; users authenticating through
-a client certificate are identified by the Distinguished Name in the certificate.
+The file defines the list of users assigned to each role using the following
+form:
+
+[source,yaml]
+----
+<role name>:
+  users:
+    - <username>
+    - <username>
+----
 
 ===== Uploading the configuration to the cluster
 
 To upload the configuration defined in the previous steps, go to the
 Elasticsearch directory and execute the
-_plugins/search-guard-5/tools/sgadmin.sh_ script as follows:
+`plugins/search-guard-5/tools/sgadmin.sh` script as follows:
 
 [source,bash]
 ----
@@ -749,8 +765,8 @@ For additional information on how to set replication settings and sgadmin in
 general please refer to the {searchguard-ref}sgadmin.html[sgadmin
 documentation].
 
-If the command executes successfully it will print a summary of the actions
-executed, e.g.:
+If the command sgadmin command is executed successfully, a list of the actions
+executed and their outcome will be printed on screen, e.g.:
 
 ----
 Clustername: elasticsearch
@@ -788,9 +804,10 @@ execute the following command:
 $ echo | openssl s_client -servername localhost -connect localhost:9220 -showcerts | openssl x509 -text -inform pem -text -noout
 ----
 
-=== {kibi-name} configuration
+[[investigate-access-control-config]]
+=== {kibi-name} access control configuration
 
-Edit _config/investigate.yml_ and specify the credentials of the **sirenserver**
+Edit `config/investigate.yml` and specify the credentials of the **sirenserver**
 user, e.g.:
 
 [source,yaml]
@@ -800,7 +817,7 @@ elasticsearch.password: 'password'
 ----
 
 If HTTPS is enabled for the Elasticsearch REST API, make sure that the
-_elasticsearch.url_ setting contains a URL starting with _https_, e.g.:
+`elasticsearch.url` setting contains a URL starting with `https`, e.g.:
 
 [source,yaml]
 ----
@@ -808,24 +825,32 @@ elasticsearch.url: 'https://localhost:9220'
 ----
 
 If the certificate is not signed by a public authority, you will also need to
-set the `elasticsearch.ssl.ca` to the path of the CA chain bundle in PEM
-format, e.g.:
+set the `elasticsearch.ssl.certificateAuthorities` to the path of the CA chain
+bundle in PEM format, e.g.:
 
 [source,yaml]
 ----
-elasticsearch.ssl.ca: 'pki/searchguard/ca.pem'
+elasticsearch.ssl.certificateAuthorities: 'pki/searchguard/ca.pem'
 ----
 
 If you're using the certificates generated by the TLS generator service, the
 PEM file containing the certification bundles is available in
 **root-ca/root-ca.pem**.
 
-To enable certificate verification, set _elasticsearch.ssl.verify_ to true,
-e.g.:
+To enable certificate verification, set `elasticsearch.ssl.verificationMode` to
+`full`, e.g.:
 
 [source,yaml]
 ----
-elasticsearch.ssl.verify: true
+elasticsearch.ssl.verificationMode: full
+----
+
+If you want to validate the certificate but not the hostname, set
+`elasticsearch.ssl.verificationMode` to `certificate`, e.g.:
+
+[source,yaml]
+----
+elasticsearch.ssl.verificationMode: certificate
 ----
 
 Set the **investigate_core.elasticsearch.auth_plugin** option to **searchguard**:
@@ -833,16 +858,7 @@ Set the **investigate_core.elasticsearch.auth_plugin** option to **searchguard**
 ----
 investigate_core:
   elasticsearch:
-    auth_plugin: 'searchguard'
-----
-
-E.g.:
-
-[source,yaml]
-----
-investigate_core:
-  elasticsearch:
-    auth_plugin: 'searchguard'
+    auth_plugin: searchguard
 ----
 
 To enable the {kibi-name} access control plugin, specify the following configuration
@@ -850,61 +866,91 @@ values in the **investigate_access_control** section:
 
 - **enabled**: set to **true** to enable the {kibi-name} access control plugin.
   Defaults to **false**.
-- **backend**: backend type of authentication. Currently available backends are **searchguard** and **xpack**.
-  Defaults to **searchguard**.
+- **backend**: the authentication backend installed in the cluster; valid
+  values are **searchguard** and **xpack**. Defaults to **searchguard**.
+- **cookie.password**: a 32 characters long alphanumeric string used to derive
+  the key used to encrypt and sign cookies.
+- **cookie.secure**: if set to **true**, the cookie will be transmitted only if
+  the request is being served over HTTPS. You will need to set this to false if
+  {kibi-name} is behind an SSL proxy or if you are running {kibi-name} without
+  HTTPS (which is not advised). Defaults to **true**.
+- **admin_role**: the name role that will have access to the access control
+  management UI . This user will not be subject to
+  any permission check by Investigate, but will still be subject to
+  permission checks when issuing queries to Elasticsearch.
+  Defaults to **sirenadmin**.
+- **acl.enabled**: set to true to disable access control on saved objects.
+  Defaults to **false**.
+
+Example minimal configuration:
+
+[source,yaml]
+----
+investigate_access_control:
+  enabled: true
+  acl:
+    enabled: true
+  cookie:
+    secure: true
+    password: '12345678123456781234567812345678'
+----
+
+**Make sure to personalize the session cookie password**.
+
+Additional configuration options:
+
 - **session.ttl**: the lifetime of the session in milliseconds.
   If not set, the session will last as long as the session cookie is valid.
   Defaults to **3600000** (1 hour).
 - **session.keepAlive**: if set to **true**, every time a request is
   received within the session lifetime, the session lifetime will be
-  extended by **session.ttl**.  Defaults to **true**.
-- **cookie.password**: a 32 characters long password used to derive
+  extended by **session.ttl**. Defaults to **true**.
+- **cookie.password**: a 32 characters long alphanumeric string used to derive
   the key used to encrypt and sign cookies.
-- **cookie.secure**: if set to **true**, the cookie will be transmitted
-  only if the request is being served over HTTPS. It is possible to set this
-  to false if {kibi-name} is behind an SSL proxy. Defaults to **true**.
 - **cookie.ttl**: the lifetime of the session cookie in milliseconds.  If not
   set, the cookie will expire when the browser is closed, which is the
   recommended setting. Please note that browsers might not remove session
   cookies when a tab is closed or even across restarts, so it is recommended to
   set **session.ttl** for additional protection. Defaults to **null**.
 - **cookie.name**: the name of the session cookie. Defaults to **kac**.
-- **admin_role**: the Search Guard role authorized to use the {kibi-name} Access
-  Control application. Defaults to **sirenadmin**.
+- **acl.index**: the Elasticsearch index in which access control rules and
+  saved objects metadata will be stored (**.sirenaccess** by default).
 
-E.g.:
-
-[source,yaml]
-----
-investigate_access_control:
-  enabled: true
-  cookie:
-    password: '12345678123456781234567812345678'
-----
-
-If {kibi-name} is running behind a reverse SSL proxy like Nginx, remember to set
-**cookie.secure** to **false** otherwise the cookie will not be sent, e.g.:
+If {kibi-name} is running behind a reverse SSL proxy like Nginx, remember to
+set **cookie.secure** to **false** otherwise the cookie will not be sent, e.g.:
 
 [source,yaml]
 ----
 investigate_access_control:
   enabled: true
+  acl:
+    enabled: true
   cookie:
     password: '12345678123456781234567812345678'
     secure: false
 ----
 
-If you are using the Siren Alert plugin, you can specify the Siren Alert user
-credentials in the `investigate_access_control.sirenalert` section, e.g.:
+If you want to use the Siren Alert plugin, you'll need to specify the Siren
+Alert user credentials in the `investigate_access_control.sirenalert` section,
+e.g.:
 
 [source,yaml]
 ----
 investigate_access_control:
+  enabled: true
+  acl:
+    enabled: true
+  cookie:
+    password: '12345678123456781234567812345678'
+    secure: false
   sirenalert:
     elasticsearch:
       username: sirenalert
       password: password
 ----
+
+If Siren Alert credentials are not specified, Siren Alert will use the backend
+credentials to execute the watchers.
 
 Restart {kibi-name} after changing the configuration file; if the configuration is
 correct, you should see an authentication dialog when browsing to {kibi-name}.
@@ -912,16 +958,23 @@ correct, you should see an authentication dialog when browsing to {kibi-name}.
 ._Authentication dialog_
 image::images/access_control/login.png["Authentication dialog",align="center"]
 
-=== Search Guard management UI
+=== Saved objects access control
+
+{kibi-name} features an access control system on saved objects that allows to
+filter dashboards and visualizations visible to end users; this was enabled in
+the previous section by setting `investigate_access_control.acl.enabled` to
+`true`.
+
+When the system is enabled, normal users should not have access to the `.siren`
+and `.sirenaccess` indices, as these will be managed by the backend user
+(`.sirenserver`).
+
+=== Search Guard management UI Setup
 
 {kibi-name} includes an optional user interface for the
 {searchguard-management-api-ref}[Search Guard REST Management API add-on] ; in
-order to use it, the {kibi-name} backend has to connect to the Elasticsearch cluster
-using a PEM client certificate with administrative privileges.
-
-It is strongly suggested to setup a dedicated {kibi-name} instance to use the
-Search Guard management UI and allow access to it only to authorized
-users.
+order to use it, the {kibi-name} backend has to connect to the Elasticsearch
+cluster using a PEM client certificate with administrative privileges.
 
 ==== Add-on installation
 
@@ -951,8 +1004,9 @@ API.
 
 ==== {kibi-name} configuration
 
-Copy the client certificate and its key to a directory readable by {kibi-name} (e.g. `pki`); then
-add the following parameters to the `investigate_access_control` configuration section:
+Copy the client certificate and its key to a directory readable by {kibi-name}
+(e.g. `pki`); then add the following parameters to the
+`investigate_access_control` configuration section:
 
 - **admin_role**: the Search Guard role that has access to the Search Guard
   management UI (**sirenadmin** by default).
@@ -960,17 +1014,28 @@ add the following parameters to the `investigate_access_control` configuration s
   client certificate bundle in PEM format.
 - **backends.searchguard.admin.ssl.key**: the path to the administrative client
   certificate key in PEM format.
+- **backends.searchguard.admin.ssl.keyPassphrase**: the passphrase of the
+  administrative client certificate key. Not required if the key is not
+  encrypted.
 
 E.g.:
 
 [source,yaml]
 ----
 investigate_access_control:
+investigate_access_control:
+  enabled: true
+  acl:
+    enabled: true
   admin_role: sirenadmin
+  cookie:
+    password: '12345678123456781234567812345678'
+    secure: false
   backends:
     searchguard:
       admin.ssl.cert: pki/searchguard/CN=sgadmin.crtfull.pem
       admin.ssl.key: pki/searchguard/CN=sgadmin.key.pem
+      admin.ssl.keyPassphrase: password
 ----
 
 Please note that the administrative client certificate bundle must contain
@@ -984,6 +1049,7 @@ $ cat user.crt.pem ca-chain.pem > user.crtfull.pem
 ----
 
 [[access_control_app]]
+==== Access Control: Authentication UI
 
 Once the certificate is setup, restart {kibi-name}, login with a user having an
 administrative role, click on the apps button, then click on **Access control**
@@ -991,11 +1057,6 @@ and finally on **Authentication**.
 
 ._The Access control app_
 image::images/access_control/acl_app.png["The Access control app",align="center"]
-
-If you get an error upon opening the Authentication app,
-most probably the client certificate does not contain
-the full CA chain or the add-on has not been installed correctly; please
-check Elasticsearch and {kibi-name} logs for related errors.
 
 The Authentication section allows to browse, edit and create the following
 Search Guard resources:
@@ -1013,106 +1074,20 @@ certificate is incorrect:
 ._Browsing Search Guard roles_
 image::images/access_control/sgroles.png["Browsing Search Guard roles",align="center"]
 
-=== Saved objects access control
+If you get an error upon opening the Authentication app, most probably the
+client certificate does not contain the full CA chain or the add-on has not
+been installed correctly; please check Elasticsearch and {kibi-name} logs for
+related errors.
 
-{kibi-name} features an access control system on saved objects that allows
-to filter dashboards and visualizations visible to end users.
+If you experience a {kibi-name} crash when opening the application, ensure that
+the option
+`investigate_access_control.backends.searchguard.admin.ssl.keyPassphrase` is
+set to the correct password.
 
-==== Setup
-
-To enable this feature, set the following parameters in the `investigate_access_control`
-configuration section:
-
-- **admin_role**: the Search Guard role that can use the saved objects access
-  control management UI (**sirenadmin** by default).
-- **acl.enabled**: set to true to enable access control on saved objects.
-- **acl.index**: the Elasticsearch index in which access control rules and
-  saved objects metadata will be stored (**.sirenaccess** by default).
-
-E.g.:
-
-[source,yaml]
-----
-investigate_access_control:
-  acl:
-    enabled: true
-----
-
-Before restarting {kibi-name}, it is required to allow the backend user (`.sirenserver`
-by default) all permissions on the index set in
-`investigate_access_control.acl.index`; for example, the following snippet from
-`sg_roles.yml` grants all privileges to the `sirenserver` user on the
-`.sirenaccess` index.
-
-[source,yaml,subs="attributes"]
-----
-# Permissions for the {kibi-name} server process.
-sirenserver:
-  cluster:
-      - cluster:monitor/nodes/info
-      - cluster:monitor/health
-      - cluster:monitor/state
-      - cluster:monitor/nodes/stats
-      - SIREN_CLUSTER
-  indices:
-    '*':
-      '*':
-        - indices:admin/get
-    '?siren*':
-      '*':
-        - ALL
-    '?sirenaccess':
-      '*':
-        - ALL
-----
-
-In addition, it is recommended to block access on the {kibi-name} index (`.siren` by
-default) to users by adding the following permissions on the `null` type in
-each user role:
-
-- `indices:data/read/search`
-
-E.g.:
-
-[source, yaml]
-----
-sirenuser:
-  cluster:
-    - SIREN_CLUSTER
-  indices:
-    /(article|investment|company|investor)/:
-      '*':
-        - SIREN_READONLY
-    watcher:
-      '*':
-        - SIREN_READONLY
-    '*':
-      '*':
-        - SIREN_COMPOSITE
-    watcher_alarms*:
-      '*':
-        - SIREN_READONLY
-    '?siren':
-      'null':
-        - 'indices:data/read/search'
-        - 'indices:data/read/coordinate-search'
-----
-
-In this way, users will be able to include the {kibi-name} index in msearch requests
-(which is a performance requirement to avoid querying all indices when time based
-index patterns are configured) but won't be able to read saved objects from it.
-
-Roles can be updated either by modifying `sg_roles.yml` and uploading it
-through `sgadmin` or by using the Search Guard management application; make
-sure to set these rules on all Search Guard roles assigned to {kibi-name} users.
-
-Once roles are configured, restart {kibi-name}; if permissions are configured correctly,
-you will be see an **ACL** section in the **Access control** application.
+==== Access Control: ACL UI
 
 ._The ACL section_
 image::images/access_control/acl_section.png["The ACL section",align="center"]
-
-==== {kibi-name} roles and rules
 
 The ACL Roles panel in the ACL section allows to define {kibi-name} roles, which
 are collections of permissions on saved objects and UI elements.
@@ -1341,72 +1316,13 @@ xpack.monitoring.exporters:
       truststore.password: password
 ----
 
-=== Handling of authorization errors
+=== X-Pack security integration
 
-{kibi-name}  parses generic authorization errors from Elasticsearch to report them
-in a more understandable way.
-
-While using {kibi-name}  on a secured cluster, you might see the following errors:
-
-* _"{kibi-name} Relational Filter: Could not load filter Relational visualization: one
-or more join relations refers to unauthorized data"_: displayed when a search
-query contains relations between unauthorized indices.
-* _"One or more visualizations Refers to unauthorized data"_: displayed when a
-dashboard contains one or more visualizations loading data from unauthorized
-indices.
-* _"Enhanced search results: Refers to unauthorized data"_: displayed
-when an "Enhanced search results" visualization tries to load data from
-unauthorized indices.
-* _"{kibi-name} Relational Filter: there are relations with unauthorized data"_:
-displayed when there are relationships between unauthorized indices.
-* _"One or more saved search refers to unauthorized data"_: displayed when a
-saved search is executed on an unauthorized index.
-
-These errors appear for five seconds as a yellow toaster at the top of the
-screen.
-
-Authorization errors can be hidden by changing the value of the
-*siren:shieldAuthorizationWarning* setting: click on the _Settings_ tab, then on
-_Advanced_ tab, and uncheck the setting to hide authorization errors messages.
-Regardless of this setting, all authorization errors will still be reported as
-warnings in the logs.
-
-._Two warning messages example_
-image::images/authorization-warning-messages.png["Two warning messages example",align="center"]
-
-If a dashboard is configured on an index on which you have no permission, all
-the visualizations loading data from the index will be empty and the custom
-warning message will be displayed at the top of the screen; in addition, the
-document count for the dashboard will display the message *Unauthorized*.
-
-If a dashboard is configured on an index on which you have permission to see only
-a subset of documents or fields, the visualizations will only process and display
-the data you're authorized to view.
-
-._A visualizations that loads unauthorized data._
-image::images/authorization-visualization-error.png["A visualization that loads unauthorized data.",align="left"]
-
-._A visualizations that refers to an unauthorized index._
-image::images/authorization-visualization-empty.png["A visualization that refers to an unauthorized index.",align="left"]
-
-
-== X-Pack integration and {kibi-name} access control
-
-If you have an existing Elasticsearch instance with X-Pack installed and wish to integrate with {kibi-name},
-there are a few short steps to take:
-
-First, set the backend parameter of the `investigate_access_control` section of the `investigate.yml` to `xpack`:
-
-[source,yaml]
-----
-investigate_access_control:
-  enabled: true
-  backend: xpack
-----
-
-Next, replace the sirenserver role with the following settings; If using a custom configuration, replace the siren (default: .siren) and access control (default: .sirenaccess) indices with your index names
+Create a `sirenserver` role with the following definition and map it
+to a `sirenserver` user:
 
 [source, json]
+----
 {
   "cluster": [ 
     "cluster:admin/plugin/siren/license/get",
@@ -1418,7 +1334,7 @@ Next, replace the sirenserver role with the following settings; If using a custo
       "privileges" : [ "indices:admin/get" ]
     },
     {
-      "names" : [ ".siren*" ],
+      "names" : [ ".siren" ],
       "privileges" : [ "all" ]
     },
     {
@@ -1427,18 +1343,83 @@ Next, replace the sirenserver role with the following settings; If using a custo
     }
   ]
 }
+----
 
-Once you log into {kibi-name}, you can configure roles as needed from {kibi-name}'s Access Control section. You can find an example role below.
-See the <<access_control_app, Access Control>> section for more information.
+If using a custom configuration, replace the configuration index name (`.siren`
+by default) and access control index name (`.sirenaccess` by default) with the
+correct names.
+
+Set `elasticsearch.username` and `elasticsearch.password` to the credentials
+of the `sirenserver` user, e.g.:
+
+[source,yaml]
+----
+elasticsearch.username: sirenserver
+elasticsearch.password: password
+----
+
+If HTTPS is enabled for the Elasticsearch REST API, make sure that the
+`elasticsearch.url` setting contains a URL starting with `https`, e.g.:
+
+[source,yaml]
+----
+elasticsearch.url: 'https://localhost:9220'
+----
+
+If the certificate is not signed by a public authority, you will also need to
+set the `elasticsearch.ssl.certificateAuthorities` to the path of the CA chain
+bundle in PEM format, e.g.:
+
+[source,yaml]
+----
+elasticsearch.ssl.certificateAuthorities: 'pki/searchguard/ca.pem'
+----
+
+To enable certificate verification, set `elasticsearch.ssl.verificationMode` to
+`full`, e.g.:
+
+[source,yaml]
+----
+elasticsearch.ssl.verificationMode: full
+----
+
+Set the **investigate_core.elasticsearch.auth_plugin** option to `xpack`:
+
+----
+investigate_core:
+  elasticsearch:
+    auth_plugin: xpack
+----
+
+Then, set the backend parameter of the `investigate_access_control` section of
+the `investigate.yml` to `xpack`:
+
+[source,yaml]
+----
+investigate_access_control:
+  enabled: true
+  backend: xpack
+  acl:
+    enabled: true
+  cookie:
+    secure: true
+    password: '12345678123456781234567812345678'
+----
+
+For a complete description of the options, see
+<<investigate-access-control-config>>.
+
+All users with access to {kibi-name} should have the following role definition:
+
+Example standard user role with access to all indices starting with `data-` and
+to all virtual indices starting with `db-`:
 
 [source, json]
+----
 {
   "cluster": [
     "cluster:admin/plugin/siren/license/get",
-    "cluster:internal/data/transfer/start",
-    "cluster:internal/data/transfer/delete",
-    "cluster:internal/data/transfer/end",
-    "cluster:internal/data/transfer/packet"
+    "cluster:siren/internal"
   ],
   "indices" : [
     {
@@ -1446,42 +1427,87 @@ See the <<access_control_app, Access Control>> section for more information.
       "privileges" : [ "indices:siren/mplan" ]
     },
     {
-      "names" : [ "company" ],
-      "privileges" : [ "read", "view_index_metadata", "indices:siren", "indices:admin/version/get" ],
-      "field_security": {
-        "grant" : [ "*" ],
-        "except": [ "city" ]
-      },
-      "query": {
-        "match": {
-          "category_code": "software"
-        }
-      }
+      "names" : [ "data-*" ],
+      "privileges" : [
+        "read",
+        "view_index_metadata",
+        "indices:data/read/search-join",
+        "indices:siren",
+        "indices:admin/version/get",
+        "indices:admin/get"
+      ]
     },
     {
-      "names" : [ "article", "investment" ],
-      "privileges" : [ "read", "view_index_metadata", "indices:siren", "indices:admin/version/get" ]
-    },
-    {
-      "names" : [ ".siren*" ],
-      "privileges" : [ "read" ]
+      "names" : [ "db-*" ],
+      "privileges" : [
+        "read",
+        "view_index_metadata",
+        "indices:data/read/search-join",
+        "indices:data/siren",
+        "indices:siren/plan",
+        "indices:admin/version/get",
+        "indices:admin/get"
+      ]
     }
   ]
 }
+----
 
-To enable Kibana monitoring in X-Pack, you'll need to grant the
-`cluster:admin/xpack/monitoring/bulk` permission to the `sirenserver` role; the permission
-can be added to the existing permissions in the `cluster` section of the role. 
-
-See the <<access_control_configuration, Access control configuration>> section for more information.
-
-If you do not need Kibana monitoring, you can add the following lines to `investigate.yml` to disable it:
+For administrative user please ensure you have `admin_role` configured in the `investigate_access_control` section 
+in `investigate.yml`. e.g
 
 [source,yaml]
 ----
-xpack:
-  monitoring:
-    kibana:
-      collection:
-        enabled: false
----- 
+investigate_access_control:
+  admin_role: sirenadmin
+----
+
+Example administrative user with access to all indices starting with `data-`,
+to all virtual indices starting with `db-`, license management, and permission
+to manage external datasources and virtual indices starting with `db-`:
+
+[source,yaml]
+----
+{
+  "cluster": [
+    "cluster:admin/plugin/siren/license",
+    "cluster:admin/siren/connector",
+    "cluster:siren/internal",
+    "manage"
+  ],
+  "indices" : [
+    {
+      "names" : [ "*" ],
+      "privileges" : [ "indices:siren/mplan" ]
+    },
+    {
+      "names" : [ "data-*" ],
+      "privileges" : [
+        "read",
+        "view_index_metadata",
+        "indices:data/read/search-join",
+        "indices:siren",
+        "indices:admin/version/get",
+        "indices:admin/get"
+      ]
+    },
+    {
+      "names" : [ "db-*" ],
+      "privileges" : [
+        "read",
+        "create_index",
+        "view_index_metadata",
+        "indices:data/read/search-join",
+        "indices:data/siren",
+        "indices:siren",
+        "indices:admin/version/get",
+        "indices:admin/get",
+        "indices:admin/siren/connector"
+      ]
+    }
+  ]
+}
+----
+
+For additional information on datasources configuration, please check the
+<<jdbc_datasources>> section.

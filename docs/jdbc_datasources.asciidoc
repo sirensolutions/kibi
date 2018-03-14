@@ -159,22 +159,24 @@ Sample X-Pack role definition:
 }
 ----
 
+Then create a user with that role e.g. a user called `federateserver`.
+
 Example `elasticsearch.yml` settings for a master node in a cluster with
-authentication:
+authentication and `federateserver` user:
 
 [source,yaml]
 ----
-siren.connector.username: connector
+siren.connector.username: federateserver
 siren.connector.password: password
 siren.connector.encryption.secret_key: "1zxtIE6/EkAKap+5OsPWRw=="
 ----
 
 Example `elasticsearch.yml` settings for a JDBC node in a cluster with
-authentication:
+authentication and `federateserver` user:
 
 [source,yaml]
 ----
-siren.connector.username: connector
+siren.connector.username: federateserver
 siren.connector.password: password
 siren.connector.encryption.secret_key: "1zxtIE6/EkAKap+5OsPWRw=="
 node.attr.connector.jdbc: true

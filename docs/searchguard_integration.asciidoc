@@ -694,8 +694,16 @@ sirenalert:
     - sirenalert
 ----
 
-The file defines the assignment of roles to users; users authenticating through
-a client certificate are identified by the Distinguished Name in the certificate.
+The file defines the list of users assigned to each role using the following
+form:
+
+[source,yaml]
+----
+<role name>:
+  users:
+    - <username>
+    - <username>
+----
 
 ===== Uploading the configuration to the cluster
 
@@ -757,8 +765,8 @@ For additional information on how to set replication settings and sgadmin in
 general please refer to the {searchguard-ref}sgadmin.html[sgadmin
 documentation].
 
-If the command executes successfully it will print a summary of the actions
-executed, e.g.:
+If the command sgadmin command is executed successfully, a list of the actions
+executed and their outcome will be printed on screen, e.g.:
 
 ----
 Clustername: elasticsearch
@@ -837,12 +845,20 @@ To enable certificate verification, set `elasticsearch.ssl.verificationMode` to
 elasticsearch.ssl.verificationMode: full
 ----
 
+If you want to validate the certificate but not the hostname, set
+`elasticsearch.ssl.verificationMode` to `certificate`, e.g.:
+
+[source,yaml]
+----
+elasticsearch.ssl.verificationMode: certificate
+----
+
 Set the **investigate_core.elasticsearch.auth_plugin** option to **searchguard**:
 
 ----
 investigate_core:
   elasticsearch:
-    auth_plugin: 'searchguard'
+    auth_plugin: searchguard
 ----
 
 To enable the {kibi-name} access control plugin, specify the following configuration
@@ -852,6 +868,8 @@ values in the **investigate_access_control** section:
   Defaults to **false**.
 - **backend**: the authentication backend installed in the cluster; valid
   values are **searchguard** and **xpack**. Defaults to **searchguard**.
+- **cookie.password**: a 32 characters long alphanumeric string used to derive
+  the key used to encrypt and sign cookies.
 - **cookie.secure**: if set to **true**, the cookie will be transmitted only if
   the request is being served over HTTPS. You will need to set this to false if
   {kibi-name} is behind an SSL proxy or if you are running {kibi-name} without
@@ -876,6 +894,8 @@ investigate_access_control:
     secure: true
     password: '12345678123456781234567812345678'
 ----
+
+**Make sure to personalize the session cookie password**.
 
 Additional configuration options:
 
@@ -910,8 +930,9 @@ investigate_access_control:
     secure: false
 ----
 
-If you are using the Siren Alert plugin, you'll need to specify the Siren Alert
-user credentials in the `investigate_access_control.sirenalert` section, e.g.:
+If you want to use the Siren Alert plugin, you'll need to specify the Siren
+Alert user credentials in the `investigate_access_control.sirenalert` section,
+e.g.:
 
 [source,yaml]
 ----

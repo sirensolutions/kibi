@@ -125,46 +125,53 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       $scope.multiSearchData.clear();
     }
 
-    return Promise.all(_.map(buttons, (button) => {
-      return Promise.all([
-        kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
-        kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)
-      ])
-      .then(([ indices, joinSeqFilter ]) => {
-        button.joinSeqFilter = joinSeqFilter;
-        button.disabled = false;
-        if ($scope.btnCountsEnabled() || updateOnClick) {
-          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
-          .then((query) => {
+    // to avoid making too many unnecessary http calls to get dashboards metadata
+    // lets first collect all target dashboard ids from all buttons
+    // and fetch a metadata for all of them at once
+    const dashboardIds = [dashboardId];
+    _.each(buttons, button => {
+      if (button.targetDashboardId && dashboardIds.indexOf(button.targetDashboardId) === -1) {
+        dashboardIds.push(button.targetDashboardId);
+      }
+    });
+
+    return kibiState.getStates(dashboardIds)
+    .then(dashboardStates => {
+
+      return Promise.all(_.map(buttons, (button) => {
+        return Promise.all([
+          kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
+          kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, dashboardStates[dashboardId], button)
+        ])
+        .then(([ indices, joinSeqFilter ]) => {
+          button.joinSeqFilter = joinSeqFilter;
+          button.disabled = false;
+          if ($scope.btnCountsEnabled() || updateOnClick) {
+            const query = kibiSequentialJoinVisHelper.buildCountQuery(dashboardStates[button.targetDashboardId], joinSeqFilter);
             button.query = searchHelper.optimize(indices, query, button.targetIndexPatternId);
             button.showSpinner = true;
-            return { button, indices };
-          });
-        } else {
-          button.query = null; //set to null to indicate that counts should not be fetched
-          button.showSpinner = false;
+          } else {
+            button.query = null; //set to null to indicate that counts should not be fetched
+            button.showSpinner = false;
+          }
           return { button, indices };
-        }
-      })
-      .catch((error) => {
-        // If computing the indices failed because of an authorization error
-        // set indices to an empty array and mark the button as forbidden.
-        if (error instanceof IndexPatternAuthorizationError) {
-          button.forbidden = true;
-          button.disabled = true;
-          return { button, indices: [] };
-        }
-        if ($scope.btnCountsEnabled() || updateOnClick) {
-          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
-          .then((query) => {
+        })
+        .catch((error) => {
+          // If computing the indices failed because of an authorization error
+          // set indices to an empty array and mark the button as forbidden.
+          if (error instanceof IndexPatternAuthorizationError) {
+            button.forbidden = true;
+            button.disabled = true;
+          }
+          if ($scope.btnCountsEnabled() || updateOnClick) {
+            const query = kibiSequentialJoinVisHelper.buildCountQuery(dashboardStates[button.targetDashboardId]);
             button.query = searchHelper.optimize([], query, button.targetIndexPatternId);
-            return { button, indices: [] };
-          });
-        } else {
+          }
           return { button, indices: [] };
-        }
-      });
-    })).catch(notify.error);
+        });
+      }));
+
+    }).catch(notify.error);
   };
 
   $scope.getCurrentDashboardBtnCounts = function () {

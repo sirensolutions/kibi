@@ -159,7 +159,7 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
     };
   };
 
-  KibiSequentialJoinVisHelper.prototype.getJoinSequenceFilter = function (dashboardId, button) {
+  KibiSequentialJoinVisHelper.prototype.getJoinSequenceFilter = function (dashboardId, dashboardState, button) {
     // check that there are any join_seq filters already on this dashboard
     //    if there is 0:
     //      create new join_seq filter with 1 relation from current dashboard to target dashboard
@@ -171,12 +171,12 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
     //      - group from all existing join_seq filters and add this group at the top
     //      - new relation from current dashboard to target dashboard
 
+    const { filters, queries, time } = dashboardState;
     return Promise.all([
       kibiState.timeBasedIndices(button.sourceIndexPatternId, dashboardId),
       kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
-      kibiState.getState(dashboardId)
     ])
-    .then(([ sourceIndices, targetIndices, { filters, queries, time } ]) => {
+    .then(([ sourceIndices, targetIndices]) => {
       const existingJoinSeqFilters = _.filter(filters, (filter) => filter.join_sequence);
       const remainingFilters = _.filter(filters, (filter) => !filter.join_sequence);
 
@@ -324,19 +324,18 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
     });
   };
 
-  KibiSequentialJoinVisHelper.prototype.buildCountQuery = function (targetDashboardId, joinSeqFilter) {
+  KibiSequentialJoinVisHelper.prototype.buildCountQuery = function (targetDashboardState, joinSeqFilter) {
     // in case relational panel is enabled at the same time
     // as buttons take care about extra filters and queries from
     // dashboards based on the same index
-    return kibiState.getState(targetDashboardId)
-    .then(function ({ filters, queries, time }) {
-      if (joinSeqFilter) {
-        filters.push(joinSeqFilter);
-      }
-      const query = queryBuilder(filters, queries, time);
-      query.size = 0; // we do not need hits just a count
-      return query;
-    });
+    const { filters, queries, time } = targetDashboardState;
+
+    if (joinSeqFilter) {
+      filters.push(joinSeqFilter);
+    }
+    const query = queryBuilder(filters, queries, time);
+    query.size = 0; // we do not need hits just a count
+    return query;
   };
 
   return new KibiSequentialJoinVisHelper();

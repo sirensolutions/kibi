@@ -121,45 +121,56 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     if ($scope.multiSearchData) {
       $scope.multiSearchData.clear();
     }
-    const indexPatternButtons = _.filter(buttons, 'type', 'INDEX_PATTERN');
-    return Promise.all(_.map(indexPatternButtons, (button) => {
-      return Promise.all([
-        kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
-        sirenSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)
-      ])
-      .then(([ indices, joinSeqFilter ]) => {
-        button.joinSeqFilter = joinSeqFilter;
-        button.disabled = false;
-        if ($scope.btnCountsEnabled() || updateOnClick) {
-          return sirenSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
-          .then((query) => {
+
+    // to avoid making too many unnecessary http calls to get dashboards metadata
+    // lets first collect all source and target dashboard ids from all buttons
+    // and fetch a metadata for all of them at once
+    const indexPatternButtons = [];
+    const dashboardIds = [dashboardId];
+    _.each(buttons, button => {
+      if (button.type === 'INDEX_PATTERN') {
+        indexPatternButtons.push(button);
+        if (button.targetDashboardId && dashboardIds.indexOf(button.targetDashboardId) === -1) {
+          dashboardIds.push(button.targetDashboardId);
+        }
+      }
+    });
+
+    return kibiState.getStates(dashboardIds)
+    .then(dashboardStates => {
+
+      return Promise.all(_.map(indexPatternButtons, (button) => {
+        return Promise.all([
+          kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
+          sirenSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, dashboardStates[dashboardId], button)
+        ])
+        .then(([ indices, joinSeqFilter ]) => {
+          button.joinSeqFilter = joinSeqFilter;
+          button.disabled = false;
+          if ($scope.btnCountsEnabled() || updateOnClick) {
+            const query = sirenSequentialJoinVisHelper.buildCountQuery(dashboardStates[button.targetDashboardId], joinSeqFilter);
             button.query = searchHelper.optimize(indices, query, button.targetIndexPatternId);
-            return { button, indices };
-          });
-        } else {
-          button.query = null; //set to null to indicate that counts should not be fetched
+          } else {
+            button.query = null; //set to null to indicate that counts should not be fetched
+          }
           return { button, indices };
-        }
-      })
-      .catch((error) => {
-        // If computing the indices failed because of an authorization error
-        // set indices to an empty array and mark the button as forbidden.
-        if (error instanceof IndexPatternAuthorizationError) {
-          button.forbidden = true;
-          button.disabled = true;
-          return { button, indices: [] };
-        }
-        if ($scope.btnCountsEnabled() || updateOnClick) {
-          return sirenSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
-          .then((query) => {
+        })
+        .catch((error) => {
+          // If computing the indices failed because of an authorization error
+          // set indices to an empty array and mark the button as forbidden.
+          if (error instanceof IndexPatternAuthorizationError) {
+            button.forbidden = true;
+            button.disabled = true;
+          }
+          if ($scope.btnCountsEnabled() || updateOnClick) {
+            const query = sirenSequentialJoinVisHelper.buildCountQuery(dashboardStates[button.targetDashboardId]);
             button.query = searchHelper.optimize([], query, button.targetIndexPatternId);
-            return { button, indices: [] };
-          });
-        } else {
+          }
           return { button, indices: [] };
-        }
-      });
-    })).catch(notify.error);
+        });
+      }));
+
+    }).catch(notify.error);
   };
 
   const delayExecutionHelper = new DelayExecutionHelper(

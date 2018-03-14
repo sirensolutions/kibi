@@ -1,5 +1,5 @@
 <div class="panel panel-default"
-     ng-class="{'panel-border': border, 'panel--edit-mode': !isViewOnlyMode()}"
+     ng-class="{'panel-border': border, 'hide-border': !border, 'panel--edit-mode': !isViewOnlyMode()}"
      ng-switch on="panel.type"
      ng-if="savedObj || error"
      data-test-subj="{{::savedObj.title}}"

@@ -8,7 +8,7 @@ import { IndexPatternAuthorizationError } from 'ui/errors';
 import { onVisualizePage } from 'ui/kibi/utils/on_page';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { SirenSequentialJoinVisHelperFactory } from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
+import { KibiSequentialJoinVisHelperFactory } from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
 import { RelationsHelperFactory }  from 'ui/kibi/helpers/relations_helper';
 import { DelayExecutionHelperFactory } from 'ui/kibi/helpers/delay_execution_helper';
 import { SearchHelper } from 'ui/kibi/helpers/search_helper';
@@ -29,7 +29,8 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const appState = getAppState();
 
   const relationsHelper = Private(RelationsHelperFactory);
-  const sirenSequentialJoinVisHelper = Private(SirenSequentialJoinVisHelperFactory);
+   // renamed variable to sirenSequentialJoinVisHelper to be able to port code from automatic buttons more easily
+  const sirenSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
   const currentDashboardId = kibiState.getCurrentDashboardId();
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);

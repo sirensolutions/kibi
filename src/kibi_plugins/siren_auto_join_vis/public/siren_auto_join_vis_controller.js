@@ -518,7 +518,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       } else if (edit) {
         return Promise.resolve(tree);
       }
-      const buttonsToUpdate = sirenAutoJoinHelper.getButtonsToUpdateCounts(tree);
+      const buttonsToUpdate = sirenAutoJoinHelper.getAllVisibleButtons(tree, $scope.vis.params.layout);
       delayExecutionHelper.addEventData({
         buttons: buttonsToUpdate,
         dashboardId: currentDashboardId

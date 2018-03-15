@@ -11,45 +11,6 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
 
   class SirenAutoJoinHelper {
 
-    getVisibleVirtualEntitySubButtons(tree, layout) {
-
-      const visibleVirtualButtons = [];
-
-      _.each(tree.nodes, node => {
-        if (node.type === TreeType.VIRTUAL_BUTTON) {
-          // if normal layout
-          if (layout === 'normal') {
-            _.each(node.nodes, relNode => {
-              if (relNode.visible) {
-                _.each(relNode.nodes, buttonNode => {
-                  if (buttonNode.visible) {
-                    visibleVirtualButtons.push(buttonNode.button);
-                  }
-                });
-              }
-            });
-            _.each(node.altNodes, dashNode => {
-              if (dashNode.visible) {
-                _.each(dashNode.nodes, buttonNode => {
-                  if (buttonNode.visible) {
-                    visibleVirtualButtons.push(buttonNode.button);
-                  }
-                });
-              }
-            });
-          } else if (layout === 'light') {
-            _.each(node.nodes, dashRelNode => {
-              if (dashRelNode.visible) {
-                visibleVirtualButtons.push(dashRelNode.button);
-              }
-            });
-          }
-        }
-      });
-
-      return visibleVirtualButtons;
-    }
-
     createFirstLevelNodes(buttons) {
       const tree = new Node({
         id: 'root',
@@ -252,31 +213,63 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
       .then(() => tree);
     };
 
+    _addVirtualButtonIfVisible(node, buttons, layout) {
+      // if normal layout
+      if (layout === 'normal') {
+        if (!node.useAltNodes) {
+          _.each(node.nodes, relNode => {
+            if (relNode.visible) {
+              _.each(relNode.nodes, buttonNode => {
+                if (buttonNode.visible) {
+                  buttons.push(buttonNode.button);
+                }
+              });
+            }
+          });
+        }
+        if (node.useAltNodes) {
+          _.each(node.altNodes, dashNode => {
+            if (dashNode.visible) {
+              _.each(dashNode.nodes, buttonNode => {
+                if (buttonNode.visible) {
+                  buttons.push(buttonNode.button);
+                }
+              });
+            }
+          });
+        }
+      } else if (layout === 'light') {
+        _.each(node.nodes, dashRelNode => {
+          if (dashRelNode.visible) {
+            buttons.push(dashRelNode.button);
+          }
+        });
+      }
+    }
 
-    getButtonsToUpdateCounts(tree) {
-      const buttonsToUpdate = [];
+    getVisibleVirtualEntitySubButtons(tree, layout) {
+      const buttons = [];
+      _.each(tree.nodes, node => {
+        if (node.type === TreeType.VIRTUAL_BUTTON) {
+          this._addVirtualButtonIfVisible(node, buttons, layout);
+        }
+      });
+      return buttons;
+    }
+
+    getAllVisibleButtons(tree, layout) {
+      const buttons = [];
       _.each(tree.nodes, node => {
         if (node.type === TreeType.BUTTON) {
-          buttonsToUpdate.push(node.button);
+          // always visible on the first level
+          buttons.push(node.button);
         } else if (node.type === TreeType.VIRTUAL_BUTTON) {
-          if (node.useAltNodes) {
-            _.each(node.altNodes, altNode => {
-              _.each(altNode.nodes, buttonNode => {
-                buttonsToUpdate.push(buttonNode.button);
-              });
-            });
-          } else {
-            _.each(node.nodes, normalNode => {
-              _.each(normalNode.nodes, buttonNode => {
-                buttonsToUpdate.push(buttonNode.button);
-              });
-            });
-          }
+          this._addVirtualButtonIfVisible(node, buttons, layout);
         } else {
           throw 'Wrong type at first level of the tree';
         }
       });
-      return buttonsToUpdate;
+      return buttons;
     };
 
     addTreeSourceCounts(tree, updateSourceCount) {

@@ -741,6 +741,34 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     };
   };
 
+  // In some places we are using the timeBasedIndices for multiple pairs of
+  // indexPatternIds + dashboardIds
+  // this helper method gets the list in the format
+  // inputList: [
+  //   {
+  //     indexPatternId: id,
+  //     dashboardIds: [id1, ...]
+  //   },
+  //   ..
+  // ]
+  //
+  // and return the list of results of timeBasedIndices method calls
+  //
+  KibiState.prototype.timeBasedIndicesMap = function (inputList) {
+    const promises = [];
+    _.each(inputList, item => {
+      promises.push(this.timeBasedIndices(item.indexPatternId, item.dashboardIds));
+    });
+    return Promise.all(promises)
+    .then(res => {
+      const outputList = _.cloneDeep(inputList);
+      _.each(outputList, (item, index) => {
+        item.timeBasedIndices = res[index];
+      });
+      return outputList;
+    });
+  };
+
   /**
    * timeBasedIndices returns an array of time-expanded indices for the given pattern. The time range is the one taken from
    * the kibi state. If the index is not time-based, then an array of the given pattern is returned.

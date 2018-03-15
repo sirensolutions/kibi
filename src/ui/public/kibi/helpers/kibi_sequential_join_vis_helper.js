@@ -159,7 +159,7 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
     };
   };
 
-  KibiSequentialJoinVisHelper.prototype.getJoinSequenceFilter = function (dashboardId, dashboardState, button) {
+  KibiSequentialJoinVisHelper.prototype.getJoinSequenceFilter = function (dashboardState, sourceIndices, targetIndices, button) {
     // check that there are any join_seq filters already on this dashboard
     //    if there is 0:
     //      create new join_seq filter with 1 relation from current dashboard to target dashboard
@@ -172,52 +172,46 @@ export function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibi
     //      - new relation from current dashboard to target dashboard
 
     const { filters, queries, time } = dashboardState;
-    return Promise.all([
-      kibiState.timeBasedIndices(button.sourceIndexPatternId, dashboardId),
-      kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
-    ])
-    .then(([ sourceIndices, targetIndices]) => {
-      const existingJoinSeqFilters = _.filter(filters, (filter) => filter.join_sequence);
-      const remainingFilters = _.filter(filters, (filter) => !filter.join_sequence);
+    const existingJoinSeqFilters = _.filter(filters, (filter) => filter.join_sequence);
+    const remainingFilters = _.filter(filters, (filter) => !filter.join_sequence);
 
-      if (existingJoinSeqFilters.length === 0) {
-        return this.buildNewJoinSeqFilter({
-          sourceIndices,
-          targetIndices,
-          button,
-          filters: remainingFilters,
-          queries,
-          time
-        });
-      } else if (existingJoinSeqFilters.length === 1) {
-        const joinSeqFilter = existingJoinSeqFilters[0];
-        return this.addRelationToJoinSeqFilter({
-          sourceIndices,
-          targetIndices,
-          button,
-          filters: remainingFilters,
-          queries,
-          time,
-          joinSeqFilter
-        });
-      } else {
-        // build join sequences + add a group of sequances to the top of the array
-        return this.buildNewJoinSeqFilter({
-          sourceIndices,
-          targetIndices,
-          button,
-          filters: remainingFilters,
-          queries,
-          time
-        })
-        .then((joinSeqFilter) => {
-          // here create a group from existing ones and add it on the top
-          const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
-          joinSeqFilter.join_sequence.unshift(group);
-          return joinSeqFilter;
-        });
-      }
-    });
+    if (existingJoinSeqFilters.length === 0) {
+      return this.buildNewJoinSeqFilter({
+        sourceIndices,
+        targetIndices,
+        button,
+        filters: remainingFilters,
+        queries,
+        time
+      });
+    } else if (existingJoinSeqFilters.length === 1) {
+      const joinSeqFilter = existingJoinSeqFilters[0];
+      return this.addRelationToJoinSeqFilter({
+        sourceIndices,
+        targetIndices,
+        button,
+        filters: remainingFilters,
+        queries,
+        time,
+        joinSeqFilter
+      });
+    } else {
+      // build join sequences + add a group of sequances to the top of the array
+      return this.buildNewJoinSeqFilter({
+        sourceIndices,
+        targetIndices,
+        button,
+        filters: remainingFilters,
+        queries,
+        time
+      })
+      .then((joinSeqFilter) => {
+        // here create a group from existing ones and add it on the top
+        const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
+        joinSeqFilter.join_sequence.unshift(group);
+        return joinSeqFilter;
+      });
+    }
   };
 
   // The join_sequence should not contain the join_set. The join_set is supposed to be a singleton in Kibi.

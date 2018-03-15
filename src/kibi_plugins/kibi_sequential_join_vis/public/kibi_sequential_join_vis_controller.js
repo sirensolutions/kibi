@@ -8,7 +8,7 @@ import { IndexPatternAuthorizationError } from 'ui/errors';
 import { onVisualizePage } from 'ui/kibi/utils/on_page';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { KibiSequentialJoinVisHelperFactory } from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
+import { SirenSequentialJoinVisHelperFactory } from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
 import { RelationsHelperFactory }  from 'ui/kibi/helpers/relations_helper';
 import { DelayExecutionHelperFactory } from 'ui/kibi/helpers/delay_execution_helper';
 import { SearchHelper } from 'ui/kibi/helpers/search_helper';
@@ -29,7 +29,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   const appState = getAppState();
 
   const relationsHelper = Private(RelationsHelperFactory);
-  const kibiSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperFactory);
+  const sirenSequentialJoinVisHelper = Private(SirenSequentialJoinVisHelperFactory);
   const currentDashboardId = kibiState.getCurrentDashboardId();
   $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -125,36 +125,88 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       $scope.multiSearchData.clear();
     }
 
-    // to avoid making too many unnecessary http calls to get dashboards metadata
-    // lets first collect all target dashboard ids from all buttons
-    // and fetch a metadata for all of them at once
+    // to avoid making too many unnecessary http calls to
+    //
+    // 1 get dashboards metadata
+    // 2 fetch field_stats while getting timeBasedIndices
+    //
+    // lets first collect all source and target dashboard ids from all buttons
+    // and all indexPattern + dashboardIds
+    // and fetch all required things before computing button queries
     const dashboardIds = [dashboardId];
+    const timeBasedIndicesList = [];
     _.each(buttons, button => {
       if (button.targetDashboardId && dashboardIds.indexOf(button.targetDashboardId) === -1) {
         dashboardIds.push(button.targetDashboardId);
       }
+
+      // compute the target indexpattern + target dashboard map
+      const sourceIndicesFound = _.find(timeBasedIndicesList, item => {
+        return item.indexPatternId === button.sourceIndexPatternId &&
+               item.dashboardIds &&
+               item.dashboardIds.length === 1 &&
+               item.dashboardIds[0] === dashboardId;
+      });
+      if (!sourceIndicesFound) {
+        timeBasedIndicesList.push({
+          indexPatternId: button.sourceIndexPatternId,
+          dashboardIds: [ dashboardId ]
+        });
+      }
+      const targetIndicesFound = _.find(timeBasedIndicesList, item => {
+        return item.indexPatternId === button.targetIndexPatternId &&
+               item.dashboardIds &&
+               item.dashboardIds.length === 1 &&
+               item.dashboardIds[0] === button.targetDashboardId;
+      });
+      if (!targetIndicesFound) {
+        timeBasedIndicesList.push({
+          indexPatternId: button.targetIndexPatternId,
+          dashboardIds: [ button.targetDashboardId ]
+        });
+      }
     });
 
-    return kibiState.getStates(dashboardIds)
-    .then(dashboardStates => {
+    const dashboardStatesPromise = kibiState.getStates(dashboardIds);
+    const timeBasedIndicesListPromise = kibiState.timeBasedIndicesMap(timeBasedIndicesList);
+
+    return Promise.all([ dashboardStatesPromise, timeBasedIndicesListPromise ])
+    .then(res => {
+      const dashboardStates = res[0];
+      const timeBasedIndicesOutputList = res[1];
 
       return Promise.all(_.map(buttons, (button) => {
-        return Promise.all([
-          kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
-          kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, dashboardStates[dashboardId], button)
-        ])
-        .then(([ indices, joinSeqFilter ]) => {
+
+        const sourceIndicesItem = _.find(timeBasedIndicesOutputList, item => {
+          return item.indexPatternId === button.sourceIndexPatternId &&
+          item.dashboardIds[0] === dashboardId;
+        });
+        const sourceIndices = sourceIndicesItem.timeBasedIndices;
+
+        const targetIndicesItem = _.find(timeBasedIndicesOutputList, item => {
+          return item.indexPatternId === button.targetIndexPatternId &&
+          item.dashboardIds[0] === button.targetDashboardId;
+        });
+        const targetIndices = targetIndicesItem.timeBasedIndices;
+
+        return sirenSequentialJoinVisHelper.getJoinSequenceFilter(
+          dashboardStates[dashboardId],
+          sourceIndices,
+          targetIndices,
+          button
+        )
+        .then(joinSeqFilter => {
           button.joinSeqFilter = joinSeqFilter;
           button.disabled = false;
           if ($scope.btnCountsEnabled() || updateOnClick) {
-            const query = kibiSequentialJoinVisHelper.buildCountQuery(dashboardStates[button.targetDashboardId], joinSeqFilter);
-            button.query = searchHelper.optimize(indices, query, button.targetIndexPatternId);
+            const query = sirenSequentialJoinVisHelper.buildCountQuery(dashboardStates[button.targetDashboardId], joinSeqFilter);
+            button.query = searchHelper.optimize(targetIndices, query, button.targetIndexPatternId);
             button.showSpinner = true;
           } else {
             button.query = null; //set to null to indicate that counts should not be fetched
             button.showSpinner = false;
           }
-          return { button, indices };
+          return { button, targetIndices };
         })
         .catch((error) => {
           // If computing the indices failed because of an authorization error
@@ -164,7 +216,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
             button.disabled = true;
           }
           if ($scope.btnCountsEnabled() || updateOnClick) {
-            const query = kibiSequentialJoinVisHelper.buildCountQuery(dashboardStates[button.targetDashboardId]);
+            const query = sirenSequentialJoinVisHelper.buildCountQuery(dashboardStates[button.targetDashboardId]);
             button.query = searchHelper.optimize([], query, button.targetIndexPatternId);
           }
           return { button, indices: [] };
@@ -273,7 +325,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
             return [];
           }
 
-          const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
+          const buttons = sirenSequentialJoinVisHelper.constructButtonsArray(
             buttonDefs,
             relations,
             currentDashboardIndex,
@@ -299,7 +351,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
         })
         .catch(notify.error);
       } else {
-        $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
+        $scope.buttons = sirenSequentialJoinVisHelper.constructButtonsArray(
           originalButtonDefs,
           relations
         );

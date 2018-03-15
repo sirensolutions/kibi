@@ -1,0 +1,49 @@
+== Siren Investigate 10.0.0-beta-3
+
+[float]
+=== Siren Investigate Changes
+
+Fixed: 
+
+* Fixed a bug in relational buttons that would remove parts of the state if a request from the button was null.
+* Completely refactored how automatically generated buttons are rendered to handle the number of requests sent on dashboard navigation.
+* Fixed 'Hide Borders' function. It now hides the borders....
+
+Changed:
+
+* Now the upgrade command backs up the configuration index by default.
+* Removed some redundant advanced settings (e.g. `siren:zoom`).
+* JDBC datasources have been removed from the `management/saved_objects` page.
+
+[float]
+==== Plugins
+
+[float]
+===== Graph Browser
+
+Improved: 
+
+* Optimized edge-count strategy, reducing time spent on `expand` actions by half, in some cases.
+
+[float]
+===== Access Control
+
+Added: 
+
+* Added `admin.ssl.keyPassphrase` option to searchguard ssl options.
+
+[float]
+===== Multichart
+
+Fixed: 
+
+* Fixed bug in Next arrow where it would return to the beginning of the list each time.
+
+[float]
+===== Gremlin Server
+
+Fixed:
+
+* Siren Gremlin Server now checks that an index mapping exists before trying to fetch the mapping. This prevents a non-blocking error report on startup with no index-pattern.
+
+

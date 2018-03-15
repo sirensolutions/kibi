@@ -2,7 +2,8 @@ export default {
   replacementMap: {
     kibi_access_control: 'investigate_access_control',
     kibi_core: 'investigate_core',
-    'sentinl.sentinl.results': 'sentinl.es.results'
+    'sentinl.sentinl.results': 'sentinl.es.results',
+    'sentinl.es.type': 'sentinl.es.default_type'
   },
   // This map holds potential value replacements.
   // If the user has diverted from the old defaults for e.g. the admin_role

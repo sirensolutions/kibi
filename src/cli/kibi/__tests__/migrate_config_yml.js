@@ -19,6 +19,8 @@ sentinl:
   sentinl:
     results: 50
     history: 10
+  es:
+    type: 'type1'
 `;
 
 const mockKibiDevYml = `
@@ -190,6 +192,10 @@ describe('Migrate Config Yaml', () => {
         expect(contents.sentinl).to.have.property('es');
         expect(contents.sentinl.es).to.have.property('results');
         expect(contents.sentinl.es.results).to.equal(50);
+        // sentinl.es.type should change to sentinl.es.default_type
+        expect(contents.sentinl.es).to.not.have.property('type');
+        expect(contents.sentinl.es).to.have.property('default_type');
+        expect(contents.sentinl.es.default_type).to.equal('type1');
         expect(contents.sentinl).to.not.have.property('sentinl');
       });
 

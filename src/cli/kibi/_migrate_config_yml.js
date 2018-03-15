@@ -1,5 +1,5 @@
 import { safeLoad, safeDump } from 'js-yaml';
-import { readFileSync as read, writeFileSync as write, renameSync as rename } from 'fs';
+import { existsSync as exists, readFileSync as read, writeFileSync as write, renameSync as rename } from 'fs';
 import { fromRoot } from '../../utils';
 import { basename, dirname } from 'path';
 import { has, get, isEmpty } from 'lodash';
@@ -185,18 +185,24 @@ function migrateConfigYml({ config: path, dev }) {
   const newPath = pathIsDefault ? `${dirname(path)}/investigate.${(dev) ? 'dev.' : ''}yml` : path;
   if (dev) path = pathIsDefault ? `${dirname(path)}/${basename(path, '.yml')}.dev.yml` : path;
   const kibiContents = readFileContents(path);
-  if (kibiContents) { // There is a kibi.yml
+  // There is a kibi.yml, kibi.dev.yml OR any config file given by user
+  if (kibiContents) {
     contents = migrateSettings(safeLoad(kibiContents));
-  } else { // there is no kibi.yml
+    // there is no kibi.yml, kibi.dev.yml or any other custom yml passed by the user, but there is an investigate.yml or investigate.dev.yml
+  } else if (exists(newPath)) {
     const investigateContents = readFileContents(newPath);
-    if (investigateContents && !validateYml(newPath)) { // There is an investigate.yml but it's out of date
+    // There is an investigate.yml or investigate.dev.yml but it's out of date
+    if (investigateContents && !validateYml(newPath)) {
       path = newPath;
       contents = migrateSettings(safeLoad(investigateContents));
-    } else { // There is no kibi.yml and no investigate.yml
-      throw(`\nNo config file found to migrate,
+    } else {
+      console.log('config/investigate.yml is up to date. Run bin/investigate to start Siren Investigate.');
+      return;
+    }
+  } else { // There is no kibi.yml and no investigate.yml
+    throw(`\nNo config file found to migrate,
 This command will migrate your investigate.yml to update settings
 Please ensure you are running the correct command and the config path is correct (if set)`);
-    }
   }
 
   const newYml = safeDump(contents);

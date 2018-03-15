@@ -122,38 +122,92 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       $scope.multiSearchData.clear();
     }
 
-    // to avoid making too many unnecessary http calls to get dashboards metadata
+    // to avoid making too many unnecessary http calls to
+    //
+    // 1 get dashboards metadata
+    // 2 fetch field_stats while getting timeBasedIndices
+    //
     // lets first collect all source and target dashboard ids from all buttons
-    // and fetch a metadata for all of them at once
+    // and all indexPattern + dashboardIds
+    // and fetch all required things before computing button queries
     const indexPatternButtons = [];
     const dashboardIds = [dashboardId];
+    const timeBasedIndicesList = [];
     _.each(buttons, button => {
       if (button.type === 'INDEX_PATTERN') {
         indexPatternButtons.push(button);
+
+        // compute the target dashboard ids
         if (button.targetDashboardId && dashboardIds.indexOf(button.targetDashboardId) === -1) {
           dashboardIds.push(button.targetDashboardId);
+        }
+
+        // compute the target indexpattern + target dashboard map
+        const sourceIndicesFound = _.find(timeBasedIndicesList, item => {
+          return item.indexPatternId === button.sourceIndexPatternId &&
+                 item.dashboardIds &&
+                 item.dashboardIds.length === 1 &&
+                 item.dashboardIds[0] === dashboardId;
+        });
+        if (!sourceIndicesFound) {
+          timeBasedIndicesList.push({
+            indexPatternId: button.sourceIndexPatternId,
+            dashboardIds: [ dashboardId ]
+          });
+        }
+        const targetIndicesFound = _.find(timeBasedIndicesList, item => {
+          return item.indexPatternId === button.targetIndexPatternId &&
+                 item.dashboardIds &&
+                 item.dashboardIds.length === 1 &&
+                 item.dashboardIds[0] === button.targetDashboardId;
+        });
+        if (!targetIndicesFound) {
+          timeBasedIndicesList.push({
+            indexPatternId: button.targetIndexPatternId,
+            dashboardIds: [ button.targetDashboardId ]
+          });
         }
       }
     });
 
-    return kibiState.getStates(dashboardIds)
-    .then(dashboardStates => {
+    const dashboardStatesPromise = kibiState.getStates(dashboardIds);
+    const timeBasedIndicesListPromise = kibiState.timeBasedIndicesMap(timeBasedIndicesList);
+
+    return Promise.all([ dashboardStatesPromise, timeBasedIndicesListPromise ])
+    .then(res => {
+      const dashboardStates = res[0];
+      const timeBasedIndicesOutputList = res[1];
 
       return Promise.all(_.map(indexPatternButtons, (button) => {
-        return Promise.all([
-          kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
-          sirenSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, dashboardStates[dashboardId], button)
-        ])
-        .then(([ indices, joinSeqFilter ]) => {
+
+        const sourceIndicesItem = _.find(timeBasedIndicesOutputList, item => {
+          return item.indexPatternId === button.sourceIndexPatternId &&
+          item.dashboardIds[0] === dashboardId;
+        });
+        const sourceIndices = sourceIndicesItem.timeBasedIndices;
+
+        const targetIndicesItem = _.find(timeBasedIndicesOutputList, item => {
+          return item.indexPatternId === button.targetIndexPatternId &&
+          item.dashboardIds[0] === button.targetDashboardId;
+        });
+        const targetIndices = targetIndicesItem.timeBasedIndices;
+
+        return sirenSequentialJoinVisHelper.getJoinSequenceFilter(
+          dashboardStates[dashboardId],
+          sourceIndices,
+          targetIndices,
+          button
+        )
+        .then(joinSeqFilter => {
           button.joinSeqFilter = joinSeqFilter;
           button.disabled = false;
           if ($scope.btnCountsEnabled() || updateOnClick) {
             const query = sirenSequentialJoinVisHelper.buildCountQuery(dashboardStates[button.targetDashboardId], joinSeqFilter);
-            button.query = searchHelper.optimize(indices, query, button.targetIndexPatternId);
+            button.query = searchHelper.optimize(targetIndices, query, button.targetIndexPatternId);
           } else {
             button.query = null; //set to null to indicate that counts should not be fetched
           }
-          return { button, indices };
+          return { button, indices: targetIndices };
         })
         .catch((error) => {
           // If computing the indices failed because of an authorization error

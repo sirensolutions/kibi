@@ -24,6 +24,8 @@ Changed:
 Improved: 
 
 * Optimized edge-count strategy, reducing time spent on `expand` actions by half, in some cases.
+* Rewrote the logic to compute counts for nodes. Big speed up, no more missing relations.
+* Now supports nodes with millions of relations.
 
 [float]
 ===== Access Control

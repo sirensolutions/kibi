@@ -396,7 +396,7 @@ Whenever the plugin is upgraded, drivers must be copied again into the
 |com.cloudera.impala.jdbc41.Driver
 |Download the latest JDBC bundle from
  https://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-42.html, extract
- the bundle, the extract the JDBC 4.1 archive and copy the following jars to the
+ the bundle, then extract the JDBC 4.1 archive and copy the following jars to the
  `siren-federate` plugin directory:
 
  `ImpalaJDBC41.jar`

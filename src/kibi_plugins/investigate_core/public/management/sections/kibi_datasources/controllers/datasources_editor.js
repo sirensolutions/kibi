@@ -68,6 +68,12 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
       "defaultPort": 31010,
       "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"https://docs.dremio.com/drivers/dremio-jdbc-driver.html\">Dremio JDBC documentation</a> for further information."
     },
+    "Impala":{
+      "driverClassName": "com.cloudera.impala.jdbc41.Driver",
+      "defaultURL": "impala://{{host}}:{{port}}/default;UseNativeQuery=1",
+      "defaultPort": 21050,
+      "disclaimer": "This is a sample connection string, see the <a target=\"_blank\" href=\"https://www.cloudera.com/documentation/enterprise/5-9-x/topics/impala_jdbc.html\">Impala JDBC documentation</a> for further information."
+    },
     "MySQL": {
       "driverClassName": "com.mysql.jdbc.Driver" ,
       "defaultURL": "jdbc:mysql://{{host}}:{{port}}{{databasename}}?useLegacyDatetimeCode=false",
@@ -244,7 +250,12 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier,
 
           url = url.replace(/{{port}}/, (defaultPort) ? defaultPort : '');
           url = url.replace(/{{host}}/, 'localhost');
-          url = url.replace(/{{databasename}}/, (databaseName) ? databaseString : '');
+
+          if (databaseParams.databaseType === 'Impala' && databaseName) {
+            url = url.replace(/\/default/, `/${databaseName}`);
+          } else {
+            url = url.replace(/{{databasename}}/, (databaseName) ? databaseString : '');
+          }
         }
         datasource.datasourceParams.connection_string = url;
       }

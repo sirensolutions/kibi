@@ -553,34 +553,42 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       return;
     }
 
-    if (console) {
-      console.log(`Updating counts on the relational buttons because: ${reason}`);
-    }
-    const self = this;
-
-    let promise;
-    if (!$scope.tree || !$scope.tree.nodes.length || edit) {
-      promise = constructTree.call(self, indexPatternId);
-    } else {
-      promise = Promise.resolve($scope.tree);
-    }
-    promise
-    .then(tree => sirenAutoJoinHelper.updateTreeCardinalityCounts(tree))
-    .then(tree => {
-      if (!tree || !tree.nodes.length) {
-        return Promise.resolve({});
-      } else if (edit) {
-        return Promise.resolve(tree);
+    savedDashboards.get(currentDashboardId).then(currentDashboard => {
+      if (!currentDashboard.savedSearchId && !$scope.vis.error) {
+        $scope.vis.error = 'This component only works on dashboards which have a saved search set.';
+        return;
       }
-      const buttonsToUpdate = sirenAutoJoinHelper.getAllVisibleButtons(tree, $scope.vis.params.layout);
-      delayExecutionHelper.addEventData({
-        buttons: buttonsToUpdate,
-        dashboardId: currentDashboardId
-      });
-      return tree;
+
+      if (console) {
+        console.log(`Updating counts on the relational buttons because: ${reason}`);
+      }
+      const self = this;
+
+      let promise;
+      if (!$scope.tree || !$scope.tree.nodes.length || edit) {
+        promise = constructTree.call(self, indexPatternId);
+      } else {
+        promise = Promise.resolve($scope.tree);
+      }
+
+      return promise
+      .then(tree => sirenAutoJoinHelper.updateTreeCardinalityCounts(tree))
+      .then(tree => {
+        if (!tree || !tree.nodes.length) {
+          return Promise.resolve({});
+        } else if (edit) {
+          return Promise.resolve(tree);
+        }
+        const buttonsToUpdate = sirenAutoJoinHelper.getAllVisibleButtons(tree, $scope.vis.params.layout);
+        delayExecutionHelper.addEventData({
+          buttons: buttonsToUpdate,
+          dashboardId: currentDashboardId
+        });
+        return tree;
+      })
+      .then(tree => sirenAutoJoinHelper.addTreeSourceCounts(tree, updateSourceCount))
+      .then(tree => $scope.tree = tree);
     })
-    .then(tree => sirenAutoJoinHelper.addTreeSourceCounts(tree, updateSourceCount))
-    .then(tree => $scope.tree = tree)
     .catch(notify.error);
   };
 

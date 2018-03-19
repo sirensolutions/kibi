@@ -27,7 +27,11 @@ describe('Kibi Automatic Join Visualization Controller', function () {
       id: 'dh',
       title: 'Dashboard h',
       savedSearchId: 'sh'
-    }
+    },
+    {
+      id: 'dash-no-saved-search',
+      title: 'Dashboard without saved search'
+    },
   ];
   const fakeSavedSearches = [
     {
@@ -206,6 +210,29 @@ describe('Kibi Automatic Join Visualization Controller', function () {
       it('should compute correct label: ' + entry.expectedLabel, function () {
         init({});
         expect($scope.getButtonLabel(entry.button, entry.addApproximate)).to.equal(entry.expectedLabel);
+      });
+    });
+  });
+
+  describe('Setting no saved search error', function () {
+    it('should set vis.error for dashboard without saved search', function (done) {
+      init({
+        currentDashboardId: 'dash-no-saved-search'
+      });
+      // to trigger in next digest after controller promisses resolved via noDigestPromises
+      setTimeout(function () {
+        expect($scope.vis.error).to.equal('This component only works on dashboards which have a saved search set.');
+        done();
+      });
+    });
+    it('should NOT set vis.error for dashboard with saved search', function (done) {
+      init({
+        currentDashboardId: 'db'
+      });
+      // to trigger in next digest after controller promisses resolved via noDigestPromises
+      setTimeout(function () {
+        expect($scope.vis.error).to.equal(undefined);
+        done();
       });
     });
   });

@@ -1,0 +1,34 @@
+== Siren Investigate 10.0.0-beta-4
+
+[float]
+=== Siren Investigate Changes
+
+Fixed: 
+
+Changed:
+
+[float]
+==== Plugins
+
+[float]
+===== Graph Browser
+
+Improved: 
+
+
+[float]
+===== Access Control
+
+Added: 
+
+
+[float]
+===== Multichart
+
+Fixed: 
+
+
+[float]
+===== Gremlin Server
+
+Fixed:

@@ -243,7 +243,9 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   );
 
 
-  const _getButtons = function (relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap) {
+  const _getButtons = function (relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap, visibility) {
+    console.log('visibility');
+    console.log(visibility);
     const buttons = [];
     _.each(relations, rel => {
       if (rel.domain.type === 'INDEX_PATTERN') {
@@ -257,20 +259,26 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         };
 
         if (button.type === 'VIRTUAL_ENTITY') {
-          const virtualEntity = _.find(entities, 'id', rel.range.id);
-          button.id = rel.id + '-ve-' + rel.range.id;
-          button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
-          buttons.push(button);
+          const id = rel.id + '-ve-' + rel.range.id;
+            if (!visibility[id] || !visibility[id].button === false) {
+            const virtualEntity = _.find(entities, 'id', rel.range.id);
+            button.id = id;
+            button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
+            buttons.push(button);
+          }
         } else if (button.type === 'INDEX_PATTERN') {
           const compatibleSavedSearches = compatibleSavedSearchesMap[rel.range.id];
           _.each(compatibleSavedSearches, compatibleSavedSearch => {
             const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
             _.each(compatibleDashboards, compatibleDashboard => {
-              const clonedButton = _.clone(button);
-              clonedButton.targetDashboardId = compatibleDashboard.id;
-              clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
-              clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
-              buttons.push(clonedButton);
+              const id = rel.id + '-ip-' + compatibleDashboard.title;
+              if (!visibility[id] || !visibility[id].button === false) {
+                const clonedButton = _.clone(button);
+                clonedButton.targetDashboardId = compatibleDashboard.id;
+                clonedButton.id = id;
+                clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
+                buttons.push(clonedButton);
+              }
             });
           });
         }
@@ -443,7 +451,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       // build maps once to avoid doing the lookups inside the loop
       const compatibleSavedSearchesMap = _createCompatibleSavedSearchesMap(savedSearches);
       const compatibleDashboardsMap = _createCompatibleDashboardsMap(savedDashboards);
-      const newButtons = _getButtons(relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap);
+      const newButtons = _getButtons(
+        relations,
+        entities,
+        compatibleSavedSearchesMap,
+        compatibleDashboardsMap,
+        $scope.vis.params.visibility);
 
       const buttonDefs = _.filter(
         newButtons,

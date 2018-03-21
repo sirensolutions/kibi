@@ -525,7 +525,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
             sirenAutoJoinHelper.addNodesToTreeNormalLayout(
               tree, relations,
               compatibleSavedSearchesMap, compatibleDashboardsMap,
-              $scope.btnCountsEnabled()
+              $scope.btnCountsEnabled(),
+              $scope.vis.params.visibility
             );
             treeHelper.addAlternativeNodesToTree(tree, $scope.btnCountsEnabled());
           } else if ($scope.vis.params.layout === 'light') {

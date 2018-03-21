@@ -102,12 +102,19 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
       });
     }
 
-    addNodesToTreeNormalLayout(tree, relations, compatibleSavedSearchesMap, compatibleDashboardsMap, btnCountEnabled) {
+    addNodesToTreeNormalLayout(tree, relations, compatibleSavedSearchesMap, compatibleDashboardsMap, btnCountEnabled, visibility) {
       _.each(tree.nodes, node => {
         if (node.type === TreeType.VIRTUAL_BUTTON) {
           const relationsByDomain = _.filter(relations, rel => rel.domain.id === node.button.targetIndexPatternId);
           _.each(relationsByDomain, relByDomain => {
-            if (relByDomain.range.id !== node.button.sourceIndexPatternId) {
+            const key = relByDomain.directLabel;
+            const relNodeId = 'tree-relation-' + key;
+
+            let relNode = node.findNode(relNodeId);
+
+            if (relByDomain.range.id !== node.button.sourceIndexPatternId
+              && (!visibility || !visibility[node.id] || !visibility[node.id].relation
+                || !visibility[node.id].relation[key] || !visibility[node.id].relation[key].toggle === false)) {
               // filter the savedSearch with the same indexPattern
               const compatibleSavedSearches = compatibleSavedSearchesMap[relByDomain.range.id];
               _.each(compatibleSavedSearches, compatibleSavedSearch => {
@@ -123,10 +130,7 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
                   if (btnCountEnabled) {
                     subButton.showSpinner = true;
                   }
-                  const key = relByDomain.directLabel;
-                  const relNodeId = 'tree-relation-' + key;
 
-                  let relNode = node.findNode(relNodeId);
                   if (!relNode) {
                     relNode = new Node({
                       type: TreeType.RELATION,
@@ -140,17 +144,21 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
                     node.addNode(relNode);
                   }
 
-                  const buttonNode = new Node({
-                    type: TreeType.BUTTON,
-                    id: subButton.id,
-                    label: subButton.label,
-                    visible: false,
-                    showChildren: false,
-                    useAltNodes: false,
-                    button: subButton
-                  });
+                  if (!visibility || !visibility[node.id] || !visibility[node.id].relation
+                   || !visibility[node.id].relation[key]
+                   || !visibility[node.id].relation[key].dashboard[compatibleDashboard.id] === false) {
+                    const buttonNode = new Node({
+                      type: TreeType.BUTTON,
+                      id: subButton.id,
+                      label: subButton.label,
+                      visible: false,
+                      showChildren: false,
+                      useAltNodes: false,
+                      button: subButton
+                    });
 
-                  relNode.addNode(buttonNode);
+                    relNode.addNode(buttonNode);
+                  }
                 });
               });
             }

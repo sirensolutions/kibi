@@ -586,3 +586,18 @@ Only terms aggregations can be nested inside a parent bucket aggregation.
   insensitive collation, string comparisons will be case insensitive.
 - Wildcards on virtual index names are not supported in any API.
 - Currently cross cluster searches on virtual indices are not supported.
+
+== Troubleshooting
+
+=== Cannot reconnect to datasource by hostname after DNS update
+
+When the Java security manager is enabled, the JVM will cache name resolutions
+indefinitely; if the system you're connecting to uses round-robin DNS or the IP
+address of the system changes frequently, you will need to modify the following
+https://docs.oracle.com/javase/8/docs/technotes/guides/security/PolicyFiles.html[Java
+Security Policy] properties:
+
+- `networkaddress.cache.ttl`: the number of seconds to cache a successful DNS
+  lookup. Defaults to `-1` (forever).
+- `networkaddress.cache.negative.ttl`: the number of seconds to cache an
+  unsuccessful DNS lookup. Defaults to `10`, set to `0` to avoid caching.

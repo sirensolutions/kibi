@@ -1,0 +1,13 @@
+[[kibi-translate-join-query]]
+== Translate Join Query
+
+{kibi-name} has a tool for translating {kibi-name} specific DSL query syntax into raw Elasticsearch query syntax. 
+
+To access it, go to `/app/kibana#/dev_tools/translateJoinQuery` in the URL bar.
+
+image::images/console/translate-join-query.png["Translate Join Query", align="center"]
+
+Paste your DSL query into the **Raw Query** box at the top.
+
+Then hit image:images/console/translate-join-query-button.png["Translate Button"] 
+to see the raw Elasticsearch query in the **Translated Query** box at the bottom.

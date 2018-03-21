@@ -8,4 +8,5 @@ The *Dev Tools* page contains development tools that you can use to interact
 with your data in Kibana.
 --
 
-include::console.asciidoc[]
+include::dev-tools/console.asciidoc[]
+include::dev-tools/translate-join-query.asciidoc[]

@@ -258,7 +258,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
         if (button.type === 'VIRTUAL_ENTITY') {
           const id = rel.id + '-ve-' + rel.range.id;
-          if (!visibility[id] || !visibility[id].button === false) {
+          if (!visibility[id] || visibility[id].button !== false) {
             const virtualEntity = _.find(entities, 'id', rel.range.id);
             button.id = id;
             button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
@@ -270,7 +270,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
             const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
             _.each(compatibleDashboards, compatibleDashboard => {
               const id = rel.id + '-ip-' + compatibleDashboard.title;
-              if (!visibility[id] || !visibility[id].button === false) {
+              if (!visibility[id] || visibility[id].button !== false) {
                 const clonedButton = _.clone(button);
                 clonedButton.targetDashboardId = compatibleDashboard.id;
                 clonedButton.id = id;

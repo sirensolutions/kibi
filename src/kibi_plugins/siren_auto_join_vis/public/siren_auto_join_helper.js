@@ -114,7 +114,7 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
 
             if (relByDomain.range.id !== node.button.sourceIndexPatternId
               && (!visibility || !visibility[node.id] || !visibility[node.id].relation
-                || !visibility[node.id].relation[key] || !visibility[node.id].relation[key].toggle === false)) {
+                || !visibility[node.id].relation[key] || visibility[node.id].relation[key].toggle !== false)) {
               // filter the savedSearch with the same indexPattern
               const compatibleSavedSearches = compatibleSavedSearchesMap[relByDomain.range.id];
               _.each(compatibleSavedSearches, compatibleSavedSearch => {
@@ -145,8 +145,8 @@ export function SirenAutoJoinHelperProvider(Private, Promise, es, kibiState) {
                   }
 
                   if (!visibility || !visibility[node.id] || !visibility[node.id].relation
-                   || !visibility[node.id].relation[key]
-                   || !visibility[node.id].relation[key].dashboard[compatibleDashboard.id] === false) {
+                   || !visibility[node.id].relation[key] || !visibility[node.id].relation[key].dashboard
+                   || visibility[node.id].relation[key].dashboard[compatibleDashboard.id] !== false) {
                     const buttonNode = new Node({
                       type: TreeType.BUTTON,
                       id: subButton.id,

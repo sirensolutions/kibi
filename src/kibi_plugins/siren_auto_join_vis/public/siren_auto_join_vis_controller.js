@@ -244,8 +244,6 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
 
   const _getButtons = function (relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap, visibility) {
-    console.log('visibility');
-    console.log(visibility);
     const buttons = [];
     _.each(relations, rel => {
       if (rel.domain.type === 'INDEX_PATTERN') {
@@ -567,7 +565,13 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       return;
     }
 
-    savedDashboards.get(currentDashboardId).then(currentDashboard => {
+    let getDashboard;
+    if (edit) {
+      getDashboard = Promise.resolve({ savedSearchId: 'edit' });
+    } else {
+      getDashboard = savedDashboards.get(currentDashboardId);
+    }
+    getDashboard.then(currentDashboard => {
       if (!currentDashboard.savedSearchId && !$scope.vis.error) {
         $scope.vis.error = 'This component only works on dashboards which have a saved search set.';
         return;
@@ -617,9 +621,11 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
   const sirenDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
   let editFilterButtonsOff;
+  let editIndexPatternId;
   if (edit) {
     editFilterButtonsOff = $rootScope.$on('siren:auto-join-params:filter:indexpattern', (event, indexPatternId) => {
       updateButtons('siren:auto-join-params:filter:indexpattern', indexPatternId);
+      editIndexPatternId = indexPatternId;
     });
   }
 
@@ -670,12 +676,24 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     }
   });
 
+  let editUpdateForVisibilityOff;
+  if (edit) {
+    editFilterButtonsOff = $scope.$watch(() => { return $scope.vis.params.visibility; }, (newVal, oldVal) => {
+      if (!_.isEqual(newVal, oldVal)) {
+        updateButtons('visibility', editIndexPatternId);
+      }
+    });
+  }
+
   $scope.$on('$destroy', function () {
     delayExecutionHelper.cancel();
     sirenDashboardChangedOff();
     removeAutorefreshHandler();
     if (editFilterButtonsOff) {
       editFilterButtonsOff();
+    }
+    if (editUpdateForVisibilityOff) {
+      editUpdateForVisibilityOff();
     }
     kibiMeta.flushRelationalButtonsFromQueue();
   });

@@ -1,0 +1,3 @@
+[[kibi-translate-join-query]]
+== Translate Join Query
+

@@ -1,8 +1,8 @@
 import Dump from './_dump';
 import { get } from 'lodash';
 import Promise from 'bluebird';
-import { mkdir, access } from 'fs';
-
+import { access } from 'fs';
+import mkdirp from 'mkdirp';
 /**
  * BackupKibi writes into a file the data and mappings of the kibi index.
  * If the ACL plugin is present, it saves also the ACL index.
@@ -28,7 +28,7 @@ export default class BackupKibi {
     if (dirExists) {
       throw new Error(`Backup folder [${this._backupDir}] already exists`);
     }
-    await Promise.fromNode(cb => mkdir(this._backupDir, cb));
+    await Promise.fromNode(cb => mkdirp(this._backupDir, cb));
 
     const kibiIndex = get(this._config, 'kibana.index', '.siren');
 

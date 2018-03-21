@@ -91,6 +91,7 @@ export default async (kbnServer, server, config) => {
       app: app,
       nav: uiExports.navLinks.inOrder,
       version: kbnServer.version,
+      branch: kbnServer.branch,
       kibiVersion: kbnServer.kibiVersion, // kibi: added to manage kibi version
       kibiKibanaAnnouncement: kbnServer.kibiKibanaAnnouncement, // kibi: added to manage kibi announcement
       buildNum: config.get('pkg.buildNum'),

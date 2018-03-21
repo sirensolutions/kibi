@@ -27,6 +27,7 @@ module.exports = class KbnServer {
   constructor(settings) {
     this.name = pkg.name;
     this.version = pkg.version;
+    this.branch = pkg.branch;
     this.kibiVersion = pkg.kibi_version; // kibi: added to manage kibi version
     this.kibiKibanaAnnouncement = pkg.kibi_kibana_announcement; // kibi: added by kibi
     this.build = pkg.build || false;

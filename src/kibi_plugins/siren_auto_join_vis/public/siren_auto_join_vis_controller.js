@@ -344,11 +344,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     // here grab visible buttons and request count update
 
     const buttons = sirenAutoJoinHelper.getVisibleVirtualEntitySubButtons($scope.tree, $scope.vis.params.layout);
-
-    _addButtonQuery(buttons, currentDashboardId)
-    .then(results => {
-      updateCounts(results, $scope);
-    });
+    if (!edit) {
+      _addButtonQuery(buttons, currentDashboardId)
+      .then(results => {
+        updateCounts(results, $scope);
+      });
+    }
   };
 
   // As buttons are shown on UI side as a tree
@@ -590,7 +591,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       }
 
       return promise
-      .then(tree => sirenAutoJoinHelper.updateTreeCardinalityCounts(tree))
+      .then(tree => {
+        if (edit) {
+          return tree;
+        }
+        return sirenAutoJoinHelper.updateTreeCardinalityCounts(tree);
+      })
       .then(tree => {
         if (!tree || !tree.nodes.length) {
           return Promise.resolve({});

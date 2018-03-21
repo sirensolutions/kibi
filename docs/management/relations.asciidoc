@@ -31,7 +31,7 @@ image::images/relations_settings/indices_settings.png["Graph of Index Patterns",
 [float]
 [[kibi-join-limit]]
 ==== Join Limit
-Clicking the image:images/EditVis.png["Edit pencil"] opens the advanced setting for each relation 
+Clicking the image:images/visualization/edit-vis-pencil.png["Edit pencil"] opens the advanced setting for each relation 
 where you can set the maximum number of unique values returned from the related index pattern for that relation. 
 
 As a semi-join, these documents will be filtered based on the presence of a *non-empty* value for the `join` field

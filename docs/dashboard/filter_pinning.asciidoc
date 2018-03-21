@@ -28,12 +28,21 @@ filter, displaying only elements that _don't_ match, toggle the filter. Exclusio
 
 Remove Filter image:images/filter/filter-delete.png[]:: Click this icon to remove a filter entirely.
 Custom Filter image:images/filter/filter-custom.png[]:: Click this icon to display a text field where you can customize the JSON
-representation of the filter and specify an alias to use for the filter name:
-+
-image::images/filter/filter-custom-json.png[]
-+
+representation of the filter and specify an alias to use for the filter name, for example, to filter the data to just the companies based in London:
+
+image::images/relational_filter/london-companies-example-filter.png["London Companies Filter Example", align="center"]
+
+Adding the `London Companies` label to the filter displays that label on the filter bar:
+
+image::images/relational_filter/london-companies-filter-bar-with-label.png["London Companies Filter Bar", align="center"]
+
+Omitting the label displays the filter query in the filter bar:
+
+image::images/relational_filter/london-companies-filter-bar.png["London Companies Filter Bar", align="center"]
+
 You can use a JSON filter representation to implement predicate logic, with `should` for OR, `must` for AND, and `must_not`
 for NOT:
+
 +
 .OR Example
 ==========
@@ -99,6 +108,8 @@ for NOT:
 }
 ==========
 Click the *Done* button to update the filter with your changes.
+
+NOTE: See {elastic-ref}/query-dsl.html[Query DSL documentation] for more information on the possibilities.
 
 To apply any of the filter actions to all the filters currently in place, click the image:images/filter/filter-actions.png[]
 *Global Filter Actions* button and select an action.

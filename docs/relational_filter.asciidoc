@@ -23,23 +23,26 @@ Both indices are <<kibi-settings-relations,configured>> so that they are joined 
 
 In the _Articles_ dashboard, the relational filter visualization is displayed as a button which indicates the number of documents in the _Companies_ dashboard that are mentioned in the articles of the current dashboard.
 
-The screenshot below shows the button for the relation described in the example; there are 18011 companies mentioned in the 602,000 articles currently displayed:
+The screenshot below shows the button for the relation described in the example; there are 18508 companies mentioned in the 646,896 articles currently displayed:
 
-image::images/relational_filter/relational_filter_companies_source.png["Relational filter button on the Articles dashboard",align="center", width="400"]
+image::images/relational_filter/relational_filter_companies_source.png["Relational filter button on the Articles dashboard",align="center", width="600"]
 
-Clicking on the button will switch you to the _Companies_ dashboard and display the 18011 companies; the relational filter is displayed in the filter bar, as displayed below:
+Clicking on the button will switch you to the _Companies_ dashboard and display the 18508 companies; the relational filter is displayed in the filter bar, as displayed below:
 
-image::images/relational_filter/relational_filter_companies_target.png["Relational filter on the Companies dashboard",align="center", width="400"]
+image::images/relational_filter/relational_filter_companies_target.png["Relational filter on the Companies dashboard",align="center", width="600"]
 
-The relational filter visualization requires the {federate-website}[Siren Federate plugin {federate-version}]
+NOTE: The relational filter visualization requires the {federate-website}[Siren Federate plugin {federate-version}]
 for Elasticsearch.
 
 [float]
 [[relational_filter_config]]
 === Configuration
 
-Click on the _Add filter_ button to create a new filter in the visualization;
-the filter is defined by the following parameters:
+To edit the Relational Filter configuration, click the image:images/dashboard/edit-button.png["Dashboard Edit Button"] on the Dashboard top navigation bar.
+
+Then click the image:images/visualization/edit-vis-pencil.png["Visualization Edit Button"] on the Relational Filter visualization.
+
+The filter is defined by the following parameters:
 
 * _Button label_: the label of the button that will be displayed inside the visualization, e.g. `Companies -->`.
 * _Custom filter label_: the label of the filter that will be displayed in the filter bar, which by default is `... related to ($COUNT) from $DASHBOARD.`. Several variables are available for customizing the label:
@@ -100,7 +103,7 @@ information about the raw data replace the visualization, as in this example:
 
 image::images/relational_filter/spy.png["Spy panel of the relational filter visualization",align="center"]
 
-This panel provides two kinds data: information about the query behind the relational filter in the `Multi Search` tab, and details about the visualization object in the `Debug` tab.
+This panel provides two kinds of data: information about the query behind the relational filter in the `Multi Search` tab, and details about the visualization object in the `Debug` tab.
 
 [float]
 ==== Multi Search
@@ -115,11 +118,6 @@ On the top, the time reported in `Multi search request duration` informs on how 
 - _Type_: the type of the indices matched by the index pattern.
 
 For a particular relational filter, you can get additional information about the query that got executed.
-
-.Filterjoin
-This displays a table that provides several statistics about each join.
-
-image::images/relational_filter/spy_filterjoin.png["Details about the filterjoin query",align="center"]
 
 .Raw Request
 The filterjoin query as sent by {kibi-name}. This uses the internal API for defining the join.
@@ -138,8 +136,8 @@ The Debug tab presents the JSON object that {kibi-name} uses for this relational
 image::images/relational_filter/spy_debug.png["Debug spy panel of the relational filter visualization",align="center"]
 
 [float]
-==== Join Limit
-The number of unique values returned from the `source` of the relation is limited by the `kibi:joinLimit` Advanced Setting in the management section.
+==== Join Task Limit
+The number of unique values returned from the `source` of the relation is limited by the `kibi:joinTaskTimeout` Advanced Setting in the management section.
 These `source` values are then used to filter the documents on the `destination`. In general, the `destination` is the current dashboard.
 
 

@@ -169,7 +169,7 @@ is stored in Elasticsearch. A formatted export contains the results of any appli
 [[changing-the-visualization]]
 == Changing the Visualization
 
-Click the _Edit_ button image:images/EditVis.png[Pencil button] at the top right of a container to open the
+Click the _Edit_ button image:images/visualization/edit-vis-pencil.png[Pencil button] at the top right of a container to open the
 visualization in the <<visualize,Visualize>> page.
 
 [float]

@@ -72,7 +72,7 @@ describe('Kibi Automatic Join Visualization Controller', function () {
     }
   ];
 
-  function init({ currentDashboardId = 'db', relations = [], entities = [] } = {}) {
+  function init({ currentDashboardId = 'db', relations = [], entities = [], visibility = {} } = {}) {
     ngMock.module('kibana/siren_auto_join_vis', $provide => {
       $provide.service('getAppState', function () {
         return () => new MockState({ filters: [] });
@@ -141,7 +141,8 @@ describe('Kibi Automatic Join Visualization Controller', function () {
       $scope = $rootScope.$new();
       $scope.vis = {
         params: {
-          buttons: []
+          buttons: [],
+          visibility: visibility
         }
       };
 
@@ -345,6 +346,73 @@ describe('Kibi Automatic Join Visualization Controller', function () {
         expect(dashButtonNode.button.sourceField).to.be.eql('fb');
         expect(dashButtonNode.button.type).to.be.eql('INDEX_PATTERN');
 
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should build the buttons - using visibility to hide root buttons', function (done) {
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'some label',
+          domain: { id: 'ia', field: 'fa', type: 'INDEX_PATTERN' },
+          range: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'another label',
+          domain: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' },
+          range: { id: 'id', field: 'fd', type: 'INDEX_PATTERN' }
+        }
+      ];
+      const visibility = {
+        'another-uuid-ip-Dashboard d': {
+          button: false
+        }
+      };
+
+      init({ relations, visibility });
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(0);
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should build the buttons - using visibility to show root buttons', function (done) {
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'some label',
+          domain: { id: 'ia', field: 'fa', type: 'INDEX_PATTERN' },
+          range: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'another label',
+          domain: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' },
+          range: { id: 'id', field: 'fd', type: 'INDEX_PATTERN' }
+        }
+      ];
+      const visibility = {
+        'another-uuid-ip-Dashboard d': {
+          button: true
+        }
+      };
+
+      init({ relations, visibility });
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(1);
+        const button = tree.nodes[0].button;
+        expect(button.domainIndexPattern).to.be.eql('ib');
+        expect(button.indexRelationId).to.be.eql('another-uuid');
+        expect(button.targetDashboardId).to.be.eql('dd');
+        expect(button.targetField).to.be.eql('fd');
+        expect(button.targetIndexPatternId).to.be.eql('id');
+        expect(button.type).to.be.eql('INDEX_PATTERN');
         done();
       })
       .catch(done);

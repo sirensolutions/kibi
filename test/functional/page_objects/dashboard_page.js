@@ -48,7 +48,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('clickDashboardBreadcrumbLink');
       // kibi: create a link to avoid creating timestamps in URLs
       await getRemote()
-      .execute(`if ($('.legacyListingLink').size() === 0) {` +
+      .execute(`if ($('.legacyListingLink').length === 0) {` +
                `$('.global-nav__links app-switcher').append($('<a class="global-nav-link__anchor legacyListingLink" ` +
                `href="#${DashboardConstants.LISTING_PAGE_PATH}">.</a>'))}`);
       await retry.try(() => getRemote().findByCssSelector(`a[href="#${DashboardConstants.LISTING_PAGE_PATH}"]`)

@@ -46,7 +46,7 @@ uiModules
       function getter(selector) {
         return function () {
           const $sel = $el.find(selector);
-          if ($sel.size()) return $sel;
+          if ($sel.length) return $sel;
         };
       }
 

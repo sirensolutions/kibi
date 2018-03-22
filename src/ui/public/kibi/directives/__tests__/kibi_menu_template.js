@@ -48,14 +48,14 @@ describe('Kibi Components', function () {
       it('check that container was appended to body, and destroyed', function () {
         init();
 
-        expect($menu.size()).to.equal(1);
+        expect($menu.length).to.equal(1);
         expect($menu[0].children.length).to.equal(0);
         expect($menu.hasClass('visible')).to.equal(false);
 
         // destroy
         $scope.$destroy();
         $menu = $document.find('body div.kibi-menu-template');
-        expect($menu.size()).to.equal(0);
+        expect($menu.length).to.equal(0);
       });
 
       describe('destroy afterEach', function () {
@@ -66,7 +66,7 @@ describe('Kibi Components', function () {
 
         it('visible class added removed correctly', function () {
           init();
-          expect($menu.size()).to.equal(1);
+          expect($menu.length).to.equal(1);
 
           // click to show
           $element.click();
@@ -79,7 +79,7 @@ describe('Kibi Components', function () {
 
         it('click outside element should hide menu', function () {
           init();
-          expect($menu.size()).to.equal(1);
+          expect($menu.length).to.equal(1);
 
           // click to show
           $element.click();
@@ -101,7 +101,7 @@ describe('Kibi Components', function () {
             onHide: onHideSpy
           });
 
-          expect($menu.size()).to.equal(1);
+          expect($menu.length).to.equal(1);
 
           $element.click();
           $element.click();
@@ -113,7 +113,7 @@ describe('Kibi Components', function () {
         it('position properties set correctly', function () {
           init();
 
-          expect($menu.size()).to.equal(1);
+          expect($menu.length).to.equal(1);
 
           //make it visible
           $element.click();
@@ -127,7 +127,7 @@ describe('Kibi Components', function () {
             leftOffset: 123
           });
 
-          expect($menu.size()).to.equal(1);
+          expect($menu.length).to.equal(1);
 
           //make it visible
           $element.click();
@@ -151,9 +151,9 @@ describe('Kibi Components', function () {
           context: { name: 'foo' }
         });
 
-        expect($menu.size()).to.equal(1);
+        expect($menu.length).to.equal(1);
         expect($menu.hasClass('visible')).to.equal(false);
-        expect($menu.find('span').size()).to.equal(1);
+        expect($menu.find('span').length).to.equal(1);
         expect($menu.find('span').text()).to.equal('foo');
 
         // now lets change the name
@@ -180,9 +180,9 @@ describe('Kibi Components', function () {
           ]
         });
 
-        expect($menu.size()).to.equal(1);
+        expect($menu.length).to.equal(1);
         expect($menu.hasClass('visible')).to.equal(false);
-        expect($menu.find('span').size()).to.equal(2);
+        expect($menu.find('span').length).to.equal(2);
         expect($menu.find('span:nth-child(1)').text()).to.equal('A');
         expect($menu.find('span:nth-child(2)').text()).to.equal('B');
 
@@ -205,9 +205,9 @@ describe('Kibi Components', function () {
           ]
         });
 
-        expect($menu.size()).to.equal(1);
+        expect($menu.length).to.equal(1);
         expect($menu.hasClass('visible')).to.equal(false);
-        expect($menu.find('span').size()).to.equal(2);
+        expect($menu.find('span').length).to.equal(2);
 
         // make it visible
         $element.click();

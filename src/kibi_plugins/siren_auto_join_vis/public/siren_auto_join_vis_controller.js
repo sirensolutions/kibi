@@ -243,7 +243,7 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
   );
 
 
-  const _getButtons = function (relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap) {
+  const _getButtons = function (relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap, visibility) {
     const buttons = [];
     _.each(relations, rel => {
       if (rel.domain.type === 'INDEX_PATTERN') {
@@ -257,20 +257,26 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
         };
 
         if (button.type === 'VIRTUAL_ENTITY') {
-          const virtualEntity = _.find(entities, 'id', rel.range.id);
-          button.id = rel.id + '-ve-' + rel.range.id;
-          button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
-          buttons.push(button);
+          const id = rel.id + '-ve-' + rel.range.id;
+          if (!visibility[id] || visibility[id].button !== false) {
+            const virtualEntity = _.find(entities, 'id', rel.range.id);
+            button.id = id;
+            button.label = rel.directLabel + ' ({0} ' + virtualEntity.label + ')';
+            buttons.push(button);
+          }
         } else if (button.type === 'INDEX_PATTERN') {
           const compatibleSavedSearches = compatibleSavedSearchesMap[rel.range.id];
           _.each(compatibleSavedSearches, compatibleSavedSearch => {
             const compatibleDashboards = compatibleDashboardsMap[compatibleSavedSearch.id];
             _.each(compatibleDashboards, compatibleDashboard => {
-              const clonedButton = _.clone(button);
-              clonedButton.targetDashboardId = compatibleDashboard.id;
-              clonedButton.id = rel.id + '-ip-' + compatibleDashboard.title;
-              clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
-              buttons.push(clonedButton);
+              const id = rel.id + '-ip-' + compatibleDashboard.title;
+              if (!visibility[id] || visibility[id].button !== false) {
+                const clonedButton = _.clone(button);
+                clonedButton.targetDashboardId = compatibleDashboard.id;
+                clonedButton.id = id;
+                clonedButton.label = rel.directLabel + ' ({0} ' + compatibleDashboard.title + ')';
+                buttons.push(clonedButton);
+              }
             });
           });
         }
@@ -338,11 +344,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     // here grab visible buttons and request count update
 
     const buttons = sirenAutoJoinHelper.getVisibleVirtualEntitySubButtons($scope.tree, $scope.vis.params.layout);
-
-    _addButtonQuery(buttons, currentDashboardId)
-    .then(results => {
-      updateCounts(results, $scope);
-    });
+    if (!edit) {
+      _addButtonQuery(buttons, currentDashboardId)
+      .then(results => {
+        updateCounts(results, $scope);
+      });
+    }
   };
 
   // As buttons are shown on UI side as a tree
@@ -443,7 +450,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       // build maps once to avoid doing the lookups inside the loop
       const compatibleSavedSearchesMap = _createCompatibleSavedSearchesMap(savedSearches);
       const compatibleDashboardsMap = _createCompatibleDashboardsMap(savedDashboards);
-      const newButtons = _getButtons(relations, entities, compatibleSavedSearchesMap, compatibleDashboardsMap);
+      const newButtons = _getButtons(
+        relations,
+        entities,
+        compatibleSavedSearchesMap,
+        compatibleDashboardsMap,
+        $scope.vis.params.visibility);
 
       const buttonDefs = _.filter(
         newButtons,
@@ -512,7 +524,8 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
             sirenAutoJoinHelper.addNodesToTreeNormalLayout(
               tree, relations,
               compatibleSavedSearchesMap, compatibleDashboardsMap,
-              $scope.btnCountsEnabled()
+              $scope.btnCountsEnabled(),
+              $scope.vis.params.visibility
             );
             treeHelper.addAlternativeNodesToTree(tree, $scope.btnCountsEnabled());
           } else if ($scope.vis.params.layout === 'light') {
@@ -553,7 +566,13 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       return;
     }
 
-    savedDashboards.get(currentDashboardId).then(currentDashboard => {
+    let getDashboard;
+    if (edit) {
+      getDashboard = Promise.resolve({ savedSearchId: 'edit' });
+    } else {
+      getDashboard = savedDashboards.get(currentDashboardId);
+    }
+    getDashboard.then(currentDashboard => {
       if (!currentDashboard.savedSearchId && !$scope.vis.error) {
         $scope.vis.error = 'This component only works on dashboards which have a saved search set.';
         return;
@@ -572,7 +591,12 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
       }
 
       return promise
-      .then(tree => sirenAutoJoinHelper.updateTreeCardinalityCounts(tree))
+      .then(tree => {
+        if (edit) {
+          return tree;
+        }
+        return sirenAutoJoinHelper.updateTreeCardinalityCounts(tree);
+      })
       .then(tree => {
         if (!tree || !tree.nodes.length) {
           return Promise.resolve({});
@@ -603,9 +627,11 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
   const sirenDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
   let editFilterButtonsOff;
+  let editIndexPatternId;
   if (edit) {
     editFilterButtonsOff = $rootScope.$on('siren:auto-join-params:filter:indexpattern', (event, indexPatternId) => {
       updateButtons('siren:auto-join-params:filter:indexpattern', indexPatternId);
+      editIndexPatternId = indexPatternId;
     });
   }
 
@@ -656,12 +682,24 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
     }
   });
 
+  let editUpdateForVisibilityOff;
+  if (edit) {
+    editFilterButtonsOff = $scope.$watch('vis.params.visibility', (newVal, oldVal) => {
+      if (newVal && !_.isEqual(newVal, oldVal)) {
+        updateButtons('visibility', editIndexPatternId);
+      }
+    }, true);
+  }
+
   $scope.$on('$destroy', function () {
     delayExecutionHelper.cancel();
     sirenDashboardChangedOff();
     removeAutorefreshHandler();
     if (editFilterButtonsOff) {
       editFilterButtonsOff();
+    }
+    if (editUpdateForVisibilityOff) {
+      editUpdateForVisibilityOff();
     }
     kibiMeta.flushRelationalButtonsFromQueue();
   });

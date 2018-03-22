@@ -72,7 +72,7 @@ describe('Kibi Automatic Join Visualization Controller', function () {
     }
   ];
 
-  function init({ currentDashboardId = 'db', relations = [], entities = [] } = {}) {
+  function init({ currentDashboardId = 'db', relations = [], entities = [], visibility = {}, layout = 'normal' } = {}) {
     ngMock.module('kibana/siren_auto_join_vis', $provide => {
       $provide.service('getAppState', function () {
         return () => new MockState({ filters: [] });
@@ -141,7 +141,9 @@ describe('Kibi Automatic Join Visualization Controller', function () {
       $scope = $rootScope.$new();
       $scope.vis = {
         params: {
-          buttons: []
+          buttons: [],
+          visibility: visibility,
+          layout: layout
         }
       };
 
@@ -345,6 +347,309 @@ describe('Kibi Automatic Join Visualization Controller', function () {
         expect(dashButtonNode.button.sourceField).to.be.eql('fb');
         expect(dashButtonNode.button.type).to.be.eql('INDEX_PATTERN');
 
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should build the buttons - using visibility to hide root buttons', function (done) {
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'some label',
+          domain: { id: 'ia', field: 'fa', type: 'INDEX_PATTERN' },
+          range: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'another label',
+          domain: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' },
+          range: { id: 'id', field: 'fd', type: 'INDEX_PATTERN' }
+        }
+      ];
+      const visibility = {
+        'another-uuid-ip-Dashboard d': {
+          button: false
+        }
+      };
+
+      init({ relations, visibility });
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(0);
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should build the buttons - using visibility to show root buttons', function (done) {
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'some label',
+          domain: { id: 'ia', field: 'fa', type: 'INDEX_PATTERN' },
+          range: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'another label',
+          domain: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' },
+          range: { id: 'id', field: 'fd', type: 'INDEX_PATTERN' }
+        }
+      ];
+      const visibility = {
+        'another-uuid-ip-Dashboard d': {
+          button: true
+        }
+      };
+
+      init({ relations, visibility });
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(1);
+        const button = tree.nodes[0].button;
+        expect(button.domainIndexPattern).to.be.eql('ib');
+        expect(button.indexRelationId).to.be.eql('another-uuid');
+        expect(button.targetDashboardId).to.be.eql('dd');
+        expect(button.targetField).to.be.eql('fd');
+        expect(button.targetIndexPatternId).to.be.eql('id');
+        expect(button.type).to.be.eql('INDEX_PATTERN');
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should build the buttons - using visibility to show relation buttons', function (done) {
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'some label',
+          domain: { id: 'iv', type: 'VIRTUAL_ENTITY' },
+          range: { id: 'id', field: 'fd', type: 'INDEX_PATTERN' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'another label',
+          domain: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' },
+          range: { id: 'iv', type: 'VIRTUAL_ENTITY' }
+        }
+      ];
+      const entities = [
+        {
+          id: 'iv',
+          label: 'virtual-entity'
+        },
+        {
+          id: 'id',
+          label: 'some-entity'
+        }
+      ];
+      const visibility = {
+        'another-uuid-ve-iv': {
+          button: true,
+          relation: {
+            'some label' : {
+              toggle: true
+            }
+          }
+        }
+      };
+
+      init({ relations, entities, visibility });
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(1);
+        const button = tree.nodes[0].button;
+        expect(button.domainIndexPattern).to.be.eql('ib');
+        expect(button.indexRelationId).to.be.eql('another-uuid');
+        expect(button.targetIndexPatternId).to.be.eql('iv');
+        expect(button.type).to.be.eql('VIRTUAL_ENTITY');
+        // relation nodes
+        expect(tree.nodes[0].nodes).to.have.length(1);
+        const relationNode = tree.nodes[0].nodes[0];
+        expect(relationNode.id).to.be.eql('tree-relation-some label');
+        expect(relationNode.type).to.be.eql('RELATION');
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should build the buttons - using visibility to hide relation buttons', function (done) {
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'some label',
+          domain: { id: 'iv', type: 'VIRTUAL_ENTITY' },
+          range: { id: 'id', field: 'fd', type: 'INDEX_PATTERN' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'another label',
+          domain: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' },
+          range: { id: 'iv', type: 'VIRTUAL_ENTITY' }
+        }
+      ];
+      const entities = [
+        {
+          id: 'iv',
+          label: 'virtual-entity'
+        },
+        {
+          id: 'id',
+          label: 'some-entity'
+        }
+      ];
+      const visibility = {
+        'another-uuid-ve-iv': {
+          button: true,
+          relation: {
+            'some label' : {
+              toggle: false
+            }
+          }
+        }
+      };
+
+      init({ relations, entities, visibility });
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(1);
+        const button = tree.nodes[0].button;
+        expect(button.domainIndexPattern).to.be.eql('ib');
+        expect(button.indexRelationId).to.be.eql('another-uuid');
+        expect(button.targetIndexPatternId).to.be.eql('iv');
+        expect(button.type).to.be.eql('VIRTUAL_ENTITY');
+        // relation nodes
+        expect(tree.nodes[0].nodes).to.have.length(0);
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should build the buttons - using visibility to show dashboard buttons', function (done) {
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'some label',
+          domain: { id: 'iv', type: 'VIRTUAL_ENTITY' },
+          range: { id: 'id', field: 'fd', type: 'INDEX_PATTERN' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'another label',
+          domain: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' },
+          range: { id: 'iv', type: 'VIRTUAL_ENTITY' }
+        }
+      ];
+      const entities = [
+        {
+          id: 'iv',
+          label: 'virtual-entity'
+        },
+        {
+          id: 'id',
+          label: 'some-entity'
+        }
+      ];
+      const visibility = {
+        'another-uuid-ve-iv': {
+          button: true,
+          relation: {
+            'some label' : {
+              toggle: true,
+              dashboard: {
+                'dd': true
+              }
+            }
+          }
+        }
+      };
+
+      init({ relations, entities, visibility });
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(1);
+        const button = tree.nodes[0].button;
+        expect(button.domainIndexPattern).to.be.eql('ib');
+        expect(button.indexRelationId).to.be.eql('another-uuid');
+        expect(button.targetIndexPatternId).to.be.eql('iv');
+        expect(button.type).to.be.eql('VIRTUAL_ENTITY');
+        // relation nodes
+        expect(tree.nodes[0].nodes).to.have.length(1);
+        const relationNode = tree.nodes[0].nodes[0];
+        expect(relationNode.id).to.be.eql('tree-relation-some label');
+        expect(relationNode.type).to.be.eql('RELATION');
+        // dashboard nodes
+        expect(tree.nodes[0].nodes[0].nodes).to.have.length(1);
+        const dashboardNode = tree.nodes[0].nodes[0].nodes[0];
+        expect(dashboardNode.id).to.be.eql('some-uuid-ip-Dashboard d');
+        expect(dashboardNode.type).to.be.eql('BUTTON');
+        const dashboardButton = dashboardNode.button;
+        expect(dashboardButton.indexRelationId).to.be.eql('another-uuid');
+        expect(dashboardButton.targetDashboardId).to.be.eql('dd');
+        expect(dashboardButton.targetField).to.be.eql('fd');
+        expect(dashboardButton.targetIndexPatternId).to.be.eql('id');
+        expect(dashboardButton.type).to.be.eql('INDEX_PATTERN');
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should build the buttons - using visibility to hide dashboard buttons', function (done) {
+      const relations = [
+        {
+          id: 'some-uuid',
+          directLabel: 'some label',
+          domain: { id: 'iv', type: 'VIRTUAL_ENTITY' },
+          range: { id: 'id', field: 'fd', type: 'INDEX_PATTERN' }
+        },
+        {
+          id: 'another-uuid',
+          directLabel: 'another label',
+          domain: { id: 'ib', field: 'fb', type: 'INDEX_PATTERN' },
+          range: { id: 'iv', type: 'VIRTUAL_ENTITY' }
+        }
+      ];
+      const entities = [
+        {
+          id: 'iv',
+          label: 'virtual-entity'
+        },
+        {
+          id: 'id',
+          label: 'some-entity'
+        }
+      ];
+      const visibility = {
+        'another-uuid-ve-iv': {
+          button: true,
+          relation: {
+            'some label' : {
+              toggle: true,
+              dashboard: {
+                'dd': false
+              }
+            }
+          }
+        }
+      };
+
+      init({ relations, entities, visibility });
+      $scope.constructTree()
+      .then((tree) => {
+        expect(tree.nodes).to.have.length(1);
+        const button = tree.nodes[0].button;
+        expect(button.domainIndexPattern).to.be.eql('ib');
+        expect(button.indexRelationId).to.be.eql('another-uuid');
+        expect(button.targetIndexPatternId).to.be.eql('iv');
+        expect(button.type).to.be.eql('VIRTUAL_ENTITY');
+        // relation nodes
+        expect(tree.nodes[0].nodes).to.have.length(1);
+        const relationNode = tree.nodes[0].nodes[0];
+        expect(relationNode.id).to.be.eql('tree-relation-some label');
+        expect(relationNode.type).to.be.eql('RELATION');
+        // dashboard nodes
+        expect(tree.nodes[0].nodes[0].nodes).to.have.length(0);
         done();
       })
       .catch(done);

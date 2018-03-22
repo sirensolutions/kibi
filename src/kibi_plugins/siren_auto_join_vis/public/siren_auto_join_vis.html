@@ -19,7 +19,8 @@
     >
 
       <div ng-if="node.type === 'BUTTON'"
-           ng-click="node.button.click()">
+           ng-click="node.button.click()"
+           class="siren-entity-root">
         <div class="siren-entity-icon {{node.icon}}" ng-if="node.icon"/>
         <div class="siren-entity-label">
           {{ getButtonLabel(node.button, false) }}

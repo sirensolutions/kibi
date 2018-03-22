@@ -49,7 +49,7 @@ export function VislibLibAlertsProvider() {
       const vis = this.vis;
 
       $(vis.el).find('.vis-alerts').append($('<div>').addClass('vis-alerts-tray'));
-      if (!alerts.size()) return;
+      if (!alerts.length) return;
       $(vis.el).find('.vis-alerts-tray').append(alerts.value());
     }
 

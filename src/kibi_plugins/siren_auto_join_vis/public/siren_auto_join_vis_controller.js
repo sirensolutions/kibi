@@ -684,11 +684,11 @@ function controller($scope, $rootScope, Private, kbnIndex, config, kibiState, ge
 
   let editUpdateForVisibilityOff;
   if (edit) {
-    editFilterButtonsOff = $scope.$watch(() => { return $scope.vis.params.visibility; }, (newVal, oldVal) => {
-      if (!_.isEqual(newVal, oldVal)) {
+    editFilterButtonsOff = $scope.$watch('vis.params.visibility', (newVal, oldVal) => {
+      if (newVal && !_.isEqual(newVal, oldVal)) {
         updateButtons('visibility', editIndexPatternId);
       }
-    });
+    }, true);
   }
 
   $scope.$on('$destroy', function () {

@@ -1,0 +1,38 @@
+[[selected-fields]]
+== Selected Fields
+
+Selected Fields are displayed on the **Selected Field** list at the top left of the Discover page.
+
+image::images/discover/selected-fields.png["Selected Fields", align="center"]
+
+Click on a field to see the field's <<viewing-field-stats, stats>>.
+
+To remove a field, hover over or click on the field and click its image:images/discover/remove-button.png[Remove Field button] button.
+
+image::images/discover/remove-field.png["Remove Selected Field", align="center"]
+
+Once you have selected at least one field, you can then select the image:images/discover/generate-dashboard-button.png[Generate Dashboard button] button to begin autogenerating a new <<dashboard, Dashboard>>. 
+
+If you have not selected any fields, you can allow {kibi-name} to select the fields it believes are the most relevant by clicking the image:images/discover/auto-select-button.png[Remove Field button] button.
+
+Note: This button is only visible if there are no fields selected. If you have selected fields, the image:images/discover/generate-dashboard-button.png[Generate Dashboard button] button will be visible in its place.
+
+=== Autoselect Fields
+
+{kibi-name} begins testing the fields with each field being analyzed for relevance against
+a number of heuristics, for example, whether all values are unique - which indicates a potential ID field and unlikely to be relevant for visualizations.
+
+image::images/discover/auto-select-test-modal.png["Auto Select Report", align="center"]
+
+Once all the fields have been analyzed, a test report is displayed.
+
+image::images/discover/auto-select-report.png["Auto Select Report", align="center"]
+
+This report shows all the fields in the Discover data, which fields are selected as most relevant, the field type, 
+the visualization selected for that type, the relevancy score and any notes on why the field was or wasn't selected as a relevant field.
+
+You can add and remove fields you would like selected using the checkboxes on the left. 
+
+Once you are ready, hit the image:images/discover/auto-select-test-modal-ok-button.png[Autoselect Test Modal OK Button] button to select the fields.
+
+Once the fields have populated the **Selected Fields** list, you are ready to <<autogenerate-dashboard, image:images/discover/generate-dashboard-button.png[Generate Dashboard button]>>.

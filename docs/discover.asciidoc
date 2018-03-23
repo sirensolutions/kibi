@@ -23,3 +23,5 @@ include::discover/document-data.asciidoc[]
 include::discover/context.asciidoc[]
 
 include::discover/viewing-field-stats.asciidoc[]
+
+include::discover/selected-fields.asciidoc[]

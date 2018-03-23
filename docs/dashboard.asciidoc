@@ -36,6 +36,8 @@ image:images/darktheme.png[Dark Theme Example]
 
 NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
 
+include::dashboard/auto-generate.asciidoc[]
+
 [[saving-dashboards]]
 == Saving Dashboards
 

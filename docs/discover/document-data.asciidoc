@@ -49,12 +49,14 @@ field data.
 To add a field column from the Fields list, hover over the field and click its
 *add* button.
 
+image::images/discover/add-field-from-sidebar.png["Add Field From Sidebar",align="center"]
+
 To add a field column from a document's field data, expand the document
 and click the field's
 image:images/add-column-button.png[Add Column] *Toggle column in table* button.
 
 Added field columns replace the `_source` column in the Documents table. The added
-fields are also added to the *Selected Fields* list.
+fields are also added to the <<selected-fields, *Selected Fields*>> list.
 
 To rearrange the field columns, hover over the header of the column you want to move
 and click the *Move left* or *Move right* button.

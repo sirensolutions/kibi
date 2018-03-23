@@ -22,7 +22,7 @@ module.exports = function (grunt) {
 
     const nodeShaSums = `${baseUri}/SHASUMS256.txt`;
 
-    const buildName = `kibi-${version}-${name}`; // kibi: renamed kibana to kibi
+    const buildName = `investigate-${version}-${name}`; // kibi: renamed kibana to investigate
     const buildDir = resolve(rootPath, `build/${buildName}`);
 
     const tarName = `${buildName}.tar.gz`;

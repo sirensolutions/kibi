@@ -1,6 +1,6 @@
 {
-  "name": "kibi",
-  "description": "Kibi extends Kibana with data intelligence features. At the core, kibi can join and filter data live from multiple indexes (elasticsearch) or from SQL/NOSQL sources. Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.",
+  "name": "siren_investigate",
+  "description": "Siren Investigate extends Kibana with data intelligence features. At the core, Investiget can join and filter data live from multiple indexes (elasticsearch) or from SQL/NOSQL sources. Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.",
   "keywords": [
     "kibana",
     "elasticsearch",
@@ -32,7 +32,7 @@
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9",
     "timestamp": "0000"
   },
-  "homepage": "http://siren.solutions/kibi",
+  "homepage": "https://siren.io",
   "bugs": {
     "url": "https://github.com/sirensolutions/kibi/issues"
   },

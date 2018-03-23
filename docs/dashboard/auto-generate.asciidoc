@@ -15,6 +15,11 @@ Here, you can edit the title of the new dashboard, choose whether to store the t
 If you wish to add a <<kibi_multi_chart, Multichart visualization>> to the dashboard, select the checkbox. 
 Be aware that this can slow the generation of the dashboard.
 
+The generated dashboard will be associated to a <<save-search,saved search>>, which by default is
+a new saved search created from the current state of the Discover page. In case a saved search is
+currently open in the Discover page, however, you have the option to use it either before or after
+saving its state.
+
 === Generate Dashboard Report
 
 Clicking image:images/discover/auto-select-test-modal-ok-button.png[Generate Dashboard Modal OK Button] on the generated dashboard's details panel opens a panel showing the details of the visualizations to be

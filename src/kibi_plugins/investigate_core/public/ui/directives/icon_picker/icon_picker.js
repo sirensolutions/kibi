@@ -21,13 +21,12 @@ uiModules
       });
       $scope.$watch('ngModel', (newVal, oldVal) => {
         if (newVal !== oldVal) {
-          const selected = newVal.replace(/^fa\s/i, '');
-          $element.data('iconpicker').setSourceValue(selected.toLowerCase());
+          $element.data('iconpicker').setSourceValue(newVal.toLowerCase());
         }
       });
       $element.on('iconpickerSelect', (item) => {
         $scope.$apply(() => {
-          $scope.ngModel = `fa ${ item.iconpickerItem.data().iconpickerValue }`;
+          $scope.ngModel = item.iconpickerItem.data().iconpickerValue;
         });
       });
       $scope.$on('$destroy', () => {

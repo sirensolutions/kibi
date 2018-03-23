@@ -267,13 +267,25 @@ describe('QuickDash Guess Fields Tests', function () {
     });
   });
 
-  it('Discards multifields', function () {
+  it('Discards multifields with selectable parent', function () {
     field.multifields = [ field2, field3 ];
 
     return guess([ field, field2, field3 ])
       .then(resFields => {
         expect(resFields.length).to.be(1);
         expect(resFields[0]).to.be(field);
+      });
+  });
+
+  it('Keeps multifields with unselectable parent', function () {
+    field.aggregatable = false;
+    field.multifields = [ field2, field3 ];
+
+    return guess([ field, field2, field3 ])
+      .then(resFields => {
+        expect(resFields.length).to.be(2);
+        expect([ field2, field3 ]).to.contain(resFields[0]);
+        expect([ field2, field3 ]).to.contain(resFields[1]);
       });
   });
 

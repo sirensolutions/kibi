@@ -166,8 +166,10 @@ export default function (program) {
         catch (e) { null; }
       }
 
-      const doBackup = !options.noBackup;
-      const folderPath = resolve((options.backupDir) ? options.backupDir : fromRoot('data/'), 'backup_' + new Date().toISOString());
+      const doBackup = !options.dontBackup;
+      const folderPath = resolve(
+        (options.backupDir) ? options.backupDir : fromRoot('data/'),
+        'backup_' + new Date().toISOString().split('.')[0].replace(/:/g, '-'));
 
       if (doBackup) {
         const backupKibi = new BackupKibi(config, folderPath);
@@ -208,7 +210,7 @@ export default function (program) {
       'Upgrade saved objects'
     )
     .option('--dev', 'Run the upgrade using development mode configuration')
-    .option('--no-backup', 'Run the upgrade without creating backup')
+    .option('--dont-backup', 'Run the upgrade without creating backup')
     .option('--keep-backup', 'Don\'t delete backup files after upgrade process')
     .option('--backup-dir <path>', 'Specify the path to the folder where the data should be saved')
     .option(

@@ -233,7 +233,7 @@
     "angular-cookies": "1.4.8",
     "elasticdump": "3.1.0",
     "syswide-cas": "3.0.0",
-    "fontawesome-iconpicker": "sirensolutions/fontawesome-iconpicker#1.2.1-kibi-fontawesome-compatible",
+    "fontawesome-iconpicker": "sirensolutions/fontawesome-iconpicker#2.0.1-fontawesome-5-pro-compatible",
     "d3-cloud": "sirensolutions/d3-cloud#v1.2.1-kibi-5.4.0",
     "babel-plugin-relative-import": "1.0.3",
     "angular-ui-tree": "2.22.6",

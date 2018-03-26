@@ -251,11 +251,21 @@ describe('QuickDash Guess Fields Tests', function () {
     });
   });
 
-  it('Discards non-aggregatable fields', function () {
+  it('Discards non-aggregatable fields without multifields', function () {
     field.aggregatable = false;
 
     return guess([ field ]).then(resFields => {
       expect(resFields.length).to.be(0);
+    });
+  });
+
+  it('Keeps non-aggregatable fields with aggregatable multifield', function () {
+    field.aggregatable = false;
+    field.multifields = [ field2 ];
+
+    return guess([ field, field2 ]).then(resFields => {
+      expect(resFields.length).to.be(1);
+      expect(resFields[0]).to.be(field);
     });
   });
 
@@ -267,25 +277,13 @@ describe('QuickDash Guess Fields Tests', function () {
     });
   });
 
-  it('Discards multifields with selectable parent', function () {
+  it('Discards multifields', function () {
     field.multifields = [ field2, field3 ];
 
     return guess([ field, field2, field3 ])
       .then(resFields => {
         expect(resFields.length).to.be(1);
         expect(resFields[0]).to.be(field);
-      });
-  });
-
-  it('Keeps multifields with unselectable parent', function () {
-    field.aggregatable = false;
-    field.multifields = [ field2, field3 ];
-
-    return guess([ field, field2, field3 ])
-      .then(resFields => {
-        expect(resFields.length).to.be(2);
-        expect([ field2, field3 ]).to.contain(resFields[0]);
-        expect([ field2, field3 ]).to.contain(resFields[1]);
       });
   });
 

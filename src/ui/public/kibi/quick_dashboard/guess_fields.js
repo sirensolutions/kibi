@@ -49,18 +49,22 @@ export function GuessFieldsProvider(
 
   // Filtering
 
-  function makeIsMultifield(args) {
+  function makeMultifieldStats(args) {
     // Input fields may be multifields - that is, alternate representations of some
-    // parent fields. Find out those whose parent is already in the supplied fields list.
+    // parent fields.
 
-    const multifieldNames = _.chain(args.workStats)
-      .map(fieldStats => fieldStats.field.multifields)
-      .flatten()
-      .map('name')
-      .indexBy()
-      .value();
+    const multifieldParents = {};
 
-    return fieldStats => !!multifieldNames[fieldStats.field.name];
+    for(const fieldStats of args.workStats) {
+      for(const mfield of fieldStats.field.multifields || []) {
+        multifieldParents[mfield.name] = fieldStats;
+      }
+    }
+
+    return {
+      isMultifield: fieldStats => !!multifieldParents[fieldStats.field.name],
+      multifieldParent: fieldStats => multifieldParents[fieldStats.field.name]
+    };
   }
 
   function makeIsMetaField(args) {
@@ -71,20 +75,46 @@ export function GuessFieldsProvider(
   }
 
   function markAcceptableFields(args) {
-    const isMultifield = makeIsMultifield(args);
+    const { isMultifield, multifieldParent } = makeMultifieldStats(args);
     const isMetaField = makeIsMetaField(args);
 
     args.workStats.forEach(fieldStats => {
       const { field } = fieldStats;
       const notesLen = fieldStats.notes.length;
 
-      if(!field.searchable) { fieldStats.notes.push('Not searchable'); }
-      if(!field.aggregatable) { fieldStats.notes.push('Not aggregatable'); }
-      if(field.scripted) { fieldStats.notes.push('Scripted'); }
-      if(isMultifield(fieldStats)) { fieldStats.notes.push('Multifield'); }
-      if(isMetaField(fieldStats)) { fieldStats.notes.push('Meta Field'); }
+      let acceptable = true;
 
-      fieldStats.acceptable = (fieldStats.notes.length === notesLen);
+      if(!field.searchable) {
+        fieldStats.notes.push('Not searchable');
+        acceptable = false;
+      }
+
+      if(!field.aggregatable) {
+        fieldStats.notes.push('Not aggregatable');
+        acceptable = false;
+      }
+
+      if(field.scripted) {
+        fieldStats.notes.push('Scripted');
+        acceptable = false;
+      }
+
+      if(isMetaField(fieldStats)) {
+        fieldStats.notes.push('Meta Field');
+        acceptable = false;
+      }
+
+      if(isMultifield(fieldStats)) {
+        fieldStats.notes.push('Multifield');
+
+        if(multifieldParent(fieldStats).acceptable) {
+          acceptable = false;
+        } else {
+          fieldStats.notes.push('Unsuitable multifield parent');
+        }
+      }
+
+      fieldStats.acceptable = acceptable;
     });
   }
 

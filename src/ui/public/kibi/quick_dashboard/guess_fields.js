@@ -47,74 +47,72 @@ export function GuessFieldsProvider(
   const termsLowRatioCut    = 0.05;
 
 
+  // Preprocessing
+
+  function useMultifieldsForNonAggregatables(args) {
+    const { index, workStats } = args;
+
+    // Non-aggregatable fields cannot be visualized effectively in most cases.
+    //
+    // However, if a non-aggregatable have an aggregatable among their multifields,
+    // then that could be used in its place.
+    //
+    // Note that we'll be getting the multifields straight from the index, the referenced
+    // ones from the parent field don't look complete.
+
+    workStats.forEach(fieldStats => {
+      const { field } = fieldStats;
+      if(field.aggregatable) { return; }
+
+      const substituteField = _(field.multifields || [])
+        .map(mfStandIn => index.fields.byName[mfStandIn.name])
+        .find(mField => mField && mField.aggregatable);
+
+      if(substituteField) { fieldStats.field = substituteField; }
+    });
+
+    return args;
+  }
+
+
   // Filtering
 
-  function makeMultifieldStats(args) {
+  function makeIsMultifield(args) {
     // Input fields may be multifields - that is, alternate representations of some
-    // parent fields.
+    // parent fields. Find out those whose parent is already in the supplied fields list.
 
-    const multifieldParents = {};
+    const multifieldNames = _.chain(args.workStats)
+      .map(fieldStats => fieldStats.origField.multifields)
+      .flatten()
+      .map('name')
+      .indexBy()
+      .value();
 
-    for(const fieldStats of args.workStats) {
-      for(const mfield of fieldStats.field.multifields || []) {
-        multifieldParents[mfield.name] = fieldStats;
-      }
-    }
-
-    return {
-      isMultifield: fieldStats => !!multifieldParents[fieldStats.field.name],
-      multifieldParent: fieldStats => multifieldParents[fieldStats.field.name]
-    };
+    return fieldStats => !!multifieldNames[fieldStats.origField.name];
   }
 
   function makeIsMetaField(args) {
     const { index } = args;
 
     const metaFieldNames = _.indexBy(index.metaFields);
-    return fieldStats => !!metaFieldNames[fieldStats.field.name];
+    return fieldStats => !!metaFieldNames[fieldStats.origField.name];
   }
 
   function markAcceptableFields(args) {
-    const { isMultifield, multifieldParent } = makeMultifieldStats(args);
+    const isMultifield = makeIsMultifield(args);
     const isMetaField = makeIsMetaField(args);
 
     args.workStats.forEach(fieldStats => {
       const { field } = fieldStats;
       const notesLen = fieldStats.notes.length;
 
-      let acceptable = true;
+      if(!field.searchable) { fieldStats.notes.push('Not searchable'); }
+      if(!field.aggregatable) { fieldStats.notes.push('Not aggregatable'); }
+      if(field.scripted) { fieldStats.notes.push('Scripted'); }
+      if(isMultifield(fieldStats)) { fieldStats.notes.push('Multifield'); }
+      if(isMetaField(fieldStats)) { fieldStats.notes.push('Meta Field'); }
 
-      if(!field.searchable) {
-        fieldStats.notes.push('Not searchable');
-        acceptable = false;
-      }
-
-      if(!field.aggregatable) {
-        fieldStats.notes.push('Not aggregatable');
-        acceptable = false;
-      }
-
-      if(field.scripted) {
-        fieldStats.notes.push('Scripted');
-        acceptable = false;
-      }
-
-      if(isMetaField(fieldStats)) {
-        fieldStats.notes.push('Meta Field');
-        acceptable = false;
-      }
-
-      if(isMultifield(fieldStats)) {
-        fieldStats.notes.push('Multifield');
-
-        if(multifieldParent(fieldStats).acceptable) {
-          acceptable = false;
-        } else {
-          fieldStats.notes.push('Unsuitable multifield parent');
-        }
-      }
-
-      fieldStats.acceptable = acceptable;
+      fieldStats.acceptable = (fieldStats.notes.length === notesLen);
     });
   }
 
@@ -208,7 +206,7 @@ export function GuessFieldsProvider(
         const domainFields = _.indexBy(relations, rel => rel.domain.field);
 
         args.workStats.forEach(fieldStats => {
-          fieldStats.related = !!domainFields[fieldStats.field.name];
+          fieldStats.related = !!domainFields[fieldStats.origField.name];
         });
       });
   }
@@ -269,20 +267,20 @@ export function GuessFieldsProvider(
     function searchDupsFor(fieldType, searchType) {
       const searchFields = _(args.workStats)
         .filter(fieldStats => fieldStats.dataType === searchType)
-        .map('field')
+        .map('origField')
         .value();
 
       args.workStats.forEach(fieldStats => {
         if(fieldStats.dataType !== fieldType) { return; }
 
-        const { field } = fieldStats;
+        const { origField } = fieldStats;
         const candidateSearchDups = _.indexBy(searchFields, 'name');
 
         // NOTE: Not using lodash chaining with forEach due to subtle chainable change
         // between lodash v3 and v4
 
         fieldStats.samples.forEach(sample => {
-          const fieldValue = sample[field.name];
+          const fieldValue = sample[origField.name];
 
           searchFields
             .filter(sField => sample[sField.name] !== fieldValue)
@@ -302,7 +300,7 @@ export function GuessFieldsProvider(
 
   function scoreName(fieldStats) {
     // Discriminate suspect field names, such as those starting with underscores
-    return fieldStats.field.name.startsWith('_') ? 0.2 : 1;
+    return fieldStats.origField.name.startsWith('_') ? 0.2 : 1;
   }
 
   function scoreDocsCount(fieldStats) {
@@ -388,7 +386,7 @@ export function GuessFieldsProvider(
       case 'text':
         // Full-text fields with many digits tend to be harder to read
 
-        const fieldName = fieldStats.field.name;
+        const fieldName = fieldStats.origField.name;
         const notDigitsRe = /\D/;
 
         const sumLengths = _.sum(fieldStats.samples, sample => sample[fieldName].length);
@@ -417,7 +415,7 @@ export function GuessFieldsProvider(
 
     if(!fieldStats.hasDuplicate) { return 1; }
 
-    const fieldName = fieldStats.field.name;
+    const fieldName = fieldStats.origField.name;
     const nonWordRe = /\W+/;
 
     const avgWordCounts =
@@ -471,7 +469,7 @@ export function GuessFieldsProvider(
     report.sort = sortContext({
       acceptable:   fieldStats => fieldStats.acceptable,
       type:         fieldStats => fieldStats.dataType || fieldStats.field.type,
-      name:         fieldStats => fieldStats.field.displayName.toLowerCase(),
+      name:         fieldStats => fieldStats.origField.displayName.toLowerCase(),
       score:        fieldStats => fieldStats.score,
       chart:        fieldStats => fieldStats.sVis && fieldStats.sVis.vis.type.title,
       notes:        fieldStats => fieldStats.notes.join()
@@ -486,7 +484,7 @@ export function GuessFieldsProvider(
     args.stats.forEach(fieldStats => {
       fieldStats.scoreStr = '' + _.round(fieldStats.score, 3);
 
-      fieldStats.typeField = _.clone(fieldStats.field);
+      fieldStats.typeField = _.clone(fieldStats.origField);
       fieldStats.typeField.name = '';
 
       if(fieldStats.dataType === 'text') { fieldStats.notes.push('Analyzed'); }
@@ -540,7 +538,7 @@ export function GuessFieldsProvider(
     ];
 
     function fieldTextMap(fieldStats) {
-      return `Testing "${fieldStats.field.displayName}"`;
+      return `Testing "${fieldStats.origField.displayName}"`;
     }
 
     function fieldValueMap(fieldStats, progress) {
@@ -681,7 +679,7 @@ export function GuessFieldsProvider(
   function toResult(args) {
     return _(args.workStats)
       .filter('selected')
-      .map('field')
+      .map('origField')
       .value();
   }
 
@@ -697,6 +695,7 @@ export function GuessFieldsProvider(
     const args = _.assign({
       index,
       stats: fields.map(field => ({
+        origField: field,
         field,
         score: 0,
         notes: []
@@ -709,6 +708,7 @@ export function GuessFieldsProvider(
     args.workStats = args.stats;
 
     return Promise.resolve(args)
+      .then(useMultifieldsForNonAggregatables)
       .then(filterAcceptableFields)
       .then(makeFilteringQuery)
       .then(makeQueries)

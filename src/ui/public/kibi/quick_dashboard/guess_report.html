@@ -24,7 +24,7 @@
         <tr ng-repeat="fieldStats in stats">
           <td><input type="checkbox" ng-model="fieldStats.selected"></td>
           <td><field-name field="fieldStats.typeField" /></td>
-          <td>{{fieldStats.field.displayName}}</td>
+          <td>{{fieldStats.origField.displayName}}</td>
           <td>{{fieldStats.sVis.vis.type.title}}</td>
           <td>{{fieldStats.scoreStr}}</td>
           <td>

@@ -158,7 +158,7 @@
     "leaflet": "0.7.5",
     "less": "2.7.1",
     "less-loader": "2.2.3",
-    "lodash": "3.10.1",
+    "lodash": "4.17.19",
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
     "moment": "^2.20.1",

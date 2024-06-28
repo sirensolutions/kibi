@@ -1,3 +1,8 @@
+# PLEASE READ
+This repository is no longer active 
+
+Kibi is now "Siren Investigate", part of the [Siren Platform](https://siren.io/).
+
 # Siren Investigate 10.0-SNAPSHOT
 
 Siren Investigate extends Kibana 5.6.5 with data intelligence features; the core feature of
